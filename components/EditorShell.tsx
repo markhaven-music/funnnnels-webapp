@@ -9,6 +9,7 @@ import { I } from "@/components/icons";
 import type { StoredFunnel } from "@/lib/blocks";
 
 const STORAGE_KEY = "funnnnels.aiPanelWidth";
+const OPEN_STORAGE_KEY = "funnnnels.aiPanelOpen";
 const MIN_W = 340;
 const MAX_W = 640;
 const DEFAULT_W = 420;
@@ -31,6 +32,7 @@ export function EditorShell({
   const [panelWidth, setPanelWidth] = useState(DEFAULT_W);
   const [deleting, setDeleting] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [aiOpen, setAiOpen] = useState(true);
   const dragging = useRef(false);
   const gripRef = useRef<HTMLDivElement>(null);
 
@@ -41,10 +43,20 @@ export function EditorShell({
         const n = parseInt(stored, 10);
         if (!Number.isNaN(n)) setPanelWidth(Math.max(MIN_W, Math.min(MAX_W, n)));
       }
+      const openStored = localStorage.getItem(OPEN_STORAGE_KEY);
+      if (openStored === "0") setAiOpen(false);
     } catch {
       /* ignore */
     }
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(OPEN_STORAGE_KEY, aiOpen ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [aiOpen]);
 
   // Strip the ?seed= query once we've consumed it so refreshes don't re-fire.
   useEffect(() => {
@@ -149,11 +161,11 @@ export function EditorShell({
   }, [funnel]);
 
   const canvasMax =
-    device === "mobile" ? 420 : device === "tablet" ? 760 : 1100;
+    device === "mobile" ? 420 : device === "tablet" ? 760 : "none";
   const blocks = funnel.pages[0]?.blocks ?? [];
 
   return (
-    <div className="editor-shell">
+    <div className={`editor-shell${aiOpen ? "" : " editor-shell--no-ai"}`}>
       <header className="editor-top">
         <Link
           href="/"
@@ -205,6 +217,14 @@ export function EditorShell({
         </div>
 
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+          <button
+            className={`btn ghost${aiOpen ? " is-on" : ""}`}
+            type="button"
+            title={aiOpen ? "Hide Riley" : "Show Riley"}
+            onClick={() => setAiOpen((v) => !v)}
+          >
+            <I.sparkles size={13} /> {aiOpen ? "Hide Riley" : "Show Riley"}
+          </button>
           {funnel.status === "live" && (
             <a
               href={`/p/${funnel.id}`}
@@ -277,22 +297,26 @@ export function EditorShell({
         </div>
       </div>
 
-      <AIPanel
-        funnelId={funnel.id}
-        funnelName={funnel.name}
-        pendingPrompt={pendingPrompt}
-        onPromptConsumed={() => setPendingPrompt(null)}
-        onMutate={refetchFunnel}
-        annotation={annotation}
-        onClearAnnotation={() => setAnnotation(null)}
-      />
+      {aiOpen && (
+        <>
+          <AIPanel
+            funnelId={funnel.id}
+            funnelName={funnel.name}
+            pendingPrompt={pendingPrompt}
+            onPromptConsumed={() => setPendingPrompt(null)}
+            onMutate={refetchFunnel}
+            annotation={annotation}
+            onClearAnnotation={() => setAnnotation(null)}
+          />
 
-      <div
-        ref={gripRef}
-        className="ai-grip"
-        style={{ right: panelWidth - 3 + "px" }}
-        onMouseDown={startDrag}
-      />
+          <div
+            ref={gripRef}
+            className="ai-grip"
+            style={{ right: panelWidth - 3 + "px" }}
+            onMouseDown={startDrag}
+          />
+        </>
+      )}
     </div>
   );
 }
