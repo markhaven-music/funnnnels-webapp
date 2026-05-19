@@ -34,7 +34,7 @@ export function LandingPagesPanel({ funnels, onAsk }: Props) {
       </div>
 
       <div className={pages.length === 0 ? "funnels funnels--empty" : "funnels"}>
-        <NewFunnelTile onPrompt={onAsk} prominent={pages.length === 0} />
+        <NewFunnelTile prominent={pages.length === 0} />
         {pages.map((f) => (
           <FunnelCard key={f.id} f={f} />
         ))}

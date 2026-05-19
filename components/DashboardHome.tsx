@@ -118,10 +118,23 @@ export function DashboardHome({ onAsk, funnels }: Props) {
   const [contactsCount, setContactsCount] = useState(0);
 
   useEffect(() => {
-    fetch("/api/contacts")
-      .then((r) => r.json())
-      .then((d) => setContactsCount((d.contacts ?? []).length))
-      .catch(() => {});
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch("/api/contacts", { cache: "no-store" });
+        if (!r.ok) {
+          console.error("Contacts fetch failed:", r.status);
+          return;
+        }
+        const d = await r.json();
+        if (!cancelled) setContactsCount((d.contacts ?? []).length);
+      } catch (err) {
+        console.error("Contacts fetch error:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const metrics = useMemo(
@@ -199,7 +212,7 @@ export function DashboardHome({ onAsk, funnels }: Props) {
       </div>
 
       <div className={funnels.length === 0 ? "funnels funnels--empty" : "funnels"}>
-        <NewFunnelTile onPrompt={onAsk} prominent={funnels.length === 0} />
+        <NewFunnelTile prominent={funnels.length === 0} />
         {filtered.map((f) => (
           <FunnelCard key={f.id} f={f} />
         ))}

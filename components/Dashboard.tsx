@@ -100,7 +100,7 @@ export function Dashboard({ funnels }: Props) {
       {activeNav === "pages"        && <LandingPagesPanel onAsk={handleAsk} funnels={funnels} />}
       {activeNav === "ab"           && <ABTestsPanel onAsk={handleAsk} funnels={funnels} />}
       {activeNav === "contacts"     && <ContactsPanel />}
-      {activeNav === "analytics"    && <AnalyticsPanel funnels={funnels} />}
+      {activeNav === "analytics"    && <AnalyticsPanel funnels={funnels} onNav={setActiveNav} />}
       {activeNav === "brand"        && <BrandKitPanel />}
       {activeNav === "integrations" && <IntegrationsPanel />}
       {activeNav === "domains"      && <DomainsPanel />}

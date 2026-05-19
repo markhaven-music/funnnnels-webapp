@@ -3,9 +3,12 @@
 import { I } from "@/components/icons";
 import type { StoredFunnel } from "@/lib/blocks";
 
-type Props = { funnels: StoredFunnel[] };
+type Props = {
+  funnels: StoredFunnel[];
+  onNav?: (id: string) => void;
+};
 
-export function AnalyticsPanel({ funnels }: Props) {
+export function AnalyticsPanel({ funnels, onNav }: Props) {
   return (
     <main className="main">
       <div className="page-head">
@@ -16,7 +19,13 @@ export function AnalyticsPanel({ funnels }: Props) {
           </p>
         </div>
         <div className="cta-group">
-          <button type="button" className="btn ghost" disabled>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => onNav?.("integrations")}
+            disabled={!onNav}
+            title="Open Integrations"
+          >
             <I.integrations size={14} /> Connect tracking
           </button>
         </div>

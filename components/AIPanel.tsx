@@ -182,16 +182,12 @@ function defaultChips(funnelOpen: boolean) {
       ];
 }
 
-export type Annotation = { blockId: string; type: string };
-
 type Props = {
   funnelId?: string | null;
   funnelName?: string;
   pendingPrompt: string | null;
   onPromptConsumed: () => void;
   onMutate?: () => void | Promise<void>;
-  annotation?: Annotation | null;
-  onClearAnnotation?: () => void;
 };
 
 export function AIPanel({
@@ -200,8 +196,6 @@ export function AIPanel({
   pendingPrompt,
   onPromptConsumed,
   onMutate,
-  annotation = null,
-  onClearAnnotation,
 }: Props) {
   const initialId = useId();
   const initial: Message = {
@@ -232,13 +226,7 @@ export function AIPanel({
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text || sending) return;
-      const finalText = annotation
-        ? `[Annotation on block ${annotation.blockId} (type=${annotation.type})] ${text}\n\nEdit only that block based on this note. Use get_block first, then update_block.`
-        : text;
-      const displayText = annotation
-        ? `↳ ${annotation.type} · ${text}`
-        : text;
-      const userMsg: Message = { id: mkId(), role: "user", content: displayText };
+      const userMsg: Message = { id: mkId(), role: "user", content: text };
       const placeholderId = mkId();
       const placeholder: Message = {
         id: placeholderId,
@@ -257,7 +245,6 @@ export function AIPanel({
       setMessages((prev) => [...prev, userMsg, placeholder]);
       setInput("");
       setSending(true);
-      if (annotation && onClearAnnotation) onClearAnnotation();
 
       try {
         const res = await fetch("/api/chat", {
@@ -266,7 +253,7 @@ export function AIPanel({
           body: JSON.stringify({
             funnelId,
             model,
-            messages: [...priorHistory, { role: "user", content: finalText }],
+            messages: [...priorHistory, { role: "user", content: text }],
           }),
         });
 
@@ -310,7 +297,7 @@ export function AIPanel({
         setSending(false);
       }
     },
-    [messages, sending, funnelId, model, annotation, onClearAnnotation, onMutate],
+    [messages, sending, funnelId, model, onMutate],
   );
 
   useEffect(() => {
@@ -360,9 +347,6 @@ export function AIPanel({
           >
             <I.refresh size={13} />
           </button>
-          <button type="button" className="tiny-btn" title="More">
-            <I.more size={13} />
-          </button>
         </div>
       </header>
 
@@ -389,30 +373,12 @@ export function AIPanel({
               ))}
             </div>
           )}
-          {annotation && (
-            <div className="annot-chip">
-              <I.sparkles size={11} />
-              <span>
-                Editing <b>{annotation.type}</b>{" "}
-                <code style={{ opacity: 0.6 }}>{annotation.blockId}</code>
-              </span>
-              <button
-                type="button"
-                onClick={onClearAnnotation}
-                aria-label="Clear annotation"
-              >
-                <I.close size={11} />
-              </button>
-            </div>
-          )}
           <div className="composer-box">
             <textarea
               placeholder={
-                annotation
-                  ? `Tell Riley what to change about this ${annotation.type}…`
-                  : funnelId
-                    ? `Ask Riley to edit ${funnelName ?? "this funnel"}…`
-                    : "Ask Riley to build, edit, or analyze a funnel…"
+                funnelId
+                  ? `Ask Riley to edit ${funnelName ?? "this funnel"}…`
+                  : "Ask Riley to build, edit, or analyze a funnel…"
               }
               value={input}
               onChange={(e) => setInput(e.target.value)}

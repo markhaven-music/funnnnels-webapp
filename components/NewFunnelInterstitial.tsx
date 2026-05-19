@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import { I } from "@/components/icons";
 
 const SUGGESTIONS = [
@@ -16,9 +16,15 @@ const SUGGESTIONS = [
 
 export function NewFunnelInterstitial() {
   const router = useRouter();
+  const params = useSearchParams();
   const [seed, setSeed] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    const initial = params.get("seed");
+    if (initial) setSeed(initial);
+  }, [params]);
 
   async function submit(text: string) {
     const t = text.trim();

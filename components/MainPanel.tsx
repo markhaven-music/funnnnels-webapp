@@ -99,7 +99,7 @@ export function MainPanel({ onAsk, funnels }: Props) {
       )}
 
       <div className={empty ? "funnels funnels--empty" : "funnels"}>
-        <NewFunnelTile onPrompt={onAsk} prominent={empty} />
+        <NewFunnelTile prominent={empty} />
         {filtered.map((f) => (
           <FunnelCard key={f.id} f={f} />
         ))}

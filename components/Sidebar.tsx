@@ -37,16 +37,21 @@ export function Sidebar({ funnelCount, active, onNav }: Props) {
           })}
         </div>
       ))}
-      <div className="workspace">
+      <button
+        type="button"
+        className="workspace"
+        onClick={() => onNav("settings")}
+        title="Workspace settings"
+      >
         <div className="ws-icon">
           <I.layers size={15} />
         </div>
-        <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ minWidth: 0, flex: 1, textAlign: "left" }}>
           <div className="ws-name">My workspace</div>
           <div className="ws-plan">SOLO · 1 SEAT</div>
         </div>
-        <I.more size={14} style={{ color: "var(--fg-2)" }} />
-      </div>
+        <I.settings size={14} style={{ color: "var(--fg-2)" }} />
+      </button>
     </aside>
   );
 }

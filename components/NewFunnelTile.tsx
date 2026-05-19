@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { I } from "@/components/icons";
 import { QUICK_PROMPTS } from "@/lib/data";
 
-type Props = { onPrompt: (p: string) => void; prominent?: boolean };
+type Props = { prominent?: boolean };
 
-export function NewFunnelTile({ onPrompt, prominent = false }: Props) {
+export function NewFunnelTile({ prominent = false }: Props) {
   return (
     <div className={`funnel new ${prominent ? "funnel--prominent" : ""}`}>
       <div className="new-icon">
@@ -19,11 +20,10 @@ export function NewFunnelTile({ onPrompt, prominent = false }: Props) {
       </p>
       <div className="quick">
         {QUICK_PROMPTS.map((p, i) => (
-          <button
+          <Link
             key={i}
-            type="button"
+            href={`/funnels/new?seed=${encodeURIComponent(p)}`}
             className="qprompt"
-            onClick={() => onPrompt(p)}
           >
             <I.sparkles
               size={12}
@@ -41,7 +41,7 @@ export function NewFunnelTile({ onPrompt, prominent = false }: Props) {
               {p}
             </span>
             <I.arrow size={12} className="arrow" />
-          </button>
+          </Link>
         ))}
       </div>
     </div>
