@@ -208,6 +208,7 @@ export function AIPanel({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [contextOn, setContextOn] = useState(true);
+  const [model, setModel] = useState<string>("claude-opus-4-7");
   const scrollerRef = useRef<HTMLDivElement>(null);
   const msgCounter = useRef(0);
 
@@ -251,6 +252,7 @@ export function AIPanel({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             funnelId,
+            model,
             messages: [...priorHistory, { role: "user", content: text }],
           }),
         });
@@ -295,7 +297,7 @@ export function AIPanel({
         setSending(false);
       }
     },
-    [messages, sending, funnelId, onMutate],
+    [messages, sending, funnelId, model, onMutate],
   );
 
   useEffect(() => {
@@ -326,7 +328,16 @@ export function AIPanel({
           <span className="orb" />
           Riley
         </div>
-        <span className="model">claude · funnel-tuned</span>
+        <select
+          className="model"
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          title="Model"
+        >
+          <option value="claude-opus-4-7">Opus 4.7 · best</option>
+          <option value="claude-sonnet-4-6">Sonnet 4.6 · fast</option>
+          <option value="claude-haiku-4-5-20251001">Haiku 4.5 · cheap</option>
+        </select>
         <div className="actions">
           <button
             type="button"
