@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { I } from "@/components/icons";
 
 type Integration = {
   id: string;
@@ -54,6 +55,11 @@ export function IntegrationsPanel() {
               : `${connected.size} integration${connected.size === 1 ? "" : "s"} connected`}
           </p>
         </div>
+      </div>
+
+      <div className="demo-banner" style={{ marginBottom: 20 }}>
+        <I.bolt size={13} /> Demo only — connections aren&rsquo;t persisted yet.
+        Real OAuth flows ship with the integration of each provider.
       </div>
 
       <div className="tabs" style={{ marginBottom: 24 }}>

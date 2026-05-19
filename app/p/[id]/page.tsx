@@ -14,12 +14,32 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const f = await getFunnel(id);
-  if (!f || f.status !== "live") return { title: "Not found" };
+  if (!f || f.status !== "live") {
+    return {
+      title: "Not found",
+      robots: { index: false, follow: false },
+    };
+  }
+  const heroProps = f.pages[0]?.blocks?.find((b) => b.type === "hero")
+    ?.props as { headline?: string; subhead?: string } | undefined;
+  const description = heroProps?.subhead ?? heroProps?.headline ?? f.name;
+  const title = heroProps?.headline ?? f.name;
   return {
-    title: f.name,
-    description: f.pages[0]?.blocks?.find((b) => b.type === "hero")?.props
-      ? ((f.pages[0].blocks.find((b) => b.type === "hero")!.props as { subhead?: string }).subhead ?? f.name)
-      : f.name,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: `/p/${id}`,
+      siteName: "funnnnels",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: { index: true, follow: true },
   };
 }
 

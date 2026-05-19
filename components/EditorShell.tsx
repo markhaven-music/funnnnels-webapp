@@ -30,6 +30,7 @@ export function EditorShell({
   const [flashIds, setFlashIds] = useState<string[]>([]);
   const [panelWidth, setPanelWidth] = useState(DEFAULT_W);
   const [deleting, setDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [aiOpen, setAiOpen] = useState(true);
   const [justPublished, setJustPublished] = useState(false);
@@ -145,10 +146,6 @@ export function EditorShell({
 
   const handleDelete = useCallback(async () => {
     if (deleting) return;
-    const ok = window.confirm(
-      `Delete "${funnel.name}"? This cannot be undone.`,
-    );
-    if (!ok) return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/funnels/${funnel.id}`, {
@@ -162,7 +159,7 @@ export function EditorShell({
     } catch {
       setDeleting(false);
     }
-  }, [deleting, funnel.id, funnel.name, router]);
+  }, [deleting, funnel.id, router]);
 
   const handlePatchBlock = useCallback(
     async (blockId: string, propsPatch: Record<string, unknown>) => {
@@ -261,6 +258,24 @@ export function EditorShell({
   useEffect(() => {
     setCanUndo(true);
   }, [funnel]);
+
+  // Close delete confirm on outside click / Esc
+  useEffect(() => {
+    if (!confirmingDelete) return;
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as Element;
+      if (!t.closest(".delete-wrap")) setConfirmingDelete(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setConfirmingDelete(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [confirmingDelete]);
 
   // Cmd/Ctrl+Z keyboard shortcut
   useEffect(() => {
@@ -417,15 +432,45 @@ export function EditorShell({
           >
             <I.sparkles size={13} /> {aiOpen ? "Hide Riley" : "Show Riley"}
           </button>
-          <button
-            className="btn ghost"
-            type="button"
-            title="Delete this funnel"
-            onClick={handleDelete}
-            disabled={deleting}
-          >
-            <I.trash size={14} /> {deleting ? "Deleting…" : "Delete"}
-          </button>
+          <div className="delete-wrap">
+            <button
+              className="btn ghost"
+              type="button"
+              title="Delete this funnel"
+              onClick={() => setConfirmingDelete((v) => !v)}
+              disabled={deleting}
+            >
+              <I.trash size={14} /> {deleting ? "Deleting…" : "Delete"}
+            </button>
+            {confirmingDelete && !deleting && (
+              <div className="delete-confirm">
+                <div className="delete-confirm__title">Delete this funnel?</div>
+                <div className="delete-confirm__msg">
+                  This permanently removes <b>{funnel.name}</b> and its history.
+                  This cannot be undone.
+                </div>
+                <div className="delete-confirm__actions">
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    onClick={() => setConfirmingDelete(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn delete-confirm__danger"
+                    onClick={() => {
+                      setConfirmingDelete(false);
+                      handleDelete();
+                    }}
+                  >
+                    <I.trash size={13} /> Delete forever
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
           <button
             className="btn primary"
             type="button"

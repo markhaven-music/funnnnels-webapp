@@ -58,6 +58,11 @@ export function DomainsPanel() {
         </div>
       </div>
 
+      <div className="demo-banner">
+        <I.bolt size={13} /> Demo only — domains aren&rsquo;t persisted yet.
+        DNS verification and routing come with the Vercel domains integration.
+      </div>
+
       {adding && (
         <form
           onSubmit={handleAdd}

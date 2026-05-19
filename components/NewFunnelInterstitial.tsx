@@ -23,8 +23,13 @@ export function NewFunnelInterstitial() {
 
   useEffect(() => {
     const initial = params.get("seed");
-    if (initial) setSeed(initial);
-  }, [params]);
+    if (initial) {
+      setSeed(initial);
+      submit(initial);
+    }
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function submit(text: string) {
     const t = text.trim();
