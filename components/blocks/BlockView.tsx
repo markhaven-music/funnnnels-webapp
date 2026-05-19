@@ -56,17 +56,27 @@ function Cta({ p }: { p: CtaProps }) {
 }
 
 function Image({ p }: { p: ImageProps }) {
-  const [c1, c2] = p.palette ?? [
-    "oklch(0.74 0.19 295)",
-    "oklch(0.55 0.18 280)",
-  ];
   return (
     <div className="fb-image" data-block="image">
       <div
         className="fb-image__placeholder"
-        style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
         aria-label={p.alt ?? "Image placeholder"}
-      />
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          aria-hidden="true"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <circle cx="9" cy="9" r="1.5" fill="currentColor" />
+          <path d="M21 15l-5-5L5 21" />
+        </svg>
+        <span>{p.alt || "Image"}</span>
+      </div>
       {p.caption && <div className="fb-image__caption">{p.caption}</div>}
     </div>
   );

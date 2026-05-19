@@ -30,6 +30,7 @@ export function EditorShell({
   const [annotation, setAnnotation] = useState<Annotation | null>(null);
   const [panelWidth, setPanelWidth] = useState(DEFAULT_W);
   const [deleting, setDeleting] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const dragging = useRef(false);
   const gripRef = useRef<HTMLDivElement>(null);
 
@@ -88,6 +89,24 @@ export function EditorShell({
     e.currentTarget.classList.add("dragging");
     document.body.style.userSelect = "none";
   };
+
+  const handlePublishToggle = useCallback(async () => {
+    if (publishing) return;
+    const nextStatus = funnel.status === "live" ? "draft" : "live";
+    setPublishing(true);
+    try {
+      const res = await fetch(`/api/funnels/${funnel.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as { funnel: StoredFunnel };
+      setFunnel(data.funnel);
+    } finally {
+      setPublishing(false);
+    }
+  }, [funnel.id, funnel.status, publishing]);
 
   const handleDelete = useCallback(async () => {
     if (deleting) return;
@@ -195,8 +214,25 @@ export function EditorShell({
           >
             <I.trash size={14} /> {deleting ? "Deleting…" : "Delete"}
           </button>
-          <button className="btn primary" type="button" title="Publishing comes soon">
-            <I.rocket size={14} /> Publish
+          <button
+            className="btn primary"
+            type="button"
+            title={
+              funnel.status === "live"
+                ? "Move back to draft"
+                : "Publish this funnel"
+            }
+            onClick={handlePublishToggle}
+            disabled={publishing || blocks.length === 0}
+          >
+            <I.rocket size={14} />{" "}
+            {publishing
+              ? funnel.status === "live"
+                ? "Unpublishing…"
+                : "Publishing…"
+              : funnel.status === "live"
+                ? "Unpublish"
+                : "Publish"}
           </button>
         </div>
       </header>
