@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type DragEvent } from "react";
 import { BlockView } from "@/components/blocks/BlockView";
 import { I } from "@/components/icons";
 import { InlineBlockEditor } from "@/components/InlineBlockEditor";
+import { SelectionTooltip } from "@/components/SelectionTooltip";
 import type { Block } from "@/lib/blocks";
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
     blockType: string,
     intent: string | null,
     instruction: string,
+    selectedText?: string | null,
   ) => void;
   onPatch?: (blockId: string, propsPatch: Record<string, unknown>) => void;
   onReorder?: (orderedIds: string[]) => void;
@@ -30,6 +32,7 @@ export function FunnelCanvas({
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
+  const [editSelection, setEditSelection] = useState<string | null>(null);
 
   useEffect(() => {
     if (flashIds.length === 0) return;
@@ -48,12 +51,20 @@ export function FunnelCanvas({
     if (!editId) return;
     const onDoc = (e: MouseEvent) => {
       const target = e.target as Element;
-      if (!target.closest(".inline-editor") && !target.closest(".fb-block__edit")) {
+      if (
+        !target.closest(".inline-editor") &&
+        !target.closest(".fb-block__edit") &&
+        !target.closest(".sel-tooltip")
+      ) {
         setEditId(null);
+        setEditSelection(null);
       }
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setEditId(null);
+      if (e.key === "Escape") {
+        setEditId(null);
+        setEditSelection(null);
+      }
     };
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
@@ -119,6 +130,14 @@ export function FunnelCanvas({
 
   return (
     <>
+      {onAskRiley && (
+        <SelectionTooltip
+          onPick={(blockId, text) => {
+            setEditId(blockId);
+            setEditSelection(text);
+          }}
+        />
+      )}
       {blocks.map((b) => {
         const isCustom = b.type === "custom_html";
         const intent = isCustom
@@ -136,6 +155,7 @@ export function FunnelCanvas({
               isEditing ? "is-editing" : "",
               dragging ? "is-dragging" : "",
               overTop ? "is-drop-target" : "",
+              isEditing && editSelection ? "is-editing-selection" : "",
             ]
               .filter(Boolean)
               .join(" ")}
@@ -190,11 +210,17 @@ export function FunnelCanvas({
               <InlineBlockEditor
                 blockType={b.type}
                 intent={intent}
+                selectedText={editSelection}
                 onSubmit={(instruction) => {
+                  const sel = editSelection;
                   setEditId(null);
-                  onAskRiley(b.id, b.type, intent, instruction);
+                  setEditSelection(null);
+                  onAskRiley(b.id, b.type, intent, instruction, sel);
                 }}
-                onCancel={() => setEditId(null)}
+                onCancel={() => {
+                  setEditId(null);
+                  setEditSelection(null);
+                }}
               />
             )}
 

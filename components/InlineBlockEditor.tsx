@@ -6,6 +6,7 @@ import { I } from "@/components/icons";
 type Props = {
   blockType: string;
   intent?: string | null;
+  selectedText?: string | null;
   onSubmit: (instruction: string) => void;
   onCancel: () => void;
 };
@@ -25,6 +26,7 @@ const QUICK_ACTIONS: Record<string, string[]> = {
 export function InlineBlockEditor({
   blockType,
   intent,
+  selectedText,
   onSubmit,
   onCancel,
 }: Props) {
@@ -52,8 +54,9 @@ export function InlineBlockEditor({
     }
   };
 
-  const suggestions =
-    QUICK_ACTIONS[blockType] ?? QUICK_ACTIONS.custom_html;
+  const suggestions = selectedText
+    ? ["Shorter", "Punchier", "More specific", "More casual"]
+    : (QUICK_ACTIONS[blockType] ?? QUICK_ACTIONS.custom_html);
 
   return (
     <div
@@ -67,7 +70,11 @@ export function InlineBlockEditor({
           Ask Riley
         </span>
         <span className="inline-editor__target">
-          {blockType === "custom_html" ? `custom · ${intent ?? "section"}` : blockType}
+          {selectedText
+            ? "Selected text"
+            : blockType === "custom_html"
+              ? `custom · ${intent ?? "section"}`
+              : blockType}
         </span>
         <button
           type="button"
@@ -79,10 +86,22 @@ export function InlineBlockEditor({
         </button>
       </div>
 
+      {selectedText && (
+        <div className="inline-editor__quote">
+          “{selectedText.length > 140
+            ? selectedText.slice(0, 137) + "…"
+            : selectedText}”
+        </div>
+      )}
+
       <textarea
         ref={ref}
         className="inline-editor__input"
-        placeholder="Tell Riley what to change…"
+        placeholder={
+          selectedText
+            ? "Tell Riley how to change this text…"
+            : "Tell Riley what to change…"
+        }
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKey}

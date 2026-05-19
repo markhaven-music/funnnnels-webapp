@@ -449,13 +449,16 @@ export function EditorShell({
               flashIds={flashIds}
               onPatch={handlePatchBlock}
               onReorder={handleReorder}
-              onAskRiley={(blockId, blockType, intent, instruction) => {
+              onAskRiley={(blockId, blockType, intent, instruction, selectedText) => {
                 const target =
                   blockType === "custom_html"
                     ? `custom_html block ${blockId} (intent="${intent ?? "section"}")`
                     : `${blockType} block ${blockId}`;
+                const selectionContext = selectedText
+                  ? `\n\nThe user highlighted this exact text inside the block: "${selectedText.replace(/"/g, '\\"')}"\nRewrite ONLY that text. Find it in the block's content (props or html), replace it with your new version, and leave everything else — copy, structure, classes, styles — completely untouched. Do NOT regenerate the whole block.`
+                  : `\n\nEdit only that block. Use get_block first to read its current state, then update_block to apply the change. Preserve the existing design and structure unless the instruction explicitly asks to change them.`;
                 setPendingPrompt(
-                  `[Click-and-edit on ${target}] ${instruction}\n\nEdit only that block. Use get_block first to read its current state, then update_block to apply the change. Preserve the existing design and structure unless the instruction explicitly asks to change them.`,
+                  `[Click-and-edit on ${target}] ${instruction}${selectionContext}`,
                 );
               }}
             />
