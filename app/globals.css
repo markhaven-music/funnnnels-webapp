@@ -1727,6 +1727,26 @@ body.light {
   opacity: 1;
 }
 
+/* Hover overlay that tracks the element under the cursor in edit mode */
+.hover-outline {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  box-shadow: 0 0 0 4px oklch(0.74 0.19 295 / 0.18);
+  transition: top 0.05s, left 0.05s, width 0.05s, height 0.05s;
+}
+
+/* Anchored inline editor (positioned at the click point) */
+.inline-editor--anchored {
+  position: fixed !important;
+  top: auto;
+  right: auto;
+  z-index: 12;
+  box-shadow: 0 24px 60px -16px oklch(0 0 0 / 0.65);
+}
+
 /* Inline editor popover */
 .inline-editor {
   position: absolute;

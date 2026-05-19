@@ -9,9 +9,13 @@ type Props = {
   selectedText?: string | null;
   selectedHtml?: string | null;
   selectedTag?: string | null;
+  anchor?: { x: number; y: number } | null;
   onSubmit: (instruction: string) => void;
   onCancel: () => void;
 };
+
+const EDITOR_W = 420;
+const EDITOR_H_GUESS = 220;
 
 const QUICK_ACTIONS: Record<string, string[]> = {
   hero: ["Punchier headline", "More urgent CTA", "Shorter subhead"],
@@ -31,6 +35,7 @@ export function InlineBlockEditor({
   selectedText,
   selectedHtml,
   selectedTag,
+  anchor,
   onSubmit,
   onCancel,
 }: Props) {
@@ -64,9 +69,26 @@ export function InlineBlockEditor({
       ? ["Shorter", "Punchier", "More specific", "More casual"]
       : (QUICK_ACTIONS[blockType] ?? QUICK_ACTIONS.custom_html);
 
+  let style: React.CSSProperties | undefined;
+  if (anchor) {
+    const pad = 12;
+    const vw = typeof window !== "undefined" ? window.innerWidth : 1200;
+    const vh = typeof window !== "undefined" ? window.innerHeight : 800;
+    const left = Math.max(
+      pad,
+      Math.min(vw - EDITOR_W - pad, anchor.x - EDITOR_W / 2),
+    );
+    const top =
+      anchor.y + EDITOR_H_GUESS + pad < vh
+        ? anchor.y + 12
+        : Math.max(pad, anchor.y - EDITOR_H_GUESS - 12);
+    style = { position: "fixed", top, left, width: EDITOR_W };
+  }
+
   return (
     <div
-      className="inline-editor"
+      className={`inline-editor${anchor ? " inline-editor--anchored" : ""}`}
+      style={style}
       onDragStart={(e) => e.stopPropagation()}
       draggable={false}
     >
