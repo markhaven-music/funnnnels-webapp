@@ -1789,6 +1789,23 @@ body.light {
   max-height: 80px;
   overflow-y: auto;
 }
+.inline-editor__fragment {
+  background: oklch(0.1 0.005 270);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--accent);
+  padding: 7px 10px;
+  border-radius: 4px;
+  max-height: 90px;
+  overflow: auto;
+}
+.inline-editor__fragment code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--fg-2);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
 
 /* Floating tooltip that appears on text selection */
 .sel-tooltip {

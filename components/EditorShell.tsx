@@ -463,17 +463,23 @@ export function EditorShell({
               onExitEditMode={() => setEditMode(false)}
               onPatch={handlePatchBlock}
               onReorder={handleReorder}
-              onAskRiley={(blockId, blockType, intent, instruction, selectedText) => {
+              onAskRiley={(blockId, blockType, intent, instruction, selectedText, element) => {
                 setEditMode(false);
                 const target =
                   blockType === "custom_html"
                     ? `custom_html block ${blockId} (intent="${intent ?? "section"}")`
                     : `${blockType} block ${blockId}`;
-                const selectionContext = selectedText
-                  ? `\n\nThe user highlighted this exact text inside the block: "${selectedText.replace(/"/g, '\\"')}"\nRewrite ONLY that text. Find it in the block's content (props or html), replace it with your new version, and leave everything else — copy, structure, classes, styles — completely untouched. Do NOT regenerate the whole block.`
-                  : `\n\nEdit only that block. Use get_block first to read its current state, then update_block to apply the change. Preserve the existing design and structure unless the instruction explicitly asks to change them.`;
+                let context: string;
+                if (element) {
+                  const fence = "```";
+                  context = `\n\nThe user clicked this exact element inside the block. Its outerHTML is:\n${fence}html\n${element.outerHtml}\n${fence}\nFind that exact substring inside the block's html prop, replace it with your edited version, and leave everything else — surrounding markup, the embedded <style>, sibling content — completely untouched. Do NOT regenerate the whole block. Use get_block to read the current html, then update_block with the new html.`;
+                } else if (selectedText) {
+                  context = `\n\nThe user highlighted this exact text inside the block: "${selectedText.replace(/"/g, '\\"')}"\nRewrite ONLY that text. Find it in the block's content (props or html), replace it with your new version, and leave everything else — copy, structure, classes, styles — completely untouched. Do NOT regenerate the whole block.`;
+                } else {
+                  context = `\n\nEdit only that block. Use get_block first to read its current state, then update_block to apply the change. Preserve the existing design and structure unless the instruction explicitly asks to change them.`;
+                }
                 setPendingPrompt(
-                  `[Click-and-edit on ${target}] ${instruction}${selectionContext}`,
+                  `[Click-and-edit on ${target}] ${instruction}${context}`,
                 );
               }}
             />

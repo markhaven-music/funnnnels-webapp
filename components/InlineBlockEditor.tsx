@@ -7,6 +7,8 @@ type Props = {
   blockType: string;
   intent?: string | null;
   selectedText?: string | null;
+  selectedHtml?: string | null;
+  selectedTag?: string | null;
   onSubmit: (instruction: string) => void;
   onCancel: () => void;
 };
@@ -27,6 +29,8 @@ export function InlineBlockEditor({
   blockType,
   intent,
   selectedText,
+  selectedHtml,
+  selectedTag,
   onSubmit,
   onCancel,
 }: Props) {
@@ -54,9 +58,11 @@ export function InlineBlockEditor({
     }
   };
 
-  const suggestions = selectedText
-    ? ["Shorter", "Punchier", "More specific", "More casual"]
-    : (QUICK_ACTIONS[blockType] ?? QUICK_ACTIONS.custom_html);
+  const suggestions = selectedHtml
+    ? ["Make bolder", "More compact", "New color", "Subtler", "Bigger"]
+    : selectedText
+      ? ["Shorter", "Punchier", "More specific", "More casual"]
+      : (QUICK_ACTIONS[blockType] ?? QUICK_ACTIONS.custom_html);
 
   return (
     <div
@@ -70,11 +76,13 @@ export function InlineBlockEditor({
           Ask Riley
         </span>
         <span className="inline-editor__target">
-          {selectedText
-            ? "Selected text"
-            : blockType === "custom_html"
-              ? `custom · ${intent ?? "section"}`
-              : blockType}
+          {selectedHtml
+            ? `<${selectedTag ?? "element"}>`
+            : selectedText
+              ? "Selected text"
+              : blockType === "custom_html"
+                ? `custom · ${intent ?? "section"}`
+                : blockType}
         </span>
         <button
           type="button"
@@ -86,6 +94,15 @@ export function InlineBlockEditor({
         </button>
       </div>
 
+      {selectedHtml && !selectedText && (
+        <div className="inline-editor__fragment">
+          <code>
+            {selectedHtml.length > 180
+              ? selectedHtml.slice(0, 177) + "…"
+              : selectedHtml}
+          </code>
+        </div>
+      )}
       {selectedText && (
         <div className="inline-editor__quote">
           “{selectedText.length > 140

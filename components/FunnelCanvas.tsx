@@ -7,6 +7,12 @@ import { InlineBlockEditor } from "@/components/InlineBlockEditor";
 import { SelectionTooltip } from "@/components/SelectionTooltip";
 import type { Block } from "@/lib/blocks";
 
+export type ElementSelection = {
+  outerHtml: string;
+  tag: string;
+  text: string;
+};
+
 type Props = {
   blocks: Block[];
   flashIds?: string[];
@@ -18,6 +24,7 @@ type Props = {
     intent: string | null,
     instruction: string,
     selectedText?: string | null,
+    element?: ElementSelection | null,
   ) => void;
   onPatch?: (blockId: string, propsPatch: Record<string, unknown>) => void;
   onReorder?: (orderedIds: string[]) => void;
@@ -37,6 +44,7 @@ export function FunnelCanvas({
   const [overId, setOverId] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [editSelection, setEditSelection] = useState<string | null>(null);
+  const [editElement, setEditElement] = useState<ElementSelection | null>(null);
 
   useEffect(() => {
     if (flashIds.length === 0) return;
@@ -50,6 +58,72 @@ export function FunnelCanvas({
     }
   }, [flashIds]);
 
+  // Element-level picker for custom_html blocks during edit mode.
+  useEffect(() => {
+    if (!editMode) return;
+    let hovered: HTMLElement | null = null;
+    const clear = () => {
+      if (hovered) {
+        hovered.style.outline = "";
+        hovered.style.outlineOffset = "";
+        hovered = null;
+      }
+    };
+    const isCandidate = (el: HTMLElement): boolean => {
+      if (!el) return false;
+      // Must be inside a custom block's rendered HTML
+      const custom = el.closest(".fb-custom");
+      if (!custom) return false;
+      // Skip chrome/editor overlays and the wrapper itself
+      if (el.closest(".fb-block__chrome") || el.closest(".inline-editor")) return false;
+      if (el === custom) return false;
+      // Skip the block wrapper itself
+      if (el.classList.contains("fb-block")) return false;
+      return true;
+    };
+    const onOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!isCandidate(target)) {
+        clear();
+        return;
+      }
+      if (hovered === target) return;
+      clear();
+      hovered = target;
+      target.style.outline = "2px solid var(--accent)";
+      target.style.outlineOffset = "2px";
+    };
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!isCandidate(target)) return;
+      const blockEl = target.closest(".fb-block") as HTMLElement | null;
+      const blockId = blockEl?.getAttribute("data-block-id");
+      if (!blockId) return;
+      // Don't intercept ongoing text selection
+      const sel = window.getSelection();
+      if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const text = (target.textContent ?? "").trim().slice(0, 160);
+      let outer = target.outerHTML;
+      if (outer.length > 1200) outer = outer.slice(0, 1200) + "…";
+      setEditElement({
+        outerHtml: outer,
+        tag: target.tagName.toLowerCase(),
+        text,
+      });
+      setEditId(blockId);
+      clear();
+    };
+    document.addEventListener("mouseover", onOver, true);
+    document.addEventListener("click", onClick, true);
+    return () => {
+      document.removeEventListener("mouseover", onOver, true);
+      document.removeEventListener("click", onClick, true);
+      clear();
+    };
+  }, [editMode]);
+
   // Close inline editor on outside click; Esc closes editor first, then exits edit mode.
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -62,6 +136,7 @@ export function FunnelCanvas({
       ) {
         setEditId(null);
         setEditSelection(null);
+        setEditElement(null);
       }
     };
     const onKey = (e: KeyboardEvent) => {
@@ -69,6 +144,7 @@ export function FunnelCanvas({
       if (editId) {
         setEditId(null);
         setEditSelection(null);
+        setEditElement(null);
       } else if (editMode && onExitEditMode) {
         onExitEditMode();
       }
@@ -219,15 +295,20 @@ export function FunnelCanvas({
                 blockType={b.type}
                 intent={intent}
                 selectedText={editSelection}
+                selectedHtml={editElement?.outerHtml ?? null}
+                selectedTag={editElement?.tag ?? null}
                 onSubmit={(instruction) => {
                   const sel = editSelection;
+                  const elt = editElement;
                   setEditId(null);
                   setEditSelection(null);
-                  onAskRiley(b.id, b.type, intent, instruction, sel);
+                  setEditElement(null);
+                  onAskRiley(b.id, b.type, intent, instruction, sel, elt);
                 }}
                 onCancel={() => {
                   setEditId(null);
                   setEditSelection(null);
+                  setEditElement(null);
                 }}
               />
             )}
