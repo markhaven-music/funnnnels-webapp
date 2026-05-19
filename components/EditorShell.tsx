@@ -268,7 +268,7 @@ export function EditorShell({
         </div>
       </header>
 
-      <div className="editor-stage">
+      <div className={`editor-stage is-${device}`}>
         <div
           className="editor-canvas"
           style={{ maxWidth: canvasMax, transition: "max-width 0.25s" }}

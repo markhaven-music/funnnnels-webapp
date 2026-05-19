@@ -1435,23 +1435,30 @@ body.light {
 }
 .editor-stage {
   overflow: auto;
-  padding: 40px;
+  padding: 0;
   display: grid;
   place-items: start center;
   position: relative;
 }
+.editor-stage.is-tablet,
+.editor-stage.is-mobile {
+  padding: 32px;
+}
 .editor-canvas {
   width: 100%;
-  max-width: 1100px;
-  min-height: 760px;
+  min-height: calc(100vh - 56px);
   background: var(--bg-1);
+  overflow: hidden;
+  position: relative;
+}
+.editor-stage.is-tablet .editor-canvas,
+.editor-stage.is-mobile .editor-canvas {
+  min-height: 760px;
   border: 1px solid var(--line);
   border-radius: 16px;
   box-shadow:
     0 30px 60px -20px oklch(0 0 0 / 0.5),
     inset 0 0 0 1px oklch(1 0 0 / 0.02);
-  overflow: hidden;
-  position: relative;
 }
 .editor-canvas .stage-grid {
   position: absolute;
