@@ -141,6 +141,81 @@ export function EditorShell({
     }
   }, [deleting, funnel.id, funnel.name, router]);
 
+  const handlePatchBlock = useCallback(
+    async (blockId: string, propsPatch: Record<string, unknown>) => {
+      // Optimistic update
+      setFunnel((prev) => {
+        const next = structuredClone(prev) as StoredFunnel;
+        const page = next.pages[0];
+        if (!page) return prev;
+        const block = page.blocks.find((b) => b.id === blockId);
+        if (!block) return prev;
+        block.props = { ...block.props, ...propsPatch } as typeof block.props;
+        return next;
+      });
+      try {
+        const res = await fetch(
+          `/api/funnels/${initialFunnel.id}/blocks/${blockId}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ props: propsPatch }),
+          },
+        );
+        if (!res.ok) {
+          // Rollback by refetching authoritative state
+          const fresh = await fetch(`/api/funnels/${initialFunnel.id}`, {
+            cache: "no-store",
+          });
+          if (fresh.ok) {
+            const data = (await fresh.json()) as { funnel: StoredFunnel };
+            setFunnel(data.funnel);
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    },
+    [initialFunnel.id],
+  );
+
+  const handleReorder = useCallback(
+    async (orderedIds: string[]) => {
+      setFunnel((prev) => {
+        const next = structuredClone(prev) as StoredFunnel;
+        const page = next.pages[0];
+        if (!page) return prev;
+        const byId = new Map(page.blocks.map((b) => [b.id, b]));
+        page.blocks = orderedIds
+          .map((id) => byId.get(id))
+          .filter((b): b is NonNullable<typeof b> => !!b);
+        return next;
+      });
+      try {
+        const res = await fetch(
+          `/api/funnels/${initialFunnel.id}/blocks/reorder`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderedIds }),
+          },
+        );
+        if (!res.ok) {
+          const fresh = await fetch(`/api/funnels/${initialFunnel.id}`, {
+            cache: "no-store",
+          });
+          if (fresh.ok) {
+            const data = (await fresh.json()) as { funnel: StoredFunnel };
+            setFunnel(data.funnel);
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    },
+    [initialFunnel.id],
+  );
+
   const refetchFunnel = useCallback(async () => {
     try {
       const before = new Set(
@@ -279,6 +354,8 @@ export function EditorShell({
               blocks={blocks}
               flashIds={flashIds}
               activeAnnotationId={annotation?.blockId ?? null}
+              onPatch={handlePatchBlock}
+              onReorder={handleReorder}
               onAnnotate={(blockId, type) => setAnnotation({ blockId, type })}
               onConvert={(blockId, intent) =>
                 setPendingPrompt(

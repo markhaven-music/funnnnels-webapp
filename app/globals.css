@@ -1617,6 +1617,49 @@ body.light {
   border-color: var(--accent);
   color: var(--accent-2);
 }
+
+/* Drag handle + drop affordance */
+.fb-block__grip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px 0 0;
+  margin-right: 2px;
+  border-right: 1px solid var(--line-soft);
+  color: var(--fg-3);
+  cursor: grab;
+}
+.fb-block__grip:active {
+  cursor: grabbing;
+}
+.fb-block.is-dragging {
+  opacity: 0.4;
+}
+.fb-block.is-drop-target {
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+
+/* Inline editable text affordance */
+.editable {
+  outline: none;
+  border-radius: 4px;
+  transition: background 0.12s, box-shadow 0.12s;
+  cursor: text;
+}
+.editable:hover {
+  background: oklch(0.74 0.19 295 / 0.04);
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+.editable:focus {
+  background: oklch(0.74 0.19 295 / 0.08);
+  box-shadow: inset 0 0 0 1px var(--accent-dim);
+}
+.editable:empty::before {
+  content: attr(data-placeholder);
+  color: var(--fg-3);
+  opacity: 0.6;
+}
 .fb-block.flash {
   animation: fb-flash 1.2s ease-out;
 }
