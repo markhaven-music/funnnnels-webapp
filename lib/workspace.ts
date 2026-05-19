@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { DEFAULT_FUNNEL_PRINCIPLES } from "@/lib/principles";
 
 export type WorkspaceSettings = {
   name: string;
@@ -8,6 +9,7 @@ export type WorkspaceSettings = {
   brandAccent: string;
   brandFont: string;
   logoUrl: string;
+  funnelPrinciples: string;
 };
 
 type Row = {
@@ -18,6 +20,7 @@ type Row = {
   brand_accent: string;
   brand_font: string;
   logo_url: string;
+  funnel_principles: string;
 };
 
 const DEFAULTS: WorkspaceSettings = {
@@ -28,6 +31,7 @@ const DEFAULTS: WorkspaceSettings = {
   brandAccent: "#a78bfa",
   brandFont: "Inter",
   logoUrl: "",
+  funnelPrinciples: "",
 };
 
 function rowToSettings(r: Row): WorkspaceSettings {
@@ -39,7 +43,14 @@ function rowToSettings(r: Row): WorkspaceSettings {
     brandAccent: r.brand_accent,
     brandFont: r.brand_font,
     logoUrl: r.logo_url,
+    funnelPrinciples: r.funnel_principles ?? "",
   };
+}
+
+export function effectivePrinciples(s: WorkspaceSettings): string {
+  return s.funnelPrinciples.trim().length > 0
+    ? s.funnelPrinciples
+    : DEFAULT_FUNNEL_PRINCIPLES;
 }
 
 export async function getWorkspace(): Promise<WorkspaceSettings> {
@@ -63,6 +74,8 @@ export async function updateWorkspace(
   if (patch.brandAccent !== undefined) update.brand_accent = patch.brandAccent;
   if (patch.brandFont !== undefined) update.brand_font = patch.brandFont;
   if (patch.logoUrl !== undefined) update.logo_url = patch.logoUrl;
+  if (patch.funnelPrinciples !== undefined)
+    update.funnel_principles = patch.funnelPrinciples;
   const { data, error } = await supabase()
     .from("workspace_settings")
     .update(update)

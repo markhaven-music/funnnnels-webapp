@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { WorkspaceSettings } from "@/lib/workspace";
+import { DEFAULT_FUNNEL_PRINCIPLES } from "@/lib/principles";
 
 const TIMEZONES = [
   "UTC", "America/New_York", "America/Chicago", "America/Denver",
@@ -65,7 +66,7 @@ export function SettingsPanel() {
         </div>
       </div>
 
-      <form onSubmit={handleSave} style={{ maxWidth: 520, display: "flex", flexDirection: "column", gap: 20 }}>
+      <form onSubmit={handleSave} style={{ maxWidth: 760, display: "flex", flexDirection: "column", gap: 20 }}>
         <Section title="Workspace">
           <Field label="WORKSPACE NAME">
             <input
@@ -75,6 +76,50 @@ export function SettingsPanel() {
               style={inputStyle}
             />
           </Field>
+        </Section>
+
+        <Section title="Riley memory — funnel principles">
+          <div style={{ color: "var(--fg-2)", fontSize: 12.5, lineHeight: 1.5 }}>
+            Riley always reads these before building or editing a page. Leave blank to use the built-in defaults shown when you click <b>Reset to defaults</b>. Add or rewrite freely — brand voice rules, must-haves, things to avoid.
+          </div>
+          <Field label="PRINCIPLES">
+            <textarea
+              value={
+                settings.funnelPrinciples && settings.funnelPrinciples.length > 0
+                  ? settings.funnelPrinciples
+                  : DEFAULT_FUNNEL_PRINCIPLES
+              }
+              onChange={(e) =>
+                setSettings((s) => s && { ...s, funnelPrinciples: e.target.value })
+              }
+              rows={16}
+              style={{
+                ...inputStyle,
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                lineHeight: 1.55,
+                resize: "vertical",
+                minHeight: 280,
+              }}
+            />
+          </Field>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={() =>
+                setSettings((s) => s && { ...s, funnelPrinciples: "" })
+              }
+              title="Clear your custom text and fall back to the built-in defaults"
+            >
+              Reset to defaults
+            </button>
+            <span style={{ alignSelf: "center", color: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-mono)" }}>
+              {settings.funnelPrinciples && settings.funnelPrinciples.trim().length > 0
+                ? "custom"
+                : "using defaults"}
+            </span>
+          </div>
         </Section>
 
         <Section title="Localisation">

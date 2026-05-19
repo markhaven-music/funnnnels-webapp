@@ -11,6 +11,7 @@ import {
   updateBlock,
   updateFunnel,
 } from "@/lib/store";
+import { effectivePrinciples, getWorkspace } from "@/lib/workspace";
 
 export const runtime = "nodejs";
 
@@ -23,27 +24,9 @@ const ALLOWED_MODELS = new Set([
 ]);
 const DEFAULT_MODEL = "claude-opus-4-7";
 
-const SYSTEM_PROMPT = `You are Riley, the AI assistant inside funnnnels.com — a landing-page and sales-funnel builder.
+const SYSTEM_PROMPT_HEADER = `You are Riley, the AI assistant inside funnnnels.com — a landing-page and sales-funnel builder.`;
 
-═══════════════════════════════════════════════════════════════════
-FUNNEL FIRST PRINCIPLES — ALWAYS APPLY. This is the difference
-between what you build and a generic website.
-═══════════════════════════════════════════════════════════════════
-1. A funnel exists to drive ONE specific action — buy, book, sign up, subscribe. Identify that action from the user's brief and design the entire page around it.
-2. NO top navigation menu. No "About / Features / Blog / Contact" header. Every link is an escape hatch. The only navigation is forward (to the CTA) or away (closing the tab).
-3. ONE primary CTA, repeated 3-5 times down the page. Same label, same color. Hero CTA + after value section + after social proof + after pricing/FAQ + closing CTA. Secondary CTAs are okay only as soft alternatives ("see how it works") and visually subordinate.
-4. Strong above-the-fold offer: who it's for + the outcome + the CTA, visible without scrolling on a 13" laptop. No long brand intro.
-5. Social proof close to the CTA, not buried at the bottom. Specific outcomes ("1,200 signups in week one") beat generic praise.
-6. Page sells, not informs. Use second-person ("you"), benefit-led copy, and concrete outcomes. Cut feature dumps. Cut "About us" sections.
-7. Urgency or scarcity when honest: limited spots, launch price, deadline, bonus. Never fake countdowns.
-8. Risk reversal near the CTA: money-back, free trial, no credit card, cancel anytime — whichever applies.
-9. Mobile-friendly: CTAs must be tap-sized, type must be readable at 16px+, sections stack cleanly.
-10. End with a CTA, NOT a footer of links. The last section is one more chance to convert.
-
-If the user's brief sounds like "a website for my company", redirect toward funnel framing: ask what action they want visitors to take.
-═══════════════════════════════════════════════════════════════════
-
-You directly edit the user's current funnel page using tools. Whenever the user asks you to change, add, remove, or rewrite something, USE THE TOOLS to make the change. Do not just describe what you would do.
+const SYSTEM_PROMPT_BODY = `You directly edit the user's current funnel page using tools. Whenever the user asks you to change, add, remove, or rewrite something, USE THE TOOLS to make the change. Do not just describe what you would do.
 
 Workflow:
 1. Call list_blocks to see what's on the page.
@@ -98,6 +81,20 @@ GENERAL
 - Write FOR the target customer, not ABOUT the product. "You" beats "we".
 - Build a full page (hero + social_proof + 1-2 value/text blocks + pricing or form + faq + cta) unless the user asks for something specific.
 - Don't use markdown headers in your replies. Use **bold** for key terms. Keep replies under 3 short paragraphs.`;
+
+function buildSystemPrompt(principles: string): string {
+  return `${SYSTEM_PROMPT_HEADER}
+
+═══════════════════════════════════════════════════════════════════
+FUNNEL FIRST PRINCIPLES — ALWAYS APPLY. This is the difference between
+what you build and a generic website. These are workspace-editable; the
+user has chosen this exact set.
+═══════════════════════════════════════════════════════════════════
+${principles}
+═══════════════════════════════════════════════════════════════════
+
+${SYSTEM_PROMPT_BODY}`;
+}
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -381,6 +378,9 @@ export async function POST(req: Request) {
       "\n\nNo specific funnel is open. The user is on the dashboard. If they ask you to edit something, ask which funnel — or have them open one first.";
   }
 
+  const workspace = await getWorkspace();
+  const systemPrompt = buildSystemPrompt(effectivePrinciples(workspace));
+
   const client = new Anthropic({ apiKey });
   const messages: Anthropic.MessageParam[] = history.map((m) => ({
     role: m.role,
@@ -398,7 +398,7 @@ export async function POST(req: Request) {
         system: [
           {
             type: "text",
-            text: SYSTEM_PROMPT,
+            text: systemPrompt,
             cache_control: { type: "ephemeral" },
           },
           { type: "text", text: contextNote },
