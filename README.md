@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# funnnnels.com
 
-## Getting Started
+An AI-first, dark-themed ClickFunnels alternative. Riley — the AI panel — actually edits your funnel pages via tool use, the same way Claude Code edits files.
 
-First, run the development server:
+## Stack
+
+- Next.js 15 (App Router) + TypeScript
+- Tailwind v4 (reset only; dashboard is hand-rolled CSS in [globals.css](app/globals.css))
+- `@anthropic-ai/sdk` running a server-side tool-use loop on `claude-sonnet-4-6`
+- Geist + Geist Mono via `next/font/google`
+- File-backed funnel store at `.data/funnels.json` (gitignored; seeded on first run)
+
+## Setup
 
 ```bash
+cp .env.local.example .env.local
+# add your ANTHROPIC_API_KEY
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Path | What it is |
+| --- | --- |
+| `/` | Dashboard — sidebar, stats, funnel grid, Riley panel |
+| `/funnels/new` | Server action: creates a fresh funnel and redirects to its editor |
+| `/funnels/[id]/edit` | Editor — canvas + Riley panel side by side |
+| `/api/chat` | POST `{ funnelId, messages }` → `{ reply, operations, mutated }` |
+| `/api/funnels` | POST → create a new funnel |
+| `/api/funnels/[id]` | GET → the funnel's current state |
 
-## Learn More
+## How Riley edits pages
 
-To learn more about Next.js, take a look at the following resources:
+The `/api/chat` route runs a real tool-use loop. Riley has these tools:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Tool | What it does |
+| --- | --- |
+| `list_blocks` | Read the page outline (id + type per block) |
+| `get_block` | Read full props for one block before editing |
+| `add_block` | Insert a new block (`hero`, `text`, `cta`, `image`, `social_proof`, `form`, `pricing`, `faq`) |
+| `update_block` | Partial patch on a block's props |
+| `delete_block` | Remove a block |
+| `reorder_blocks` | Rearrange the page |
+| `rename_funnel` | Rename the funnel itself |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The system prompt documents the schema for every block type. Loop caps at 8 iterations and the API persists changes to `.data/funnels.json` after each tool call. The client refetches the funnel when the response reports `mutated: true`, and new/edited blocks flash on the canvas.
 
-## Deploy on Vercel
+### Try it
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open an existing funnel (e.g. http://localhost:3000/funnels/f1/edit) and ask Riley:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- "Rewrite the hero for designers, more confident tone"
+- "Add a 3-tier pricing section after the social proof"
+- "Make the form ask for company name and team size"
+- "Delete the social proof block"
+- "Reorder so the form is at the top"
+
+Each turn shows a **Tools used** card in the chat with the operations Riley ran. The canvas updates immediately afterward.
+
+## Block schema
+
+See [`lib/blocks.ts`](lib/blocks.ts). Each block has `{ id, type, props }`; props per type are documented in `BLOCK_SCHEMA_DOC` (which is also injected into Riley's system prompt so it knows what shape to send).
+
+## Where to extend
+
+- **Drag/drop reordering** — Riley can reorder via tool, but a manual UI affordance is still TODO. The block boundaries already light up on hover.
+- **Property panels** — clicking a block doesn't open an editor yet. Today you ask Riley to change it.
+- **Multi-page funnels** — `StoredFunnel.pages` is already an array; the UI assumes one page.
+- **Auth / multi-tenant** — single shared store; add NextAuth or Clerk before opening up.
+- **Real publishing** — the publish button is wired to nothing. Build a publish step that renders a static page from the block tree.
