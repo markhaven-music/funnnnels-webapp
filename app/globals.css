@@ -2002,9 +2002,33 @@ textarea.fb-form__input {
 .fb-custom {
   width: 100%;
 }
-.fb-block .fb-custom {
-  /* In editor canvas, give custom blocks their natural full width */
-  margin: -24px;
+.fb-block--custom {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.fb-block--custom > .fb-block__chrome {
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  background: oklch(0.12 0.01 270 / 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+}
+.fb-block--custom:hover > .fb-block__chrome,
+.fb-block--custom.is-annotating > .fb-block__chrome {
+  opacity: 1;
+}
+.fb-block--custom:hover {
+  background: transparent;
+  outline: 1px solid var(--line);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+.fb-block--custom.is-annotating {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
 }
 .public-foot {
   margin-top: 64px;

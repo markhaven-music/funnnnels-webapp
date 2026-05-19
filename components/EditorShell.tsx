@@ -260,6 +260,11 @@ export function EditorShell({
               flashIds={flashIds}
               activeAnnotationId={annotation?.blockId ?? null}
               onAnnotate={(blockId, type) => setAnnotation({ blockId, type })}
+              onConvert={(blockId, intent) =>
+                setPendingPrompt(
+                  `Convert custom_html block ${blockId} (intent="${intent}") into structured blocks. Read it with get_block, infer the equivalent structured blocks (hero / text / cta / social_proof / pricing / form / faq as appropriate), add them at the same position, then delete the original custom block. Preserve the copy verbatim.`,
+                )
+              }
             />
           </div>
         </div>

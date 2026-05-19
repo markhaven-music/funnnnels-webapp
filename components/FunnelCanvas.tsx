@@ -9,6 +9,7 @@ type Props = {
   blocks: Block[];
   flashIds?: string[];
   onAnnotate?: (blockId: string, type: string) => void;
+  onConvert?: (blockId: string, intent: string) => void;
   activeAnnotationId?: string | null;
 };
 
@@ -16,6 +17,7 @@ export function FunnelCanvas({
   blocks,
   flashIds = [],
   onAnnotate,
+  onConvert,
   activeAnnotationId = null,
 }: Props) {
   const refs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -46,33 +48,52 @@ export function FunnelCanvas({
 
   return (
     <>
-      {blocks.map((b) => (
-        <div
-          key={b.id}
-          className={`fb-block${activeAnnotationId === b.id ? " is-annotating" : ""}`}
-          data-block-id={b.id}
-          ref={(el) => {
-            if (el) refs.current.set(b.id, el);
-            else refs.current.delete(b.id);
-          }}
-        >
-          <div className="fb-block__chrome">
-            <span>{b.type}</span>
-            {onAnnotate && (
-              <button
-                type="button"
-                className="fb-block__note"
-                onClick={() => onAnnotate(b.id, b.type)}
-                title="Tell Riley to edit this block"
-              >
-                <I.sparkles size={10} />
-                Note Riley
-              </button>
-            )}
+      {blocks.map((b) => {
+        const isCustom = b.type === "custom_html";
+        const intent = isCustom
+          ? ((b.props as { intent?: string }).intent ?? "section")
+          : null;
+        return (
+          <div
+            key={b.id}
+            className={`fb-block${isCustom ? " fb-block--custom" : ""}${
+              activeAnnotationId === b.id ? " is-annotating" : ""
+            }`}
+            data-block-id={b.id}
+            ref={(el) => {
+              if (el) refs.current.set(b.id, el);
+              else refs.current.delete(b.id);
+            }}
+          >
+            <div className="fb-block__chrome">
+              <span>{isCustom ? `custom · ${intent}` : b.type}</span>
+              {onAnnotate && (
+                <button
+                  type="button"
+                  className="fb-block__note"
+                  onClick={() => onAnnotate(b.id, b.type)}
+                  title="Tell Riley to edit this block"
+                >
+                  <I.sparkles size={10} />
+                  Note Riley
+                </button>
+              )}
+              {isCustom && onConvert && (
+                <button
+                  type="button"
+                  className="fb-block__note"
+                  onClick={() => onConvert(b.id, intent ?? "section")}
+                  title="Convert this custom block into editable structured blocks"
+                >
+                  <I.layers size={10} />
+                  Make editable
+                </button>
+              )}
+            </div>
+            <BlockView block={b} />
           </div>
-          <BlockView block={b} />
-        </div>
-      ))}
+        );
+      })}
     </>
   );
 }

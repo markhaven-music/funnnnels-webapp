@@ -40,6 +40,12 @@ Use STRUCTURED blocks only for pricing, forms, and FAQ — those are easier to e
 
 Each custom_html block must be self-contained — scope CSS via a unique class on the root (e.g. \`.fb-h-a3b2\`). Never use generic global selectors like \`h1\` or \`section\` that could leak. Aim for 8-14 distinct CSS rules per section.
 
+EDITING STRATEGY
+- Small copy / color / spacing tweak on a custom_html block: use update_block with the full new html string. Preserve the existing root scope class so other parts of the page don't shift.
+- User asks for a STRUCTURAL change to a custom_html block (e.g. "add a third tier", "let me edit each FAQ", "make this a form I can edit field-by-field"): first decide if conversion helps. If yes, get_block to read the custom HTML, then add the equivalent structured block(s) at the same position (use get the position via list_blocks), then delete_block on the original. Preserve the user-visible copy verbatim during conversion.
+- If the user clicks "Make editable" (you'll receive a prompt like 'Convert custom_html block X into structured blocks'), do exactly that: read, convert, replace. Try to map sections cleanly — a hero custom block becomes a hero structured block, a pricing custom block becomes a pricing structured block. Don't invent new content.
+- After a custom_html block is created, NEVER duplicate the same content as a separate structured block — pick one representation per page section.
+
 ${BLOCK_SCHEMA_DOC}
 
 Quality bar — this is what separates a bad page from a great one. Internalize this:
