@@ -36,6 +36,7 @@ export function EditorShell({
   const [copied, setCopied] = useState(false);
   const [undoing, setUndoing] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const dragging = useRef(false);
   const gripRef = useRef<HTMLDivElement>(null);
 
@@ -342,6 +343,17 @@ export function EditorShell({
         </div>
 
         <button
+          className={`btn ghost${editMode ? " is-on" : ""}`}
+          type="button"
+          title={editMode ? "Exit edit mode (Esc)" : "Click any block to ask Riley"}
+          onClick={() => setEditMode((v) => !v)}
+          style={{ padding: "0 10px", height: 32 }}
+        >
+          <I.sparkles size={13} />
+          {editMode ? "Pick a block…" : "Click and edit"}
+        </button>
+
+        <button
           className="btn ghost"
           type="button"
           title="Undo last change (⌘Z)"
@@ -447,9 +459,12 @@ export function EditorShell({
             <FunnelCanvas
               blocks={blocks}
               flashIds={flashIds}
+              editMode={editMode}
+              onExitEditMode={() => setEditMode(false)}
               onPatch={handlePatchBlock}
               onReorder={handleReorder}
               onAskRiley={(blockId, blockType, intent, instruction, selectedText) => {
+                setEditMode(false);
                 const target =
                   blockType === "custom_html"
                     ? `custom_html block ${blockId} (intent="${intent ?? "section"}")`

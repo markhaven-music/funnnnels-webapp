@@ -1693,9 +1693,38 @@ body.light {
   outline: 1px solid var(--accent);
   outline-offset: -1px;
 }
-.fb-block.is-editing > .fb-block__edit,
-.fb-block .fb-block__chrome:has(+ .inline-editor) .fb-block__edit {
-  color: var(--accent);
+
+/* Edit mode: blocks become click-to-edit targets */
+.editor-shell:has(.btn.is-on .icon-sparkles),
+.editor-stage:has(.fb-block.is-pickable) {
+  cursor: crosshair;
+}
+.fb-block.is-pickable {
+  cursor: pointer;
+  position: relative;
+}
+.fb-block.is-pickable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 1.5px dashed var(--accent-dim);
+  background: oklch(0.74 0.19 295 / 0.04);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s, border-color 0.12s, background 0.12s;
+  z-index: 1;
+}
+.fb-block.is-pickable:hover::after {
+  opacity: 1;
+  border-color: var(--accent);
+  background: oklch(0.74 0.19 295 / 0.08);
+}
+.fb-block.is-pickable.is-editing::after {
+  opacity: 0;
+}
+.fb-block.is-pickable > .fb-block__chrome {
+  opacity: 1;
 }
 
 /* Inline editor popover */

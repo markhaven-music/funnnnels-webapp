@@ -10,6 +10,8 @@ import type { Block } from "@/lib/blocks";
 type Props = {
   blocks: Block[];
   flashIds?: string[];
+  editMode?: boolean;
+  onExitEditMode?: () => void;
   onAskRiley?: (
     blockId: string,
     blockType: string,
@@ -24,6 +26,8 @@ type Props = {
 export function FunnelCanvas({
   blocks,
   flashIds = [],
+  editMode = false,
+  onExitEditMode,
   onAskRiley,
   onPatch,
   onReorder,
@@ -46,14 +50,14 @@ export function FunnelCanvas({
     }
   }, [flashIds]);
 
-  // Close inline editor on outside click or Esc
+  // Close inline editor on outside click; Esc closes editor first, then exits edit mode.
   useEffect(() => {
-    if (!editId) return;
     const onDoc = (e: MouseEvent) => {
+      if (!editId) return;
       const target = e.target as Element;
       if (
         !target.closest(".inline-editor") &&
-        !target.closest(".fb-block__edit") &&
+        !target.closest(".fb-block") &&
         !target.closest(".sel-tooltip")
       ) {
         setEditId(null);
@@ -61,9 +65,12 @@ export function FunnelCanvas({
       }
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key !== "Escape") return;
+      if (editId) {
         setEditId(null);
         setEditSelection(null);
+      } else if (editMode && onExitEditMode) {
+        onExitEditMode();
       }
     };
     document.addEventListener("mousedown", onDoc);
@@ -72,7 +79,7 @@ export function FunnelCanvas({
       document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
     };
-  }, [editId]);
+  }, [editId, editMode, onExitEditMode]);
 
   if (blocks.length === 0) {
     return (
@@ -156,15 +163,27 @@ export function FunnelCanvas({
               dragging ? "is-dragging" : "",
               overTop ? "is-drop-target" : "",
               isEditing && editSelection ? "is-editing-selection" : "",
+              editMode ? "is-pickable" : "",
             ]
               .filter(Boolean)
               .join(" ")}
             data-block-id={b.id}
-            draggable={!!onReorder && !isEditing}
+            draggable={!!onReorder && !isEditing && !editMode}
             onDragStart={(e) => handleDragStart(e, b.id)}
             onDragOver={(e) => handleDragOver(e, b.id)}
             onDrop={(e) => handleDrop(e, b.id)}
             onDragEnd={handleDragEnd}
+            onClick={(e) => {
+              if (!editMode || !onAskRiley) return;
+              // Don't trigger if user clicked into the inline editor or chrome
+              const target = e.target as Element;
+              if (target.closest(".inline-editor") || target.closest(".fb-block__chrome")) return;
+              // Don't trigger if there's an active text selection
+              const sel = window.getSelection();
+              if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) return;
+              e.preventDefault();
+              setEditId(b.id);
+            }}
             ref={(el) => {
               if (el) refs.current.set(b.id, el);
               else refs.current.delete(b.id);
@@ -193,17 +212,6 @@ export function FunnelCanvas({
                 </span>
               )}
               <span>{isCustom ? `custom · ${intent}` : b.type}</span>
-              {onAskRiley && (
-                <button
-                  type="button"
-                  className="fb-block__edit"
-                  onClick={() => setEditId(isEditing ? null : b.id)}
-                  title="Click and edit with Riley"
-                >
-                  <I.sparkles size={10} />
-                  Click and edit
-                </button>
-              )}
             </div>
 
             {isEditing && onAskRiley && (
