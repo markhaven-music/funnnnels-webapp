@@ -204,7 +204,18 @@ export function EditorShell({
           ))}
         </div>
 
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+          {funnel.status === "live" && (
+            <a
+              href={`/p/${funnel.id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="btn ghost"
+              title="Open the published page"
+            >
+              <I.rocket size={13} /> View live
+            </a>
+          )}
           <button
             className="btn ghost"
             type="button"

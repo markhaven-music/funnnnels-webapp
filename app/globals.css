@@ -1981,6 +1981,37 @@ textarea.fb-form__input {
   font-size: 13.5px;
 }
 
+/* Public published page */
+.public-page {
+  min-height: 100vh;
+  background: var(--bg-0);
+  padding: 64px 24px 96px;
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+.public-block {
+  width: 100%;
+}
+.public-foot {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line-soft);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+}
+.public-foot a {
+  color: var(--fg-2);
+  text-decoration: none;
+}
+.public-foot a:hover {
+  color: var(--accent-2);
+}
+
 /* New-with-AI interstitial */
 .new-funnel {
   min-height: 100vh;
