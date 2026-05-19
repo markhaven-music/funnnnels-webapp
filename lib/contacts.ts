@@ -1,8 +1,4 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
-
-const DATA_DIR = path.join(process.cwd(), ".data");
-const FILE = path.join(DATA_DIR, "contacts.json");
+import { supabase } from "@/lib/supabase";
 
 export type Contact = {
   id: string;
@@ -13,44 +9,59 @@ export type Contact = {
   createdAt: string;
 };
 
-type Store = { contacts: Contact[] };
+type Row = {
+  id: string;
+  email: string;
+  name: string | null;
+  source: string | null;
+  tags: string[];
+  created_at: string;
+};
 
-async function load(): Promise<Store> {
-  try {
-    return JSON.parse(await fs.readFile(FILE, "utf-8")) as Store;
-  } catch {
-    return { contacts: [] };
-  }
-}
-
-async function persist(s: Store) {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(FILE, JSON.stringify(s, null, 2), "utf-8");
+function rowToContact(r: Row): Contact {
+  return {
+    id: r.id,
+    email: r.email,
+    name: r.name ?? undefined,
+    source: r.source ?? undefined,
+    tags: r.tags ?? [],
+    createdAt: r.created_at,
+  };
 }
 
 export async function listContacts(): Promise<Contact[]> {
-  return (await load()).contacts;
+  const { data, error } = await supabase()
+    .from("contacts")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as Row[]).map(rowToContact);
 }
 
 export async function addContact(
   data: Omit<Contact, "id" | "createdAt">,
 ): Promise<Contact> {
-  const s = await load();
-  const c: Contact = {
-    id: Math.random().toString(36).slice(2, 10),
-    ...data,
-    createdAt: new Date().toISOString(),
-  };
-  s.contacts.unshift(c);
-  await persist(s);
-  return c;
+  const id = Math.random().toString(36).slice(2, 10);
+  const { data: row, error } = await supabase()
+    .from("contacts")
+    .insert({
+      id,
+      email: data.email,
+      name: data.name ?? null,
+      source: data.source ?? null,
+      tags: data.tags ?? [],
+    })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return rowToContact(row as Row);
 }
 
 export async function deleteContact(id: string): Promise<boolean> {
-  const s = await load();
-  const before = s.contacts.length;
-  s.contacts = s.contacts.filter((c) => c.id !== id);
-  if (s.contacts.length === before) return false;
-  await persist(s);
-  return true;
+  const { error, count } = await supabase()
+    .from("contacts")
+    .delete({ count: "exact" })
+    .eq("id", id);
+  if (error) throw error;
+  return (count ?? 0) > 0;
 }
