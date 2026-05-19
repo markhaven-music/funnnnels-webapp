@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AIPanel, type Annotation } from "@/components/AIPanel";
+import { AIPanel } from "@/components/AIPanel";
 import { FunnelCanvas } from "@/components/FunnelCanvas";
 import { I } from "@/components/icons";
 import type { StoredFunnel } from "@/lib/blocks";
@@ -28,7 +28,6 @@ export function EditorShell({
   const [device, setDevice] = useState<Device>("desktop");
   const [pendingPrompt, setPendingPrompt] = useState<string | null>(initialSeed);
   const [flashIds, setFlashIds] = useState<string[]>([]);
-  const [annotation, setAnnotation] = useState<Annotation | null>(null);
   const [panelWidth, setPanelWidth] = useState(DEFAULT_W);
   const [deleting, setDeleting] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -390,15 +389,17 @@ export function EditorShell({
             <FunnelCanvas
               blocks={blocks}
               flashIds={flashIds}
-              activeAnnotationId={annotation?.blockId ?? null}
               onPatch={handlePatchBlock}
               onReorder={handleReorder}
-              onAnnotate={(blockId, type) => setAnnotation({ blockId, type })}
-              onConvert={(blockId, intent) =>
+              onAskRiley={(blockId, blockType, intent, instruction) => {
+                const target =
+                  blockType === "custom_html"
+                    ? `custom_html block ${blockId} (intent="${intent ?? "section"}")`
+                    : `${blockType} block ${blockId}`;
                 setPendingPrompt(
-                  `Convert custom_html block ${blockId} (intent="${intent}") into structured blocks. Read it with get_block, infer the equivalent structured blocks (hero / text / cta / social_proof / pricing / form / faq as appropriate), add them at the same position, then delete the original custom block. Preserve the copy verbatim.`,
-                )
-              }
+                  `[Click-and-edit on ${target}] ${instruction}\n\nEdit only that block. Use get_block first to read its current state, then update_block to apply the change. Preserve the existing design and structure unless the instruction explicitly asks to change them.`,
+                );
+              }}
             />
           </div>
         </div>
@@ -419,8 +420,6 @@ export function EditorShell({
             pendingPrompt={pendingPrompt}
             onPromptConsumed={() => setPendingPrompt(null)}
             onMutate={refetchFunnel}
-            annotation={annotation}
-            onClearAnnotation={() => setAnnotation(null)}
           />
 
           <div

@@ -3,30 +3,33 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
 import { BlockView } from "@/components/blocks/BlockView";
 import { I } from "@/components/icons";
+import { InlineBlockEditor } from "@/components/InlineBlockEditor";
 import type { Block } from "@/lib/blocks";
 
 type Props = {
   blocks: Block[];
   flashIds?: string[];
-  onAnnotate?: (blockId: string, type: string) => void;
-  onConvert?: (blockId: string, intent: string) => void;
+  onAskRiley?: (
+    blockId: string,
+    blockType: string,
+    intent: string | null,
+    instruction: string,
+  ) => void;
   onPatch?: (blockId: string, propsPatch: Record<string, unknown>) => void;
   onReorder?: (orderedIds: string[]) => void;
-  activeAnnotationId?: string | null;
 };
 
 export function FunnelCanvas({
   blocks,
   flashIds = [],
-  onAnnotate,
-  onConvert,
+  onAskRiley,
   onPatch,
   onReorder,
-  activeAnnotationId = null,
 }: Props) {
   const refs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
 
   useEffect(() => {
     if (flashIds.length === 0) return;
@@ -39,6 +42,26 @@ export function FunnelCanvas({
       }
     }
   }, [flashIds]);
+
+  // Close inline editor on outside click or Esc
+  useEffect(() => {
+    if (!editId) return;
+    const onDoc = (e: MouseEvent) => {
+      const target = e.target as Element;
+      if (!target.closest(".inline-editor") && !target.closest(".fb-block__edit")) {
+        setEditId(null);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setEditId(null);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [editId]);
 
   if (blocks.length === 0) {
     return (
@@ -103,20 +126,21 @@ export function FunnelCanvas({
           : null;
         const dragging = dragId === b.id;
         const overTop = overId === b.id && dragId !== b.id;
+        const isEditing = editId === b.id;
         return (
           <div
             key={b.id}
             className={[
               "fb-block",
               isCustom ? "fb-block--custom" : "",
-              activeAnnotationId === b.id ? "is-annotating" : "",
+              isEditing ? "is-editing" : "",
               dragging ? "is-dragging" : "",
               overTop ? "is-drop-target" : "",
             ]
               .filter(Boolean)
               .join(" ")}
             data-block-id={b.id}
-            draggable={!!onReorder}
+            draggable={!!onReorder && !isEditing}
             onDragStart={(e) => handleDragStart(e, b.id)}
             onDragOver={(e) => handleDragOver(e, b.id)}
             onDrop={(e) => handleDrop(e, b.id)}
@@ -149,29 +173,31 @@ export function FunnelCanvas({
                 </span>
               )}
               <span>{isCustom ? `custom · ${intent}` : b.type}</span>
-              {onAnnotate && (
+              {onAskRiley && (
                 <button
                   type="button"
-                  className="fb-block__note"
-                  onClick={() => onAnnotate(b.id, b.type)}
-                  title="Tell Riley to edit this block"
+                  className="fb-block__edit"
+                  onClick={() => setEditId(isEditing ? null : b.id)}
+                  title="Click and edit with Riley"
                 >
                   <I.sparkles size={10} />
-                  Note Riley
-                </button>
-              )}
-              {isCustom && onConvert && (
-                <button
-                  type="button"
-                  className="fb-block__note"
-                  onClick={() => onConvert(b.id, intent ?? "section")}
-                  title="Convert this custom block into editable structured blocks"
-                >
-                  <I.layers size={10} />
-                  Make editable
+                  Click and edit
                 </button>
               )}
             </div>
+
+            {isEditing && onAskRiley && (
+              <InlineBlockEditor
+                blockType={b.type}
+                intent={intent}
+                onSubmit={(instruction) => {
+                  setEditId(null);
+                  onAskRiley(b.id, b.type, intent, instruction);
+                }}
+                onCancel={() => setEditId(null)}
+              />
+            )}
+
             <BlockView
               block={b}
               patch={
