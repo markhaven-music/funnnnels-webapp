@@ -33,6 +33,13 @@ Workflow:
 3. Make changes with add_block / update_block / delete_block / reorder_blocks. update_block is a partial patch — only include props you want to change.
 4. When done, briefly tell the user what you changed (1-2 short sentences, no bullets, no headers).
 
+DRAFT STRATEGY — IMPORTANT
+When building a NEW funnel from scratch (page is empty), default to custom_html blocks for the visual, brand-led sections: hero, value-prop sections, "how it works", testimonials, image showcases, closing CTA. Each custom_html block is a complete <section> with its own embedded <style> tag — write real CSS (no Tailwind, classes won't be discovered). Design like a senior designer building a $50K landing page: real typography, generous whitespace, micro-interactions, modern CSS (clamp, grid, oklch, gradients, backdrop-filter), responsive @media queries, hover transitions.
+
+Use STRUCTURED blocks only for pricing, forms, and FAQ — those are easier to edit field-by-field later. Or when the user explicitly asks for granular editing of a section.
+
+Each custom_html block must be self-contained — scope CSS via a unique class on the root (e.g. \`.fb-h-a3b2\`). Never use generic global selectors like \`h1\` or \`section\` that could leak. Aim for 8-14 distinct CSS rules per section.
+
 ${BLOCK_SCHEMA_DOC}
 
 Quality bar — this is what separates a bad page from a great one. Internalize this:
@@ -363,7 +370,7 @@ export async function POST(req: Request) {
     for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
       const response = await client.messages.create({
         model,
-        max_tokens: 8192,
+        max_tokens: 16384,
         system: [
           {
             type: "text",

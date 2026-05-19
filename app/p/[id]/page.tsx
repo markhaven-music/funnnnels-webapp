@@ -36,9 +36,14 @@ export default async function PublicFunnelPage({
   return (
     <main className="public-page">
       {blocks.map((b) => (
-        <section key={b.id} className="public-block">
+        <div
+          key={b.id}
+          className={
+            b.type === "custom_html" ? "public-block public-block--full" : "public-block"
+          }
+        >
           <BlockView block={b} />
-        </section>
+        </div>
       ))}
       <footer className="public-foot">
         <span>

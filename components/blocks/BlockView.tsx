@@ -1,6 +1,7 @@
 import type {
   Block,
   CtaProps,
+  CustomHtmlProps,
   FaqProps,
   FormProps,
   HeroProps,
@@ -9,6 +10,19 @@ import type {
   SocialProofProps,
   TextProps,
 } from "@/lib/blocks";
+import { sanitizeBlockHtml } from "@/lib/sanitize";
+
+function CustomHtml({ p }: { p: CustomHtmlProps }) {
+  const safe = sanitizeBlockHtml(p.html || "");
+  return (
+    <div
+      className="fb-custom"
+      data-block="custom_html"
+      data-intent={p.intent}
+      dangerouslySetInnerHTML={{ __html: safe }}
+    />
+  );
+}
 
 function Hero({ p }: { p: HeroProps }) {
   const align = p.align ?? "center";
@@ -205,6 +219,8 @@ function Faq({ p }: { p: FaqProps }) {
 
 export function BlockView({ block }: { block: Block }) {
   switch (block.type) {
+    case "custom_html":
+      return <CustomHtml p={block.props as CustomHtmlProps} />;
     case "hero":
       return <Hero p={block.props as HeroProps} />;
     case "text":

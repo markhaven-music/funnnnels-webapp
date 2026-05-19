@@ -1,4 +1,5 @@
 export const BLOCK_TYPES = [
+  "custom_html",
   "hero",
   "text",
   "cta",
@@ -82,7 +83,14 @@ export type FaqProps = {
   items: FaqItem[];
 };
 
+export type CustomHtmlProps = {
+  intent: string;
+  html: string;
+  theme?: string;
+};
+
 export type BlockPropsByType = {
+  custom_html: CustomHtmlProps;
   hero: HeroProps;
   text: TextProps;
   cta: CtaProps;
@@ -126,10 +134,20 @@ export type StoredFunnel = {
 
 export const BLOCK_SCHEMA_DOC = `Block types and their props:
 
+PREFERRED FOR FIRST DRAFTS — custom_html
+- custom_html: { intent: string, html: string, theme?: string }
+- Use this for hero, value sections, "how it works", testimonials section, anything that should look bespoke.
+- "html" is a complete self-contained <section>...</section> with an embedded <style>...</style> block at the top. No Tailwind classes (they won't be JIT-discovered) — write real CSS scoped via a unique class like .fb-h-<short-random>.
+- Design like a senior designer: real typography hierarchy, generous whitespace, real color choices that fit the brand vibe, hover/transition micro-interactions, responsive (use @media queries), modern CSS (clamp, grid, flex, oklch, backdrop-filter).
+- Reference real product/brand language. Avoid placeholders like "Acme" or "Lorem ipsum".
+- "intent" is a short label like "hero", "value-prop", "testimonials" — used for editing later.
+- "theme" is a short vibe label like "luxe dark", "soft warm", "brutal mono", "clean tech".
+
+STRUCTURED (use only when the user asks for granular editing — pricing/forms/faq are easier as structured)
 - hero: { eyebrow?, headline, subhead?, primary_cta?, secondary_cta?, align?: "center"|"left" }
-- text: { heading?, body } — long-form paragraph text
-- cta: { headline?, subhead?, button_label, variant?: "primary"|"secondary" } — standalone call-to-action band
-- image: { caption?, alt?, palette?: [hex/oklch, hex/oklch] } — placeholder image
+- text: { heading?, body }
+- cta: { headline?, subhead?, button_label, variant?: "primary"|"secondary" }
+- image: { caption?, alt? }
 - social_proof: { heading?, logos?: string[], quote?, attribution? }
 - form: { heading?, subhead?, fields: [{ label, name, type: "text"|"email"|"tel"|"select"|"textarea", required?, placeholder? }], submit_label }
 - pricing: { heading?, subhead?, tiers: [{ name, price, period?, features: string[], cta_label?, featured? }] }
@@ -139,6 +157,12 @@ export function defaultProps<T extends BlockType>(
   type: T,
 ): BlockPropsByType[T] {
   switch (type) {
+    case "custom_html":
+      return {
+        intent: "section",
+        html: "<section><p>Custom section</p></section>",
+        theme: "",
+      } as BlockPropsByType[T];
     case "hero":
       return {
         eyebrow: "New",
