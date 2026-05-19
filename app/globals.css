@@ -1985,3 +1985,149 @@ textarea.fb-form__input {
   margin: 0;
   font-size: 13.5px;
 }
+
+/* New-with-AI interstitial */
+.new-funnel {
+  min-height: 100vh;
+  background:
+    radial-gradient(60% 50% at 50% 0%, oklch(0.74 0.19 295 / 0.10), transparent 70%),
+    var(--bg-0);
+  position: relative;
+}
+.new-funnel__back {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+.new-funnel__inner {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 96px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.new-funnel__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--accent-2);
+}
+.new-funnel__eyebrow .orb {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), oklch(0.55 0.18 280));
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+.new-funnel__title {
+  font-size: 38px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+  font-weight: 600;
+}
+.new-funnel__sub {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: 15px;
+  line-height: 1.5;
+  max-width: 540px;
+}
+.new-funnel__composer {
+  margin-top: 8px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.new-funnel__composer:focus-within {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 0 4px oklch(0.74 0.19 295 / 0.08);
+}
+.new-funnel__composer textarea {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: var(--fg-0);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  padding: 6px 8px;
+}
+.new-funnel__composer textarea::placeholder {
+  color: var(--fg-3);
+}
+.new-funnel__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding: 0 4px;
+}
+.new-funnel__hint {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--fg-3);
+}
+.new-funnel__err {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: oklch(0.7 0.18 25);
+}
+.new-funnel__suggestions {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.new-funnel__suggestions-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg-3);
+}
+.new-funnel__suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+@media (max-width: 600px) {
+  .new-funnel__suggestions-grid { grid-template-columns: 1fr; }
+  .new-funnel__title { font-size: 30px; }
+}
+.new-funnel__suggestion {
+  text-align: left;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--fg-1);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+.new-funnel__suggestion:hover:not(:disabled) {
+  border-color: var(--accent-dim);
+  background: oklch(0.74 0.19 295 / 0.06);
+  color: var(--fg-0);
+}
+.new-funnel__suggestion:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.new-funnel__suggestion .pl {
+  color: var(--accent-2);
+  font-family: var(--font-mono);
+}

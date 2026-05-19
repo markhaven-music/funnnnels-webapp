@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
-import { createFunnel } from "@/lib/store";
+import { NewFunnelInterstitial } from "@/components/NewFunnelInterstitial";
 
-export default async function NewFunnelPage() {
-  const f = await createFunnel("Untitled funnel");
-  redirect(`/funnels/${f.id}/edit`);
+export const dynamic = "force-dynamic";
+
+export default function NewFunnelPage() {
+  return <NewFunnelInterstitial />;
 }

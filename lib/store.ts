@@ -46,20 +46,7 @@ function rowToFunnel(r: Row): StoredFunnel {
 }
 
 function starterBlocks(): Block[] {
-  return [
-    {
-      id: blockId(),
-      type: "hero",
-      props: {
-        eyebrow: "New funnel",
-        headline: "Tell Riley what you want.",
-        subhead:
-          "Ask in the chat on the right — Riley will rewrite this hero, add sections, and wire your CTAs.",
-        primary_cta: "Get started",
-        align: "center",
-      },
-    },
-  ];
+  return [];
 }
 
 export async function listFunnels(): Promise<StoredFunnel[]> {

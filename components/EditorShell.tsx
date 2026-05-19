@@ -15,11 +15,17 @@ const DEFAULT_W = 420;
 
 type Device = "desktop" | "tablet" | "mobile";
 
-export function EditorShell({ initialFunnel }: { initialFunnel: StoredFunnel }) {
+export function EditorShell({
+  initialFunnel,
+  initialSeed = null,
+}: {
+  initialFunnel: StoredFunnel;
+  initialSeed?: string | null;
+}) {
   const router = useRouter();
   const [funnel, setFunnel] = useState<StoredFunnel>(initialFunnel);
   const [device, setDevice] = useState<Device>("desktop");
-  const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
+  const [pendingPrompt, setPendingPrompt] = useState<string | null>(initialSeed);
   const [flashIds, setFlashIds] = useState<string[]>([]);
   const [annotation, setAnnotation] = useState<Annotation | null>(null);
   const [panelWidth, setPanelWidth] = useState(DEFAULT_W);
@@ -37,6 +43,14 @@ export function EditorShell({ initialFunnel }: { initialFunnel: StoredFunnel }) 
     } catch {
       /* ignore */
     }
+  }, []);
+
+  // Strip the ?seed= query once we've consumed it so refreshes don't re-fire.
+  useEffect(() => {
+    if (initialSeed) {
+      router.replace(`/funnels/${initialFunnel.id}/edit`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
