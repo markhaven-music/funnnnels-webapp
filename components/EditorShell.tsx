@@ -34,6 +34,8 @@ export function EditorShell({
   const [aiOpen, setAiOpen] = useState(true);
   const [justPublished, setJustPublished] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [undoing, setUndoing] = useState(false);
+  const [canUndo, setCanUndo] = useState(false);
   const dragging = useRef(false);
   const gripRef = useRef<HTMLDivElement>(null);
 
@@ -236,6 +238,51 @@ export function EditorShell({
     [initialFunnel.id],
   );
 
+  const handleUndo = useCallback(async () => {
+    if (undoing) return;
+    setUndoing(true);
+    try {
+      const res = await fetch(`/api/funnels/${initialFunnel.id}/undo`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { funnel: StoredFunnel };
+        setFunnel(data.funnel);
+      } else if (res.status === 409) {
+        setCanUndo(false);
+      }
+    } finally {
+      setUndoing(false);
+    }
+  }, [initialFunnel.id, undoing]);
+
+  // Any mutation flips canUndo on; the API tells us when there's nothing left.
+  useEffect(() => {
+    setCanUndo(true);
+  }, [funnel]);
+
+  // Cmd/Ctrl+Z keyboard shortcut
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const isMeta = e.metaKey || e.ctrlKey;
+      if (!isMeta || e.shiftKey) return;
+      if (e.key !== "z" && e.key !== "Z") return;
+      // Don't hijack if user is editing inline text
+      const target = e.target as Element | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          (target as HTMLElement).isContentEditable)
+      )
+        return;
+      e.preventDefault();
+      handleUndo();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [handleUndo]);
+
   const refetchFunnel = useCallback(async () => {
     try {
       const before = new Set(
@@ -293,6 +340,17 @@ export function EditorShell({
             autosaved
           </div>
         </div>
+
+        <button
+          className="btn ghost"
+          type="button"
+          title="Undo last change (⌘Z)"
+          onClick={handleUndo}
+          disabled={!canUndo || undoing}
+          style={{ padding: "0 10px", height: 32 }}
+        >
+          <I.refresh size={13} /> {undoing ? "Undoing…" : "Undo"}
+        </button>
 
         <div className="device-tabs" style={{ marginLeft: 18 }}>
           {(["desktop", "tablet", "mobile"] as Device[]).map((d) => (

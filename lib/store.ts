@@ -144,12 +144,60 @@ function activePage(f: StoredFunnel): Page {
   return f.pages[0];
 }
 
+const HISTORY_LIMIT = 30;
+
 async function savePages(id: string, pages: Page[]): Promise<void> {
+  const { data: cur } = await supabase()
+    .from(TABLE)
+    .select("pages, history")
+    .eq("id", id)
+    .maybeSingle();
+  const prevHistory: Page[][] = Array.isArray(cur?.history) ? cur!.history : [];
+  const snapshot: Page[] = (cur?.pages as Page[] | undefined) ?? [];
+  const history = [...prevHistory, snapshot];
+  while (history.length > HISTORY_LIMIT) history.shift();
   const { error } = await supabase()
     .from(TABLE)
-    .update({ pages, updated_at: new Date().toISOString() })
+    .update({ pages, history, updated_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw error;
+}
+
+export async function undoFunnel(
+  id: string,
+): Promise<StoredFunnel | null> {
+  const { data: cur } = await supabase()
+    .from(TABLE)
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (!cur) return null;
+  const history: Page[][] = Array.isArray(cur.history) ? cur.history : [];
+  if (history.length === 0) return null;
+  const previous = history[history.length - 1];
+  const nextHistory = history.slice(0, -1);
+  const { data, error } = await supabase()
+    .from(TABLE)
+    .update({
+      pages: previous,
+      history: nextHistory,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToFunnel(data as Row) : null;
+}
+
+export async function getHistoryDepth(id: string): Promise<number> {
+  const { data } = await supabase()
+    .from(TABLE)
+    .select("history")
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) return 0;
+  return Array.isArray(data.history) ? data.history.length : 0;
 }
 
 export async function listBlocks(
