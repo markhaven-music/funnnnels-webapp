@@ -48,7 +48,8 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
-body {
+body:has(.editor-shell),
+body:has(.app) {
   overflow: hidden;
 }
 
