@@ -33,6 +33,8 @@ export function EditorShell({
   const [deleting, setDeleting] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [aiOpen, setAiOpen] = useState(true);
+  const [justPublished, setJustPublished] = useState(false);
+  const [copied, setCopied] = useState(false);
   const dragging = useRef(false);
   const gripRef = useRef<HTMLDivElement>(null);
 
@@ -115,10 +117,29 @@ export function EditorShell({
       if (!res.ok) return;
       const data = (await res.json()) as { funnel: StoredFunnel };
       setFunnel(data.funnel);
+      if (nextStatus === "live") {
+        setJustPublished(true);
+        setTimeout(() => setJustPublished(false), 3500);
+      }
     } finally {
       setPublishing(false);
     }
   }, [funnel.id, funnel.status, publishing]);
+
+  const publicUrl =
+    typeof window === "undefined"
+      ? `/p/${funnel.id}`
+      : `${window.location.origin}/p/${funnel.id}`;
+
+  const copyUrl = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* ignore */
+    }
+  }, [publicUrl]);
 
   const handleDelete = useCallback(async () => {
     if (deleting) return;
@@ -292,6 +313,33 @@ export function EditorShell({
         </div>
 
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+          {funnel.status === "live" && (
+            <div
+              className={`live-bar${justPublished ? " is-fresh" : ""}`}
+              title="This funnel is live"
+            >
+              <span className="live-bar__dot" />
+              <span className="live-bar__label">Live at</span>
+              <span className="live-bar__url">{`/p/${funnel.id}`}</span>
+              <button
+                type="button"
+                className="live-bar__btn"
+                onClick={copyUrl}
+                title="Copy public URL"
+              >
+                <I.copy size={11} /> {copied ? "Copied" : "Copy"}
+              </button>
+              <a
+                href={`/p/${funnel.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="live-bar__btn live-bar__btn--primary"
+                title="Open the live page in a new tab"
+              >
+                <I.rocket size={11} /> Go to live site
+              </a>
+            </div>
+          )}
           <button
             className={`btn ghost${aiOpen ? " is-on" : ""}`}
             type="button"
@@ -300,17 +348,6 @@ export function EditorShell({
           >
             <I.sparkles size={13} /> {aiOpen ? "Hide Riley" : "Show Riley"}
           </button>
-          {funnel.status === "live" && (
-            <a
-              href={`/p/${funnel.id}`}
-              target="_blank"
-              rel="noreferrer"
-              className="btn ghost"
-              title="Open the published page"
-            >
-              <I.rocket size={13} /> View live
-            </a>
-          )}
           <button
             className="btn ghost"
             type="button"
