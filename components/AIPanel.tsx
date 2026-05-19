@@ -257,9 +257,21 @@ export function AIPanel({
           }),
         });
 
-        const data = await res.json();
+        let data: { error?: unknown; reply?: string; operations?: Op[]; mutated?: boolean };
+        try {
+          data = await res.json();
+        } catch {
+          throw new Error(`Request failed (${res.status})`);
+        }
         if (!res.ok) {
-          throw new Error(data.error || `Request failed (${res.status})`);
+          const raw = data?.error;
+          const msg =
+            typeof raw === "string"
+              ? raw
+              : raw && typeof raw === "object"
+                ? JSON.stringify(raw)
+                : `Request failed (${res.status})`;
+          throw new Error(msg);
         }
 
         setMessages((prev) =>
@@ -285,10 +297,26 @@ export function AIPanel({
               ? {
                   ...m,
                   thinking: false,
-                  content:
-                    err instanceof Error
-                      ? `Hmm — ${err.message}. Check your \`ANTHROPIC_API_KEY\` and try again.`
-                      : "Hmm — couldn't reach the model just now.",
+                  content: (() => {
+                    if (!(err instanceof Error)) {
+                      return "Hmm — couldn't reach the model just now.";
+                    }
+                    const m = err.message || "";
+                    const lower = m.toLowerCase();
+                    if (lower.includes("anthropic_api_key") || lower.includes("api key")) {
+                      return `Hmm — ${m}. Check your \`ANTHROPIC_API_KEY\` in the environment.`;
+                    }
+                    if (lower.includes("rate") && lower.includes("limit")) {
+                      return `Rate-limited by Anthropic. Try again in a few seconds.`;
+                    }
+                    if (lower.includes("overloaded") || lower.includes("503")) {
+                      return `Anthropic API is overloaded right now. Try again in a moment.`;
+                    }
+                    if (lower.includes("too long") || lower.includes("max_tokens") || lower.includes("context")) {
+                      return `Hit a context limit: ${m}. Try a shorter prompt or open a new chat.`;
+                    }
+                    return `Riley couldn't finish that — ${m}`;
+                  })(),
                 }
               : m,
           ),

@@ -458,17 +458,34 @@ export async function POST(req: Request) {
       ),
     });
   } catch (error) {
+    console.error("[chat] request failed:", error);
+    const toStr = (v: unknown): string => {
+      if (typeof v === "string") return v;
+      if (v && typeof v === "object" && "message" in v) {
+        const m = (v as { message: unknown }).message;
+        if (typeof m === "string") return m;
+        try {
+          return JSON.stringify(m);
+        } catch {
+          return String(m);
+        }
+      }
+      try {
+        return JSON.stringify(v);
+      } catch {
+        return String(v);
+      }
+    };
     if (error instanceof Anthropic.APIError) {
+      const msg = toStr(error.message) || `Anthropic API error (${error.status ?? "unknown"})`;
       return NextResponse.json(
-        { error: error.message, operations: ops },
+        { error: msg, operations: ops },
         { status: error.status ?? 500 },
       );
     }
+    const msg = error instanceof Error ? toStr(error.message) : toStr(error);
     return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Unknown error",
-        operations: ops,
-      },
+      { error: msg || "Unknown error", operations: ops },
       { status: 500 },
     );
   }
