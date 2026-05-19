@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AIPanel } from "@/components/AIPanel";
+import { AIPanel, type Annotation } from "@/components/AIPanel";
 import { FunnelCanvas } from "@/components/FunnelCanvas";
 import { I } from "@/components/icons";
 import type { StoredFunnel } from "@/lib/blocks";
@@ -21,6 +21,7 @@ export function EditorShell({ initialFunnel }: { initialFunnel: StoredFunnel }) 
   const [device, setDevice] = useState<Device>("desktop");
   const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
   const [flashIds, setFlashIds] = useState<string[]>([]);
+  const [annotation, setAnnotation] = useState<Annotation | null>(null);
   const [panelWidth, setPanelWidth] = useState(DEFAULT_W);
   const [deleting, setDeleting] = useState(false);
   const dragging = useRef(false);
@@ -193,7 +194,12 @@ export function EditorShell({ initialFunnel }: { initialFunnel: StoredFunnel }) 
         >
           <div className="stage-grid" />
           <div style={{ position: "relative", zIndex: 1, padding: "32px 0" }}>
-            <FunnelCanvas blocks={blocks} flashIds={flashIds} />
+            <FunnelCanvas
+              blocks={blocks}
+              flashIds={flashIds}
+              activeAnnotationId={annotation?.blockId ?? null}
+              onAnnotate={(blockId, type) => setAnnotation({ blockId, type })}
+            />
           </div>
         </div>
 
@@ -211,6 +217,8 @@ export function EditorShell({ initialFunnel }: { initialFunnel: StoredFunnel }) 
         pendingPrompt={pendingPrompt}
         onPromptConsumed={() => setPendingPrompt(null)}
         onMutate={refetchFunnel}
+        annotation={annotation}
+        onClearAnnotation={() => setAnnotation(null)}
       />
 
       <div

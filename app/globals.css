@@ -1242,6 +1242,36 @@ button {
   color: var(--fg-3);
 }
 
+.annot-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--accent-2);
+  background: oklch(0.74 0.19 295 / 0.1);
+  border: 1px solid var(--accent-dim);
+  padding: 4px 6px 4px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  max-width: 100%;
+}
+.annot-chip code {
+  font-size: 9.5px;
+}
+.annot-chip button {
+  background: transparent;
+  border: 0;
+  color: var(--accent-2);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+}
+.annot-chip button:hover {
+  background: oklch(0.74 0.19 295 / 0.15);
+}
 .composer-controls {
   display: flex;
   align-items: center;
@@ -1534,6 +1564,33 @@ body.light {
 }
 .fb-block:hover .fb-block__chrome {
   opacity: 1;
+}
+.fb-block__note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  color: var(--accent-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0 0 0 6px;
+  border-left: 1px solid var(--line-soft);
+}
+.fb-block__note:hover {
+  color: var(--accent);
+}
+.fb-block.is-annotating {
+  border-color: var(--accent);
+  background: oklch(0.74 0.19 295 / 0.06);
+}
+.fb-block.is-annotating .fb-block__chrome {
+  opacity: 1;
+  border-color: var(--accent);
+  color: var(--accent-2);
 }
 .fb-block.flash {
   animation: fb-flash 1.2s ease-out;

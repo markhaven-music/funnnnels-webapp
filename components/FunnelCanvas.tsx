@@ -2,14 +2,22 @@
 
 import { useEffect, useRef } from "react";
 import { BlockView } from "@/components/blocks/BlockView";
+import { I } from "@/components/icons";
 import type { Block } from "@/lib/blocks";
 
 type Props = {
   blocks: Block[];
   flashIds?: string[];
+  onAnnotate?: (blockId: string, type: string) => void;
+  activeAnnotationId?: string | null;
 };
 
-export function FunnelCanvas({ blocks, flashIds = [] }: Props) {
+export function FunnelCanvas({
+  blocks,
+  flashIds = [],
+  onAnnotate,
+  activeAnnotationId = null,
+}: Props) {
   const refs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
@@ -18,7 +26,6 @@ export function FunnelCanvas({ blocks, flashIds = [] }: Props) {
       const el = refs.current.get(id);
       if (el) {
         el.classList.remove("flash");
-        // force reflow so the animation restarts even if class was just added
         void el.offsetWidth;
         el.classList.add("flash");
       }
@@ -42,14 +49,27 @@ export function FunnelCanvas({ blocks, flashIds = [] }: Props) {
       {blocks.map((b) => (
         <div
           key={b.id}
-          className="fb-block"
+          className={`fb-block${activeAnnotationId === b.id ? " is-annotating" : ""}`}
           data-block-id={b.id}
           ref={(el) => {
             if (el) refs.current.set(b.id, el);
             else refs.current.delete(b.id);
           }}
         >
-          <div className="fb-block__chrome">{b.type}</div>
+          <div className="fb-block__chrome">
+            <span>{b.type}</span>
+            {onAnnotate && (
+              <button
+                type="button"
+                className="fb-block__note"
+                onClick={() => onAnnotate(b.id, b.type)}
+                title="Tell Riley to edit this block"
+              >
+                <I.sparkles size={10} />
+                Note Riley
+              </button>
+            )}
+          </div>
           <BlockView block={b} />
         </div>
       ))}
