@@ -257,7 +257,18 @@ function PayStep(props: Props & BodyState & { info: Info }) {
 
   return (
     <>
-      <PaymentElement options={{ layout: "tabs" }} />
+      <PaymentElement
+        options={{
+          layout: "tabs",
+          // Step 1 already asked; don't make the buyer type it twice.
+          defaultValues: {
+            billingDetails: {
+              email: props.info.email,
+              name: `${props.info.firstName} ${props.info.lastName}`.trim(),
+            },
+          },
+        }}
+      />
       <PayStepBody
         {...props}
         offer={props.bump}
