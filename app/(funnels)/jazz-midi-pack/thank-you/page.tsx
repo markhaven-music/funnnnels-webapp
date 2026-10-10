@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif } from "next/font/google";
-import { stripe, stripeConfigured } from "@/lib/stripe";
+import { getOrder } from "@/lib/orders";
 import { funnel } from "../funnel";
 import s from "../jazz.module.css";
 
@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const LABELS: Record<string, string> = {
+  pack: funnel.product,
+  [funnel.bump.id]: funnel.bump.name,
+};
+
 // Stripe sends the buyer here with ?payment_intent=pi_… after paying. We ask
 // Stripe directly whether it succeeded; the URL alone proves nothing.
 export default async function ThankYou({
@@ -19,23 +24,10 @@ export default async function ThankYou({
 }: {
   searchParams: Promise<{ payment_intent?: string }>;
 }) {
-  const { payment_intent: id } = await searchParams;
-  let status: string | null = null;
-  let email: string | null = null;
-  if (id && stripeConfigured() && /^pi_[A-Za-z0-9]+$/.test(id)) {
-    try {
-      const intent = await stripe().paymentIntents.retrieve(id);
-      if (intent.metadata.funnel === funnel.slug) {
-        status = intent.status;
-        email = intent.receipt_email;
-      }
-    } catch {
-      status = null;
-    }
-  }
-
-  const paid = status === "succeeded";
-  const pending = status === "processing";
+  const { payment_intent } = await searchParams;
+  const order = await getOrder(payment_intent, funnel.slug);
+  const paid = order?.status === "succeeded";
+  const pending = order?.status === "processing";
 
   return (
     <main className={`${s.page} ${serif.variable}`}>
@@ -58,11 +50,29 @@ export default async function ThankYou({
         </h1>
         <p className={s.lede}>
           {paid
-            ? `Payment received. Your download link is on its way${email ? ` to ${email}` : ""}.`
+            ? "Payment received. Your files are below. Bookmark this page: the buttons keep working whenever you come back."
             : pending
-              ? "Your bank is still confirming the payment. We'll email your download link as soon as it clears."
+              ? "Your bank is still confirming the payment. Refresh this page in a minute and your downloads will appear."
               : "Nothing was charged. You can go back and try again with another card or PayPal."}
         </p>
+        {paid && order && (
+          <div className={s.heroActions}>
+            {order.items.map((key) => (
+              <a
+                key={key}
+                href={`/${funnel.slug}/download?order=${order.id}&file=${key}`}
+                className={key === "pack" ? s.primary : s.ghost}
+              >
+                Download {LABELS[key] ?? key}
+              </a>
+            ))}
+          </div>
+        )}
+        {paid && order?.email && (
+          <p className={s.note} style={{ marginTop: 20 }}>
+            Stripe has emailed your receipt to {order.email}.
+          </p>
+        )}
         {!paid && !pending && (
           <div className={s.heroActions}>
             <a href={`/${funnel.slug}#buy`} className={s.primary}>

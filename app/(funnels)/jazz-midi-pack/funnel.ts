@@ -14,6 +14,11 @@ export const funnel = {
     pitch:
       "All 12 major/minor key pairs in six folders: best voicing, best voicing with a smooth bass, sevenths, extended, altered & borrowed chords, and progressions. Same voice-leading as the main pack.",
   },
+  // Paid downloads, served from /private only after Stripe confirms payment.
+  files: {
+    pack: "private/jazz-midi-pack/Jazz MIDI Pack.zip",
+    "chord-pack": "private/jazz-midi-pack/Jazz MIDI Chord Pack.zip",
+  },
   checkout: {
     leadTags: ["checkout-started"],
     buyerTags: ["buyer"],

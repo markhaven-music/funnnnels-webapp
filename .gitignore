@@ -42,3 +42,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# paid product files: deployed to Vercel, never committed (the repo is public)
+/private/
