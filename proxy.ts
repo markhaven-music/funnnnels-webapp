@@ -1,11 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-// The dashboard, editor and every admin API sit behind one password; the
-// funnels visitors see stay open. Think of it as a staff door: shoppers walk
-// through the shop front, everything else asks for the key.
+// One app, several front doors:
+// - funnel domains (jazz.thegrind.studio) show ONE funnel at their root and
+//   nothing else — no dashboard, no admin API, whatever the path;
+// - every other host (funnnnels.com, *.vercel.app) is the dashboard, behind
+//   ADMIN_PASSWORD, and still serves the public funnel paths.
 //
-// Without ADMIN_PASSWORD the door is open in `next dev` and locked in
+// Without ADMIN_PASSWORD the dashboard is open in `next dev` and locked in
 // production, so a deploy that forgot the variable fails closed.
+
+// Host → funnel slug. A new funnel domain = one line here + one DNS record.
+const FUNNEL_HOSTS: Record<string, string> = {
+  "jazz.thegrind.studio": "jazz-midi-pack",
+};
 
 const PUBLIC = [
   /^\/p\//, // pages published from the builder
@@ -18,6 +25,20 @@ const PUBLIC = [
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const host = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
+
+  const slug = FUNNEL_HOSTS[host];
+  if (slug) {
+    // Pretty paths on the funnel's own domain: / → the page, /thank-you, /download.
+    if (pathname === "/" || pathname === "/thank-you" || pathname === "/download") {
+      const url = request.nextUrl.clone();
+      url.pathname = pathname === "/" ? `/${slug}` : `/${slug}${pathname}`;
+      return NextResponse.rewrite(url);
+    }
+    if (PUBLIC.some((re) => re.test(pathname))) return NextResponse.next();
+    return new NextResponse("Not found", { status: 404 });
+  }
+
   if (PUBLIC.some((re) => re.test(pathname))) return NextResponse.next();
 
   const password = process.env.ADMIN_PASSWORD;
