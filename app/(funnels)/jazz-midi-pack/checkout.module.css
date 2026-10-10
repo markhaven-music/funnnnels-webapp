@@ -1,0 +1,329 @@
+/* The ClickFunnels order-form anatomy, in the page's record-sleeve palette. */
+.widget {
+  --ink: #12100d;
+  --ink-2: #1b1814;
+  --ink-3: #26221c;
+  --rule: #3a342b;
+  --cream: #f1e8d8;
+  --cream-2: #c9bfae;
+  --cream-3: #8f8676;
+  --brass: #d9a441;
+  --brass-2: #f0c46a;
+
+  width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--ink-2);
+  color: var(--cream);
+  box-shadow: 0 30px 80px -40px rgb(0 0 0 / 0.8);
+}
+
+.secure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--cream-2);
+  background: var(--ink-3);
+  border-bottom: 1px solid var(--rule);
+}
+
+/* ─── step tabs ─────────────────────────── */
+.tabs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--rule);
+}
+.tab {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--cream-3);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tabs li + li .tab {
+  border-left: 1px solid var(--rule);
+  cursor: default;
+}
+.tabOn {
+  color: var(--cream);
+  box-shadow: inset 0 -2px 0 var(--brass);
+}
+.tabNum {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid var(--rule);
+}
+.tabOn .tabNum {
+  background: var(--brass);
+  border-color: var(--brass);
+  color: var(--ink);
+}
+.tabTitle {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+}
+.tabSub {
+  display: block;
+  font-size: 12px;
+  color: var(--cream-3);
+}
+
+.body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── step 1 ────────────────────────────── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.input {
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  background: var(--ink);
+  color: var(--cream);
+  font: inherit;
+  font-size: 16px; /* no iOS zoom */
+}
+.input::placeholder {
+  color: var(--cream-3);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--brass);
+}
+
+.cta {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--brass-2), var(--brass));
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset, 0 10px 24px -12px rgb(217 164 65 / 0.7);
+  transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease;
+}
+.cta:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+.cta:active:not(:disabled) {
+  transform: scale(0.985);
+}
+.cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ctaMain {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+.ctaSub {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.fine {
+  margin: 0;
+  font-size: 12px;
+  text-align: center;
+  color: var(--cream-3);
+}
+.error {
+  margin: 0;
+  font-size: 14px;
+  color: #f08a76;
+}
+
+/* ─── step 2 ────────────────────────────── */
+.back {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cream-2);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.productRow {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--ink);
+}
+.radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 2px solid var(--brass);
+  box-shadow: inset 0 0 0 4px var(--ink), inset 0 0 0 10px var(--brass);
+}
+.productText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.productName {
+  font-size: 15px;
+  font-weight: 700;
+}
+.productDesc {
+  font-size: 12px;
+  color: var(--cream-3);
+}
+.productPrice {
+  font-size: 15px;
+  font-weight: 700;
+}
+.label {
+  margin: 4px 0 -4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cream-3);
+}
+.notConnected {
+  padding: 18px 16px;
+  border: 1px dashed var(--rule);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--cream-3);
+  text-align: center;
+}
+
+/* the tick-box add-on: dashed frame + highlighted header, like the CF bump */
+.bump {
+  display: flex;
+  flex-direction: column;
+  border: 2px dashed var(--brass);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: rgb(217 164 65 / 0.05);
+}
+.bumpOn {
+  border-style: solid;
+  background: rgb(217 164 65 / 0.1);
+}
+.bumpHead {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  background: rgb(217 164 65 / 0.16);
+}
+.bumpTitle {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--brass-2);
+}
+.bumpPrice {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--cream);
+}
+.bumpPitch {
+  padding: 12px 14px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--cream-2);
+}
+.bumpPitch strong {
+  color: var(--cream);
+}
+.check {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--brass);
+  cursor: pointer;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 0 2px;
+  border-top: 1px solid var(--rule);
+}
+.sumRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+  color: var(--cream-2);
+}
+.sumTotal {
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--cream);
+}
+
+.waiver {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 10px;
+  align-items: start;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cream-3);
+  cursor: pointer;
+}
+
+@media (max-width: 380px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

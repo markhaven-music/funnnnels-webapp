@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Instrument_Serif } from "next/font/google";
 import { currencyFor, formatPrice, visitorCountry } from "@/lib/geo";
+import { stripeConfigured } from "@/lib/stripe";
 import { funnel } from "./funnel";
 import previews from "@/public/funnels/jazz-midi-pack/audio/index.json";
 import { Previews } from "./Previews";
 import { OptinForm } from "./OptinForm";
+import { CheckoutWidget } from "./CheckoutWidget";
 import s from "./jazz.module.css";
 
 const serif = Instrument_Serif({
@@ -129,27 +131,48 @@ export default async function JazzMidiPackPage({
         <OptinForm funnel={funnel.slug} />
       </section>
 
-      <section id="buy" className={`${s.section} ${s.buy}`}>
-        <div className={s.priceCard}>
-          <p className={s.eyebrow}>One payment · instant download</p>
-          <p className={s.price}>{price}</p>
+      <section id="buy" className={`${s.section} ${s.order}`}>
+        <div className={s.orderSummary}>
+          <p className={s.eyebrow}>Order summary</p>
+          <div className={s.sleeve} aria-hidden>
+            <span className={s.sleeveBrand}>MIDI · {n.files.toLocaleString("en-US")} files</span>
+            <span className={s.sleeveTitle}>
+              Jazz
+              <br />
+              <em>MIDI Pack</em>
+            </span>
+            <span className={s.sleeveKeys} />
+          </div>
           <ul className={s.includes}>
             <li>{n.files.toLocaleString("en-US")} MIDI files in 5 folders</li>
             <li>
               {n.progressions} progressions × {n.voicings} voicings × {n.rhythms} rhythms
             </li>
             <li>All 12 keys, bass lines, combo and genre loops</li>
+            <li>Chord names written into every file</li>
             <li>Works in Ableton, Logic, FL Studio, Cubase, Reaper, GarageBand</li>
+            <li>One payment, instant download, yours to keep</li>
           </ul>
-          {funnel.checkoutOpen ? (
-            <a href="#" className={s.primary}>
-              Buy now — {price}
-            </a>
-          ) : (
-            <button className={s.primary} disabled>
-              Checkout opens soon
-            </button>
-          )}
+        </div>
+        <div className={s.orderForm}>
+          <CheckoutWidget
+            funnel={funnel.slug}
+            product={funnel.product}
+            tagline={funnel.tagline}
+            currency={currency}
+            country={country}
+            price={funnel.price[currency]}
+            bump={{
+              name: funnel.bump.name,
+              price: funnel.bump.price[currency],
+              pitch: funnel.bump.pitch,
+            }}
+            thankYou={funnel.checkout.thankYou}
+            publishableKey={
+              stripeConfigured() ? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY! : null
+            }
+            europe={currency === "eur"}
+          />
         </div>
       </section>
 

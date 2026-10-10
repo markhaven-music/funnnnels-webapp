@@ -4,8 +4,21 @@
 export const funnel = {
   slug: "jazz-midi-pack",
   product: "Jazz MIDI Pack",
+  tagline: "26 progressions × 13 voicings × 8 rhythms, all 12 keys",
   price: { eur: 27, usd: 27 },
-  checkoutOpen: false, // Phase 2 turns the Buy button on
+  // The tick-box offer inside the checkout (ClickFunnels calls it an order bump).
+  bump: {
+    id: "chord-pack",
+    name: "Jazz MIDI Chord Pack",
+    price: { eur: 9, usd: 9 },
+    pitch:
+      "All 12 major/minor key pairs in six folders: best voicing, best voicing with a smooth bass, sevenths, extended, altered & borrowed chords, and progressions. Same voice-leading as the main pack.",
+  },
+  checkout: {
+    leadTags: ["checkout-started"],
+    buyerTags: ["buyer"],
+    thankYou: "/jazz-midi-pack/thank-you",
+  },
   optin: {
     source: "jazz-midi-pack",
     tags: ["lead", "free-sample"],

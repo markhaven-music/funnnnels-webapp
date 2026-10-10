@@ -29,6 +29,12 @@ function rowToContact(r: Row): Contact {
   };
 }
 
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+export function isEmail(value: string): boolean {
+  return value.length <= 254 && EMAIL.test(value);
+}
+
 export async function listContacts(): Promise<Contact[]> {
   const { data, error } = await supabase()
     .from("contacts")
