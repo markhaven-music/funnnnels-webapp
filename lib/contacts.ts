@@ -57,6 +57,31 @@ export async function addContact(
   return rowToContact(row as Row);
 }
 
+// Public opt-ins: the same email signing up twice keeps one contact and
+// collects the union of tags instead of creating a duplicate.
+export async function upsertContact(
+  data: Omit<Contact, "id" | "createdAt">,
+): Promise<Contact> {
+  const email = data.email.trim().toLowerCase();
+  const { data: existing, error } = await supabase()
+    .from("contacts")
+    .select("*")
+    .eq("email", email)
+    .maybeSingle();
+  if (error) throw error;
+  if (!existing) return addContact({ ...data, email });
+  const row = existing as Row;
+  const tags = Array.from(new Set([...(row.tags ?? []), ...(data.tags ?? [])]));
+  const { data: updated, error: upErr } = await supabase()
+    .from("contacts")
+    .update({ tags, name: row.name ?? data.name ?? null })
+    .eq("id", row.id)
+    .select("*")
+    .single();
+  if (upErr) throw upErr;
+  return rowToContact(updated as Row);
+}
+
 export async function deleteContact(id: string): Promise<boolean> {
   const { error, count } = await supabase()
     .from("contacts")

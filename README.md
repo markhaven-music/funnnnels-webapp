@@ -70,3 +70,18 @@ See [`lib/blocks.ts`](lib/blocks.ts). Each block has `{ id, type, props }`; prop
 - **Multi-page funnels** — `StoredFunnel.pages` is already an array; the UI assumes one page.
 - **Auth / multi-tenant** — single shared store; add NextAuth or Clerk before opening up.
 - **Real publishing** — the publish button is wired to nothing. Build a publish step that renders a static page from the block tree.
+
+## Code funnels (built with Claude Code)
+
+Funnels can also live as code, one folder per funnel under `app/(funnels)/`:
+
+| File | What it holds |
+| --- | --- |
+| `funnel.ts` | product, prices (`eur` / `usd`), opt-in source + tags, checkout switch |
+| `page.tsx` + `*.module.css` | the landing page |
+| `public/funnels/<slug>/` | audio previews, free sample zip |
+
+- **Price by country:** `lib/geo.ts` reads Vercel's `x-vercel-ip-country`; Europe sees euros, everyone else dollars. Preview locally with `?country=IT` / `?country=US`.
+- **Opt-in:** forms POST to `/api/optin` with the funnel slug; tags are chosen server-side and the same email is merged, never duplicated.
+- **Password:** `proxy.ts` locks everything except funnel pages, `/p/*`, funnel assets and `/api/optin` behind `ADMIN_PASSWORD`.
+- **Previews:** `python3 tools/render_previews.py` renders MP3s + piano-roll JSON from the pack's MIDI. Drop real bounces over the MP3s with the same names.
