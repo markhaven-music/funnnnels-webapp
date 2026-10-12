@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 import { loadStripe, type Appearance } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import s from "./checkout.module.css";
+import b from "./btn.module.css";
+import { Arrow } from "./Cta";
+import { pixel } from "./Tracking";
 
 // The two-step order form, modeled on the ClickFunnels checkout:
 //   1 · Your info  → name + email (saved as a lead before any card is asked for)
@@ -101,6 +104,11 @@ export function CheckoutWidget(props: Props) {
             onDone={(next) => {
               setInfo(next);
               setStep(2);
+              pixel("InitiateCheckout", {
+                content_name: props.product,
+                value: props.price,
+                currency: props.currency.toUpperCase(),
+              });
             }}
           />
         ) : (
@@ -200,8 +208,12 @@ function InfoStep({
         required
         className={s.input}
       />
-      <button className={s.cta}>
-        <span className={s.ctaMain}>Go to step 2</span>
+      <button className={b.btn}>
+        <span className={b.shine} aria-hidden />
+        <span className={b.label}>
+          <span>Go to step 2</span>
+          <Arrow className={b.arrow} />
+        </span>
       </button>
       <p className={s.fine}>We respect your privacy. Your download link goes to this email.</p>
     </form>
@@ -314,7 +326,7 @@ function PayStepBody({
             onChange={(e) => setTicked(e.target.checked)}
             className={s.check}
           />
-          <span className={s.bumpTitle}>Yes! Add the {offer.name}</span>
+          <span className={s.bumpTitle}>Yes, add the {offer.name}</span>
           <span className={s.bumpPrice}>+{money(offer.price, currency)}</span>
         </span>
         <span className={s.bumpPitch}>
@@ -354,16 +366,13 @@ function PayStepBody({
         </label>
       )}
 
-      <button
-        type="button"
-        className={s.cta}
-        disabled={blocked}
-        onClick={() => onPay?.(waiver)}
-      >
-        <span className={s.ctaMain}>
-          {paying && !disabled ? "Processing…" : `Get the pack — ${money(total, currency)}`}
+      <button type="button" className={b.btn} disabled={blocked} onClick={() => onPay?.(waiver)}>
+        <span className={b.shine} aria-hidden />
+        <span className={b.label}>
+          <span>{paying && !disabled ? "Processing…" : "Get the pack"}</span>
+          {!paying && <Arrow className={b.arrow} />}
         </span>
-        <span className={s.ctaSub}>Instant download · one payment</span>
+        <span className={b.inner}>{money(total, currency)} · instant download · one payment</span>
       </button>
       {error && (
         <p className={s.error} role="alert">

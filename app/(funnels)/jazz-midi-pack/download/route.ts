@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     return new Response("This download link isn't valid for a completed order.", { status: 403 });
   }
 
-  const data = await readFile(path.join(process.cwd(), file));
+  const data = await readFile(path.join(/*turbopackIgnore: true*/ process.cwd(), file));
   return new Response(new Uint8Array(data), {
     headers: {
       "content-type": "application/zip",

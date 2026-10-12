@@ -127,43 +127,6 @@
   border-color: var(--brass);
 }
 
-.cta {
-  width: 100%;
-  min-height: 60px;
-  padding: 10px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  border: 0;
-  border-radius: 14px;
-  background: linear-gradient(180deg, var(--brass-2), var(--brass));
-  color: var(--ink);
-  cursor: pointer;
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset, 0 10px 24px -12px rgb(217 164 65 / 0.7);
-  transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease;
-}
-.cta:hover:not(:disabled) {
-  filter: brightness(1.05);
-}
-.cta:active:not(:disabled) {
-  transform: scale(0.985);
-}
-.cta:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.ctaMain {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-}
-.ctaSub {
-  font-size: 12px;
-  font-weight: 600;
-  opacity: 0.75;
-}
 
 .fine {
   margin: 0;

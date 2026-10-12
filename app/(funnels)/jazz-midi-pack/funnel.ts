@@ -4,6 +4,20 @@
 export const funnel = {
   slug: "jazz-midi-pack",
   product: "Jazz MIDI Pack",
+  brand: "GRIND STUDIO",
+  // Same accounts as the Grind Studio landings (grind-studio-landing-pages/src/lib/site.ts).
+  tracking: {
+    metaPixelId: "1679148316291540",
+    clarityId: "yum5a2rsel",
+    neoSnippet: "https://t.thegrind.studio/api/s/3d5ba6a05e6bcaea",
+  },
+  support: "support@thegrind.studio",
+  guaranteeDays: 14,
+  legal: {
+    terms: "https://www.thegrind.studio/terms-and-conditions",
+    privacy: "https://www.thegrind.studio/privacy-policy",
+    refund: "https://www.thegrind.studio/refund-policy",
+  },
   tagline: "26 progressions × 13 voicings × 8 rhythms, all 12 keys",
   price: { eur: 27, usd: 27 },
   // The tick-box offer inside the checkout (ClickFunnels calls it an order bump).

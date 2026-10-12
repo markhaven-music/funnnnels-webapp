@@ -4,6 +4,8 @@ export type Order = {
   id: string;
   status: string; // Stripe PaymentIntent status: "succeeded", "processing", …
   email: string | null;
+  amount: number; // in currency units, e.g. 36
+  currency: string; // "eur" | "usd"
   items: string[]; // file keys this order unlocks, e.g. ["pack", "chord-pack"]
 };
 
@@ -16,7 +18,14 @@ export async function getOrder(id: unknown, funnelSlug: string): Promise<Order |
     if (intent.metadata.funnel !== funnelSlug) return null;
     const items = ["pack"];
     if (intent.metadata.bump) items.push(intent.metadata.bump);
-    return { id, status: intent.status, email: intent.receipt_email, items };
+    return {
+      id,
+      status: intent.status,
+      email: intent.receipt_email,
+      amount: intent.amount / 100,
+      currency: intent.currency,
+      items,
+    };
   } catch {
     return null;
   }

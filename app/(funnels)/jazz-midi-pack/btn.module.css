@@ -1,0 +1,196 @@
+/* The one CTA style of the page: a big physical key, ported from the Grind
+   Studio landings (.btn in grind-studio-landing-pages/src/styles/global.css),
+   recoloured brass. Lip underneath, candy gloss, light sweep, pulsing glow,
+   gentle breathing, an arrow that nudges; it sinks onto its lip when pressed. */
+.btn {
+  --brass-hi: #f6d58a;
+  --brass: #e2a93b;
+  --brass-deep: #b97d16;
+  --lip: #7a4f06;
+  --glow: rgb(230 170 60 / 0.5);
+  --ink: #1a1206;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  width: 100%;
+  max-width: 32rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 86px;
+  margin-bottom: 7px;
+  padding: 1rem 1.5rem;
+  border: 0;
+  border-radius: 22px;
+  background: linear-gradient(180deg, var(--brass-hi) 0%, var(--brass) 44%, var(--brass-deep) 100%);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  font-size: 1.6rem;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.6),
+    inset 0 -4px 0 rgb(0 0 0 / 0.14),
+    0 7px 0 var(--lip),
+    0 22px 48px -12px var(--glow),
+    0 0 42px -8px var(--glow);
+  transition: translate 90ms ease-out, box-shadow 90ms ease-out, filter 160ms ease, opacity 160ms ease;
+  animation: breathe 2.8s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  box-shadow: 0 0 60px 10px var(--glow);
+  opacity: 0;
+  animation: pulse 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-wrap: balance;
+}
+.arrow {
+  flex: none;
+  animation: nudge 1.4s ease-in-out infinite;
+}
+.inner {
+  position: relative;
+  font-size: clamp(0.78rem, 3.3vw, 0.95rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  opacity: 0.8;
+}
+.shine {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.shine::after {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 3px;
+  height: 46%;
+  border-radius: 18px 18px 50% 50% / 18px 18px 14px 14px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.6), rgb(255 255 255 / 0));
+  opacity: 0.55;
+}
+.shine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.6), transparent);
+  transform: translateX(-120%) skewX(-12deg);
+  animation: sweep 3.4s ease-in-out infinite;
+}
+.btn:hover:not(:disabled) {
+  filter: brightness(1.06) saturate(1.08);
+}
+.btn:active:not(:disabled) {
+  translate: 0 6px;
+  animation-play-state: paused;
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.45),
+    inset 0 -2px 0 rgb(0 0 0 / 0.12),
+    0 1px 0 var(--lip),
+    0 8px 22px -10px var(--glow);
+}
+.btn:active::after {
+  animation: none;
+  opacity: 0;
+}
+.btn:focus-visible {
+  outline: 3px solid #f1e8d8;
+  outline-offset: 4px;
+}
+.btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  animation: none;
+}
+.btn:disabled::after,
+.btn:disabled .shine::before,
+.btn:disabled .arrow {
+  animation: none;
+}
+
+.sm {
+  min-height: 54px;
+  margin-bottom: 4px;
+  padding: 0.55rem 1.2rem;
+  border-radius: 16px;
+  font-size: 1.12rem;
+  width: auto;
+  animation: none;
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.55),
+    inset 0 -3px 0 rgb(0 0 0 / 0.14),
+    0 4px 0 var(--lip),
+    0 10px 26px -10px var(--glow);
+}
+.sm:active:not(:disabled) {
+  translate: 0 3px;
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.45), 0 1px 0 var(--lip), 0 6px 16px -10px var(--glow);
+}
+.sm::after {
+  animation: none;
+}
+
+.note {
+  margin: 0.75rem 0 0;
+  max-width: 32rem;
+  text-align: center;
+  font-size: 0.88rem;
+  color: #a69c8b;
+}
+
+@media (min-width: 900px) {
+  .btn {
+    min-height: 96px;
+    font-size: 1.8rem;
+  }
+  .sm {
+    min-height: 54px;
+    font-size: 1.12rem;
+  }
+}
+
+@keyframes breathe {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.022; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.55; }
+}
+@keyframes nudge {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 5px 0; }
+}
+@keyframes sweep {
+  0%, 55% { transform: translateX(-120%) skewX(-12deg); }
+  85%, 100% { transform: translateX(260%) skewX(-12deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .btn::after, .arrow, .shine::before { animation: none; }
+}
