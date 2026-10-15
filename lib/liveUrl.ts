@@ -3,6 +3,7 @@
 // id = their slug) at KIT_HOME/<slug>; builder funnels on /p/<id>.
 const CODE_FUNNELS: Record<string, string> = {
   "jazz-midi-pack": "https://m.thegrind.studio/jazz-midi-pack",
+  "top-hits-midi-bundle": "https://m.thegrind.studio/top-hits-midi-bundle",
 };
 
 // The brand domain that forwards /<slug> of launch-kit products here

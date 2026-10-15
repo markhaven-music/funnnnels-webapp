@@ -1,4 +1,5 @@
 import { funnel as jazz } from "@/app/(funnels)/jazz-midi-pack/funnel";
+import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import type { Currency } from "@/lib/geo";
 import { phaseAt, toCents, unitPrice, type Launch, type Money, type Phase } from "@/lib/launch";
 import { getKitProduct } from "@/lib/products";
@@ -7,8 +8,8 @@ import { getKitProduct } from "@/lib/products";
 // so prices, tags and files always come from the server, never from the visitor.
 //
 // Two kinds share one shape:
-//   code  the Jazz MIDI Pack, defined in app/(funnels)/jazz-midi-pack/funnel.ts
-//         with its own hand-built page. No launch: always full price.
+//   code  hand-built pages with their funnel.ts: the Jazz MIDI Pack and the
+//         TOP HITS MIDI Bundle (app/(funnels)/<slug>). No launch: always full price.
 //   kit   products made in the dashboard (Launches): a row in `products`, the
 //         template page in app/(funnels)/[slug], zips in Supabase Storage, and
 //         optionally a launch whose dates set the phase and the price.
@@ -23,7 +24,11 @@ export type Product = {
   tagline: string;
   price: Money;
   bump: Bump | null;
-  checkout: { leadTags: readonly string[]; buyerTags: readonly string[]; thankYou: string };
+  // Checkouts with several tick-box offers (ClickFunnels-style multi-bump) list
+  // them here instead of `bump`; the browser then sends `bumps: [ids]`.
+  bumps?: readonly Bump[];
+  // orderPage: where the order form lives when it isn't the landing's #buy.
+  checkout: { leadTags: readonly string[]; buyerTags: readonly string[]; thankYou: string; orderPage?: string };
   optin: { source: string; tags: readonly string[]; download?: string } | null;
   launch: Launch | null;
 };
@@ -41,7 +46,21 @@ const JAZZ: Product = {
   launch: null,
 };
 
-const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ };
+const TOP_HITS: Product = {
+  kind: "code",
+  slug: topHits.slug,
+  product: topHits.product,
+  brand: topHits.brand,
+  tagline: topHits.tagline,
+  price: topHits.price,
+  bump: null,
+  bumps: topHits.bumps.map(({ id, name, price, pitch }) => ({ id, name, price, pitch })),
+  checkout: topHits.checkout,
+  optin: null,
+  launch: null,
+};
+
+const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS };
 
 /** Code products only (no database read). */
 export function getFunnel(slug: unknown): Product | undefined {
@@ -56,17 +75,44 @@ export async function resolveFunnel(slug: unknown): Promise<Product | undefined>
   return (await getKitProduct(slug)) ?? undefined;
 }
 
+/** Every add-on the checkout offers: the multi-bump list, or the single bump. */
+export function offeredBumps(f: Product): readonly Bump[] {
+  return f.bumps ?? (f.bump ? [f.bump] : []);
+}
+
+/**
+ * The add-ons an order includes, from what the browser sent: `bumps: [ids]`
+ * (multi-bump checkouts) or `bump: true` (the single one). Ids this product
+ * doesn't offer are dropped, so nothing unpriced can ride along.
+ */
+export function pickedBumps(f: Product, body: { bump?: unknown; bumps?: unknown }): Bump[] {
+  const ids = body.bumps;
+  if (Array.isArray(ids)) return offeredBumps(f).filter((b) => ids.includes(b.id));
+  return body.bump === true && f.bump ? [f.bump] : [];
+}
+
+/** The add-ons an order or a check refers to: a list, or the single bump's yes/no. */
+const addOns = (f: Product, bump: boolean | readonly Bump[]): readonly Bump[] =>
+  typeof bump === "boolean" ? (bump && f.bump ? [f.bump] : []) : bump;
+
+const addOnTotal = (f: Product, currency: Currency, bump: boolean | readonly Bump[]) =>
+  addOns(f, bump).reduce((sum, b) => sum + b.price[currency], 0);
+
 /** Order total in the smallest currency unit (cents), at the price in force at `now`. */
-export function orderAmount(f: Product, currency: Currency, bump: boolean, now = Date.now()): number {
-  const extra = bump && f.bump ? f.bump.price[currency] : 0;
-  return toCents(unitPrice(f.price, f.launch, currency, now) + extra);
+export function orderAmount(f: Product, currency: Currency, bump: boolean | readonly Bump[], now = Date.now()): number {
+  return toCents(unitPrice(f.price, f.launch, currency, now) + addOnTotal(f, currency, bump));
 }
 
 /** Every total this product could have been sold at (early-bird and full), for checking a paid order. */
-export function possibleAmounts(f: Product, currency: Currency, bump: boolean): number[] {
-  const extra = bump && f.bump ? f.bump.price[currency] : 0;
+export function possibleAmounts(f: Product, currency: Currency, bump: boolean | readonly Bump[]): number[] {
+  const extra = addOnTotal(f, currency, bump);
   const prices = [f.price[currency], ...(f.launch ? [f.launch.early[currency]] : [])];
   return prices.map((p) => toCents(p + extra));
+}
+
+/** "Product + Add-on + Add-on", for the payment's description. */
+export function orderDescription(f: Product, bumps: readonly Bump[]): string {
+  return [f.product, ...bumps.map((b) => b.name)].join(" + ");
 }
 
 export function checkoutPhase(f: Product, now = Date.now()): Phase {

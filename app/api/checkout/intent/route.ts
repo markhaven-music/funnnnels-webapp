@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { isEmail } from "@/lib/contacts";
-import { checkoutPhase, isDryRun, orderAmount, requestNow, resolveFunnel } from "@/lib/funnels";
+import { checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, requestNow, resolveFunnel } from "@/lib/funnels";
 import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { stripe, stripeConfigured } from "@/lib/stripe";
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   if (!isEmail(email)) {
     return NextResponse.json({ error: "Please enter a valid email." }, { status: 400 });
   }
-  const bump = body.bump === true;
+  const bumps = pickedBumps(f, body);
   const country = visitorCountry(await headers(), body.country);
   const currency = currencyFor(country);
   const name = [body.firstName, body.lastName]
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     .filter(Boolean)
     .join(" ")
     .slice(0, 80);
-  const amount = orderAmount(f, currency, bump, now);
+  const amount = orderAmount(f, currency, bumps, now);
   // The page showed a total; if the price changed since (the early-bird just
   // ended), say so instead of charging something the buyer didn't see.
   if (typeof body.expected === "number" && Math.round(body.expected * 100) !== amount) {
@@ -55,10 +55,11 @@ export async function POST(req: Request) {
       // Cards only, matching the checkout's card fields (Apple Pay / Google Pay are cards).
       allowed_payment_method_types: ["card"],
       receipt_email: email,
-      description: bump && f.bump ? `${f.product} + ${f.bump.name}` : f.product,
+      description: orderDescription(f, bumps),
       metadata: {
         funnel: f.slug,
-        bump: bump && f.bump ? f.bump.id : "",
+        // The add-ons' ids, comma-separated (one for single-bump products).
+        bump: bumps.map((b) => b.id).join(","),
         email,
         name,
         country,

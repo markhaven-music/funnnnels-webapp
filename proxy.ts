@@ -14,6 +14,7 @@ import { KIT_HOME } from "@/lib/liveUrl";
 // *.vercel.app origin must keep serving the pages the brand domain forwards.
 const FUNNEL_HOME: Record<string, string> = {
   "jazz-midi-pack": "https://m.thegrind.studio",
+  "top-hits-midi-bundle": "https://m.thegrind.studio",
 };
 const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
 
@@ -21,7 +22,7 @@ const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
 // The visitor keeps the plain URL; the country comes from ?country= (the
 // brand domain's rewrite sets it, and it lets you preview either price) or
 // from Vercel's geo header, and also goes into a cookie for the checkout.
-const CURRENCY_PAGES = new Set(["/jazz-midi-pack"]);
+const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/top-hits-midi-bundle", "/top-hits-midi-bundle/order"]);
 
 // Launch-kit products (dashboard → Launches) live at /<slug> and are served by
 // app/(funnels)/[slug]: the page per currency, /<slug>/thank-you and
@@ -29,7 +30,7 @@ const CURRENCY_PAGES = new Set(["/jazz-midi-pack"]);
 // that isn't one of the app's own routes counts as a product path: public,
 // currency-rewritten, and a 404 if no such product exists. Keep this list in
 // sync with RESERVED_SLUGS in lib/products.ts.
-const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "jazz-midi-pack"]);
+const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "jazz-midi-pack", "top-hits-midi-bundle"]);
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 function kitSlug(pathname: string): string | null {
@@ -40,6 +41,7 @@ function kitSlug(pathname: string): string | null {
 const PUBLIC = [
   /^\/p\//, // pages published from the builder
   /^\/jazz-midi-pack(\/|$)/,
+  /^\/top-hits-midi-bundle(\/|$)/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
   /^\/api\/checkout\/(lead|intent|paypal|paypal\/return)$/,

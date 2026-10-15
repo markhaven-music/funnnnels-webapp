@@ -1,6 +1,6 @@
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { isPayPalOrderId, paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
-import { possibleAmounts, resolveFunnel } from "@/lib/funnels";
+import { offeredBumps, possibleAmounts, resolveFunnel } from "@/lib/funnels";
 
 export type Order = {
   id: string;
@@ -27,7 +27,8 @@ async function getStripeOrder(id: string, funnelSlug: string): Promise<Order | n
     const intent = await stripe().paymentIntents.retrieve(id);
     if (intent.metadata.funnel !== funnelSlug) return null;
     const items = ["pack"];
-    if (intent.metadata.bump) items.push(intent.metadata.bump);
+    // metadata.bump: the add-ons' ids, comma-separated.
+    if (intent.metadata.bump) items.push(...intent.metadata.bump.split(","));
     return {
       id,
       provider: "stripe",
@@ -51,12 +52,13 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
     const meta = JSON.parse(unit?.custom_id ?? "{}");
     if (meta.f !== funnelSlug) return null;
 
-    const bump = Boolean(f.bump && meta.b === f.bump.id);
+    const ids = String(meta.b ?? "").split(",");
+    const bumps = offeredBumps(f).filter((b) => ids.includes(b.id));
     const currency = unit.amount.currency_code.toLowerCase();
     if (currency !== "eur" && currency !== "usd") return null;
     // Belt and braces: the order we created can't be edited by the buyer, but
     // only hand over files the amount actually paid for (at the early-bird or the full price).
-    if (!possibleAmounts(f, currency, bump).some((a) => paypalValue(a) === unit.amount.value)) return null;
+    if (!possibleAmounts(f, currency, bumps).some((a) => paypalValue(a) === unit.amount.value)) return null;
 
     // The order says COMPLETED once captured; the capture itself can still be
     // PENDING (an eCheck, a review), which is Stripe's "processing".
@@ -71,7 +73,7 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
       email: order.payer?.email_address ?? meta.e ?? null,
       amount: Number(unit.amount.value),
       currency,
-      items: bump && f.bump ? ["pack", f.bump.id] : ["pack"],
+      items: ["pack", ...bumps.map((b) => b.id)],
     };
   } catch {
     return null;

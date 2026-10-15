@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { isEmail } from "@/lib/contacts";
-import { checkoutPhase, isDryRun, orderAmount, requestNow, resolveFunnel } from "@/lib/funnels";
+import { checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, requestNow, resolveFunnel } from "@/lib/funnels";
 import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
@@ -44,11 +44,11 @@ export async function POST(req: Request) {
   if (!isEmail(email)) {
     return NextResponse.json({ error: "Please enter a valid email." }, { status: 400 });
   }
-  const bump = body.bump === true;
+  const bumps = pickedBumps(f, body);
   const country = visitorCountry(await headers(), body.country);
   const currency = currencyFor(country);
   const origin = returnOrigin(body.origin);
-  const amount = orderAmount(f, currency, bump, now);
+  const amount = orderAmount(f, currency, bumps, now);
   if (typeof body.expected === "number" && Math.round(body.expected * 100) !== amount) {
     return NextResponse.json(
       { error: `The price just changed: it's now ${money(amount / 100, currency)}. Check the total and pay again.`, amount: amount / 100 },
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 
   // PayPal has no metadata, only custom_id (127 chars). It carries what the
   // thank-you page and the download need; the step-1 email rides along when it fits.
-  const meta = { f: f.slug, b: bump && f.bump ? f.bump.id : "", w: body.waiver === true ? 1 : 0, c: country };
+  const meta = { f: f.slug, b: bumps.map((b) => b.id).join(","), w: body.waiver === true ? 1 : 0, c: country };
   const withEmail = JSON.stringify({ ...meta, e: email });
   const customId = withEmail.length <= 127 ? withEmail : JSON.stringify(meta);
 
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
           {
             reference_id: f.slug,
             custom_id: customId,
-            description: (bump && f.bump ? `${f.product} + ${f.bump.name}` : f.product).slice(0, 127),
+            description: orderDescription(f, bumps).slice(0, 127),
             amount: { currency_code: currency.toUpperCase(), value: paypalValue(amount) },
           },
         ],
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
               user_action: "PAY_NOW",
               // PayPal appends ?token=<order id>&PayerID=… to both.
               return_url: `${origin}/api/checkout/paypal/return?funnel=${f.slug}`,
-              cancel_url: `${origin}/${f.slug}#buy`,
+              cancel_url: `${origin}${f.checkout.orderPage ?? `/${f.slug}#buy`}`,
             },
           },
         },

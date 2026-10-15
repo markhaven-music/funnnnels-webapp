@@ -13,7 +13,7 @@ import { supabase } from "@/lib/supabase";
 export const BUCKET = "product-files";
 
 // First path segments that are app routes, never product slugs (see proxy.ts).
-export const RESERVED_SLUGS = new Set(["api", "funnels", "p", "jazz-midi-pack", "favicon", "robots", "sitemap"]);
+export const RESERVED_SLUGS = new Set(["api", "funnels", "p", "jazz-midi-pack", "top-hits-midi-bundle", "favicon", "robots", "sitemap"]);
 export const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 type ProductRow = {

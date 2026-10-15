@@ -1,0 +1,49 @@
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 60px 20px 80px;
+  text-align: center;
+}
+.title {
+  margin: 0 0 14px;
+  font-size: clamp(32px, 6vw, 48px);
+  font-weight: 900;
+  line-height: 1.1;
+}
+.lead {
+  margin: 0 0 30px;
+  font-size: 17px;
+  line-height: 1.5;
+  color: #d5d5d5;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.btn {
+  min-height: 70px !important;
+  font-size: 22px !important;
+  text-decoration: none;
+}
+.ghost {
+  display: block;
+  padding: 16px 20px;
+  border: 2px solid #3a3a3a;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+.ghost:hover {
+  border-color: #fff;
+}
+.note {
+  margin: 26px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #a9a9a9;
+}
+.note a {
+  color: #fff;
+}

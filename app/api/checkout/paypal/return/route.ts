@@ -13,7 +13,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const f = await resolveFunnel(url.searchParams.get("funnel"));
   const orderId = url.searchParams.get("token");
-  if (!f || !isPayPalOrderId(orderId) || !paypalConfigured()) return redirect(f ? `/${f.slug}#buy` : "/");
+  if (!f || !isPayPalOrderId(orderId) || !paypalConfigured()) return redirect(f ? (f.checkout.orderPage ?? `/${f.slug}#buy`) : "/");
 
   try {
     await paypal(`/v2/checkout/orders/${orderId}/capture`, { method: "POST", body: {} });
