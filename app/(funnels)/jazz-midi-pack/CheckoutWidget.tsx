@@ -7,6 +7,7 @@ import s from "./checkout.module.css";
 import b from "./btn.module.css";
 import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
+import { cookieCountry } from "@/lib/geo";
 
 // The two-step order form, copied from the ClickFunnels checkout:
 //   1 · Your info  → name + email (saved as a lead before any card is asked for)
@@ -285,7 +286,7 @@ function PayStep(props: Props & BodyState) {
         ...props.info,
         bump: props.ticked,
         waiver,
-        country: props.country,
+        country: cookieCountry(props.currency, props.country),
       }),
     });
     const json = await res.json().catch(() => ({}));
@@ -414,7 +415,14 @@ function PayStepBody({
       const res = await fetch("/api/checkout/paypal", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ funnel, ...info, bump: ticked, waiver, country, origin: window.location.origin }),
+        body: JSON.stringify({
+          funnel,
+          ...info,
+          bump: ticked,
+          waiver,
+          country: cookieCountry(currency, country),
+          origin: window.location.origin,
+        }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.approveUrl) throw new Error(json.error ?? "PayPal couldn't start.");

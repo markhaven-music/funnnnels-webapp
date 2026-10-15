@@ -3,6 +3,11 @@
 // lets you preview either price. Europe pays in euros, everyone else in dollars.
 
 export type Currency = "eur" | "usd";
+export const CURRENCIES: Currency[] = ["eur", "usd"];
+
+// Funnel pages are cached per currency, so the HTML can't carry the visitor's
+// country; proxy.ts puts it in this cookie for the checkout to report.
+export const COUNTRY_COOKIE = "visitor_country";
 
 // Every European country, EU or not (UK, Switzerland, Norway… included).
 const EUROPE = new Set([
@@ -23,4 +28,12 @@ export function currencyFor(country: string): Currency {
 
 export function formatPrice(amount: number, currency: Currency): string {
   return currency === "eur" ? `€${amount}` : `$${amount}`;
+}
+
+// Browser side: the visitor's country from the cookie, when it matches the
+// currency the page shows (so the server charges what the visitor saw).
+export function cookieCountry(currency: Currency, fallback: string): string {
+  if (typeof document === "undefined") return fallback;
+  const m = document.cookie.match(new RegExp(`(?:^|; )${COUNTRY_COOKIE}=([A-Z]{2})(?:;|$)`));
+  return m && currencyFor(m[1]) === currency ? m[1] : fallback;
 }

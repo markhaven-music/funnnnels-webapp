@@ -1,19 +1,24 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 import { Instrument_Serif } from "next/font/google";
-import { currencyFor, formatPrice, visitorCountry } from "@/lib/geo";
-import { stripeConfigured } from "@/lib/stripe";
+import { CURRENCIES, formatPrice, type Currency } from "@/lib/geo";
 import { getPublishedBlocks } from "@/lib/pages";
-import { funnel } from "./funnel";
-import { DEFAULT_SECTIONS, type Section } from "./content";
-import { SectionView, isSectionType, type Ctx } from "./sections";
-import { StickyCta } from "./StickyCta";
-import { Tracking } from "./Tracking";
-import s from "./jazz.module.css";
+import { funnel } from "../funnel";
+import { DEFAULT_SECTIONS, type Section } from "../content";
+import { SectionView, isSectionType, type Ctx } from "../sections";
+import { StickyCta } from "../StickyCta";
+import { Tracking } from "../Tracking";
+import s from "../jazz.module.css";
 
 // Copy rules: grind-studio-landing-pages/docs/copy-style.md ("Diretto").
 // Every claim is in BRIEF.md. The sections are edited in the dashboard
 // editor (funnnnels.com); content.ts holds the defaults / fallback.
+//
+// Served from Vercel's CDN, not rendered per visit: one prebuilt page per
+// currency (/jazz-midi-pack/eur, /jazz-midi-pack/usd). proxy.ts picks the
+// visitor's one and rewrites /jazz-midi-pack to it, so the address bar never
+// changes. Publishing from the editor refreshes both (lib/pages.ts
+// revalidateFunnelPages); the hourly revalidate is only a safety net.
 
 const serif = Instrument_Serif({
   subsets: ["latin"],
@@ -22,7 +27,15 @@ const serif = Instrument_Serif({
   variable: "--font-serif",
 });
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+export function generateStaticParams() {
+  return CURRENCIES.map((currency) => ({ currency }));
+}
+
+// The country the checkout reports when the browser has no visitor_country
+// cookie (proxy.ts sets it): one that maps to the page's currency.
+const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
 
 export const metadata: Metadata = {
   title: "Jazz MIDI Pack · GRIND STUDIO",
@@ -38,23 +51,22 @@ export const metadata: Metadata = {
 const valid = (b: unknown): b is Section =>
   !!b && typeof b === "object" && isSectionType((b as Section).type) && typeof (b as Section).props === "object";
 
-export default async function JazzMidiPackPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ country?: string }>;
-}) {
-  const { country: override } = await searchParams;
-  const country = visitorCountry(await headers(), override);
-  const currency = currencyFor(country);
+export default async function JazzMidiPackPage({ params }: { params: Promise<{ currency: string }> }) {
+  const { currency } = (await params) as { currency: Currency };
+  if (!CURRENCIES.includes(currency)) notFound();
   const amount = funnel.price[currency];
   const price = formatPrice(amount, currency);
-  const sections = await getPublishedBlocks(funnel.slug, DEFAULT_SECTIONS, valid);
+  // strict: a failed read keeps the last good page in the cache instead of
+  // caching the coded defaults over the published copy.
+  const sections = await getPublishedBlocks(funnel.slug, DEFAULT_SECTIONS, valid, { strict: true });
   const ctx: Ctx = {
     price,
     amount,
     currency,
-    country,
-    publishableKey: stripeConfigured() ? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY! : null,
+    country: FALLBACK_COUNTRY[currency],
+    // Read at build time, so only the public key: the secret one is the
+    // checkout API's business (it answers "not connected" without it).
+    publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null,
   };
 
   return (

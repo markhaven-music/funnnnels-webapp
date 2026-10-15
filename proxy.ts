@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { COUNTRY_COOKIE, currencyFor, visitorCountry } from "@/lib/geo";
 
 // funnnnels.com is the dashboard, behind ADMIN_PASSWORD. Funnels are public
 // but live on their brand's domain: m.thegrind.studio forwards /jazz-midi-pack
@@ -14,6 +15,12 @@ const FUNNEL_HOME: Record<string, string> = {
   "jazz-midi-pack": "https://m.thegrind.studio",
 };
 const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
+
+// Funnel pages cached on the CDN once per currency (app/(funnels)/<slug>/[currency]).
+// The visitor keeps the plain URL; the country comes from ?country= (the
+// brand domain's rewrite sets it, and it lets you preview either price) or
+// from Vercel's geo header, and also goes into a cookie for the checkout.
+const CURRENCY_PAGES = new Set(["/jazz-midi-pack"]);
 
 const PUBLIC = [
   /^\/p\//, // pages published from the builder
@@ -31,6 +38,16 @@ export function proxy(request: NextRequest) {
   const home = FUNNEL_HOME[pathname.split("/")[1]];
   if (home && DASHBOARD_HOSTS.has(host)) {
     return NextResponse.redirect(`${home}${pathname}${request.nextUrl.search}`, 308);
+  }
+
+  const page = pathname.replace(/\/$/, "");
+  if (CURRENCY_PAGES.has(page)) {
+    const country = visitorCountry(request.headers, request.nextUrl.searchParams.get("country"));
+    const url = request.nextUrl.clone();
+    url.pathname = `${page}/${currencyFor(country)}`;
+    const res = NextResponse.rewrite(url);
+    res.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax" });
+    return res;
   }
 
   if (PUBLIC.some((re) => re.test(pathname))) return NextResponse.next();
