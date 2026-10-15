@@ -15,6 +15,8 @@ import { EditableText } from "@/components/blocks/EditableText";
 import { SectionBlock } from "@/app/(funnels)/jazz-midi-pack/SectionBlock";
 import { isSectionType } from "@/app/(funnels)/jazz-midi-pack/sections";
 import type { Section } from "@/app/(funnels)/jazz-midi-pack/content";
+import { KitSectionBlock } from "@/app/(funnels)/_kit/KitSectionBlock";
+import { isKitSection } from "@/app/(funnels)/_kit/content";
 
 type PatchFn = (propsPatch: Record<string, unknown>) => void;
 
@@ -529,6 +531,8 @@ export function BlockView({
       if (isSectionType(block.type)) {
         return <SectionBlock section={block as unknown as Section} patch={patch} />;
       }
+      // Sections of launch-kit products (the template page).
+      if (isKitSection(block)) return <KitSectionBlock section={block} patch={patch} />;
       return (
         <div className="fb-unknown">Unknown block type: {block.type}</div>
       );

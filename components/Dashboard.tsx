@@ -13,6 +13,7 @@ import { ContactsPanel } from "@/components/panels/ContactsPanel";
 import { DomainsPanel } from "@/components/panels/DomainsPanel";
 import { IntegrationsPanel } from "@/components/panels/IntegrationsPanel";
 import { LandingPagesPanel } from "@/components/panels/LandingPagesPanel";
+import { LaunchesPanel } from "@/components/panels/LaunchesPanel";
 import { SettingsPanel } from "@/components/panels/SettingsPanel";
 import { NAV } from "@/lib/data";
 import type { StoredFunnel } from "@/lib/blocks";
@@ -34,6 +35,7 @@ export function Dashboard({ funnels }: Props) {
       <TopBar trail={[{ label: topBarLabel }]} />
       {activeNav === "home"         && <DashboardHome funnels={funnels} />}
       {activeNav === "funnels"      && <MainPanel funnels={funnels} />}
+      {activeNav === "launches"     && <LaunchesPanel />}
       {activeNav === "pages"        && <LandingPagesPanel funnels={funnels} />}
       {activeNav === "ab"           && <ABTestsPanel funnels={funnels} />}
       {activeNav === "contacts"     && <ContactsPanel />}

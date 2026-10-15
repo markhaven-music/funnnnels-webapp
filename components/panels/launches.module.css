@@ -1,0 +1,338 @@
+/* Dashboard → Launches. Uses the dashboard's tokens (globals.css). */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.card {
+  text-align: left;
+  background: var(--bg-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  color: var(--fg-0);
+  cursor: pointer;
+  font: inherit;
+  display: grid;
+  gap: 6px;
+}
+.card:hover,
+.cardOn {
+  border-color: var(--accent-dim);
+}
+.cardName {
+  font-size: 15px;
+  font-weight: 600;
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.chip {
+  justify-self: start;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  color: var(--fg-1);
+}
+.chip_waitlist {
+  color: var(--sky);
+  border-color: var(--sky);
+}
+.chip_early {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+.chip_open {
+  color: var(--mint);
+  border-color: var(--mint);
+}
+
+.panel {
+  background: var(--bg-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+.sub {
+  font-size: 13px;
+  color: var(--fg-2);
+  margin: 4px 0 0;
+}
+.links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* timeline */
+.timeline {
+  position: relative;
+  display: flex;
+  height: 54px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.seg {
+  position: relative;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.35;
+  min-width: 0;
+  overflow: hidden;
+  border-right: 1px solid var(--line);
+}
+.seg b {
+  display: block;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.seg span {
+  color: var(--fg-2);
+  white-space: nowrap;
+}
+.seg_waitlist {
+  background: oklch(0.78 0.13 230 / 0.12);
+}
+.seg_early {
+  background: oklch(0.82 0.16 75 / 0.14);
+}
+.seg_open {
+  background: oklch(0.86 0.16 165 / 0.1);
+  flex: 1 0 120px;
+  border-right: 0;
+}
+.now {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--rose);
+  box-shadow: 0 0 0 2px var(--bg-1);
+}
+.dates {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.dates b {
+  display: block;
+  color: var(--fg-0);
+  font-weight: 500;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stat {
+  background: var(--bg-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+  letter-spacing: 0.04em;
+}
+.statValue {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 6px;
+}
+
+.bars {
+  display: grid;
+  gap: 6px;
+}
+.barRow {
+  display: grid;
+  grid-template-columns: 90px 1fr 140px;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+}
+.barTrack {
+  height: 10px;
+  background: var(--bg-2);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.barFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 5px;
+}
+
+/* forms */
+.form {
+  display: grid;
+  gap: 14px;
+}
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+.field {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.input,
+.textarea,
+.select {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: var(--fg-0);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  width: 100%;
+  box-sizing: border-box;
+}
+.textarea {
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.5;
+}
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--accent-dim);
+}
+.legend {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg-1);
+  margin: 4px 0 -4px;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.error {
+  color: var(--rose);
+  font-size: 13px;
+}
+.ok {
+  color: var(--mint);
+  font-size: 13px;
+}
+.note {
+  font-size: 12px;
+  color: var(--fg-2);
+  line-height: 1.5;
+}
+.notice {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--fg-1);
+  border: 1px dashed var(--amber);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+/* emails */
+.emails {
+  display: grid;
+}
+.email {
+  border-top: 1px solid var(--line-soft);
+}
+.emailRow {
+  display: grid;
+  grid-template-columns: 150px 170px 1fr 90px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 13px;
+  width: 100%;
+  background: none;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+.emailRow:hover .subject {
+  color: var(--accent-2);
+}
+.subject {
+  color: var(--fg-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.emailEdit {
+  padding: 4px 0 16px;
+}
+
+.files {
+  display: grid;
+  gap: 10px;
+}
+.fileRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.danger {
+  color: var(--rose);
+  border-color: var(--rose);
+}
+
+@media (max-width: 720px) {
+  .emailRow {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .barRow {
+    grid-template-columns: 70px 1fr;
+  }
+  .barRow > :last-child {
+    grid-column: 2;
+  }
+  .dates {
+    grid-template-columns: 1fr;
+  }
+}

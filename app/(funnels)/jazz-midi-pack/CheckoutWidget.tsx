@@ -30,7 +30,8 @@ type Props = {
   currency: "eur" | "usd";
   country: string;
   price: number;
-  bump: { name: string; price: number; pitch: string };
+  // The add-on; `cover` is the two lines on its little box (default: the Jazz Chord Pack's).
+  bump: { name: string; price: number; pitch: string; cover?: [string, string] } | null;
   thankYou: string;
   publishableKey: string | null;
   europe: boolean;
@@ -68,7 +69,7 @@ export function CheckoutWidget(props: Props) {
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [bump, setBump] = useState(false);
   const [method, setMethod] = useState<Method>("card");
-  const total = props.price + (bump ? props.bump.price : 0);
+  const total = props.price + (bump && props.bump ? props.bump.price : 0);
   const stripePromise = useMemo(
     () => (props.publishableKey ? stripeFor(props.publishableKey) : null),
     [props.publishableKey],
@@ -144,7 +145,7 @@ export function CheckoutWidget(props: Props) {
                 stripe={stripePromise}
                 options={{
                   mode: "payment",
-                  amount: total * 100,
+                  amount: Math.round(total * 100),
                   currency: props.currency,
                   appearance,
                   // Plain card fields, as on ClickFunnels. Apple Pay / Google Pay
@@ -287,6 +288,8 @@ function PayStep(props: Props & BodyState) {
         bump: props.ticked,
         waiver,
         country: cookieCountry(props.currency, props.country),
+        // The total on screen: the server refuses if its price differs (an early-bird just ended).
+        expected: props.total,
       }),
     });
     const json = await res.json().catch(() => ({}));
@@ -422,6 +425,7 @@ function PayStepBody({
           waiver,
           country: cookieCountry(currency, country),
           origin: window.location.origin,
+          expected: total,
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -434,7 +438,7 @@ function PayStepBody({
     }
   }
 
-  const [lead, rest] = splitPitch(offer.pitch);
+  const [lead, rest] = splitPitch(offer?.pitch ?? "");
 
   return (
     <>
@@ -445,35 +449,37 @@ function PayStepBody({
         </div>
       )}
 
-      <label className={`${s.bump} ${ticked ? s.bumpOn : ""}`}>
-        <span className={s.bumpHead}>
-          <span className={s.bumpArrow} aria-hidden>
-            ➜
+      {offer && (
+        <label className={`${s.bump} ${ticked ? s.bumpOn : ""}`}>
+          <span className={s.bumpHead}>
+            <span className={s.bumpArrow} aria-hidden>
+              ➜
+            </span>
+            <input
+              type="checkbox"
+              checked={ticked}
+              onChange={(e) => setTicked(e.target.checked)}
+              className={s.bumpCheck}
+            />
+            <span className={s.bumpTitle}>YES! Add the {offer.name}!</span>
+            <span className={s.bumpPrice}>{money(offer.price, currency)}</span>
           </span>
-          <input
-            type="checkbox"
-            checked={ticked}
-            onChange={(e) => setTicked(e.target.checked)}
-            className={s.bumpCheck}
-          />
-          <span className={s.bumpTitle}>YES! Add the {offer.name}!</span>
-          <span className={s.bumpPrice}>{money(offer.price, currency)}</span>
-        </span>
-        <span className={s.bumpBody}>
-          <BumpCover />
-          <span className={s.bumpPitch}>
-            <span className={s.bumpOffer}>ADD-ON OFFER:</span> <strong>{lead}</strong>
-            {rest} Only <strong>{money(offer.price, currency)}</strong>, added to this order.
+          <span className={s.bumpBody}>
+            <BumpCover lines={offer.cover} />
+            <span className={s.bumpPitch}>
+              <span className={s.bumpOffer}>ADD-ON OFFER:</span> <strong>{lead}</strong>
+              {rest} Only <strong>{money(offer.price, currency)}</strong>, added to this order.
+            </span>
           </span>
-        </span>
-      </label>
+        </label>
+      )}
 
       <div className={s.summary}>
         <div className={s.sumRow}>
           <span>{product}</span>
           <span>{money(price, currency)}</span>
         </div>
-        {ticked && (
+        {ticked && offer && (
           <div className={s.sumRow}>
             <span>{offer.name}</span>
             <span>{money(offer.price, currency)}</span>
@@ -520,16 +526,17 @@ function splitPitch(pitch: string): [string, string] {
 }
 
 function money(amount: number, currency: "eur" | "usd") {
-  return currency === "eur" ? `€${amount}` : `$${amount}`;
+  const n = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
+  return currency === "eur" ? `€${n}` : `$${n}`;
 }
 
 // The add-on as a small cover, drawn in CSS like the main product box.
-function BumpCover() {
+function BumpCover({ lines = ["Jazz", "CHORD PACK"] }: { lines?: [string, string] }) {
   return (
     <span className={s.bumpCover} aria-hidden>
       <span className={s.bumpCoverBrand}>GRIND ◆ STUDIO</span>
-      <span className={s.bumpCoverJazz}>Jazz</span>
-      <span className={s.bumpCoverName}>CHORD PACK</span>
+      <span className={s.bumpCoverJazz}>{lines[0]}</span>
+      <span className={s.bumpCoverName}>{lines[1]}</span>
       <span className={s.bumpCoverKeys}>
         {Array.from({ length: 7 }, (_, i) => (
           <i key={i} />

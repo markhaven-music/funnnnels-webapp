@@ -1,10 +1,12 @@
 import type { BlockType } from "@/lib/blocks";
 import { SECTION_LABELS, type SectionType } from "@/app/(funnels)/jazz-midi-pack/content";
-import { isCodeFunnel } from "@/lib/liveUrl";
+import { KIT_SECTION_LABELS } from "@/app/(funnels)/_kit/content";
+import { PRODUCT_TYPE, isCodeFunnel } from "@/lib/liveUrl";
 
 // What the editor's "Add section" bar offers. Builder funnels get the generic
-// blocks; a code funnel (the Jazz page, the only one so far) gets its own
-// sections, the same ones the live page renders.
+// blocks; a code funnel (the Jazz page) gets its own sections, and a
+// launch-kit product (type "Product") the template's — the same ones the
+// live page renders.
 const BLOCK_LABELS: Record<Exclude<BlockType, "custom_html">, string> = {
   hero: "Hero",
   text: "Text",
@@ -18,11 +20,12 @@ const BLOCK_LABELS: Record<Exclude<BlockType, "custom_html">, string> = {
 
 export type Addable = { type: string; label: string };
 
-export function addableSections(funnelId: string): Addable[] {
-  const labels: Record<string, string> = isCodeFunnel(funnelId) ? SECTION_LABELS : BLOCK_LABELS;
+export function addableSections(funnelId: string, type?: string): Addable[] {
+  const labels: Record<string, string> =
+    type === PRODUCT_TYPE ? KIT_SECTION_LABELS : isCodeFunnel(funnelId) ? SECTION_LABELS : BLOCK_LABELS;
   return Object.entries(labels).map(([type, label]) => ({ type, label }));
 }
 
-export function isAddable(funnelId: string, type: unknown): type is BlockType | SectionType {
-  return typeof type === "string" && addableSections(funnelId).some((a) => a.type === type);
+export function isAddable(funnelId: string, funnelType: string | undefined, type: unknown): type is BlockType | SectionType {
+  return typeof type === "string" && addableSections(funnelId, funnelType).some((a) => a.type === type);
 }

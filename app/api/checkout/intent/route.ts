@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { isEmail } from "@/lib/contacts";
-import { getFunnel, orderAmount } from "@/lib/funnels";
+import { checkoutPhase, isDryRun, orderAmount, requestNow, resolveFunnel } from "@/lib/funnels";
+import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 
@@ -12,12 +13,17 @@ export const runtime = "nodejs";
 // currency are worked out here from the funnel and the visitor's country —
 // whatever the browser displayed, it can only ever pay the real price.
 export async function POST(req: Request) {
-  if (!stripeConfigured()) {
+  const body = await req.json().catch(() => ({}));
+  const f = await resolveFunnel(body.funnel);
+  if (!f) return NextResponse.json({ error: "Unknown funnel" }, { status: 404 });
+  // Launches: no sales before the cart opens; the early-bird price only until its deadline.
+  const now = requestNow(body);
+  if (checkoutPhase(f, now) === "waitlist") {
+    return NextResponse.json({ error: "The cart isn't open yet." }, { status: 403 });
+  }
+  if (!isDryRun(body) && !stripeConfigured()) {
     return NextResponse.json({ error: "Payments are not connected yet." }, { status: 503 });
   }
-  const body = await req.json().catch(() => ({}));
-  const f = getFunnel(body.funnel);
-  if (!f) return NextResponse.json({ error: "Unknown funnel" }, { status: 404 });
 
   const email = String(body.email ?? "").trim();
   if (!isEmail(email)) {
@@ -31,18 +37,28 @@ export async function POST(req: Request) {
     .filter(Boolean)
     .join(" ")
     .slice(0, 80);
+  const amount = orderAmount(f, currency, bump, now);
+  // The page showed a total; if the price changed since (the early-bird just
+  // ended), say so instead of charging something the buyer didn't see.
+  if (typeof body.expected === "number" && Math.round(body.expected * 100) !== amount) {
+    return NextResponse.json(
+      { error: `The price just changed: it's now ${money(amount / 100, currency)}. Check the total and pay again.`, amount: amount / 100 },
+      { status: 409 },
+    );
+  }
+  if (isDryRun(body)) return NextResponse.json({ dryRun: true, amount, currency, phase: checkoutPhase(f, now) });
 
   try {
     const intent = await stripe().paymentIntents.create({
-      amount: orderAmount(f, currency, bump),
+      amount,
       currency,
       // Cards only, matching the checkout's card fields (Apple Pay / Google Pay are cards).
       allowed_payment_method_types: ["card"],
       receipt_email: email,
-      description: bump ? `${f.product} + ${f.bump.name}` : f.product,
+      description: bump && f.bump ? `${f.product} + ${f.bump.name}` : f.product,
       metadata: {
         funnel: f.slug,
-        bump: bump ? f.bump.id : "",
+        bump: bump && f.bump ? f.bump.id : "",
         email,
         name,
         country,

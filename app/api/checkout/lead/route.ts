@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isEmail, upsertContact } from "@/lib/contacts";
-import { getFunnel } from "@/lib/funnels";
+import { resolveFunnel } from "@/lib/funnels";
 
 export const runtime = "nodejs";
 
@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 // must never block a sale, so the visitor moves on to step 2 either way.
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
-  const f = getFunnel(body.funnel);
+  const f = await resolveFunnel(body.funnel);
   if (!f) return NextResponse.json({ error: "Unknown funnel" }, { status: 404 });
 
   const email = String(body.email ?? "").trim();

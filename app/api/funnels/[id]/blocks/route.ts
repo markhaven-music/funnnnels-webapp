@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { SECTION_LABELS, defaultSection, type SectionType } from "@/app/(funnels)/jazz-midi-pack/content";
+import { defaultKitSection, isKitSectionType } from "@/app/(funnels)/_kit/content";
 import { isAddable } from "@/lib/addable";
 import type { Block } from "@/lib/blocks";
 import { addBlock, getFunnel } from "@/lib/store";
@@ -14,11 +15,17 @@ export async function POST(
 ) {
   const { id } = await ctx.params;
   const body = await req.json().catch(() => ({}));
-  if (!isAddable(id, body.type)) {
+  const funnel = await getFunnel(id);
+  if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!isAddable(id, funnel.type, body.type)) {
     return NextResponse.json({ error: "Unknown section type" }, { status: 400 });
   }
-  // Builder blocks get their defaults inside addBlock; code-funnel sections bring their own.
-  const props = body.type in SECTION_LABELS ? defaultSection(body.type as SectionType).props : {};
+  // Builder blocks get their defaults inside addBlock; code-funnel and template sections bring their own.
+  const props = isKitSectionType(body.type)
+    ? defaultKitSection(body.type).props
+    : body.type in SECTION_LABELS
+      ? defaultSection(body.type as SectionType).props
+      : {};
   const block = await addBlock(id, body.type as Block["type"], props as Record<string, unknown>);
   if (!block) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ block, funnel: await getFunnel(id) });

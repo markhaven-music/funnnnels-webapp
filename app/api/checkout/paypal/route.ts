@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { isEmail } from "@/lib/contacts";
-import { getFunnel, orderAmount } from "@/lib/funnels";
+import { checkoutPhase, isDryRun, orderAmount, requestNow, resolveFunnel } from "@/lib/funnels";
+import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
 
@@ -28,12 +29,16 @@ function returnOrigin(raw: unknown): string {
 }
 
 export async function POST(req: Request) {
-  if (!paypalConfigured()) {
+  const body = await req.json().catch(() => ({}));
+  const f = await resolveFunnel(body.funnel);
+  if (!f) return NextResponse.json({ error: "Unknown funnel" }, { status: 404 });
+  const now = requestNow(body);
+  if (checkoutPhase(f, now) === "waitlist") {
+    return NextResponse.json({ error: "The cart isn't open yet." }, { status: 403 });
+  }
+  if (!isDryRun(body) && !paypalConfigured()) {
     return NextResponse.json({ error: "PayPal is not connected yet." }, { status: 503 });
   }
-  const body = await req.json().catch(() => ({}));
-  const f = getFunnel(body.funnel);
-  if (!f) return NextResponse.json({ error: "Unknown funnel" }, { status: 404 });
 
   const email = String(body.email ?? "").trim();
   if (!isEmail(email)) {
@@ -43,10 +48,18 @@ export async function POST(req: Request) {
   const country = visitorCountry(await headers(), body.country);
   const currency = currencyFor(country);
   const origin = returnOrigin(body.origin);
+  const amount = orderAmount(f, currency, bump, now);
+  if (typeof body.expected === "number" && Math.round(body.expected * 100) !== amount) {
+    return NextResponse.json(
+      { error: `The price just changed: it's now ${money(amount / 100, currency)}. Check the total and pay again.`, amount: amount / 100 },
+      { status: 409 },
+    );
+  }
+  if (isDryRun(body)) return NextResponse.json({ dryRun: true, amount, currency, phase: checkoutPhase(f, now) });
 
   // PayPal has no metadata, only custom_id (127 chars). It carries what the
   // thank-you page and the download need; the step-1 email rides along when it fits.
-  const meta = { f: f.slug, b: bump ? f.bump.id : "", w: body.waiver === true ? 1 : 0, c: country };
+  const meta = { f: f.slug, b: bump && f.bump ? f.bump.id : "", w: body.waiver === true ? 1 : 0, c: country };
   const withEmail = JSON.stringify({ ...meta, e: email });
   const customId = withEmail.length <= 127 ? withEmail : JSON.stringify(meta);
 
@@ -59,8 +72,8 @@ export async function POST(req: Request) {
           {
             reference_id: f.slug,
             custom_id: customId,
-            description: (bump ? `${f.product} + ${f.bump.name}` : f.product).slice(0, 127),
-            amount: { currency_code: currency.toUpperCase(), value: paypalValue(orderAmount(f, currency, bump)) },
+            description: (bump && f.bump ? `${f.product} + ${f.bump.name}` : f.product).slice(0, 127),
+            amount: { currency_code: currency.toUpperCase(), value: paypalValue(amount) },
           },
         ],
         payment_source: {

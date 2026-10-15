@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { COUNTRY_COOKIE, currencyFor, visitorCountry } from "@/lib/geo";
+import { KIT_HOME } from "@/lib/liveUrl";
 
 // funnnnels.com is the dashboard, behind ADMIN_PASSWORD. Funnels are public
 // but live on their brand's domain: m.thegrind.studio forwards /jazz-midi-pack
@@ -22,6 +23,20 @@ const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
 // from Vercel's geo header, and also goes into a cookie for the checkout.
 const CURRENCY_PAGES = new Set(["/jazz-midi-pack"]);
 
+// Launch-kit products (dashboard → Launches) live at /<slug> and are served by
+// app/(funnels)/[slug]: the page per currency, /<slug>/thank-you and
+// /<slug>/download. Their slugs are in the database, so any first path segment
+// that isn't one of the app's own routes counts as a product path: public,
+// currency-rewritten, and a 404 if no such product exists. Keep this list in
+// sync with RESERVED_SLUGS in lib/products.ts.
+const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "jazz-midi-pack"]);
+const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+function kitSlug(pathname: string): string | null {
+  const seg = pathname.split("/")[1] ?? "";
+  return !APP_SEGMENTS.has(seg) && SLUG.test(seg) ? seg : null;
+}
+
 const PUBLIC = [
   /^\/p\//, // pages published from the builder
   /^\/jazz-midi-pack(\/|$)/,
@@ -35,13 +50,14 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const host = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
 
-  const home = FUNNEL_HOME[pathname.split("/")[1]];
+  const slug = kitSlug(pathname);
+  const home = FUNNEL_HOME[pathname.split("/")[1]] ?? (slug ? KIT_HOME : undefined);
   if (home && DASHBOARD_HOSTS.has(host)) {
     return NextResponse.redirect(`${home}${pathname}${request.nextUrl.search}`, 308);
   }
 
   const page = pathname.replace(/\/$/, "");
-  if (CURRENCY_PAGES.has(page)) {
+  if (CURRENCY_PAGES.has(page) || (slug && page === `/${slug}`)) {
     const country = visitorCountry(request.headers, request.nextUrl.searchParams.get("country"));
     const url = request.nextUrl.clone();
     url.pathname = `${page}/${currencyFor(country)}`;
@@ -50,7 +66,7 @@ export function proxy(request: NextRequest) {
     return res;
   }
 
-  if (PUBLIC.some((re) => re.test(pathname))) return NextResponse.next();
+  if (slug || PUBLIC.some((re) => re.test(pathname))) return NextResponse.next();
 
   const password = process.env.ADMIN_PASSWORD;
   if (!password) {

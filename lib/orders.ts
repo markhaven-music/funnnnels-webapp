@@ -1,6 +1,6 @@
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { isPayPalOrderId, paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
-import { getFunnel, orderAmount } from "@/lib/funnels";
+import { possibleAmounts, resolveFunnel } from "@/lib/funnels";
 
 export type Order = {
   id: string;
@@ -43,7 +43,7 @@ async function getStripeOrder(id: string, funnelSlug: string): Promise<Order | n
 }
 
 async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | null> {
-  const f = getFunnel(funnelSlug);
+  const f = await resolveFunnel(funnelSlug);
   if (!f || !paypalConfigured()) return null;
   try {
     const order = await paypal<PayPalOrder>(`/v2/checkout/orders/${id}`);
@@ -51,12 +51,12 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
     const meta = JSON.parse(unit?.custom_id ?? "{}");
     if (meta.f !== funnelSlug) return null;
 
-    const bump = meta.b === f.bump.id;
+    const bump = Boolean(f.bump && meta.b === f.bump.id);
     const currency = unit.amount.currency_code.toLowerCase();
     if (currency !== "eur" && currency !== "usd") return null;
     // Belt and braces: the order we created can't be edited by the buyer, but
-    // only hand over files the amount actually paid for.
-    if (unit.amount.value !== paypalValue(orderAmount(f, currency, bump))) return null;
+    // only hand over files the amount actually paid for (at the early-bird or the full price).
+    if (!possibleAmounts(f, currency, bump).some((a) => paypalValue(a) === unit.amount.value)) return null;
 
     // The order says COMPLETED once captured; the capture itself can still be
     // PENDING (an eCheck, a review), which is Stripe's "processing".
@@ -71,7 +71,7 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
       email: order.payer?.email_address ?? meta.e ?? null,
       amount: Number(unit.amount.value),
       currency,
-      items: bump ? ["pack", f.bump.id] : ["pack"],
+      items: bump && f.bump ? ["pack", f.bump.id] : ["pack"],
     };
   } catch {
     return null;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isEmail, upsertContact } from "@/lib/contacts";
-import { getFunnel } from "@/lib/funnels";
+import { resolveFunnel } from "@/lib/funnels";
 
 export const runtime = "nodejs";
 
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
-  const optin = getFunnel(body.funnel)?.optin;
+  const optin = (await resolveFunnel(body.funnel))?.optin;
   if (!optin) return NextResponse.json({ error: "Unknown funnel" }, { status: 404 });
 
   // Honeypot: a field humans never see. Bots fill it; pretend success.

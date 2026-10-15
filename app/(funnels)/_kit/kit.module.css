@@ -1,0 +1,134 @@
+/* Launch-kit additions on top of the Jazz page styles (jazz.module.css):
+   the early-bird bar, countdowns and the waitlist form. Same rules: dark,
+   one accent (brass), text ≥ 17px, no pills. */
+
+.bar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 16px;
+  padding: 10px 20px;
+  background: var(--brass);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: center;
+}
+.bar b {
+  font-weight: 700;
+}
+.bar .countdown {
+  color: var(--ink);
+}
+
+.countdown {
+  display: inline-flex;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--brass-hi);
+}
+.unit b {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.bigCountdown {
+  font-size: clamp(22px, 5vw, 32px);
+  gap: 14px;
+  margin: 18px 0 6px;
+}
+
+.waitlist {
+  min-height: 92vh;
+  display: flex;
+  flex-direction: column;
+}
+.waitlistBody {
+  position: relative;
+  z-index: 1;
+  padding-top: clamp(28px, 6vw, 64px);
+  padding-bottom: 56px;
+}
+.bullets {
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 0;
+  display: grid;
+  gap: 10px;
+}
+.bullets li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 28px;
+  max-width: 520px;
+}
+.input {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  background: var(--ink-2);
+  color: var(--cream);
+  font: inherit;
+  font-size: 17px;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--brass);
+}
+.honey {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.formNote {
+  margin-top: 12px;
+  color: var(--mute);
+  font-size: 15px;
+}
+.done {
+  margin-top: 28px;
+  padding: 18px 20px;
+  border: 1px solid var(--brass);
+  border-radius: 12px;
+  max-width: 520px;
+}
+.error {
+  color: #f08a76;
+  font-size: 15px;
+  margin-top: 10px;
+}
+
+.boxName {
+  font-family: var(--font-serif), serif;
+  font-style: italic;
+  font-size: 2.1em;
+  line-height: 1;
+  color: var(--cream);
+  overflow-wrap: anywhere;
+}
+.boxSub {
+  font-family: var(--font-mono);
+  font-size: 0.62em;
+  letter-spacing: 0.24em;
+  color: var(--brass);
+  margin-top: 0.6em;
+}
+
+.cell {
+  min-height: 0;
+}

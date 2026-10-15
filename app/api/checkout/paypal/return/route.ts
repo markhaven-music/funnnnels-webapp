@@ -1,4 +1,4 @@
-import { getFunnel } from "@/lib/funnels";
+import { resolveFunnel } from "@/lib/funnels";
 import { isPayPalOrderId, paypal, paypalCheckoutUrl, paypalConfigured, PayPalError } from "@/lib/paypal";
 
 export const runtime = "nodejs";
@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 // and the buyer approved.
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const f = getFunnel(url.searchParams.get("funnel"));
+  const f = await resolveFunnel(url.searchParams.get("funnel"));
   const orderId = url.searchParams.get("token");
   if (!f || !isPayPalOrderId(orderId) || !paypalConfigured()) return redirect(f ? `/${f.slug}#buy` : "/");
 

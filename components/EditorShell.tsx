@@ -58,7 +58,7 @@ export function EditorShell({ initialFunnel }: { initialFunnel: StoredFunnel }) 
     }
   }, [funnel.id, publishing]);
 
-  const livePath = liveUrl(funnel.id);
+  const livePath = liveUrl(funnel.id, funnel.type);
   const publicUrl =
     typeof window === "undefined" || livePath.startsWith("http")
       ? livePath
@@ -401,7 +401,7 @@ export function EditorShell({ initialFunnel }: { initialFunnel: StoredFunnel }) 
               </div>
             )}
           </div>
-          {funnel.status === "live" && !isCodeFunnel(funnel.id) && (
+          {funnel.status === "live" && !isCodeFunnel(funnel.id, funnel.type) && (
             <button className="btn ghost" type="button" onClick={handleUnpublish} disabled={publishing}>
               Unpublish
             </button>
@@ -442,7 +442,7 @@ export function EditorShell({ initialFunnel }: { initialFunnel: StoredFunnel }) 
               <span className="add-bar__label">
                 <I.plus size={12} /> {adding ? "Adding…" : "Add section"}
               </span>
-              {addableSections(funnel.id).map((a) => (
+              {addableSections(funnel.id, funnel.type).map((a) => (
                 <button
                   key={a.type}
                   type="button"
