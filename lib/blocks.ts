@@ -130,6 +130,8 @@ export type StoredFunnel = {
   steps: number;
   on: number;
   pages: Page[];
+  /** Snapshot taken by "Publish": what visitors see. Edits stay draft until the next publish. */
+  publishedPages?: Page[] | null;
 };
 
 export const BLOCK_SCHEMA_DOC = `Block types and their props:

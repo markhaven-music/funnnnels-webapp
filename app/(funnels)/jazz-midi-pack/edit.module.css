@@ -1,0 +1,110 @@
+/* Editor-only affordances layered over the real page sections. */
+.text {
+  outline: 1px dashed transparent;
+  outline-offset: 3px;
+  border-radius: 3px;
+  cursor: text;
+  transition: outline-color 120ms;
+}
+.text:hover {
+  outline-color: rgb(226 169 59 / 0.6);
+}
+.text:focus {
+  outline: 2px solid #e2a93b;
+  background: rgb(226 169 59 / 0.06);
+}
+.text:empty::before {
+  content: attr(data-placeholder);
+  color: #6b5f53;
+}
+.row {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.row > :first-child {
+  flex: 1;
+}
+.style {
+  flex: none;
+  margin-top: 4px;
+  padding: 2px 4px;
+  border: 1px solid #3a342b;
+  border-radius: 6px;
+  background: #16130f;
+  color: #cfc5b3;
+  font-size: 11px;
+}
+.remove {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-left: 6px;
+  border: 1px solid #5a3a30;
+  border-radius: 6px;
+  background: #241612;
+  color: #ef8c74;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.add {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 12px;
+  border: 1px dashed #e2a93b;
+  border-radius: 8px;
+  background: transparent;
+  color: #f6d58a;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.itemBar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px dashed #3a342b;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #cfc5b3;
+}
+.hint {
+  margin: 8px 0 16px;
+  font-size: 13px;
+  color: #9a907f;
+}
+.locked {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 28px;
+  border: 1px dashed #e2a93b;
+  border-radius: 20px;
+  background: rgb(226 169 59 / 0.05);
+  color: #cfc5b3;
+  font-size: 15px;
+}
+.locked b {
+  color: #f6d58a;
+  font-size: 18px;
+}
+.faqItem {
+  position: relative;
+  padding: 14px 0;
+  border-bottom: 1px solid #332d24;
+  color: #cfc5b3;
+}
+.faqQ {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f3ebdc;
+}

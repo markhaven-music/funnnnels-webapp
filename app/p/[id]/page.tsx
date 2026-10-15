@@ -51,7 +51,7 @@ export default async function PublicFunnelPage({
   const { id } = await params;
   const funnel = await getFunnel(id);
   if (!funnel || funnel.status !== "live") notFound();
-  const blocks = funnel.pages[0]?.blocks ?? [];
+  const blocks = (funnel.publishedPages ?? funnel.pages)[0]?.blocks ?? [];
 
   return (
     <main className="public-page">

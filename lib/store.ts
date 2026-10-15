@@ -24,6 +24,7 @@ type Row = {
   steps: number;
   on: number;
   pages: Page[];
+  published_pages: Page[] | null;
   updated_at: string;
 };
 
@@ -41,6 +42,7 @@ function rowToFunnel(r: Row): StoredFunnel {
     steps: r.steps,
     on: r.on,
     pages: r.pages,
+    publishedPages: r.published_pages ?? null,
     updated: "just now",
   };
 }
@@ -119,6 +121,21 @@ export async function updateFunnel(
   const { data, error } = await supabase()
     .from(TABLE)
     .update(update)
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToFunnel(data as Row) : null;
+}
+
+/** Publish = snapshot the draft. Visitors only ever see the snapshot. */
+export async function publishFunnel(id: string): Promise<StoredFunnel | null> {
+  const { data: cur, error: readErr } = await supabase().from(TABLE).select("pages").eq("id", id).maybeSingle();
+  if (readErr) throw readErr;
+  if (!cur) return null;
+  const { data, error } = await supabase()
+    .from(TABLE)
+    .update({ published_pages: cur.pages, status: "live", updated_at: new Date().toISOString() })
     .eq("id", id)
     .select("*")
     .maybeSingle();

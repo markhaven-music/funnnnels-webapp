@@ -12,6 +12,9 @@ import type {
 } from "@/lib/blocks";
 import { sanitizeBlockHtml } from "@/lib/sanitize";
 import { EditableText } from "@/components/blocks/EditableText";
+import { SectionBlock } from "@/app/(funnels)/jazz-midi-pack/SectionBlock";
+import { isSectionType } from "@/app/(funnels)/jazz-midi-pack/sections";
+import type { Section } from "@/app/(funnels)/jazz-midi-pack/content";
 
 type PatchFn = (propsPatch: Record<string, unknown>) => void;
 
@@ -521,6 +524,11 @@ export function BlockView({
     case "faq":
       return <Faq p={block.props as FaqProps} patch={patch} />;
     default:
+      // Sections of code funnels (Jazz MIDI Pack): the real page section,
+      // click-to-edit when the canvas passes `patch`.
+      if (isSectionType(block.type)) {
+        return <SectionBlock section={block as unknown as Section} patch={patch} />;
+      }
       return (
         <div className="fb-unknown">Unknown block type: {block.type}</div>
       );

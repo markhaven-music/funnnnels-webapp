@@ -1,5 +1,6 @@
 "use client";
 
+import { isCodeFunnel, liveUrl } from "@/lib/liveUrl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -107,32 +108,45 @@ export function EditorShell({
     document.body.style.userSelect = "none";
   };
 
-  const handlePublishToggle = useCallback(async () => {
+  // Publish copies the draft into what visitors see; editing afterwards
+  // never touches the live page until "Publish changes".
+  const handlePublish = useCallback(async () => {
     if (publishing) return;
-    const nextStatus = funnel.status === "live" ? "draft" : "live";
+    setPublishing(true);
+    try {
+      const res = await fetch(`/api/funnels/${funnel.id}/publish`, { method: "POST" });
+      if (!res.ok) return;
+      const data = (await res.json()) as { funnel: StoredFunnel };
+      setFunnel(data.funnel);
+      setJustPublished(true);
+      setTimeout(() => setJustPublished(false), 3500);
+    } finally {
+      setPublishing(false);
+    }
+  }, [funnel.id, publishing]);
+
+  const handleUnpublish = useCallback(async () => {
+    if (publishing) return;
     setPublishing(true);
     try {
       const res = await fetch(`/api/funnels/${funnel.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: nextStatus }),
+        body: JSON.stringify({ status: "draft" }),
       });
       if (!res.ok) return;
       const data = (await res.json()) as { funnel: StoredFunnel };
       setFunnel(data.funnel);
-      if (nextStatus === "live") {
-        setJustPublished(true);
-        setTimeout(() => setJustPublished(false), 3500);
-      }
     } finally {
       setPublishing(false);
     }
-  }, [funnel.id, funnel.status, publishing]);
+  }, [funnel.id, publishing]);
 
+  const livePath = liveUrl(funnel.id);
   const publicUrl =
-    typeof window === "undefined"
-      ? `/p/${funnel.id}`
-      : `${window.location.origin}/p/${funnel.id}`;
+    typeof window === "undefined" || livePath.startsWith("http")
+      ? livePath
+      : `${window.location.origin}${livePath}`;
 
   const copyUrl = useCallback(async () => {
     try {
@@ -321,6 +335,8 @@ export function EditorShell({
   const canvasMax =
     device === "mobile" ? 420 : device === "tablet" ? 760 : "none";
   const blocks = funnel.pages[0]?.blocks ?? [];
+  const dirty =
+    JSON.stringify(blocks) !== JSON.stringify(funnel.publishedPages?.[0]?.blocks ?? null);
 
   return (
     <div className={`editor-shell${aiOpen ? "" : " editor-shell--no-ai"}`}>
@@ -404,7 +420,7 @@ export function EditorShell({
             >
               <span className="live-bar__dot" />
               <span className="live-bar__label">Live at</span>
-              <span className="live-bar__url">{`/p/${funnel.id}`}</span>
+              <span className="live-bar__url">{livePath.replace(/^https?:\/\//, "")}</span>
               <button
                 type="button"
                 className="live-bar__btn"
@@ -414,7 +430,7 @@ export function EditorShell({
                 <I.copy size={11} /> {copied ? "Copied" : "Copy"}
               </button>
               <a
-                href={`/p/${funnel.id}`}
+                href={livePath}
                 target="_blank"
                 rel="noreferrer"
                 className="live-bar__btn live-bar__btn--primary"
@@ -471,25 +487,26 @@ export function EditorShell({
               </div>
             )}
           </div>
+          {funnel.status === "live" && !isCodeFunnel(funnel.id) && (
+            <button className="btn ghost" type="button" onClick={handleUnpublish} disabled={publishing}>
+              Unpublish
+            </button>
+          )}
           <button
             className="btn primary"
             type="button"
-            title={
-              funnel.status === "live"
-                ? "Move back to draft"
-                : "Publish this funnel"
-            }
-            onClick={handlePublishToggle}
-            disabled={publishing || blocks.length === 0}
+            title={dirty ? "Put your edits live" : "Everything is live"}
+            onClick={handlePublish}
+            disabled={publishing || blocks.length === 0 || (funnel.status === "live" && !dirty)}
           >
             <I.rocket size={14} />{" "}
             {publishing
-              ? funnel.status === "live"
-                ? "Unpublishing…"
-                : "Publishing…"
-              : funnel.status === "live"
-                ? "Unpublish"
-                : "Publish"}
+              ? "Publishing…"
+              : funnel.status !== "live"
+                ? "Publish"
+                : dirty
+                  ? "Publish changes"
+                  : "Published"}
           </button>
         </div>
       </header>
