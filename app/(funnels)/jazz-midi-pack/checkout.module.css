@@ -151,48 +151,6 @@
   font-size: 14px;
   cursor: pointer;
 }
-.productRow {
-  display: grid;
-  grid-template-columns: 20px minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: center;
-  padding: 14px 16px;
-  border: 1px solid var(--rule);
-  border-radius: 12px;
-  background: var(--ink);
-}
-.radio {
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  border: 2px solid var(--brass);
-  box-shadow: inset 0 0 0 4px var(--ink), inset 0 0 0 10px var(--brass);
-}
-.productText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.productName {
-  font-size: 15px;
-  font-weight: 700;
-}
-.productDesc {
-  font-size: 12px;
-  color: var(--cream-3);
-}
-.productPrice {
-  font-size: 15px;
-  font-weight: 700;
-}
-.label {
-  margin: 4px 0 -4px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--cream-3);
-}
 .notConnected {
   padding: 18px 16px;
   border: 1px dashed var(--rule);
@@ -204,53 +162,6 @@
 }
 
 /* the tick-box add-on: dashed frame + highlighted header, like the CF bump */
-.bump {
-  display: flex;
-  flex-direction: column;
-  border: 2px dashed var(--brass);
-  border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-  background: rgb(217 164 65 / 0.05);
-}
-.bumpOn {
-  border-style: solid;
-  background: rgb(217 164 65 / 0.1);
-}
-.bumpHead {
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-  padding: 12px 14px;
-  background: rgb(217 164 65 / 0.16);
-}
-.bumpTitle {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--brass-2);
-}
-.bumpPrice {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--cream);
-}
-.bumpPitch {
-  padding: 12px 14px 14px;
-  font-size: 13px;
-  line-height: 1.55;
-  color: var(--cream-2);
-}
-.bumpPitch strong {
-  color: var(--cream);
-}
-.check {
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  accent-color: var(--brass);
-  cursor: pointer;
-}
 
 .summary {
   display: flex;
@@ -274,16 +185,6 @@
   color: var(--cream);
 }
 
-.waiver {
-  display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 10px;
-  align-items: start;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--cream-3);
-  cursor: pointer;
-}
 
 @media (max-width: 380px) {
   .row {
@@ -291,28 +192,229 @@
   }
 }
 
-/* ─── PayPal, under the main button ─────── */
-.or {
+/* ─── step 2, ClickFunnels order: product box, Card | PayPal, bump ─── */
+.orderBox {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 12px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 16px;
+  border: 3px solid var(--cream);
+  border-radius: 6px;
+  background: var(--ink);
+}
+.orderTag {
+  font-size: 11px;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: #f0715a;
+}
+.orderName {
+  font-size: 17px;
+  font-weight: 800;
+}
+.orderDesc {
+  font-size: 12px;
   color: var(--cream-3);
 }
-.or::before,
-.or::after {
+.orderPrice {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cream-2);
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 6px 0 -2px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cream-2);
+}
+.label::after {
   content: "";
   flex: 1;
   height: 1px;
   background: var(--rule);
 }
-.paypal {
-  min-height: 48px;
-  transition: opacity 0.2s ease;
+
+.methods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
-/* Still clickable while the EU waiver is unticked: the click explains why. */
-.paypalWait {
-  opacity: 0.45;
+.method {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--cream-2);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.method:hover {
+  color: var(--cream);
+}
+.methodOn {
+  border: 2px solid var(--cream);
+  color: var(--cream);
+}
+.ppGlyph {
+  flex: none;
+}
+.paypalNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--cream-2);
+}
+.paypalNote svg {
+  margin-top: 2px;
+}
+
+/* The order bump, as ClickFunnels draws it: a loud yellow box with a salmon
+   frame, a red arrow pointing at the tick box, a cover, a red offer label. */
+.bump {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 14px 16px;
+  border: 4px solid #f6a690;
+  border-radius: 4px;
+  background: #fff8dc;
+  color: #1c1a17;
+  cursor: pointer;
+}
+.bumpOn {
+  border-color: #e8573f;
+}
+.bumpHead {
+  display: grid;
+  grid-template-columns: auto 22px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+.bumpArrow {
+  font-size: 20px;
+  line-height: 1;
+  color: #e0301e;
+  animation: bumpNudge 1s ease-in-out infinite;
+}
+@keyframes bumpNudge {
+  50% {
+    transform: translateX(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bumpArrow {
+    animation: none;
+  }
+}
+.bumpCheck {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: #e0301e;
+  cursor: pointer;
+}
+.bumpTitle {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.bumpPrice {
+  font-size: 15px;
+  font-weight: 700;
+}
+.bumpBody {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.bumpPitch {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.bumpOffer {
+  font-weight: 800;
+  color: #e0301e;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* The add-on's cover: a mini record sleeve in the main box's palette. */
+.bumpCover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  aspect-ratio: 0.8;
+  padding: 8px 6px;
+  border: 1px solid #3a342b;
+  border-radius: 4px;
+  background: radial-gradient(120% 90% at 50% 0%, #2b241a, #0e0c09 70%);
+  box-shadow: 0 8px 18px -8px rgb(0 0 0 / 0.6);
+  color: #f3ebdc;
+  text-align: center;
+}
+.bumpCoverBrand {
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #cfc5b3;
+}
+.bumpCoverJazz {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 26px;
+  font-style: italic;
+  line-height: 1;
+  color: #f6d58a;
+}
+.bumpCoverName {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.bumpCoverKeys {
+  display: flex;
+  gap: 1px;
+  margin-top: 4px;
+}
+.bumpCoverKeys i {
+  width: 6px;
+  height: 14px;
+  border-radius: 0 0 1px 1px;
+  background: #f3ebdc;
+}
+
+@media (max-width: 420px) {
+  .bumpHead {
+    grid-template-columns: auto 22px minmax(0, 1fr);
+  }
+  .bumpPrice {
+    grid-column: 3;
+  }
+  .bumpBody {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
 }

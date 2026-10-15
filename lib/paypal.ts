@@ -3,8 +3,13 @@
 // Sandbox unless PAYPAL_ENV=live, so test keys can never move real money and
 // live keys without the flag fail loudly instead of half-working.
 
-const BASE =
-  process.env.PAYPAL_ENV === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
+const LIVE = process.env.PAYPAL_ENV === "live";
+const BASE = LIVE ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
+
+/** PayPal's own checkout page for an order, e.g. to let a declined buyer pick another source. */
+export function paypalCheckoutUrl(orderId: string): string {
+  return `${LIVE ? "https://www.paypal.com" : "https://www.sandbox.paypal.com"}/checkoutnow?token=${orderId}`;
+}
 
 export function paypalConfigured(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET);
@@ -24,6 +29,7 @@ export type PayPalOrder = {
   id: string;
   status: string; // "CREATED" | "APPROVED" | "COMPLETED" | …
   payer?: { email_address?: string };
+  links?: { rel: string; href: string }[];
   purchase_units: {
     custom_id?: string;
     amount: { currency_code: string; value: string };

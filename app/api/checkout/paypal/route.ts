@@ -7,10 +7,26 @@ import { paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/p
 
 export const runtime = "nodejs";
 
-// The PayPal twin of /api/checkout/intent: the buyer clicked the PayPal button
-// on step 2, and this creates the order the PayPal popup then asks them to
-// approve. As with Stripe, the amount and currency are worked out here, so the
-// popup can only ever show the real price.
+// The PayPal twin of /api/checkout/intent: the buyer picked the PayPal tab on
+// step 2 and clicked the big button. This creates the order and hands back
+// PayPal's page for approving it; PayPal then sends the buyer to
+// /api/checkout/paypal/return, which takes the money. As with Stripe, the
+// amount and currency are worked out here, so PayPal only ever shows the real price.
+
+// Where PayPal may send buyers back to: the brand domain the funnel lives on
+// (it forwards /api/checkout/* here), this deployment, and local dev.
+const RETURN_HOSTS = new Set(["m.thegrind.studio", "jazz.thegrind.studio", "funnnnels.vercel.app", "localhost"]);
+
+function returnOrigin(raw: unknown): string {
+  try {
+    const url = new URL(String(raw));
+    if (RETURN_HOSTS.has(url.hostname) || url.hostname.endsWith(".local")) return url.origin;
+  } catch {
+    // not a URL: fall through to the brand domain
+  }
+  return "https://m.thegrind.studio";
+}
+
 export async function POST(req: Request) {
   if (!paypalConfigured()) {
     return NextResponse.json({ error: "PayPal is not connected yet." }, { status: 503 });
@@ -26,6 +42,7 @@ export async function POST(req: Request) {
   const bump = body.bump === true;
   const country = visitorCountry(await headers(), body.country);
   const currency = currencyFor(country);
+  const origin = returnOrigin(body.origin);
 
   // PayPal has no metadata, only custom_id (127 chars). It carries what the
   // thank-you page and the download need; the step-1 email rides along when it fits.
@@ -53,12 +70,17 @@ export async function POST(req: Request) {
               brand_name: f.brand,
               shipping_preference: "NO_SHIPPING",
               user_action: "PAY_NOW",
+              // PayPal appends ?token=<order id>&PayerID=… to both.
+              return_url: `${origin}/api/checkout/paypal/return?funnel=${f.slug}`,
+              cancel_url: `${origin}/${f.slug}#buy`,
             },
           },
         },
       },
     });
-    return NextResponse.json({ orderId: order.id });
+    const approve = order.links?.find((l) => l.rel === "payer-action" || l.rel === "approve");
+    if (!approve) throw new Error(`PayPal order ${order.id} came back without an approval link`);
+    return NextResponse.json({ orderId: order.id, approveUrl: approve.href });
   } catch (err) {
     console.error("paypal order failed", err);
     return NextResponse.json(

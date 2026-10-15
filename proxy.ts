@@ -20,7 +20,7 @@ const PUBLIC = [
   /^\/jazz-midi-pack(\/|$)/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
-  /^\/api\/checkout\/(lead|intent|paypal|paypal\/capture)$/,
+  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return)$/,
   /^\/favicon\.ico$/,
 ];
 

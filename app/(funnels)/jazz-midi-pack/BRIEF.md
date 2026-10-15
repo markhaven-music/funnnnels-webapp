@@ -32,7 +32,12 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
 - €27 in Europe, $27 elsewhere. One payment, instant download. No strike-through price: the pack was never
   sold higher, so none is shown (no fake urgency, no "worth $997").
 - Checkout add-on: Jazz MIDI Chord Pack, €9 / $9 (12 major/minor key pairs, six folders).
-- Payment: card through Stripe, plus the methods Stripe shows (Link, Bancontact, EPS…). No PayPal yet.
+- EU withdrawal waiver: a notice under the pay button (clicking it is the consent), no tick box.
+- Payment: a Card | PayPal choice, as on the ClickFunnels checkout. Card through Stripe, plus the methods
+  Stripe shows (Link, Bancontact, EPS…). PayPal through our own PayPal account: the big button sends the
+  buyer to PayPal's page and back.
+- Order bump: copied from the ClickFunnels template (yellow box, red arrow, cover, red offer label). Its
+  label says "ADD-ON OFFER", never "one-time offer": the Chord Pack isn't promised to disappear.
 - Delivery: download buttons on the thank-you page right after payment; Stripe emails the receipt.
 
 ## Guarantee and legal (same as the Grind Studio store)
