@@ -7,13 +7,17 @@ import s from "./checkout.module.css";
 import b from "./btn.module.css";
 import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
+import { PayPalButton } from "./PayPalButton";
+
+// Public by design (it is in PayPal's script URL); inlined at build time.
+const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || null;
 
 // The two-step order form, modeled on the ClickFunnels checkout:
 //   1 · Your info  → name + email (saved as a lead before any card is asked for)
-//   2 · Payment    → product row, card / PayPal / wallets (Stripe), the tick-box
-//                    add-on, summary, one big button.
+//   2 · Payment    → product row, card / wallets (Stripe), the tick-box add-on,
+//                    summary, one big button, then PayPal's own button.
 // Stripe's Payment Element draws the card fields, so card numbers never touch
-// our server.
+// our server. PayPal runs beside Stripe, not through it (see lib/paypal.ts).
 
 type Props = {
   funnel: string;
@@ -137,10 +141,11 @@ export function CheckoutWidget(props: Props) {
             ) : (
               <>
                 <div className={s.notConnected}>
-                  Card and PayPal payments switch on once the Stripe keys are added.
+                  Card payments switch on once the Stripe keys are added.
                 </div>
                 <PayStepBody
                   {...props}
+                  info={info}
                   offer={props.bump}
                   ticked={bump}
                   setTicked={setBump}
@@ -293,6 +298,10 @@ function PayStep(props: Props & BodyState & { info: Info }) {
 }
 
 function PayStepBody({
+  funnel,
+  country,
+  thankYou,
+  info,
   currency,
   price,
   product,
@@ -305,8 +314,9 @@ function PayStepBody({
   paying,
   disabled,
   error,
-}: Pick<Props, "currency" | "price" | "product" | "europe"> &
+}: Pick<Props, "funnel" | "country" | "thankYou" | "currency" | "price" | "product" | "europe"> &
   BodyState & {
+    info: Info;
     offer: Props["bump"];
     onPay?: (waiver: boolean) => void;
     paying?: boolean;
@@ -314,7 +324,46 @@ function PayStepBody({
     error?: string | null;
   }) {
   const [waiver, setWaiver] = useState(false);
-  const blocked = disabled || paying || (europe && !waiver);
+  const [paypalError, setPaypalError] = useState<string | null>(null);
+  const [paypalBusy, setPaypalBusy] = useState(false);
+  const blocked = disabled || paying || paypalBusy || (europe && !waiver);
+  const waiverMissing = europe && !waiver;
+
+  async function createPayPalOrder(): Promise<string> {
+    const res = await fetch("/api/checkout/paypal", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ funnel, ...info, bump: ticked, waiver, country }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.orderId) throw new Error(json.error ?? "PayPal couldn't start.");
+    return json.orderId;
+  }
+
+  async function capturePayPalOrder(orderId: string): Promise<"done" | "restart"> {
+    setPaypalBusy(true);
+    try {
+      const res = await fetch("/api/checkout/paypal/capture", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (json.restart) {
+        setPaypalBusy(false);
+        return "restart";
+      }
+      if (!res.ok) throw new Error(json.error ?? "PayPal couldn't complete the payment.");
+      // Same page Stripe returns to; it asks PayPal whether the order paid.
+      const next = new URL(thankYou, window.location.origin);
+      next.searchParams.set("paypal_order", orderId);
+      window.location.assign(next);
+      return "done";
+    } catch (err) {
+      setPaypalBusy(false);
+      throw err;
+    }
+  }
 
   return (
     <>
@@ -378,6 +427,32 @@ function PayStepBody({
         <p className={s.error} role="alert">
           {error}
         </p>
+      )}
+
+      {PAYPAL_CLIENT_ID && (
+        <>
+          <div className={s.or}>
+            <span>or</span>
+          </div>
+          <div className={`${s.paypal} ${waiverMissing || paypalBusy ? s.paypalWait : ""}`}>
+            <PayPalButton
+              clientId={PAYPAL_CLIENT_ID}
+              currency={currency}
+              check={() =>
+                waiverMissing ? "Tick the instant-access box above first, then pay with PayPal." : null
+              }
+              createOrder={createPayPalOrder}
+              onApprove={capturePayPalOrder}
+              onError={setPaypalError}
+            />
+          </div>
+          {paypalBusy && <p className={s.fine}>Confirming your PayPal payment…</p>}
+          {paypalError && (
+            <p className={s.error} role="alert">
+              {paypalError}
+            </p>
+          )}
+        </>
       )}
     </>
   );

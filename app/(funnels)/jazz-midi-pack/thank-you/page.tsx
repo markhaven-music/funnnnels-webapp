@@ -19,15 +19,16 @@ const LABELS: Record<string, string> = {
   [funnel.bump.id]: funnel.bump.name,
 };
 
-// Stripe sends the buyer here with ?payment_intent=pi_… after paying. We ask
-// Stripe directly whether it succeeded; the URL alone proves nothing.
+// Stripe sends the buyer here with ?payment_intent=pi_… after paying, the
+// PayPal button with ?paypal_order=…. We ask the provider directly whether it
+// succeeded; the URL alone proves nothing.
 export default async function ThankYou({
   searchParams,
 }: {
-  searchParams: Promise<{ payment_intent?: string }>;
+  searchParams: Promise<{ payment_intent?: string; paypal_order?: string }>;
 }) {
-  const { payment_intent } = await searchParams;
-  const order = await getOrder(payment_intent, funnel.slug);
+  const { payment_intent, paypal_order } = await searchParams;
+  const order = await getOrder(payment_intent ?? paypal_order, funnel.slug);
   const paid = order?.status === "succeeded";
   const pending = order?.status === "processing";
 
@@ -63,7 +64,7 @@ export default async function ThankYou({
               ? "Payment received. Your files are below. Bookmark this page: the buttons keep working when you come back."
               : pending
                 ? "Your bank is still confirming the payment. Refresh this page in a minute and your downloads will appear."
-                : "Nothing was charged. Go back and try again with another card."}
+                : "Nothing was charged. Go back and try again with another card or PayPal."}
           </p>
           {paid && order && (
             <div className={s.thanksActions}>
@@ -82,7 +83,7 @@ export default async function ThankYou({
           )}
           {paid && (
             <p className={s.sub}>
-              Start with folder 01, file 01. Stripe has emailed your receipt
+              Start with folder 01, file 01. {order?.provider === "paypal" ? "PayPal" : "Stripe"} has emailed your receipt
               {order?.email ? ` to ${order.email}` : ""}. A file doesn&rsquo;t open? Email{" "}
               <a href={`mailto:${funnel.support}`}>{funnel.support}</a> and we fix it.
             </p>

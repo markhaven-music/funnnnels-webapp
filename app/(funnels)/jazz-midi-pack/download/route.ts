@@ -5,8 +5,8 @@ import { funnel } from "../funnel";
 
 export const runtime = "nodejs";
 
-// /jazz-midi-pack/download?order=pi_…&file=pack|chord-pack
-// Sends a paid zip only when Stripe says this order succeeded and includes it.
+// /jazz-midi-pack/download?order=pi_…|<PayPal order id>&file=pack|chord-pack
+// Sends a paid zip only when Stripe or PayPal says this order succeeded and includes it.
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const key = url.searchParams.get("file") ?? "pack";

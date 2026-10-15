@@ -290,3 +290,29 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── PayPal, under the main button ─────── */
+.or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cream-3);
+}
+.or::before,
+.or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+.paypal {
+  min-height: 48px;
+  transition: opacity 0.2s ease;
+}
+/* Still clickable while the EU waiver is unticked: the click explains why. */
+.paypalWait {
+  opacity: 0.45;
+}
