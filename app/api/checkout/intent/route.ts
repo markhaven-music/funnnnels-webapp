@@ -36,7 +36,8 @@ export async function POST(req: Request) {
     const intent = await stripe().paymentIntents.create({
       amount: orderAmount(f, currency, bump),
       currency,
-      automatic_payment_methods: { enabled: true },
+      // Cards only, matching the checkout's card fields (Apple Pay / Google Pay are cards).
+      allowed_payment_method_types: ["card"],
       receipt_email: email,
       description: bump ? `${f.product} + ${f.bump.name}` : f.product,
       metadata: {

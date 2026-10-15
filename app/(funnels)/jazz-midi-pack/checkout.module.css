@@ -418,3 +418,29 @@
     grid-template-columns: 64px minmax(0, 1fr);
   }
 }
+
+/* Card tab: wallet buttons (when the device has one), then the card fields. */
+.cardPane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cardPane[hidden] {
+  display: none;
+}
+.orCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cream-3);
+}
+.orCard::before,
+.orCard::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}

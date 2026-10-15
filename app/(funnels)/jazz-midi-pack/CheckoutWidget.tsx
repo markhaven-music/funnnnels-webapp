@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { loadStripe, type Appearance } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { Elements, ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import s from "./checkout.module.css";
 import b from "./btn.module.css";
 import { Arrow } from "./Cta";
@@ -141,7 +141,15 @@ export function CheckoutWidget(props: Props) {
             {stripePromise ? (
               <Elements
                 stripe={stripePromise}
-                options={{ mode: "payment", amount: total * 100, currency: props.currency, appearance }}
+                options={{
+                  mode: "payment",
+                  amount: total * 100,
+                  currency: props.currency,
+                  appearance,
+                  // Plain card fields, as on ClickFunnels. Apple Pay / Google Pay
+                  // are cards too: they show as buttons above the fields.
+                  allowedPaymentMethodTypes: ["card"],
+                }}
               >
                 <PayStep {...body} />
               </Elements>
@@ -263,6 +271,38 @@ function PayStep(props: Props & BodyState) {
   const elements = useElements();
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasWallet, setHasWallet] = useState(false);
+
+  // Card fields and wallet buttons both end here: create the PaymentIntent at
+  // the server's price, then confirm it. Success redirects to the thank-you page.
+  async function confirm(waiver: boolean) {
+    if (!stripe || !elements) return;
+    const res = await fetch("/api/checkout/intent", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        funnel: props.funnel,
+        ...props.info,
+        bump: props.ticked,
+        waiver,
+        country: props.country,
+      }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.clientSecret) throw new Error(json.error ?? "Payment couldn't start.");
+
+    const name = `${props.info.firstName} ${props.info.lastName}`.trim();
+    const { error: payError } = await stripe.confirmPayment({
+      elements,
+      clientSecret: json.clientSecret,
+      confirmParams: {
+        return_url: new URL(props.thankYou, window.location.origin).toString(),
+        payment_method_data: { billing_details: { name, email: props.info.email } },
+      },
+    });
+    // Only reached when the payment fails.
+    if (payError) throw new Error(payError.message);
+  }
 
   async function payByCard(waiver: boolean) {
     if (!stripe || !elements) return;
@@ -271,32 +311,7 @@ function PayStep(props: Props & BodyState) {
     try {
       const { error: submitError } = await elements.submit();
       if (submitError) throw new Error(submitError.message);
-
-      const res = await fetch("/api/checkout/intent", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          funnel: props.funnel,
-          ...props.info,
-          bump: props.ticked,
-          waiver,
-          country: props.country,
-        }),
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.clientSecret) throw new Error(json.error ?? "Payment couldn't start.");
-
-      const name = `${props.info.firstName} ${props.info.lastName}`.trim();
-      const { error: payError } = await stripe.confirmPayment({
-        elements,
-        clientSecret: json.clientSecret,
-        confirmParams: {
-          return_url: new URL(props.thankYou, window.location.origin).toString(),
-          payment_method_data: { billing_details: { name, email: props.info.email } },
-        },
-      });
-      // Only reached when the payment fails; success redirects to the thank-you page.
-      if (payError) throw new Error(payError.message);
+      await confirm(waiver);
     } catch (err) {
       setError((err as Error).message);
       setPaying(false);
@@ -306,10 +321,36 @@ function PayStep(props: Props & BodyState) {
   return (
     <>
       {/* Hidden, not unmounted, on the PayPal tab: switching back keeps what was typed. */}
-      <div hidden={props.method !== "card"}>
+      <div hidden={props.method !== "card"} className={s.cardPane}>
+        {/* Apple Pay / Google Pay buttons, only on devices that have one. */}
+        <ExpressCheckoutElement
+          options={{
+            buttonHeight: 48,
+            buttonType: { applePay: "buy", googlePay: "buy" },
+            paymentMethods: { applePay: "auto", googlePay: "auto", link: "never", paypal: "never", amazonPay: "never", klarna: "never" },
+          }}
+          onReady={(e) => setHasWallet(Boolean(e.availablePaymentMethods))}
+          onConfirm={async (e) => {
+            setError(null);
+            try {
+              // Tapping the wallet is the EU buyer's consent, like the big button.
+              await confirm(props.europe);
+            } catch (err) {
+              setError((err as Error).message);
+              e.paymentFailed({ reason: "fail" });
+            }
+          }}
+        />
+        {hasWallet && (
+          <div className={s.orCard}>
+            <span>or pay by card</span>
+          </div>
+        )}
         <PaymentElement
           options={{
             layout: "tabs",
+            // Only the card form: the wallets are the buttons above.
+            wallets: { applePay: "never", googlePay: "never", link: "never" },
             // Step 1 already asked; don't make the buyer type it twice.
             defaultValues: {
               billingDetails: {
