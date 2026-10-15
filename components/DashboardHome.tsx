@@ -111,9 +111,9 @@ function greeting() {
 type TabKey = "all" | FunnelStatus;
 const TABS: TabKey[] = ["all", "live", "test", "draft"];
 
-type Props = { onAsk: (p: string) => void; funnels: StoredFunnel[] };
+type Props = { funnels: StoredFunnel[] };
 
-export function DashboardHome({ onAsk, funnels }: Props) {
+export function DashboardHome({ funnels }: Props) {
   const [tab, setTab] = useState<TabKey>("all");
   const [contactsCount, setContactsCount] = useState(0);
 

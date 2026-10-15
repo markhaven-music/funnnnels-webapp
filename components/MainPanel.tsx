@@ -10,9 +10,9 @@ import type { FunnelStatus, StoredFunnel } from "@/lib/blocks";
 type TabKey = "all" | FunnelStatus;
 const TABS: TabKey[] = ["all", "live", "test", "draft"];
 
-type Props = { onAsk: (p: string) => void; funnels: StoredFunnel[] };
+type Props = { funnels: StoredFunnel[] };
 
-export function MainPanel({ onAsk, funnels }: Props) {
+export function MainPanel({ funnels }: Props) {
   const [tab, setTab] = useState<TabKey>("all");
   const filtered = useMemo(() => {
     if (tab === "all") return funnels;

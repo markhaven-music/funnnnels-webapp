@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { updateBlock } from "@/lib/store";
+import { deleteBlock, getFunnel, updateBlock } from "@/lib/store";
 
 export const runtime = "nodejs";
 
@@ -22,4 +22,14 @@ export async function PATCH(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
   return NextResponse.json({ block });
+}
+
+export async function DELETE(
+  _req: Request,
+  ctx: { params: Promise<{ id: string; blockId: string }> },
+) {
+  const { id, blockId } = await ctx.params;
+  const ok = await deleteBlock(id, blockId);
+  if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json({ funnel: await getFunnel(id) });
 }

@@ -4,109 +4,25 @@ import { isCodeFunnel, liveUrl } from "@/lib/liveUrl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AIPanel } from "@/components/AIPanel";
 import { FunnelCanvas } from "@/components/FunnelCanvas";
 import { I } from "@/components/icons";
+import { addableSections } from "@/lib/addable";
 import type { StoredFunnel } from "@/lib/blocks";
-
-const STORAGE_KEY = "funnnnels.aiPanelWidth";
-const OPEN_STORAGE_KEY = "funnnnels.aiPanelOpen";
-const MIN_W = 340;
-const MAX_W = 640;
-const DEFAULT_W = 420;
 
 type Device = "desktop" | "tablet" | "mobile";
 
-export function EditorShell({
-  initialFunnel,
-  initialSeed = null,
-}: {
-  initialFunnel: StoredFunnel;
-  initialSeed?: string | null;
-}) {
+export function EditorShell({ initialFunnel }: { initialFunnel: StoredFunnel }) {
   const router = useRouter();
   const [funnel, setFunnel] = useState<StoredFunnel>(initialFunnel);
   const [device, setDevice] = useState<Device>("desktop");
-  const [pendingPrompt, setPendingPrompt] = useState<string | null>(initialSeed);
-  const [flashIds, setFlashIds] = useState<string[]>([]);
-  const [panelWidth, setPanelWidth] = useState(DEFAULT_W);
   const [deleting, setDeleting] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [aiOpen, setAiOpen] = useState(true);
   const [justPublished, setJustPublished] = useState(false);
   const [copied, setCopied] = useState(false);
   const [undoing, setUndoing] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const dragging = useRef(false);
-  const gripRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const n = parseInt(stored, 10);
-        if (!Number.isNaN(n)) setPanelWidth(Math.max(MIN_W, Math.min(MAX_W, n)));
-      }
-      const openStored = localStorage.getItem(OPEN_STORAGE_KEY);
-      if (openStored === "0") setAiOpen(false);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(OPEN_STORAGE_KEY, aiOpen ? "1" : "0");
-    } catch {
-      /* ignore */
-    }
-  }, [aiOpen]);
-
-  // Strip the ?seed= query once we've consumed it so refreshes don't re-fire.
-  useEffect(() => {
-    if (initialSeed) {
-      router.replace(`/funnels/${initialFunnel.id}/edit`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.style.setProperty("--ai-w", `${panelWidth}px`);
-  }, [panelWidth]);
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (!dragging.current) return;
-      const w = Math.max(MIN_W, Math.min(MAX_W, window.innerWidth - e.clientX));
-      setPanelWidth(w);
-    };
-    const onUp = () => {
-      if (!dragging.current) return;
-      dragging.current = false;
-      gripRef.current?.classList.remove("dragging");
-      document.body.style.userSelect = "";
-      try {
-        localStorage.setItem(STORAGE_KEY, String(panelWidth));
-      } catch {
-        /* ignore */
-      }
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-  }, [panelWidth]);
-
-  const startDrag = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    dragging.current = true;
-    e.currentTarget.classList.add("dragging");
-    document.body.style.userSelect = "none";
-  };
+  const [adding, setAdding] = useState(false);
 
   // Publish copies the draft into what visitors see; editing afterwards
   // never touches the live page until "Publish changes".
@@ -313,24 +229,41 @@ export function EditorShell({
     return () => window.removeEventListener("keydown", onKey);
   }, [handleUndo]);
 
-  const refetchFunnel = useCallback(async () => {
-    try {
-      const before = new Set(
-        (funnel.pages[0]?.blocks ?? []).map((b) => b.id),
-      );
-      const res = await fetch(`/api/funnels/${funnel.id}`, {
-        cache: "no-store",
-      });
+  // Add a section at the bottom of the page; drag it where it belongs.
+  const handleAddSection = useCallback(
+    async (type: string) => {
+      if (adding) return;
+      setAdding(true);
+      try {
+        const res = await fetch(`/api/funnels/${initialFunnel.id}/blocks`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type }),
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as { block: { id: string }; funnel: StoredFunnel };
+        setFunnel(data.funnel);
+        requestAnimationFrame(() =>
+          document
+            .querySelector(`[data-block-id="${data.block.id}"]`)
+            ?.scrollIntoView({ behavior: "smooth", block: "center" }),
+        );
+      } finally {
+        setAdding(false);
+      }
+    },
+    [adding, initialFunnel.id],
+  );
+
+  const handleDeleteBlock = useCallback(
+    async (blockId: string) => {
+      const res = await fetch(`/api/funnels/${initialFunnel.id}/blocks/${blockId}`, { method: "DELETE" });
       if (!res.ok) return;
       const data = (await res.json()) as { funnel: StoredFunnel };
       setFunnel(data.funnel);
-      const after = data.funnel.pages[0]?.blocks ?? [];
-      const flash = after.filter((b) => !before.has(b.id)).map((b) => b.id);
-      setFlashIds(flash);
-    } catch {
-      /* ignore */
-    }
-  }, [funnel]);
+    },
+    [initialFunnel.id],
+  );
 
   const canvasMax =
     device === "mobile" ? 420 : device === "tablet" ? 760 : "none";
@@ -339,7 +272,7 @@ export function EditorShell({
     JSON.stringify(blocks) !== JSON.stringify(funnel.publishedPages?.[0]?.blocks ?? null);
 
   return (
-    <div className={`editor-shell${aiOpen ? "" : " editor-shell--no-ai"}`}>
+    <div className="editor-shell">
       <header className="editor-top">
         <Link
           href="/"
@@ -372,17 +305,6 @@ export function EditorShell({
             autosaved
           </div>
         </div>
-
-        <button
-          className={`btn ghost${editMode ? " is-on" : ""}`}
-          type="button"
-          title={editMode ? "Exit edit mode (Esc)" : "Click any block to ask Riley"}
-          onClick={() => setEditMode((v) => !v)}
-          style={{ padding: "0 10px", height: 32 }}
-        >
-          <I.sparkles size={13} />
-          {editMode ? "Pick a block…" : "Click and edit"}
-        </button>
 
         <button
           className="btn ghost"
@@ -440,14 +362,6 @@ export function EditorShell({
               </a>
             </div>
           )}
-          <button
-            className={`btn ghost${aiOpen ? " is-on" : ""}`}
-            type="button"
-            title={aiOpen ? "Hide Riley" : "Show Riley"}
-            onClick={() => setAiOpen((v) => !v)}
-          >
-            <I.sparkles size={13} /> {aiOpen ? "Hide Riley" : "Show Riley"}
-          </button>
           <div className="delete-wrap">
             <button
               className="btn ghost"
@@ -520,60 +434,35 @@ export function EditorShell({
           <div style={{ position: "relative", zIndex: 1, padding: "32px 0" }}>
             <FunnelCanvas
               blocks={blocks}
-              flashIds={flashIds}
-              editMode={editMode}
-              onExitEditMode={() => setEditMode(false)}
               onPatch={handlePatchBlock}
               onReorder={handleReorder}
-              onAskRiley={(blockId, blockType, intent, instruction, selectedText, element) => {
-                setEditMode(false);
-                const target =
-                  blockType === "custom_html"
-                    ? `custom_html block ${blockId} (intent="${intent ?? "section"}")`
-                    : `${blockType} block ${blockId}`;
-                let context: string;
-                if (element) {
-                  const fence = "```";
-                  context = `\n\nThe user clicked this exact element inside the block. Its outerHTML is:\n${fence}html\n${element.outerHtml}\n${fence}\nFind that exact substring inside the block's html prop, replace it with your edited version, and leave everything else — surrounding markup, the embedded <style>, sibling content — completely untouched. Do NOT regenerate the whole block. Use get_block to read the current html, then update_block with the new html.`;
-                } else if (selectedText) {
-                  context = `\n\nThe user highlighted this exact text inside the block: "${selectedText.replace(/"/g, '\\"')}"\nRewrite ONLY that text. Find it in the block's content (props or html), replace it with your new version, and leave everything else — copy, structure, classes, styles — completely untouched. Do NOT regenerate the whole block.`;
-                } else {
-                  context = `\n\nEdit only that block. Use get_block first to read its current state, then update_block to apply the change. Preserve the existing design and structure unless the instruction explicitly asks to change them.`;
-                }
-                setPendingPrompt(
-                  `[Click-and-edit on ${target}] ${instruction}${context}`,
-                );
-              }}
+              onDelete={handleDeleteBlock}
             />
+            <div className="add-bar">
+              <span className="add-bar__label">
+                <I.plus size={12} /> {adding ? "Adding…" : "Add section"}
+              </span>
+              {addableSections(funnel.id).map((a) => (
+                <button
+                  key={a.type}
+                  type="button"
+                  className="add-bar__btn"
+                  onClick={() => handleAddSection(a.type)}
+                  disabled={adding}
+                >
+                  {a.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="editor-stage-footer">
           <div className="hint">
-            <I.sparkles size={11} style={{ color: "var(--accent-2)" }} />
-            Riley edits this page in real time — try the chat on the right.
+            Click any text to edit it · drag a section by its grip to move it · × deletes it
           </div>
         </div>
       </div>
-
-      {aiOpen && (
-        <>
-          <AIPanel
-            funnelId={funnel.id}
-            funnelName={funnel.name}
-            pendingPrompt={pendingPrompt}
-            onPromptConsumed={() => setPendingPrompt(null)}
-            onMutate={refetchFunnel}
-          />
-
-          <div
-            ref={gripRef}
-            className="ai-grip"
-            style={{ right: panelWidth - 3 + "px" }}
-            onMouseDown={startDrag}
-          />
-        </>
-      )}
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-import { DEFAULT_FUNNEL_PRINCIPLES } from "@/lib/principles";
 
 export type WorkspaceSettings = {
   name: string;
@@ -45,12 +44,6 @@ function rowToSettings(r: Row): WorkspaceSettings {
     logoUrl: r.logo_url,
     funnelPrinciples: r.funnel_principles ?? "",
   };
-}
-
-export function effectivePrinciples(s: WorkspaceSettings): string {
-  return s.funnelPrinciples.trim().length > 0
-    ? s.funnelPrinciples
-    : DEFAULT_FUNNEL_PRINCIPLES;
 }
 
 export async function getWorkspace(): Promise<WorkspaceSettings> {

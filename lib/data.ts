@@ -40,15 +40,3 @@ export const NAV: NavSection[] = [
   },
 ];
 
-export const QUICK_PROMPTS = [
-  "Build a SaaS landing page for an AI note-taking app",
-  "Build a webinar registration funnel for a free workshop",
-  "Build a lead-magnet opt-in for a free PDF guide",
-];
-
-export const SUGGESTED = [
-  "Build a SaaS landing page",
-  "Build a webinar registration",
-  "Build a lead-magnet opt-in",
-  "Explain how funnels work",
-];

@@ -21,7 +21,7 @@ export function EditableText({
 }: Props) {
   const ref = useRef<HTMLElement | null>(null);
 
-  // Keep the DOM in sync when the value changes externally (e.g. Riley edits).
+  // Keep the DOM in sync when the value changes externally (e.g. Undo).
   useEffect(() => {
     if (!ref.current) return;
     if (document.activeElement === ref.current) return; // don't clobber while typing

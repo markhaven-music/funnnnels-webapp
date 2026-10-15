@@ -7,9 +7,9 @@ import { NewFunnelTile } from "@/components/NewFunnelTile";
 import { I } from "@/components/icons";
 import type { StoredFunnel } from "@/lib/blocks";
 
-type Props = { funnels: StoredFunnel[]; onAsk: (p: string) => void };
+type Props = { funnels: StoredFunnel[] };
 
-export function LandingPagesPanel({ funnels, onAsk }: Props) {
+export function LandingPagesPanel({ funnels }: Props) {
   const pages = useMemo(
     () => funnels.filter((f) => f.type === "Landing"),
     [funnels],

@@ -5,18 +5,10 @@ import { getFunnel } from "@/lib/store";
 export const dynamic = "force-dynamic";
 
 type Params = { id: string };
-type Search = { seed?: string };
 
-export default async function FunnelEditPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<Params>;
-  searchParams: Promise<Search>;
-}) {
+export default async function FunnelEditPage({ params }: { params: Promise<Params> }) {
   const { id } = await params;
-  const { seed } = await searchParams;
   const funnel = await getFunnel(id);
   if (!funnel) notFound();
-  return <EditorShell initialFunnel={funnel} initialSeed={seed ?? null} />;
+  return <EditorShell initialFunnel={funnel} />;
 }

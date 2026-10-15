@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "funnnnels — Dashboard",
   description:
-    "Your AI-first funnel builder. Riley drafts pages, copy, and tests in seconds.",
+    "Your own funnel builder: landing pages, checkout, contacts.",
 };
 
 export default function RootLayout({

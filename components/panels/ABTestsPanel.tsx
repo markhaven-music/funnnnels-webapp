@@ -6,9 +6,9 @@ import { FunnelCard } from "@/components/FunnelCard";
 import { I } from "@/components/icons";
 import type { StoredFunnel } from "@/lib/blocks";
 
-type Props = { funnels: StoredFunnel[]; onAsk: (p: string) => void };
+type Props = { funnels: StoredFunnel[] };
 
-export function ABTestsPanel({ funnels, onAsk }: Props) {
+export function ABTestsPanel({ funnels }: Props) {
   const tests = useMemo(
     () => funnels.filter((f) => f.status === "test"),
     [funnels],
@@ -26,15 +26,6 @@ export function ABTestsPanel({ funnels, onAsk }: Props) {
           </p>
         </div>
         <div className="cta-group">
-          <button
-            type="button"
-            className="btn ghost"
-            onClick={() =>
-              onAsk("Set up an A/B test for my best-performing funnel")
-            }
-          >
-            <I.sparkles size={14} /> Ask Riley
-          </button>
           <Link href="/funnels/new" className="btn primary">
             <I.sparkles size={14} /> New test
           </Link>

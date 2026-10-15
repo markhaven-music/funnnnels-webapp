@@ -1,184 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState, type DragEvent } from "react";
+import { useState, type DragEvent } from "react";
 import { BlockView } from "@/components/blocks/BlockView";
-import { I } from "@/components/icons";
-import { InlineBlockEditor } from "@/components/InlineBlockEditor";
-import { SelectionTooltip } from "@/components/SelectionTooltip";
 import type { Block } from "@/lib/blocks";
 
-export type ElementSelection = {
-  outerHtml: string;
-  tag: string;
-  text: string;
-};
-
+// The page in the editor: every block is a box you edit in place, drag by its
+// grip to reorder, or delete from its label bar.
 type Props = {
   blocks: Block[];
-  flashIds?: string[];
-  editMode?: boolean;
-  onExitEditMode?: () => void;
-  onAskRiley?: (
-    blockId: string,
-    blockType: string,
-    intent: string | null,
-    instruction: string,
-    selectedText?: string | null,
-    element?: ElementSelection | null,
-  ) => void;
   onPatch?: (blockId: string, propsPatch: Record<string, unknown>) => void;
   onReorder?: (orderedIds: string[]) => void;
+  onDelete?: (blockId: string) => void;
 };
 
-export function FunnelCanvas({
-  blocks,
-  flashIds = [],
-  editMode = false,
-  onExitEditMode,
-  onAskRiley,
-  onPatch,
-  onReorder,
-}: Props) {
-  const refs = useRef<Map<string, HTMLDivElement>>(new Map());
+export function FunnelCanvas({ blocks, onPatch, onReorder, onDelete }: Props) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editSelection, setEditSelection] = useState<string | null>(null);
-  const [editElement, setEditElement] = useState<ElementSelection | null>(null);
-  const [editAnchor, setEditAnchor] = useState<{ x: number; y: number } | null>(null);
-  const [hoverRect, setHoverRect] = useState<{
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  } | null>(null);
-
-  useEffect(() => {
-    if (flashIds.length === 0) return;
-    for (const id of flashIds) {
-      const el = refs.current.get(id);
-      if (el) {
-        el.classList.remove("flash");
-        void el.offsetWidth;
-        el.classList.add("flash");
-      }
-    }
-  }, [flashIds]);
-
-  // Element-level picker for custom_html blocks during edit mode.
-  useEffect(() => {
-    if (!editMode) {
-      setHoverRect(null);
-      return;
-    }
-    let hovered: HTMLElement | null = null;
-    const isCandidate = (el: HTMLElement | null): el is HTMLElement => {
-      if (!el) return false;
-      if (!el.closest(".fb-custom")) return false;
-      if (el.closest(".fb-block__chrome") || el.closest(".inline-editor")) return false;
-      if (el.classList.contains("fb-block")) return false;
-      if (el.classList.contains("fb-custom")) return false;
-      return true;
-    };
-    const onMove = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (!isCandidate(target)) {
-        if (hovered) {
-          hovered = null;
-          setHoverRect(null);
-        }
-        return;
-      }
-      if (hovered === target) return;
-      hovered = target;
-      const r = target.getBoundingClientRect();
-      setHoverRect({
-        top: r.top,
-        left: r.left,
-        width: r.width,
-        height: r.height,
-      });
-    };
-    const onLeave = () => {
-      hovered = null;
-      setHoverRect(null);
-    };
-    const onClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (!isCandidate(target)) return;
-      const blockEl = target.closest(".fb-block") as HTMLElement | null;
-      const blockId = blockEl?.getAttribute("data-block-id");
-      if (!blockId) return;
-      const sel = window.getSelection();
-      if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const text = (target.textContent ?? "").trim().slice(0, 160);
-      let outer = target.outerHTML;
-      if (outer.length > 1200) outer = outer.slice(0, 1200) + "…";
-      setEditElement({
-        outerHtml: outer,
-        tag: target.tagName.toLowerCase(),
-        text,
-      });
-      setEditId(blockId);
-      setEditAnchor({ x: e.clientX, y: e.clientY });
-      setHoverRect(null);
-    };
-    document.addEventListener("mousemove", onMove, true);
-    document.addEventListener("mouseleave", onLeave, true);
-    document.addEventListener("click", onClick, true);
-    return () => {
-      document.removeEventListener("mousemove", onMove, true);
-      document.removeEventListener("mouseleave", onLeave, true);
-      document.removeEventListener("click", onClick, true);
-      setHoverRect(null);
-    };
-  }, [editMode]);
-
-  // Close inline editor on outside click; Esc closes editor first, then exits edit mode.
-  useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
-      if (!editId) return;
-      const target = e.target as Element;
-      if (
-        !target.closest(".inline-editor") &&
-        !target.closest(".fb-block") &&
-        !target.closest(".sel-tooltip")
-      ) {
-        setEditId(null);
-        setEditSelection(null);
-        setEditElement(null);
-        setEditAnchor(null);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      if (editId) {
-        setEditId(null);
-        setEditSelection(null);
-        setEditElement(null);
-        setEditAnchor(null);
-      } else if (editMode && onExitEditMode) {
-        onExitEditMode();
-      }
-    };
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [editId, editMode, onExitEditMode]);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   if (blocks.length === 0) {
     return (
       <div className="fb-empty">
         <h3>Empty page</h3>
-        <p>
-          Tell Riley what you want — &ldquo;build a SaaS landing page for an AI
-          note-taking app&rdquo; works.
-        </p>
+        <p>Add a section from the bar below to start building.</p>
       </div>
     );
   }
@@ -227,25 +71,6 @@ export function FunnelCanvas({
 
   return (
     <>
-      {hoverRect && (
-        <div
-          className="hover-outline"
-          style={{
-            top: hoverRect.top,
-            left: hoverRect.left,
-            width: hoverRect.width,
-            height: hoverRect.height,
-          }}
-        />
-      )}
-      {onAskRiley && (
-        <SelectionTooltip
-          onPick={(blockId, text) => {
-            setEditId(blockId);
-            setEditSelection(text);
-          }}
-        />
-      )}
       {blocks.map((b) => {
         const isCustom = b.type === "custom_html";
         const intent = isCustom
@@ -253,41 +78,23 @@ export function FunnelCanvas({
           : null;
         const dragging = dragId === b.id;
         const overTop = overId === b.id && dragId !== b.id;
-        const isEditing = editId === b.id;
         return (
           <div
             key={b.id}
             className={[
               "fb-block",
               isCustom ? "fb-block--custom" : "",
-              isEditing ? "is-editing" : "",
               dragging ? "is-dragging" : "",
               overTop ? "is-drop-target" : "",
-              isEditing && editSelection ? "is-editing-selection" : "",
-              editMode ? "is-pickable" : "",
             ]
               .filter(Boolean)
               .join(" ")}
             data-block-id={b.id}
-            draggable={!!onReorder && !isEditing && !editMode}
+            draggable={!!onReorder}
             onDragStart={(e) => handleDragStart(e, b.id)}
             onDragOver={(e) => handleDragOver(e, b.id)}
             onDrop={(e) => handleDrop(e, b.id)}
             onDragEnd={handleDragEnd}
-            onClick={(e) => {
-              if (!editMode || !onAskRiley) return;
-              const target = e.target as Element;
-              if (target.closest(".inline-editor") || target.closest(".fb-block__chrome")) return;
-              const sel = window.getSelection();
-              if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) return;
-              e.preventDefault();
-              setEditId(b.id);
-              setEditAnchor({ x: e.clientX, y: e.clientY });
-            }}
-            ref={(el) => {
-              if (el) refs.current.set(b.id, el);
-              else refs.current.delete(b.id);
-            }}
           >
             <div className="fb-block__chrome">
               {onReorder && (
@@ -312,33 +119,28 @@ export function FunnelCanvas({
                 </span>
               )}
               <span>{isCustom ? `custom · ${intent}` : b.type}</span>
+              {onDelete &&
+                (confirmId === b.id ? (
+                  <span className="fb-block__confirm">
+                    <button type="button" className="fb-block__del is-danger" onClick={() => { setConfirmId(null); onDelete(b.id); }}>
+                      Delete
+                    </button>
+                    <button type="button" className="fb-block__del" onClick={() => setConfirmId(null)}>
+                      Keep
+                    </button>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    className="fb-block__del"
+                    title="Delete this section"
+                    aria-label="Delete this section"
+                    onClick={() => setConfirmId(b.id)}
+                  >
+                    ×
+                  </button>
+                ))}
             </div>
-
-            {isEditing && !editAnchor && onAskRiley && (
-              <InlineBlockEditor
-                blockType={b.type}
-                intent={intent}
-                selectedText={editSelection}
-                selectedHtml={editElement?.outerHtml ?? null}
-                selectedTag={editElement?.tag ?? null}
-                anchor={null}
-                onSubmit={(instruction) => {
-                  const sel = editSelection;
-                  const elt = editElement;
-                  setEditId(null);
-                  setEditSelection(null);
-                  setEditElement(null);
-                  setEditAnchor(null);
-                  onAskRiley(b.id, b.type, intent, instruction, sel, elt);
-                }}
-                onCancel={() => {
-                  setEditId(null);
-                  setEditSelection(null);
-                  setEditElement(null);
-                  setEditAnchor(null);
-                }}
-              />
-            )}
 
             <BlockView
               block={b}
@@ -351,40 +153,6 @@ export function FunnelCanvas({
           </div>
         );
       })}
-
-      {editId && editAnchor && onAskRiley && (() => {
-        const b = blocks.find((x) => x.id === editId);
-        if (!b) return null;
-        const isCustom = b.type === "custom_html";
-        const intent = isCustom
-          ? ((b.props as { intent?: string }).intent ?? "section")
-          : null;
-        return (
-          <InlineBlockEditor
-            blockType={b.type}
-            intent={intent}
-            selectedText={editSelection}
-            selectedHtml={editElement?.outerHtml ?? null}
-            selectedTag={editElement?.tag ?? null}
-            anchor={editAnchor}
-            onSubmit={(instruction) => {
-              const sel = editSelection;
-              const elt = editElement;
-              setEditId(null);
-              setEditSelection(null);
-              setEditElement(null);
-              setEditAnchor(null);
-              onAskRiley(b.id, b.type, intent, instruction, sel, elt);
-            }}
-            onCancel={() => {
-              setEditId(null);
-              setEditSelection(null);
-              setEditElement(null);
-              setEditAnchor(null);
-            }}
-          />
-        );
-      })()}
     </>
   );
 }
