@@ -1,10 +1,10 @@
 // Renders the Jazz page's sections. Same components on the live page and in
 // the editor: with `patch` every text is click-to-edit and lists get add /
 // remove controls; without it they're plain server-rendered text.
-import type { ElementType, ReactNode } from "react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
 import { EditableText } from "@/components/blocks/EditableText";
 import { funnel } from "./funnel";
-import type { Section, SectionProps, SectionType } from "./content";
+import { DEFAULT_SECTIONS, type ChartCell, type Section, type SectionProps, type SectionType } from "./content";
 import { Cta } from "./Cta";
 import { PlayableRoll } from "./PlayableRoll";
 import { ProductBox, Scene } from "./ProductBox";
@@ -352,26 +352,81 @@ function Inside({ p, patch, ctx }: { p: SectionProps["s_inside"]; patch?: Patch;
   );
 }
 
-function Math_({ p, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patch; ctx: Ctx }) {
-  const ops = listOps(p.cards, "cards", patch);
+const MATH_DEFAULT = DEFAULT_SECTIONS.find((x) => x.type === "s_math")!.props as SectionProps["s_math"];
+
+/** ✓ / ✗ / – in a chart cell. In the editor a click cycles through them. */
+function Mark({ ok, onClick }: { ok: boolean | null; onClick?: () => void }) {
+  const cls = ok === true ? s.markYes : ok === false ? s.markNo : s.markMeh;
+  const icon = (
+    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden>
+      {ok === true ? (
+        <path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      ) : ok === false ? (
+        <path d="M5.5 5.5l9 9M14.5 5.5l-9 9" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      ) : (
+        <path d="M5.5 10h9" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      )}
+    </svg>
+  );
+  const label = ok === true ? "Yes" : ok === false ? "No" : "Partly";
+  if (onClick)
+    return (
+      <button type="button" className={`${s.mark} ${cls} ${e.markBtn}`} onClick={onClick} title="Click: ✓ / ✗ / –" aria-label={label}>
+        {icon}
+      </button>
+    );
+  return (
+    <span className={`${s.mark} ${cls}`} role="img" aria-label={label}>
+      {icon}
+    </span>
+  );
+}
+
+function Math_({ p: raw, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patch; ctx: Ctx }) {
+  // Pages published before the chart hold cards, not rows: they show the default chart.
+  const p = { ...raw, cols: raw.cols ?? MATH_DEFAULT.cols, rows: raw.rows ?? MATH_DEFAULT.rows, note: raw.note ?? MATH_DEFAULT.note };
+  const last = p.cols.length - 1;
+  const rows = listOps(p.rows, "rows", patch);
+  const setCell = (r: number, c: number, cell: ChartCell) =>
+    rows.set!(r, { ...p.rows[r], cells: p.rows[r].cells.map((x, j) => (j === c ? cell : x)) });
+  const next = (ok: boolean | null) => (ok === true ? false : ok === false ? null : true);
+  const win = (i: number) => (i === last ? s.chWin : "");
   return (
     <section className={`${s.sec} ${s.band}`}>
       <div className={s.wrap}>
         <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
-        <div className={s.compare}>
-          {p.cards.map((c, i) => (
-            <div key={i} className={s.cmp}>
-              <T v={c.title} set={ops.set && ((v) => ops.set!(i, { ...c, title: v }))} ctx={ctx} as="h3" />
-              <T v={c.text} set={ops.set && ((v) => ops.set!(i, { ...c, text: v }))} ctx={ctx} as="p" />
-              <Remove onClick={ops.remove && (() => ops.remove!(i))} />
+        <div className={s.chart} role="table" aria-label={fill(p.title, ctx)} style={{ "--cols": p.cols.length } as CSSProperties}>
+          <div className={s.chRow} role="row">
+            <span className={s.chCorner} role="columnheader" />
+            {p.cols.map((c, i) => (
+              <span key={i} role="columnheader" className={`${s.chHead} ${win(i)}`}>
+                <T v={c} set={patch && ((v) => patch({ cols: p.cols.map((x, j) => (j === i ? v : x)) }))} ctx={ctx} />
+              </span>
+            ))}
+          </div>
+          {p.rows.map((row, r) => (
+            <div key={r} className={s.chRow} role="row">
+              <span role="rowheader" className={s.chLabel}>
+                <T v={row.label} set={rows.set && ((v) => rows.set!(r, { ...row, label: v }))} ctx={ctx} />
+                <Remove onClick={rows.remove && (() => rows.remove!(r))} />
+              </span>
+              {p.cols.map((_, c) => {
+                const cell = row.cells[c] ?? { ok: null, text: "" };
+                return (
+                  <span key={c} role="cell" className={`${s.chCell} ${win(c)} ${r === p.rows.length - 1 ? s.chEnd : ""}`}>
+                    <Mark ok={cell.ok} onClick={patch && (() => setCell(r, c, { ...cell, ok: next(cell.ok) }))} />
+                    <T v={cell.text} set={patch && ((v) => setCell(r, c, { ...cell, text: v }))} ctx={ctx} placeholder="Text" />
+                  </span>
+                );
+              })}
             </div>
           ))}
-          <div className={`${s.cmp} ${s.cmpWin}`}>
-            <T v={p.winTitle} set={patch && ((v) => patch({ winTitle: v }))} ctx={ctx} as="h3" />
-            <T v={p.winText} set={patch && ((v) => patch({ winText: v }))} ctx={ctx} as="p" />
-          </div>
         </div>
-        <Add onClick={ops.add && (() => ops.add!({ title: "Another way", text: "Why it's worse." }))} label="card" />
+        <Add
+          onClick={rows.add && (() => rows.add!({ label: "New row", cells: p.cols.map(() => ({ ok: true, text: "" })) }))}
+          label="row"
+        />
+        <T v={p.note} set={patch && ((v) => patch({ note: v }))} ctx={ctx} as="p" className={s.chNote} />
       </div>
     </section>
   );

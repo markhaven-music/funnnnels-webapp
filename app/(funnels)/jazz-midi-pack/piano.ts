@@ -76,6 +76,18 @@ export function stop() {
   current = undefined;
 }
 
+// Genre loops are Full files: the bass track doubles the chord's root. On one
+// piano the two strikes, a few ms apart, flam; play them as one (the longer).
+function unisons(notes: number[][]) {
+  const out: number[][] = [];
+  for (const n of notes) {
+    const twin = out.find((m) => m[2] === n[2] && Math.abs(m[0] - n[0]) < 0.06);
+    if (twin) twin[1] = Math.max(twin[1], n[1]);
+    else out.push([...n]);
+  }
+  return out;
+}
+
 async function play(id: RollId, scope: HTMLElement) {
   const roll = rolls[id] as Roll;
   const my = ++token;
@@ -90,7 +102,7 @@ async function play(id: RollId, scope: HTMLElement) {
     const spb = 60 / roll.bpm;
     const t0 = ac.currentTime + 0.06;
     const dur = roll.beats * spb;
-    for (const [s, l, p] of roll.notes) {
+    for (const [s, l, p] of unisons(roll.notes)) {
       const base = sampleFor(p);
       const src = ac.createBufferSource();
       src.buffer = bufs.get(base)!;

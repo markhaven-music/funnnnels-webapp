@@ -108,3 +108,10 @@
   font-weight: 700;
   color: #f3ebdc;
 }
+
+/* the ✓ / ✗ / – of a chart cell, clickable in the editor */
+.markBtn {
+  padding: 0;
+  border: 1px dashed currentColor;
+  cursor: pointer;
+}

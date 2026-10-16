@@ -63,3 +63,8 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
 ## Previews
 - Real files from the pack, notes extracted by `tools/extract_rolls.py`, played on Salamander Grand Piano
   samples (Alexander Holm, CC BY 3.0, credited in the footer). Drums are not played.
+- 2026-10-16: Neo Soul loops fixed in `make_pack.py`. The bass approach note on beat 4-and used to be a half
+  step below the next root even when it rubbed against a chord note still ringing (C# under Am7 in loop 05).
+  It now takes the first clean option: a half step below, a half step above, the next root's fifth, or the
+  nearest ringing chord tone. 48 files changed (Bass + Full in 24 loops), 0 clashes left, zip rebuilt.
+- The player merges unisons (bass + chord root on the same pitch at the same time) into one piano note.

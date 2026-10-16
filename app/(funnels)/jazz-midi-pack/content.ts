@@ -8,6 +8,8 @@
 import type { RollId } from "./piano";
 
 export type Para = { style: "p" | "bold" | "pull" | "hit"; text: string };
+export type ChartCell = { ok: boolean | null; text: string };
+export type ChartRow = { label: string; cells: ChartCell[] };
 
 export type SectionProps = {
   s_hero: { tag: string; headline: string; headlineEm: string; lead: string; ticks: string[]; hud: string[]; daws: string };
@@ -17,7 +19,9 @@ export type SectionProps = {
   s_previews: { eyebrow: string; title: string; sub: string; items: { roll: RollId; title: string; meta: string }[] };
   s_steps: { eyebrow: string; title: string; steps: { title: string; text: string }[] };
   s_inside: { eyebrow: string; title: string };
-  s_math: { eyebrow: string; title: string; cards: { title: string; text: string }[]; winTitle: string; winText: string };
+  // A comparison chart: one column per way to get voicings, the last one is the pack.
+  // ok: true = ✓, false = ✗, null = neutral.
+  s_math: { eyebrow: string; title: string; cols: string[]; rows: ChartRow[]; note: string };
   s_offer: { eyebrow: string; title: string; stack: string[]; guarantee: string };
   s_guarantee: { title: string; text: string };
   s_after: { eyebrow: string; title: string; items: { lead: string; text: string }[] };
@@ -140,13 +144,46 @@ export const DEFAULT_SECTIONS: Section[] = [
     props: {
       eyebrow: "Do the math",
       title: "Other ways to get jazz voicings.",
-      cards: [
-        { title: "Learn jazz piano", text: "Months of lessons and theory. Then you still have to play every chord in." },
-        { title: "Book a keys player", text: "Paid per session, every song. Your chords wait on their calendar." },
-        { title: "Chord plugins", text: "One voicing, block chords. The exact jump you’re trying to get rid of." },
+      cols: ["Learn jazz piano", "Book a keys player", "Chord plugins", "This pack"],
+      rows: [
+        {
+          label: "Voiced the way a pianist plays",
+          cells: [
+            { ok: true, text: "Once you can play it" },
+            { ok: true, text: "Yes" },
+            { ok: false, text: "One voicing, block chords that jump" },
+            { ok: true, text: "13 voicings, note by note" },
+          ],
+        },
+        {
+          label: "No theory, no playing",
+          cells: [
+            { ok: false, text: "Months of lessons and theory" },
+            { ok: true, text: "They play it" },
+            { ok: true, text: "Yes" },
+            { ok: true, text: "Chord names in every file" },
+          ],
+        },
+        {
+          label: "Chords in your track today",
+          cells: [
+            { ok: false, text: "You still play every chord in" },
+            { ok: false, text: "When their calendar says so" },
+            { ok: true, text: "Yes" },
+            { ok: true, text: "Instant download" },
+          ],
+        },
+        {
+          label: "What it costs",
+          cells: [
+            { ok: false, text: "Lessons, for months" },
+            { ok: false, text: "Every session, every song" },
+            { ok: null, text: "A plugin license" },
+            { ok: true, text: "{price} once" },
+          ],
+        },
       ],
-      winTitle: "This pack",
-      winText: "{price} once. {files} files. Less than a cent a file.",
+      note: "{files} files for {price}. Less than a cent a file.",
     },
   },
   {

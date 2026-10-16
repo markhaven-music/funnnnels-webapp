@@ -467,34 +467,85 @@
 }
 
 /* math */
-.compare {
+/* comparison chart (Do the math). Phone: each row is its label on a full
+   line, then one cell per column. Desktop: a real table, labels on the left. */
+.chart {
   display: grid;
-  gap: 12px;
-}
-.cmp {
-  padding: 22px;
+  grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
   border: 1px solid var(--rule);
   border-radius: 16px;
   background: var(--ink);
+  overflow: hidden;
 }
-.cmp h3 {
-  font-size: 19px;
+.chRow {
+  display: contents;
+}
+.chCorner {
+  display: none;
+}
+.chHead {
+  padding: 14px 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mute);
 }
-.cmp p {
-  margin-top: 6px;
-  font-size: 15px;
+.chLabel {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  padding: 14px 12px 2px;
+  border-top: 1px solid var(--rule);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cream);
+}
+.chCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 8px 14px;
+  font-size: 13px;
+  line-height: 1.35;
   color: var(--cream-2);
 }
-.cmpWin {
-  border-color: var(--brass);
-  background:
-    radial-gradient(90% 90% at 100% 0%, rgb(226 169 59 / 0.18), transparent 70%),
-    var(--ink);
-  box-shadow: 0 0 50px -20px rgb(226 169 59 / 0.6);
-}
-.cmpWin h3 {
+.chHead.chWin {
   color: var(--brass-hi);
+}
+.chWin {
+  background: rgb(226 169 59 / 0.1);
+}
+.chCell.chWin {
+  color: var(--cream);
+  font-weight: 600;
+}
+.mark {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+.markYes {
+  color: var(--brass-hi);
+  background: rgb(226 169 59 / 0.16);
+}
+.markNo {
+  color: #ef8c74;
+  background: rgb(196 85 60 / 0.16);
+}
+.markMeh {
+  color: var(--mute);
+  background: rgb(243 235 220 / 0.07);
+}
+.chNote {
+  margin-top: 18px;
+  font-size: 17px;
+  color: var(--cream-2);
 }
 
 /* order */
@@ -797,9 +848,38 @@
     grid-column: 1 / -1;
   }
   .previews,
-  .steps,
-  .compare {
+  .steps {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .chart {
+    grid-template-columns: minmax(150px, 1.25fr) repeat(var(--cols, 4), minmax(0, 1fr));
+  }
+  .chCorner {
+    display: block;
+  }
+  .chHead {
+    padding: 20px 16px 16px;
+    font-size: 12px;
+  }
+  .chLabel {
+    grid-column: auto;
+    padding: 18px 16px;
+    font-size: 17px;
+  }
+  .chCell {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 18px 16px;
+    border-top: 1px solid var(--rule);
+    font-size: 15px;
+  }
+  .chWin {
+    border-left: 1px solid rgb(226 169 59 / 0.55);
+  }
+  .chHead.chWin {
+    font-size: 13px;
+    box-shadow: inset 0 3px 0 var(--brass);
   }
   .bento {
     grid-template-columns: repeat(2, 1fr);
@@ -867,9 +947,6 @@
   }
   .progGrid {
     columns: 1;
-  }
-  .compare {
-    grid-template-columns: repeat(4, 1fr);
   }
   .orderGrid {
     grid-template-columns: 0.85fr 1.15fr;
