@@ -56,6 +56,10 @@
   animation: pulse 2.6s ease-in-out infinite;
   pointer-events: none;
 }
+/* inside a form: as wide as the fields above it */
+.full {
+  max-width: none;
+}
 .label {
   position: relative;
   display: inline-flex;

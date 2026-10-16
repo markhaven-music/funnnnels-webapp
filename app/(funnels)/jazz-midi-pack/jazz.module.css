@@ -12,6 +12,7 @@
   --brass: #e2a93b;
   --brass-hi: #f6d58a;
   --red: #c4553c;
+  --green: #3fd16b; /* checks only, like the Grind Studio Drum Kit page */
   min-height: 100vh;
   background: var(--ink);
   color: var(--cream);
@@ -200,6 +201,8 @@
   color: var(--cream-2);
 }
 .heroCta {
+  width: 100%;
+  max-width: 32rem; /* same size as every other CTA (btn max-width) */
   margin-top: 22px;
 }
 .proofRow {
@@ -219,7 +222,7 @@
 }
 .tick {
   flex: none;
-  color: var(--brass);
+  color: var(--green);
 }
 .hud {
   position: absolute;
@@ -601,8 +604,8 @@
   border-radius: 50%;
 }
 .markYes {
-  color: var(--brass-hi);
-  background: rgb(226 169 59 / 0.16);
+  color: var(--green);
+  background: rgb(63 209 107 / 0.14);
 }
 .markNo {
   color: #ef8c74;

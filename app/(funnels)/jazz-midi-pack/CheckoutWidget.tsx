@@ -254,7 +254,7 @@ function InfoStep({
         required
         className={s.input}
       />
-      <button className={b.btn}>
+      <button className={`${b.btn} ${b.full}`}>
         <span className={b.shine} aria-hidden />
         <span className={b.label}>
           <span>Go to step 2</span>
@@ -500,7 +500,7 @@ function PayStepBody({
 
       <button
         type="button"
-        className={b.btn}
+        className={`${b.btn} ${b.full}`}
         disabled={blocked}
         onClick={() => (paypal ? payWithPayPal() : onCard?.(waiver))}
       >
