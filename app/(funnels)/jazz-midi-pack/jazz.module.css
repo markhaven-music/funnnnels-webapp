@@ -101,12 +101,86 @@
   background: var(--brass);
   box-shadow: 0 0 10px var(--brass);
 }
-.heroGrid {
+/* centered hero, like the Grind Studio Drum Kit page */
+.topband {
   position: relative;
   z-index: 1;
+  border-bottom: 1px solid var(--rule);
+  background: rgb(22 19 15 / 0.85);
+}
+.heroCenter {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 34px;
+  text-align: center;
+}
+.heroPre {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cream);
+}
+.heroHead {
+  max-width: 21em;
+  margin-top: 12px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(30px, 6.4vw, 52px);
+  font-weight: 800;
+  line-height: 1.14;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.hl2 {
+  color: var(--brass-hi);
+}
+.heroHead u {
+  text-decoration-thickness: 0.07em;
+  text-underline-offset: 0.12em;
+}
+.heroSub {
+  margin-top: 14px;
+  font-size: clamp(16px, 2vw, 18px);
+  font-weight: 700;
+  color: var(--cream);
+}
+.heroFrame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 960px;
+  margin-top: 26px;
+  padding: 18px 0 8px;
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  /* flat behind the render: its haze would show as a box over a gradient */
+  background: #0b0a08;
+  box-shadow: 0 0 0 6px rgb(243 235 220 / 0.04), 0 30px 90px -40px rgb(226 169 59 / 0.45);
+}
+.heroBullets {
   display: grid;
   gap: 8px;
-  padding-top: 8px;
+  margin-top: 26px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 700;
+}
+.heroBullets li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.heroBullets .tick {
+  margin-top: 3px;
+}
+.hero .proofRow,
+.hero .dawStrip {
+  justify-content: center;
+  text-align: center;
 }
 .display {
   font-family: var(--font-serif), Georgia, serif;
@@ -147,10 +221,6 @@
   flex: none;
   color: var(--brass);
 }
-.heroVis {
-  position: relative;
-  margin-top: 12px;
-}
 .hud {
   position: absolute;
   z-index: 2;
@@ -167,9 +237,9 @@
   color: var(--brass-hi);
   font-weight: 700;
 }
-.hudA { top: 2%; left: 0; }
-.hudB { top: 46%; right: 0; }
-.hudC { bottom: 2%; right: 4%; }
+.hudA { top: 7%; left: 4%; }
+.hudB { top: 46%; right: 4%; }
+.hudC { bottom: 7%; left: 6%; }
 .dawStrip {
   position: relative;
   z-index: 1;
@@ -982,18 +1052,16 @@
 }
 
 @media (min-width: 1000px) {
-  .heroGrid {
-    grid-template-columns: 1.08fr 0.92fr;
-    align-items: center;
-    gap: 40px;
-    padding-top: 26px;
-    padding-bottom: 20px;
-  }
-  .heroVis {
-    margin-top: 0;
-  }
   .hud {
     font-size: 12px;
+  }
+  .heroBullets {
+    grid-template-columns: repeat(2, auto);
+    gap: 10px 48px;
+    font-size: 17px;
+  }
+  .heroFrame {
+    padding: 26px 0 12px;
   }
   .ba {
     grid-template-columns: 1fr 1fr;

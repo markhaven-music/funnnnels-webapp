@@ -19,7 +19,7 @@ export function ProductBox({ variant = "box", priority = false }: { variant?: "h
         className={s.img}
         src={`${DIR}/${variant}-${shot.src[0]}.webp`}
         srcSet={shot.src.map((w) => `${DIR}/${variant}-${w}.webp ${w}w`).join(", ")}
-        sizes={variant === "hero" ? "(min-width: 1000px) 470px, 86vw" : "(min-width: 1000px) 360px, 64vw"}
+        sizes={variant === "hero" ? "(min-width: 1000px) 380px, 86vw" : "(min-width: 1000px) 360px, 64vw"}
         width={shot.w}
         height={shot.h}
         alt="Jazz MIDI Pack box by GRIND STUDIO: the most important jazz progressions, as MIDI files"

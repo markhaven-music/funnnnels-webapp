@@ -127,31 +127,55 @@ function TickList({ items, k, patch, ctx, className }: { items: string[]; k: str
 
 // ─── the sections ─────────────────────────────────────────────
 
-function Hero({ p, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch; ctx: Ctx }) {
-  const set = (k: string) => patch && ((v: string) => patch({ [k]: v }));
-  const hud = listOps(p.hud, "hud", patch);
+const HERO_DEFAULT = DEFAULT_SECTIONS.find((x) => x.type === "s_hero")!.props as SectionProps["s_hero"];
+
+/** "*a*" → highlighted, "_b_" → underlined (the hero headline). */
+function Marked({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(\*[^*]+\*|_[^_]+_)/).map((part, i) =>
+        part.startsWith("*") && part.endsWith("*") && part.length > 2 ? (
+          <span key={i} className={s.hl2}>
+            {part.slice(1, -1)}
+          </span>
+        ) : part.startsWith("_") && part.endsWith("_") && part.length > 2 ? (
+          <u key={i}>{part.slice(1, -1)}</u>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch; ctx: Ctx }) {
+  // Pages published before the centered hero have no `pre`: they get its default copy.
+  const p = raw.pre === undefined ? { ...HERO_DEFAULT, tag: raw.tag, hud: raw.hud, daws: raw.daws, ticks: raw.ticks } : raw;
+  const set = (k: string) => patch && ((v: string) => patch({ ...p, [k]: v }));
+  const hud = listOps(p.hud, "hud", patch && ((x) => patch({ ...p, ...x })));
+  const bullets = listOps(p.bullets, "bullets", patch && ((x) => patch({ ...p, ...x })));
   return (
     <section id="hero" className={s.hero}>
       <div className={s.heroBg} aria-hidden />
-      <header className={`${s.wrap} ${s.topbar}`}>
-        <span className={s.logo}>
-          GRIND <span className={s.dia}>◆</span> STUDIO
-        </span>
-        <span className={s.tag}>
-          <span className={s.dot} aria-hidden />
-          <T v={p.tag} set={set("tag")} ctx={ctx} />
-        </span>
-      </header>
-      <div className={`${s.wrap} ${s.heroGrid}`}>
-        <div className={s.heroCopy}>
-          <h1 className={s.display}>
-            <T v={p.headline} set={set("headline")} ctx={ctx} /> <T v={p.headlineEm} set={set("headlineEm")} ctx={ctx} as="em" />
-          </h1>
-          <T v={p.lead} set={set("lead")} ctx={ctx} as="p" className={s.lead} />
-          <Cta className={s.heroCta} inner={`${ctx.price} · instant download`} />
-          <TickList items={p.ticks} k="ticks" patch={patch} ctx={ctx} className={s.proofRow} />
-        </div>
-        <div className={s.heroVis}>
+      <div className={s.topband}>
+        <header className={`${s.wrap} ${s.topbar}`}>
+          <span className={s.logo}>
+            GRIND <span className={s.dia}>◆</span> STUDIO
+          </span>
+          <span className={s.tag}>
+            <span className={s.dot} aria-hidden />
+            <T v={p.tag} set={set("tag")} ctx={ctx} />
+          </span>
+        </header>
+      </div>
+      <div className={`${s.wrap} ${s.heroCenter}`}>
+        <T v={p.pre} set={set("pre")} ctx={ctx} as="p" className={s.heroPre} />
+        <h1 className={s.heroHead}>
+          {patch ? <T v={p.headline} set={set("headline")} ctx={ctx} /> : <Marked text={fill(p.headline, ctx)} />}
+        </h1>
+        {patch && <p className={e.hint}>*word* = highlighted, _word_ = underlined</p>}
+        <T v={p.sub} set={set("sub")} ctx={ctx} as="p" className={s.heroSub} />
+        <div className={s.heroFrame}>
           <ProductBox variant="hero" priority />
           {[s.hudA, s.hudB, s.hudC].map((cls, i) =>
             p.hud[i] !== undefined ? (
@@ -161,6 +185,18 @@ function Hero({ p, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch; ctx
             ) : null,
           )}
         </div>
+        <ul className={s.heroBullets}>
+          {p.bullets.map((b, i) => (
+            <li key={i}>
+              <Tick />
+              <T v={b} set={bullets.set && ((v) => bullets.set!(i, v))} ctx={ctx} />
+              <Remove onClick={bullets.remove && (() => bullets.remove!(i))} />
+            </li>
+          ))}
+        </ul>
+        <Add onClick={bullets.add && (() => bullets.add!("New bullet"))} label="bullet" />
+        <Cta className={s.heroCta} inner={`${ctx.price} · instant download`} />
+        <TickList items={p.ticks} k="ticks" patch={patch && ((x) => patch({ ...p, ...x }))} ctx={ctx} className={s.proofRow} />
       </div>
       <div className={`${s.wrap} ${s.dawStrip}`}>
         <span className={s.mono}>Works in</span>

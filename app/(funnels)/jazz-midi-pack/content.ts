@@ -12,7 +12,9 @@ export type ChartCell = { ok: boolean | null; text: string };
 export type ChartRow = { label: string; cells: ChartCell[] };
 
 export type SectionProps = {
-  s_hero: { tag: string; headline: string; headlineEm: string; lead: string; ticks: string[]; hud: string[]; daws: string };
+  // Centered, like the Grind Studio Drum Kit hero. In `headline`, *words* are highlighted
+  // and _words_ underlined.
+  s_hero: { tag: string; pre: string; headline: string; sub: string; bullets: string[]; ticks: string[]; hud: string[]; daws: string };
   s_letter: { eyebrow: string; title: string; paras: Para[] };
   s_compare_rolls: { beforeLabel: string; beforeText: string; afterLabel: string; afterText: string; note: string };
   s_product: { eyebrow: string; title: string; titleEm: string; lead: string; ticks: string[] };
@@ -57,9 +59,17 @@ export const DEFAULT_SECTIONS: Section[] = [
     type: "s_hero",
     props: {
       tag: "{files} MIDI files",
-      headline: "Jazz chords that sound",
-      headlineEm: "played, not programmed.",
-      lead: "26 jazz progressions, voiced the way a pianist plays them. 13 voicings, 8 rhythms, all 12 keys. Drag a .mid onto your track, load your keys, write on top.",
+      pre: "For producers who don’t play jazz piano",
+      headline: "Write *Jazz Chords* Like A *Real Pianist* With Drag-And-Drop MIDI, _EASILY!_",
+      sub: "Voiced note by note: chords that sound played, not programmed",
+      bullets: [
+        "{files} Drag-And-Drop Jazz MIDI Files",
+        "26 Progressions × 13 Voicings × 8 Rhythms",
+        "Voice-Led Like A Pianist: No Jumping Chords",
+        "Chord Names In Every File, No Theory Needed",
+        "All 12 Keys, Bass Lines And Genre Loops",
+        "5 Free Bonuses Included",
+      ],
       ticks: ["Any DAW", "Chord names in every file", "{days}-day guarantee"],
       hud: [".mid · drag & drop", "13 voicings", "chords on the timeline"],
       daws: "Ableton Live · Logic · FL Studio · Cubase · Studio One · Reaper · Bitwig · GarageBand",

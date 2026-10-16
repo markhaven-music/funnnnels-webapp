@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Instrument_Serif } from "next/font/google";
+import { Instrument_Serif, Poppins } from "next/font/google";
 import { CURRENCIES, formatPrice, type Currency } from "@/lib/geo";
 import { getPublishedBlocks } from "@/lib/pages";
 import { funnel } from "../funnel";
@@ -20,6 +20,8 @@ import s from "../jazz.module.css";
 // changes. Publishing from the editor refreshes both (lib/pages.ts
 // revalidateFunnelPages); the hourly revalidate is only a safety net.
 
+// The hero headline: a heavy geometric sans, like the Grind Studio Drum Kit page.
+const display = Poppins({ subsets: ["latin"], weight: "800", variable: "--font-display" });
 const serif = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
@@ -70,7 +72,7 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
   };
 
   return (
-    <main className={`${s.page} ${serif.variable}`}>
+    <main className={`${s.page} ${serif.variable} ${display.variable}`}>
       <Tracking value={amount} currency={currency} />
       {sections.map((section) => (
         <SectionView key={section.id} section={section} ctx={ctx} />

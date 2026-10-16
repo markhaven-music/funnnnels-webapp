@@ -10,7 +10,11 @@
   animation: float 7s ease-in-out infinite;
 }
 .hero .img {
-  width: min(86vw, 470px);
+  width: auto;
+  height: min(118vw, 520px);
+  /* the render's glow is cut at the image edge: fade top, right and bottom */
+  mask-image: linear-gradient(to left, transparent, #000 7%), linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent);
+  mask-composite: intersect;
 }
 .box {
   padding: 6px 0 30px;
