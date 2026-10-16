@@ -505,51 +505,73 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
   );
 }
 
+/** What the order includes: the box, the stack, the bonuses, the guarantee. On the landing's recap and the order page. */
+export function OrderSummary({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx }) {
+  return (
+    <div className={s.orderSummary}>
+      <ProductBox />
+      <TickList items={p.stack} k="stack" patch={patch} ctx={ctx} className={s.stack} />
+      <div className={s.bonusMini}>
+        <p className={s.bonusMiniHead}>Plus {funnel.bonuses.length} free bonuses</p>
+        <ul>
+          {funnel.bonuses.map((x, i) => (
+            <li key={x.id}>
+              <img src={`${DIR}/bonus-${i + 1}-360.webp`} width={36} height={54} alt="" loading="lazy" />
+              <span>{x.name}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className={s.guaranteeMini}>
+        <Shield /> <T v={p.guarantee} set={patch && ((v) => patch({ guarantee: v }))} ctx={ctx} />
+      </p>
+    </div>
+  );
+}
+
+/** The checkout itself, on the order page. */
+export function Checkout({ ctx }: { ctx: Ctx }) {
+  return (
+    <CheckoutWidget
+      funnel={funnel.slug}
+      product={funnel.product}
+      tagline={`${funnel.tagline} + ${funnel.bonuses.length} bonuses`}
+      image="/funnels/jazz-midi-pack/box-520.webp"
+      currency={ctx.currency}
+      country={ctx.country}
+      price={ctx.amount}
+      bump={null}
+      thankYou={funnel.checkout.thankYou}
+      publishableKey={ctx.publishableKey}
+      europe={ctx.currency === "eur"}
+    />
+  );
+}
+
+// The landing's offer: a recap and one button to the order page (the checkout
+// has its own page since 2026-10-16).
 function Offer({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx }) {
   return (
     <section id="buy" className={`${s.sec} ${s.order}`}>
       <div className={s.wrap}>
         <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
         <div className={s.orderGrid}>
-          <div className={s.orderSummary}>
-            <ProductBox />
-            <TickList items={p.stack} k="stack" patch={patch} ctx={ctx} className={s.stack} />
-            <div className={s.bonusMini}>
-              <p className={s.bonusMiniHead}>Plus {funnel.bonuses.length} free bonuses</p>
-              <ul>
-                {funnel.bonuses.map((x, i) => (
-                  <li key={x.id}>
-                    <img src={`${DIR}/bonus-${i + 1}-360.webp`} width={36} height={54} alt="" loading="lazy" />
-                    <span>{x.name}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <p className={s.guaranteeMini}>
-              <Shield /> <T v={p.guarantee} set={patch && ((v) => patch({ guarantee: v }))} ctx={ctx} />
-            </p>
-          </div>
-          <div className={s.orderForm}>
-            {ctx.editing ? (
-              <div className={e.locked}>
-                <b>Checkout</b>
-                <span>Locked in the editor so a payment can never break. Prices and the Chord Pack add-on are in the funnel settings.</span>
-              </div>
-            ) : (
-              <CheckoutWidget
-                funnel={funnel.slug}
-                product={funnel.product}
-                tagline={`${funnel.tagline} + ${funnel.bonuses.length} bonuses`}
-                image="/funnels/jazz-midi-pack/box-520.webp"
-                currency={ctx.currency}
-                country={ctx.country}
-                price={ctx.amount}
-                bump={null}
-                thankYou={funnel.checkout.thankYou}
-                publishableKey={ctx.publishableKey}
-                europe={ctx.currency === "eur"}
-              />
-            )}
+          <OrderSummary p={p} patch={patch} ctx={ctx} />
+          <div className={s.priceCard}>
+            <p className={s.priceBig}>{ctx.price}</p>
+            <p className={s.priceNote}>One payment · instant download · yours to keep</p>
+            <Cta className={s.priceCta} inner="Card or PayPal · secure checkout" />
+            <ul className={s.payList}>
+              <li>
+                <Tick /> Card, Apple Pay, Google Pay or PayPal
+              </li>
+              <li>
+                <Tick /> Download buttons right after you pay
+              </li>
+              <li>
+                <Tick /> {funnel.bonuses.length} bonuses included
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -610,7 +632,7 @@ function Faq({ p, patch, ctx }: { p: SectionProps["s_faq"]; patch?: Patch; ctx: 
                 <summary>{fill(it.q, ctx)}</summary>
                 <p>
                   {fill(it.a, ctx)}{" "}
-                  <a href="#buy" data-cta className={s.micro}>
+                  <a href={funnel.checkout.orderPage} data-cta className={s.micro}>
                     Get the pack
                   </a>
                 </p>

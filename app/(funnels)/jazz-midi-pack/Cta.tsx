@@ -1,21 +1,24 @@
 import b from "./btn.module.css";
+import { funnel } from "./funnel";
 
-// The one call to action. Same label everywhere; scrolls to the checkout.
+// The one call to action. Same label everywhere; goes to the order page.
 // `data-cta` is what Tracking listens to for LandingCTAClick.
 export function Cta({
   label = "Get the pack",
   inner,
   note,
   className,
+  href = funnel.checkout.orderPage,
 }: {
   label?: string;
   inner?: string;
   note?: string;
   className?: string;
+  href?: string;
 }) {
   return (
     <div className={className}>
-      <a href="#buy" className={b.btn} data-cta>
+      <a href={href} className={b.btn} data-cta>
         <span className={b.shine} aria-hidden />
         <span className={b.label}>
           <span>{label}</span>

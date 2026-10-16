@@ -35,5 +35,8 @@ export async function getPublishedBlocks<T>(
 // Code funnels cache one page per currency (app/(funnels)/<slug>/[currency]).
 // Called after a publish so the new copy is live within seconds everywhere.
 export function revalidateFunnelPages(funnelId: string) {
-  for (const currency of CURRENCIES) revalidatePath(`/${funnelId}/${currency}`);
+  for (const currency of CURRENCIES) {
+    revalidatePath(`/${funnelId}/${currency}`);
+    revalidatePath(`/${funnelId}/order/${currency}`); // funnels with their own order page
+  }
 }

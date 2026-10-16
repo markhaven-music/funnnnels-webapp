@@ -54,6 +54,8 @@ export const funnel = {
     leadTags: ["checkout-started"],
     buyerTags: ["buyer"],
     thankYou: "/jazz-midi-pack/thank-you",
+    // Its own page since 2026-10-16, like the ClickFunnels funnels: every CTA goes here.
+    orderPage: "/jazz-midi-pack/order",
   },
   optin: {
     source: "jazz-midi-pack",

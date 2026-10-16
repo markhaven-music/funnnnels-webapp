@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import b from "./btn.module.css";
 import s from "./jazz.module.css";
+import { funnel } from "./funnel";
 
 // Bottom bar with the CTA, once the hero has scrolled away. Hidden while the
-// checkout itself is on screen, so it never covers the form.
+// offer recap (#buy) is on screen, which has its own big button.
 export function StickyCta({ price }: { price: string }) {
   const [show, setShow] = useState(false);
 
@@ -34,7 +35,7 @@ export function StickyCta({ price }: { price: string }) {
           <p className={s.stickyTitle}>Jazz MIDI Pack · 3,536 .mid files</p>
           <p className={s.stickySub}>{price} · one payment</p>
         </div>
-        <a href="#buy" className={`${b.btn} ${b.sm}`} data-cta tabIndex={show ? 0 : -1}>
+        <a href={funnel.checkout.orderPage} className={`${b.btn} ${b.sm}`} data-cta tabIndex={show ? 0 : -1}>
           <span className={b.shine} aria-hidden />
           <span className={b.label}>Get the pack</span>
         </a>

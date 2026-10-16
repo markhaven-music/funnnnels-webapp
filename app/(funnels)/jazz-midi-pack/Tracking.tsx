@@ -11,7 +11,8 @@ import { funnel } from "./funnel";
 // checkout widget (step 1 → 2) and Purchase from the thank-you page, with the
 // Stripe PaymentIntent id as eventID.
 // Local previews never reach Meta / Clarity / Neo.
-export function Tracking({ value, currency }: { value: number; currency: string }) {
+// page="order": the order page sends PageView + OrderPageView instead of ViewContent.
+export function Tracking({ value, currency, page = "landing" }: { value: number; currency: string; page?: "landing" | "order" }) {
   const { metaPixelId, clarityId, neoSnippet } = funnel.tracking;
   const params = JSON.stringify({
     content_name: funnel.product,
@@ -44,7 +45,7 @@ export function Tracking({ value, currency }: { value: number; currency: string 
           var params = ${params};
           ${BOOT}
           bootPixel('${metaPixelId}');
-          fbq('track', 'ViewContent', params);
+          ${page === "order" ? "fbq('trackCustom', 'OrderPageView', params);" : "fbq('track', 'ViewContent', params);"}
           document.addEventListener('click', function (e) {
             if (e.target && e.target.closest && e.target.closest('[data-cta]')) fbq('trackCustom', 'LandingCTAClick', params);
           }, { capture: true });

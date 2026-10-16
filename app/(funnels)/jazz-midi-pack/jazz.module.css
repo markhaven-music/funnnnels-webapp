@@ -719,6 +719,56 @@
   display: flex;
   flex-direction: column;
 }
+/* the landing's offer recap: price + one button to the order page */
+.priceCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 22px 24px;
+  border: 1px solid rgb(226 169 59 / 0.45);
+  border-radius: 18px;
+  text-align: center;
+  background:
+    radial-gradient(80% 60% at 50% 0%, rgb(226 169 59 / 0.14), transparent 70%),
+    var(--ink-2);
+}
+.priceBig {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 64px;
+  line-height: 1;
+  color: var(--cream);
+}
+.priceNote {
+  margin-top: 8px;
+  font-size: 15px;
+  color: var(--cream-2);
+}
+.priceCta {
+  width: 100%;
+  margin-top: 22px;
+}
+.payList {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+  font-size: 15px;
+  color: var(--cream-2);
+}
+.payList li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.payList .tick {
+  margin-top: 3px;
+}
+/* the order page: no big section gap above the form */
+.orderPage {
+  padding-top: clamp(28px, 5vw, 56px);
+}
 .guaranteeMini {
   display: flex;
   gap: 10px;
@@ -1125,7 +1175,8 @@
     grid-template-columns: 0.85fr 1.15fr;
     gap: 56px;
   }
-  .orderForm {
+  .orderForm,
+  .priceCard {
     order: 0;
     position: sticky;
     top: 24px;

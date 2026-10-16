@@ -96,7 +96,7 @@ export default async function ThankYou({
           )}
           {!paid && !pending && (
             <div className={s.thanksActions}>
-              <a href={`/${funnel.slug}#buy`} className={b.btn}>
+              <a href={funnel.checkout.orderPage} className={b.btn}>
                 <span className={b.shine} aria-hidden />
                 <span className={b.label}>Back to checkout</span>
               </a>
