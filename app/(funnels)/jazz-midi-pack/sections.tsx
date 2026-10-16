@@ -443,7 +443,7 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
         <ol className={s.bonuses}>
           {p.items.map((it, i) => (
             <li key={i} className={s.bonus}>
-              {i < 3 && (
+              {i < 5 && (
                 <img
                   className={s.bonusImg}
                   src={`${DIR}/bonus-${i + 1}-360.webp`}

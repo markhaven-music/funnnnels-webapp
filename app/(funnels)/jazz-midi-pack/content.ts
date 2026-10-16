@@ -22,7 +22,7 @@ export type SectionProps = {
   // A comparison chart: one column per way to get voicings, the last one is the pack.
   // ok: true = ✓, false = ✗, null = neutral.
   s_math: { eyebrow: string; title: string; cols: string[]; rows: ChartRow[]; note: string };
-  // The free bonuses: item 1, 2, 3 show the covers bonus-1/2/3 in public/funnels/jazz-midi-pack.
+  // The free bonuses: item n shows the cover bonus-n in public/funnels/jazz-midi-pack (1–5).
   s_bonuses: { eyebrow: string; title: string; sub: string; items: { name: string; text: string }[] };
   s_offer: { eyebrow: string; title: string; stack: string[]; guarantee: string };
   s_guarantee: { title: string; text: string };
@@ -194,17 +194,28 @@ export const DEFAULT_SECTIONS: Section[] = [
     type: "s_bonuses",
     props: {
       eyebrow: "Free with the pack",
-      title: "Three bonuses. All in the {price}.",
+      title: "Five bonuses. All in the {price}.",
       sub: "Every order gets them, on the same download page as the pack.",
       items: [
         {
           name: "MIDI Chord Pack (Jazz Edition)",
           text: "2,304 MIDI files. All 12 major/minor key pairs in six folders: best voicing, best voicing with a smooth bass, sevenths, extended, altered & borrowed chords, and progressions.",
         },
-        { name: "The Chord Progressions Bible", text: "The 50 most used chord progressions of all time." },
+        {
+          name: "The Chord Progressions Bible",
+          text: "The 50 most used chord progressions of all time. Each one as block chords, arpeggios and a piano arrangement: 150 MIDI files, e-piano WAV loops and a PDF cheat sheet.",
+        },
         {
           name: "Anime & Video Games MIDI Pack",
           text: "1,548 MIDI files in all 12 keys. Add9, extended and borrowed chords, plus anime progressions (royal road, Komuro, Canon) and video game ones (victory fanfare, boss battle, dungeon).",
+        },
+        {
+          name: "Emotional Keys MIDI Bundle",
+          text: "Three volumes, 195 MIDI files: songstarters, chord progressions, melodies and bonus melodies, with an MP3 preview of each.",
+        },
+        {
+          name: "Drum Loops for Songwriting",
+          text: "47 WAV drum loops to write over: modern pop and ballads, hip hop, trap and R&B, dance and electronic, vintage and rock.",
         },
       ],
     },

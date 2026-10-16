@@ -29,18 +29,26 @@ export const funnel = {
     pitch:
       "All 12 major/minor key pairs in six folders: best voicing, best voicing with a smooth bass, sevenths, extended, altered & borrowed chords, and progressions. Same voice-leading as the main pack.",
   },
-  // Free with every pack. `id` is the download key in `files`; a bonus without a
-  // file yet shows on the page but gets no download button.
+  // Free with every pack. `id` is the download key in `files` or `remoteFiles`.
   bonuses: [
     { id: "chord-pack", name: "MIDI Chord Pack (Jazz Edition)" },
     { id: "bible", name: "The Chord Progressions Bible" },
     { id: "anime-pack", name: "Anime & Video Games MIDI Pack" },
+    { id: "emotional-keys", name: "Emotional Keys MIDI Bundle" },
+    { id: "drum-loops", name: "Drum Loops for Songwriting" },
   ],
   // Paid downloads, served from /private only after Stripe confirms payment.
   files: {
     pack: "private/jazz-midi-pack/Jazz MIDI Pack.zip",
     "chord-pack": "private/jazz-midi-pack/Jazz MIDI Chord Pack.zip",
     "anime-pack": "private/jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip",
+  } as Record<string, string>,
+  // Too big for the deployment: objects in the R2 bucket (lib/r2.ts), uploaded from
+  // ~/Desktop/midi jazz pack bonuses. Served through a 10-minute presigned link.
+  remoteFiles: {
+    bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
+    "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
+    "drum-loops": "jazz-midi-pack/Drum Loops for Songwriting.zip",
   } as Record<string, string>,
   checkout: {
     leadTags: ["checkout-started"],
@@ -81,6 +89,8 @@ export const funnel = {
 
 /** The download keys an order unlocks: what it paid for, plus every bonus that has a file. */
 export function unlocked(items: readonly string[]): string[] {
-  const bonuses = items.includes("pack") ? funnel.bonuses.map((b) => b.id).filter((id) => funnel.files[id]) : [];
+  const bonuses = items.includes("pack")
+    ? funnel.bonuses.map((b) => b.id).filter((id) => funnel.files[id] || funnel.remoteFiles[id])
+    : [];
   return [...new Set([...items, ...bonuses])];
 }

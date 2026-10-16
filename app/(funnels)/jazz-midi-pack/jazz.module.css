@@ -1029,8 +1029,15 @@
     columns: 1;
   }
   .bonuses {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 18px;
+  }
+  /* 3 on the first row, 2 wider ones under them */
+  .bonus {
+    grid-column: span 2;
+  }
+  .bonus:nth-child(n + 4) {
+    grid-column: span 3;
   }
   .bonus {
     grid-template-columns: 1fr;

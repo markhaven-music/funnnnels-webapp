@@ -31,7 +31,7 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
 ## Offer
 - €27 in Europe, $27 elsewhere. One payment, instant download. No strike-through price: the pack was never
   sold higher, so none is shown (no fake urgency, no "worth $997").
-- Three free bonuses with every pack (since 2026-10-16), on the same download page:
+- Five free bonuses with every pack (since 2026-10-16), on the same download page:
   1. MIDI Chord Pack (Jazz Edition): the Jazz MIDI Chord Pack, 2,304 MIDI files, 12 major/minor key pairs,
      six folders (best voicing, best voicing + smooth bass, sevenths, extended, altered & borrowed, progressions).
   2. The Chord Progressions Bible: "the 50 most used chord progressions of all time". Supplied by Mark; no
@@ -39,6 +39,14 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   3. Anime & Video Games MIDI Pack: the Anime & Video Game MIDI Chord Pack, 1,548 MIDI files, 12 key pairs;
      add9, extended, colour & borrowed chords; anime progressions (royal road, Marusa, Komuro, Canon…) and
      video game ones (victory fanfare, Lydian wonder, boss phrygian, battle, dungeon…).
+  4. Emotional Keys MIDI Bundle: Vol. 1–3, each 20 songstarters + 20 chord progressions + 20 melodies +
+     5 bonus melodies = 195 MIDI files, each with an MP3 preview (+ a demo MP3 per volume).
+  5. Drum Loops for Songwriting: 47 WAV loops (the source folder is called "50 Drum Loops" but holds 47; the
+     page says 47) in four styles: modern pop & ballads, hip hop / trap / urban, dance & electronic, vintage & rock.
+  Bible details (its READ ME): the 50 most used progressions, each as block chords, arpeggio and piano
+  arrangement: 150 MIDI files, plus e-piano WAV loops and "The Ultimate Chord Progression - Cheat Sheet.pdf".
+  Bonuses 2, 4, 5 come from ~/Desktop/midi jazz pack bonuses and are served from Cloudflare R2 (lib/r2.ts):
+  the Bible zip alone is 1.07 GB.
   No "worth $X" values on the bonuses either.
 - No checkout add-on since 2026-10-16: the Chord Pack (the old €9 add-on) became bonus 1. The server still
   knows the old add-on so orders that bought it keep verifying.
