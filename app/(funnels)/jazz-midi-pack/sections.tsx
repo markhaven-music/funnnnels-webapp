@@ -7,7 +7,7 @@ import { funnel } from "./funnel";
 import type { Section, SectionProps, SectionType } from "./content";
 import { Cta } from "./Cta";
 import { PlayableRoll } from "./PlayableRoll";
-import { ProductBox } from "./ProductBox";
+import { ProductBox, Scene } from "./ProductBox";
 import { CheckoutWidget } from "./CheckoutWidget";
 import s from "./jazz.module.css";
 import e from "./edit.module.css";
@@ -152,7 +152,7 @@ function Hero({ p, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch; ctx
           <TickList items={p.ticks} k="ticks" patch={patch} ctx={ctx} className={s.proofRow} />
         </div>
         <div className={s.heroVis}>
-          <ProductBox />
+          <ProductBox variant="hero" priority />
           {[s.hudA, s.hudB, s.hudC].map((cls, i) =>
             p.hud[i] !== undefined ? (
               <span key={i} className={`${s.hud} ${cls}`}>
@@ -242,7 +242,7 @@ function Product({ p, patch, ctx }: { p: SectionProps["s_product"]; patch?: Patc
   return (
     <section className={`${s.sec} ${s.band}`}>
       <div className={`${s.wrap} ${s.introGrid}`}>
-        <ProductBox size="md" />
+        <ProductBox />
         <div>
           <T v={p.eyebrow} set={set("eyebrow")} ctx={ctx} as="p" className={s.eyebrow} />
           <h2 className={s.h2}>
@@ -299,6 +299,9 @@ function Steps({ p, patch, ctx }: { p: SectionProps["s_steps"]; patch?: Patch; c
           ))}
         </ol>
         <Add onClick={ops.add && (() => ops.add!({ title: "New step", text: "What happens." }))} label="step" />
+        <figure className={s.dawShot}>
+          <Scene name="daw" alt="A laptop with the DAW piano roll showing gold jazz voicings under Dm9, G13 and Cmaj9, next to the Jazz MIDI Pack box" />
+        </figure>
       </div>
     </section>
   );
@@ -381,7 +384,7 @@ function Offer({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; c
         <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
         <div className={s.orderGrid}>
           <div className={s.orderSummary}>
-            <ProductBox size="md" />
+            <ProductBox />
             <TickList items={p.stack} k="stack" patch={patch} ctx={ctx} className={s.stack} />
             <p className={s.guaranteeMini}>
               <Shield /> <T v={p.guarantee} set={patch && ((v) => patch({ guarantee: v }))} ctx={ctx} />
@@ -398,6 +401,7 @@ function Offer({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; c
                 funnel={funnel.slug}
                 product={funnel.product}
                 tagline={funnel.tagline}
+                image="/funnels/jazz-midi-pack/box-520.webp"
                 currency={ctx.currency}
                 country={ctx.country}
                 price={ctx.amount}
@@ -484,7 +488,10 @@ function Faq({ p, patch, ctx }: { p: SectionProps["s_faq"]; patch?: Patch; ctx: 
 function Final({ p, patch, ctx }: { p: SectionProps["s_final"]; patch?: Patch; ctx: Ctx }) {
   return (
     <section className={`${s.sec} ${s.final}`}>
-      <div className={`${s.wrap} ${s.col} ${s.finalIn}`}>
+      <div className={s.finalBg} aria-hidden>
+        <Scene name="stage" alt="" />
+      </div>
+      <div className={`${s.wrap} ${s.finalIn}`}>
         <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
         <Cta className={s.ctaBlock} inner={`${ctx.price} · instant download`} note={fill(p.note, ctx)} />
         {patch && <T v={p.note} set={(v) => patch({ note: v })} ctx={ctx} as="p" className={e.hint} />}

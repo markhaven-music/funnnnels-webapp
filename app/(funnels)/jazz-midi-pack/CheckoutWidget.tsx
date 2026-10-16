@@ -27,6 +27,8 @@ type Props = {
   funnel: string;
   product: string;
   tagline: string;
+  // A small picture of the product next to its name in step 2 (optional).
+  image?: string;
   currency: "eur" | "usd";
   country: string;
   price: number;
@@ -128,11 +130,16 @@ export function CheckoutWidget(props: Props) {
               ← Go back
             </button>
 
-            <div className={s.orderBox}>
-              <span className={s.orderTag}>Instant download</span>
-              <span className={s.orderName}>{props.product}</span>
-              <span className={s.orderDesc}>{props.tagline}</span>
-              <span className={s.orderPrice}>{money(props.price, props.currency)} · one payment</span>
+            <div className={`${s.orderBox} ${props.image ? s.orderBoxPic : ""}`}>
+              {props.image && (
+                <img className={s.orderPic} src={props.image} alt="" width={52} height={74} />
+              )}
+              <span className={s.orderText}>
+                <span className={s.orderTag}>Instant download</span>
+                <span className={s.orderName}>{props.product}</span>
+                <span className={s.orderDesc}>{props.tagline}</span>
+                <span className={s.orderPrice}>{money(props.price, props.currency)} · one payment</span>
+              </span>
             </div>
 
             <p className={s.label}>

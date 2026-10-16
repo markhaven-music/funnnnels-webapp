@@ -1,42 +1,52 @@
-import s from "./box.module.css";
+import s from "./shot.module.css";
 
-// The product, as a box: GRIND STUDIO wordmark, name, the real counts.
-// Drawn in CSS so it stays sharp at any size (an AI render can replace it).
-export function ProductBox({ size = "lg" }: { size?: "lg" | "md" }) {
+// The product, from the real box artwork (GRIND STUDIO "MIDI JAZZ PACK").
+// Renders made with Higgsfield and saved as webp in public/funnels/jazz-midi-pack:
+// "hero" = the box with gold piano-roll notes and .mid files flying out,
+// "box" = the box alone, background removed.
+const DIR = "/funnels/jazz-midi-pack";
+
+const SHOTS = {
+  hero: { src: [600, 960], w: 960, h: 1315 },
+  box: { src: [520, 900], w: 900, h: 1282 },
+} as const;
+
+export function ProductBox({ variant = "box", priority = false }: { variant?: "hero" | "box"; priority?: boolean }) {
+  const shot = SHOTS[variant];
   return (
-    <div className={`${s.stage} ${s[size]}`} aria-label="Jazz MIDI Pack box by GRIND STUDIO: 3,536 MIDI files">
-      <div className={s.box}>
-        <div className={s.front}>
-          <span className={s.brand}>
-            GRIND <Diamond /> STUDIO
-          </span>
-          <span className={s.name}>
-            <span className={s.jazz}>Jazz</span>
-            <span className={s.midi}>MIDI PACK</span>
-          </span>
-          <span className={s.keys} aria-hidden>
-            {Array.from({ length: 14 }, (_, i) => (
-              <i key={i} className={[1, 2, 4, 5, 6, 8, 9, 11, 12, 13].includes(i) ? s.hasBlack : ""} />
-            ))}
-          </span>
-          <span className={s.stats}>
-            <b>3,536</b> MIDI files <span>·</span> <b>26</b> progressions <span>·</span> <b>13</b> voicings
-          </span>
-          <span className={s.format}>MIDI FORMAT</span>
-        </div>
-        <div className={s.side} aria-hidden>
-          <span>JAZZ MIDI PACK · GRIND STUDIO</span>
-        </div>
-      </div>
-      <span className={s.floor} aria-hidden />
+    <div className={`${s.stage} ${s[variant]}`}>
+      <img
+        className={s.img}
+        src={`${DIR}/${variant}-${shot.src[0]}.webp`}
+        srcSet={shot.src.map((w) => `${DIR}/${variant}-${w}.webp ${w}w`).join(", ")}
+        sizes={variant === "hero" ? "(min-width: 1000px) 470px, 86vw" : "(min-width: 1000px) 360px, 64vw"}
+        width={shot.w}
+        height={shot.h}
+        alt="Jazz MIDI Pack box by GRIND STUDIO: the most important jazz progressions, as MIDI files"
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
+        decoding="async"
+      />
+      {variant === "box" && <span className={s.floor} aria-hidden />}
     </div>
   );
 }
 
-function Diamond() {
+/** A wide photo with the box in it: the DAW desk, the club stage. */
+export function Scene({ name, alt, className }: { name: "daw" | "stage"; alt: string; className?: string }) {
+  const sizes = name === "daw" ? [900, 1600] : [1100, 2200];
+  const dims = name === "daw" ? [1600, 905] : [2200, 943];
   return (
-    <svg viewBox="0 0 10 10" width="0.8em" height="0.8em" aria-hidden className={s.diamond}>
-      <path d="M5 0 10 5 5 10 0 5z" fill="currentColor" />
-    </svg>
+    <img
+      className={className}
+      src={`${DIR}/${name}-${sizes[0]}.webp`}
+      srcSet={sizes.map((w) => `${DIR}/${name}-${w}.webp ${w}w`).join(", ")}
+      sizes={name === "daw" ? "(min-width: 1160px) 1120px, 100vw" : "100vw"}
+      width={dims[0]}
+      height={dims[1]}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+    />
   );
 }

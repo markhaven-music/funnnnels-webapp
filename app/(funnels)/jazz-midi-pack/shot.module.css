@@ -1,0 +1,48 @@
+/* The product renders (ProductBox.tsx). The glow is baked into the images. */
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.img {
+  display: block;
+  height: auto;
+  animation: float 7s ease-in-out infinite;
+}
+.hero .img {
+  width: min(86vw, 470px);
+}
+.box {
+  padding: 6px 0 30px;
+}
+.box .img {
+  position: relative;
+  z-index: 1;
+  width: min(64vw, 340px);
+  filter: drop-shadow(0 26px 40px rgb(0 0 0 / 0.6)) drop-shadow(0 0 36px rgb(226 169 59 / 0.16));
+}
+.floor {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  width: min(56vw, 300px);
+  height: 34px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(226 169 59 / 0.3), transparent);
+  filter: blur(6px);
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .img {
+    animation: none;
+  }
+}
