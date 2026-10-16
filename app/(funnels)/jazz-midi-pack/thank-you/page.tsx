@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Serif } from "next/font/google";
 import { getOrder } from "@/lib/orders";
-import { funnel } from "../funnel";
+import { funnel, unlocked } from "../funnel";
 import { PurchasePixel } from "../PurchasePixel";
 import s from "../jazz.module.css";
 import b from "../btn.module.css";
@@ -14,10 +14,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// Bonus names win over the old add-on's: the Chord Pack is bonus 1 now.
 const LABELS: Record<string, string> = {
   pack: funnel.product,
   [funnel.bump.id]: funnel.bump.name,
+  ...Object.fromEntries(funnel.bonuses.map((x) => [x.id, x.name])),
 };
+const BONUS = new Set<string>(funnel.bonuses.map((x) => x.id));
 
 // Stripe sends the buyer here with ?payment_intent=pi_… after paying, the
 // PayPal button with ?paypal_order=…. We ask the provider directly whether it
@@ -68,14 +71,17 @@ export default async function ThankYou({
           </p>
           {paid && order && (
             <div className={s.thanksActions}>
-              {order.items.map((key) => (
+              {unlocked(order.items).map((key) => (
                 <a
                   key={key}
                   href={`/${funnel.slug}/download?order=${order.id}&file=${key}`}
                   className={key === "pack" ? b.btn : s.ghostBtn}
                 >
                   {key === "pack" && <span className={b.shine} aria-hidden />}
-                  <span className={key === "pack" ? b.label : undefined}>Download {LABELS[key] ?? key}</span>
+                  <span className={key === "pack" ? b.label : undefined}>
+                    Download {BONUS.has(key) && key !== "pack" ? "bonus: " : ""}
+                    {LABELS[key] ?? key}
+                  </span>
                   {key === "pack" && <span className={b.inner}>.zip · {funnel.counts.files.toLocaleString("en-US")} MIDI files</span>}
                 </a>
               ))}

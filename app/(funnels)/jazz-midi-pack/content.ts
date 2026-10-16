@@ -22,6 +22,8 @@ export type SectionProps = {
   // A comparison chart: one column per way to get voicings, the last one is the pack.
   // ok: true = ✓, false = ✗, null = neutral.
   s_math: { eyebrow: string; title: string; cols: string[]; rows: ChartRow[]; note: string };
+  // The free bonuses: item 1, 2, 3 show the covers bonus-1/2/3 in public/funnels/jazz-midi-pack.
+  s_bonuses: { eyebrow: string; title: string; sub: string; items: { name: string; text: string }[] };
   s_offer: { eyebrow: string; title: string; stack: string[]; guarantee: string };
   s_guarantee: { title: string; text: string };
   s_after: { eyebrow: string; title: string; items: { lead: string; text: string }[] };
@@ -41,6 +43,7 @@ export const SECTION_LABELS: Record<SectionType, string> = {
   s_steps: "How it works",
   s_inside: "What's inside",
   s_math: "Do the math",
+  s_bonuses: "Bonuses",
   s_offer: "Offer + checkout",
   s_guarantee: "Guarantee",
   s_after: "After you pay",
@@ -184,6 +187,26 @@ export const DEFAULT_SECTIONS: Section[] = [
         },
       ],
       note: "{files} files for {price}. Less than a cent a file.",
+    },
+  },
+  {
+    id: "bonuses",
+    type: "s_bonuses",
+    props: {
+      eyebrow: "Free with the pack",
+      title: "Three bonuses. All in the {price}.",
+      sub: "Every order gets them, on the same download page as the pack.",
+      items: [
+        {
+          name: "MIDI Chord Pack (Jazz Edition)",
+          text: "2,304 MIDI files. All 12 major/minor key pairs in six folders: best voicing, best voicing with a smooth bass, sevenths, extended, altered & borrowed chords, and progressions.",
+        },
+        { name: "The Chord Progressions Bible", text: "The 50 most used chord progressions of all time." },
+        {
+          name: "Anime & Video Games MIDI Pack",
+          text: "1,548 MIDI files in all 12 keys. Add9, extended and borrowed chords, plus anime progressions (royal road, Komuro, Canon) and video game ones (victory fanfare, boss battle, dungeon).",
+        },
+      ],
     },
   },
   {

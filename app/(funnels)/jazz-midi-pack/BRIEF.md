@@ -31,12 +31,22 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
 ## Offer
 - €27 in Europe, $27 elsewhere. One payment, instant download. No strike-through price: the pack was never
   sold higher, so none is shown (no fake urgency, no "worth $997").
-- Checkout add-on: Jazz MIDI Chord Pack, €9 / $9 (12 major/minor key pairs, six folders).
+- Three free bonuses with every pack (since 2026-10-16), on the same download page:
+  1. MIDI Chord Pack (Jazz Edition): the Jazz MIDI Chord Pack, 2,304 MIDI files, 12 major/minor key pairs,
+     six folders (best voicing, best voicing + smooth bass, sevenths, extended, altered & borrowed, progressions).
+  2. The Chord Progressions Bible: "the 50 most used chord progressions of all time". Supplied by Mark; no
+     other claims until we have the file.
+  3. Anime & Video Games MIDI Pack: the Anime & Video Game MIDI Chord Pack, 1,548 MIDI files, 12 key pairs;
+     add9, extended, colour & borrowed chords; anime progressions (royal road, Marusa, Komuro, Canon…) and
+     video game ones (victory fanfare, Lydian wonder, boss phrygian, battle, dungeon…).
+  No "worth $X" values on the bonuses either.
+- No checkout add-on since 2026-10-16: the Chord Pack (the old €9 add-on) became bonus 1. The server still
+  knows the old add-on so orders that bought it keep verifying.
 - EU withdrawal waiver: a notice under the pay button (clicking it is the consent), no tick box.
 - Payment: a Card | PayPal choice, as on the ClickFunnels checkout. Card through Stripe, plus the methods
   Stripe shows (Link, Bancontact, EPS…). PayPal through our own PayPal account: the big button sends the
   buyer to PayPal's page and back.
-- Order bump: copied from the ClickFunnels template (yellow box, red arrow, cover, red offer label). Its
+- Order bump (not shown since 2026-10-16): copied from the ClickFunnels template (yellow box, red arrow, cover, red offer label). Its
   label says "ADD-ON OFFER", never "one-time offer": the Chord Pack isn't promised to disappear.
 - Delivery: download buttons on the thank-you page right after payment; Stripe emails the receipt.
 

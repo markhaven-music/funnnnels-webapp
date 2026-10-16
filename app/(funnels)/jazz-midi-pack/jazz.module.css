@@ -548,6 +548,86 @@
   color: var(--cream-2);
 }
 
+/* bonuses: three covers in cards (phone: stacked, desktop: three across) */
+.bonuses {
+  display: grid;
+  gap: 14px;
+  padding: 0;
+  list-style: none;
+}
+.bonus {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  column-gap: 16px;
+  align-items: start;
+  align-content: start;
+  padding: 18px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: var(--ink-2);
+}
+.bonusImg {
+  grid-row: span 3;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 12px 18px rgb(0 0 0 / 0.55));
+}
+.bonusN {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+.bonus h3 {
+  margin-top: 4px;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.bonus p {
+  margin-top: 6px;
+  font-size: 15px;
+  color: var(--cream-2);
+}
+/* the bonuses again, small, next to the checkout */
+.bonusMini {
+  margin-top: 22px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--ink-2);
+}
+.bonusMiniHead {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+.bonusMini ul {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.bonusMini li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.bonusMini img {
+  flex: none;
+  width: 36px;
+  height: auto;
+}
+
 /* order */
 .order {
   background:
@@ -947,6 +1027,21 @@
   }
   .progGrid {
     columns: 1;
+  }
+  .bonuses {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .bonus {
+    grid-template-columns: 1fr;
+    padding: 26px 24px 28px;
+  }
+  .bonusImg {
+    grid-row: auto;
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    margin: 0 auto 18px;
   }
   .orderGrid {
     grid-template-columns: 0.85fr 1.15fr;

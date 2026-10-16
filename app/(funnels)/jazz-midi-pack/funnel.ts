@@ -20,7 +20,8 @@ export const funnel = {
   },
   tagline: "26 progressions × 13 voicings × 8 rhythms, all 12 keys",
   price: { eur: 27, usd: 27 },
-  // The tick-box offer inside the checkout (ClickFunnels calls it an order bump).
+  // The old €9 tick-box offer. Since 2026-10-16 the checkout no longer shows it
+  // (the Chord Pack is bonus 1); it stays so orders that bought it still verify.
   bump: {
     id: "chord-pack",
     name: "Jazz MIDI Chord Pack",
@@ -28,11 +29,19 @@ export const funnel = {
     pitch:
       "All 12 major/minor key pairs in six folders: best voicing, best voicing with a smooth bass, sevenths, extended, altered & borrowed chords, and progressions. Same voice-leading as the main pack.",
   },
+  // Free with every pack. `id` is the download key in `files`; a bonus without a
+  // file yet shows on the page but gets no download button.
+  bonuses: [
+    { id: "chord-pack", name: "MIDI Chord Pack (Jazz Edition)" },
+    { id: "bible", name: "The Chord Progressions Bible" },
+    { id: "anime-pack", name: "Anime & Video Games MIDI Pack" },
+  ],
   // Paid downloads, served from /private only after Stripe confirms payment.
   files: {
     pack: "private/jazz-midi-pack/Jazz MIDI Pack.zip",
     "chord-pack": "private/jazz-midi-pack/Jazz MIDI Chord Pack.zip",
-  },
+    "anime-pack": "private/jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip",
+  } as Record<string, string>,
   checkout: {
     leadTags: ["checkout-started"],
     buyerTags: ["buyer"],
@@ -69,3 +78,9 @@ export const funnel = {
     "Minor Line Cliché", "II7#11 (A Train)", "Sus Dominant ii-V",
   ],
 } as const;
+
+/** The download keys an order unlocks: what it paid for, plus every bonus that has a file. */
+export function unlocked(items: readonly string[]): string[] {
+  const bonuses = items.includes("pack") ? funnel.bonuses.map((b) => b.id).filter((id) => funnel.files[id]) : [];
+  return [...new Set([...items, ...bonuses])];
+}

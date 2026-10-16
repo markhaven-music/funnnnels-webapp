@@ -432,6 +432,43 @@ function Math_({ p: raw, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patc
   );
 }
 
+const DIR = "/funnels/jazz-midi-pack";
+
+function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patch; ctx: Ctx }) {
+  const ops = listOps(p.items, "items", patch);
+  return (
+    <section className={s.sec}>
+      <div className={s.wrap}>
+        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} patch={patch} ctx={ctx} />
+        <ol className={s.bonuses}>
+          {p.items.map((it, i) => (
+            <li key={i} className={s.bonus}>
+              {i < 3 && (
+                <img
+                  className={s.bonusImg}
+                  src={`${DIR}/bonus-${i + 1}-360.webp`}
+                  srcSet={`${DIR}/bonus-${i + 1}-360.webp 360w, ${DIR}/bonus-${i + 1}-640.webp 640w`}
+                  sizes="(min-width: 1000px) 300px, 60vw"
+                  width={640}
+                  height={960}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              <span className={s.bonusN}>Bonus {i + 1}</span>
+              <T v={it.name} set={ops.set && ((v) => ops.set!(i, { ...it, name: v }))} ctx={ctx} as="h3" />
+              <T v={it.text} set={ops.set && ((v) => ops.set!(i, { ...it, text: v }))} ctx={ctx} as="p" />
+              <Remove onClick={ops.remove && (() => ops.remove!(i))} />
+            </li>
+          ))}
+        </ol>
+        <Add onClick={ops.add && (() => ops.add!({ name: "New bonus", text: "What it is." }))} label="bonus" />
+      </div>
+    </section>
+  );
+}
+
 function Offer({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx }) {
   return (
     <section id="buy" className={`${s.sec} ${s.order}`}>
@@ -441,6 +478,17 @@ function Offer({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; c
           <div className={s.orderSummary}>
             <ProductBox />
             <TickList items={p.stack} k="stack" patch={patch} ctx={ctx} className={s.stack} />
+            <div className={s.bonusMini}>
+              <p className={s.bonusMiniHead}>Plus {funnel.bonuses.length} free bonuses</p>
+              <ul>
+                {funnel.bonuses.map((x, i) => (
+                  <li key={x.id}>
+                    <img src={`${DIR}/bonus-${i + 1}-360.webp`} width={36} height={54} alt="" loading="lazy" />
+                    <span>{x.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
             <p className={s.guaranteeMini}>
               <Shield /> <T v={p.guarantee} set={patch && ((v) => patch({ guarantee: v }))} ctx={ctx} />
             </p>
@@ -455,12 +503,12 @@ function Offer({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; c
               <CheckoutWidget
                 funnel={funnel.slug}
                 product={funnel.product}
-                tagline={funnel.tagline}
+                tagline={`${funnel.tagline} + ${funnel.bonuses.length} bonuses`}
                 image="/funnels/jazz-midi-pack/box-520.webp"
                 currency={ctx.currency}
                 country={ctx.country}
                 price={ctx.amount}
-                bump={{ name: funnel.bump.name, price: funnel.bump.price[ctx.currency], pitch: funnel.bump.pitch }}
+                bump={null}
                 thankYou={funnel.checkout.thankYou}
                 publishableKey={ctx.publishableKey}
                 europe={ctx.currency === "eur"}
@@ -564,6 +612,7 @@ const VIEWS: { [K in SectionType]: (a: { p: SectionProps[K]; patch?: Patch; ctx:
   s_steps: Steps,
   s_inside: Inside,
   s_math: Math_,
+  s_bonuses: Bonuses,
   s_offer: Offer,
   s_guarantee: Guarantee,
   s_after: After,
