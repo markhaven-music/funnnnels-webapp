@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { isEmail } from "@/lib/contacts";
-import { checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, requestNow, resolveFunnel } from "@/lib/funnels";
+import { checkoutPages, checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, requestNow, resolveFunnel } from "@/lib/funnels";
 import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
@@ -17,6 +17,9 @@ export const runtime = "nodejs";
 // Where PayPal may send buyers back to: the brand domain the funnel lives on
 // (it forwards /api/checkout/* here), this deployment, and local dev.
 const RETURN_HOSTS = new Set(["m.thegrind.studio", "jazz.thegrind.studio", "funnnnels.vercel.app", "localhost"]);
+
+// PayPal page languages for the funnels' non-English pages.
+const PAYPAL_LOCALE: Record<string, string> = { fr: "fr-FR", it: "it-IT", de: "de-DE", nl: "nl-NL" };
 
 function returnOrigin(raw: unknown): string {
   try {
@@ -48,6 +51,8 @@ export async function POST(req: Request) {
   const country = visitorCountry(await headers(), body.country);
   const currency = currencyFor(country);
   const origin = returnOrigin(body.origin);
+  // The buyer's language, for the pages PayPal sends them back to and its own page.
+  const pages = checkoutPages(f, body.lang);
   const amount = orderAmount(f, currency, bumps, now);
   if (typeof body.expected === "number" && Math.round(body.expected * 100) !== amount) {
     return NextResponse.json(
@@ -83,9 +88,10 @@ export async function POST(req: Request) {
               brand_name: f.brand,
               shipping_preference: "NO_SHIPPING",
               user_action: "PAY_NOW",
+              ...(pages.lang ? { locale: PAYPAL_LOCALE[pages.lang] } : {}),
               // PayPal appends ?token=<order id>&PayerID=… to both.
-              return_url: `${origin}/api/checkout/paypal/return?funnel=${f.slug}`,
-              cancel_url: `${origin}${f.checkout.orderPage ?? `/${f.slug}#buy`}`,
+              return_url: `${origin}/api/checkout/paypal/return?funnel=${f.slug}${pages.lang ? `&lang=${pages.lang}` : ""}`,
+              cancel_url: `${origin}${pages.orderPage}`,
             },
           },
         },

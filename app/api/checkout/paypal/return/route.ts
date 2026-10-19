@@ -1,10 +1,11 @@
-import { resolveFunnel } from "@/lib/funnels";
+import { checkoutPages, resolveFunnel } from "@/lib/funnels";
 import { isPayPalOrderId, paypal, paypalCheckoutUrl, paypalConfigured, PayPalError } from "@/lib/paypal";
 
 export const runtime = "nodejs";
 
 // PayPal sends the buyer here after they approve on PayPal's page:
 //   /api/checkout/paypal/return?funnel=jazz-midi-pack&token=<order id>&PayerID=…
+// (plus &lang=fr when the buyer paid from a translated page)
 // This takes the money, then hands them to the thank-you page, which asks
 // PayPal again whether the order paid: nothing here is trusted on its own.
 // Capturing is safe to expose: it only works on an order this server created
@@ -13,7 +14,8 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const f = await resolveFunnel(url.searchParams.get("funnel"));
   const orderId = url.searchParams.get("token");
-  if (!f || !isPayPalOrderId(orderId) || !paypalConfigured()) return redirect(f ? (f.checkout.orderPage ?? `/${f.slug}#buy`) : "/");
+  const pages = f ? checkoutPages(f, url.searchParams.get("lang")) : null;
+  if (!f || !pages || !isPayPalOrderId(orderId) || !paypalConfigured()) return redirect(pages ? pages.orderPage : "/");
 
   try {
     await paypal(`/v2/checkout/orders/${orderId}/capture`, { method: "POST", body: {} });
@@ -26,7 +28,7 @@ export async function GET(req: Request) {
       console.error("paypal capture failed", err);
     }
   }
-  return redirect(`${f.checkout.thankYou}?paypal_order=${orderId}`);
+  return redirect(`${pages.thankYou}?paypal_order=${orderId}`);
 }
 
 // Relative on purpose: the buyer arrived through the brand domain

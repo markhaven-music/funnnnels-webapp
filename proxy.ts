@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { COUNTRY_COOKIE, currencyFor, visitorCountry } from "@/lib/geo";
 import { KIT_HOME } from "@/lib/liveUrl";
+import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
 
 // funnnnels.com is the dashboard, behind ADMIN_PASSWORD. Funnels are public
 // but live on their brand's domain: m.thegrind.studio forwards /jazz-midi-pack
@@ -15,6 +16,7 @@ import { KIT_HOME } from "@/lib/liveUrl";
 const FUNNEL_HOME: Record<string, string> = {
   "jazz-midi-pack": "https://m.thegrind.studio",
   "top-hits-midi-bundle": "https://m.thegrind.studio",
+  "midi-drum-kit": "https://m.thegrind.studio",
 };
 const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
 
@@ -30,8 +32,25 @@ const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/to
 // that isn't one of the app's own routes counts as a product path: public,
 // currency-rewritten, and a 404 if no such product exists. Keep this list in
 // sync with RESERVED_SLUGS in lib/products.ts.
-const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "jazz-midi-pack", "top-hits-midi-bundle"]);
+// Funnels sold in several languages: English at /<slug>, the others at
+// /<lang>/<slug>. Their landing, order and thank-you pages are cached per
+// language (and per currency) at /<slug>/<lang>/…, see localized().
+const LOCALIZED: Record<string, readonly string[]> = { "midi-drum-kit": DRUM_KIT_LANGS };
+const LANG_PREFIXES = new Set(["fr", "it", "de", "nl", "es"]);
+
+const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", ...LANG_PREFIXES]);
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
+function localized(pathname: string): { slug: string; lang: string; page: "" | "order" | "thank-you" } | null {
+  const parts = pathname.replace(/\/$/, "").split("/");
+  const lang = LANG_PREFIXES.has(parts[1]) ? parts[1] : "en";
+  const at = lang === "en" ? 1 : 2;
+  const slug = parts[at];
+  const page = parts.slice(at + 1).join("/");
+  if (!LOCALIZED[slug]?.includes(lang) || (page !== "" && page !== "order" && page !== "thank-you")) return null;
+  return { slug, lang, page };
+}
 
 function kitSlug(pathname: string): string | null {
   const seg = pathname.split("/")[1] ?? "";
@@ -42,6 +61,7 @@ const PUBLIC = [
   /^\/p\//, // pages published from the builder
   /^\/jazz-midi-pack(\/|$)/,
   /^\/top-hits-midi-bundle(\/|$)/,
+  /^\/midi-drum-kit(\/|$)/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
   /^\/api\/checkout\/(lead|intent|paypal|paypal\/return)$/,
@@ -53,9 +73,23 @@ export function proxy(request: NextRequest) {
   const host = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
 
   const slug = kitSlug(pathname);
-  const home = FUNNEL_HOME[pathname.split("/")[1]] ?? (slug ? KIT_HOME : undefined);
+  const loc = localized(pathname);
+  const home = FUNNEL_HOME[loc?.slug ?? pathname.split("/")[1]] ?? (slug ? KIT_HOME : undefined);
   if (home && DASHBOARD_HOSTS.has(host)) {
     return NextResponse.redirect(`${home}${pathname}${request.nextUrl.search}`, 308);
+  }
+
+  if (loc) {
+    const url = request.nextUrl.clone();
+    if (loc.page === "thank-you") {
+      url.pathname = `/${loc.slug}/${loc.lang}/thank-you`;
+      return NextResponse.rewrite(url);
+    }
+    const country = visitorCountry(request.headers, request.nextUrl.searchParams.get("country"));
+    url.pathname = `/${loc.slug}/${loc.lang}${loc.page ? `/${loc.page}` : ""}/${currencyFor(country)}`;
+    const res = NextResponse.rewrite(url);
+    res.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax" });
+    return res;
   }
 
   const page = pathname.replace(/\/$/, "");

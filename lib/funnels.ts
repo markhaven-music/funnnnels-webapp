@@ -1,4 +1,6 @@
 import { funnel as jazz } from "@/app/(funnels)/jazz-midi-pack/funnel";
+import { funnel as drumKit } from "@/app/(funnels)/midi-drum-kit/funnel";
+import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import type { Currency } from "@/lib/geo";
 import { phaseAt, toCents, unitPrice, type Launch, type Money, type Phase } from "@/lib/launch";
@@ -8,8 +10,9 @@ import { getKitProduct } from "@/lib/products";
 // so prices, tags and files always come from the server, never from the visitor.
 //
 // Two kinds share one shape:
-//   code  hand-built pages with their funnel.ts: the Jazz MIDI Pack and the
-//         TOP HITS MIDI Bundle (app/(funnels)/<slug>). No launch: always full price.
+//   code  hand-built pages with their funnel.ts: the Jazz MIDI Pack, the
+//         TOP HITS MIDI Bundle and the MIDI Drum Kit (app/(funnels)/<slug>).
+//         No launch: always full price.
 //   kit   products made in the dashboard (Launches): a row in `products`, the
 //         template page in app/(funnels)/[slug], zips in Supabase Storage, and
 //         optionally a launch whose dates set the phase and the price.
@@ -31,6 +34,9 @@ export type Product = {
   checkout: { leadTags: readonly string[]; buyerTags: readonly string[]; thankYou: string; orderPage?: string };
   optin: { source: string; tags: readonly string[]; download?: string } | null;
   launch: Launch | null;
+  // Languages the pages come in. English keeps the plain addresses; the others
+  // live under /<lang> (see checkoutPages).
+  langs?: readonly string[];
 };
 
 const JAZZ: Product = {
@@ -60,7 +66,34 @@ const TOP_HITS: Product = {
   launch: null,
 };
 
-const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS };
+const DRUM_KIT: Product = {
+  kind: "code",
+  slug: drumKit.slug,
+  product: drumKit.product,
+  brand: drumKit.brand,
+  tagline: drumKit.tagline,
+  price: drumKit.price,
+  bump: null,
+  bumps: drumKit.bumps.map(({ id, name, price, pitch }) => ({ id, name, price, pitch })),
+  checkout: drumKit.checkout,
+  optin: null,
+  launch: null,
+  langs: DRUM_KIT_LANGS,
+};
+
+const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS, [DRUM_KIT.slug]: DRUM_KIT };
+
+/**
+ * The thank-you and order pages in the buyer's language: /fr/midi-drum-kit/…
+ * for a language the product has, the plain English ones otherwise.
+ */
+export function checkoutPages(f: Product, lang: unknown): { thankYou: string; orderPage: string; lang: string | null } {
+  const order = f.checkout.orderPage ?? `/${f.slug}#buy`;
+  if (typeof lang !== "string" || lang === "en" || !f.langs?.includes(lang)) {
+    return { thankYou: f.checkout.thankYou, orderPage: order, lang: null };
+  }
+  return { thankYou: `/${lang}${f.checkout.thankYou}`, orderPage: `/${lang}${order}`, lang };
+}
 
 /** Code products only (no database read). */
 export function getFunnel(slug: unknown): Product | undefined {
