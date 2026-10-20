@@ -52,13 +52,9 @@ export function FunnelCard({ f }: { f: StoredFunnel }) {
       </div>
     </>
   );
-  // Pages built in code have no editor: the card opens the live page.
-  return f.liveUrl ? (
-    <a href={f.liveUrl} target="_blank" rel="noreferrer" className="funnel" title={`Open ${f.liveUrl}`}>
-      {body}
-    </a>
-  ) : (
-    <Link href={`/funnels/${f.id}/edit`} className="funnel">
+  // The funnel's map: its pages, their live links and numbers (app/funnels/[id]).
+  return (
+    <Link href={`/funnels/${f.id}`} className="funnel">
       {body}
     </Link>
   );

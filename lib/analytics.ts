@@ -67,6 +67,7 @@ export type Metrics = {
   visitors: number; // unique visitors of the landing, per day
   orderViews: number; // … of the order page
   checkouts: number; // filled in step 1 (name + email)
+  thankYouViews: number; // … of the thank-you page
   orders: number;
   eur: number; // revenue in euros
   usd: number; // revenue in dollars
@@ -133,6 +134,7 @@ const empty = (): Metrics => ({
   visitors: 0,
   orderViews: 0,
   checkouts: 0,
+  thankYouViews: 0,
   orders: 0,
   eur: 0,
   usd: 0,
@@ -147,6 +149,7 @@ function addView(m: Metrics, page: Step, n: number) {
   if (page === "landing") m.visitors += n;
   else if (page === "order") m.orderViews += n;
   else if (page === "checkout") m.checkouts += n;
+  else if (page === "thank-you") m.thankYouViews += n;
 }
 
 function addSale(m: Metrics, s: Sale) {

@@ -3,25 +3,22 @@ import type { StoredFunnel } from "@/lib/blocks";
 
 // The funnels built in code (app/(funnels)/<slug>) on the dashboard's funnel
 // list. They have no row in the `funnels` table (only Jazz does, because its
-// sections can be edited), so they're added here, live, with a card that
-// opens the live page instead of the editor. Their visits, CVR and revenue
+// sections can be edited), so they're added here, live; every card opens the
+// funnel's map (app/funnels/[id]). Their visits, CVR and revenue
 // come from dashboard → Analytics (see withStats).
 
-type CodeCard = { id: string; name: string; liveUrl: string; image: string; steps: number };
+type CodeCard = { id: string; name: string; image: string; steps: number };
 
 const CARDS: CodeCard[] = [
   {
     id: "midi-drum-kit",
     name: "MIDI Drum Kit",
-    // English /midi-drum-kit on the brand domain is still the old Astro page.
-    liveUrl: "https://m.thegrind.studio/fr/midi-drum-kit",
     image: "/funnels/midi-drum-kit/preview.webp",
     steps: 3,
   },
   {
     id: "top-hits-midi-bundle",
     name: "TOP HITS MIDI Bundle",
-    liveUrl: "https://m.thegrind.studio/top-hits-midi-bundle",
     image: "/funnels/top-hits-midi-bundle/preview.webp",
     steps: 3,
   },
@@ -48,7 +45,6 @@ export function withCodeFunnels(funnels: StoredFunnel[]): StoredFunnel[] {
     steps: c.steps,
     on: c.steps,
     pages: [],
-    liveUrl: c.liveUrl,
     image: c.image,
   }));
   return [...code, ...funnels.map((f) => (IMAGES[f.id] ? { ...f, image: IMAGES[f.id] } : f))];

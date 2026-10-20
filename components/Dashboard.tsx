@@ -32,6 +32,11 @@ const CARD_RANGE = "28d";
 export function Dashboard({ funnels: rows }: Props) {
   const [activeNav, setActiveNav] = useState<string>("home");
   const [stats, setStats] = useState<Record<string, Metrics>>({});
+  // ?nav=analytics (from a funnel map) opens that panel.
+  useEffect(() => {
+    const nav = new URLSearchParams(window.location.search).get("nav");
+    if (nav && nav in NAV_LABELS) setActiveNav(nav);
+  }, []);
   useEffect(() => {
     fetch(`/api/analytics?range=${CARD_RANGE}`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
