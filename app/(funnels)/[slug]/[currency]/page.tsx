@@ -9,6 +9,7 @@ import { KitSectionView, type KitCtx } from "../../_kit/sections";
 import { EarlyBirdBar, LaunchClock, Phased } from "../../_kit/LaunchClock";
 import { KitSticky } from "../../_kit/KitSticky";
 import { KitTracking } from "../../_kit/KitTracking";
+import { Beacon } from "../../Beacon";
 import { BRAND } from "../../_kit/brand";
 import s from "../../jazz-midi-pack/jazz.module.css";
 
@@ -83,6 +84,7 @@ export default async function KitProductPage({ params }: { params: Promise<Param
     <main className={`${s.page} ${serif.variable}`}>
       <LaunchClock launch={product.launch} price={product.price} currency={currency} renderedAt={Date.now()}>
         <KitTracking product={product.product} value={product.price[currency]} currency={currency} />
+        <Beacon funnel={product.slug} page="landing" />
         <EarlyBirdBar />
         {sections.map((section) => (
           <Phased key={section.id} show={WAITLIST_ONLY.includes(section.type) ? ["waitlist"] : ["early", "open"]}>

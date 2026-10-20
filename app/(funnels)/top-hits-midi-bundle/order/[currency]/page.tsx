@@ -8,6 +8,7 @@ import { OrderForm } from "../../OrderForm";
 import { ReservedTimer } from "../../ReservedTimer";
 import { Check } from "../../sections";
 import { Tracking } from "../../Tracking";
+import { Beacon } from "../../../Beacon";
 import s from "../../order.module.css";
 
 // The order page, a copy of ClickFunnels' /order-top-hits-midi-bundle.
@@ -34,6 +35,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   return (
     <main className={`${s.page} ${fontVars}`}>
       <Tracking value={funnel.price[currency]} currency={currency} event={null} />
+      <Beacon funnel={funnel.slug} page="order" />
       <div className={s.redbar}>
         <b>MORE BLACK FRIDAY:</b> 90% Sale Is Ending Soon
       </div>

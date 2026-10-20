@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { loadStripe, type Appearance } from "@stripe/stripe-js";
 import { Elements, ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
+import { track } from "@/lib/beacon";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { bumpCopy } from "./copy";
 import { funnel } from "./funnel";
@@ -86,6 +87,7 @@ export function OrderForm({ currency, country, publishableKey }: Props) {
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
               pixel("InitiateCheckout", { content_name: funnel.product, value: price, currency: currency.toUpperCase() });
+              track({ funnel: funnel.slug, page: "checkout" });
             }}
           />
         </>

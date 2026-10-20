@@ -3,6 +3,7 @@ import { getOrder } from "@/lib/orders";
 import { funnel } from "../funnel";
 import { fontVars } from "../fonts";
 import { PurchasePixel } from "../Tracking";
+import { Beacon } from "../../Beacon";
 import s from "../order.module.css";
 import t from "./thanks.module.css";
 
@@ -31,6 +32,7 @@ export default async function ThankYou({
 
   return (
     <main className={`${s.page} ${fontVars}`}>
+      <Beacon funnel={funnel.slug} page="thank-you" />
       {paid && order && <PurchasePixel orderId={order.id} value={order.amount} currency={order.currency} />}
       <header className={s.header} style={{ display: "block" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}

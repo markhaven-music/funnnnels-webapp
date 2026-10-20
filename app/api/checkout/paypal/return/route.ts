@@ -1,5 +1,6 @@
 import { checkoutPages, resolveFunnel } from "@/lib/funnels";
-import { isPayPalOrderId, paypal, paypalCheckoutUrl, paypalConfigured, PayPalError } from "@/lib/paypal";
+import { recordPayPalSale } from "@/lib/analytics";
+import { isPayPalOrderId, paypal, paypalCheckoutUrl, paypalConfigured, PayPalError, type PayPalOrder } from "@/lib/paypal";
 
 export const runtime = "nodejs";
 
@@ -17,8 +18,10 @@ export async function GET(req: Request) {
   const pages = f ? checkoutPages(f, url.searchParams.get("lang")) : null;
   if (!f || !pages || !isPayPalOrderId(orderId) || !paypalConfigured()) return redirect(pages ? pages.orderPage : "/");
 
+  let captured = false;
   try {
     await paypal(`/v2/checkout/orders/${orderId}/capture`, { method: "POST", body: {} });
+    captured = true;
   } catch (err) {
     // The buyer's card or bank said no: back to PayPal to pick another source.
     if (err instanceof PayPalError && err.issue === "INSTRUMENT_DECLINED") return redirect(paypalCheckoutUrl(orderId));
@@ -26,6 +29,16 @@ export async function GET(req: Request) {
     // the thank-you page shows "not completed" with a way back to checkout.
     if (!(err instanceof PayPalError && err.issue === "ORDER_ALREADY_CAPTURED")) {
       console.error("paypal capture failed", err);
+    } else {
+      captured = true;
+    }
+  }
+  // PayPal can't list our orders, so dashboard → Analytics counts them from here.
+  if (captured) {
+    try {
+      await recordPayPalSale(await paypal<PayPalOrder>(`/v2/checkout/orders/${orderId}`), pages.lang ?? "en");
+    } catch (err) {
+      console.error("paypal sale not recorded", err);
     }
   }
   return redirect(`${pages.thankYou}?paypal_order=${orderId}`);

@@ -8,6 +8,7 @@ import { DEFAULT_SECTIONS, type Section } from "../content";
 import { SectionView, isSectionType, type Ctx } from "../sections";
 import { StickyCta } from "../StickyCta";
 import { Tracking } from "../Tracking";
+import { Beacon } from "../../Beacon";
 import s from "../jazz.module.css";
 
 // Copy rules: grind-studio-landing-pages/docs/copy-style.md ("Diretto").
@@ -74,6 +75,7 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
   return (
     <main className={`${s.page} ${serif.variable} ${display.variable}`}>
       <Tracking value={amount} currency={currency} />
+      <Beacon funnel={funnel.slug} page="landing" />
       {sections.map((section) => (
         <SectionView key={section.id} section={section} ctx={ctx} />
       ))}

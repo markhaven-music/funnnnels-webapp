@@ -95,6 +95,9 @@ export function checkoutPages(f: Product, lang: unknown): { thankYou: string; or
   return { thankYou: `/${lang}${f.checkout.thankYou}`, orderPage: `/${lang}${order}`, lang };
 }
 
+/** The hand-built funnels, in the order the dashboard lists them. */
+export const codeFunnels = (): Product[] => Object.values(CODE);
+
 /** Code products only (no database read). */
 export function getFunnel(slug: unknown): Product | undefined {
   return CODE[String(slug)];

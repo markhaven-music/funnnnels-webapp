@@ -3,6 +3,7 @@ import { Instrument_Serif } from "next/font/google";
 import { getOrder } from "@/lib/orders";
 import { funnel, unlocked } from "../funnel";
 import { PurchasePixel } from "../PurchasePixel";
+import { Beacon } from "../../Beacon";
 import s from "../jazz.module.css";
 import b from "../btn.module.css";
 
@@ -37,6 +38,7 @@ export default async function ThankYou({
 
   return (
     <main className={`${s.page} ${serif.variable}`}>
+      <Beacon funnel={funnel.slug} page="thank-you" />
       {paid && order && <PurchasePixel orderId={order.id} value={order.amount} currency={order.currency} />}
       <section className={s.hero}>
         <div className={s.heroBg} aria-hidden />

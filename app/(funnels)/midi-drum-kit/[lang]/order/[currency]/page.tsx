@@ -8,7 +8,8 @@ import s from "../../../../top-hits-midi-bundle/order.module.css";
 import d from "../../../order.module.css";
 import { copyFor } from "../../../copy";
 import { funnel } from "../../../funnel";
-import { AB_SCRIPT } from "../../../abtest";
+import { AB, AB_SCRIPT } from "../../../abtest";
+import { Beacon } from "../../../../Beacon";
 import { isLang, LANGS } from "../../../i18n";
 import { OrderForm } from "../../../OrderForm";
 import { ReservedTimer } from "../../../ReservedTimer";
@@ -48,6 +49,7 @@ export default async function OrderPage({ params }: { params: Params }) {
       {/* The button-colour test: before the buttons paint (see ../../../abtest.ts). */}
       <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
       <Tracking value={funnel.price[currency]} currency={currency} event={null} />
+      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={AB.cookie} />
       <div className={s.redbar}>
         <Rich text={t.orderTopbar} currency={currency} />
       </div>

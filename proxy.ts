@@ -64,7 +64,7 @@ const PUBLIC = [
   /^\/midi-drum-kit(\/|$)/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
-  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return)$/,
+  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view)$/,
   /^\/favicon\.ico$/,
 ];
 

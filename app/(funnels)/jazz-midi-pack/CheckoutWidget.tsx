@@ -7,6 +7,7 @@ import s from "./checkout.module.css";
 import b from "./btn.module.css";
 import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
+import { track } from "@/lib/beacon";
 import { cookieCountry } from "@/lib/geo";
 
 // The two-step order form, copied from the ClickFunnels checkout:
@@ -122,6 +123,7 @@ export function CheckoutWidget(props: Props) {
                 value: props.price,
                 currency: props.currency.toUpperCase(),
               });
+              track({ funnel: props.funnel, page: "checkout" });
             }}
           />
         ) : (

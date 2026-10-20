@@ -4,6 +4,7 @@ import { Instrument_Serif } from "next/font/google";
 import { resolveFunnel } from "@/lib/funnels";
 import { getOrder } from "@/lib/orders";
 import { KitPurchasePixel } from "../../_kit/KitTracking";
+import { Beacon } from "../../Beacon";
 import { BRAND } from "../../_kit/brand";
 import s from "../../jazz-midi-pack/jazz.module.css";
 import b from "../../jazz-midi-pack/btn.module.css";
@@ -36,6 +37,7 @@ export default async function KitThankYou({
 
   return (
     <main className={`${s.page} ${serif.variable}`}>
+      <Beacon funnel={f.slug} page="thank-you" />
       {paid && order && <KitPurchasePixel product={f.product} orderId={order.id} value={order.amount} currency={order.currency} />}
       <section className={s.hero}>
         <div className={s.heroBg} aria-hidden />

@@ -7,6 +7,7 @@ import { funnel } from "../../funnel";
 import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content";
 import { Checkout, OrderSummary, Shield, fill, isSectionType, type Ctx } from "../../sections";
 import { Tracking } from "../../Tracking";
+import { Beacon } from "../../../Beacon";
 import s from "../../jazz.module.css";
 
 const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif" });
@@ -57,6 +58,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   return (
     <main className={`${s.page} ${serif.variable}`}>
       <Tracking value={amount} currency={currency} page="order" />
+      <Beacon funnel={funnel.slug} page="order" />
       <div className={s.topband}>
         <header className={`${s.wrap} ${s.topbar}`}>
           <a href={`/${funnel.slug}`} className={s.logo} style={{ textDecoration: "none" }}>

@@ -10,6 +10,7 @@ import { Faq } from "../Faq";
 import { StockDate } from "../StockDate";
 import { Tracklist } from "../Tracklist";
 import { Tracking } from "../Tracking";
+import { Beacon } from "../../Beacon";
 import { Wistia } from "../Wistia";
 import s from "../landing.module.css";
 
@@ -41,6 +42,7 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
   return (
     <main className={`${s.page} ${fontVars}`}>
       <Tracking value={funnel.price[currency]} currency={currency} />
+      <Beacon funnel={funnel.slug} page="landing" />
       <div className={s.topbar}>MORE BLACK FRIDAY: 90% Sale Ends Soon</div>
 
       <section className={s.hero}>

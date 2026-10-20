@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { loadStripe, type Appearance } from "@stripe/stripe-js";
 import { Elements, ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
-import { readVariant } from "./abtest";
+import { track } from "@/lib/beacon";
+import { AB, readVariant } from "./abtest";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { Rich } from "../top-hits-midi-bundle/Rich";
 import s from "../top-hits-midi-bundle/order.module.css";
@@ -92,6 +93,7 @@ export function OrderForm({ lang, currency, country, publishableKey }: Props) {
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
               pixel("InitiateCheckout", { content_name: funnel.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant() });
+              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: AB.cookie });
             }}
           />
         </>
@@ -233,6 +235,7 @@ function CardPay(props: PayState) {
         ...props.info,
         bumps: props.picked,
         variant: readVariant(),
+        lang: props.lang,
         waiver: europe,
         country: cookieCountry(props.currency, props.country),
         expected: props.total,

@@ -67,6 +67,8 @@ export async function POST(req: Request) {
         withdrawal_waiver: body.waiver === true ? "accepted" : "",
         // The A/B test variant the buyer saw (e.g. the button colour), if any.
         variant: cleanVariant(body.variant),
+        // The page's language ("fr" for /fr/midi-drum-kit), for Analytics.
+        lang: typeof body.lang === "string" && f.langs?.includes(body.lang) ? body.lang : "en",
       },
     });
     return NextResponse.json({ clientSecret: intent.client_secret });

@@ -8,6 +8,8 @@ import { copyFor } from "../../copy";
 import { funnel } from "../../funnel";
 import { isLang, paths } from "../../i18n";
 import { PurchasePixel } from "../../Tracking";
+import { AB } from "../../abtest";
+import { Beacon } from "../../../Beacon";
 
 // proxy.ts rewrites /midi-drum-kit/thank-you and /<lang>/midi-drum-kit/thank-you here.
 export const dynamic = "force-dynamic";
@@ -44,6 +46,7 @@ export default async function ThankYou({
 
   return (
     <main className={`${s.page} ${fontVars}`} lang={lang}>
+      <Beacon funnel={funnel.slug} page="thank-you" lang={lang} abCookie={AB.cookie} />
       {paid && order && <PurchasePixel orderId={order.id} value={order.amount} currency={order.currency} />}
       <header className={s.header} style={{ display: "block" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
