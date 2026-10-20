@@ -161,11 +161,12 @@ function script(offerId: string, lang: Lang, next: string): string {
     fetch('/api/checkout/upsell', {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ funnel: C.funnel, offer: C.offer, order: main[1], lang: C.lang, bought: bought, variant: cookie(C.ab), ft_vid: cookie('ft_vid') })
-    }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (r) {
+    }).then(function (res) { return res.json().catch(function () { return {}; }).then(function (r) { r.code = res.status; return r; }); }).then(function (r) {
       if (r.status === 'paid') return go(r.id);
       if (r.status === 'action') return stripeAction(r, a);
       if (r.status === 'paypal') return (location.href = r.url);
-      reset(a); say(a, r.error || C.ui.failed);
+      // The server's words are English (Stripe's reason for a declined card too).
+      reset(a); say(a, C.lang === 'en' && r.error ? r.error : r.code === 400 ? C.ui.noOrder : C.ui.failed);
     }).catch(function () { reset(a); say(a, C.ui.failed); });
   }, true);
 
