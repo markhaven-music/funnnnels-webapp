@@ -7,6 +7,7 @@ import { cookieCountry, type Currency } from "@/lib/geo";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { Rich } from "../top-hits-midi-bundle/Rich";
 import s from "../top-hits-midi-bundle/order.module.css";
+import d from "./order.module.css";
 import { copyFor, type Copy } from "./copy";
 import { funnel } from "./funnel";
 import { money as fmt, paths, type Lang } from "./i18n";
@@ -294,7 +295,12 @@ function CardPay(props: PayState) {
             layout: "tabs",
             wallets: { applePay: "never", googlePay: "never", link: "never" },
             defaultValues: {
-              billingDetails: { email: props.info.email, name: `${props.info.firstName} ${props.info.lastName}`.trim() },
+              billingDetails: {
+                email: props.info.email,
+                name: `${props.info.firstName} ${props.info.lastName}`.trim(),
+                // Stripe guesses the country field and often guesses wrong.
+                address: { country: cookieCountry(props.currency, props.country) },
+              },
             },
           }}
         />
@@ -369,8 +375,8 @@ function PayBody({
         const on = picked.includes(b.id);
         return (
           <label key={b.id} className={`${s.bump} ${on ? s.bumpOn : ""}`}>
-            <span className={s.bumpHead}>
-              <span className={s.bumpArrow} aria-hidden>
+            <span className={`${s.bumpHead} ${d.bumpHead}`}>
+              <span className={`${s.bumpArrow} ${d.bumpArrow}`} aria-hidden>
                 <svg viewBox="0 0 448 512" width="14" height="14">
                   <path
                     fill="currentColor"

@@ -132,3 +132,11 @@
     font-size: 9px;
   }
 }
+
+/* ── order bumps: arrow, tick box and headline start on the left ── */
+.bumpHead {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+}
+.bumpArrow {
+  justify-self: start;
+}

@@ -120,6 +120,19 @@ const FIXES = `
 /* funnnnels: without ClickFunnels' scripts the Wistia iframe keeps its 640x360
    attributes; give it the full width at 16:9 as their fitvids did. */
 .elVideo iframe.wistia_embed{width:100%;height:auto;aspect-ratio:16/9;display:block}
+/* funnnnels, fixes over ClickFunnels' own layout (it has the same faults):
+   buttons have 100px side padding and text that never wraps, so on tablet
+   widths and with longer translations they stick out of their box. */
+.elButton{max-width:100%;box-sizing:border-box}
+.elButton .elButtonMainText,.elButton .elButtonSub{white-space:normal}
+@media (max-width:1100px){#glass-btn.elBTN a.elButton,#glass-btn-white.elBTN a.elButton,.elBTN a.elButton{padding-left:24px!important;padding-right:24px!important}}
+/* The desktop row of producer logos: each logo is a percentage of a narrow
+   column, so they shrink to a few pixels below ~1200px. Fixed size instead,
+   and room for the label on the left. */
+.id-6Z-XnX8GG-357 .elImageWrapper{width:min(140px,8vw)!important;flex:none}
+.id-6Z-XnX8GG-357 .elImageWrapper img{width:100%!important;height:auto!important}
+@media (max-width:1000px){.id-6Z-XnX8GG-357>*{flex:1 1 0!important;min-width:0!important;width:auto!important;padding-left:4px!important;padding-right:4px!important}.id-6Z-XnX8GG-357>:first-child{flex:0 0 110px!important}.id-6Z-XnX8GG-357 .elImageWrapper{margin:0 auto}}
+.id-6Z-XnX8GG-357 [data-page-element="Headline/V1"],.id-6Z-XnX8GG-357 [data-page-element="SubHeadline/V1"],.id-6Z-XnX8GG-357 [data-page-element="Paragraph/V1"]{min-width:120px}
 `;
 let out = template.replace("</head>", `<style>${FIXES}</style>\n{{HEAD}}\n</head>`);
 out = out.replace("</body>", "{{BODY}}\n</body>");
