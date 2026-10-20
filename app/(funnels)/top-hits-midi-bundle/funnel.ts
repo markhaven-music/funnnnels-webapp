@@ -55,13 +55,13 @@ export const funnel = {
       pitch: "32 packs, 320 MIDI transcriptions of famous drum beats.",
     },
   ],
-  // Paid zips in the private Supabase bucket "product-files" (lib/products.ts
-  // BUCKET), handed out as 60-second signed links once the payment is confirmed.
+  // Paid zips in Cloudflare R2 (lib/r2.ts; copied from the ClickFunnels
+  // downloads), handed out as 10-minute links once the payment is confirmed.
   files: {
     pack: "top-hits-midi-bundle/TOP HITS MIDI Bundle.zip",
-    "emotional-keys": "top-hits-midi-bundle/Emotional Keys MIDI Bundle.zip",
-    hustle: "top-hits-midi-bundle/HUSTLE MIDI Bundle.zip",
-    "famous-beats": "top-hits-midi-bundle/Famous Beats Bundle.zip",
+    "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
+    hustle: "shared/HUSTLE MIDI Bundle.zip",
+    "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
   },
   checkout: {
     leadTags: ["checkout-started"],

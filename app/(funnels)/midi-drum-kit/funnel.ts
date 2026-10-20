@@ -55,15 +55,22 @@ export const funnel = {
       pitch: "The chord progressions of 750 of the best songs, plus the Chord Progressions Bible, Drum Loops and 3 Emotional Keys packs.",
     },
   ],
-  // Paid zips in the private Supabase bucket "product-files" (lib/products.ts
-  // BUCKET), handed out as 60-second signed links once the payment is confirmed.
-  // HUSTLE is the same zip the TOP HITS funnel sells.
+  // Paid zips in Cloudflare R2 (lib/r2.ts; copied from the ClickFunnels
+  // downloads), handed out as 10-minute links once the payment is confirmed.
+  // HUSTLE is the same zip the TOP HITS funnel sells; the Chord Progressions
+  // Bundle is three zips the Jazz funnel also gives (its bonuses).
   files: {
-    pack: "midi-drum-kit/MIDI Drum Kit.zip",
-    expansions: "midi-drum-kit/MIDI Drum Kit Expansions.zip",
-    hustle: "top-hits-midi-bundle/HUSTLE MIDI Bundle.zip",
-    chords: "midi-drum-kit/Chord Progressions Bundle.zip",
+    pack: "midi-drum-kit/MIDI Drum Kit - Bundle.zip",
+    expansions: "midi-drum-kit/EXPLORER Expansions (House, Lofi, Afrobeat).zip",
+    hustle: "shared/HUSTLE MIDI Bundle.zip",
+    chords: "jazz-midi-pack/The Chord Progressions Bible.zip",
+    "drum-loops": "jazz-midi-pack/Drum Loops for Songwriting.zip",
+    "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
   },
+  // Files an add-on brings beyond its own (its key in `files`).
+  includes: { chords: ["drum-loops", "emotional-keys"] } as Record<string, readonly string[]>,
+  // Download labels for the files that aren't the pack or an add-on.
+  fileNames: { "drum-loops": "Drum Loops for Songwriting", "emotional-keys": "Emotional Keys MIDI Bundle" } as Record<string, string>,
   checkout: {
     leadTags: ["checkout-started"],
     buyerTags: ["buyer", "buyer-midi-drum-kit"],
@@ -72,3 +79,6 @@ export const funnel = {
     orderPage: "/midi-drum-kit/order",
   },
 } as const;
+
+/** Everything an order's items unlock: each item and the files it includes. */
+export const unlocked = (items: readonly string[]) => [...new Set(items.flatMap((i) => [i, ...(funnel.includes[i] ?? [])]))];

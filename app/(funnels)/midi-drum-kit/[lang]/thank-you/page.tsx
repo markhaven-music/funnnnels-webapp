@@ -6,7 +6,7 @@ import { fontVars } from "../../../top-hits-midi-bundle/fonts";
 import s from "../../../top-hits-midi-bundle/order.module.css";
 import t from "../../../top-hits-midi-bundle/thank-you/thanks.module.css";
 import { copyFor } from "../../copy";
-import { funnel } from "../../funnel";
+import { funnel, unlocked } from "../../funnel";
 import { isLang, paths } from "../../i18n";
 import { PurchasePixel } from "../../Tracking";
 import { AB } from "../../abtest";
@@ -26,6 +26,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 const LABELS: Record<string, string> = {
   pack: funnel.product,
   ...Object.fromEntries(funnel.bumps.map((b) => [b.id, b.name])),
+  ...funnel.fileNames,
 };
 
 // Stripe sends the buyer here with ?payment_intent=pi_…, PayPal's return with
@@ -60,7 +61,7 @@ export default async function ThankYou({
         <p className={t.lead}>{paid ? c.paidLead : pending ? c.pendingLead : c.failedLead}</p>
         {paid && order && (
           <div className={t.list}>
-            {order.items.map((key) => (
+            {unlocked(order.items).map((key) => (
               <a key={key} className={key === "pack" ? `${s.orange} ${t.btn}` : t.ghost} href={`/${funnel.slug}/download?order=${order.id}&file=${key}`}>
                 {c.download} {LABELS[key] ?? key}
               </a>

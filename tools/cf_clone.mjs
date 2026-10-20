@@ -5,19 +5,31 @@
 //   - every piece of text tagged data-t="tNNN" and written to <copy>/en.json,
 //     so each language only needs its own JSON (same keys, translated HTML).
 //
-//   node tools/cf_clone.mjs <cf page url> <out dir> <copy dir>
+//   node tools/cf_clone.mjs <cf page url> <out dir> <copy dir> [--oto <name>]
 //
 // Needs puppeteer-core and Chrome (the DOM work runs in a headless browser on
 // the page's server HTML, with ClickFunnels' scripts stripped first). Used for
 // app/(funnels)/midi-drum-kit: out = app/(funnels)/midi-drum-kit/cf (writes template.ts),
 // copy = app/(funnels)/midi-drum-kit/copy/landing.
+//
+// --oto <name>: a one-click upsell page (writes <out>/<name>.ts, <copy>/en.json).
+// Its "Okay, add to my order" buttons become {{YES}} and the "No thanks" links
+// {{NO}}; the page's own custom HTML/JS blocks keep their scripts (their
+// inline code becomes {{sNNN}}, so a language can translate the strings in
+// it), the text inside them is tagged like the rest, and images ClickFunnels
+// has that we don't are downloaded into public/funnels/midi-drum-kit as
+// up-<id>.webp. The page's checkout pop-up (shipping, card) is dropped:
+// the charge happens on our server.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import puppeteer from "puppeteer-core";
 
 const [url, outDir, copyDir] = process.argv.slice(2);
-if (!url || !outDir || !copyDir) throw new Error("usage: node tools/cf_clone.mjs <url> <outDir> <copyDir>");
+if (!url || !outDir || !copyDir) throw new Error("usage: node tools/cf_clone.mjs <url> <outDir> <copyDir> [--oto <name>]");
+const OTO = process.argv.includes("--oto") ? process.argv[process.argv.indexOf("--oto") + 1] : null;
 const ORIGIN = new URL(url).origin;
+const PUBLIC_DIR = new URL("../public/funnels/midi-drum-kit/", import.meta.url).pathname;
 
 // ClickFunnels image id → our file in /public/funnels/midi-drum-kit (made by
 // the same session's converter: webp, animated webp for the GIFs).
@@ -45,7 +57,10 @@ const IMAGES = {
 let html = await (await fetch(url, { headers: { "user-agent": "Mozilla/5.0" } })).text();
 
 // ── text-level cleanup, before the DOM ──
-html = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+// On upsell pages the page's own blocks (class="id-6Z-…", inside custom
+// HTML/JS) and Wistia's player stay; ClickFunnels' platform scripts go.
+const keep = (open) => OTO && (/class="id-6Z-/.test(open) || /src="https:\/\/fast\.wistia\.com\//.test(open));
+html = html.replace(/(<script\b[^>]*>)[\s\S]*?<\/script>/g, (whole, open) => (keep(open) ? whole : ""));
 html = html.replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/g, "");
 html = html.replace(/\sintegrity="[^"]*"/g, "");
 // ClickFunnels' own stylesheets: fetched now, inlined below (no request to their servers at runtime).
@@ -60,17 +75,30 @@ html = html.replace(/<link[^>]+video-js[^>]*>/g, "");
 html = html.replace(
   /(?:https:\/\/images\.clickfunnels\.com\/cdn-cgi\/image\/[^/]+\/)?https:\/\/statics\.myclickfunnels\.com\/workspace\/[^/]+\/image\/(\d+)\/file\/[0-9a-f]+\.(?:png|jpe?g|webp|gif)/g,
   (whole, id) => {
-    if (!IMAGES[id]) throw new Error(`no local image for ClickFunnels image ${id}`);
-    return `${IMG}${IMAGES[id]}.webp`;
+    if (IMAGES[id]) return `${IMG}${IMAGES[id]}.webp`;
+    if (!OTO) throw new Error(`no local image for ClickFunnels image ${id}`);
+    fetchImage(id, whole.replace(/^https:\/\/images\.clickfunnels\.com\/cdn-cgi\/image\/[^/]+\//, ""));
+    return `${IMG}up-${id}.webp`;
   },
 );
+
+// An image we don't have yet → public/funnels/midi-drum-kit/up-<id>.webp (GIFs stay animated).
+function fetchImage(id, src) {
+  const out = `${PUBLIC_DIR}up-${id}.webp`;
+  if (existsSync(out)) return;
+  const tmp = `/tmp/cf-img-${id}${src.slice(src.lastIndexOf("."))}`;
+  execFileSync("curl", ["-sL", "--fail", src, "-o", tmp]);
+  if (tmp.endsWith(".gif")) execFileSync("gif2webp", ["-quiet", "-q", "80", tmp, "-o", out]);
+  else execFileSync("cwebp", ["-quiet", "-q", "82", "-resize", "1600", "0", tmp, "-o", out]);
+  console.log("image", id, "→", out);
+}
 const left = html.match(/https?:\/\/[^"' )]*(clickfunnels|myclickfunnels)[^"' )]*/g) ?? [];
 if (left.length) console.warn("still pointing at ClickFunnels:", [...new Set(left)].slice(0, 10));
 
 const browser = await puppeteer.launch({ executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", headless: "new" });
 const page = await browser.newPage();
 await page.setJavaScriptEnabled(false);
-await page.setContent(html, { waitUntil: "domcontentloaded" });
+await page.setContent(OTO ? html.replace("<html", "<html data-oto") : html, { waitUntil: "domcontentloaded" });
 
 const { template, strings, stray } = await page.evaluate(() => {
   const d = document;
@@ -78,8 +106,16 @@ const { template, strings, stray } = await page.evaluate(() => {
   d.querySelectorAll('[data-page-element="Modal/V1"], .otoloading, img[src*="facebook.com/tr"], link[rel="preload"], link[rel="prefetch"], meta[name="csrf-token"], meta[name="csrf-param"]').forEach((e) => e.remove());
   // lazysizes: real src straight away.
   d.querySelectorAll("img[data-src]").forEach((i) => { i.setAttribute("src", i.getAttribute("data-src")); i.removeAttribute("data-src"); i.classList.remove("lazyload"); i.setAttribute("loading", "lazy"); });
-  // The CTAs → our order page.
-  d.querySelectorAll('a[href*="next_funnel_step"]').forEach((a) => { a.setAttribute("href", "{{ORDER}}"); a.setAttribute("data-cta", ""); });
+  const oto = document.documentElement.hasAttribute("data-oto");
+  if (oto) {
+    // One-click upsell: "Okay, add to my order" and "No thanks".
+    d.querySelectorAll('[data-page-element="Checkout/V2"], [data-page-element="CheckoutLoading/V1"]').forEach((e) => e.remove());
+    d.querySelectorAll('a[href="#submit-oto"]').forEach((a) => { a.setAttribute("href", "{{YES}}"); a.setAttribute("data-oto", "yes"); });
+    d.querySelectorAll('a[href*="next_funnel_step"]').forEach((a) => { a.setAttribute("href", "{{NO}}"); a.setAttribute("data-oto", "no"); });
+  } else {
+    // The CTAs → our order page.
+    d.querySelectorAll('a[href*="next_funnel_step"]').forEach((a) => { a.setAttribute("href", "{{ORDER}}"); a.setAttribute("data-cta", ""); });
+  }
 
   // Text containers, in page order.
   const sel = [
@@ -91,20 +127,47 @@ const { template, strings, stray } = await page.evaluate(() => {
   ].join(",");
   const strings = {};
   let n = 0;
-  for (const el of d.querySelectorAll(sel)) {
-    if (el.parentElement.closest("[data-t]")) continue;
-    if (!el.textContent.trim()) continue;
+  const tag = (el) => {
     const key = `t${String(++n).padStart(3, "0")}`;
     el.setAttribute("data-t", key);
     strings[key] = el.innerHTML.trim();
     el.innerHTML = `{{${key}}}`;
+  };
+  // Upsell pages: the text inside the custom HTML blocks, one entry per
+  // smallest block that holds it (a paragraph with its <strong>s and all).
+  const BLOCK = "P,DIV,H1,H2,H3,H4,H5,H6,LI,UL,OL,TABLE,TR,TD,TH,SECTION,BLOCKQUOTE,BUTTON,LABEL";
+  const isBlock = (e) => BLOCK.split(",").includes(e.tagName);
+  const ownText = (e) => [...e.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim());
+  const inCustom = (e) => Boolean(e.closest(".elCustomHtmlJsCode"));
+  for (const el of d.querySelectorAll(sel + (oto ? ", .elCustomHtmlJsCode *" : ""))) {
+    if (el.parentElement.closest("[data-t]")) continue;
+    if (!el.textContent.trim()) continue;
+    if (oto && inCustom(el) && !el.matches(sel)) {
+      if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.closest("script, style")) continue;
+      // The smallest block with text of its own, not a wrapper of other blocks.
+      if (!ownText(el) || [...el.querySelectorAll("*")].some(isBlock)) continue;
+    }
+    tag(el);
   }
+  // The custom blocks' inline scripts (tracklists, FAQs, comparison tables):
+  // whole, as {{sNNN}}, so a language can translate the strings inside.
+  const scripts = {};
+  let m = 0;
+  if (oto) {
+    for (const sc of d.querySelectorAll(".elCustomHtmlJsCode script:not([src])")) {
+      const key = `s${String(++m).padStart(3, "0")}`;
+      scripts[key] = sc.textContent;
+      sc.textContent = `{{${key}}}`;
+    }
+  }
+  Object.assign(strings, scripts);
   // Text left outside any container: reported, so nothing English slips through.
   const stray = [];
   const walk = d.createTreeWalker(d.body, NodeFilter.SHOW_TEXT);
   for (let t; (t = walk.nextNode()); ) {
     if (t.textContent.trim() && !t.parentElement.closest("[data-t], style, script")) stray.push(t.textContent.trim().slice(0, 80));
   }
+  d.documentElement.removeAttribute("data-oto");
   d.title = "{{TITLE}}";
   d.documentElement.setAttribute("lang", "{{LANG}}");
   let desc = d.querySelector('meta[name="description"]');
@@ -140,10 +203,12 @@ out = out.replace("</body>", "{{BODY}}\n</body>");
 mkdirSync(outDir, { recursive: true });
 mkdirSync(copyDir, { recursive: true });
 writeFileSync(
-  `${outDir}/template.ts`,
+  `${outDir}/${OTO ?? "template"}.ts`,
   `// Generated by tools/cf_clone.mjs from ${url}. Don't edit by hand: re-run the\n` +
     `// tool. ClickFunnels' page with its scripts stripped; {{tNNN}} are the texts\n` +
-    `// (copy/landing/<lang>.json), {{ORDER}} the order page, the rest in ../page.ts.\n` +
+    (OTO
+      ? `// and {{sNNN}} the page's own scripts (${copyDir.split("/").slice(-2).join("/")}/<lang>.json), {{YES}} / {{NO}} the offer's buttons.\n`
+      : `// (copy/landing/<lang>.json), {{ORDER}} the order page, the rest in ../page.ts.\n`) +
     `export const TEMPLATE = ${JSON.stringify(out)};\n`,
 );
 writeFileSync(`${copyDir}/en.json`, JSON.stringify(strings, null, 2) + "\n");
