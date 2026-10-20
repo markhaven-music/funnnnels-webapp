@@ -2,9 +2,8 @@
 
 Every funnel page is built to score 90+ on Google PageSpeed **mobile**. A slow
 landing loses buyers before the first word is read. These are the rules, learnt
-on the MIDI Drum Kit landing: a ClickFunnels clone that went from 59 (LCP 9.2 s)
-to 82 so far
-(LCP 3.5 s). The rest is in rule 11.
+on the MIDI Drum Kit landing, a ClickFunnels clone. It went from 59 (LCP 9.2 s)
+to 82 (LCP 3.5 s) so far; rule 11 is what's left.
 
 ## How to measure
 
