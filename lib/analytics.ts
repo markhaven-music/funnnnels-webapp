@@ -71,6 +71,13 @@ export type Metrics = {
   eur: number; // revenue in euros
   usd: number; // revenue in dollars
   revenue: number; // both, in euros
+  // The orders and revenue since visitors were first counted, for the rates
+  // (orders / visitors, revenue / visitor): Stripe remembers older sales, the
+  // visitor count doesn't go back that far.
+  ratedOrders: number;
+  ratedEur: number;
+  ratedUsd: number;
+  ratedRevenue: number;
 };
 
 export type FunnelStats = {
@@ -99,6 +106,8 @@ export type TestStats = {
 export type Analytics = {
   range: Range;
   since: string | null;
+  /** The first day any visitor was counted. */
+  trackingSince: string | null;
   usdToEur: number;
   funnels: FunnelStats[];
   test: TestStats | null;
@@ -106,7 +115,7 @@ export type Analytics = {
   errors: string[];
 };
 
-type Sale = { funnel: string; lang: string; variant: string; amount: number; currency: string; created: number };
+type Sale = { funnel: string; lang: string; variant: string; amount: number; currency: string; created: number; rated?: boolean };
 type ViewRow = { funnel: string; page: Step; lang: string; variant: string; views: number };
 
 const DAY = 86_400_000;
@@ -120,7 +129,19 @@ function sinceDay(range: Range, now = Date.now()): string | null {
   return new Date(now - (days - 1) * DAY).toISOString().slice(0, 10);
 }
 
-const empty = (): Metrics => ({ visitors: 0, orderViews: 0, checkouts: 0, orders: 0, eur: 0, usd: 0, revenue: 0 });
+const empty = (): Metrics => ({
+  visitors: 0,
+  orderViews: 0,
+  checkouts: 0,
+  orders: 0,
+  eur: 0,
+  usd: 0,
+  revenue: 0,
+  ratedOrders: 0,
+  ratedEur: 0,
+  ratedUsd: 0,
+  ratedRevenue: 0,
+});
 
 function addView(m: Metrics, page: Step, n: number) {
   if (page === "landing") m.visitors += n;
@@ -132,6 +153,10 @@ function addSale(m: Metrics, s: Sale) {
   m.orders += 1;
   if (s.currency === "eur") m.eur += s.amount;
   if (s.currency === "usd") m.usd += s.amount;
+  if (!s.rated) return;
+  m.ratedOrders += 1;
+  if (s.currency === "eur") m.ratedEur += s.amount;
+  if (s.currency === "usd") m.ratedUsd += s.amount;
 }
 
 async function viewTotals(since: string | null): Promise<ViewRow[]> {
@@ -218,15 +243,18 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
   ].map((f) => ({ ...f, url: `${KIT_HOME}/${f.slug}` }));
 
   const hasStripe = stripeConfigured();
-  const [views, allViews, rate, testStart, paypal, ...stripeLists] = await Promise.all([
+  const [views, allViews, rate, trackingSince, testStart, paypal, ...stripeLists] = await Promise.all([
     soft("visitors", viewTotals(since), []),
     range === "all" ? Promise.resolve(null) : soft("visitors (all time)", viewTotals(null), []),
     usdToEur(),
-    soft("test start", firstTestDay(), null),
+    soft("tracking start", firstDay(), null),
+    soft("test start", firstDay("midi-drum-kit"), null),
     soft("PayPal orders", paypalSales(), []),
     ...list.map((f) => (hasStripe ? soft(`Stripe orders (${f.slug})`, stripeSales(f.slug), []) : Promise.resolve([] as Sale[]))),
   ]);
   const allSales = [...paypal, ...stripeLists.flat()];
+  const ratedFrom = trackingSince ? Date.parse(`${trackingSince}T00:00:00Z`) : Infinity;
+  for (const s of allSales) s.rated = s.created >= ratedFrom;
   const sales = allSales.filter((s) => s.created >= sinceMs);
 
   const funnels: FunnelStats[] = list.map((f) => {
@@ -257,6 +285,7 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
   return {
     range,
     since,
+    trackingSince,
     usdToEur: rate,
     funnels,
     test: buttonTest(allViews ?? views, allSales, rate, testStart, now),
@@ -266,21 +295,19 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
 }
 
 function withRevenue(m: Metrics, rate: number): Metrics {
-  return { ...m, revenue: m.eur + m.usd * rate };
+  return { ...m, revenue: m.eur + m.usd * rate, ratedRevenue: m.ratedEur + m.ratedUsd * rate };
 }
 
 // ─── the A/B test ──────────────────────────────────────────────
 
-/** The first day the MIDI Drum Kit button-colour test (app/(funnels)/midi-drum-kit/abtest.ts) counted a visitor. */
-async function firstTestDay(): Promise<string | null> {
-  const { data, error } = await supabase()
-    .from("page_views")
-    .select("day")
-    .eq("funnel", "midi-drum-kit")
-    .neq("variant", "")
-    .order("day")
-    .limit(1)
-    .maybeSingle();
+/**
+ * The first day a visitor was counted: on any funnel, or with an A/B variant
+ * on this one (the MIDI Drum Kit button-colour test, app/(funnels)/midi-drum-kit/abtest.ts).
+ */
+async function firstDay(testFunnel?: string): Promise<string | null> {
+  let q = supabase().from("page_views").select("day");
+  if (testFunnel) q = q.eq("funnel", testFunnel).neq("variant", "");
+  const { data, error } = await q.order("day").limit(1).maybeSingle();
   if (error) throw error;
   return data?.day ?? null;
 }

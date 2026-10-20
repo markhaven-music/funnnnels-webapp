@@ -132,6 +132,12 @@ export type StoredFunnel = {
   pages: Page[];
   /** Snapshot taken by "Publish": what visitors see. Edits stay draft until the next publish. */
   publishedPages?: Page[] | null;
+  /** A page built in code (lib/codeFunnels.ts): its card opens this live URL, not the editor. */
+  liveUrl?: string;
+  /** A picture of the product for the card, instead of the generated thumbnail. */
+  image?: string;
+  /** What the numbers on the card cover, e.g. "28d". */
+  statsRange?: string;
 };
 
 export function defaultProps<T extends BlockType>(

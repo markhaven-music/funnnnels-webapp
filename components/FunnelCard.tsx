@@ -4,10 +4,15 @@ import type { StoredFunnel } from "@/lib/blocks";
 
 export function FunnelCard({ f }: { f: StoredFunnel }) {
   const stages = Array.from({ length: f.steps }, (_, i) => i < f.on);
-  return (
-    <Link href={`/funnels/${f.id}/edit`} className="funnel">
+  const body = (
+    <>
       <div className="thumb">
-        <FunnelThumb palette={f.palette} />
+        {f.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="funnel-thumb-img" src={f.image} alt="" loading="lazy" />
+        ) : (
+          <FunnelThumb palette={f.palette} />
+        )}
         <div className="funnel-thumb-tag">{f.type}</div>
         <div className="funnel-thumb-watermark">{f.tag}</div>
       </div>
@@ -28,7 +33,7 @@ export function FunnelCard({ f }: { f: StoredFunnel }) {
             <b>{f.cvr}</b> cvr
           </span>
           <span className="pip" />
-          <span>upd {f.updated}</span>
+          <span>{f.statsRange ?? `upd ${f.updated}`}</span>
         </div>
       </div>
       <div className="funnel-foot">
@@ -45,6 +50,16 @@ export function FunnelCard({ f }: { f: StoredFunnel }) {
           )}
         </div>
       </div>
+    </>
+  );
+  // Pages built in code have no editor: the card opens the live page.
+  return f.liveUrl ? (
+    <a href={f.liveUrl} target="_blank" rel="noreferrer" className="funnel" title={`Open ${f.liveUrl}`}>
+      {body}
+    </a>
+  ) : (
+    <Link href={`/funnels/${f.id}/edit`} className="funnel">
+      {body}
     </Link>
   );
 }

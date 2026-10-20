@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Brand } from "@/components/Brand";
 import { DashboardHome } from "@/components/DashboardHome";
 import { MainPanel } from "@/components/MainPanel";
@@ -16,7 +16,9 @@ import { LandingPagesPanel } from "@/components/panels/LandingPagesPanel";
 import { LaunchesPanel } from "@/components/panels/LaunchesPanel";
 import { SettingsPanel } from "@/components/panels/SettingsPanel";
 import { NAV } from "@/lib/data";
+import type { Analytics, Metrics } from "@/lib/analytics";
 import type { StoredFunnel } from "@/lib/blocks";
+import { withStats } from "@/lib/codeFunnels";
 
 const NAV_LABELS: Record<string, string> = Object.fromEntries(
   NAV.flatMap((s) => s.items.map((it) => [it.id, it.label])),
@@ -24,8 +26,19 @@ const NAV_LABELS: Record<string, string> = Object.fromEntries(
 
 type Props = { funnels: StoredFunnel[] };
 
-export function Dashboard({ funnels }: Props) {
+// The cards' visits, CVR and revenue: the last 28 days from dashboard → Analytics.
+const CARD_RANGE = "28d";
+
+export function Dashboard({ funnels: rows }: Props) {
   const [activeNav, setActiveNav] = useState<string>("home");
+  const [stats, setStats] = useState<Record<string, Metrics>>({});
+  useEffect(() => {
+    fetch(`/api/analytics?range=${CARD_RANGE}`, { cache: "no-store" })
+      .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
+      .then((a) => a && setStats(Object.fromEntries(a.funnels.map((f) => [f.slug, f.total]))))
+      .catch(() => {});
+  }, []);
+  const funnels = useMemo(() => withStats(rows, stats, CARD_RANGE), [rows, stats]);
   const topBarLabel = NAV_LABELS[activeNav] ?? "Dashboard";
 
   return (

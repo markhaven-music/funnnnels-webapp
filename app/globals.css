@@ -886,6 +886,20 @@ button {
   color: var(--fg-3);
   letter-spacing: 0.04em;
 }
+/* a product picture on code funnels' cards (lib/codeFunnels.ts) */
+.funnel-thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px 0;
+  background: radial-gradient(ellipse at 50% 60%, oklch(0.82 0.16 75 / 0.16), transparent 70%);
+  filter: drop-shadow(0 8px 18px oklch(0 0 0 / 0.45));
+}
+.funnel-thumb-img ~ .funnel-thumb-watermark {
+  display: none;
+}
 .funnel-thumb-tag {
   position: absolute;
   top: 10px;

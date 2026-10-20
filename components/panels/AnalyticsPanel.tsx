@@ -22,7 +22,7 @@ const int = (n: number) => n.toLocaleString("en-US");
 const eur = (n: number, cents = false) =>
   new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0 }).format(n);
 const pct = (part: number, whole: number) => (whole > 0 ? `${((part / whole) * 100).toFixed(part / whole < 0.1 ? 1 : 0)}%` : "—");
-const perVisitor = (m: Metrics) => (m.visitors > 0 ? eur(m.revenue / m.visitors, true) : "—");
+const perVisitor = (m: Metrics) => (m.visitors > 0 ? eur(m.ratedRevenue / m.visitors, true) : "—");
 
 function langPath(slug: string, lang: string) {
   return lang === "en" ? `/${slug}` : lang === "?" ? "" : `/${lang}/${slug}`;
@@ -56,9 +56,10 @@ export function AnalyticsPanel() {
       visitors: t.visitors + f.total.visitors,
       checkouts: t.checkouts + f.total.checkouts,
       orders: t.orders + f.total.orders,
+      ratedOrders: t.ratedOrders + f.total.ratedOrders,
       revenue: t.revenue + f.total.revenue,
     }),
-    { visitors: 0, checkouts: 0, orders: 0, revenue: 0 },
+    { visitors: 0, checkouts: 0, orders: 0, ratedOrders: 0, revenue: 0 },
   );
 
   return (
@@ -92,7 +93,7 @@ export function AnalyticsPanel() {
       <div className={`stats ${s.stats}`} style={{ opacity: loading ? 0.5 : 1 }}>
         <Stat label="VISITORS" value={total ? int(total.visitors) : "…"} color="var(--sky)" />
         <Stat label="CHECKOUTS" value={total ? int(total.checkouts) : "…"} sub={total ? pct(total.checkouts, total.visitors) : ""} color="var(--amber)" />
-        <Stat label="ORDERS" value={total ? int(total.orders) : "…"} sub={total ? pct(total.orders, total.visitors) : ""} color="var(--mint)" />
+        <Stat label="ORDERS" value={total ? int(total.orders) : "…"} sub={total ? pct(total.ratedOrders, total.visitors) : ""} color="var(--mint)" />
         <Stat label="REVENUE" value={total ? eur(total.revenue) : "…"} color="var(--accent)" />
       </div>
 
@@ -147,7 +148,8 @@ export function AnalyticsPanel() {
         <p className={s.foot}>
           Visitors are unique per page per day (someone who comes back another day counts again), counted by our own script
           since it went live; ad blockers can hide a few. Checkouts = step 1 of the order form filled in. Orders and revenue come
-          from Stripe and PayPal; dollar sales are converted at today&apos;s ECB rate ($1 = {eur(data.usdToEur, true)}).
+          from Stripe and PayPal; dollar sales are converted at today&apos;s ECB rate ($1 = {eur(data.usdToEur, true)}). CVR and €
+          / visitor only count orders{data.trackingSince ? ` since ${data.trackingSince}` : ""}, when visitors started being counted.
         </p>
       )}
     </main>
@@ -178,10 +180,10 @@ function MetricRow({ name, m, sub }: { name: React.ReactNode; m: Metrics; sub?: 
         {int(m.checkouts)} <small>{pct(m.checkouts, m.visitors)}</small>
       </span>
       <span>
-        {int(m.orders)} <small>{pct(m.orders, m.checkouts)}</small>
+        {int(m.orders)} <small>{pct(m.ratedOrders, m.checkouts)}</small>
       </span>
       <span>{eur(m.revenue)}</span>
-      <span className={s.strong}>{pct(m.orders, m.visitors)}</span>
+      <span className={s.strong}>{pct(m.ratedOrders, m.visitors)}</span>
       <span>{perVisitor(m)}</span>
     </div>
   );
@@ -251,7 +253,7 @@ function TestCard({ t }: { t: TestStats }) {
                 <dt>Orders</dt>
                 <dd>{int(v.m.orders)}</dd>
                 <dt>Conversion</dt>
-                <dd className={s.strong}>{pct(v.m.orders, v.m.visitors || v.m.orderViews)}</dd>
+                <dd className={s.strong}>{pct(v.m.ratedOrders, v.m.visitors || v.m.orderViews)}</dd>
                 <dt>Revenue</dt>
                 <dd>{eur(v.m.revenue)}</dd>
                 <dt>€ / visitor</dt>
