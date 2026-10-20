@@ -15,7 +15,7 @@ trap 'rm -rf "$TMP"' EXIT
 
 shot() { # slug file url
   "$CHROME" --headless=new --disable-gpu --hide-scrollbars --window-size=1280,800 \
-    --virtual-time-budget=8000 --user-data-dir="$TMP/profile-$1-$2" \
+    --virtual-time-budget=15000 --user-data-dir="$TMP/profile-$1-$2" \
     --screenshot="$TMP/$1-$2.png" "$3" >/dev/null 2>&1
   cwebp -quiet -q 82 -resize 720 0 "$TMP/$1-$2.png" -o "public/funnels/$1/$2.webp"
   echo "public/funnels/$1/$2.webp"

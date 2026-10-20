@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { I } from "@/components/icons";
-import type { Analytics, Metrics, Range } from "@/lib/analytics";
+import { COLORS, type Variant } from "@/app/(funnels)/midi-drum-kit/abtest";
+import type { Analytics, Metrics, Range, TestStats } from "@/lib/analytics";
 import type { FunnelMap, MapStep } from "@/lib/funnelMap";
 import s from "./funnelMap.module.css";
 
 // A funnel's map, like ClickFunnels' funnel view: where it starts, then each
-// page in order with its picture, live link and numbers for the chosen range.
+// page in order with its picture, live link and numbers for the chosen range,
+// the A/B test's colours on the steps it runs on, and a + to add a language.
 
 const RANGES: { id: Range; label: string; note: string }[] = [
   { id: "7d", label: "7D", note: "the last 7 days" },
@@ -16,11 +18,22 @@ const RANGES: { id: Range; label: string; note: string }[] = [
   { id: "all", label: "ALL", note: "all time" },
 ];
 
+// Languages that can be added with the + (the funnel's own are left out).
+// Note: from the Meta ads so far, Spanish and Portuguese markets barely buy.
+const ADDABLE: { lang: string; name: string; it: string; note?: string }[] = [
+  { lang: "it", name: "Italian", it: "l'italiano" },
+  { lang: "de", name: "German", it: "il tedesco" },
+  { lang: "nl", name: "Dutch", it: "l'olandese" },
+  { lang: "es", name: "Spanish", it: "lo spagnolo", note: "few sales from Spanish-speaking countries so far" },
+  { lang: "pt", name: "Portuguese", it: "il portoghese", note: "few sales from Portuguese-speaking countries so far" },
+];
+
 const int = (n: number) => n.toLocaleString("en-US");
 const eur = (n: number) => new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
-const pct = (part: number, whole: number) => (whole > 0 ? ` (${((part / whole) * 100).toFixed(part / whole < 0.1 ? 1 : 0)}%)` : "");
+const rate = (part: number, whole: number) => (whole > 0 ? `${((part / whole) * 100).toFixed(part / whole < 0.1 ? 1 : 0)}%` : "—");
+const pct = (part: number, whole: number) => (whole > 0 ? ` (${rate(part, whole)})` : "");
 
-type Stat = { label: string; value: string; tone?: "sky" | "amber" | "mint" | "accent" };
+type Stat = { label: string; value: string; tone: "sky" | "amber" | "mint" | "accent" };
 
 function stepStats(step: MapStep, m: Metrics, hasOrderStep: boolean): Stat[] {
   if (step.kind === "landing") {
@@ -28,6 +41,7 @@ function stepStats(step: MapStep, m: Metrics, hasOrderStep: boolean): Stat[] {
       ? [
           { label: "Visitors", value: int(m.visitors), tone: "sky" },
           { label: "Went to order page", value: int(m.orderViews) + pct(m.orderViews, m.visitors), tone: "amber" },
+          { label: "Orders / visitor", value: rate(m.ratedOrders, m.visitors), tone: "mint" },
         ]
       : [
           { label: "Visitors", value: int(m.visitors), tone: "sky" },
@@ -71,6 +85,134 @@ function CopyButton({ text, label = "Copy URL" }: { text: string; label?: string
   );
 }
 
+/** The A/B test's colours on a step: a row per colour with the numbers that step decides. */
+function Variants({ test, step }: { test: TestStats; step: MapStep }) {
+  const name = (v: string) => v[0].toUpperCase() + v.slice(1);
+  const cols =
+    step.kind === "landing"
+      ? ["Visitors", "Went to order page", "Orders", "Orders / visitor"]
+      : ["Visitors", "Checkouts", "Orders", "Revenue"];
+  return (
+    <div className={s.variants}>
+      <div className={s.variantsHead}>
+        <span className={s.variantsTitle}>
+          <I.abtest size={13} /> A/B/C test · {test.name}
+        </span>
+        <span className={s.variantsMeta}>
+          {test.since ? `since ${test.since} · ` : ""}every language ·{" "}
+          <Link href="/?nav=analytics" className={s.link}>
+            {test.verdict === "winner" && test.leader ? `${name(test.leader)} wins` : test.verdict === "tie" ? "no clear winner" : `${int(test.salesToGo)} sales to a reliable answer`}
+          </Link>
+        </span>
+      </div>
+      <div className={s.variantGrid} role="table">
+        <div className={`${s.variantRow} ${s.variantHeadRow}`} role="row">
+          <span>Colour</span>
+          {cols.map((c) => (
+            <span key={c}>{c}</span>
+          ))}
+        </div>
+        {test.variants.map((v) => {
+          const c = COLORS[v.variant as Variant];
+          const m = v.m;
+          const values =
+            step.kind === "landing"
+              ? [int(m.visitors), int(m.orderViews) + pct(m.orderViews, m.visitors), int(m.orders), rate(m.ratedOrders, m.visitors || m.orderViews)]
+              : [int(m.orderViews), int(m.checkouts) + pct(m.checkouts, m.orderViews), int(m.orders) + pct(m.ratedOrders, m.checkouts), eur(m.revenue)];
+          return (
+            <div key={v.variant} className={s.variantRow} role="row">
+              <span className={s.variantName}>
+                <span className={s.swatch} style={{ background: c ? `linear-gradient(180deg, ${c.from}, ${c.to})` : "#999" }} />
+                {name(v.variant)}
+                {test.leader === v.variant && <span className={s.leading}>leading</span>}
+              </span>
+              {values.map((val, i) => (
+                <span key={i} className={s.num}>
+                  {val}
+                </span>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** The + next to the languages: pick one, get the request to send to Claude. */
+function AddLanguage({ map }: { map: FunnelMap }) {
+  const [open, setOpen] = useState(false);
+  const [pick, setPick] = useState<(typeof ADDABLE)[number] | null>(null);
+  const [at, setAt] = useState({ top: 0, left: 0 });
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [open]);
+  const have = new Set(map.langs.map((l) => l.lang));
+  const options = ADDABLE.filter((o) => !have.has(o.lang));
+  const prompt = pick
+    ? `Aggiungi ${pick.it} al funnel ${map.name} (${map.id}): traduci fedelmente pagina di vendita, pagina d'ordine e thank-you come per il francese, con la VSL in ${pick.name.toLowerCase()} (stessa voce ElevenLabs o una nativa della libreria), e mettilo online su m.thegrind.studio/${pick.lang}/${map.id}.`
+    : "";
+  return (
+    <div className={s.addWrap} ref={ref}>
+      <button
+        type="button"
+        className={s.add}
+        title="Add a language"
+        onClick={(e) => {
+          // The strip scrolls sideways, so the menu is placed on the page, under the +.
+          const r = e.currentTarget.getBoundingClientRect();
+          setAt({ top: r.bottom + 8, left: Math.max(16, Math.min(r.left, window.innerWidth - 356)) });
+          setOpen(!open);
+          setPick(null);
+        }}
+      >
+        <I.plus size={14} />
+      </button>
+      {open && (
+        <div className={s.pop} style={at} role="dialog" aria-label="Add a language">
+          {!pick ? (
+            <>
+              <div className={s.popTitle}>Add a language</div>
+              <p className={s.popText}>The pages are translated by hand (faithfully, like French), so a new language is a request to Claude.</p>
+              {options.map((o) => (
+                <button key={o.lang} type="button" className={s.popItem} onClick={() => setPick(o)}>
+                  <span>
+                    {o.name} <code>/{o.lang}/{map.id}</code>
+                  </span>
+                  {o.note && <span className={s.popNote}>{o.note}</span>}
+                </button>
+              ))}
+            </>
+          ) : (
+            <>
+              <div className={s.popTitle}>Add {pick.name}</div>
+              <p className={s.popText}>Send this to Claude Code. It translates the three pages, makes the {pick.name} VSL and puts it live.</p>
+              <div className={s.prompt}>{prompt}</div>
+              <div className={s.actions}>
+                <CopyButton text={prompt} label="Copy request" />
+                <button type="button" className={s.btn} onClick={() => setPick(null)}>
+                  Back
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function FunnelMapView({ map }: { map: FunnelMap }) {
   const [range, setRange] = useState<Range>("28d");
   const [lang, setLang] = useState(map.langs[0]?.lang ?? "en");
@@ -93,7 +235,9 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
 
   const current = map.langs.find((l) => l.lang === lang) ?? map.langs[0];
   const stats = data?.funnels.find((f) => f.slug === map.statsSlug);
-  const metrics = stats ? (map.langs.length > 1 ? stats.langs?.find((l) => l.lang === lang)?.m : stats.total) : undefined;
+  const langMetrics = (l: string) => (map.langs.length > 1 ? stats?.langs?.find((x) => x.lang === l)?.m : stats?.total);
+  const metrics = stats ? langMetrics(lang) : undefined;
+  const test = data?.test && data.test.funnel === map.statsSlug ? data.test : null;
   const hasOrderStep = current.steps.some((st) => st.kind === "order");
   const entry = current.steps[0];
 
@@ -111,15 +255,6 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
           </span>
         </div>
         <div className={s.barRight}>
-          {map.langs.length > 1 && (
-            <div className="tabs" role="tablist" aria-label="Language">
-              {map.langs.map((l) => (
-                <button key={l.lang} type="button" className={`tab ${l.lang === lang ? "active" : ""}`} onClick={() => setLang(l.lang)}>
-                  {l.label}
-                </button>
-              ))}
-            </div>
-          )}
           {map.statsSlug && (
             <div className="tabs" role="tablist" aria-label="Range">
               {RANGES.map((r) => (
@@ -137,6 +272,23 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
         </div>
       </header>
 
+      {map.canTranslate && (
+        <nav className={s.langs} aria-label="Languages">
+          {map.langs.map((l) => {
+            const m = langMetrics(l.lang);
+            return (
+              <button key={l.lang} type="button" className={`${s.lang} ${l.lang === lang ? s.langOn : ""}`} onClick={() => setLang(l.lang)}>
+                <span className={s.langName}>{l.label}</span>
+                <span className={s.langStats}>
+                  {m ? `${int(m.visitors)} visitors · ${int(m.orders)} orders · ${eur(m.revenue)}` : loading ? "…" : "no numbers yet"}
+                </span>
+              </button>
+            );
+          })}
+          <AddLanguage map={map} />
+        </nav>
+      )}
+
       <main className={s.canvas}>
         {entry && (
           <section className={s.start}>
@@ -144,7 +296,7 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
               <I.funnel size={15} /> Start of funnel
             </div>
             <div className={s.url}>{entry.url}</div>
-            <div className={s.actions}>
+            <div className={`${s.actions} ${s.center}`}>
               <a href={entry.url} target="_blank" rel="noreferrer" className={s.btn}>
                 <I.eye size={13} /> Open page
               </a>
@@ -165,13 +317,14 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={step.image} alt="" loading="lazy" />
                     ) : (
-                      <span className={s.thumbEmpty}>
-                        {step.kind === "thank-you" ? <I.check size={22} /> : <I.page size={22} />}
-                      </span>
+                      <span className={s.thumbEmpty}>{step.kind === "thank-you" ? <I.check size={22} /> : <I.page size={22} />}</span>
                     )}
                   </a>
                   <div className={s.info}>
-                    <div className={s.stepName}>{step.name}</div>
+                    <div className={s.stepName}>
+                      {step.name}
+                      {test && (step.kind === "landing" || step.kind === "order") && <span className={s.abTag}>A/B/C</span>}
+                    </div>
                     <div className={s.path}>{step.path}</div>
                     <div className={s.actions}>
                       <a href={step.url} target="_blank" rel="noreferrer" className={s.btn}>
@@ -188,16 +341,21 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
                 </div>
                 {map.statsSlug && (
                   <div className={s.stats} style={{ opacity: loading ? 0.5 : 1 }}>
-                    {rows.length
-                      ? rows.map((r) => (
-                          <div key={r.label} className={`${s.stat} ${r.tone ? s[r.tone] : ""}`}>
-                            <span className={s.statLabel}>{r.label}</span>
-                            <span className={s.statValue}>{r.value}</span>
-                          </div>
-                        ))
-                      : <div className={s.stat}><span className={s.statLabel}>{loading ? "Loading…" : "No numbers yet"}</span></div>}
+                    {rows.length ? (
+                      rows.map((r) => (
+                        <div key={r.label} className={`${s.stat} ${s[r.tone]}`}>
+                          <span className={s.statLabel}>{r.label}</span>
+                          <span className={s.statValue}>{r.value}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className={s.stat}>
+                        <span className={s.statLabel}>{loading ? "Loading…" : "No numbers yet"}</span>
+                      </div>
+                    )}
                   </div>
                 )}
+                {test && (step.kind === "landing" || step.kind === "order") && <Variants test={test} step={step} />}
               </section>
             </div>
           );
@@ -205,9 +363,9 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
 
         {map.statsSlug && (
           <p className={s.note}>
-            <I.analytics size={12} /> Numbers for {RANGES.find((r) => r.id === range)?.note}
-            {map.langs.length > 1 ? `, ${current.label} pages` : ""}. Visitors are counted by our own script
-            {data?.trackingSince ? ` since ${data.trackingSince}` : ""}; orders come from Stripe and PayPal.{" "}
+            Numbers for {RANGES.find((r) => r.id === range)?.note}
+            {map.langs.length > 1 ? `, ${current.label} pages` : ""}; the A/B/C test counts the whole test. Visitors are counted by
+            our own script{data?.trackingSince ? ` since ${data.trackingSince}` : ""}; orders come from Stripe and PayPal.{" "}
             <Link href="/?nav=analytics" className={s.link}>
               All analytics
             </Link>

@@ -26,6 +26,8 @@ export type FunnelMap = {
   status: string;
   /** The funnel's slug in Analytics, or null for builder funnels (not counted). */
   statsSlug: string | null;
+  /** Hand-built funnels can get more languages (the + on the map). */
+  canTranslate: boolean;
   langs: MapLang[];
 };
 
@@ -52,6 +54,7 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
     name: f.product,
     status: "live",
     statsSlug: f.slug,
+    canTranslate: f.kind === "code",
     langs: langs.map((lang) => {
       const prefix = lang === "en" ? "" : `/${lang}`;
       const base = home(f.slug, lang);
@@ -93,6 +96,7 @@ export async function getFunnelMap(id: string): Promise<FunnelMap | null> {
     name: row.name,
     status: row.status,
     statsSlug: row.type === PRODUCT_TYPE ? row.id : null,
+    canTranslate: false,
     langs: [
       {
         lang: "en",
