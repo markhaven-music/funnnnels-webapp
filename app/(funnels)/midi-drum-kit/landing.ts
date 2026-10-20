@@ -22,6 +22,11 @@ const IMAGES: Partial<Record<Lang, Record<string, string>>> = {
   fr: { "value-stack": "value-stack-fr" },
 };
 
+// The hero video (Wistia) per language: English is ClickFunnels' (funnel.wistiaId);
+// French is the same VSL re-voiced in French with French captions
+// (vsl/script-fr.md, made with tools/vsl_captions.py).
+const VIDEOS: Partial<Record<Lang, string>> = { fr: "3774byed1i" };
+
 // French: the space before : ; ! ? » % and after « stays on the line with the
 // mark, and "glisser-déposer" never splits at its hyphen.
 const frenchSpaces = (text: string) =>
@@ -55,6 +60,8 @@ export function landingHtml(lang: Lang, currency: Currency): string {
       `<script>${AB_SCRIPT}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: AB.cookie })}</script>\n${headScripts(currency)}`,
     )
     .replace("{{BODY}}", BODY_SCRIPT);
+  const video = VIDEOS[lang];
+  if (video) html = html.replaceAll(funnel.wistiaId, video);
   for (const [from, to] of Object.entries(IMAGES[lang] ?? {})) {
     html = html.replaceAll(`/funnels/midi-drum-kit/${from}.webp`, `/funnels/midi-drum-kit/${to}.webp`);
   }

@@ -16,7 +16,8 @@ export const funnel = {
     clarityId: "yum5a2rsel",
     neoSnippet: "https://t.thegrind.studio/api/s/3d5ba6a05e6bcaea",
   },
-  // The ClickFunnels page's Wistia video (hero). It's in English.
+  // The ClickFunnels page's Wistia video (hero). It's in English; other
+  // languages swap it in landing.ts (VIDEOS).
   wistiaId: "xeyd5v0tsm",
   support: "support@thegrind.studio",
   guaranteeDays: 14,
