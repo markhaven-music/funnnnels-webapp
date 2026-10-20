@@ -15,20 +15,21 @@ const CARDS: CodeCard[] = [
     name: "MIDI Drum Kit",
     // English /midi-drum-kit on the brand domain is still the old Astro page.
     liveUrl: "https://m.thegrind.studio/fr/midi-drum-kit",
-    image: "/funnels/midi-drum-kit/product.webp",
+    image: "/funnels/midi-drum-kit/preview.webp",
     steps: 3,
   },
   {
     id: "top-hits-midi-bundle",
     name: "TOP HITS MIDI Bundle",
     liveUrl: "https://m.thegrind.studio/top-hits-midi-bundle",
-    image: "/funnels/top-hits-midi-bundle/product.webp",
+    image: "/funnels/top-hits-midi-bundle/preview.webp",
     steps: 3,
   },
 ];
 
-// Pictures for code funnels that do have a row (Jazz).
-const IMAGES: Record<string, string> = { "jazz-midi-pack": "/funnels/jazz-midi-pack/box-520.webp" };
+// The cards show a screenshot of the first page: public/funnels/<slug>/preview.webp,
+// made by tools/funnel-previews.sh. Jazz has a row, so it gets its screenshot here.
+const IMAGES: Record<string, string> = { "jazz-midi-pack": "/funnels/jazz-midi-pack/preview.webp" };
 
 /** The code funnels missing from the table, first, then the table's funnels. */
 export function withCodeFunnels(funnels: StoredFunnel[]): StoredFunnel[] {

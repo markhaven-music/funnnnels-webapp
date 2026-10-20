@@ -134,7 +134,7 @@ export type StoredFunnel = {
   publishedPages?: Page[] | null;
   /** A page built in code (lib/codeFunnels.ts): its card opens this live URL, not the editor. */
   liveUrl?: string;
-  /** A picture of the product for the card, instead of the generated thumbnail. */
+  /** A screenshot of the first page for the card, instead of the generated thumbnail. */
   image?: string;
   /** What the numbers on the card cover, e.g. "28d". */
   statsRange?: string;
