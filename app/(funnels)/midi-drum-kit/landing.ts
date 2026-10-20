@@ -24,8 +24,12 @@ const IMAGES: Partial<Record<Lang, Record<string, string>>> = {
 
 // The hero video (Wistia) per language: English is ClickFunnels' (funnel.wistiaId);
 // French is the same VSL re-voiced in French with French captions
-// (vsl/script-fr.md, made with tools/vsl_captions.py).
-const VIDEOS: Partial<Record<Lang, string>> = { fr: "3774byed1i" };
+// (vsl/script-fr.md, made with tools/vsl_captions.py). poster = its Wistia
+// thumbnail saved in public/funnels/midi-drum-kit, shown until the player loads.
+const VIDEOS: Record<Lang, { id: string; poster: string }> = {
+  en: { id: funnel.wistiaId, poster: "vsl-en" },
+  fr: { id: "3774byed1i", poster: "vsl-fr" },
+};
 
 // French: the space before : ; ! ? » % and after « stays on the line with the
 // mark, and "glisser-déposer" never splits at its hyphen.
@@ -61,11 +65,88 @@ export function landingHtml(lang: Lang, currency: Currency): string {
     )
     .replace("{{BODY}}", BODY_SCRIPT);
   const video = VIDEOS[lang];
-  if (video) html = html.replaceAll(funnel.wistiaId, video);
+  html = html.replaceAll(funnel.wistiaId, video.id);
   for (const [from, to] of Object.entries(IMAGES[lang] ?? {})) {
     html = html.replaceAll(`/funnels/midi-drum-kit/${from}.webp`, `/funnels/midi-drum-kit/${to}.webp`);
   }
-  return html;
+  return faster(html, video.poster);
+}
+
+// Speed (PageSpeed scored the page 59 on mobile, LCP 9 s): the page is
+// ClickFunnels' markup, which makes the browser wait for Font Awesome and
+// Google Fonts before painting, asks for 13 ClickFunnels script chunks that
+// don't exist here, finds the hero background late, and loads Wistia's player
+// (≈320 KB of script plus video) before anything else. So:
+//   - those stylesheets load without holding the first paint (fonts swap in);
+//   - the dead chunk preloads go; the hero background and the video's
+//     thumbnail are preloaded;
+//   - the video shows its thumbnail and red play button (the same look) and
+//     the real player loads on the first tap (and plays) or 2.5 s after the
+//     page has loaded;
+//   - images below the video load as they scroll into view (ClickFunnels'
+//     loading="true|false" meant nothing without its script).
+const ASYNC_CSS = /<link([^>]*?) rel="stylesheet"([^>]*?) href="(https:\/\/(?:use\.fontawesome\.com|fonts\.googleapis\.com)\/[^"]+)"([^>]*)>/g;
+const WISTIA_IFRAME = /<iframe class="wistia_embed"[^>]*src="\/\/fast\.wistia\.net\/embed\/iframe\/([a-z0-9]+)[^"]*"[^>]*><\/iframe>/;
+
+const POSTER_CSS = `.vsl-poster{position:relative;display:block;width:100%;aspect-ratio:16/9;background:#000;cursor:pointer;border-radius:inherit;overflow:hidden}
+.vsl-poster img{width:100%;height:100%;object-fit:cover;display:block}
+.vsl-play{position:absolute;left:50%;top:50%;width:14.6%;aspect-ratio:125/80;transform:translate(-50%,-50%);background:#dd0000;border-radius:4px}
+.vsl-play::after{content:"";position:absolute;left:39%;top:27%;width:28%;height:46%;background:#fff;clip-path:polygon(0 0,100% 50%,0 100%)}
+.vsl-poster iframe{position:absolute;inset:0;width:100%;height:100%;border:0}`;
+
+const POSTER_SCRIPT = `<script>
+(function () {
+  var p = document.querySelector('.vsl-poster');
+  if (!p) return;
+  var done = false;
+  function load(play) {
+    if (done) return;
+    done = true;
+    var f = document.createElement('iframe');
+    f.className = 'wistia_embed';
+    f.name = 'wistia_embed';
+    f.title = 'Watch This!';
+    f.allow = 'autoplay; fullscreen';
+    f.setAttribute('allowfullscreen', '');
+    f.src = 'https://fast.wistia.net/embed/iframe/' + p.getAttribute('data-wistia') + '?autoplay=' + (play ? 1 : 0) + '&wmode=transparent';
+    p.style.cursor = 'default';
+    p.appendChild(f);
+  }
+  p.addEventListener('click', function () { load(true); });
+  p.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); load(true); } });
+  window.addEventListener('load', function () { setTimeout(function () { load(false); }, 2500); });
+})();
+</script>`;
+
+function faster(html: string, poster: string): string {
+  html = html.replace(/<link rel="modulepreload"[^>]*>\n?/g, "");
+  html = html.replace(ASYNC_CSS, (_, a: string, b: string, href: string, c: string) => {
+    const url = href.includes("fonts.googleapis.com") && !href.includes("display=") ? `${href}&display=swap` : href;
+    return `<link${a} rel="stylesheet"${b} href="${url}"${c} media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="${url}"></noscript>`;
+  });
+  const img = `/funnels/midi-drum-kit/${poster}.webp`;
+  html = html.replace(
+    "<head>",
+    `<head>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="image" href="/funnels/midi-drum-kit/hero-bg.webp" fetchpriority="high">
+<link rel="preload" as="image" href="${img}" fetchpriority="high">
+<style>${POSTER_CSS}</style>`,
+  );
+  html = html.replace(
+    WISTIA_IFRAME,
+    (_, id: string) =>
+      `<div class="vsl-poster" data-wistia="${id}" role="button" tabindex="0" aria-label="Play the video"><img src="${img}" alt="" width="960" height="540" fetchpriority="high"><span class="vsl-play" aria-hidden="true"></span></div>`,
+  );
+  // ClickFunnels marks images loading="true" / "false" for its own lazy-loader
+  // (stripped), which browsers read as "load now": the ones under the video wait
+  // for the scroll, the logo and the thumbnail above it load at once.
+  const at = html.indexOf('<span class="vsl-play"');
+  if (at > 0) {
+    const lazy = (tag: string) => tag.replace(/\sloading="[^"]*"/, "").replace("<img ", '<img loading="lazy" decoding="async" ');
+    html = html.slice(0, at).replace(/\sloading="(true|false)"/g, "") + html.slice(at).replace(/<img [^>]*>/g, lazy);
+  }
+  return html.replace("</body>", `${POSTER_SCRIPT}\n</body>`);
 }
 
 // Meta Pixel + Clarity + Neo, as on the other funnels (their Tracking.tsx).
