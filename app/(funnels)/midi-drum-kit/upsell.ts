@@ -10,7 +10,7 @@ import topHitsEn from "./copy/upsell-tophits/en.json";
 import topHitsFr from "./copy/upsell-tophits/fr.json";
 import { funnel } from "./funnel";
 import type { Lang } from "./i18n";
-import { escapeAttr, faster, frenchSpaces, mapText } from "./landing";
+import { AFTER_LOAD, escapeAttr, faster, frenchSpaces, mapText } from "./landing";
 
 // The one-click upsell pages after the order (funnel.offers): ClickFunnels'
 // own pages, 1:1 (./cf/upsell-*.ts, made by tools/cf_clone.mjs --oto), with
@@ -23,7 +23,8 @@ import { escapeAttr, faster, frenchSpaces, mapText } from "./landing";
 // (Stripe) or ?paypal_order=… (PayPal), plus u=<the upsells bought so far>,
 // up to the thank-you page, which checks every one with Stripe or PayPal.
 
-type Copy = Record<string, string> & { extra?: Record<string, string> };
+// extra: words outside the tagged texts, English → this language.
+type Copy = { [key: string]: string | Record<string, string> | undefined; extra?: Record<string, string> };
 
 // poster: the Wistia thumbnail shown until the player loads (landing.ts faster),
 // with that player's play-button colour; the TOP HITS page's player is Wistia's
@@ -56,9 +57,10 @@ export function upsellHtml(offerId: string, lang: Lang, currency: Currency): str
   if (!page || !offer || !product) return null;
 
   const strings: Copy = { ...page.copy.en, ...page.copy[lang] };
+  const said = (key: string) => (typeof strings[key] === "string" ? (strings[key] as string) : "");
   const dollars = (t: string) => (currency === "usd" ? t.replaceAll("€", "$") : t);
   const text = (key: string) => {
-    let html = strings[key] ?? "";
+    let html = said(key);
     if (key.startsWith("s")) return dollars(html); // a script: only its prices change
     html = mapText(html, dollars);
     if (lang === "fr") html = mapText(html, frenchSpaces);
@@ -98,24 +100,16 @@ function headScripts(): string {
   return `<script>
 (function () {
   if (${OFF}.test(location.hostname)) return;
-  (function (c, l, a, r, i, t, y) {
-    c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
-    t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i;
-    y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
-  })(window, document, 'clarity', 'script', '${clarityId}');
+  window.clarity = window.clarity || function () { (clarity.q = clarity.q || []).push(arguments); };
   clarity('set', 'landing', location.pathname.replace(/\\/$/, '') || '/');
-  !(function (f, b, e, v, n, t, s) {
-    if (f.fbq) return;
-    n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
-    if (!f._fbq) f._fbq = n;
+  if (!window.fbq) {
+    var n = window.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+    if (!window._fbq) window._fbq = n;
     n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
-    t = b.createElement(e); t.async = !0; t.src = v;
-    s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-  })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+  }
   fbq('init', '${metaPixelId}');
   fbq('track', 'PageView');
-  var s = document.createElement('script'); s.async = true; s.src = '${neoSnippet}';
-  document.head.appendChild(s);
+  ${AFTER_LOAD}(['https://connect.facebook.net/en_US/fbevents.js', '${neoSnippet}', 'https://www.clarity.ms/tag/${clarityId}']);
 })();
 </script>`;
 }
@@ -175,13 +169,14 @@ function script(offerId: string, lang: Lang, next: string): string {
     }).catch(function () { reset(a); say(a, C.ui.failed); });
   }, true);
 
-  // "Your copy is reserved for 15:00": counts down from the first visit of this page.
-  var key = 'oto-' + C.offer, start = Number(sessionStorage.getItem(key)) || Date.now();
-  try { sessionStorage.setItem(key, String(start)); } catch (e) {}
+  // "Your copy is reserved for 05:00": short, so it's decided on impulse; counts
+  // down from this order's first visit of this page (a reload doesn't restart it).
+  var key = 'oto-' + C.offer + '-' + (main ? main[1] : ''), start = Date.now();
+  try { start = Number(sessionStorage.getItem(key)) || start; sessionStorage.setItem(key, String(start)); } catch (e) {}
   var mins = document.getElementById('cf-mins'), secs = document.getElementById('cf-secs'), ms = document.getElementById('cf-ms');
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function tick() {
-    var left = Math.max(0, 15 * 60 * 1000 - (Date.now() - start));
+    var left = Math.max(0, 5 * 60 * 1000 - (Date.now() - start));
     if (mins) mins.textContent = pad(Math.floor(left / 60000));
     if (secs) secs.textContent = pad(Math.floor(left / 1000) % 60);
     if (ms) ms.textContent = pad(Math.floor(left / 10) % 100);
