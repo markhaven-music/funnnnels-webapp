@@ -51,10 +51,16 @@ function starterBlocks(): Block[] {
   return [];
 }
 
+/**
+ * The dashboard's funnels. Archived ones (archived_at set: the old "New with
+ * AI" examples and test funnels) are left out; they still open at /p/<id> and
+ * in the editor. Unarchive: `update funnels set archived_at = null where id = …`.
+ */
 export async function listFunnels(): Promise<StoredFunnel[]> {
   const { data, error } = await supabase()
     .from(TABLE)
     .select("*")
+    .is("archived_at", null)
     .order("position", { ascending: false });
   if (error) throw error;
   return (data as Row[]).map(rowToFunnel);
