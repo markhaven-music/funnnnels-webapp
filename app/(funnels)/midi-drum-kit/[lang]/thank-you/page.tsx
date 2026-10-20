@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { reportSaleToNeo } from "@/lib/neo";
 import { getOrder } from "@/lib/orders";
 import { fontVars } from "../../../top-hits-midi-bundle/fonts";
 import s from "../../../top-hits-midi-bundle/order.module.css";
@@ -41,6 +42,8 @@ export default async function ThankYou({
   const c = copyFor(lang).thanks;
   const { payment_intent, paypal_order } = await searchParams;
   const order = await getOrder(payment_intent ?? paypal_order, funnel.slug);
+  // The sale also goes to neo, labelled funnnnels (lib/neo.ts).
+  if (order) reportSaleToNeo(order, funnel.product);
   const paid = order?.status === "succeeded";
   const pending = order?.status === "processing";
 

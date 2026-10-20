@@ -3,6 +3,7 @@
 import Script from "next/script";
 import { BOOT } from "../jazz-midi-pack/Tracking";
 import { BRAND } from "./brand";
+import { purchaseEventId } from "@/lib/neoIds";
 
 // Meta Pixel + Clarity + Neo, as on the Jazz page (../jazz-midi-pack/Tracking.tsx),
 // for template products. Fires only where real buyers are: never on localhost,
@@ -42,7 +43,7 @@ export function KitTracking({ product, value, currency }: { product: string; val
   );
 }
 
-/** Purchase, once per order (eventID = order id), on the thank-you page. Same host rule. */
+/** Purchase, once per order (eventID = neo's "purchase_<order id>", lib/neo.ts), on the thank-you page. Same host rule. */
 export function KitPurchasePixel({ product, orderId, value, currency }: { product: string; orderId: string; value: number; currency: string }) {
   const data = JSON.stringify({ content_name: product, content_type: "product", value, currency: currency.toUpperCase() });
   return (
@@ -53,7 +54,7 @@ export function KitPurchasePixel({ product, orderId, value, currency }: { produc
         try { if (localStorage.getItem(key)) return; localStorage.setItem(key, '1'); } catch (e) {}
         ${BOOT}
         bootPixel('${BRAND.tracking.metaPixelId}');
-        fbq('track', 'Purchase', ${data}, { eventID: '${orderId}' });
+        fbq('track', 'Purchase', ${data}, { eventID: '${purchaseEventId(orderId)}' });
       })();
     `}</Script>
   );

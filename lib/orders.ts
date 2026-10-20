@@ -10,6 +10,7 @@ export type Order = {
   amount: number; // in currency units, e.g. 36
   currency: string; // "eur" | "usd"
   items: string[]; // file keys this order unlocks, e.g. ["pack", "chord-pack"]
+  visitorId: string | null; // neo's ft_vid from the checkout, for lib/neo.ts
 };
 
 // Until orders live in the database (Phase 3b), the Stripe PaymentIntent or
@@ -37,6 +38,7 @@ async function getStripeOrder(id: string, funnelSlug: string): Promise<Order | n
       amount: intent.amount / 100,
       currency: intent.currency,
       items,
+      visitorId: intent.metadata.ft_vid || null,
     };
   } catch {
     return null;
@@ -74,6 +76,7 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
       amount: Number(unit.amount.value),
       currency,
       items: ["pack", ...bumps.map((b) => b.id)],
+      visitorId: typeof meta.n === "string" ? meta.n : null,
     };
   } catch {
     return null;

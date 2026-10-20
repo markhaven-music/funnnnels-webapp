@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { isEmail } from "@/lib/contacts";
 import { checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, requestNow, resolveFunnel } from "@/lib/funnels";
 import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
+import { cleanVisitorId } from "@/lib/neoIds";
 
 export const runtime = "nodejs";
 
@@ -69,6 +70,8 @@ export async function POST(req: Request) {
         variant: cleanVariant(body.variant),
         // The page's language ("fr" for /fr/midi-drum-kit), for Analytics.
         lang: typeof body.lang === "string" && f.langs?.includes(body.lang) ? body.lang : "en",
+        // neo's visitor id (its snippet adds it to the form, and sets the cookie), for lib/neo.ts.
+        ft_vid: cleanVisitorId(body.ft_vid) || cleanVisitorId((await cookies()).get("ft_vid")?.value),
       },
     });
     return NextResponse.json({ clientSecret: intent.client_secret });

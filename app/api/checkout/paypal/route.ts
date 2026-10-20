@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { isEmail } from "@/lib/contacts";
 import { checkoutPages, checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, requestNow, resolveFunnel } from "@/lib/funnels";
 import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
+import { cleanVisitorId } from "@/lib/neoIds";
 
 export const runtime = "nodejs";
 
@@ -68,8 +69,12 @@ export async function POST(req: Request) {
   // v: the A/B test variant the buyer saw (e.g. the button colour), if any.
   const variant = cleanVariant(body.variant);
   const meta = { f: f.slug, b: bumps.map((b) => b.id).join(","), w: body.waiver === true ? 1 : 0, c: country, ...(variant ? { v: variant } : {}) };
-  const withEmail = JSON.stringify({ ...meta, e: email });
-  const customId = withEmail.length <= 127 ? withEmail : JSON.stringify(meta);
+  // n: neo's visitor id (lib/neo.ts). The 127 characters keep, in order of need:
+  // meta, then the visitor id, then the email.
+  const vid = cleanVisitorId(body.ft_vid) || cleanVisitorId((await cookies()).get("ft_vid")?.value);
+  const fits = (m: object) => (JSON.stringify(m).length <= 127 ? JSON.stringify(m) : null);
+  const customId =
+    fits({ ...meta, ...(vid ? { n: vid } : {}), e: email }) ?? fits({ ...meta, ...(vid ? { n: vid } : {}) }) ?? fits({ ...meta, e: email }) ?? JSON.stringify(meta);
 
   try {
     const order = await paypal<PayPalOrder>("/v2/checkout/orders", {

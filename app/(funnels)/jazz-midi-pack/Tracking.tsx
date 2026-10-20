@@ -9,7 +9,7 @@ import { funnel } from "./funnel";
 // Unlike the Grind landings, checkout and purchase happen on THIS page, not
 // in ClickFunnels, so nothing else sends them: InitiateCheckout fires from the
 // checkout widget (step 1 → 2) and Purchase from the thank-you page, with the
-// Stripe PaymentIntent id as eventID.
+// "purchase_<order id>" as eventID, the id neo's server-side Purchase uses (lib/neo.ts).
 // Local previews never reach Meta / Clarity / Neo.
 // page="order": the order page sends PageView + OrderPageView instead of ViewContent.
 export function Tracking({ value, currency, page = "landing" }: { value: number; currency: string; page?: "landing" | "order" }) {

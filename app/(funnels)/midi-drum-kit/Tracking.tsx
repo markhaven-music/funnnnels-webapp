@@ -3,6 +3,7 @@
 import Script from "next/script";
 import { BOOT } from "../jazz-midi-pack/Tracking";
 import { funnel } from "./funnel";
+import { purchaseEventId } from "@/lib/neoIds";
 
 // Meta Pixel + Clarity + Neo, as on the Jazz page. Never on localhost, *.local
 // or *.vercel.app (previews, and the origin m.thegrind.studio forwards to), so
@@ -41,7 +42,7 @@ export function Tracking({ value, currency, event = "ViewContent" }: { value: nu
   );
 }
 
-/** Purchase, once per order (eventID = order id), on the thank-you page. */
+/** Purchase, once per order (eventID = neo's "purchase_<order id>", lib/neo.ts), on the thank-you page. */
 export function PurchasePixel({ orderId, value, currency }: { orderId: string; value: number; currency: string }) {
   const data = JSON.stringify({ content_name: funnel.product, content_type: "product", value, currency: currency.toUpperCase() });
   return (
@@ -54,7 +55,7 @@ export function PurchasePixel({ orderId, value, currency }: { orderId: string; v
         bootPixel('${funnel.tracking.metaPixelId}');
         var data = ${data};
         data.ab_btn = (document.cookie.match(/(?:^|; )ab_btn=([a-z]+)/) || [])[1];
-        fbq('track', 'Purchase', data, { eventID: '${orderId}' });
+        fbq('track', 'Purchase', data, { eventID: '${purchaseEventId(orderId)}' });
       })();
     `}</Script>
   );
