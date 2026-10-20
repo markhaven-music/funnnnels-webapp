@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import s from "../top-hits-midi-bundle/order.module.css";
 import type { Copy } from "./copy";
+import s from "./order.module.css";
 
-// ClickFunnels' "YOUR COPY IS RESERVED FOR" box: ten minutes from page load,
-// counting down to 00:00:00 (it only stops; nothing expires).
+// The Drum Kit order page's "YOUR COPY IS RESERVED FOR:" box: ten minutes from
+// page load, counting down to 00:00:00 (it only stops; nothing expires).
 const START = 10 * 60 * 1000;
 
 export function ReservedTimer({ t }: { t: Copy["order"]["timer"] }) {
@@ -20,27 +20,21 @@ export function ReservedTimer({ t }: { t: Copy["order"]["timer"] }) {
     return () => clearInterval(id);
   }, []);
   const pad = (n: number) => String(n).padStart(2, "0");
-  const min = Math.floor(left / 60000);
-  const sec = Math.floor((left % 60000) / 1000);
-  const cs = Math.floor((left % 1000) / 10);
+  const units = [
+    [pad(Math.floor(left / 60000)), t.min],
+    [pad(Math.floor((left % 60000) / 1000)), t.sec],
+    [pad(Math.floor((left % 1000) / 10)), t.ms],
+  ];
   return (
     <div className={s.timer} role="timer" aria-label={t.label}>
       <div className={s.timerTitle}>{t.title}</div>
       <div className={s.timerDigits}>
-        <span className={s.timerUnit}>
-          <span className={s.timerNum}>{pad(min)}</span>
-          <span className={s.timerLabel}>{t.min}</span>
-        </span>
-        <span className={s.timerSep}>:</span>
-        <span className={s.timerUnit}>
-          <span className={s.timerNum}>{pad(sec)}</span>
-          <span className={s.timerLabel}>{t.sec}</span>
-        </span>
-        <span className={s.timerSep}>:</span>
-        <span className={s.timerUnit}>
-          <span className={s.timerNum}>{pad(cs)}</span>
-          <span className={s.timerLabel}>{t.ms}</span>
-        </span>
+        {units.map(([n, label]) => (
+          <span key={label} className={s.timerUnit}>
+            <span className={s.timerNum}>{n}</span>
+            <span className={s.timerLabel}>{label}</span>
+          </span>
+        ))}
       </div>
     </div>
   );

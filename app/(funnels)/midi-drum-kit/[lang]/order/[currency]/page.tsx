@@ -5,6 +5,7 @@ import { Rich } from "../../../../top-hits-midi-bundle/Rich";
 import { fontVars } from "../../../../top-hits-midi-bundle/fonts";
 import { Check } from "../../../../top-hits-midi-bundle/sections";
 import s from "../../../../top-hits-midi-bundle/order.module.css";
+import d from "../../../order.module.css";
 import { copyFor } from "../../../copy";
 import { funnel } from "../../../funnel";
 import { isLang, LANGS } from "../../../i18n";
@@ -94,16 +95,16 @@ export default async function OrderPage({ params }: { params: Params }) {
       <section className={s.reviews}>
         <div className={s.reviewGrid}>
           {t.order.reviews.map((r) => (
-            <figure key={r.name} className={s.review}>
+            <figure key={r.name} className={`${s.review} ${d.review}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className={s.stars} src={`${IMG}/stars.webp`} alt={t.order.starsAlt} width={300} height={99} />
-              <blockquote className={s.quote}>{r.quote}</blockquote>
-              <figcaption className={s.who}>
+              <img className={`${s.stars} ${d.stars}`} src={`${IMG}/stars.webp`} alt={t.order.starsAlt} width={300} height={99} />
+              <blockquote className={`${s.quote} ${d.quote}`}>{r.quote}</blockquote>
+              <figcaption className={`${s.who} ${d.who}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={`${IMG}/${r.avatar}.webp`} alt="" width={50} height={50} />
                 <span>
-                  <span className={s.name}>{r.name}</span>
-                  <span className={s.role}>{r.role}</span>
+                  <span className={`${s.name} ${d.name}`}>{r.name}</span>
+                  <span className={`${s.role} ${d.role}`}>{r.role}</span>
                 </span>
               </figcaption>
             </figure>
@@ -113,7 +114,7 @@ export default async function OrderPage({ params }: { params: Params }) {
 
       <section className={s.guarantee}>
         <div className={s.gGrid}>
-          <div className={s.g}>
+          <div className={`${s.g} ${d.g}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`${IMG}/badge-guarantee.webp`} alt="" width={86} height={86} />
             <div>
@@ -121,7 +122,7 @@ export default async function OrderPage({ params }: { params: Params }) {
               <p>{t.order.guaranteeText}</p>
             </div>
           </div>
-          <div className={s.g}>
+          <div className={`${s.g} ${d.g}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`${IMG}/badge-secure.webp`} alt="" width={86} height={86} />
             <div>
