@@ -4,7 +4,7 @@ import { isEmail } from "@/lib/contacts";
 import { checkoutPages, checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, requestNow, resolveFunnel } from "@/lib/funnels";
 import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
-import { paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
+import { PAYPAL_LOCALE, paypal, paypalConfigured, paypalValue, returnOrigin, type PayPalOrder } from "@/lib/paypal";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { cleanVisitorId } from "@/lib/neoIds";
 
@@ -15,23 +15,6 @@ export const runtime = "nodejs";
 // PayPal's page for approving it; PayPal then sends the buyer to
 // /api/checkout/paypal/return, which takes the money. As with Stripe, the
 // amount and currency are worked out here, so PayPal only ever shows the real price.
-
-// Where PayPal may send buyers back to: the brand domain the funnel lives on
-// (it forwards /api/checkout/* here), this deployment, and local dev.
-const RETURN_HOSTS = new Set(["m.thegrind.studio", "jazz.thegrind.studio", "funnnnels.vercel.app", "localhost"]);
-
-// PayPal page languages for the funnels' non-English pages.
-const PAYPAL_LOCALE: Record<string, string> = { fr: "fr-FR", it: "it-IT", de: "de-DE", nl: "nl-NL" };
-
-function returnOrigin(raw: unknown): string {
-  try {
-    const url = new URL(String(raw));
-    if (RETURN_HOSTS.has(url.hostname) || url.hostname.endsWith(".local")) return url.origin;
-  } catch {
-    // not a URL: fall through to the brand domain
-  }
-  return "https://m.thegrind.studio";
-}
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));

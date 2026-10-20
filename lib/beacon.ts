@@ -13,7 +13,7 @@
 // Keep them in step.
 
 export const BEACON_URL = "/api/checkout/view";
-export const STEPS = ["landing", "order", "checkout", "thank-you"] as const;
+export const STEPS = ["landing", "order", "checkout", "upsell-1", "upsell-2", "thank-you"] as const;
 export type Step = (typeof STEPS)[number];
 
 export type BeaconOptions = {

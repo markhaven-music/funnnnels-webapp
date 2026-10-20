@@ -30,5 +30,7 @@ export function paths(lang: Lang) {
     landing: `${prefix}${funnel.checkout.orderPage.replace(/\/order$/, "")}`,
     order: `${prefix}${funnel.checkout.orderPage}`,
     thankYou: `${prefix}${funnel.checkout.thankYou}`,
+    // The one-click upsells, in order (funnel.offers).
+    offers: funnel.offers.map((o) => `${prefix}/${funnel.slug}/${o.path}`),
   };
 }

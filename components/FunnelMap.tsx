@@ -57,6 +57,15 @@ function stepStats(step: MapStep, m: Metrics, hasOrderStep: boolean): Stat[] {
       { label: "Revenue", value: eur(m.revenue), tone: "accent" },
     ];
   }
+  if (step.kind === "upsell" && step.offer) {
+    const views = m.upsellViews[step.offer.page] ?? 0;
+    const o = m.offers[step.offer.id] ?? { orders: 0, revenue: 0 };
+    return [
+      { label: "Visitors", value: int(views), tone: "sky" },
+      { label: "Took it", value: int(o.orders) + pct(o.orders, views), tone: "mint" },
+      { label: "Revenue", value: eur(o.revenue), tone: "accent" },
+    ];
+  }
   if (step.kind === "thank-you") {
     return [
       { label: "Visitors", value: int(m.thankYouViews), tone: "sky" },
@@ -330,6 +339,11 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
                     <div className={s.stepName}>
                       {step.name}
                       {test && (step.kind === "landing" || step.kind === "order") && <span className={s.abTag}>A/B/C</span>}
+                      {step.offer && !step.offer.live && (
+                        <span className={s.offTag} title="Buyers go straight to the thank-you page until the upsells are switched on (UPSELLS=on).">
+                          Off until tested
+                        </span>
+                      )}
                     </div>
                     <div className={s.path}>{step.path}</div>
                     <div className={s.actions}>

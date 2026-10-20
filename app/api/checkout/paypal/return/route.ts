@@ -1,4 +1,4 @@
-import { checkoutPages, resolveFunnel } from "@/lib/funnels";
+import { checkoutPages, nextStep, offerOf, resolveFunnel } from "@/lib/funnels";
 import { recordPayPalSale } from "@/lib/analytics";
 import { isPayPalOrderId, paypal, paypalCheckoutUrl, paypalConfigured, PayPalError, type PayPalOrder } from "@/lib/paypal";
 
@@ -6,7 +6,8 @@ export const runtime = "nodejs";
 
 // PayPal sends the buyer here after they approve on PayPal's page:
 //   /api/checkout/paypal/return?funnel=jazz-midi-pack&token=<order id>&PayerID=…
-// (plus &lang=fr when the buyer paid from a translated page)
+// (plus &lang=fr when the buyer paid from a translated page, and for a
+// one-click upsell &offer=<id>&paypal_order=<the order it follows>&u=<upsells so far>)
 // This takes the money, then hands them to the thank-you page, which asks
 // PayPal again whether the order paid: nothing here is trusted on its own.
 // Capturing is safe to expose: it only works on an order this server created
@@ -17,6 +18,8 @@ export async function GET(req: Request) {
   const orderId = url.searchParams.get("token");
   const pages = f ? checkoutPages(f, url.searchParams.get("lang")) : null;
   if (!f || !pages || !isPayPalOrderId(orderId) || !paypalConfigured()) return redirect(pages ? pages.orderPage : "/");
+  const offer = offerOf(f, url.searchParams.get("offer"));
+  const parent = url.searchParams.get("paypal_order");
 
   let captured = false;
   try {
@@ -41,7 +44,13 @@ export async function GET(req: Request) {
       console.error("paypal sale not recorded", err);
     }
   }
-  return redirect(`${pages.thankYou}?paypal_order=${orderId}`);
+  // Next: the upsells (with the order and what was bought so far), then the thank-you page.
+  if (offer && isPayPalOrderId(parent)) {
+    const u = (url.searchParams.get("u") ?? "").split(",").filter((id) => isPayPalOrderId(id));
+    if (captured) u.push(orderId);
+    return redirect(`${nextStep(f, url.searchParams.get("lang"), offer.id)}?paypal_order=${parent}${u.length ? `&u=${u.join(",")}` : ""}`);
+  }
+  return redirect(`${nextStep(f, url.searchParams.get("lang"), null)}?paypal_order=${orderId}`);
 }
 
 // Relative on purpose: the buyer arrived through the brand domain

@@ -1,4 +1,4 @@
-import { resolveFunnel, type Product } from "@/lib/funnels";
+import { resolveFunnel, upsellsOn, type Product } from "@/lib/funnels";
 import { KIT_HOME, PRODUCT_TYPE } from "@/lib/liveUrl";
 import { getFunnel } from "@/lib/store";
 
@@ -7,7 +7,7 @@ import { getFunnel } from "@/lib/store";
 // and, for pages built in the editor, a link to edit it. Its numbers come from
 // dashboard → Analytics (components/FunnelMap.tsx).
 
-export type MapStepKind = "landing" | "order" | "thank-you" | "page";
+export type MapStepKind = "landing" | "order" | "upsell" | "thank-you" | "page";
 
 export type MapStep = {
   kind: MapStepKind;
@@ -16,6 +16,9 @@ export type MapStep = {
   url: string; // the live page
   image: string | null; // a screenshot (tools/funnel-previews.sh)
   editUrl: string | null;
+  // One-click upsells: which one, the page's visitor-count name, and whether
+  // buyers are sent there yet (UPSELLS=on, lib/funnels.ts upsellsOn).
+  offer?: { id: string; page: string; live: boolean };
 };
 
 export type MapLang = { lang: string; label: string; steps: MapStep[] };
@@ -74,6 +77,10 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
         step("landing", f.checkout.orderPage ? "Sales page" : "Sales page + checkout", `/${f.slug}`, img(shots?.landing), edit),
         // Jazz's order page shows the same edited sections as its landing.
         ...(f.checkout.orderPage ? [step("order", "Order page", f.checkout.orderPage, img(shots?.order), edit)] : []),
+        ...(f.offers ?? []).map((o, i) => ({
+          ...step("upsell", `Upsell ${i + 1}: ${o.name}`, `/${f.slug}/${o.path}`, img(o.path), null),
+          offer: { id: o.id, page: `upsell-${i + 1}`, live: upsellsOn(f) },
+        })),
         step("thank-you", "Thank-you page", f.checkout.thankYou, null, null),
       ];
       return { lang, label: LANG_LABEL[lang] ?? lang.toUpperCase(), steps };

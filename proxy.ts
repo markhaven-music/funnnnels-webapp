@@ -42,13 +42,16 @@ const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "jazz-midi-pack", "top-
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
-function localized(pathname: string): { slug: string; lang: string; page: "" | "order" | "thank-you" } | null {
+// The pages a localized funnel has after its /<lang>/<slug>.
+const LOCAL_PAGES = ["", "order", "offer", "last-offer", "thank-you"] as const;
+
+function localized(pathname: string): { slug: string; lang: string; page: (typeof LOCAL_PAGES)[number] } | null {
   const parts = pathname.replace(/\/$/, "").split("/");
   const lang = LANG_PREFIXES.has(parts[1]) ? parts[1] : "en";
   const at = lang === "en" ? 1 : 2;
   const slug = parts[at];
-  const page = parts.slice(at + 1).join("/");
-  if (!LOCALIZED[slug]?.includes(lang) || (page !== "" && page !== "order" && page !== "thank-you")) return null;
+  const page = LOCAL_PAGES.find((p) => p === parts.slice(at + 1).join("/"));
+  if (!LOCALIZED[slug]?.includes(lang) || page === undefined) return null;
   return { slug, lang, page };
 }
 
@@ -64,7 +67,7 @@ const PUBLIC = [
   /^\/midi-drum-kit(\/|$)/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
-  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view)$/,
+  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|upsell)$/,
   /^\/favicon\.ico$/,
 ];
 

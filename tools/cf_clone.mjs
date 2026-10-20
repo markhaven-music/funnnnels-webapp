@@ -140,7 +140,8 @@ const { template, strings, stray } = await page.evaluate(() => {
   const ownText = (e) => [...e.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim());
   const inCustom = (e) => Boolean(e.closest(".elCustomHtmlJsCode"));
   for (const el of d.querySelectorAll(sel + (oto ? ", .elCustomHtmlJsCode *" : ""))) {
-    if (el.parentElement.closest("[data-t]")) continue;
+    // Inside a block tagged just before: gone from the page with its old HTML.
+    if (!el.isConnected || el.parentElement.closest("[data-t]")) continue;
     if (!el.textContent.trim()) continue;
     if (oto && inCustom(el) && !el.matches(sel)) {
       if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.closest("script, style")) continue;

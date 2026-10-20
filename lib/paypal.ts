@@ -15,6 +15,24 @@ export function paypalConfigured(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET);
 }
 
+// Where PayPal may send buyers back to: the brand domain the funnel lives on
+// (it forwards /api/checkout/* here), this deployment, and local dev.
+const RETURN_HOSTS = new Set(["m.thegrind.studio", "jazz.thegrind.studio", "funnnnels.vercel.app", "localhost"]);
+
+/** PayPal page languages for the funnels' non-English pages. */
+export const PAYPAL_LOCALE: Record<string, string> = { fr: "fr-FR", it: "it-IT", de: "de-DE", nl: "nl-NL" };
+
+/** The origin PayPal sends the buyer back to: theirs when it's one of ours, else the brand domain. */
+export function returnOrigin(raw: unknown): string {
+  try {
+    const url = new URL(String(raw));
+    if (RETURN_HOSTS.has(url.hostname) || url.hostname.endsWith(".local")) return url.origin;
+  } catch {
+    // not a URL: fall through to the brand domain
+  }
+  return "https://m.thegrind.studio";
+}
+
 /** PayPal order ids look like "5O190127TN364715T". */
 export function isPayPalOrderId(id: unknown): id is string {
   return typeof id === "string" && /^[A-Z0-9]{10,24}$/.test(id);

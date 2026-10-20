@@ -61,3 +61,11 @@ revoke all on function public.count_page_view(text, text, text, text, text) from
 revoke all on function public.page_view_totals(date) from public, anon, authenticated;
 grant execute on function public.count_page_view(text, text, text, text, text) to service_role;
 grant execute on function public.page_view_totals(date) to service_role;
+
+-- One-click upsells (migration "funnel_analytics_upsells", 2026-10-20): their
+-- pages are counted, and PayPal sales say which upsell they were.
+alter table public.page_views drop constraint page_views_page_check;
+alter table public.page_views add constraint page_views_page_check
+  check (page in ('landing', 'order', 'checkout', 'upsell-1', 'upsell-2', 'thank-you'));
+alter table public.paypal_sales add column offer text not null default '';
+alter table public.paypal_sales add column parent text;

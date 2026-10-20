@@ -28,7 +28,10 @@ const PAYPAL_ON = Boolean(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID);
 
 type Method = "card" | "paypal";
 type Info = { firstName: string; lastName: string; email: string };
-type Props = { lang: Lang; currency: Currency; country: string; publishableKey: string | null };
+// afterOrder: the page after paying (the first upsell, or the thank-you page);
+// keepCard: the card is kept for the one-click upsells (Stripe setup_future_usage,
+// which the intent route sets too: both must say the same).
+type Props = { lang: Lang; currency: Currency; country: string; publishableKey: string | null; afterOrder: string; keepCard: boolean };
 
 const stripeCache = new Map<string, ReturnType<typeof loadStripe>>();
 function stripeFor(key: string) {
@@ -54,7 +57,7 @@ const appearance: Appearance = {
 };
 
 
-export function OrderForm({ lang, currency, country, publishableKey }: Props) {
+export function OrderForm({ lang, currency, country, publishableKey, afterOrder, keepCard }: Props) {
   const t = copyFor(lang).form;
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
@@ -63,7 +66,7 @@ export function OrderForm({ lang, currency, country, publishableKey }: Props) {
   const price = funnel.price[currency];
   const total = price + funnel.bumps.filter((b) => picked.includes(b.id)).reduce((n, b) => n + b.price[currency], 0);
   const stripePromise = useMemo(() => (publishableKey ? stripeFor(publishableKey) : null), [publishableKey]);
-  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total };
+  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder };
 
   return (
     <div className={s.form}>
@@ -146,7 +149,15 @@ export function OrderForm({ lang, currency, country, publishableKey }: Props) {
           {stripePromise ? (
             <Elements
               stripe={stripePromise}
-              options={{ mode: "payment", amount: Math.round(total * 100), currency, appearance, allowedPaymentMethodTypes: ["card"], locale: lang }}
+              options={{
+                mode: "payment",
+                amount: Math.round(total * 100),
+                currency,
+                appearance,
+                allowedPaymentMethodTypes: ["card"],
+                locale: lang,
+                ...(keepCard ? { setupFutureUsage: "off_session" as const } : {}),
+              }}
             >
               <CardPay {...state} />
             </Elements>
@@ -207,6 +218,7 @@ function InfoStep({ t, info, onDone }: { t: Copy["form"]; info: Info; onDone: (i
 
 type PayState = {
   lang: Lang;
+  afterOrder: string;
   t: Copy["form"];
   currency: Currency;
   country: string;
@@ -248,7 +260,7 @@ function CardPay(props: PayState) {
       elements,
       clientSecret: json.clientSecret,
       confirmParams: {
-        return_url: new URL(paths(props.lang).thankYou, window.location.origin).toString(),
+        return_url: new URL(props.afterOrder, window.location.origin).toString(),
         // The card form doesn't ask for the country (fields below): Stripe needs
         // it here instead, so it's the one we already know from the visit.
         payment_method_data: {

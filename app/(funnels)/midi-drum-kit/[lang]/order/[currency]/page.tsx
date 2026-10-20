@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getFunnel, nextStep, upsellsOn } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { Rich } from "../../../../top-hits-midi-bundle/Rich";
 import { fontVars } from "../../../../top-hits-midi-bundle/fonts";
@@ -43,6 +44,7 @@ export default async function OrderPage({ params }: { params: Params }) {
   if (!isLang(lang) || !CURRENCIES.includes(cur as Currency)) notFound();
   const currency = cur as Currency;
   const t = copyFor(lang);
+  const product = getFunnel(funnel.slug)!;
 
   return (
     <main className={`${s.page} ${fontVars}`} lang={lang}>
@@ -91,6 +93,8 @@ export default async function OrderPage({ params }: { params: Params }) {
             currency={currency}
             country={FALLBACK_COUNTRY[currency]}
             publishableKey={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null}
+            afterOrder={nextStep(product, lang, null)}
+            keepCard={upsellsOn(product)}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.paylogos} src={`${IMG}/paylogos.webp`} alt={t.order.paylogosAlt} width={190} height={22} />

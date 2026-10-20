@@ -1,6 +1,7 @@
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { isPayPalOrderId, paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
-import { offeredBumps, possibleAmounts, resolveFunnel } from "@/lib/funnels";
+import { offerOf, offeredBumps, possibleAmounts, resolveFunnel } from "@/lib/funnels";
+import { toCents } from "@/lib/launch";
 
 export type Order = {
   id: string;
@@ -11,6 +12,9 @@ export type Order = {
   currency: string; // "eur" | "usd"
   items: string[]; // file keys this order unlocks, e.g. ["pack", "chord-pack"]
   visitorId: string | null; // neo's ft_vid from the checkout, for lib/neo.ts
+  // A one-click upsell (funnel.offers): its id and the order it followed.
+  offer: string | null;
+  parent: string | null;
 };
 
 // Until orders live in the database (Phase 3b), the Stripe PaymentIntent or
@@ -27,9 +31,11 @@ async function getStripeOrder(id: string, funnelSlug: string): Promise<Order | n
   try {
     const intent = await stripe().paymentIntents.retrieve(id);
     if (intent.metadata.funnel !== funnelSlug) return null;
-    const items = ["pack"];
-    // metadata.bump: the add-ons' ids, comma-separated.
-    if (intent.metadata.bump) items.push(...intent.metadata.bump.split(","));
+    // An upsell unlocks its own file only; an order, the pack and its add-ons
+    // (metadata.bump: their ids, comma-separated).
+    const offer = intent.metadata.offer || null;
+    const items = offer ? [offer] : ["pack"];
+    if (!offer && intent.metadata.bump) items.push(...intent.metadata.bump.split(","));
     return {
       id,
       provider: "stripe",
@@ -39,6 +45,8 @@ async function getStripeOrder(id: string, funnelSlug: string): Promise<Order | n
       currency: intent.currency,
       items,
       visitorId: intent.metadata.ft_vid || null,
+      offer,
+      parent: intent.metadata.parent || null,
     };
   } catch {
     return null;
@@ -54,13 +62,17 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
     const meta = JSON.parse(unit?.custom_id ?? "{}");
     if (meta.f !== funnelSlug) return null;
 
-    const ids = String(meta.b ?? "").split(",");
-    const bumps = offeredBumps(f).filter((b) => ids.includes(b.id));
     const currency = unit.amount.currency_code.toLowerCase();
     if (currency !== "eur" && currency !== "usd") return null;
+    // An upsell (custom_id u = its id, p = the order it followed): its price only.
+    const offer = typeof meta.u === "string" ? offerOf(f, meta.u) : undefined;
+    if (meta.u && !offer) return null;
+    const ids = offer ? [] : String(meta.b ?? "").split(",");
+    const bumps = offeredBumps(f).filter((b) => ids.includes(b.id));
     // Belt and braces: the order we created can't be edited by the buyer, but
     // only hand over files the amount actually paid for (at the early-bird or the full price).
-    if (!possibleAmounts(f, currency, bumps).some((a) => paypalValue(a) === unit.amount.value)) return null;
+    const paid = offer ? [toCents(offer.price[currency])] : possibleAmounts(f, currency, bumps);
+    if (!paid.some((a) => paypalValue(a) === unit.amount.value)) return null;
 
     // The order says COMPLETED once captured; the capture itself can still be
     // PENDING (an eCheck, a review), which is Stripe's "processing".
@@ -75,8 +87,10 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
       email: order.payer?.email_address ?? meta.e ?? null,
       amount: Number(unit.amount.value),
       currency,
-      items: ["pack", ...bumps.map((b) => b.id)],
+      items: offer ? [offer.id] : ["pack", ...bumps.map((b) => b.id)],
       visitorId: typeof meta.n === "string" ? meta.n : null,
+      offer: offer?.id ?? null,
+      parent: typeof meta.p === "string" ? meta.p : null,
     };
   } catch {
     return null;

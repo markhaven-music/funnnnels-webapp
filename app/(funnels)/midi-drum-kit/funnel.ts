@@ -66,7 +66,17 @@ export const funnel = {
     chords: "jazz-midi-pack/The Chord Progressions Bible.zip",
     "drum-loops": "jazz-midi-pack/Drum Loops for Songwriting.zip",
     "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
+    "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
+    "top-hits": "top-hits-midi-bundle/TOP HITS MIDI Bundle.zip",
   },
+  // One-click upsells after the order, in ClickFunnels order (its
+  // /famous-beats-bundle and /last-offer-top-hits-midi-bundle): each its own
+  // page (./upsell.ts) and its own charge on the card just used. `id` doubles
+  // as the file key; `path` is the page after /midi-drum-kit/.
+  offers: [
+    { id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } },
+    { id: "top-hits", path: "last-offer", name: "TOP HITS MIDI Bundle (1000 Chord Progressions)", price: { eur: 27, usd: 27 } },
+  ],
   // Files an add-on brings beyond its own (its key in `files`).
   includes: { chords: ["drum-loops", "emotional-keys"] } as Record<string, readonly string[]>,
   // Download labels for the files that aren't the pack or an add-on.

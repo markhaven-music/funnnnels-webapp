@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies, headers } from "next/headers";
 import { isEmail } from "@/lib/contacts";
-import { checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, requestNow, resolveFunnel } from "@/lib/funnels";
+import { checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, requestNow, resolveFunnel, upsellsOn } from "@/lib/funnels";
 import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { stripe, stripeConfigured } from "@/lib/stripe";
@@ -51,9 +51,14 @@ export async function POST(req: Request) {
   if (isDryRun(body)) return NextResponse.json({ dryRun: true, amount, currency, phase: checkoutPhase(f, now) });
 
   try {
+    // With one-click upsells after the order, the card is kept on a customer
+    // so each "Okay, add to my order" charges it without asking again.
+    const keepCard = upsellsOn(f);
+    const customer = keepCard ? await stripe().customers.create({ email, name: name || undefined, metadata: { funnel: f.slug } }) : null;
     const intent = await stripe().paymentIntents.create({
       amount,
       currency,
+      ...(customer ? { customer: customer.id, setup_future_usage: "off_session" as const } : {}),
       // Cards only, matching the checkout's card fields (Apple Pay / Google Pay are cards).
       allowed_payment_method_types: ["card"],
       receipt_email: email,

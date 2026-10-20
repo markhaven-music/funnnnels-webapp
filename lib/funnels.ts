@@ -19,6 +19,9 @@ import { getKitProduct } from "@/lib/products";
 
 export type Bump = { id: string; name: string; price: Money; pitch: string };
 
+/** A one-click upsell: its own page after the order (`path` after /<slug>/), charged to the card just used. */
+export type Offer = { id: string; path: string; name: string; price: Money };
+
 export type Product = {
   kind: "code" | "kit";
   slug: string;
@@ -37,6 +40,8 @@ export type Product = {
   // Languages the pages come in. English keeps the plain addresses; the others
   // live under /<lang> (see checkoutPages).
   langs?: readonly string[];
+  // One-click upsells after the order, in order (MIDI Drum Kit).
+  offers?: readonly Offer[];
 };
 
 const JAZZ: Product = {
@@ -79,6 +84,7 @@ const DRUM_KIT: Product = {
   optin: null,
   launch: null,
   langs: DRUM_KIT_LANGS,
+  offers: drumKit.offers,
 };
 
 const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS, [DRUM_KIT.slug]: DRUM_KIT };
@@ -93,6 +99,28 @@ export function checkoutPages(f: Product, lang: unknown): { thankYou: string; or
     return { thankYou: f.checkout.thankYou, orderPage: order, lang: null };
   }
   return { thankYou: `/${lang}${f.checkout.thankYou}`, orderPage: `/${lang}${order}`, lang };
+}
+
+/**
+ * One-click upsells are switched on with UPSELLS=on: they change the main
+ * checkout (the card is kept for them), so they go live only once tested.
+ */
+export const upsellsOn = (f: Product) => Boolean(f.offers?.length) && process.env.UPSELLS === "on";
+
+/** The product's upsell with this id. */
+export const offerOf = (f: Product, id: unknown) => f.offers?.find((o) => o.id === id);
+
+/**
+ * Where the buyer goes next: after the order (`after` = null) or after an
+ * upsell (its id), the next upsell, then the thank-you page.
+ */
+export function nextStep(f: Product, lang: unknown, after: string | null): string {
+  const pages = checkoutPages(f, lang);
+  if (!upsellsOn(f)) return pages.thankYou;
+  const offers = f.offers ?? [];
+  const at = after === null ? -1 : offers.findIndex((o) => o.id === after);
+  const next = after !== null && at < 0 ? undefined : offers[at + 1];
+  return next ? `${pages.lang ? `/${pages.lang}` : ""}/${f.slug}/${next.path}` : pages.thankYou;
 }
 
 /** The hand-built funnels, in the order the dashboard lists them. */

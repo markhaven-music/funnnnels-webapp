@@ -53,6 +53,8 @@ export async function recordPayPalSale(order: PayPalOrder, lang: string) {
         lang,
         variant: typeof meta.v === "string" ? meta.v : "",
         country: typeof meta.c === "string" ? meta.c : "",
+        offer: typeof meta.u === "string" ? meta.u : "",
+        parent: typeof meta.p === "string" ? meta.p : null,
         amount_cents: Math.round(Number(capture.amount.value) * 100),
         currency,
       },
@@ -68,10 +70,13 @@ export type Metrics = {
   orderViews: number; // … of the order page
   checkouts: number; // filled in step 1 (name + email)
   thankYouViews: number; // … of the thank-you page
-  orders: number;
-  eur: number; // revenue in euros
-  usd: number; // revenue in dollars
+  upsellViews: Record<string, number>; // … of each upsell page ("upsell-1", "upsell-2")
+  orders: number; // the orders themselves, not their upsells
+  eur: number; // revenue in euros, upsells included
+  usd: number; // revenue in dollars, upsells included
   revenue: number; // both, in euros
+  // Each one-click upsell (funnel.offers id): how many took it, and its revenue.
+  offers: Record<string, { orders: number; eur: number; usd: number; revenue: number }>;
   // The orders and revenue since visitors were first counted, for the rates
   // (orders / visitors, revenue / visitor): Stripe remembers older sales, the
   // visitor count doesn't go back that far.
@@ -116,7 +121,8 @@ export type Analytics = {
   errors: string[];
 };
 
-type Sale = { funnel: string; lang: string; variant: string; amount: number; currency: string; created: number; rated?: boolean };
+// offer: the upsell's id for a one-click upsell, "" for an order.
+type Sale = { funnel: string; lang: string; variant: string; offer: string; amount: number; currency: string; created: number; rated?: boolean };
 type ViewRow = { funnel: string; page: Step; lang: string; variant: string; views: number };
 
 const DAY = 86_400_000;
@@ -135,6 +141,7 @@ const empty = (): Metrics => ({
   orderViews: 0,
   checkouts: 0,
   thankYouViews: 0,
+  upsellViews: {},
   orders: 0,
   eur: 0,
   usd: 0,
@@ -143,6 +150,7 @@ const empty = (): Metrics => ({
   ratedEur: 0,
   ratedUsd: 0,
   ratedRevenue: 0,
+  offers: {},
 });
 
 function addView(m: Metrics, page: Step, n: number) {
@@ -150,14 +158,20 @@ function addView(m: Metrics, page: Step, n: number) {
   else if (page === "order") m.orderViews += n;
   else if (page === "checkout") m.checkouts += n;
   else if (page === "thank-you") m.thankYouViews += n;
+  else if (page.startsWith("upsell-")) m.upsellViews[page] = (m.upsellViews[page] ?? 0) + n;
 }
 
 function addSale(m: Metrics, s: Sale) {
-  m.orders += 1;
+  if (s.offer) {
+    const o = (m.offers[s.offer] ??= { orders: 0, eur: 0, usd: 0, revenue: 0 });
+    o.orders += 1;
+    if (s.currency === "eur") o.eur += s.amount;
+    if (s.currency === "usd") o.usd += s.amount;
+  } else m.orders += 1;
   if (s.currency === "eur") m.eur += s.amount;
   if (s.currency === "usd") m.usd += s.amount;
   if (!s.rated) return;
-  m.ratedOrders += 1;
+  if (!s.offer) m.ratedOrders += 1;
   if (s.currency === "eur") m.ratedEur += s.amount;
   if (s.currency === "usd") m.ratedUsd += s.amount;
 }
@@ -182,6 +196,7 @@ async function stripeSales(slug: string): Promise<Sale[]> {
         funnel: slug,
         lang: pi.metadata.lang || "?",
         variant: pi.metadata.variant || "",
+        offer: pi.metadata.offer || "",
         amount: pi.amount_received / 100,
         currency: pi.currency,
         created: pi.created * 1000,
@@ -194,12 +209,13 @@ async function stripeSales(slug: string): Promise<Sale[]> {
 }
 
 async function paypalSales(): Promise<Sale[]> {
-  const { data, error } = await supabase().from("paypal_sales").select("funnel, lang, variant, amount_cents, currency, created_at").limit(10000);
+  const { data, error } = await supabase().from("paypal_sales").select("funnel, lang, variant, offer, amount_cents, currency, created_at").limit(10000);
   if (error) throw error;
   return (data ?? []).map((r) => ({
     funnel: r.funnel,
     lang: r.lang,
     variant: r.variant,
+    offer: r.offer ?? "",
     amount: r.amount_cents / 100,
     currency: r.currency,
     created: Date.parse(r.created_at),
@@ -298,7 +314,8 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
 }
 
 function withRevenue(m: Metrics, rate: number): Metrics {
-  return { ...m, revenue: m.eur + m.usd * rate, ratedRevenue: m.ratedEur + m.ratedUsd * rate };
+  const offers = Object.fromEntries(Object.entries(m.offers).map(([id, o]) => [id, { ...o, revenue: o.eur + o.usd * rate }]));
+  return { ...m, revenue: m.eur + m.usd * rate, ratedRevenue: m.ratedEur + m.ratedUsd * rate, offers };
 }
 
 // ─── the A/B test ──────────────────────────────────────────────
@@ -322,7 +339,8 @@ function buttonTest(views: ViewRow[], sales: Sale[], rate: number, since: string
   const by = new Map<string, Metrics>(BUTTON_TEST.variants.map((v) => [v, empty()]));
   for (const v of views) if (v.funnel === funnel && known.has(v.variant)) addView(by.get(v.variant)!, v.page, v.views);
   for (const s of sales) {
-    if (s.funnel !== funnel || !known.has(s.variant)) continue;
+    // The colours are judged on the orders; upsells are another decision.
+    if (s.funnel !== funnel || !known.has(s.variant) || s.offer) continue;
     addSale(by.get(s.variant)!, s);
   }
 

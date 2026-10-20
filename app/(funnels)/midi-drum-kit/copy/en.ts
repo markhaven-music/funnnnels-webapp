@@ -113,6 +113,9 @@ export const en = {
 
   // The thank-you page.
   thanks: {
+    // As on ClickFunnels' thank-you page.
+    title: "Thank you!",
+    sub: "You're in. Time to cook up.",
     paid: "You're in!",
     pending: "Payment processing…",
     failed: "Payment not completed",
@@ -121,9 +124,11 @@ export const en = {
     failedLead: "Nothing was charged. Go back and try again with another card or PayPal.",
     download: "Download",
     receipt: (provider: string, email: string | null) =>
-      `${provider} has emailed your receipt${email ? ` to ${email}` : ""}. A file doesn't open? Email`,
+      `${provider} has emailed your receipt${email ? ` to ${email}` : ""}.`,
     fix: "and we fix it.",
     back: "Back to checkout",
+    // Under the buttons, for what came with an add-on.
+    support: "If you have any problem contact us at",
   },
 };
 

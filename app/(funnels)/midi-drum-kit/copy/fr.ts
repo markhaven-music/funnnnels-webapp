@@ -113,6 +113,8 @@ export const fr: Copy = {
   },
 
   thanks: {
+    title: "Merci !",
+    sub: "C'est bon, tu es dedans. À toi de cuisiner.",
     paid: "C'est bon, tu l'as !",
     pending: "Paiement en cours…",
     failed: "Paiement non finalisé",
@@ -121,8 +123,9 @@ export const fr: Copy = {
     failedLead: "Rien n'a été débité. Reviens en arrière et réessaie avec une autre carte ou avec PayPal.",
     download: "Télécharger",
     receipt: (provider: string, email: string | null) =>
-      `${provider} t'a envoyé ton reçu${email ? ` à ${email}` : ""}. Un fichier ne s'ouvre pas ? Écris à`,
+      `${provider} t'a envoyé ton reçu${email ? ` à ${email}` : ""}.`,
     fix: "et on règle ça.",
     back: "Retour au paiement",
+    support: "Un problème ? Écris-nous à",
   },
 };

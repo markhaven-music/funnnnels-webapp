@@ -33,16 +33,16 @@ const VIDEOS: Record<Lang, { id: string; poster: string }> = {
 
 // French: the space before : ; ! ? » % and after « stays on the line with the
 // mark, and "glisser-déposer" never splits at its hyphen.
-const frenchSpaces = (text: string) =>
+export const frenchSpaces = (text: string) =>
   text
     .replace(/ (?=[:;!?»%€$])/g, " ")
     .replace(/« /g, "« ")
     .replace(/glisser-dépos/g, "glisser‑dépos");
 
 /** Apply fn to the text between tags only, never to tags or attributes. */
-const mapText = (html: string, fn: (t: string) => string) => html.replace(/(^|>)([^<]+)/g, (_, gt, text) => gt + fn(text));
+export const mapText = (html: string, fn: (t: string) => string) => html.replace(/(^|>)([^<]+)/g, (_, gt, text) => gt + fn(text));
 
-const escapeAttr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+export const escapeAttr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
 export function landingHtml(lang: Lang, currency: Currency): string {
   const strings = { ...STRINGS.en, ...STRINGS[lang] };
@@ -90,7 +90,7 @@ const WISTIA_IFRAME = /<iframe class="wistia_embed"[^>]*src="\/\/fast\.wistia\.n
 
 const POSTER_CSS = `.vsl-poster{position:relative;display:block;width:100%;aspect-ratio:16/9;background:#000;cursor:pointer;border-radius:inherit;overflow:hidden}
 .vsl-poster img{width:100%;height:100%;object-fit:cover;display:block}
-.vsl-play{position:absolute;left:50%;top:50%;width:14.6%;aspect-ratio:125/80;transform:translate(-50%,-50%);background:#dd0000;border-radius:4px}
+.vsl-play{position:absolute;left:50%;top:50%;width:14.6%;aspect-ratio:125/80;transform:translate(-50%,-50%);background:var(--vsl-play,#dd0000);border-radius:4px}
 .vsl-play::after{content:"";position:absolute;left:39%;top:27%;width:28%;height:46%;background:#fff;clip-path:polygon(0 0,100% 50%,0 100%)}
 .vsl-poster iframe{position:absolute;inset:0;width:100%;height:100%;border:0}`;
 
@@ -118,35 +118,44 @@ const POSTER_SCRIPT = `<script>
 })();
 </script>`;
 
-function faster(html: string, poster: string): string {
+/**
+ * The same speed-ups for any page cloned from ClickFunnels (the upsell pages
+ * too, ./upsell.ts): poster = the Wistia thumbnail shown until the player
+ * loads, preload = pictures above the fold (public/funnels/midi-drum-kit/<name>.webp),
+ * playColor = the colour of that Wistia player's play button.
+ */
+export function faster(html: string, poster: string | null, preload: readonly string[] = ["hero-bg"], playColor = "#dd0000"): string {
   html = html.replace(/<link rel="modulepreload"[^>]*>\n?/g, "");
   html = html.replace(ASYNC_CSS, (_, a: string, b: string, href: string, c: string) => {
     const url = href.includes("fonts.googleapis.com") && !href.includes("display=") ? `${href}&display=swap` : href;
     return `<link${a} rel="stylesheet"${b} href="${url}"${c} media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="${url}"></noscript>`;
   });
-  const img = `/funnels/midi-drum-kit/${poster}.webp`;
+  const img = poster ? `/funnels/midi-drum-kit/${poster}.webp` : null;
+  const early = [...preload.map((n) => `/funnels/midi-drum-kit/${n}.webp`), ...(img ? [img] : [])];
   html = html.replace(
     "<head>",
     `<head>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="image" href="/funnels/midi-drum-kit/hero-bg.webp" fetchpriority="high">
-<link rel="preload" as="image" href="${img}" fetchpriority="high">
+${early.map((src) => `<link rel="preload" as="image" href="${src}" fetchpriority="high">`).join("\n")}
 <style>${POSTER_CSS}</style>`,
   );
+  if (!img) return lazyBelow(html, html.indexOf("<wistia-player"));
   html = html.replace(
     WISTIA_IFRAME,
     (_, id: string) =>
-      `<div class="vsl-poster" data-wistia="${id}" role="button" tabindex="0" aria-label="Play the video"><img src="${img}" alt="" width="960" height="540" fetchpriority="high"><span class="vsl-play" aria-hidden="true"></span></div>`,
+      `<div class="vsl-poster" data-wistia="${id}" style="--vsl-play:${playColor}" role="button" tabindex="0" aria-label="Play the video"><img src="${img}" alt="" width="960" height="540" fetchpriority="high"><span class="vsl-play" aria-hidden="true"></span></div>`,
   );
-  // ClickFunnels marks images loading="true" / "false" for its own lazy-loader
-  // (stripped), which browsers read as "load now": the ones under the video wait
-  // for the scroll, the logo and the thumbnail above it load at once.
-  const at = html.indexOf('<span class="vsl-play"');
-  if (at > 0) {
-    const lazy = (tag: string) => tag.replace(/\sloading="[^"]*"/, "").replace("<img ", '<img loading="lazy" decoding="async" ');
-    html = html.slice(0, at).replace(/\sloading="(true|false)"/g, "") + html.slice(at).replace(/<img [^>]*>/g, lazy);
-  }
+  html = lazyBelow(html, html.indexOf('<span class="vsl-play"'));
   return html.replace("</body>", `${POSTER_SCRIPT}\n</body>`);
+}
+
+// ClickFunnels marks images loading="true" / "false" for its own lazy-loader
+// (stripped), which browsers read as "load now": the ones under the video wait
+// for the scroll, the logo and the thumbnail above it load at once.
+function lazyBelow(html: string, at: number): string {
+  if (at <= 0) return html;
+  const lazy = (tag: string) => tag.replace(/\sloading="[^"]*"/, "").replace("<img ", '<img loading="lazy" decoding="async" ');
+  return html.slice(0, at).replace(/\sloading="(true|false)"/g, "") + html.slice(at).replace(/<img [^>]*>/g, lazy);
 }
 
 // Meta Pixel + Clarity + Neo, as on the other funnels (their Tracking.tsx).
