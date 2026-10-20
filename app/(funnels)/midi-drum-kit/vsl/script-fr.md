@@ -7,6 +7,14 @@ French (ElevenLabs). Informal "tu" and the French landing's words
 (glisser-déposer, DopaBounce). Prices in euros, as on the French page.
 [IN BRACKETS] = notes for the edit, not read aloud.
 
+Voiceover (2026-10-20): ElevenLabs voice "Anatole - Convincing, Dynamic and
+Clear" from the Voice Library, in the account as "VSL FR - Anatole"; model
+eleven_multilingual_v2, stability 0.5, similarity 0.8, style 0.25, speaker
+boost; one request per paragraph with previous_text / next_text. Spelled for
+the voice: GRIND STUDIO → "Graïnde Studio", 808 → "huit-zéro-huit",
+A$AP Rocky → "A-Sap Rocky". The Travis Scott clip is the original English
+audio, 149.95 s → 165.82 s of the English VSL. Whole track: 8:02.
+
 ---
 
 Est-ce que t'as déjà grimacé en réécoutant tes propres beats ? Est-ce que tes prods sonnent encore comme celles d'il y a des années ? Est-ce que t'as l'impression qu'il manque toujours quelque chose ? Nous, c'est GRIND STUDIO, et on a décidé de révéler la méthode secrète qui rend les beats hip-hop et trap irrésistibles.
