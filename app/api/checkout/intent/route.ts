@@ -67,7 +67,8 @@ export async function POST(req: Request) {
         funnel: f.slug,
         // The add-ons' ids, comma-separated (one for single-bump products).
         bump: bumps.map((b) => b.id).join(","),
-        email,
+        // Lower-case: the customer login finds orders by it (lib/account.ts).
+        email: email.toLowerCase(),
         name,
         country,
         withdrawal_waiver: body.waiver === true ? "accepted" : "",

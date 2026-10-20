@@ -67,7 +67,7 @@ export async function POST(req: Request) {
             lang,
             variant: cleanVariant(body.variant),
             ft_vid: cleanVisitorId(body.ft_vid) || parent.visitorId || "",
-            email: parent.email ?? "",
+            email: parent.email?.toLowerCase() ?? "",
             country: intent.metadata.country ?? "",
           },
         },
@@ -97,8 +97,11 @@ export async function POST(req: Request) {
   const origin = returnOrigin(req.headers.get("origin") ?? req.headers.get("referer"));
   const page = `${lang === "en" ? "" : `/${lang}`}/${f.slug}/${offer.path}`;
   const back = `paypal_order=${parent.id}${bought.length ? `&u=${bought.join(",")}` : ""}`;
-  // custom_id (127 characters): f = funnel, u = this upsell, p = the order it follows.
-  const customId = JSON.stringify({ f: f.slug, u: offer.id, p: parent.id, v: cleanVariant(body.variant) });
+  // custom_id (127 characters): f = funnel, u = this upsell, p = the order it
+  // follows, e = the buyer's email when it fits (the customer login finds it).
+  const base = { f: f.slug, u: offer.id, p: parent.id, v: cleanVariant(body.variant) };
+  const withEmail = JSON.stringify({ ...base, e: parent.email ?? "" });
+  const customId = withEmail.length <= 127 ? withEmail : JSON.stringify(base);
   try {
     const order = await paypal<PayPalOrder>("/v2/checkout/orders", {
       method: "POST",
@@ -107,7 +110,7 @@ export async function POST(req: Request) {
         purchase_units: [
           {
             reference_id: `${f.slug}-${offer.id}`,
-            custom_id: customId.slice(0, 127),
+            custom_id: customId,
             description: `${f.product}: ${offer.name}`.slice(0, 127),
             amount: { currency_code: currency.toUpperCase(), value: paypalValue(amount) },
           },

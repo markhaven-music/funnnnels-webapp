@@ -1,3 +1,4 @@
+import type Stripe from "stripe";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { isPayPalOrderId, paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
 import { offerOf, offeredBumps, possibleAmounts, resolveFunnel } from "@/lib/funnels";
@@ -31,26 +32,31 @@ async function getStripeOrder(id: string, funnelSlug: string): Promise<Order | n
   try {
     const intent = await stripe().paymentIntents.retrieve(id);
     if (intent.metadata.funnel !== funnelSlug) return null;
-    // An upsell unlocks its own file only; an order, the pack and its add-ons
-    // (metadata.bump: their ids, comma-separated).
-    const offer = intent.metadata.offer || null;
-    const items = offer ? [offer] : ["pack"];
-    if (!offer && intent.metadata.bump) items.push(...intent.metadata.bump.split(","));
-    return {
-      id,
-      provider: "stripe",
-      status: intent.status,
-      email: intent.receipt_email,
-      amount: intent.amount / 100,
-      currency: intent.currency,
-      items,
-      visitorId: intent.metadata.ft_vid || null,
-      offer,
-      parent: intent.metadata.parent || null,
-    };
+    return orderFromIntent(intent);
   } catch {
     return null;
   }
+}
+
+/** The order a PaymentIntent is (the customer library lists them from Stripe's search, lib/account.ts). */
+export function orderFromIntent(intent: Stripe.PaymentIntent): Order {
+  // An upsell unlocks its own file only; an order, the pack and its add-ons
+  // (metadata.bump: their ids, comma-separated).
+  const offer = intent.metadata.offer || null;
+  const items = offer ? [offer] : ["pack"];
+  if (!offer && intent.metadata.bump) items.push(...intent.metadata.bump.split(","));
+  return {
+    id: intent.id,
+    provider: "stripe",
+    status: intent.status,
+    email: intent.receipt_email,
+    amount: intent.amount / 100,
+    currency: intent.currency,
+    items,
+    visitorId: intent.metadata.ft_vid || null,
+    offer,
+    parent: intent.metadata.parent || null,
+  };
 }
 
 async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | null> {

@@ -57,6 +57,10 @@ export async function recordPayPalSale(order: PayPalOrder, lang: string) {
         parent: typeof meta.p === "string" ? meta.p : null,
         amount_cents: Math.round(Number(capture.amount.value) * 100),
         currency,
+        // For the customer login (lib/account.ts): the email typed at the
+        // checkout, and the PayPal account's.
+        email: typeof meta.e === "string" && meta.e ? meta.e.toLowerCase() : null,
+        payer_email: order.payer?.email_address?.toLowerCase() ?? null,
       },
       { onConflict: "order_id", ignoreDuplicates: true },
     );
