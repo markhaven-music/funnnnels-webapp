@@ -85,6 +85,12 @@ export function landingHtml(lang: Lang, currency: Currency): string {
 //     page has loaded;
 //   - images below the video load as they scroll into view (ClickFunnels'
 //     loading="true|false" meant nothing without its script).
+// Then (Google's PageSpeed still 64–71, LCP 5.6 s: a phone's processor busy
+// with the whole long page and with the trackers before the first screen):
+//   - sections past the first screen are laid out only when they come near it;
+//   - Font Awesome's few icons are drawn by the page itself (no ≈80 KB font);
+//   - the trackers' scripts load once the page has shown (headScripts);
+//   - every image has an alt (empty: they're pictures, the words are text).
 const ASYNC_CSS = /<link([^>]*?) rel="stylesheet"([^>]*?) href="(https:\/\/(?:use\.fontawesome\.com|fonts\.googleapis\.com)\/[^"]+)"([^>]*)>/g;
 const WISTIA_IFRAME = /<iframe class="wistia_embed"[^>]*src="\/\/fast\.wistia\.net\/embed\/iframe\/([a-z0-9]+)[^"]*"[^>]*><\/iframe>/;
 
@@ -93,6 +99,37 @@ const POSTER_CSS = `.vsl-poster{position:relative;display:block;width:100%;aspec
 .vsl-play{position:absolute;left:50%;top:50%;width:14.6%;aspect-ratio:125/80;transform:translate(-50%,-50%);background:var(--vsl-play,#dd0000);border-radius:4px}
 .vsl-play::after{content:"";position:absolute;left:39%;top:27%;width:28%;height:46%;background:#fff;clip-path:polygon(0 0,100% 50%,0 100%)}
 .vsl-poster iframe{position:absolute;inset:0;width:100%;height:100%;border:0}`;
+
+// The page is long (≈2,300 elements, 25 screens on a phone) and a phone works
+// out every one of them before showing the first: the sections after the
+// first screen are laid out when they come near it instead.
+const LATER_CSS = `.pageRoot>.container:nth-child(n+4){content-visibility:auto;contain-intrinsic-size:auto 900px}`;
+
+// Font Awesome's icons that ClickFunnels pages use, as masks of the same shapes
+// (Font Awesome Free 5.15 solid, svgs/solid/*.svg): [width of the 512-high glyph, path].
+const FA_ICONS: Record<string, [number, string]> = {
+  check: [512, "M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"],
+  times: [352, "M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"],
+  "angle-right": [256, "M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"],
+  "cart-plus": [576, "M504.717 320H211.572l6.545 32h268.418c15.401 0 26.816 14.301 23.403 29.319l-5.517 24.276C523.112 414.668 536 433.828 536 456c0 31.202-25.519 56.444-56.824 55.994-29.823-.429-54.35-24.631-55.155-54.447-.44-16.287 6.085-31.049 16.803-41.548H231.176C241.553 426.165 248 440.326 248 456c0 31.813-26.528 57.431-58.67 55.938-28.54-1.325-51.751-24.385-53.251-52.917-1.158-22.034 10.436-41.455 28.051-51.586L93.883 64H24C10.745 64 0 53.255 0 40V24C0 10.745 10.745 0 24 0h102.529c11.401 0 21.228 8.021 23.513 19.19L159.208 64H551.99c15.401 0 26.816 14.301 23.403 29.319l-47.273 208C525.637 312.246 515.923 320 504.717 320zM408 168h-48v-40c0-8.837-7.163-16-16-16h-16c-8.837 0-16 7.163-16 16v40h-48c-8.837 0-16 7.163-16 16v16c0 8.837 7.163 16 16 16h48v40c0 8.837 7.163 16 16 16h16c8.837 0 16-7.163 16-16v-40h48c8.837 0 16-7.163 16-16v-16c0-8.837-7.163-16-16-16z"],
+  download: [512, "M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"],
+  spinner: [512, "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z"],
+};
+// Class names that size or move an icon rather than name one.
+const FA_KEEP = new Set(["fw", "spin", "pulse", "lg", "xs", "sm", "1x", "2x", "3x", "li", "ul", "border", "pull-left", "pull-right"]);
+
+function faCss(icons: string[]): string {
+  const shape = (n: string) => {
+    const [w, d] = FA_ICONS[n];
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${w} 512'><path d='${d}'/></svg>`;
+    return `.fa-${n}::before{width:${(w / 512).toFixed(4)}em;-webkit-mask-image:url("data:image/svg+xml,${encodeURIComponent(svg)}");mask-image:url("data:image/svg+xml,${encodeURIComponent(svg)}")}`;
+  };
+  return `.fa,.fas,.far{display:inline-block;font-style:normal;line-height:1}
+.fa-fw{width:1.25em;text-align:center}
+${icons.map((n) => `.fa-${n}::before`).join(",")}{content:"";display:inline-block;height:1em;vertical-align:-.125em;background:currentColor;-webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
+${icons.map(shape).join("\n")}
+.fa-spin{animation:fa-spin 2s linear infinite}@keyframes fa-spin{to{transform:rotate(360deg)}}`;
+}
 
 const POSTER_SCRIPT = `<script>
 (function () {
@@ -126,6 +163,14 @@ const POSTER_SCRIPT = `<script>
  */
 export function faster(html: string, poster: string | null, preload: readonly string[] = ["hero-bg"], playColor = "#dd0000"): string {
   html = html.replace(/<link rel="modulepreload"[^>]*>\n?/g, "");
+  // Font Awesome (its CSS and a ≈80 KB font) only for a few icons: drawn here
+  // instead, when the page uses no others.
+  const icons = new Set([...html.matchAll(/\bfa-([a-z0-9-]+)/g)].map((m) => m[1]).filter((n) => !FA_KEEP.has(n)));
+  if ([...icons].every((n) => n in FA_ICONS)) {
+    html = html.replace(/<link[^>]*href="https:\/\/use\.fontawesome\.com\/[^"]+"[^>]*>\n?/g, "");
+    html = html.replace("</head>", `<style>${faCss([...icons])}</style>\n</head>`);
+  }
+  html = html.replace(/<img (?![^>]*\balt=)/g, '<img alt="" ');
   html = html.replace(ASYNC_CSS, (_, a: string, b: string, href: string, c: string) => {
     const url = href.includes("fonts.googleapis.com") && !href.includes("display=") ? `${href}&display=swap` : href;
     return `<link${a} rel="stylesheet"${b} href="${url}"${c} media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="${url}"></noscript>`;
@@ -137,7 +182,7 @@ export function faster(html: string, poster: string | null, preload: readonly st
     `<head>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 ${early.map((src) => `<link rel="preload" as="image" href="${src}" fetchpriority="high">`).join("\n")}
-<style>${POSTER_CSS}</style>`,
+<style>${POSTER_CSS}\n${LATER_CSS}</style>`,
   );
   if (!img) return lazyBelow(html, html.indexOf("<wistia-player"));
   html = html.replace(
@@ -170,22 +215,15 @@ function headScripts(currency: Currency): string {
   return `<script>
 (function () {
   if (${OFF}.test(location.hostname)) return;
-  (function (c, l, a, r, i, t, y) {
-    c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
-    t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i;
-    y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
-  })(window, document, 'clarity', 'script', '${clarityId}');
+  window.clarity = window.clarity || function () { (clarity.q = clarity.q || []).push(arguments); };
   clarity('set', 'landing', location.pathname.replace(/\\/$/, '') || '/');
   var params = ${params};
   params.ab_btn = window.__abBtn;
-  !(function (f, b, e, v, n, t, s) {
-    if (f.fbq) return;
-    n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
-    if (!f._fbq) f._fbq = n;
+  if (!window.fbq) {
+    var n = window.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+    if (!window._fbq) window._fbq = n;
     n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
-    t = b.createElement(e); t.async = !0; t.src = v;
-    s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-  })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+  }
   fbq('init', '${metaPixelId}');
   fbq('track', 'PageView');
   fbq('track', 'ViewContent', params);
@@ -195,11 +233,18 @@ function headScripts(currency: Currency): string {
       clarity('event', 'cta_click');
     }
   }, { capture: true });
-  var s = document.createElement('script'); s.async = true; s.src = '${neoSnippet}';
-  document.head.appendChild(s);
+  ${AFTER_LOAD}(['https://connect.facebook.net/en_US/fbevents.js', '${neoSnippet}', 'https://www.clarity.ms/tag/${clarityId}']);
 })();
 </script>`;
 }
+
+// The trackers' scripts (≈1 s of a phone's processor, the Pixel and Clarity
+// most) load once the page has shown: their calls above wait in their queues
+// until then, so nothing is lost.
+export const AFTER_LOAD = `(function (srcs) {
+    function go() { srcs.forEach(function (src) { var s = document.createElement('script'); s.async = true; s.src = src; document.head.appendChild(s); }); }
+    if (document.readyState === 'complete') go(); else addEventListener('load', function () { setTimeout(go, 0); });
+  })`;
 
 // The FAQ accordion, which ClickFunnels opens with its own scripts: a click on
 // a question opens or closes its answer (same classes, so same look).

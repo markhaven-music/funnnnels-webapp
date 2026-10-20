@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/jazz-midi-pack/download": ["./private/jazz-midi-pack/**/*"],
   },
+  // The funnels' pictures (public/funnels): a returning visitor's browser keeps
+  // them for a week instead of asking again each time. A changed picture gets
+  // a new file name.
+  async headers() {
+    return [{ source: "/funnels/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }] }];
+  },
 };
 
 export default nextConfig;
