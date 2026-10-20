@@ -1,4 +1,5 @@
 import type { Currency } from "@/lib/geo";
+import { AB_LANDING_CSS, AB_SCRIPT } from "./abtest";
 import { TEMPLATE } from "./cf/template";
 import en from "./copy/landing/en.json";
 import fr from "./copy/landing/fr.json";
@@ -10,7 +11,7 @@ import { paths, type Lang } from "./i18n";
 // tools/cf_clone.mjs), so it looks exactly like the ClickFunnels page on every
 // screen, with the words of the visitor's language (./copy/landing/<lang>.json,
 // same keys as en.json; a missing key falls back to English), our order page
-// behind every button, and our tracking.
+// behind every button, our tracking and the button-colour test (./abtest.ts).
 
 const STRINGS: Record<Lang, Record<string, string>> = { en, fr };
 
@@ -47,7 +48,7 @@ export function landingHtml(lang: Lang, currency: Currency): string {
     .replace("{{LANG}}", lang)
     .replace("{{TITLE}}", escapeAttr(meta.title))
     .replace("{{DESCRIPTION}}", escapeAttr(meta.description))
-    .replace("{{HEAD}}", headScripts(currency))
+    .replace("{{HEAD}}", `<script>${AB_SCRIPT}</script>\n<style>${AB_LANDING_CSS}</style>\n${headScripts(currency)}`)
     .replace("{{BODY}}", BODY_SCRIPT);
   for (const [from, to] of Object.entries(IMAGES[lang] ?? {})) {
     html = html.replaceAll(`/funnels/midi-drum-kit/${from}.webp`, `/funnels/midi-drum-kit/${to}.webp`);
@@ -74,6 +75,7 @@ function headScripts(currency: Currency): string {
   })(window, document, 'clarity', 'script', '${clarityId}');
   clarity('set', 'landing', location.pathname.replace(/\\/$/, '') || '/');
   var params = ${params};
+  params.ab_btn = window.__abBtn;
   !(function (f, b, e, v, n, t, s) {
     if (f.fbq) return;
     n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };

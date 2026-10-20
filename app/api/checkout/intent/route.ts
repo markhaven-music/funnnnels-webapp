@@ -5,6 +5,7 @@ import { checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, re
 import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { stripe, stripeConfigured } from "@/lib/stripe";
+import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
 
 export const runtime = "nodejs";
 
@@ -64,6 +65,8 @@ export async function POST(req: Request) {
         name,
         country,
         withdrawal_waiver: body.waiver === true ? "accepted" : "",
+        // The A/B test variant the buyer saw (e.g. the button colour), if any.
+        variant: cleanVariant(body.variant),
       },
     });
     return NextResponse.json({ clientSecret: intent.client_secret });

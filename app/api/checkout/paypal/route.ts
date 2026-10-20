@@ -5,6 +5,7 @@ import { checkoutPages, checkoutPhase, isDryRun, orderAmount, orderDescription, 
 import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
+import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
 
 export const runtime = "nodejs";
 
@@ -64,7 +65,9 @@ export async function POST(req: Request) {
 
   // PayPal has no metadata, only custom_id (127 chars). It carries what the
   // thank-you page and the download need; the step-1 email rides along when it fits.
-  const meta = { f: f.slug, b: bumps.map((b) => b.id).join(","), w: body.waiver === true ? 1 : 0, c: country };
+  // v: the A/B test variant the buyer saw (e.g. the button colour), if any.
+  const variant = cleanVariant(body.variant);
+  const meta = { f: f.slug, b: bumps.map((b) => b.id).join(","), w: body.waiver === true ? 1 : 0, c: country, ...(variant ? { v: variant } : {}) };
   const withEmail = JSON.stringify({ ...meta, e: email });
   const customId = withEmail.length <= 127 ? withEmail : JSON.stringify(meta);
 

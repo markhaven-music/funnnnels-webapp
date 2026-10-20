@@ -24,6 +24,7 @@ export function Tracking({ value, currency, event = "ViewContent" }: { value: nu
         })(window, document, 'clarity', 'script', '${clarityId}');
         clarity('set', 'landing', location.pathname.replace(/\\/$/, '') || '/');
         var params = ${params};
+        params.ab_btn = (document.cookie.match(/(?:^|; )ab_btn=([a-z]+)/) || [])[1];
         ${BOOT}
         bootPixel('${metaPixelId}');
         ${event ? `fbq('track', '${event}', params);` : ""}
@@ -51,7 +52,9 @@ export function PurchasePixel({ orderId, value, currency }: { orderId: string; v
         try { if (localStorage.getItem(key)) return; localStorage.setItem(key, '1'); } catch (e) {}
         ${BOOT}
         bootPixel('${funnel.tracking.metaPixelId}');
-        fbq('track', 'Purchase', ${data}, { eventID: '${orderId}' });
+        var data = ${data};
+        data.ab_btn = (document.cookie.match(/(?:^|; )ab_btn=([a-z]+)/) || [])[1];
+        fbq('track', 'Purchase', data, { eventID: '${orderId}' });
       })();
     `}</Script>
   );

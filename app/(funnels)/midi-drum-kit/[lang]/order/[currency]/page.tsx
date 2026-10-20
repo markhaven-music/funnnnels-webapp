@@ -8,6 +8,7 @@ import s from "../../../../top-hits-midi-bundle/order.module.css";
 import d from "../../../order.module.css";
 import { copyFor } from "../../../copy";
 import { funnel } from "../../../funnel";
+import { AB_SCRIPT } from "../../../abtest";
 import { isLang, LANGS } from "../../../i18n";
 import { OrderForm } from "../../../OrderForm";
 import { ReservedTimer } from "../../../ReservedTimer";
@@ -44,6 +45,8 @@ export default async function OrderPage({ params }: { params: Params }) {
 
   return (
     <main className={`${s.page} ${fontVars}`} lang={lang}>
+      {/* The button-colour test: before the buttons paint (see ../../../abtest.ts). */}
+      <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
       <Tracking value={funnel.price[currency]} currency={currency} event={null} />
       <div className={s.redbar}>
         <Rich text={t.orderTopbar} currency={currency} />

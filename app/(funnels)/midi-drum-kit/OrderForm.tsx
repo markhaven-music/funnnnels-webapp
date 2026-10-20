@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { loadStripe, type Appearance } from "@stripe/stripe-js";
 import { Elements, ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
+import { readVariant } from "./abtest";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { Rich } from "../top-hits-midi-bundle/Rich";
 import s from "../top-hits-midi-bundle/order.module.css";
@@ -90,7 +91,7 @@ export function OrderForm({ lang, currency, country, publishableKey }: Props) {
               setInfo(next);
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
-              pixel("InitiateCheckout", { content_name: funnel.product, value: price, currency: currency.toUpperCase() });
+              pixel("InitiateCheckout", { content_name: funnel.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant() });
             }}
           />
         </>
@@ -188,7 +189,7 @@ function InfoStep({ t, info, onDone }: { t: Copy["form"]; info: Info; onDone: (i
           className={`${s.input} ${s.wide}`}
         />
       </div>
-      <button className={s.orange}>
+      <button className={`${s.orange} ${d.cta}`}>
         <svg viewBox="0 0 448 512" className={s.orangeArrow} aria-hidden>
           <path
             fill="currentColor"
@@ -231,6 +232,7 @@ function CardPay(props: PayState) {
         funnel: funnel.slug,
         ...props.info,
         bumps: props.picked,
+        variant: readVariant(),
         waiver: europe,
         country: cookieCountry(props.currency, props.country),
         expected: props.total,
@@ -346,6 +348,7 @@ function PayBody({
           funnel: funnel.slug,
           ...info,
           bumps: picked,
+          variant: readVariant(),
           waiver: europe,
           country: cookieCountry(currency, country),
           origin: window.location.origin,
@@ -438,7 +441,7 @@ function PayBody({
         </div>
       </details>
 
-      <button type="button" className={`${s.orange} ${s.rush}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
+      <button type="button" className={`${s.orange} ${s.rush} ${d.cta}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
         {busy && !cardOff ? (paypal ? t.openingPaypal : t.processing) : t.pay}
       </button>
       {error && (

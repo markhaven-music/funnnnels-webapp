@@ -140,3 +140,17 @@
 .bumpArrow {
   justify-self: start;
 }
+
+/* ── button-colour test (./abtest.ts sets <html data-ab-btn>; same colours there) ── */
+:global(html[data-ab-btn="green"]) .cta {
+  background: linear-gradient(135deg, #16a34a 0%, #3fd468 99%);
+  color: #fff;
+}
+:global(html[data-ab-btn="yellow"]) .cta {
+  background: linear-gradient(135deg, #f5b800 0%, #ffe14d 99%);
+  color: #1a1400;
+}
+:global(html[data-ab-btn="orange"]) .cta {
+  background: linear-gradient(135deg, #ec6a0c 0%, #ffa13d 99%);
+  color: #fff;
+}
