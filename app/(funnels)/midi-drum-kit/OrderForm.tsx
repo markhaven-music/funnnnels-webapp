@@ -244,7 +244,11 @@ function CardPay(props: PayState) {
       clientSecret: json.clientSecret,
       confirmParams: {
         return_url: new URL(paths(props.lang).thankYou, window.location.origin).toString(),
-        payment_method_data: { billing_details: { name, email: props.info.email } },
+        // The card form doesn't ask for the country (fields below): Stripe needs
+        // it here instead, so it's the one we already know from the visit.
+        payment_method_data: {
+          billing_details: { name, email: props.info.email, address: { country: cookieCountry(props.currency, props.country) } },
+        },
       },
     });
     if (payError) throw new Error(payError.message);
@@ -294,13 +298,11 @@ function CardPay(props: PayState) {
           options={{
             layout: "tabs",
             wallets: { applePay: "never", googlePay: "never", link: "never" },
+            // No country picker: one field less to fill in ("crea friction inutile").
+            // The postal code stays where Stripe asks for it (US, UK, Canada cards).
+            fields: { billingDetails: { address: { country: "never" } } },
             defaultValues: {
-              billingDetails: {
-                email: props.info.email,
-                name: `${props.info.firstName} ${props.info.lastName}`.trim(),
-                // Stripe guesses the country field and often guesses wrong.
-                address: { country: cookieCountry(props.currency, props.country) },
-              },
+              billingDetails: { email: props.info.email, name: `${props.info.firstName} ${props.info.lastName}`.trim() },
             },
           }}
         />
