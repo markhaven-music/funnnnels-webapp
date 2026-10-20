@@ -125,6 +125,8 @@ export const en = {
     download: "Download",
     receipt: (provider: string, email: string | null) =>
       `${provider} has emailed your receipt${email ? ` to ${email}` : ""}.`,
+    // Before the link to the customer login (m.thegrind.studio/account).
+    account: "Find your downloads anytime at",
     fix: "and we fix it.",
     back: "Back to checkout",
     // Under the buttons, for what came with an add-on.

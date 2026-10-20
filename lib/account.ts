@@ -23,6 +23,9 @@ export const LANG_COOKIE = "gs_lang";
 export const SESSION_DAYS = 30;
 const LINK_MINUTES = 30;
 
+// Where a buyer finds their downloads again: the thank-you pages link here.
+export const ACCOUNT_URL = "https://m.thegrind.studio/account";
+
 // ── Signed tokens ──────────────────────────────────────────────────────────
 // ACCOUNT_SECRET if set, otherwise a key derived from the server's Supabase
 // secret (never sent anywhere): changing either signs everybody out.

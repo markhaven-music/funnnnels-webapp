@@ -37,6 +37,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("account login email failed", err);
+    // While SES is in its sandbox it only mails verified addresses: say what
+    // "off" says (write to us), not "try again in a minute".
+    if (String(err).includes("not verified")) return NextResponse.json({ error: "off" }, { status: 503 });
     return NextResponse.json({ error: "failed" }, { status: 502 });
   }
 }

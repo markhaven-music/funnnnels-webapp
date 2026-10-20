@@ -124,6 +124,7 @@ export const fr: Copy = {
     download: "Télécharger",
     receipt: (provider: string, email: string | null) =>
       `${provider} t'a envoyé ton reçu${email ? ` à ${email}` : ""}.`,
+    account: "Retrouve tes téléchargements à tout moment sur",
     fix: "et on règle ça.",
     back: "Retour au paiement",
     support: "Un problème ? Écris-nous à",

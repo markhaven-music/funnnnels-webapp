@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { notFound } from "next/navigation";
+import { ACCOUNT_URL } from "@/lib/account";
 import { reportSaleToNeo } from "@/lib/neo";
 import { getOrder, type Order } from "@/lib/orders";
 import { copyFor } from "../../copy";
@@ -103,6 +104,11 @@ export default async function ThankYou({
         )}
         {paid && order && (
           <p className={t.note}>{c.receipt(order.provider === "paypal" ? "PayPal" : "Stripe", order.email)}</p>
+        )}
+        {paid && (
+          <p className={t.account}>
+            {c.account} <a href={ACCOUNT_URL}>{ACCOUNT_URL.replace("https://", "")}</a>
+          </p>
         )}
         {!paid && !pending && (
           <a className={t.main} href={paths(lang).order}>

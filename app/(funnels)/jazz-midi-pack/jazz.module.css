@@ -995,6 +995,14 @@
 .thanks {
   padding: 18px 0 80px;
 }
+.account {
+  margin-top: 10px;
+  color: var(--cream-2);
+}
+.account a {
+  color: var(--cream);
+  font-weight: 600;
+}
 .thanksActions {
   display: flex;
   flex-direction: column;

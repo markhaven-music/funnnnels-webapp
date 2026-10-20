@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif } from "next/font/google";
+import { ACCOUNT_URL } from "@/lib/account";
 import { reportSaleToNeo } from "@/lib/neo";
 import { getOrder } from "@/lib/orders";
 import { funnel, unlocked } from "../funnel";
@@ -97,6 +98,11 @@ export default async function ThankYou({
               Start with folder 01, file 01. {order?.provider === "paypal" ? "PayPal" : "Stripe"} has emailed your receipt
               {order?.email ? ` to ${order.email}` : ""}. A file doesn&rsquo;t open? Email{" "}
               <a href={`mailto:${funnel.support}`}>{funnel.support}</a> and we fix it.
+            </p>
+          )}
+          {paid && (
+            <p className={s.account}>
+              Find your downloads anytime at <a href={ACCOUNT_URL}>{ACCOUNT_URL.replace("https://", "")}</a>
             </p>
           )}
           {!paid && !pending && (

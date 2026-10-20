@@ -47,3 +47,12 @@
 .note a {
   color: #fff;
 }
+.account {
+  margin: 12px 0 0;
+  font-size: 15px;
+  color: #e8e8e8;
+}
+.account a {
+  color: #fff;
+  font-weight: 700;
+}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ACCOUNT_URL } from "@/lib/account";
 import { reportSaleToNeo } from "@/lib/neo";
 import { getOrder } from "@/lib/orders";
 import { funnel } from "../funnel";
@@ -63,6 +64,11 @@ export default async function ThankYou({
           <p className={t.note}>
             {order?.provider === "paypal" ? "PayPal" : "Stripe"} has emailed your receipt{order?.email ? ` to ${order.email}` : ""}. A file
             doesn&apos;t open? Email <a href={`mailto:${funnel.support}`}>{funnel.support}</a> and we fix it.
+          </p>
+        )}
+        {paid && (
+          <p className={t.account}>
+            Find your downloads anytime at <a href={ACCOUNT_URL}>{ACCOUNT_URL.replace("https://", "")}</a>
           </p>
         )}
         {!paid && !pending && (
