@@ -96,7 +96,13 @@ function Variants({ test, step }: { test: TestStats; step: MapStep }) {
     <div className={s.variants}>
       <div className={s.variantsHead}>
         <span className={s.variantsTitle}>
-          <I.abtest size={13} /> A/B/C test · {test.name}
+          <span className={s.dots} aria-hidden>
+            {test.variants.map((v) => {
+              const c = COLORS[v.variant as Variant];
+              return <span key={v.variant} style={{ background: c?.to ?? "#999" }} />;
+            })}
+          </span>
+          A/B/C test · {test.name}
         </span>
         <span className={s.variantsMeta}>
           {test.since ? `since ${test.since} · ` : ""}every language ·{" "}
