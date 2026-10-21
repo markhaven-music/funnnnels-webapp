@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { I } from "@/components/icons";
 import type { OrderRow } from "@/lib/sales";
 import e from "./email.module.css";
 
@@ -100,7 +99,7 @@ export function OrdersPanel() {
 
       {!loading && orders.length === 0 ? (
         <div className={e.empty}>
-          <I.receipt size={28} style={{ opacity: 0.4 }} />
+          <img className={e.emptyArt} src="/funnels/dashboard/orders.webp" width={112} height={112} alt="" />
           <div>No orders recorded yet.</div>
         </div>
       ) : (

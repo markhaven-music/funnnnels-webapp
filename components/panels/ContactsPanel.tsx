@@ -210,7 +210,7 @@ export function ContactsPanel() {
 
       {!loading && contacts.length === 0 ? (
         <div className={e.empty}>
-          <I.contacts size={28} style={{ opacity: 0.4 }} />
+          <img className={e.emptyArt} src="/funnels/dashboard/contacts.webp" width={112} height={112} alt="" />
           <div>No contacts yet. They arrive from checkouts and forms, or import your list from ClickFunnels.</div>
         </div>
       ) : (

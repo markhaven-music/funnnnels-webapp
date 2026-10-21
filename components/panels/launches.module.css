@@ -61,6 +61,22 @@
   padding: 18px 20px;
   margin-bottom: 16px;
 }
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px 36px;
+}
+.empty .sub {
+  max-width: 460px;
+  line-height: 1.5;
+}
+/* Glass rocket rendered with Higgsfield (public/funnels/dashboard). */
+.emptyArt {
+  margin-bottom: 10px;
+  filter: drop-shadow(0 8px 24px oklch(0.74 0.19 295 / 0.25));
+}
 .panelHead {
   display: flex;
   align-items: center;

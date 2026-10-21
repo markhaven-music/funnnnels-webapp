@@ -105,6 +105,14 @@
   padding: 24px 16px;
   color: var(--fg-3);
   font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+/* Glass chart rendered with Higgsfield (public/funnels/dashboard). */
+.emptyArt {
+  filter: drop-shadow(0 8px 24px oklch(0.74 0.19 295 / 0.25));
 }
 .foot {
   font-size: 12px;

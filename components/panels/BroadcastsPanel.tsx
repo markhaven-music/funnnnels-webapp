@@ -83,7 +83,7 @@ export function BroadcastsPanel() {
 
       {!loading && list.length === 0 ? (
         <div className={e.empty}>
-          <I.mail size={28} style={{ opacity: 0.4 }} />
+          <img className={e.emptyArt} src="/funnels/dashboard/broadcasts.webp" width={112} height={112} alt="" />
           <div>No broadcasts yet. Write your first newsletter.</div>
         </div>
       ) : (

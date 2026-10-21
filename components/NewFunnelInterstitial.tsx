@@ -42,6 +42,7 @@ export function NewFunnelInterstitial() {
       </div>
 
       <form className="new-funnel__inner" onSubmit={submit}>
+        <img className="new-funnel__art" src="/funnels/dashboard/funnel.webp" width={96} height={96} alt="" />
         <h1 className="new-funnel__title">Name your funnel</h1>
         <p className="new-funnel__sub">
           You get a starter page. Click any text to change it, add or delete sections, drag them

@@ -8,10 +8,10 @@ type Props = { prominent?: boolean };
 export function NewFunnelTile({ prominent = false }: Props) {
   return (
     <Link href="/funnels/new" className={`funnel new ${prominent ? "funnel--prominent" : ""}`}>
-      <div className="new-icon">
-        <I.plus size={18} />
-      </div>
-      <h4>New funnel</h4>
+      <img className="new-art" src="/funnels/dashboard/new-funnel.webp" width={88} height={88} alt="" />
+      <h4>
+        <I.plus size={14} /> New funnel
+      </h4>
       <p>
         {prominent
           ? "You don't have any funnels yet. Start from a starter page and edit it section by section."

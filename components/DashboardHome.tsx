@@ -154,7 +154,7 @@ export function DashboardHome({ funnels }: Props) {
   }, [funnels]);
 
   return (
-    <main className="main">
+    <main className="main home">
       {/* Header */}
       <div className="page-head">
         <div>

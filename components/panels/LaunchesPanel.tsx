@@ -114,7 +114,8 @@ export function LaunchesPanel() {
       {rows === null ? (
         <p className="page-sub">Loading…</p>
       ) : rows.length === 0 && !creating ? (
-        <div className={c.panel}>
+        <div className={`${c.panel} ${c.empty}`}>
+          <img className={c.emptyArt} src="/funnels/dashboard/launches.webp" width={112} height={112} alt="" />
           <p className={c.h2}>No launches yet</p>
           <p className={c.sub}>
             Click New launch: name the product, set its prices and dates, and it gets a waitlist page, a sales page

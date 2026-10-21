@@ -116,7 +116,18 @@ export function AnalyticsPanel() {
             <span title="Orders per landing visitor">CVR</span>
             <span title="Revenue per landing visitor">€ / VISITOR</span>
           </div>
-          {!data && <div className={s.empty}>{loading ? "Loading…" : "No data"}</div>}
+          {!data && (
+            <div className={s.empty}>
+              {loading ? (
+                "Loading…"
+              ) : (
+                <>
+                  <img className={s.emptyArt} src="/funnels/dashboard/analytics.webp" width={96} height={96} alt="" />
+                  No data
+                </>
+              )}
+            </div>
+          )}
           {data?.funnels.map((f) => (
             <div key={f.slug}>
               <MetricRow

@@ -4,7 +4,7 @@ export function Brand() {
   return (
     <div className="logo-cell">
       <Link href="/" className="brand" style={{ textDecoration: "none", color: "inherit" }}>
-        <div className="brand-mark" />
+        <img className="brand-mark" src="/funnels/dashboard/brand-mark.webp" width={26} height={26} alt="" />
         <div className="brand-name">
           <b>funn</b>
           <i>nn</i>
