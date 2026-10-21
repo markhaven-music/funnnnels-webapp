@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { I } from "@/components/icons";
 import type { Sequence, SequenceStep } from "@/lib/sequences";
 import e from "./email.module.css";
-import { FormatHelp, Preview, TagSelect, useAudience } from "./emailShared";
+import { FormatHelp, Preview, TagSelect, euros, useAudience, useEmailResults } from "./emailShared";
 
 // Dashboard → Automations: the emails that send themselves.
 //   Built in: the receipt after every order, the abandoned-checkout reminder.
@@ -21,11 +21,13 @@ async function call<T>(url: string, method = "GET", body?: unknown): Promise<T> 
 
 const BUILT_IN = [
   {
+    id: null,
     name: "Receipt with the downloads",
     when: "5 minutes after every paid order, with the upsells bought right after it",
     detail: "In the buyer's language (EN, FR, ES, DE). The links don't expire.",
   },
   {
+    id: "reminder", // its numbers in dashboard → Email → Insights
     name: "Abandoned checkout",
     when: "1 hour after someone types their email at checkout and doesn't pay",
     detail: "Once per product and person, never to a buyer or an unsubscribed contact, given up after 3 days.",
@@ -38,6 +40,12 @@ export function AutomationsPanel() {
   const [list, setList] = useState<Sequence[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<Sequence | "new" | null>(null);
+  // Orders and revenue per sequence and for the reminder, all time (dashboard → Email → Insights).
+  const results = useEmailResults();
+  const sold = (id: string) => {
+    const r = results.get(id);
+    return r && r.clicked.orders + r.clicked.upsells > 0 ? `${euros(r.clicked.revenue)} from ${r.clicked.orders + r.clicked.upsells} order${r.clicked.orders + r.clicked.upsells === 1 ? "" : "s"}` : null;
+  };
 
   const load = useCallback(async () => {
     try {
@@ -86,6 +94,7 @@ export function AutomationsPanel() {
               <span className={`${e.chip} ${e.chip_on}`}>on</span>
               <b>{b.name}</b>
               <span className={e.dim}>· {b.when}</span>
+              {b.id && sold(b.id) && <span className={e.mono}>· {sold(b.id)}</span>}
             </div>
             <div className={e.hint} style={{ margin: 0 }}>
               {b.detail}
@@ -100,7 +109,7 @@ export function AutomationsPanel() {
         </div>
         {!loading && list.length === 0 && <p className={e.hint}>None yet. A welcome series for new contacts, or a follow-up after a purchase, starts here.</p>}
         {list.map((s) => (
-          <button key={s.id} type="button" className={e.rowButton} style={{ gridTemplateColumns: "60px minmax(0,2fr) minmax(0,1.4fr) 90px 160px", borderRadius: "var(--radius-sm)" }} onClick={() => setOpen(s)}>
+          <button key={s.id} type="button" className={e.rowButton} style={{ gridTemplateColumns: "60px minmax(0,2fr) minmax(0,1.4fr) 90px 160px 150px", borderRadius: "var(--radius-sm)" }} onClick={() => setOpen(s)}>
             <span className={`${e.chip} ${s.active ? e.chip_on : ""}`}>{s.active ? "on" : "off"}</span>
             <span className={`${e.cell} ${e.strong}`}>{s.name}</span>
             <span className={`${e.cell} ${e.dim}`}>
@@ -113,6 +122,7 @@ export function AutomationsPanel() {
             <span className={e.mono}>
               {s.running} in · {s.finished} done
             </span>
+            <span className={e.mono}>{sold(s.id) ?? "—"}</span>
           </button>
         ))}
       </div>

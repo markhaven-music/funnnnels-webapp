@@ -33,6 +33,7 @@ export const NAV: NavSection[] = [
   {
     section: "Email",
     items: [
+      { id: "email-insights", label: "Insights", icon: "sparkles" },
       { id: "contacts", label: "Contacts", icon: "contacts" },
       { id: "broadcasts", label: "Broadcasts", icon: "mail" },
       { id: "automations", label: "Automations", icon: "bolt" },

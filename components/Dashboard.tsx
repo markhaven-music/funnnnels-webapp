@@ -13,6 +13,7 @@ import { BroadcastsPanel } from "@/components/panels/BroadcastsPanel";
 import { BrandKitPanel } from "@/components/panels/BrandKitPanel";
 import { ContactsPanel } from "@/components/panels/ContactsPanel";
 import { DomainsPanel } from "@/components/panels/DomainsPanel";
+import { EmailInsightsPanel } from "@/components/panels/EmailInsightsPanel";
 import { IntegrationsPanel } from "@/components/panels/IntegrationsPanel";
 import { LandingPagesPanel } from "@/components/panels/LandingPagesPanel";
 import { LaunchesPanel } from "@/components/panels/LaunchesPanel";
@@ -52,12 +53,13 @@ export function Dashboard({ funnels: rows }: Props) {
     return withStats(rows, stats, CARD_RANGE);
   }, [rows, analytics]);
   const topBarLabel = NAV_LABELS[activeNav] ?? "Dashboard";
+  const trail = activeNav === "email-insights" ? [{ label: "Email" }, { label: topBarLabel }] : [{ label: topBarLabel }];
 
   return (
     <div className="app">
       <Brand />
       <Sidebar funnelCount={funnels.length} active={activeNav} onNav={setActiveNav} />
-      <TopBar trail={[{ label: topBarLabel }]} />
+      <TopBar trail={trail} />
       {activeNav === "home"         && <DashboardHome funnels={funnels} analytics={analytics} />}
       {activeNav === "funnels"      && <MainPanel funnels={funnels} />}
       {activeNav === "launches"     && <LaunchesPanel />}
@@ -65,6 +67,7 @@ export function Dashboard({ funnels: rows }: Props) {
       {activeNav === "ab"           && <ABTestsPanel funnels={funnels} />}
       {activeNav === "orders"       && <OrdersPanel />}
       {activeNav === "contacts"     && <ContactsPanel />}
+      {activeNav === "email-insights" && <EmailInsightsPanel analytics={analytics} />}
       {activeNav === "broadcasts"   && <BroadcastsPanel />}
       {activeNav === "automations"  && <AutomationsPanel />}
       {activeNav === "analytics"    && <AnalyticsPanel />}

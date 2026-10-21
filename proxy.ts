@@ -68,7 +68,7 @@ const PUBLIC = [
   /^\/midi-drum-kit(\/|$)/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
-  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|upsell)$/,
+  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|upsell|go)$/, // go: a click in an email (lib/mail.ts)
   /^\/account$/, // the customer login and its API
   /^\/api\/checkout\/account\/(login|verify|session)$/,
   // Email: Stripe's webhook, the email job (its own CRON_SECRET), unsubscribing.

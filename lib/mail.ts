@@ -42,6 +42,48 @@ export function readUnsubscribeToken(token: unknown): string | null {
 
 export const unsubscribeUrl = (email: string) => `${UNSUBSCRIBE_ORIGIN}/unsubscribe?t=${unsubscribeToken(email)}`;
 
+// ─── clicks ────────────────────────────────────────────────────────
+// Each link of a broadcast, sequence step, launch email or reminder goes
+// through /api/checkout/go, which notes who clicked which email (email_clicks,
+// db/email-insights.sql) and sends them on: what dashboard → Email → Insights
+// credits orders with. Signed, so it can't send anyone anywhere else. On
+// m.thegrind.studio, which forwards /api/checkout/* here: the same domain as
+// the sender and the pages the links open.
+export const CLICK_ORIGIN = "https://m.thegrind.studio";
+
+export type EmailKind = "broadcast" | "launch" | "sequence" | "reminder";
+export type Track = { kind: EmailKind; ref: string };
+
+const KIND_CODE: Record<EmailKind, string> = { broadcast: "b", launch: "l", sequence: "s", reminder: "r" };
+const CODE_KIND = Object.fromEntries(Object.entries(KIND_CODE).map(([k, c]) => [c, k])) as Record<string, EmailKind>;
+
+const clickKey = () => createHmac("sha256", key()).update("grind-click-v1").digest();
+
+export function clickUrl(t: Track, email: string, url: string): string {
+  const p = Buffer.from(JSON.stringify([KIND_CODE[t.kind], t.ref, email.toLowerCase(), url])).toString("base64url");
+  return `${CLICK_ORIGIN}/api/checkout/go?t=${p}.${createHmac("sha256", clickKey()).update(p).digest("base64url").slice(0, 32)}`;
+}
+
+/** What a click link carries, with ok=false when the signature doesn't match. */
+export function readClickToken(token: unknown): { ok: boolean; kind: EmailKind; ref: string; email: string; url: string } | null {
+  if (typeof token !== "string" || token.length > 6000) return null;
+  const [p, sig] = token.split(".");
+  if (!p || !sig) return null;
+  let v: unknown;
+  try {
+    v = JSON.parse(Buffer.from(p, "base64url").toString());
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(v) || v.length !== 4 || !v.every((x) => typeof x === "string")) return null;
+  const [code, ref, email, url] = v as string[];
+  const kind = CODE_KIND[code];
+  if (!kind || !/^https?:\/\//.test(url)) return null;
+  const want = Buffer.from(createHmac("sha256", clickKey()).update(p).digest("base64url").slice(0, 32));
+  const got = Buffer.from(sig);
+  return { ok: got.length === want.length && timingSafeEqual(got, want), kind, ref, email, url };
+}
+
 // ─── the newsletter text format ────────────────────────────────────
 // What the Broadcasts, Automations and Launches editors take:
 //   a blank line            new paragraph
@@ -62,18 +104,24 @@ export function fill(text: string, r: Recipient, vars: Record<string, string> = 
     .replace(/\{([a-z_]+)\}/g, (m, k) => vars[k] ?? m);
 }
 
-function inline(s: string): string {
+const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&");
+
+/** A link's address in the HTML: through the click counter when the email is tracked. */
+type Href = (url: string) => string;
+const plainHref: Href = (u) => esc(u);
+
+function inline(s: string, href: Href): string {
   // Escape first, then add the few marks we allow.
   return esc(s)
     .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, t, u) => `<a href="${u}" style="color:#111;text-decoration:underline">${t}</a>`)
-    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, (_, pre, u) => `${pre}<a href="${u}" style="color:#111;text-decoration:underline">${u}</a>`);
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, t, u) => `<a href="${href(unesc(u))}" style="color:#111;text-decoration:underline">${t}</a>`)
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, (_, pre, u) => `${pre}<a href="${href(unesc(u))}" style="color:#111;text-decoration:underline">${u}</a>`);
 }
 
 const BUTTON = /^\[button:\s*(.+?)\]\((https?:\/\/\S+)\)$/i;
 
-/** The editor's text as the letter's HTML body and its plain-text twin. */
-export function render(text: string): { html: string; text: string } {
+/** The editor's text as the letter's HTML body and its plain-text twin (which keeps the plain addresses). */
+export function render(text: string, href: Href = plainHref): { html: string; text: string } {
   const blocks = text.replace(/\r\n/g, "\n").trim().split(/\n{2,}/);
   const html: string[] = [];
   const plain: string[] = [];
@@ -82,17 +130,17 @@ export function render(text: string): { html: string; text: string } {
     const button = lines.length === 1 && lines[0].trim().match(BUTTON);
     if (button) {
       html.push(
-        `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="border-radius:10px;background:#111"><a href="${esc(button[2])}" style="display:inline-block;padding:15px 26px;font-size:16px;font-weight:700;color:#fff;text-decoration:none;border-radius:10px">${esc(button[1])}</a></td></tr></table>`,
+        `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="border-radius:10px;background:#111"><a href="${href(button[2])}" style="display:inline-block;padding:15px 26px;font-size:16px;font-weight:700;color:#fff;text-decoration:none;border-radius:10px">${esc(button[1])}</a></td></tr></table>`,
       );
       plain.push(`${button[1]}: ${button[2]}`);
     } else if (lines[0].startsWith("# ")) {
-      html.push(`<h1 style="margin:0 0 18px;font-size:24px;line-height:1.3;font-weight:800">${inline(lines.join(" ").slice(2))}</h1>`);
+      html.push(`<h1 style="margin:0 0 18px;font-size:24px;line-height:1.3;font-weight:800">${inline(lines.join(" ").slice(2), href)}</h1>`);
       plain.push(lines.join(" ").slice(2).toUpperCase());
     } else if (lines.every((l) => /^[-•] /.test(l))) {
-      html.push(`<ul style="margin:0 0 18px;padding-left:22px">${lines.map((l) => `<li style="margin:0 0 6px">${inline(l.slice(2))}</li>`).join("")}</ul>`);
+      html.push(`<ul style="margin:0 0 18px;padding-left:22px">${lines.map((l) => `<li style="margin:0 0 6px">${inline(l.slice(2), href)}</li>`).join("")}</ul>`);
       plain.push(lines.join("\n"));
     } else {
-      html.push(`<p style="margin:0 0 18px">${lines.map(inline).join("<br>")}</p>`);
+      html.push(`<p style="margin:0 0 18px">${lines.map((l) => inline(l, href)).join("<br>")}</p>`);
       plain.push(lines.join("\n"));
     }
   }
@@ -107,9 +155,10 @@ const UNSUB_WORDS: Record<string, [string, string]> = {
 };
 
 /** A newsletter-type email, ready for sendEmail: the letter, the unsubscribe link and headers. */
-export function letter(o: { to: Recipient; subject: string; preheader?: string; body: string; vars?: Record<string, string>; lang?: string | null }): Email {
+export function letter(o: { to: Recipient; subject: string; preheader?: string; body: string; vars?: Record<string, string>; lang?: string | null; track?: Track }): Email {
   const r = o.to;
-  const { html, text } = render(fill(o.body, r, o.vars));
+  const t = o.track;
+  const { html, text } = render(fill(o.body, r, o.vars), t ? (u) => esc(clickUrl(t, r.email, u)) : plainHref);
   const unsub = unsubscribeUrl(r.email);
   const [ask, word] = UNSUB_WORDS[o.lang ?? "en"] ?? UNSUB_WORDS.en;
   const pre = o.preheader ? fill(o.preheader, r, o.vars) : "";

@@ -2,7 +2,7 @@ import { purchasesOf, shelfOf } from "@/lib/account";
 import { checkoutPages, resolveFunnel, type Product } from "@/lib/funnels";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { money } from "@/lib/launch";
-import { card, letter, type CardButton } from "@/lib/mail";
+import { card, clickUrl, letter, type CardButton } from "@/lib/mail";
 import { mailCopy } from "@/lib/mailCopy";
 import { getLaunch } from "@/lib/products";
 import { hasPaidOrder } from "@/lib/sales";
@@ -241,11 +241,15 @@ async function reminders(run: Run) {
       const id = await run.send({
         to: row.email,
         subject: c.subject(f.product),
-        html: card({ lang: row.lang, title: c.title(first, f.product), lead: c.lead, buttons: [{ label: c.button, url }], notes: c.notes, help: c.help }),
+        html: card({ lang: row.lang, title: c.title(first, f.product), lead: c.lead, buttons: [{ label: c.button, url: clickUrl({ kind: "reminder", ref: row.funnel }, row.email, url) }], notes: c.notes, help: c.help }),
         text: [c.title(first, f.product), "", c.lead, "", `${c.button}: ${url}`, "", ...c.notes, "", "support@thegrind.studio"].join("\n"),
       });
       if (id === null && !run.dryRun) await mark(null);
-      else run.report.reminders++;
+      else {
+        run.report.reminders++;
+        // For dashboard → Email → Insights: sent, and the orders that followed.
+        if (!run.dryRun) await db.from("email_sends").upsert({ kind: "reminder", ref: row.funnel, email: row.email, status: "sent", message_id: id }, { onConflict: "kind,ref,email", ignoreDuplicates: true });
+      }
     } catch (err) {
       run.report.failed++;
       // In the sandbox (or any refusal) the reminder stays sent: one try only, never a late one.
@@ -303,7 +307,7 @@ async function sequences(run: Run) {
       continue;
     }
 
-    const sent = await sendOnce(run, "sequence", step.id, contact, () => letter({ to: contact, subject: step.subject, body: step.body, lang: contact.lang }));
+    const sent = await sendOnce(run, "sequence", step.id, contact, () => letter({ to: contact, subject: step.subject, body: step.body, lang: contact.lang, track: { kind: "sequence", ref: step.id } }));
     // Not sent and not recorded (time up, the sandbox): this step again next run.
     if (sent === "retry") {
       if (run.over || run.sandbox) return;
@@ -433,7 +437,7 @@ async function broadcasts(run: Run) {
       "broadcast",
       b.id,
       { tag: b.audience_tag, exclude: b.exclude_tag },
-      (r) => letter({ to: r, subject: b.subject, preheader: b.preheader, body: b.body, lang: r.lang }),
+      (r) => letter({ to: r, subject: b.subject, preheader: b.preheader, body: b.body, lang: r.lang, track: { kind: "broadcast", ref: b.id } }),
       async (sent, failed) => {
         total = { sent: total.sent + sent, failed: total.failed + failed };
         await db.from("broadcasts").update({ sent_count: total.sent, failed_count: total.failed, updated_at: new Date().toISOString() }).eq("id", b.id);
@@ -473,7 +477,7 @@ async function launchEmails(run: Run) {
       "launch",
       e.id,
       { tag: e.audience_tag, exclude: e.exclude_tag },
-      (r) => letter({ to: r, subject: e.subject, body: e.body, vars, lang: r.lang }),
+      (r) => letter({ to: r, subject: e.subject, body: e.body, vars, lang: r.lang, track: { kind: "launch", ref: e.id } }),
       async (sent) => {
         sentCount += sent;
         await db.from("launch_emails").update({ sent_count: sentCount }).eq("id", e.id);

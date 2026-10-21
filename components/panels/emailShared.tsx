@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { EmailInsights, EmailRow } from "@/lib/emailInsights";
 import e from "./email.module.css";
 
 // What the Broadcasts and Automations editors share: the tag list, the live
@@ -85,6 +86,26 @@ export function FormatHelp({ extra }: { extra?: string }) {
     </p>
   );
 }
+
+/** Each email's clicks, orders and revenue, all time (dashboard → Email → Insights' numbers), by id. */
+export function useEmailResults(): Map<string, EmailRow> {
+  const [rows, setRows] = useState<Map<string, EmailRow>>(new Map());
+  useEffect(() => {
+    let live = true;
+    fetch("/api/email/insights?range=all", { cache: "no-store" })
+      .then((r) => (r.ok ? (r.json() as Promise<EmailInsights>) : null))
+      .then((d) => {
+        if (live && d) setRows(new Map([...d.campaigns, ...d.automations].map((r) => [r.id, r])));
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
+  return rows;
+}
+
+export const euros = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 
 export const toLocal = (iso: string | null) => {
   if (!iso) return "";

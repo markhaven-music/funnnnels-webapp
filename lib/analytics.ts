@@ -157,7 +157,7 @@ const DAY = 86_400_000;
 const TARGET_SALES = 100;
 
 /** First UTC day of the range ("2026-10-14"), or null for all time. */
-function sinceDay(range: Range, now = Date.now()): string | null {
+export function sinceDay(range: Range, now = Date.now()): string | null {
   if (range === "all") return null;
   const days = range === "7d" ? 7 : 28;
   return new Date(now - (days - 1) * DAY).toISOString().slice(0, 10);
@@ -293,7 +293,7 @@ async function paypalSales(): Promise<Sale[]> {
 }
 
 /** USD → EUR from the ECB's daily rate (free, cached a day); a rough fixed rate if it's down. */
-async function usdToEur(): Promise<number> {
+export async function usdToEur(): Promise<number> {
   try {
     const res = await fetch("https://api.frankfurter.app/latest?from=USD&to=EUR", { next: { revalidate: 86400 } });
     const rate = (await res.json())?.rates?.EUR;

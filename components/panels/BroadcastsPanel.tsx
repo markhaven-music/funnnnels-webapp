@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { I } from "@/components/icons";
 import type { Broadcast } from "@/lib/broadcasts";
+import { clickRate, clicksCounted, type EmailRow } from "@/lib/emailInsights";
 import e from "./email.module.css";
-import { FormatHelp, Preview, TagSelect, fromLocal, toLocal, useAudience, useTestAddress, when } from "./emailShared";
+import { FormatHelp, Preview, TagSelect, euros, fromLocal, toLocal, useAudience, useEmailResults, useTestAddress, when } from "./emailShared";
 
 // Dashboard → Broadcasts: the newsletter. Write it, send yourself a test,
 // then send it now or at a time, to a tag or to everyone subscribed.
@@ -17,12 +18,18 @@ async function call<T>(url: string, method = "GET", body?: unknown): Promise<T> 
   return d as T;
 }
 
-const COLS = { gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr) 100px 90px 150px" };
+const COLS = { gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr) 100px 90px 100px 90px 150px" };
+
+/** "12 · 4.1%" people who clicked it, or — before it went out (or before clicks were counted). */
+const clicked = (r: EmailRow | undefined) =>
+  r && r.sent && clicksCounted(r) ? `${r.clickers.toLocaleString("en-US")} · ${(clickRate(r) * 100).toFixed(1)}%` : "—";
 
 export function BroadcastsPanel() {
   const [list, setList] = useState<Broadcast[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
+  // Clicks and revenue per broadcast (dashboard → Email → Insights).
+  const results = useEmailResults();
 
   const load = useCallback(async () => {
     try {
@@ -53,6 +60,7 @@ export function BroadcastsPanel() {
       <Editor
         key={current.id}
         b={current}
+        result={results.get(current.id)}
         onBack={() => {
           setOpen(null);
           load();
@@ -93,6 +101,8 @@ export function BroadcastsPanel() {
             <span>TO</span>
             <span>STATUS</span>
             <span>SENT</span>
+            <span>CLICKED</span>
+            <span>REVENUE</span>
             <span>WHEN</span>
           </div>
           {list.map((b) => (
@@ -107,6 +117,10 @@ export function BroadcastsPanel() {
                 {b.sentCount.toLocaleString("en-US")}
                 {b.failedCount ? ` · ${b.failedCount} failed` : ""}
               </span>
+              <span className={e.mono}>{clicked(results.get(b.id))}</span>
+              <span className={e.mono} style={(results.get(b.id)?.clicked.revenue ?? 0) > 0 ? { color: "var(--fg-0)", fontWeight: 600 } : undefined}>
+                {results.has(b.id) ? euros(results.get(b.id)!.clicked.revenue) : "—"}
+              </span>
               <span className={e.mono}>{when(b.sentAt ?? b.sendAt ?? b.updatedAt)}</span>
             </button>
           ))}
@@ -116,7 +130,21 @@ export function BroadcastsPanel() {
   );
 }
 
-function Editor({ b, onBack, onChange, onDuplicate, onDeleted }: { b: Broadcast; onBack: () => void; onChange: (b: Broadcast) => void; onDuplicate: () => void; onDeleted: () => void }) {
+function Editor({
+  b,
+  result,
+  onBack,
+  onChange,
+  onDuplicate,
+  onDeleted,
+}: {
+  b: Broadcast;
+  result: EmailRow | undefined;
+  onBack: () => void;
+  onChange: (b: Broadcast) => void;
+  onDuplicate: () => void;
+  onDeleted: () => void;
+}) {
   const [f, setF] = useState({ subject: b.subject, preheader: b.preheader, body: b.body, audienceTag: b.audienceTag, excludeTag: b.excludeTag });
   const [sendAt, setSendAt] = useState(toLocal(b.sendAt));
   const [dirty, setDirty] = useState(false);
@@ -182,6 +210,13 @@ function Editor({ b, onBack, onChange, onDuplicate, onDeleted }: { b: Broadcast;
             {b.status === "scheduled" && `goes out ${when(b.sendAt)}`}
             {(b.status === "sending" || b.status === "sent") && `${b.sentCount.toLocaleString("en-US")} sent${b.failedCount ? `, ${b.failedCount} failed` : ""}`}
             {b.status === "sent" && ` · ${when(b.sentAt)}`}
+            {result && result.sent > 0 && (
+              <>
+                {clicksCounted(result) && ` · ${result.clickers.toLocaleString("en-US")} clicked`}
+                {` · ${euros(result.clicked.revenue)} from ${result.clicked.orders} order${result.clicked.orders === 1 ? "" : "s"}`}
+                {result.unsubscribed > 0 && ` · ${result.unsubscribed} left`}
+              </>
+            )}
           </p>
         </div>
         <div className="cta-group">

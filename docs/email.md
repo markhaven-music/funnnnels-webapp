@@ -15,6 +15,18 @@ Everything goes out through Amazon SES (eu-west-1, `lib/ses.ts`), from one job:
 Orders are recorded (`lib/sales.ts`) by the Stripe webhook, the PayPal return
 and every thank-you page; Stripe/PayPal stay the judge of what's paid.
 
+## What they bring in
+
+Dashboard → Email → Insights (`lib/emailStats.ts`, `lib/emailInsights.ts`,
+`db/email-insights.sql`), plus the Clicked / Revenue columns of Broadcasts
+and Automations. The links of broadcasts, sequences, launch emails and the
+abandoned-checkout reminder go through `m.thegrind.studio/api/checkout/go`
+(signed, `lib/mail.ts` clickUrl), which notes the click in `email_clicks` and
+sends the reader on; mail scanners and bots aren't counted. An order counts
+for an email when its buyer clicked it in the 5 days before paying (the last
+email clicked wins); bought after getting one without a click is shown apart.
+Addresses @example.com are tests and stay out of every number.
+
 Newsletter-type emails carry an unsubscribe link and one-click
 `List-Unsubscribe` headers (`lib/mail.ts`); unsubscribing sets
 `contacts.status`. SES's own suppression list stops bounces and complaints.
