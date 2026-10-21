@@ -111,6 +111,25 @@ const POSTER_CSS = `.vsl-poster{position:relative;display:block;width:100%;aspec
 .vsl-play::after{content:"";position:absolute;left:39%;top:27%;width:28%;height:46%;background:#fff;clip-path:polygon(0 0,100% 50%,0 100%)}
 .vsl-poster iframe{position:absolute;inset:0;width:100%;height:100%;border:0}`;
 
+// The web fonts arrive after the first paint (they don't hold it), and text
+// drawn in the stand-in font wraps differently: the first screen jumped when
+// Poppins swapped in (PageSpeed CLS 0.18 on the Spanish hero). The stand-in is
+// Arial, or its metric twin Liberation Sans on Linux, resized to each web
+// font's measurements (next/font's numbers: get-fallback-font-override-metrics),
+// so lines break in the same places before and after.
+const FALLBACK_FONTS: Record<string, { size: string; ascent: string; descent: string; lineGap: string }> = {
+  Poppins: { size: "112.16%", ascent: "93.62%", descent: "31.21%", lineGap: "8.92%" },
+  Inter: { size: "107.12%", ascent: "90.44%", descent: "22.52%", lineGap: "0%" },
+  "Open Sans": { size: "105.15%", ascent: "101.65%", descent: "27.86%", lineGap: "0%" },
+};
+const FALLBACK_CSS = Object.entries(FALLBACK_FONTS)
+  .map(
+    ([family, m]) =>
+      `@font-face{font-family:"${family} Fallback";src:local("Arial"),local("ArialMT"),local("Liberation Sans"),local("LiberationSans"),local("Arimo");size-adjust:${m.size};ascent-override:${m.ascent};descent-override:${m.descent};line-gap-override:${m.lineGap}}`,
+  )
+  .join("\n");
+const FALLBACK_STACK = new RegExp(`"(${Object.keys(FALLBACK_FONTS).join("|")})", sans-serif`, "g");
+
 // The page is long (≈2,300 elements, 25 screens on a phone) and a phone works
 // out every one of them before showing the first: the sections after the
 // first screen are laid out when they come near it instead.
@@ -182,6 +201,7 @@ export function faster(html: string, poster: string | null, preload: readonly st
     html = html.replace("</head>", `<style>${faCss([...icons])}</style>\n</head>`);
   }
   html = html.replace(/<img (?![^>]*\balt=)/g, '<img alt="" ');
+  html = html.replace(FALLBACK_STACK, '"$1", "$1 Fallback", sans-serif');
   html = html.replace(ASYNC_CSS, (_, a: string, b: string, href: string, c: string) => {
     const url = href.includes("fonts.googleapis.com") && !href.includes("display=") ? `${href}&display=swap` : href;
     return `<link${a} rel="stylesheet"${b} href="${url}"${c} media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="${url}"></noscript>`;
@@ -193,7 +213,7 @@ export function faster(html: string, poster: string | null, preload: readonly st
     `<head>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 ${early.map((src) => `<link rel="preload" as="image" href="${src}" fetchpriority="high">`).join("\n")}
-<style>${POSTER_CSS}\n${LATER_CSS}</style>`,
+<style>${FALLBACK_CSS}\n${POSTER_CSS}\n${LATER_CSS}</style>`,
   );
   if (!img) return lazyBelow(html, html.indexOf("<wistia-player"));
   html = html.replace(
