@@ -1,4 +1,4 @@
-/* Dashboard → Shop. Uses the dashboard's tokens (globals.css) and its rules
+/* Dashboard → Shop and Products. Uses the dashboard's tokens (globals.css) and its rules
    (docs/design.md): cards told apart by their fill, nearly square corners. */
 
 .stats {
@@ -99,6 +99,7 @@
   color: inherit;
   font: inherit;
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
 }
 .rowMain:hover .rowName {
@@ -136,6 +137,46 @@
 .chip_draft {
   background: oklch(0.82 0.16 75 / 0.12);
   color: var(--amber);
+}
+.chip_funnel {
+  background: oklch(0.78 0.13 230 / 0.12);
+  color: var(--sky);
+}
+.rowLink {
+  justify-self: end;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  color: var(--fg-1);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.rowLink:hover {
+  background: var(--bg-3);
+  color: var(--fg-0);
+}
+/* a funnel product's add-ons and upsells */
+.extras {
+  display: grid;
+  margin: 0 0 10px 56px;
+  padding: 4px 12px;
+  background: var(--bg-2);
+  border-radius: var(--radius-sm);
+}
+.extra {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 70px 130px 60px;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 13px;
+}
+.extra + .extra {
+  border-top: 1px solid var(--line-soft);
 }
 .moves {
   display: flex;
@@ -269,6 +310,16 @@
   }
   .editor {
     grid-template-columns: 1fr;
+  }
+  .extras {
+    margin-left: 0;
+  }
+  .extra {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .extra > :nth-child(2),
+  .extra > :nth-child(4) {
+    display: none;
   }
   .media {
     max-width: 240px;

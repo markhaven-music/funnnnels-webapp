@@ -18,6 +18,7 @@ export const NAV: NavSection[] = [
     items: [
       { id: "home", label: "Dashboard", icon: "layers" },
       { id: "funnels", label: "Funnels", icon: "funnel", badgeKey: "funnels" },
+      { id: "products", label: "Products", icon: "box" },
       { id: "launches", label: "Launches", icon: "rocket" },
       { id: "pages", label: "Landing Pages", icon: "page" },
       { id: "ab", label: "A/B Tests", icon: "abtest" },

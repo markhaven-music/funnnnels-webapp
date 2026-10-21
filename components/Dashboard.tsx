@@ -18,6 +18,7 @@ import { IntegrationsPanel } from "@/components/panels/IntegrationsPanel";
 import { LandingPagesPanel } from "@/components/panels/LandingPagesPanel";
 import { LaunchesPanel } from "@/components/panels/LaunchesPanel";
 import { OrdersPanel } from "@/components/panels/OrdersPanel";
+import { ProductsPanel } from "@/components/panels/ProductsPanel";
 import { SettingsPanel } from "@/components/panels/SettingsPanel";
 import { ShopPanel } from "@/components/panels/ShopPanel";
 import { NAV } from "@/lib/data";
@@ -63,6 +64,7 @@ export function Dashboard({ funnels: rows }: Props) {
       <TopBar trail={trail} />
       {activeNav === "home"         && <DashboardHome funnels={funnels} analytics={analytics} />}
       {activeNav === "funnels"      && <MainPanel funnels={funnels} />}
+      {activeNav === "products"     && <ProductsPanel />}
       {activeNav === "launches"     && <LaunchesPanel />}
       {activeNav === "pages"        && <LandingPagesPanel funnels={funnels} />}
       {activeNav === "ab"           && <ABTestsPanel funnels={funnels} />}

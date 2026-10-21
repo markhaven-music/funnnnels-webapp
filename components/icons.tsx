@@ -220,6 +220,12 @@ export const I = {
       <path d="M9 8h6M9 12h6M9 16h3" />
     </Base>
   ),
+  box: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M12 3 4 7v10l8 4 8-4V7l-8-4z" />
+      <path d="m4 7 8 4 8-4M12 11v10" />
+    </Base>
+  ),
   bag: (p: IconProps) => (
     <Base {...p}>
       <path d="M5 8h14l-1 12H6L5 8z" />
