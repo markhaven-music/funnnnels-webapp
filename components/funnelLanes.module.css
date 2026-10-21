@@ -1,0 +1,399 @@
+/* The A/B/C test as lanes on the funnel map (components/FunnelLanes.tsx).
+   Inside .page of funnelMap.module.css, so its light colours (--ink, --card…) apply. */
+
+.viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  background-image: radial-gradient(rgb(0 0 0 / 0.09) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.viewport:active {
+  cursor: grabbing;
+}
+.stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  align-items: stretch;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* the split */
+.split {
+  background: var(--card);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 10px 28px rgb(0 0 0 / 0.06);
+  padding: 16px;
+  text-align: center;
+  justify-self: center;
+  width: 560px;
+  max-width: 100%;
+}
+.splitHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 16px;
+}
+.splitMeta {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.url {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  background: var(--soft);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  overflow-wrap: anywhere;
+}
+.link {
+  color: var(--accent-l);
+  font-weight: 600;
+}
+.dots {
+  display: inline-flex;
+  gap: 3px;
+}
+.dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+}
+.branches {
+  display: block;
+}
+
+/* the lanes' heads */
+.laneHead {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  padding: 10px 14px;
+  background: var(--card);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+}
+.swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-xs);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+}
+.laneName {
+  font-weight: 700;
+  font-size: 15px;
+}
+.laneShare {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.leading,
+.best {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--mint-l);
+  border: 1px solid #a9e2cd;
+  background: #ecfaf4;
+  border-radius: var(--radius-xs);
+  padding: 1px 6px;
+}
+
+/* the page column */
+.labelCell {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.page {
+  margin-top: 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: rgb(255 255 255 / 0.55);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+}
+.thumb {
+  display: block;
+  height: 120px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--soft);
+  border: 1px solid var(--edge);
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
+.thumbEmpty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--ink-3);
+}
+.pageName {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.offTag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #9a5b00;
+  background: #fff4e0;
+  border: 1px solid #f2d39a;
+  border-radius: var(--radius-xs);
+  padding: 1px 6px;
+}
+.path {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
+}
+.pageActions {
+  display: flex;
+  gap: 6px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #d6d2ca;
+  background: #f3f1ed;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.btn:hover {
+  background: #e8e5df;
+}
+.totalLabel {
+  margin-top: 34px;
+  padding: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.totalLabel span {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+
+/* a lane's node */
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.connector {
+  flex: none;
+  width: 2.5px;
+  height: 34px;
+  opacity: 0.85;
+}
+.node {
+  flex: 1;
+  width: 100%;
+  background: var(--card);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 10px 28px rgb(0 0 0 / 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.nodeBar {
+  height: 4px;
+  flex: none;
+}
+.key {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--edge);
+}
+.keyBest {
+  background: #f3fbf7;
+}
+.keyLabel {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.keyValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.delta {
+  align-self: center;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.up {
+  color: var(--mint-l);
+}
+.down {
+  color: #c2410c;
+}
+.rows {
+  margin: 0;
+  padding: 6px 14px 10px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 13px;
+}
+.row + .row {
+  border-top: 1px solid var(--edge);
+}
+.row dt {
+  color: var(--ink-2);
+}
+.row dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.total .rows {
+  padding-top: 10px;
+}
+
+/* zoom buttons */
+.tools {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: var(--card);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.12);
+  cursor: default;
+}
+.tool {
+  min-width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tool:hover {
+  background: var(--soft);
+}
+.fit {
+  font-size: 13px;
+  padding: 0 10px;
+}
+.zoom {
+  min-width: 46px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.hint {
+  position: absolute;
+  left: 16px;
+  bottom: 22px;
+  font-size: 12px;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+@media (max-width: 600px) {
+  .hint {
+    display: none;
+  }
+}
+
+/* the pages every colour shares, after the lanes join */
+.sharedCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.sharedLine {
+  background: #b9b3a9;
+}
+.shared {
+  flex: none;
+  width: 560px;
+  max-width: 100%;
+}
+.byColour {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding: 9px 14px 11px;
+  border-top: 1px solid var(--edge);
+  background: #faf9f7;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.colourStat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.colourStat .swatch {
+  width: 11px;
+  height: 11px;
+}
+.colourStat b {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}

@@ -113,7 +113,8 @@ export type TestStats = {
   since: string | null;
   days: number;
   target: number; // sales per variant for a reliable answer
-  variants: { variant: string; m: Metrics; chanceBest: number | null }[];
+  /** m: the orders alone, which the test is judged on; full: the same visitors with their upsells too (the map's lanes). */
+  variants: { variant: string; m: Metrics; full: Metrics; chanceBest: number | null }[];
   leader: string | null;
   verdict: "waiting" | "early" | "winner" | "tie";
   salesToGo: number;
@@ -418,14 +419,25 @@ function buttonTest(views: ViewRow[], sales: Sale[], rate: number, since: string
   const funnel = "midi-drum-kit";
   const known = new Set<string>(BUTTON_TEST.variants);
   const by = new Map<string, Metrics>(BUTTON_TEST.variants.map((v) => [v, empty()]));
-  for (const v of views) if (v.funnel === funnel && known.has(v.variant)) addView(by.get(v.variant)!, v.page, v.views);
+  const full = new Map<string, Metrics>(BUTTON_TEST.variants.map((v) => [v, empty()]));
+  for (const v of views) {
+    if (v.funnel !== funnel || !known.has(v.variant)) continue;
+    addView(by.get(v.variant)!, v.page, v.views);
+    addView(full.get(v.variant)!, v.page, v.views);
+  }
   for (const s of sales) {
+    if (s.funnel !== funnel || !known.has(s.variant)) continue;
+    addSale(full.get(s.variant)!, s);
     // The colours are judged on the orders; upsells are another decision.
-    if (s.funnel !== funnel || !known.has(s.variant) || s.offer) continue;
-    addSale(by.get(s.variant)!, s);
+    if (!s.offer) addSale(by.get(s.variant)!, s);
   }
 
-  const variants = [...by.entries()].map(([variant, m]) => ({ variant, m: withRevenue(m, rate), chanceBest: null as number | null }));
+  const variants = [...by.entries()].map(([variant, m]) => ({
+    variant,
+    m: withRevenue(m, rate),
+    full: withRevenue(full.get(variant)!, rate),
+    chanceBest: null as number | null,
+  }));
   // Orders per landing visitor; the order page's visitors when the landing has none.
   const rateOf = (m: Metrics) => {
     const n = m.visitors || m.orderViews;

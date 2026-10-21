@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { Lanes } from "@/components/FunnelLanes";
 import { I } from "@/components/icons";
 import { COLORS, type Variant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import type { Analytics, Metrics, Range, TestStats } from "@/lib/analytics";
@@ -11,12 +12,16 @@ import s from "./funnelMap.module.css";
 // A funnel's map, like ClickFunnels' funnel view: where it starts, then each
 // page in order with its picture, live link and numbers for the chosen range,
 // the A/B test's colours on the steps it runs on, and a + to add a language.
+// While a test runs, Lanes shows it as one flow per variant side by side.
 
 const RANGES: { id: Range; label: string; note: string }[] = [
   { id: "7d", label: "7D", note: "the last 7 days" },
   { id: "28d", label: "28D", note: "the last 28 days" },
   { id: "all", label: "ALL", note: "all time" },
 ];
+
+type View = "flow" | "lanes";
+const VIEW_KEY = "funnel-map-view";
 
 // Languages that can be added with the + (the funnel's own are left out).
 // Note: from the Meta ads so far, Spanish and Portuguese markets barely buy.
@@ -233,6 +238,21 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
   const [lang, setLang] = useState(map.langs[0]?.lang ?? "en");
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(Boolean(map.statsSlug));
+  // The lanes need room: they open by themselves on a wide screen, the choice is remembered.
+  const [view, setView] = useState<View | null>(null);
+  useEffect(() => {
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem(VIEW_KEY);
+    } catch {}
+    setView(saved === "flow" || saved === "lanes" ? saved : window.innerWidth >= 760 ? "lanes" : "flow");
+  }, []);
+  const pickView = (v: View) => {
+    setView(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {}
+  };
 
   useEffect(() => {
     if (!map.statsSlug) return;
@@ -255,9 +275,10 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
   const test = data?.test && data.test.funnel === map.statsSlug ? data.test : null;
   const hasOrderStep = current.steps.some((st) => st.kind === "order");
   const entry = current.steps[0];
+  const lanes = test !== null && view === "lanes";
 
   return (
-    <div className={s.page}>
+    <div className={`${s.page} ${lanes ? s.pageLanes : ""}`}>
       <header className={s.bar}>
         <Link href="/" className={s.back} title="Back to the dashboard">
           <I.arrowLeft size={16} />
@@ -270,7 +291,17 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
           </span>
         </div>
         <div className={s.barRight}>
-          {map.statsSlug && (
+          {test && (
+            <div className="tabs" role="tablist" aria-label="View">
+              <button type="button" className={`tab ${!lanes ? "active" : ""}`} onClick={() => pickView("flow")}>
+                Flow
+              </button>
+              <button type="button" className={`tab ${lanes ? "active" : ""}`} onClick={() => pickView("lanes")}>
+                A/B/C lanes
+              </button>
+            </div>
+          )}
+          {map.statsSlug && !lanes && (
             <div className="tabs" role="tablist" aria-label="Range">
               {RANGES.map((r) => (
                 <button key={r.id} type="button" className={`tab ${r.id === range ? "active" : ""}`} onClick={() => setRange(r.id)}>
@@ -304,7 +335,9 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
         </nav>
       )}
 
-      <main className={s.canvas}>
+      {lanes && test && entry && <Lanes test={test} steps={current.steps} entryUrl={entry.url} />}
+
+      {!lanes && <main className={s.canvas}>
         {entry && (
           <section className={s.start}>
             <div className={s.startHead}>
@@ -391,7 +424,7 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
             </Link>
           </p>
         )}
-      </main>
+      </main>}
     </div>
   );
 }

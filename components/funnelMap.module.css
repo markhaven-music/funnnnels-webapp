@@ -506,3 +506,11 @@
     display: none;
   }
 }
+
+/* the A/B/C lanes (components/FunnelLanes.tsx) fill the screen under the bars */
+.pageLanes {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
