@@ -92,8 +92,9 @@ export function landingHtml(lang: Lang, currency: Currency): string {
 //   - the dead chunk preloads go; the hero background and the video's
 //     thumbnail are preloaded;
 //   - the video shows its thumbnail and red play button (the same look) and
-//     the real player loads on the first tap (and plays) or 2.5 s after the
-//     page has loaded;
+//     the real player loads on the tap (and plays), never on its own: the
+//     English VSL's player alone cost ≈760 ms of a phone's processor on
+//     PageSpeed when it loaded 2.5 s after the page (Spanish page 80–83);
 //   - images below the video load as they scroll into view (ClickFunnels'
 //     loading="true|false" meant nothing without its script).
 // Then (Google's PageSpeed still 64–71, LCP 5.6 s: a phone's processor busy
@@ -181,7 +182,6 @@ const POSTER_SCRIPT = `<script>
   }
   p.addEventListener('click', function () { load(true); });
   p.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); load(true); } });
-  window.addEventListener('load', function () { setTimeout(function () { load(false); }, 2500); });
 })();
 </script>`;
 

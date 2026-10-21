@@ -34,8 +34,10 @@ to 82–90 (FCP 1.1 s, LCP 3.4 s); rule 11 is the next step.
    - Below the first screen, every image gets `loading="lazy" decoding="async"`.
 3. **No video player on load.**
    - Show the video's thumbnail (webp) with the same play button and colour.
-   - Load the player (Wistia ≈ 320 KB of script) on the tap. It may also load
-     a few seconds after the page has loaded.
+   - Load the player (Wistia ≈ 320 KB of script) on the tap, and only then.
+     Loading it a few seconds after the page counts against the score too:
+     the English VSL's player cost ≈760 ms of the phone's processor and kept
+     the Spanish page at 80–83.
 4. **Trackers load after the page has shown.** This covers the Meta Pixel,
    Clarity, neo and any third party.
    - Put their stub and queue inline, so `fbq(...)` and `clarity(...)` calls
