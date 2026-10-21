@@ -38,10 +38,9 @@ const LANG_LABEL: Record<string, string> = { en: "English", fr: "French", es: "S
 
 // Where each language's pages are live. The brand domain forwards the funnels'
 // paths here, except the MIDI Drum Kit in English: m.thegrind.studio/midi-drum-kit
-// is still the old Astro page, so its funnnnels pages are on the origin. Same for
-// Spanish until grind-studio-landing-pages forwards /es/midi-drum-kit.
+// is still the old Astro page, so its funnnnels pages are on the origin.
 const home = (slug: string, lang: string) =>
-  slug === "midi-drum-kit" && (lang === "en" || lang === "es") ? "https://funnnnels.vercel.app" : KIT_HOME;
+  slug === "midi-drum-kit" && lang === "en" ? "https://funnnnels.vercel.app" : KIT_HOME;
 
 // Screenshots in public/funnels/<slug>/ (tools/funnel-previews.sh), per language.
 const SHOTS: Record<string, Record<string, { landing: string; order?: string }>> = {
@@ -51,7 +50,7 @@ const SHOTS: Record<string, Record<string, { landing: string; order?: string }>>
 };
 
 function codeMap(f: Product, editable: Set<string>): FunnelMap {
-  // French first for the funnels sold in several languages: it's the one live on the brand domain.
+  // The translations first for the funnels sold in several languages: they're the ones live on the brand domain.
   const langs = f.langs ? [...f.langs].sort((a, b) => (a === "en" ? 1 : b === "en" ? -1 : 0)) : ["en"];
   return {
     id: f.slug,
