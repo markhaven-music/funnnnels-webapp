@@ -49,7 +49,9 @@ export async function recordSale(order: Order, funnel: string, lang?: string | n
   // A new buyer: tag them (which can start a sequence, db/email.sql).
   if (inserted?.length && email) {
     try {
-      await upsertContact({ email, name: order.name ?? undefined, source: funnel, tags: [...f.checkout.buyerTags], lang: language });
+      // The shop also tags what was bought (buyer-shop-<slug>), for emails to its buyers.
+      const tags = [...f.checkout.buyerTags, ...(f.kind === "shop" ? order.items.map((s) => `buyer-shop-${s}`) : [])];
+      await upsertContact({ email, name: order.name ?? undefined, source: funnel, tags, lang: language });
     } catch (err) {
       console.error(`order ${order.id}: tagging the buyer failed`, err);
     }

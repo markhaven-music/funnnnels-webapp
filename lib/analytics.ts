@@ -1,7 +1,8 @@
 import { AB as BUTTON_TEST } from "@/app/(funnels)/midi-drum-kit/abtest";
 import type { Step } from "@/lib/beacon";
 import { codeFunnels } from "@/lib/funnels";
-import { KIT_HOME } from "@/lib/liveUrl";
+import { KIT_HOME, SHOP_URL } from "@/lib/liveUrl";
+import { SHOP_SLUG } from "@/lib/shop";
 import type { PayPalOrder } from "@/lib/paypal";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
@@ -327,9 +328,13 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
 
   const kits = await soft("products", kitFunnels(), []);
   const list = [
-    ...codeFunnels().map((f) => ({ slug: f.slug, name: f.product, langs: f.langs ?? null })),
-    ...kits.map((k) => ({ slug: k.slug, name: k.name, langs: null })),
-  ].map((f) => ({ ...f, url: `${KIT_HOME}/${f.slug}` }));
+    ...[
+      ...codeFunnels().map((f) => ({ slug: f.slug, name: f.product, langs: f.langs ?? null })),
+      ...kits.map((k) => ({ slug: k.slug, name: k.name, langs: null })),
+    ].map((f) => ({ ...f, url: `${KIT_HOME}/${f.slug}` })),
+    // The shop's orders, all its products together (lib/shop.ts).
+    { slug: SHOP_SLUG, name: "Shop", langs: null, url: SHOP_URL },
+  ];
 
   const hasStripe = stripeConfigured();
   // The day-by-day rows reach back one range more, for the comparison.

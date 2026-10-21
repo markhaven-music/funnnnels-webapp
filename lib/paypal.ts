@@ -51,6 +51,8 @@ export type PayPalOrder = {
   purchase_units: {
     custom_id?: string;
     amount: { currency_code: string; value: string };
+    // The order's lines, when it has them (the shop: sku = the product's slug).
+    items?: { name: string; sku?: string; quantity: string; unit_amount: { currency_code: string; value: string } }[];
     payments?: {
       captures?: { id: string; status: string; amount: { currency_code: string; value: string } }[];
     };

@@ -19,6 +19,7 @@ import { LandingPagesPanel } from "@/components/panels/LandingPagesPanel";
 import { LaunchesPanel } from "@/components/panels/LaunchesPanel";
 import { OrdersPanel } from "@/components/panels/OrdersPanel";
 import { SettingsPanel } from "@/components/panels/SettingsPanel";
+import { ShopPanel } from "@/components/panels/ShopPanel";
 import { NAV } from "@/lib/data";
 import type { Analytics, Metrics } from "@/lib/analytics";
 import type { StoredFunnel } from "@/lib/blocks";
@@ -65,6 +66,7 @@ export function Dashboard({ funnels: rows }: Props) {
       {activeNav === "launches"     && <LaunchesPanel />}
       {activeNav === "pages"        && <LandingPagesPanel funnels={funnels} />}
       {activeNav === "ab"           && <ABTestsPanel funnels={funnels} />}
+      {activeNav === "shop"         && <ShopPanel />}
       {activeNav === "orders"       && <OrdersPanel />}
       {activeNav === "contacts"     && <ContactsPanel />}
       {activeNav === "email-insights" && <EmailInsightsPanel analytics={analytics} />}

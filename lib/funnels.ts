@@ -5,6 +5,8 @@ import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import type { Currency } from "@/lib/geo";
 import { phaseAt, toCents, unitPrice, type Launch, type Money, type Phase } from "@/lib/launch";
 import { getKitProduct } from "@/lib/products";
+import { SHOP_HOME } from "@/lib/liveUrl";
+import { SHOP_SLUG } from "@/lib/shop";
 
 // Every product the checkout can sell. The public APIs look products up here
 // so prices, tags and files always come from the server, never from the visitor.
@@ -16,6 +18,9 @@ import { getKitProduct } from "@/lib/products";
 //   kit   products made in the dashboard (Launches): a row in `products`, the
 //         template page in app/(funnels)/[slug], zips in Supabase Storage, and
 //         optionally a launch whose dates set the phase and the price.
+//   shop  the shop (dashboard → Shop, lib/shop.ts): one entry for the whole
+//         cart. It lends the checkout its tags and pages; its own APIs
+//         (/api/checkout/shop/*) price the products in the cart.
 
 export type Bump = { id: string; name: string; price: Money; pitch: string };
 
@@ -23,7 +28,7 @@ export type Bump = { id: string; name: string; price: Money; pitch: string };
 export type Offer = { id: string; path: string; name: string; price: Money };
 
 export type Product = {
-  kind: "code" | "kit";
+  kind: "code" | "kit" | "shop";
   slug: string;
   product: string; // display name
   brand: string;
@@ -42,6 +47,8 @@ export type Product = {
   langs?: readonly string[];
   // One-click upsells after the order, in order (MIDI Drum Kit, TOP HITS).
   offers?: readonly Offer[];
+  // The origin its pages are on, when it isn't the brand domain (the shop, see SHOP_HOME).
+  home?: string;
 };
 
 const JAZZ: Product = {
@@ -90,6 +97,28 @@ const DRUM_KIT: Product = {
 
 const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS, [DRUM_KIT.slug]: DRUM_KIT };
 
+// Named for the abandoned-checkout reminder ("Your GRIND STUDIO order is
+// waiting"); the receipt names the products themselves.
+const SHOP: Product = {
+  kind: "shop",
+  slug: SHOP_SLUG,
+  product: `${jazz.brand} order`,
+  brand: jazz.brand,
+  tagline: "",
+  price: { eur: 0, usd: 0 },
+  bump: null,
+  checkout: {
+    leadTags: ["checkout-started"],
+    // Plus buyer-shop-<slug> per product bought (lib/sales.ts).
+    buyerTags: ["buyer", "buyer-shop"],
+    thankYou: "/shop/thank-you",
+    orderPage: "/shop/cart",
+  },
+  optin: null,
+  launch: null,
+  home: SHOP_HOME,
+};
+
 /**
  * The thank-you and order pages in the buyer's language: /fr/midi-drum-kit/…
  * for a language the product has, the plain English ones otherwise.
@@ -133,10 +162,11 @@ export function getFunnel(slug: unknown): Product | undefined {
   return CODE[String(slug)];
 }
 
-/** Any product: code first, then the dashboard's products (with their current launch). */
+/** Any product: code first, the shop, then the dashboard's products (with their current launch). */
 export async function resolveFunnel(slug: unknown): Promise<Product | undefined> {
   const code = getFunnel(slug);
   if (code) return code;
+  if (slug === SHOP_SLUG) return SHOP;
   if (typeof slug !== "string" || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return undefined;
   return (await getKitProduct(slug)) ?? undefined;
 }

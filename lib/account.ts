@@ -3,7 +3,9 @@ import type Stripe from "stripe";
 import { funnel as drumKit, unlocked as drumKitUnlocked } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { funnel as jazz, unlocked as jazzUnlocked } from "@/app/(funnels)/jazz-midi-pack/funnel";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
+import { SHOP_HOME } from "@/lib/liveUrl";
 import { getOrder, orderFromIntent, type Order } from "@/lib/orders";
+import { SHOP_SLUG, orderTitle, shopLabels, type ShopLabel } from "@/lib/shop";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
 
@@ -126,6 +128,11 @@ export function shelfOf(funnel: string, order: Pick<Order, "id" | "items" | "off
   };
 }
 
+// The shop's orders (lib/shop.ts) have no shelf: their products are named in
+// the database, and each one is a download of its own.
+const owned = (funnel: string) => Boolean(SHELVES[funnel]) || funnel === SHOP_SLUG;
+const SHOP_COVER = "/funnels/dashboard/orders.webp"; // for products without a picture
+
 export type Purchase = {
   order: Order;
   funnel: string;
@@ -150,7 +157,7 @@ export async function purchasesOf(email: string): Promise<Purchase[]> {
       page = res.next_page;
     }
     for (const intent of intents) {
-      if (!SHELVES[intent.metadata.funnel]) continue;
+      if (!owned(intent.metadata.funnel)) continue;
       found.push({ order: orderFromIntent(intent), funnel: intent.metadata.funnel, date: new Date(intent.created * 1000), lang: intent.metadata.lang || "en" });
     }
   }
@@ -164,7 +171,7 @@ export async function purchasesOf(email: string): Promise<Purchase[]> {
     : { data: [] };
   const paypal = await Promise.all(
     (rows ?? [])
-      .filter((r) => SHELVES[r.funnel])
+      .filter((r) => owned(r.funnel))
       .map(async (r) => ({ order: await getOrder(r.order_id, r.funnel), funnel: r.funnel as string, date: new Date(r.created_at), lang: r.lang as string })),
   );
   for (const p of paypal) if (p.order?.status === "succeeded") found.push({ ...p, order: p.order });
@@ -177,7 +184,19 @@ export async function purchasesOf(email: string): Promise<Purchase[]> {
     ...mains.flatMap((m) => [m, ...found.filter((p) => p.order.offer && p.order.parent === m.order.id).sort((a, b) => -byDate(a, b))]),
     ...found.filter((p) => p.order.offer && !ids.has(p.order.parent ?? "")).sort(byDate),
   ];
+  const shop = await shopLabels(found.filter((p) => p.funnel === SHOP_SLUG).flatMap((p) => p.order.items)).catch((): Record<string, ShopLabel> => ({}));
   return ordered.map(({ order, funnel, date, lang }) => {
+      if (funnel === SHOP_SLUG) {
+        return {
+          order,
+          funnel,
+          date,
+          lang,
+          name: orderTitle(order.items, shop),
+          cover: order.items.map((k) => shop[k]?.image?.sm).find(Boolean) ?? SHOP_COVER,
+          files: order.items.map((k) => ({ key: k, label: shop[k]?.name ?? k, href: `${SHOP_HOME}/shop/download?order=${order.id}&file=${k}` })),
+        };
+      }
       const shelf = SHELVES[funnel];
       return {
         order,

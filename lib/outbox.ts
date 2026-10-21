@@ -5,6 +5,7 @@ import { money } from "@/lib/launch";
 import { card, clickUrl, letter, type CardButton } from "@/lib/mail";
 import { mailCopy } from "@/lib/mailCopy";
 import { getLaunch } from "@/lib/products";
+import { orderTitle, shopLabels, type ShopLabel } from "@/lib/shop";
 import { hasPaidOrder } from "@/lib/sales";
 import { SesError, sendEmail, sesConfigured, type Email } from "@/lib/ses";
 import { supabase } from "@/lib/supabase";
@@ -150,7 +151,9 @@ async function receipts(run: Run) {
     const f = await resolveFunnel(main.funnel);
     try {
       if (!f) throw new Error(`unknown product ${main.funnel}`);
-      const id = await run.send(receiptEmail(group, f));
+      // The shop's products are named in the database.
+      const shop = f.kind === "shop" ? await shopLabels(group.flatMap((o) => o.items)) : {};
+      const id = await run.send(receiptEmail(group, f, shop));
       if (id === null && !run.dryRun) await db.from("orders").update({ email_sent_at: null }).in("id", ids);
       else run.report.receipts++;
     } catch (err) {
@@ -166,13 +169,13 @@ async function receipts(run: Run) {
   }
 }
 
-function receiptEmail(group: OrderRow[], f: Product): Email {
+function receiptEmail(group: OrderRow[], f: Product, shop: Record<string, ShopLabel>): Email {
   const main = group[0];
   const c = mailCopy(main.lang).receipt;
   const buttons: CardButton[] = [];
   const text: string[] = [c.title, "", c.lead, ""];
   for (const o of group) {
-    const shelf = shelfOf(o.funnel, { id: o.id, items: o.items, offer: o.offer }) ?? kitShelf(o, f);
+    const shelf = shelfOf(o.funnel, { id: o.id, items: o.items, offer: o.offer }) ?? kitShelf(o, f, shop);
     for (const file of shelf.files) {
       buttons.push({ label: c.download(file.label), url: file.href, primary: buttons.length === 0 });
       text.push(`${c.download(file.label)}: ${file.href}`);
@@ -180,7 +183,11 @@ function receiptEmail(group: OrderRow[], f: Product): Email {
   }
   const orders = group.map((o) => c.order(o.id, money(o.amount_cents / 100, o.currency), o.provider === "paypal"));
   text.push("", ...orders, c.account, "", `${c.help} support@thegrind.studio`);
-  const product = main.offer ? (shelfOf(main.funnel, { id: main.id, items: main.items, offer: main.offer })?.name ?? f.product) : f.product;
+  const product = main.offer
+    ? (shelfOf(main.funnel, { id: main.id, items: main.items, offer: main.offer })?.name ?? f.product)
+    : f.kind === "shop"
+      ? orderTitle(main.items, shop)
+      : f.product;
   return {
     to: main.email!,
     subject: c.subject(product),
@@ -189,12 +196,16 @@ function receiptEmail(group: OrderRow[], f: Product): Email {
   };
 }
 
-/** Dashboard-made products (Launches): the pack and its add-on, downloaded from their own page. */
-function kitShelf(o: OrderRow, f: Product) {
-  const labels: Record<string, string> = { pack: f.product, ...(f.bump ? { [f.bump.id]: f.bump.name } : {}) };
+/** Dashboard-made products (Launches, and the shop's), downloaded from their own page. */
+function kitShelf(o: OrderRow, f: Product, shop: Record<string, ShopLabel>) {
+  const labels: Record<string, string> = {
+    pack: f.product,
+    ...(f.bump ? { [f.bump.id]: f.bump.name } : {}),
+    ...Object.fromEntries(Object.entries(shop).map(([slug, l]) => [slug, l.name])),
+  };
   return {
     name: f.product,
-    files: o.items.map((k) => ({ key: k, label: labels[k] ?? k, href: `${BRAND_ORIGIN}/${f.slug}/download?order=${encodeURIComponent(o.id)}&file=${encodeURIComponent(k)}` })),
+    files: o.items.map((k) => ({ key: k, label: labels[k] ?? k, href: `${f.home ?? BRAND_ORIGIN}/${f.slug}/download?order=${encodeURIComponent(o.id)}&file=${encodeURIComponent(k)}` })),
   };
 }
 
@@ -236,7 +247,7 @@ async function reminders(run: Run) {
     }
     const c = mailCopy(row.lang).reminder;
     const first = (row.name ?? "").trim().split(/\s+/)[0]?.slice(0, 40) ?? "";
-    const url = `${BRAND_ORIGIN}${checkoutPages(f, row.lang).orderPage}`;
+    const url = `${f.home ?? BRAND_ORIGIN}${checkoutPages(f, row.lang).orderPage}`;
     try {
       const id = await run.send({
         to: row.email,

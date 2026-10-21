@@ -26,6 +26,7 @@ export const NAV: NavSection[] = [
   {
     section: "Sales",
     items: [
+      { id: "shop", label: "Shop", icon: "bag" },
       { id: "orders", label: "Orders", icon: "receipt" },
       { id: "analytics", label: "Analytics", icon: "analytics" },
     ],

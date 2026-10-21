@@ -17,7 +17,8 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const f = await resolveFunnel(body.funnel);
-  if (!f) return NextResponse.json({ error: "Unknown funnel" }, { status: 404 });
+  // The shop prices a cart: /api/checkout/shop/*.
+  if (!f || f.kind === "shop") return NextResponse.json({ error: "Unknown funnel" }, { status: 404 });
   // Launches: no sales before the cart opens; the early-bird price only until its deadline.
   const now = requestNow(body);
   if (checkoutPhase(f, now) === "waitlist") {

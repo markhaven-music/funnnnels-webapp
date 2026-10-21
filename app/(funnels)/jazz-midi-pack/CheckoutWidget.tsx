@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { loadStripe, type Appearance } from "@stripe/stripe-js";
+// "pure": Stripe.js loads when loadStripe is called, not as soon as this file does.
+import { loadStripe } from "@stripe/stripe-js/pure";
+import type { Appearance } from "@stripe/stripe-js";
 import { Elements, ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import s from "./checkout.module.css";
 import b from "./btn.module.css";
@@ -38,6 +40,13 @@ type Props = {
   thankYou: string;
   publishableKey: string | null;
   europe: boolean;
+  // The shop: several products in one order. They fill the summary and go to
+  // the shop's checkout APIs as `items` (their slugs); `price` is the cart's
+  // total, and the cart page shows the products, so there's no order box.
+  cart?: { slug: string; name: string; price: number }[];
+  // Load Stripe.js once the buyer starts on step 1, not with the page (the
+  // shop's cart, whose first screen is the cart itself: docs/page-speed.md).
+  deferStripe?: boolean;
 };
 
 type Info = { firstName: string; lastName: string; email: string };
@@ -73,9 +82,10 @@ export function CheckoutWidget(props: Props) {
   const [bump, setBump] = useState(false);
   const [method, setMethod] = useState<Method>("card");
   const total = props.price + (bump && props.bump ? props.bump.price : 0);
+  const [wanted, setWanted] = useState(!props.deferStripe);
   const stripePromise = useMemo(
-    () => (props.publishableKey ? stripeFor(props.publishableKey) : null),
-    [props.publishableKey],
+    () => (props.publishableKey && wanted ? stripeFor(props.publishableKey) : null),
+    [props.publishableKey, wanted],
   );
   const body = { ...props, info, method, ticked: bump, setTicked: setBump, total };
 
@@ -110,13 +120,14 @@ export function CheckoutWidget(props: Props) {
         </li>
       </ol>
 
-      <div className={s.body}>
+      <div className={s.body} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
         {step === 1 ? (
           <InfoStep
             funnel={props.funnel}
             info={info}
             onDone={(next) => {
               setInfo(next);
+              setWanted(true);
               setStep(2);
               pixel("InitiateCheckout", {
                 content_name: props.product,
@@ -132,17 +143,19 @@ export function CheckoutWidget(props: Props) {
               ← Go back
             </button>
 
-            <div className={`${s.orderBox} ${props.image ? s.orderBoxPic : ""}`}>
-              {props.image && (
-                <img className={s.orderPic} src={props.image} alt="" width={52} height={74} />
-              )}
-              <span className={s.orderText}>
-                <span className={s.orderTag}>Instant download</span>
-                <span className={s.orderName}>{props.product}</span>
-                <span className={s.orderDesc}>{props.tagline}</span>
-                <span className={s.orderPrice}>{money(props.price, props.currency)} · one payment</span>
-              </span>
-            </div>
+            {!props.cart && (
+              <div className={`${s.orderBox} ${props.image ? s.orderBoxPic : ""}`}>
+                {props.image && (
+                  <img className={s.orderPic} src={props.image} alt="" width={52} height={74} />
+                )}
+                <span className={s.orderText}>
+                  <span className={s.orderTag}>Instant download</span>
+                  <span className={s.orderName}>{props.product}</span>
+                  <span className={s.orderDesc}>{props.tagline}</span>
+                  <span className={s.orderPrice}>{money(props.price, props.currency)} · one payment</span>
+                </span>
+              </div>
+            )}
 
             <p className={s.label}>
               <span>Payment information</span>
@@ -288,11 +301,12 @@ function PayStep(props: Props & BodyState) {
   // the server's price, then confirm it. Success redirects to the thank-you page.
   async function confirm(waiver: boolean) {
     if (!stripe || !elements) return;
-    const res = await fetch("/api/checkout/intent", {
+    const res = await fetch(props.cart ? "/api/checkout/shop/intent" : "/api/checkout/intent", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         funnel: props.funnel,
+        ...(props.cart ? { items: props.cart.map((l) => l.slug) } : {}),
         ...props.info,
         bump: props.ticked,
         waiver,
@@ -394,6 +408,7 @@ function PayStepBody({
   price,
   product,
   europe,
+  cart,
   offer,
   ticked,
   setTicked,
@@ -402,7 +417,7 @@ function PayStepBody({
   cardPaying,
   cardOff,
   cardError,
-}: Pick<Props, "funnel" | "country" | "currency" | "price" | "product" | "europe"> &
+}: Pick<Props, "funnel" | "country" | "currency" | "price" | "product" | "europe" | "cart"> &
   BodyState & {
     offer: Props["bump"];
     onCard?: (waiver: boolean) => void;
@@ -424,11 +439,12 @@ function PayStepBody({
     setPaypalBusy(true);
     setPaypalError(null);
     try {
-      const res = await fetch("/api/checkout/paypal", {
+      const res = await fetch(cart ? "/api/checkout/shop/paypal" : "/api/checkout/paypal", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           funnel,
+          ...(cart ? { items: cart.map((l) => l.slug) } : {}),
           ...info,
           bump: ticked,
           waiver,
@@ -484,10 +500,12 @@ function PayStepBody({
       )}
 
       <div className={s.summary}>
-        <div className={s.sumRow}>
-          <span>{product}</span>
-          <span>{money(price, currency)}</span>
-        </div>
+        {(cart ?? [{ slug: "", name: product, price }]).map((l) => (
+          <div key={l.slug} className={s.sumRow}>
+            <span>{l.name}</span>
+            <span>{money(l.price, currency)}</span>
+          </div>
+        ))}
         {ticked && offer && (
           <div className={s.sumRow}>
             <span>{offer.name}</span>
@@ -508,7 +526,7 @@ function PayStepBody({
       >
         <span className={b.shine} aria-hidden />
         <span className={b.label}>
-          <span>{busy && !cardOff ? (paypal ? "Opening PayPal…" : "Processing…") : paypal ? "Pay with PayPal" : "Get the pack"}</span>
+          <span>{busy && !cardOff ? (paypal ? "Opening PayPal…" : "Processing…") : paypal ? "Pay with PayPal" : cart ? "Complete my order" : "Get the pack"}</span>
           {!busy && <Arrow className={b.arrow} />}
         </span>
         <span className={b.inner}>{money(total, currency)} · instant download · one payment</span>

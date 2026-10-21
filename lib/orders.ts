@@ -3,6 +3,7 @@ import { stripe, stripeConfigured } from "@/lib/stripe";
 import { isPayPalOrderId, paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
 import { offerOf, offeredBumps, possibleAmounts, resolveFunnel } from "@/lib/funnels";
 import { toCents } from "@/lib/launch";
+import { SHOP_SLUG, shopItems } from "@/lib/shop";
 
 export type Order = {
   id: string;
@@ -46,9 +47,10 @@ async function getStripeOrder(id: string, funnelSlug: string): Promise<Order | n
 /** The order a PaymentIntent is (the customer library lists them from Stripe's search, lib/account.ts). */
 export function orderFromIntent(intent: Stripe.PaymentIntent): Order {
   // An upsell unlocks its own file only; an order, the pack and its add-ons
-  // (metadata.bump: their ids, comma-separated).
+  // (metadata.bump: their ids, comma-separated); a shop order, its products
+  // (metadata.items: their slugs).
   const offer = intent.metadata.offer || null;
-  const items = offer ? [offer] : ["pack"];
+  const items = intent.metadata.funnel === SHOP_SLUG ? shopItems(intent.metadata.items) : offer ? [offer] : ["pack"];
   if (!offer && intent.metadata.bump) items.push(...intent.metadata.bump.split(","));
   return {
     id: intent.id,
@@ -82,12 +84,23 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
     // An upsell (custom_id u = its id, p = the order it followed): its price only.
     const offer = typeof meta.u === "string" ? offerOf(f, meta.u) : undefined;
     if (meta.u && !offer) return null;
-    const ids = offer ? [] : String(meta.b ?? "").split(",");
-    const bumps = offeredBumps(f).filter((b) => ids.includes(b.id));
-    // Belt and braces: the order we created can't be edited by the buyer, but
-    // only hand over files the amount actually paid for (at the early-bird or the full price).
-    const paid = offer ? [toCents(offer.price[currency])] : possibleAmounts(f, currency, bumps);
-    if (!paid.some((a) => paypalValue(a) === unit.amount.value)) return null;
+    let items: string[];
+    if (f.kind === "shop") {
+      // The shop's order lines are its products (sku = slug), each at the
+      // price it was sold at; they must add up to what was paid.
+      const lines = unit.items ?? [];
+      const sum = lines.reduce((n, l) => n + toCents(Number(l.unit_amount.value)) * Number(l.quantity), 0);
+      items = shopItems(lines.map((l) => l.sku ?? "").join(","));
+      if (!items.length || items.length !== lines.length || paypalValue(sum) !== unit.amount.value) return null;
+    } else {
+      const ids = offer ? [] : String(meta.b ?? "").split(",");
+      const bumps = offeredBumps(f).filter((b) => ids.includes(b.id));
+      // Belt and braces: the order we created can't be edited by the buyer, but
+      // only hand over files the amount actually paid for (at the early-bird or the full price).
+      const paid = offer ? [toCents(offer.price[currency])] : possibleAmounts(f, currency, bumps);
+      if (!paid.some((a) => paypalValue(a) === unit.amount.value)) return null;
+      items = offer ? [offer.id] : ["pack", ...bumps.map((b) => b.id)];
+    }
 
     // The order says COMPLETED once captured; the capture itself can still be
     // PENDING (an eCheck, a review), which is Stripe's "processing".
@@ -102,7 +115,7 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
       email: order.payer?.email_address ?? meta.e ?? null,
       amount: Number(unit.amount.value),
       currency,
-      items: offer ? [offer.id] : ["pack", ...bumps.map((b) => b.id)],
+      items,
       visitorId: typeof meta.n === "string" ? meta.n : null,
       offer: offer?.id ?? null,
       parent: typeof meta.p === "string" ? meta.p : null,

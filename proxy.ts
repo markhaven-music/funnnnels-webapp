@@ -39,7 +39,7 @@ const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/to
 const LOCALIZED: Record<string, readonly string[]> = { "midi-drum-kit": DRUM_KIT_LANGS };
 const LANG_PREFIXES = new Set(["fr", "it", "de", "nl", "es"]);
 
-const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", ...LANG_PREFIXES]);
+const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", "shop", ...LANG_PREFIXES]);
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
@@ -56,6 +56,16 @@ function localized(pathname: string): { slug: string; lang: string; page: (typeo
   return { slug, lang, page };
 }
 
+// The shop (app/shop, dashboard → Shop): /shop, /shop/cart and
+// /shop/<product> are cached per currency at /shop/<currency>[/…], like the
+// funnels; its thank-you page and downloads aren't. Public on every host.
+// Returns what follows /shop ("", "/cart", "/<product>"), or null.
+function shopPage(pathname: string): string | null {
+  const m = pathname.replace(/\/$/, "").match(/^\/shop(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?$/);
+  if (!m || m[1] === "thank-you" || m[1] === "download") return null;
+  return m[1] ? `/${m[1]}` : "";
+}
+
 function kitSlug(pathname: string): string | null {
   const seg = pathname.split("/")[1] ?? "";
   return !APP_SEGMENTS.has(seg) && SLUG.test(seg) ? seg : null;
@@ -66,6 +76,8 @@ const PUBLIC = [
   /^\/jazz-midi-pack(\/|$)/,
   /^\/top-hits-midi-bundle(\/|$)/,
   /^\/midi-drum-kit(\/|$)/,
+  /^\/shop(\/|$)/, // the shop's pages, its thank-you page and downloads
+  /^\/api\/checkout\/shop\/(intent|paypal)$/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
   /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|upsell|go)$/, // go: a click in an email (lib/mail.ts)
@@ -98,6 +110,16 @@ export function proxy(request: NextRequest) {
     }
     const country = visitorCountry(request.headers, request.nextUrl.searchParams.get("country"));
     url.pathname = `/${loc.slug}/${loc.lang}${loc.page ? `/${loc.page}` : ""}/${currencyFor(country)}`;
+    const res = NextResponse.rewrite(url);
+    res.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax" });
+    return res;
+  }
+
+  const shop = shopPage(pathname);
+  if (shop !== null) {
+    const country = visitorCountry(request.headers, request.nextUrl.searchParams.get("country"));
+    const url = request.nextUrl.clone();
+    url.pathname = `/shop/${currencyFor(country)}${shop}`;
     const res = NextResponse.rewrite(url);
     res.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax" });
     return res;
