@@ -15,6 +15,14 @@ import { supabase } from "@/lib/supabase";
 //   PayPal orders              paypal_sales, noted at capture
 // Tables: db/analytics.sql.
 
+// Visitors count from this day on. The bot filter (lib/bots.ts) went live on
+// 2026-10-21 at 19:34 UTC; before it, Meta's ad reviewers were counted as
+// visitors (41 French landing visits on 10-20, 37 of them from the US, while
+// the French ads had no impressions yet). page_views has days, not hours, so
+// the first whole day with the filter is where the count starts.
+export const VISITS_FROM = "2026-10-22";
+const counted = (since: string | null) => (since && since > VISITS_FROM ? since : VISITS_FROM);
+
 export type Range = "7d" | "28d" | "all";
 export const RANGES: Range[] = ["7d", "28d", "all"];
 
@@ -119,6 +127,8 @@ export type TestStats = {
   verdict: "waiting" | "early" | "winner" | "tie";
   salesToGo: number;
   daysToGo: number | null;
+  /** The same test on each language's pages alone (the funnel map's language tabs). */
+  byLang?: Record<string, TestStats>;
 };
 
 /** One UTC day, all funnels together. */
@@ -206,7 +216,7 @@ function addSale(m: Metrics, s: Sale) {
 }
 
 async function viewTotals(since: string | null): Promise<ViewRow[]> {
-  const { data, error } = await supabase().rpc("page_view_totals", { p_since: since });
+  const { data, error } = await supabase().rpc("page_view_totals", { p_since: counted(since) });
   if (error) throw error;
   return ((data ?? []) as ViewRow[]).map((r) => ({ ...r, views: Number(r.views) }));
 }
@@ -214,7 +224,7 @@ async function viewTotals(since: string | null): Promise<ViewRow[]> {
 type DayRow = { day: string; funnel: string; page: Step; views: number };
 
 async function viewDays(since: string | null): Promise<DayRow[]> {
-  const { data, error } = await supabase().rpc("page_view_days", { p_since: since });
+  const { data, error } = await supabase().rpc("page_view_days", { p_since: counted(since) });
   if (error) throw error;
   return ((data ?? []) as DayRow[]).map((r) => ({ ...r, views: Number(r.views) }));
 }
@@ -387,7 +397,7 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
     trackingSince,
     usdToEur: rate,
     funnels,
-    test: buttonTest(allViews ?? views, allSales, rate, testStart, now),
+    test: buttonTests(allViews ?? views, allSales, rate, testStart, now),
     ...daily(range, since, now, dayRows, allSales, rate, trackingSince),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
@@ -407,16 +417,40 @@ function withRevenue(m: Metrics, rate: number): Metrics {
  * on this one (the MIDI Drum Kit button-colour test, app/(funnels)/midi-drum-kit/abtest.ts).
  */
 async function firstDay(testFunnel?: string): Promise<string | null> {
-  let q = supabase().from("page_views").select("day");
+  let q = supabase().from("page_views").select("day").gte("day", VISITS_FROM);
   if (testFunnel) q = q.eq("funnel", testFunnel).neq("variant", "");
   const { data, error } = await q.order("day").limit(1).maybeSingle();
   if (error) throw error;
   return data?.day ?? null;
 }
 
-/** The button-colour test, all time: visitors, checkouts and orders per colour, and how sure the leader is. */
+/** The button-colour test, every language together and each one apart. */
+function buttonTests(views: ViewRow[], sales: Sale[], rate: number, since: string | null, now: number): TestStats {
+  const from = since ? Date.parse(`${since}T00:00:00Z`) : Infinity;
+  const tested = sales.filter((s) => s.created >= from);
+  const langs = codeFunnels().find((f) => f.slug === TEST_FUNNEL)?.langs ?? ["en"];
+  return {
+    ...buttonTest(views, tested, rate, since, now),
+    byLang: Object.fromEntries(
+      langs.map((l) => [
+        l,
+        buttonTest(
+          views.filter((v) => v.lang === l),
+          tested.filter((s) => s.lang === l),
+          rate,
+          since,
+          now,
+        ),
+      ]),
+    ),
+  };
+}
+
+const TEST_FUNNEL = "midi-drum-kit";
+
+/** The button-colour test since it started: visitors, checkouts and orders per colour, and how sure the leader is. */
 function buttonTest(views: ViewRow[], sales: Sale[], rate: number, since: string | null, now: number): TestStats {
-  const funnel = "midi-drum-kit";
+  const funnel = TEST_FUNNEL;
   const known = new Set<string>(BUTTON_TEST.variants);
   const by = new Map<string, Metrics>(BUTTON_TEST.variants.map((v) => [v, empty()]));
   const full = new Map<string, Metrics>(BUTTON_TEST.variants.map((v) => [v, empty()]));

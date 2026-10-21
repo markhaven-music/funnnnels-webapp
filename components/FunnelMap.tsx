@@ -100,7 +100,7 @@ function CopyButton({ text, label = "Copy URL" }: { text: string; label?: string
 }
 
 /** The A/B test's colours on a step: a row per colour with the numbers that step decides. */
-function Variants({ test, step }: { test: TestStats; step: MapStep }) {
+function Variants({ test, scope, step }: { test: TestStats; scope: string; step: MapStep }) {
   const name = (v: string) => v[0].toUpperCase() + v.slice(1);
   const cols =
     step.kind === "landing"
@@ -119,7 +119,7 @@ function Variants({ test, step }: { test: TestStats; step: MapStep }) {
           A/B/C test · {test.name}
         </span>
         <span className={s.variantsMeta}>
-          {test.since ? `since ${test.since} · ` : ""}every language ·{" "}
+          {test.since ? `since ${test.since} · ` : ""}{scope} ·{" "}
           <Link href="/?nav=analytics" className={s.link}>
             {test.verdict === "winner" && test.leader ? `${name(test.leader)} wins` : test.verdict === "tie" ? "no clear winner" : `${int(test.salesToGo)} sales to a reliable answer`}
           </Link>
@@ -274,7 +274,10 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
   const stats = data?.funnels.find((f) => f.slug === map.statsSlug);
   const langMetrics = (l: string) => (map.langs.length > 1 ? stats?.langs?.find((x) => x.lang === l)?.m : stats?.total);
   const metrics = stats ? langMetrics(lang) : undefined;
-  const test = data?.test && data.test.funnel === map.statsSlug ? data.test : null;
+  // The test on the chosen language's pages, like the rest of the map.
+  const wholeTest = data?.test && data.test.funnel === map.statsSlug ? data.test : null;
+  const test = wholeTest && map.langs.length > 1 ? (wholeTest.byLang?.[lang] ?? wholeTest) : wholeTest;
+  const testScope = test !== wholeTest ? `${current.label} pages` : "every language";
   const hasOrderStep = current.steps.some((st) => st.kind === "order");
   const entry = current.steps[0];
   const lanes = test !== null && view === "lanes";
@@ -337,7 +340,7 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
         </nav>
       )}
 
-      {lanes && test && entry && <Lanes test={test} steps={current.steps} entryUrl={entry.url} />}
+      {lanes && test && entry && <Lanes test={test} scope={testScope} steps={current.steps} entryUrl={entry.url} />}
 
       {!lanes && <main className={s.canvas}>
         {entry && (
@@ -410,7 +413,7 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
                     )}
                   </div>
                 )}
-                {test && (step.kind === "landing" || step.kind === "order") && <Variants test={test} step={step} />}
+                {test && (step.kind === "landing" || step.kind === "order") && <Variants test={test} scope={testScope} step={step} />}
               </section>
             </div>
           );
@@ -419,7 +422,7 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
         {map.statsSlug && (
           <p className={s.note}>
             Numbers for {RANGES.find((r) => r.id === range)?.note}
-            {map.langs.length > 1 ? `, ${current.label} pages` : ""}; the A/B/C test counts the whole test. Visitors are counted by
+            {map.langs.length > 1 ? `, ${current.label} pages` : ""}; the A/B/C test counts since it started. Visitors are counted by
             our own script{data?.trackingSince ? ` since ${data.trackingSince}` : ""}; orders come from Stripe and PayPal.{" "}
             <Link href="/?nav=analytics" className={s.link}>
               All analytics

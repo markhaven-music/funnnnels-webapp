@@ -307,7 +307,7 @@ function PageLabel({ step }: { step: MapStep }) {
 
 const ratioText = (key: Key, ratio: number | null) => (ratio === null ? "—" : key.money ? eur(ratio, 2) : share(ratio));
 
-export function Lanes({ test, steps, entryUrl }: { test: TestStats; steps: MapStep[]; entryUrl: string }) {
+export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope: string; steps: MapStep[]; entryUrl: string }) {
   const { viewport, stage, view, handlers, zoomCenter, refit } = usePanZoom();
   const hasOrderStep = steps.some((st) => st.kind === "order");
   const lanes = test.variants;
@@ -348,7 +348,7 @@ export function Lanes({ test, steps, entryUrl }: { test: TestStats; steps: MapSt
             A/B/C test · {test.name}
           </div>
           <div className={s.splitMeta}>
-            {int(totalVisitors)} visitors{test.since ? ` since ${test.since}` : ""} · every language ·{" "}
+            {int(totalVisitors)} visitors{test.since ? ` since ${test.since}` : ""} · {scope} ·{" "}
             <Link href="/?nav=analytics" className={s.link}>
               {verdict}
             </Link>
