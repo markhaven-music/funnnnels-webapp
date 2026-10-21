@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { notFound } from "next/navigation";
 import { ACCOUNT_URL } from "@/lib/account";
+import { after } from "next/server";
 import { reportSaleToNeo } from "@/lib/neo";
+import { noteSale } from "@/lib/sales";
 import { getOrder, type Order } from "@/lib/orders";
 import { copyFor } from "../../copy";
 import { funnel, unlocked } from "../../funnel";
@@ -64,6 +66,10 @@ export default async function ThankYou({
   // Every sale also goes to neo, labelled funnnnels (lib/neo.ts).
   if (order) reportSaleToNeo(order, funnel.product);
   for (const up of upsells) reportSaleToNeo(up, LABELS[up.offer!] ?? up.offer!);
+  // …and into our orders (the receipt email, the dashboard), after the page is sent.
+  after(async () => {
+    for (const o of [order, ...upsells]) await noteSale(o, funnel.slug, lang);
+  });
 
   const downloads = paid && order ? [order, ...upsells].flatMap((o) => unlocked(o.items).map((key) => ({ order: o.id, key }))) : [];
 

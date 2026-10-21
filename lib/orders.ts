@@ -16,6 +16,11 @@ export type Order = {
   // A one-click upsell (funnel.offers): its id and the order it followed.
   offer: string | null;
   parent: string | null;
+  // For the receipt and the dashboard (lib/sales.ts); not always known.
+  name?: string | null;
+  country?: string | null;
+  lang?: string | null;
+  waiver?: boolean;
 };
 
 // Until orders live in the database (Phase 3b), the Stripe PaymentIntent or
@@ -56,6 +61,10 @@ export function orderFromIntent(intent: Stripe.PaymentIntent): Order {
     visitorId: intent.metadata.ft_vid || null,
     offer,
     parent: intent.metadata.parent || null,
+    name: intent.metadata.name || null,
+    country: intent.metadata.country || null,
+    lang: intent.metadata.lang || null,
+    waiver: intent.metadata.withdrawal_waiver === "accepted",
   };
 }
 
@@ -97,6 +106,9 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
       visitorId: typeof meta.n === "string" ? meta.n : null,
       offer: offer?.id ?? null,
       parent: typeof meta.p === "string" ? meta.p : null,
+      name: [order.payer?.name?.given_name, order.payer?.name?.surname].filter(Boolean).join(" ") || null,
+      country: typeof meta.c === "string" ? meta.c : null,
+      waiver: meta.w === 1,
     };
   } catch {
     return null;

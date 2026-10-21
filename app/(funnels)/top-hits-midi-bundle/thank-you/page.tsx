@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ACCOUNT_URL } from "@/lib/account";
+import { after } from "next/server";
 import { reportSaleToNeo } from "@/lib/neo";
+import { noteSale } from "@/lib/sales";
 import { getOrder } from "@/lib/orders";
 import { funnel } from "../funnel";
 import { fontVars } from "../fonts";
@@ -31,6 +33,7 @@ export default async function ThankYou({
   const order = await getOrder(payment_intent ?? paypal_order, funnel.slug);
   // The sale also goes to neo, labelled funnnnels (lib/neo.ts).
   if (order) reportSaleToNeo(order, funnel.product);
+  if (order) after(() => noteSale(order, funnel.slug, "en"));
   const paid = order?.status === "succeeded";
   const pending = order?.status === "processing";
 

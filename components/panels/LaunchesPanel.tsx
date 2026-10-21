@@ -641,8 +641,7 @@ function Emails({ launchId, emails, onSaved }: { launchId: string; emails: Launc
         cart-open on, buyers of this product are left out.
       </p>
       <p className={c.notice}>
-        Sending isn&rsquo;t connected yet. These emails are stored with their schedule; they go out through Amazon SES
-        once the email sender lands. Mark one &ldquo;Scheduled&rdquo; when its copy is final.
+        A &ldquo;Scheduled&rdquo; email goes out at its time through Amazon SES (dashboard &rarr; Broadcasts sends the same way), to subscribed contacts with its tag. Keep it a draft until the copy is final.
       </p>
       <div className={c.emails}>
         {emails.map((e) => (

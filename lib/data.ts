@@ -24,10 +24,18 @@ export const NAV: NavSection[] = [
     ],
   },
   {
-    section: "Audience",
+    section: "Sales",
+    items: [
+      { id: "orders", label: "Orders", icon: "receipt" },
+      { id: "analytics", label: "Analytics", icon: "analytics" },
+    ],
+  },
+  {
+    section: "Email",
     items: [
       { id: "contacts", label: "Contacts", icon: "contacts" },
-      { id: "analytics", label: "Analytics", icon: "analytics" },
+      { id: "broadcasts", label: "Broadcasts", icon: "mail" },
+      { id: "automations", label: "Automations", icon: "bolt" },
     ],
   },
   {

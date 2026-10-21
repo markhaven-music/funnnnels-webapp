@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addContact, deleteContact, listContacts } from "@/lib/contacts";
+import { addContact, deleteContact, listContacts, setContactStatus } from "@/lib/contacts";
 
 export const runtime = "nodejs";
 
@@ -24,5 +24,15 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   const { id } = await req.json();
   const ok = await deleteContact(id);
+  return NextResponse.json({ ok }, { status: ok ? 200 : 404 });
+}
+
+// { email, status: "subscribed" | "unsubscribed" }: switch the newsletter on or off for one contact.
+export async function PATCH(req: Request) {
+  const { email, status } = await req.json().catch(() => ({}));
+  if (typeof email !== "string" || (status !== "subscribed" && status !== "unsubscribed")) {
+    return NextResponse.json({ error: "email and status required" }, { status: 400 });
+  }
+  const ok = await setContactStatus(email, status);
   return NextResponse.json({ ok }, { status: ok ? 200 : 404 });
 }

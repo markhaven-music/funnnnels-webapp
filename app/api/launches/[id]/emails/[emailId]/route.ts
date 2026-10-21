@@ -4,7 +4,7 @@ import { updateLaunchEmail } from "@/lib/products";
 export const runtime = "nodejs";
 
 // Edit one launch email (subject, body, audience, send time, draft ↔ scheduled).
-// Sent emails can't change. Nothing here sends: see the Launches panel note.
+// Sent emails can't change. Scheduled ones are sent by lib/outbox.ts.
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string; emailId: string }> }) {
   const { id, emailId } = await ctx.params;
   const body = await req.json().catch(() => ({}));
