@@ -23,7 +23,9 @@ const PAYPAL_ON = Boolean(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID);
 
 type Method = "card" | "paypal";
 type Info = { firstName: string; lastName: string; email: string };
-type Props = { currency: Currency; country: string; publishableKey: string | null };
+// afterOrder: where Stripe sends the buyer once paid (the upsell, or the
+// thank-you page); upsell: that page's offer, skipped when ticked as an add-on.
+type Props = { currency: Currency; country: string; publishableKey: string | null; afterOrder: string; upsell: string | null };
 
 const stripeCache = new Map<string, ReturnType<typeof loadStripe>>();
 function stripeFor(key: string) {
@@ -50,7 +52,7 @@ const appearance: Appearance = {
 
 const money = (n: number, c: Currency) => `${c === "eur" ? "€" : "$"}${n.toFixed(2)}`;
 
-export function OrderForm({ currency, country, publishableKey }: Props) {
+export function OrderForm({ currency, country, publishableKey, afterOrder, upsell }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);
@@ -58,7 +60,9 @@ export function OrderForm({ currency, country, publishableKey }: Props) {
   const price = funnel.price[currency];
   const total = price + funnel.bumps.filter((b) => picked.includes(b.id)).reduce((n, b) => n + b.price[currency], 0);
   const stripePromise = useMemo(() => (publishableKey ? stripeFor(publishableKey) : null), [publishableKey]);
-  const state: PayState = { currency, country, info, method, picked, setPicked, total };
+  // Paid by card: the upsell, unless its product is already in the order.
+  const next = upsell && picked.includes(upsell) ? funnel.checkout.thankYou : afterOrder;
+  const state: PayState = { currency, country, info, method, picked, setPicked, total, next };
 
   return (
     <div className={s.form}>
@@ -208,6 +212,7 @@ type PayState = {
   picked: string[];
   setPicked: (ids: string[]) => void;
   total: number;
+  next: string;
 };
 
 function CardPay(props: PayState) {
@@ -239,7 +244,7 @@ function CardPay(props: PayState) {
       elements,
       clientSecret: json.clientSecret,
       confirmParams: {
-        return_url: new URL(funnel.checkout.thankYou, window.location.origin).toString(),
+        return_url: new URL(props.next, window.location.origin).toString(),
         payment_method_data: { billing_details: { name, email: props.info.email } },
       },
     });

@@ -56,7 +56,9 @@ export async function GET(req: Request) {
     if (captured) u.push(orderId);
     return redirect(`${nextStep(f, url.searchParams.get("lang"), offer.id)}?paypal_order=${parent}${u.length ? `&u=${u.join(",")}` : ""}`);
   }
-  return redirect(`${nextStep(f, url.searchParams.get("lang"), null)}?paypal_order=${orderId}`);
+  // An upsell the buyer already ticked as an add-on is skipped.
+  const owned = captured && f.offers?.length ? ((await getOrder(orderId, f.slug))?.items ?? []) : [];
+  return redirect(`${nextStep(f, url.searchParams.get("lang"), null, owned)}?paypal_order=${orderId}`);
 }
 
 // Relative on purpose: the buyer arrived through the brand domain

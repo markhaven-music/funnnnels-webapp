@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getFunnel, nextStep } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { orderBullets, reviews } from "../../copy";
 import { funnel } from "../../funnel";
@@ -82,6 +83,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
             currency={currency}
             country={FALLBACK_COUNTRY[currency]}
             publishableKey={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null}
+            afterOrder={nextStep(getFunnel(funnel.slug)!, "en", null)}
+            upsell={funnel.offers[0].id}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.paylogos} src={`${IMG}/payment-logos.webp`} alt="PayPal, Visa, Mastercard, American Express, Discover" width={190} height={22} />

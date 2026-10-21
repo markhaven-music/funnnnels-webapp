@@ -63,6 +63,10 @@ export const funnel = {
     hustle: "shared/HUSTLE MIDI Bundle.zip",
     "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
   },
+  // One-click upsell after the order (lib/funnels.ts nextStep): the MIDI Drum
+  // Kit's Famous Beats page (midi-drum-kit/upsell.ts), skipped when the buyer
+  // already ticked it as an add-on.
+  offers: [{ id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } }],
   checkout: {
     leadTags: ["checkout-started"],
     buyerTags: ["buyer", "buyer-top-hits-midi-bundle"],

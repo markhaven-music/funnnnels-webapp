@@ -40,7 +40,7 @@ export type Product = {
   // Languages the pages come in. English keeps the plain addresses; the others
   // live under /<lang> (see checkoutPages).
   langs?: readonly string[];
-  // One-click upsells after the order, in order (MIDI Drum Kit).
+  // One-click upsells after the order, in order (MIDI Drum Kit, TOP HITS).
   offers?: readonly Offer[];
 };
 
@@ -69,6 +69,7 @@ const TOP_HITS: Product = {
   checkout: topHits.checkout,
   optin: null,
   launch: null,
+  offers: topHits.offers,
 };
 
 const DRUM_KIT: Product = {
@@ -112,14 +113,15 @@ export const offerOf = (f: Product, id: unknown) => f.offers?.find((o) => o.id =
 
 /**
  * Where the buyer goes next: after the order (`after` = null) or after an
- * upsell (its id), the next upsell, then the thank-you page.
+ * upsell (its id), the next upsell, then the thank-you page. `owned`: what
+ * the order already has (an add-on ticked at checkout), whose upsell is skipped.
  */
-export function nextStep(f: Product, lang: unknown, after: string | null): string {
+export function nextStep(f: Product, lang: unknown, after: string | null, owned: readonly string[] = []): string {
   const pages = checkoutPages(f, lang);
   if (!upsellsOn(f)) return pages.thankYou;
   const offers = f.offers ?? [];
   const at = after === null ? -1 : offers.findIndex((o) => o.id === after);
-  const next = after !== null && at < 0 ? undefined : offers[at + 1];
+  const next = after !== null && at < 0 ? undefined : offers.slice(at + 1).find((o) => !owned.includes(o.id));
   return next ? `${pages.lang ? `/${pages.lang}` : ""}/${f.slug}/${next.path}` : pages.thankYou;
 }
 

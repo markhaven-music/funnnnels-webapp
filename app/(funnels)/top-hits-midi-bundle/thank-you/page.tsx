@@ -3,7 +3,7 @@ import { ACCOUNT_URL } from "@/lib/account";
 import { after } from "next/server";
 import { reportSaleToNeo } from "@/lib/neo";
 import { noteSale } from "@/lib/sales";
-import { getOrder } from "@/lib/orders";
+import { getOrder, type Order } from "@/lib/orders";
 import { funnel } from "../funnel";
 import { fontVars } from "../fonts";
 import { PurchasePixel } from "../Tracking";
@@ -20,20 +20,34 @@ export const metadata: Metadata = {
 const LABELS: Record<string, string> = {
   pack: funnel.product,
   ...Object.fromEntries(funnel.bumps.map((b) => [b.id, b.name])),
+  ...Object.fromEntries(funnel.offers.map((o) => [o.id, o.name])),
 };
 
 // Stripe sends the buyer here with ?payment_intent=pi_…, PayPal's return with
-// ?paypal_order=…. We ask the provider whether it paid; the URL proves nothing.
+// ?paypal_order=…; the upsell page adds u=<upsell orders>. We ask the
+// provider about every one; the URL proves nothing.
 export default async function ThankYou({
   searchParams,
 }: {
-  searchParams: Promise<{ payment_intent?: string; paypal_order?: string }>;
+  searchParams: Promise<{ payment_intent?: string; paypal_order?: string; u?: string }>;
 }) {
-  const { payment_intent, paypal_order } = await searchParams;
+  const { payment_intent, paypal_order, u } = await searchParams;
   const order = await getOrder(payment_intent ?? paypal_order, funnel.slug);
+
+  // The upsells bought after this order, each checked with its provider.
+  const upsells: Order[] = [];
+  if (order && !order.offer) {
+    const ids = [...new Set((u ?? "").split(",").filter(Boolean))].slice(0, funnel.offers.length);
+    for (const up of await Promise.all(ids.map((id) => getOrder(id, funnel.slug)))) {
+      if (up?.offer && up.parent === order.id && up.status === "succeeded") upsells.push(up);
+    }
+  }
   // The sale also goes to neo, labelled funnnnels (lib/neo.ts).
   if (order) reportSaleToNeo(order, funnel.product);
-  if (order) after(() => noteSale(order, funnel.slug, "en"));
+  for (const up of upsells) reportSaleToNeo(up, LABELS[up.offer!] ?? up.offer!);
+  after(async () => {
+    for (const o of [order, ...upsells]) await noteSale(o, funnel.slug, "en");
+  });
   const paid = order?.status === "succeeded";
   const pending = order?.status === "processing";
 
@@ -41,6 +55,9 @@ export default async function ThankYou({
     <main className={`${s.page} ${fontVars}`}>
       <Beacon funnel={funnel.slug} page="thank-you" />
       {paid && order && <PurchasePixel orderId={order.id} value={order.amount} currency={order.currency} />}
+      {upsells.map((up) => (
+        <PurchasePixel key={up.id} orderId={up.id} value={up.amount} currency={up.currency} />
+      ))}
       <header className={s.header} style={{ display: "block" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={s.logo} src="/funnels/top-hits-midi-bundle/logo.png" alt="GRIND STUDIO" width={900} height={103} />
@@ -56,8 +73,8 @@ export default async function ThankYou({
         </p>
         {paid && order && (
           <div className={t.list}>
-            {order.items.map((key) => (
-              <a key={key} className={key === "pack" ? `${s.orange} ${t.btn}` : t.ghost} href={`/${funnel.slug}/download?order=${order.id}&file=${key}`}>
+            {[order, ...upsells].flatMap((o) => o.items.map((key) => ({ order: o.id, key }))).map(({ order: id, key }) => (
+              <a key={`${id}-${key}`} className={key === "pack" ? `${s.orange} ${t.btn}` : t.ghost} href={`/${funnel.slug}/download?order=${id}&file=${key}`}>
                 Download {LABELS[key] ?? key}
               </a>
             ))}

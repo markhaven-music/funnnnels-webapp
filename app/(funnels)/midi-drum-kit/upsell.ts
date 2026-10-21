@@ -71,10 +71,12 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string }> = {
 
 export const offerIds = () => funnel.offers.map((o) => o.id);
 
-export function upsellHtml(offerId: string, lang: Lang, currency: Currency): string | null {
+// slug: the funnel the page sells for. The TOP HITS MIDI Bundle shows the
+// Famous Beats page too, after its own order (same pixel, Clarity and neo).
+export function upsellHtml(offerId: string, lang: Lang, currency: Currency, slug: string = funnel.slug): string | null {
   const page = PAGES[offerId];
-  const offer = funnel.offers.find((o) => o.id === offerId);
-  const product = getFunnel(funnel.slug);
+  const product = getFunnel(slug);
+  const offer = product?.offers?.find((o) => o.id === offerId);
   if (!page || !offer || !product) return null;
 
   const strings: Copy = { ...page.copy.en, ...page.copy[lang] };
@@ -98,8 +100,8 @@ export function upsellHtml(offerId: string, lang: Lang, currency: Currency): str
     .replace("{{LANG}}", lang)
     .replace("{{TITLE}}", escapeAttr(page.title))
     .replace("{{DESCRIPTION}}", escapeAttr(page.title))
-    .replace("{{HEAD}}", `<style>${FIXES}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: page.beacon, lang, abCookie: AB.cookie })}</script>\n${headScripts()}`)
-    .replace("{{BODY}}", script(offerId, lang, nextStep(product, lang, offerId)));
+    .replace("{{HEAD}}", `<style>${FIXES}</style>\n<script>${beaconScript({ funnel: slug, page: page.beacon, lang, abCookie: AB.cookie })}</script>\n${headScripts()}`)
+    .replace("{{BODY}}", script(slug, offerId, lang, nextStep(product, lang, offerId)));
 
   // Words outside the tagged texts: the "reserved for" timer, the progress
   // bar, the tracklist's search box.
@@ -139,8 +141,8 @@ function headScripts(): string {
 }
 
 /** The buttons, the "reserved for" countdown. */
-function script(offerId: string, lang: Lang, next: string): string {
-  const cfg = JSON.stringify({ funnel: funnel.slug, offer: offerId, lang, next, ui: UI[lang], ab: AB.cookie });
+function script(slug: string, offerId: string, lang: Lang, next: string): string {
+  const cfg = JSON.stringify({ funnel: slug, offer: offerId, lang, next, ui: UI[lang], ab: AB.cookie });
   return `<script>
 (function () {
   var C = ${cfg};
