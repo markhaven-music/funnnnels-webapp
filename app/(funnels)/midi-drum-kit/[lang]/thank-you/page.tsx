@@ -1,3 +1,4 @@
+import { resolveFunnel } from "@/lib/funnels";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { notFound } from "next/navigation";
@@ -51,6 +52,13 @@ export default async function ThankYou({
   if (!isLang(lang)) notFound();
   const c = copyFor(lang).thanks;
   const { payment_intent, paypal_order, u, preview } = await searchParams;
+  // The names dashboard → Products gives the add-ons and upsells (an added add-on too).
+  const f = await resolveFunnel(funnel.slug);
+  const labels: Record<string, string> = {
+    ...LABELS,
+    ...Object.fromEntries([...(f?.bumps ?? []), ...(f?.offers ?? [])].map((x) => [x.id, x.name])),
+    ...(f && f.product !== funnel.product ? { pack: f.product } : {}),
+  };
   const order = await getOrder(payment_intent ?? paypal_order, funnel.slug);
   // The dashboard's preview (?preview=1, not counted: lib/beacon.ts) with no order:
   // the page as someone who bought everything sees it, its buttons inert.
@@ -68,7 +76,7 @@ export default async function ThankYou({
   }
   // Every sale also goes to neo, labelled funnnnels (lib/neo.ts).
   if (order) reportSaleToNeo(order, funnel.product);
-  for (const up of upsells) reportSaleToNeo(up, LABELS[up.offer!] ?? up.offer!);
+  for (const up of upsells) reportSaleToNeo(up, labels[up.offer!] ?? up.offer!);
   // …and into our orders (the receipt email, the dashboard), after the page is sent.
   after(async () => {
     for (const o of [order, ...upsells]) await noteSale(o, funnel.slug, lang);
@@ -110,7 +118,7 @@ export default async function ThankYou({
                     d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32v242.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64h384c35.3 0 64-28.7 64-64v-32c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64z"
                   />
                 </svg>
-                {c.download} {LABELS[d.key] ?? d.key}
+                {c.download} {labels[d.key] ?? d.key}
               </a>
             ))}
           </div>

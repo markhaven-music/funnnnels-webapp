@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Instrument_Serif, Poppins } from "next/font/google";
-import { CURRENCIES, formatPrice, type Currency } from "@/lib/geo";
+import { getFunnel, resolveFunnel } from "@/lib/funnels";
+import { CURRENCIES, type Currency } from "@/lib/geo";
+import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
 import { funnel } from "../funnel";
 import { DEFAULT_SECTIONS, type Section } from "../content";
@@ -57,8 +59,9 @@ const valid = (b: unknown): b is Section =>
 export default async function JazzMidiPackPage({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
-  const amount = funnel.price[currency];
-  const price = formatPrice(amount, currency);
+  // Its price as dashboard → Products has it.
+  const amount = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency];
+  const price = money(amount, currency);
   // strict: a failed read keeps the last good page in the cache instead of
   // caching the coded defaults over the published copy.
   const sections = await getPublishedBlocks(funnel.slug, DEFAULT_SECTIONS, valid, { strict: true });

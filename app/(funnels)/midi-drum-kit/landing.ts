@@ -1,5 +1,6 @@
 import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS } from "@/lib/beacon";
+import { restate } from "@/lib/restate";
 import { AB, AB_LANDING_CSS, AB_SCRIPT } from "./abtest";
 import { TEMPLATE } from "./cf/template";
 import de from "./copy/landing/de.json";
@@ -62,10 +63,12 @@ export const mapText = (html: string, fn: (t: string) => string) => html.replace
 
 export const escapeAttr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
-export function landingHtml(lang: Lang, currency: Currency): string {
+// price: the kit's in this currency, as dashboard → Products has it; the
+// words that say the code's price ("Only €297 €27") say this one.
+export function landingHtml(lang: Lang, currency: Currency, price: number = funnel.price[currency]): string {
   const strings = { ...STRINGS.en, ...STRINGS[lang] };
   const words = (key: string) => {
-    let html = strings[key] ?? "";
+    let html = mapText(strings[key] ?? "", (t) => restate(t, funnel.price[currency], price, lang));
     if (lang === "es" || lang === "de" || lang === "it") html = mapText(html, unitSpaces);
     if (lang === "es" && currency === "usd") html = mapText(html, dollarFirst);
     if (currency === "usd") html = mapText(html, (t) => t.replaceAll("€", "$"));
@@ -82,7 +85,7 @@ export function landingHtml(lang: Lang, currency: Currency): string {
     .replace("{{DESCRIPTION}}", escapeAttr(meta.description))
     .replace(
       "{{HEAD}}",
-      `<script>${AB_SCRIPT}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: AB.cookie })}</script>\n${headScripts(currency)}`,
+      `<script>${AB_SCRIPT}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: AB.cookie })}</script>\n${headScripts(currency, price)}`,
     )
     .replace("{{BODY}}", BODY_SCRIPT);
   const video = VIDEOS[lang];
@@ -250,9 +253,9 @@ function lazyBelow(html: string, at: number): string {
 // form and the thank-you page.
 const OFF = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/);
 
-function headScripts(currency: Currency): string {
+function headScripts(currency: Currency, price: number): string {
   const { metaPixelId, clarityId, neoSnippet } = funnel.tracking;
-  const params = JSON.stringify({ content_name: funnel.product, content_type: "product", value: funnel.price[currency], currency: currency.toUpperCase() });
+  const params = JSON.stringify({ content_name: funnel.product, content_type: "product", value: price, currency: currency.toUpperCase() });
   return `<script>
 (function () {
   if (${OFF}.test(location.hostname) || ${PREVIEW_JS}) return;

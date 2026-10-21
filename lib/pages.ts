@@ -1,4 +1,5 @@
 import { revalidatePath } from "next/cache";
+import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { supabase } from "@/lib/supabase";
 import { CURRENCIES } from "@/lib/geo";
 
@@ -38,5 +39,18 @@ export function revalidateFunnelPages(funnelId: string) {
   for (const currency of CURRENCIES) {
     revalidatePath(`/${funnelId}/${currency}`);
     revalidatePath(`/${funnelId}/order/${currency}`); // funnels with their own order page
+  }
+}
+
+// Every page of a code funnel that shows a price (dashboard → Products saved
+// one): its landing, order page and upsells, per currency (and language).
+export function revalidateSalesPages(funnelId: string) {
+  revalidateFunnelPages(funnelId);
+  for (const currency of CURRENCIES) {
+    revalidatePath(`/${funnelId}/offer/${currency}`); // TOP HITS' upsell
+    if (funnelId !== "midi-drum-kit") continue;
+    for (const lang of DRUM_KIT_LANGS) {
+      for (const page of ["", "/order", "/offer", "/last-offer"]) revalidatePath(`/${funnelId}/${lang}${page}/${currency}`);
+    }
   }
 }

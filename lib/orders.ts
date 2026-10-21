@@ -1,9 +1,10 @@
 import type Stripe from "stripe";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { isPayPalOrderId, paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
-import { offerOf, offeredBumps, possibleAmounts, resolveFunnel } from "@/lib/funnels";
+import { getFunnel, offerOf, offeredBumps, possibleAmounts, resolveFunnel } from "@/lib/funnels";
 import { toCents } from "@/lib/launch";
 import { SHOP_SLUG, shopItems } from "@/lib/shop";
+import { supabase } from "@/lib/supabase";
 
 export type Order = {
   id: string;
@@ -70,36 +71,57 @@ export function orderFromIntent(intent: Stripe.PaymentIntent): Order {
   };
 }
 
+// Every PayPal order this server creates, with what it sells and for how
+// much (db/catalog.sql paypal_orders). PayPal's custom_id alone proves
+// nothing: anyone can create an order to our account in a browser with the
+// public client id, with any amount and custom_id. The record also outlives
+// a price changed in dashboard → Products.
+export async function notePayPalOrder(o: { id: string; funnel: string; amountCents: number; currency: string; items: string[]; offer?: string | null }) {
+  const { error } = await supabase()
+    .from("paypal_orders")
+    .insert({ id: o.id, funnel: o.funnel, amount_cents: o.amountCents, currency: o.currency, items: o.items, offer: o.offer ?? null });
+  if (error) throw error;
+}
+
+type MadeRow = { funnel: string; amount_cents: number; currency: string; items: string[]; offer: string | null };
+
 async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | null> {
-  const f = await resolveFunnel(funnelSlug);
-  if (!f || !paypalConfigured()) return null;
+  if (!paypalConfigured()) return null;
   try {
-    const order = await paypal<PayPalOrder>(`/v2/checkout/orders/${id}`);
+    const [order, { data: made, error: madeErr }] = await Promise.all([
+      paypal<PayPalOrder>(`/v2/checkout/orders/${id}`),
+      supabase().from("paypal_orders").select("funnel, amount_cents, currency, items, offer").eq("id", id).maybeSingle(),
+    ]);
+    if (madeErr) throw madeErr;
     const unit = order.purchase_units[0];
     const meta = JSON.parse(unit?.custom_id ?? "{}");
     if (meta.f !== funnelSlug) return null;
 
     const currency = unit.amount.currency_code.toLowerCase();
     if (currency !== "eur" && currency !== "usd") return null;
-    // An upsell (custom_id u = its id, p = the order it followed): its price only.
-    const offer = typeof meta.u === "string" ? offerOf(f, meta.u) : undefined;
-    if (meta.u && !offer) return null;
     let items: string[];
-    if (f.kind === "shop") {
-      // The shop's order lines are its products (sku = slug), each at the
-      // price it was sold at; they must add up to what was paid.
-      const lines = unit.items ?? [];
-      const sum = lines.reduce((n, l) => n + toCents(Number(l.unit_amount.value)) * Number(l.quantity), 0);
-      items = shopItems(lines.map((l) => l.sku ?? "").join(","));
-      if (!items.length || items.length !== lines.length || paypalValue(sum) !== unit.amount.value) return null;
+    let offer: string | null;
+    if (made) {
+      // Ours: it unlocks what we sold, for the amount we asked.
+      const m = made as MadeRow;
+      if (m.funnel !== funnelSlug || m.currency !== currency || paypalValue(m.amount_cents) !== unit.amount.value) return null;
+      items = m.items;
+      offer = m.offer;
     } else {
-      const ids = offer ? [] : String(meta.b ?? "").split(",");
+      // Not recorded: made before orders were (2026-10-22), so checked
+      // against the code's prices, the ones of that time. The shop records all of its own.
+      const f = funnelSlug === SHOP_SLUG ? undefined : (getFunnel(funnelSlug) ?? (await resolveFunnel(funnelSlug)));
+      if (!f) return null;
+      // An upsell (custom_id u = its id, p = the order it followed): its price only.
+      const up = typeof meta.u === "string" ? offerOf(f, meta.u) : undefined;
+      if (meta.u && !up) return null;
+      const ids = up ? [] : String(meta.b ?? "").split(",");
       const bumps = offeredBumps(f).filter((b) => ids.includes(b.id));
-      // Belt and braces: the order we created can't be edited by the buyer, but
-      // only hand over files the amount actually paid for (at the early-bird or the full price).
-      const paid = offer ? [toCents(offer.price[currency])] : possibleAmounts(f, currency, bumps);
+      // Only hand over files the amount actually paid for (at the early-bird or the full price).
+      const paid = up ? [toCents(up.price[currency])] : possibleAmounts(f, currency, bumps);
       if (!paid.some((a) => paypalValue(a) === unit.amount.value)) return null;
-      items = offer ? [offer.id] : ["pack", ...bumps.map((b) => b.id)];
+      items = up ? [up.id] : ["pack", ...bumps.map((b) => b.id)];
+      offer = up?.id ?? null;
     }
 
     // The order says COMPLETED once captured; the capture itself can still be
@@ -117,7 +139,7 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
       currency,
       items,
       visitorId: typeof meta.n === "string" ? meta.n : null,
-      offer: offer?.id ?? null,
+      offer,
       parent: typeof meta.p === "string" ? meta.p : null,
       name: [order.payer?.name?.given_name, order.payer?.name?.surname].filter(Boolean).join(" ") || null,
       country: typeof meta.c === "string" ? meta.c : null,

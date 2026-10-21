@@ -19,6 +19,8 @@ export type Ctx = {
   country: string;
   publishableKey: string | null;
   editing?: boolean;
+  // An add-on given to Jazz in dashboard → Products (none since 2026-10-16).
+  bump?: { name: string; price: number; pitch: string; cover: [string, string] } | null;
 };
 
 type Patch = (props: Record<string, unknown>) => void;
@@ -540,7 +542,7 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       currency={ctx.currency}
       country={ctx.country}
       price={ctx.amount}
-      bump={null}
+      bump={ctx.bump ?? null}
       thankYou={funnel.checkout.thankYou}
       publishableKey={ctx.publishableKey}
       europe={ctx.currency === "eur"}

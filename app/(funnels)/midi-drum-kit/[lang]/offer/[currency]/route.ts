@@ -7,6 +7,8 @@ import { upsellHtml } from "../../../upsell";
 // /<lang>/midi-drum-kit/offer here.
 
 export const dynamic = "force-static";
+// Its price is dashboard → Products' (saving there revalidates it; hourly at the latest).
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return LANGS.flatMap((lang) => CURRENCIES.map((currency) => ({ lang, currency })));
@@ -14,7 +16,7 @@ export function generateStaticParams() {
 
 export async function GET(_req: Request, { params }: { params: Promise<{ lang: string; currency: string }> }) {
   const { lang, currency } = await params;
-  const html = isLang(lang) && CURRENCIES.includes(currency as Currency) ? upsellHtml("famous-beats", lang, currency as Currency) : null;
+  const html = isLang(lang) && CURRENCIES.includes(currency as Currency) ? await upsellHtml("famous-beats", lang, currency as Currency) : null;
   if (!html) return new Response("Not found", { status: 404 });
   return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
 }

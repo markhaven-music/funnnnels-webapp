@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { funnel as drumKit, unlocked as drumKitUnlocked } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { funnel as jazz, unlocked as jazzUnlocked } from "@/app/(funnels)/jazz-midi-pack/funnel";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
+import { resolveFunnel } from "@/lib/funnels";
 import { SHOP_HOME } from "@/lib/liveUrl";
 import { getOrder, orderFromIntent, type Order } from "@/lib/orders";
 import { SHOP_SLUG, orderTitle, shopLabels, type ShopLabel } from "@/lib/shop";
@@ -185,6 +186,15 @@ export async function purchasesOf(email: string): Promise<Purchase[]> {
     ...found.filter((p) => p.order.offer && !ids.has(p.order.parent ?? "")).sort(byDate),
   ];
   const shop = await shopLabels(found.filter((p) => p.funnel === SHOP_SLUG).flatMap((p) => p.order.items)).catch((): Record<string, ShopLabel> => ({}));
+  // The add-ons' and upsells' names as dashboard → Products has them (one added there is on no shelf).
+  const names: Record<string, Record<string, string>> = Object.fromEntries(
+    await Promise.all(
+      [...new Set(found.map((p) => p.funnel).filter((f) => SHELVES[f]))].map(async (slug) => {
+        const f = await resolveFunnel(slug).catch(() => undefined);
+        return [slug, Object.fromEntries([...(f?.bumps ?? []), ...(f?.offers ?? [])].map((x) => [x.id, x.name]))] as const;
+      }),
+    ),
+  );
   return ordered.map(({ order, funnel, date, lang }) => {
       if (funnel === SHOP_SLUG) {
         return {
@@ -198,14 +208,15 @@ export async function purchasesOf(email: string): Promise<Purchase[]> {
         };
       }
       const shelf = SHELVES[funnel];
+      const label = (k: string) => names[funnel]?.[k] ?? shelf.labels[k] ?? k;
       return {
         order,
         funnel,
         date,
         lang,
-        name: order.offer ? (shelf.labels[order.offer] ?? order.offer) : shelf.product,
+        name: order.offer ? label(order.offer) : shelf.product,
         cover: shelf.cover(order),
-        files: shelf.unlocked(order.items).map((k) => ({ key: k, label: shelf.labels[k] ?? k, href: shelf.download(order, k) })),
+        files: shelf.unlocked(order.items).map((k) => ({ key: k, label: label(k), href: shelf.download(order, k) })),
       };
     });
 }

@@ -179,8 +179,29 @@
 .dim {
   color: var(--fg-2);
 }
-.use + .use {
+.use + .use,
+.useEdit + .use,
+.useEdit + .useEdit,
+.use + .useEdit {
   border-top: 1px solid var(--line-soft);
+}
+/* a funnel that sells the product: its name and price there, editable */
+.useEdit {
+  display: grid;
+  gap: 10px;
+  padding: 12px 0;
+}
+.useHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+.legend {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg-1);
+  margin: 6px 0 0;
 }
 .moves {
   display: flex;

@@ -1,14 +1,16 @@
 import type { Currency } from "@/lib/geo";
+import { restate } from "@/lib/restate";
 import { compare, type Cell } from "./copy";
 import { funnel } from "./funnel";
 import { Rich, sign } from "./Rich";
 import s from "./landing.module.css";
 
 // The landing's repeated blocks: the value stack, the two green buttons, the comparison table.
+// `price`: the bundle's, as dashboard → Products has it; the words that say
+// the code's price say this one (lib/restate.ts).
 
-export function ValueStack({ currency }: { currency: Currency }) {
+export function ValueStack({ currency, price }: { currency: Currency; price: number }) {
   const c = sign(currency);
-  const price = funnel.price[currency];
   return (
     <div className={s.stack}>
       <div className={s.stackHead}>Here&apos;s What You Get Today</div>
@@ -119,7 +121,7 @@ function Mark({ cell, currency }: { cell: Cell; currency: Currency }) {
   return <Rich text={cell} currency={currency} />;
 }
 
-export function Compare({ currency }: { currency: Currency }) {
+export function Compare({ currency, price }: { currency: Currency; price: number }) {
   return (
     <div className={s.cmp}>
       <p className={s.eyebrow}>DO THE MATH</p>
@@ -145,7 +147,7 @@ export function Compare({ currency }: { currency: Currency }) {
               <td className={s.isLabel}>{row.label}</td>
               {row.values.map((v, i) => (
                 <td key={i} className={compare.columns[i].bundle ? s.isBundle : undefined}>
-                  <Mark cell={v} currency={currency} />
+                  <Mark cell={typeof v === "string" ? restate(v, funnel.price[currency], price) : v} currency={currency} />
                 </td>
               ))}
             </tr>

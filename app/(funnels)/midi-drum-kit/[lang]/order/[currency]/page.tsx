@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getFunnel, nextStep, upsellsOn } from "@/lib/funnels";
+import { getFunnel, nextStep, resolveFunnel, upsellsOn } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { Rich } from "../../../../top-hits-midi-bundle/Rich";
 import { fontVars } from "../../../../top-hits-midi-bundle/fonts";
@@ -12,6 +12,7 @@ import { funnel } from "../../../funnel";
 import { AB, AB_SCRIPT } from "../../../abtest";
 import { Beacon } from "../../../../Beacon";
 import { isLang, LANGS } from "../../../i18n";
+import { orderOffer } from "../../../offer";
 import { OrderForm } from "../../../OrderForm";
 import { ReservedTimer } from "../../../ReservedTimer";
 import { Tracking } from "../../../Tracking";
@@ -19,7 +20,8 @@ import { Tracking } from "../../../Tracking";
 // The order page, a copy of ClickFunnels' /spot-available-midi-drum-kit-ad-15m30
 // (the same template as the TOP HITS one, so it shares its stylesheet).
 // Cached per language and currency; proxy.ts rewrites /midi-drum-kit/order and
-// /<lang>/midi-drum-kit/order here.
+// /<lang>/midi-drum-kit/order here. Its prices and add-ons are dashboard →
+// Products' (../../../offer.ts); saving there revalidates it.
 
 export const revalidate = 3600;
 
@@ -44,13 +46,14 @@ export default async function OrderPage({ params }: { params: Params }) {
   if (!isLang(lang) || !CURRENCIES.includes(cur as Currency)) notFound();
   const currency = cur as Currency;
   const t = copyFor(lang);
-  const product = getFunnel(funnel.slug)!;
+  const product = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
+  const offer = await orderOffer(lang, currency, product);
 
   return (
     <main className={`${s.page} ${fontVars}`} lang={lang}>
       {/* The button-colour test: before the buttons paint (see ../../../abtest.ts). */}
       <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
-      <Tracking value={funnel.price[currency]} currency={currency} event={null} />
+      <Tracking value={offer.price} currency={currency} event={null} />
       <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={AB.cookie} />
       <div className={s.redbar}>
         <Rich text={t.orderTopbar} currency={currency} />
@@ -95,6 +98,7 @@ export default async function OrderPage({ params }: { params: Params }) {
             publishableKey={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null}
             afterOrder={nextStep(product, lang, null)}
             keepCard={upsellsOn(product)}
+            offer={offer}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.paylogos} src={`${IMG}/paylogos.webp`} alt={t.order.paylogosAlt} width={190} height={22} />

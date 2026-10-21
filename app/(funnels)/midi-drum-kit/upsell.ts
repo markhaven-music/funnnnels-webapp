@@ -1,6 +1,7 @@
-import { getFunnel, nextStep } from "@/lib/funnels";
+import { getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS, type Step } from "@/lib/beacon";
+import { restate } from "@/lib/restate";
 import { AB } from "./abtest";
 import { TEMPLATE as FAMOUS } from "./cf/upsell-famous";
 import { TEMPLATE as TOP_HITS } from "./cf/upsell-tophits";
@@ -28,6 +29,8 @@ import { AFTER_LOAD, dollarFirst, escapeAttr, faster, frenchSpaces, mapText, uni
 // The order travels in the address from page to page: ?payment_intent=pi_…
 // (Stripe) or ?paypal_order=… (PayPal), plus u=<the upsells bought so far>,
 // up to the thank-you page, which checks every one with Stripe or PayPal.
+// The offer's price and its place after the order are dashboard → Products'
+// (lib/funnels.ts resolveFunnel): every price the page states is that one.
 
 // extra: words outside the tagged texts, English → this language.
 type Copy = { [key: string]: string | Record<string, string> | undefined; extra?: Record<string, string> };
@@ -73,14 +76,16 @@ export const offerIds = () => funnel.offers.map((o) => o.id);
 
 // slug: the funnel the page sells for. The TOP HITS MIDI Bundle shows the
 // Famous Beats page too, after its own order (same pixel, Clarity and neo).
-export function upsellHtml(offerId: string, lang: Lang, currency: Currency, slug: string = funnel.slug): string | null {
+export async function upsellHtml(offerId: string, lang: Lang, currency: Currency, slug: string = funnel.slug): Promise<string | null> {
   const page = PAGES[offerId];
-  const product = getFunnel(slug);
+  const product = (await resolveFunnel(slug)) ?? getFunnel(slug);
   const offer = product?.offers?.find((o) => o.id === offerId);
+  const was = getFunnel(slug)?.offers?.find((o) => o.id === offerId)?.price[currency];
   if (!page || !offer || !product) return null;
 
   const strings: Copy = { ...page.copy.en, ...page.copy[lang] };
-  const said = (key: string) => (typeof strings[key] === "string" ? (strings[key] as string) : "");
+  const said = (key: string) =>
+    typeof strings[key] === "string" ? restate(strings[key] as string, was ?? offer.price[currency], offer.price[currency], lang) : "";
   const dollars = (t: string) => (currency === "usd" ? t.replaceAll("€", "$") : t);
   const text = (key: string) => {
     let html = said(key);

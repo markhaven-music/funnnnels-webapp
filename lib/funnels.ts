@@ -4,6 +4,7 @@ import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import type { Currency } from "@/lib/geo";
 import { phaseAt, toCents, unitPrice, type Launch, type Money, type Phase } from "@/lib/launch";
+import { funnelItems, type FunnelItem } from "@/lib/catalog";
 import { getKitProduct } from "@/lib/products";
 import { SHOP_HOME } from "@/lib/liveUrl";
 import { SHOP_SLUG } from "@/lib/shop";
@@ -21,8 +22,15 @@ import { SHOP_SLUG } from "@/lib/shop";
 //   shop  the shop (dashboard → Shop, lib/shop.ts): one entry for the whole
 //         cart. It lends the checkout its tags and pages; its own APIs
 //         (/api/checkout/shop/*) price the products in the cart.
+//
+// The code funnels' prices, add-ons and upsells are in the database since
+// 2026-10-22 (funnel_items, lib/catalog.ts: dashboard → Products edits them),
+// seeded with what their funnel.ts says; resolveFunnel applies them. Their
+// funnel.ts keeps the pages, the words and the ids, and is the fallback when
+// the database can't be read. getFunnel is the code alone.
 
-export type Bump = { id: string; name: string; price: Money; pitch: string };
+// image: the add-on's picture on the order forms that show one.
+export type Bump = { id: string; name: string; price: Money; pitch: string; image?: string };
 
 /** A one-click upsell: its own page after the order (`path` after /<slug>/), charged to the card just used. */
 export type Offer = { id: string; path: string; name: string; price: Money };
@@ -72,7 +80,7 @@ const TOP_HITS: Product = {
   tagline: topHits.tagline,
   price: topHits.price,
   bump: null,
-  bumps: topHits.bumps.map(({ id, name, price, pitch }) => ({ id, name, price, pitch })),
+  bumps: topHits.bumps.map(({ id, name, price, pitch, image }) => ({ id, name, price, pitch, image })),
   checkout: topHits.checkout,
   optin: null,
   launch: null,
@@ -87,7 +95,7 @@ const DRUM_KIT: Product = {
   tagline: drumKit.tagline,
   price: drumKit.price,
   bump: null,
-  bumps: drumKit.bumps.map(({ id, name, price, pitch }) => ({ id, name, price, pitch })),
+  bumps: drumKit.bumps.map(({ id, name, price, pitch, image }) => ({ id, name, price, pitch, image })),
   checkout: drumKit.checkout,
   optin: null,
   launch: null,
@@ -162,10 +170,47 @@ export function getFunnel(slug: unknown): Product | undefined {
   return CODE[String(slug)];
 }
 
-/** Any product: code first, the shop, then the dashboard's products (with their current launch). */
+/**
+ * A code funnel as funnel_items sells it: the main product's name and price,
+ * its add-ons and upsells in their order, with their names and prices. An
+ * add-on the code doesn't know takes its pitch and picture from the product;
+ * an upsell needs the page its code has, so only those are kept.
+ */
+export function withItems(p: Product, items: readonly FunnelItem[]): Product {
+  if (!items.length) return p;
+  const main = items.find((i) => i.role === "main");
+  const code = p.bumps ?? (p.bump ? [p.bump] : []);
+  const bumps: Bump[] = items
+    .filter((i) => i.role === "bump")
+    .map((i) => {
+      const known = code.find((b) => b.id === i.key);
+      return { id: i.key, name: i.name, price: i.price, pitch: known?.pitch ?? i.tagline, image: known?.image ?? i.image ?? undefined };
+    });
+  const offers = items.flatMap((i) => {
+    const known = i.role === "upsell" ? p.offers?.find((o) => o.id === i.key) : undefined;
+    return known ? [{ ...known, name: i.name, price: i.price }] : [];
+  });
+  return {
+    ...p,
+    product: main?.name ?? p.product,
+    price: main?.price ?? p.price,
+    // Single-add-on checkouts (Jazz) take the first.
+    ...(p.bumps ? { bumps } : { bump: bumps[0] ?? null }),
+    ...(p.offers ? { offers } : {}),
+  };
+}
+
+/** Any product: code first (as funnel_items sells it), the shop, then the dashboard's products (with their current launch). */
 export async function resolveFunnel(slug: unknown): Promise<Product | undefined> {
   const code = getFunnel(slug);
-  if (code) return code;
+  if (code) {
+    try {
+      return withItems(code, await funnelItems(code.slug));
+    } catch (err) {
+      console.error(`funnel ${code.slug}: its prices couldn't be read, so the code's are used`, err);
+      return code;
+    }
+  }
   if (slug === SHOP_SLUG) return SHOP;
   if (typeof slug !== "string" || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return undefined;
   return (await getKitProduct(slug)) ?? undefined;

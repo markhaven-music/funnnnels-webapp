@@ -36,7 +36,7 @@ export default async function ShopPage({ params }: { params: Promise<Params> }) 
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
   const [settings, products] = await Promise.all([shopSettings(), liveProducts()]);
-  if (products.some((p) => p.image)) preconnect(new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).origin);
+  if (products.some((p) => p.image && /^https?:/.test(p.image.sm))) preconnect(new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).origin);
 
   return (
     <ShopFrame>

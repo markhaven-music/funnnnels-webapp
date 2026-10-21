@@ -1,3 +1,4 @@
+import { resolveFunnel } from "@/lib/funnels";
 import type { Metadata } from "next";
 import { ACCOUNT_URL } from "@/lib/account";
 import { after } from "next/server";
@@ -32,6 +33,13 @@ export default async function ThankYou({
   searchParams: Promise<{ payment_intent?: string; paypal_order?: string; u?: string }>;
 }) {
   const { payment_intent, paypal_order, u } = await searchParams;
+  // The names dashboard → Products gives the add-ons and upsells (an added add-on too).
+  const f = await resolveFunnel(funnel.slug);
+  const labels: Record<string, string> = {
+    ...LABELS,
+    ...Object.fromEntries([...(f?.bumps ?? []), ...(f?.offers ?? [])].map((x) => [x.id, x.name])),
+    ...(f && f.product !== funnel.product ? { pack: f.product } : {}),
+  };
   const order = await getOrder(payment_intent ?? paypal_order, funnel.slug);
 
   // The upsells bought after this order, each checked with its provider.
@@ -44,7 +52,7 @@ export default async function ThankYou({
   }
   // The sale also goes to neo, labelled funnnnels (lib/neo.ts).
   if (order) reportSaleToNeo(order, funnel.product);
-  for (const up of upsells) reportSaleToNeo(up, LABELS[up.offer!] ?? up.offer!);
+  for (const up of upsells) reportSaleToNeo(up, labels[up.offer!] ?? up.offer!);
   after(async () => {
     for (const o of [order, ...upsells]) await noteSale(o, funnel.slug, "en");
   });
@@ -75,7 +83,7 @@ export default async function ThankYou({
           <div className={t.list}>
             {[order, ...upsells].flatMap((o) => o.items.map((key) => ({ order: o.id, key }))).map(({ order: id, key }) => (
               <a key={`${id}-${key}`} className={key === "pack" ? `${s.orange} ${t.btn}` : t.ghost} href={`/${funnel.slug}/download?order=${id}&file=${key}`}>
-                Download {LABELS[key] ?? key}
+                Download {labels[key] ?? key}
               </a>
             ))}
           </div>

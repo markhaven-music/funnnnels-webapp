@@ -42,7 +42,8 @@ export default async function ShopProductPage({ params }: { params: Promise<Para
   const more = all.filter((x) => x.slug !== p.slug).slice(0, 4);
   if (p.image) {
     // The first screen's picture is found at once (docs/page-speed.md rule 2).
-    preconnect(new URL(p.image.lg).origin);
+    // An uploaded one is on Supabase; a funnel's own is on this site.
+    if (/^https?:/.test(p.image.lg)) preconnect(new URL(p.image.lg).origin);
     preload(p.image.lg, { as: "image", fetchPriority: "high", imageSrcSet: `${p.image.sm} 600w, ${p.image.lg} 1200w`, imageSizes: HERO_SIZES });
   }
   const price = p.price[currency];

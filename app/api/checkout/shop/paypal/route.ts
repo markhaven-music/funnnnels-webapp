@@ -6,6 +6,7 @@ import { isDryRun } from "@/lib/funnels";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { money, toCents } from "@/lib/launch";
 import { cleanVisitorId } from "@/lib/neoIds";
+import { notePayPalOrder } from "@/lib/orders";
 import { paypal, paypalConfigured, paypalValue, returnOrigin, type PayPalOrder } from "@/lib/paypal";
 import { SHOP_SLUG, priceCart } from "@/lib/shop";
 
@@ -13,7 +14,8 @@ export const runtime = "nodejs";
 
 // The PayPal twin of /api/checkout/shop/intent, like /api/checkout/paypal for
 // the funnels: it creates the order with one line per product (sku = its
-// slug: what the order unlocks, read back in lib/orders.ts) and hands back
+// slug), records what it sells (lib/orders.ts notePayPalOrder: the proof the
+// order is ours, which the download asks for) and hands back
 // PayPal's page for approving it. PayPal then sends the buyer to
 // /api/checkout/paypal/return?funnel=shop, which takes the money and goes on
 // to /shop/thank-you.
@@ -94,6 +96,7 @@ export async function POST(req: Request) {
     });
     const approve = order.links?.find((l) => l.rel === "payer-action" || l.rel === "approve");
     if (!approve) throw new Error(`PayPal order ${order.id} came back without an approval link`);
+    await notePayPalOrder({ id: order.id, funnel: SHOP_SLUG, amountCents: cart.amount, currency, items: cart.items.map((i) => i.slug) });
     return NextResponse.json({ orderId: order.id, approveUrl: approve.href });
   } catch (err) {
     console.error("shop paypal order failed", err);

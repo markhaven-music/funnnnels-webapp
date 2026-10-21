@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getFunnel, nextStep } from "@/lib/funnels";
+import { getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { orderBullets, reviews } from "../../copy";
 import { funnel } from "../../funnel";
 import { fontVars } from "../../fonts";
+import { orderOffer } from "../../offer";
 import { OrderForm } from "../../OrderForm";
 import { ReservedTimer } from "../../ReservedTimer";
 import { Check } from "../../sections";
@@ -32,10 +33,13 @@ export const metadata: Metadata = {
 export default async function OrderPage({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
+  // What it sells, as dashboard → Products has it (../../offer.ts); saving there revalidates the page.
+  const product = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
+  const offer = await orderOffer(currency, product);
 
   return (
     <main className={`${s.page} ${fontVars}`}>
-      <Tracking value={funnel.price[currency]} currency={currency} event={null} />
+      <Tracking value={offer.price} currency={currency} event={null} />
       <Beacon funnel={funnel.slug} page="order" />
       <div className={s.redbar}>
         <b>MORE BLACK FRIDAY:</b> 90% Sale Is Ending Soon
@@ -83,8 +87,9 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
             currency={currency}
             country={FALLBACK_COUNTRY[currency]}
             publishableKey={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null}
-            afterOrder={nextStep(getFunnel(funnel.slug)!, "en", null)}
-            upsell={funnel.offers[0].id}
+            afterOrder={nextStep(product, "en", null)}
+            upsell={product.offers?.[0]?.id ?? null}
+            offer={offer}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.paylogos} src={`${IMG}/payment-logos.webp`} alt="PayPal, Visa, Mastercard, American Express, Discover" width={190} height={22} />

@@ -13,6 +13,7 @@ import d from "./order.module.css";
 import { copyFor, type Copy } from "./copy";
 import { funnel } from "./funnel";
 import { money as fmt, paths, type Lang } from "./i18n";
+import type { OrderOffer } from "./offer";
 
 // The ClickFunnels order form of /spot-available-midi-drum-kit-ad-15m30 (the
 // same template as TOP HITS' ../top-hits-midi-bundle/OrderForm.tsx), step for
@@ -22,7 +23,9 @@ import { money as fmt, paths, type Lang } from "./i18n";
 //                   Summary, "Rush My Order!"
 // Card fields are Stripe's (numbers never touch our server); PayPal sends the
 // buyer to PayPal and back (/api/checkout/paypal → /api/checkout/paypal/return).
-// Prices shown here are only a preview: the server prices the order itself.
+// What it sells (`offer`: names, prices, add-ons) comes from the server page,
+// as dashboard → Products has it (./offer.ts). Prices shown here are only a
+// preview: the server prices the order itself.
 
 const PAYPAL_ON = Boolean(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID);
 
@@ -31,7 +34,7 @@ type Info = { firstName: string; lastName: string; email: string };
 // afterOrder: the page after paying (the first upsell, or the thank-you page);
 // keepCard: the card is kept for the one-click upsells (Stripe setup_future_usage,
 // which the intent route sets too: both must say the same).
-type Props = { lang: Lang; currency: Currency; country: string; publishableKey: string | null; afterOrder: string; keepCard: boolean };
+type Props = { lang: Lang; currency: Currency; country: string; publishableKey: string | null; afterOrder: string; keepCard: boolean; offer: OrderOffer };
 
 const stripeCache = new Map<string, ReturnType<typeof loadStripe>>();
 function stripeFor(key: string) {
@@ -57,16 +60,16 @@ const appearance: Appearance = {
 };
 
 
-export function OrderForm({ lang, currency, country, publishableKey, afterOrder, keepCard }: Props) {
+export function OrderForm({ lang, currency, country, publishableKey, afterOrder, keepCard, offer }: Props) {
   const t = copyFor(lang, currency).form;
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);
   const [method, setMethod] = useState<Method>("card");
-  const price = funnel.price[currency];
-  const total = price + funnel.bumps.filter((b) => picked.includes(b.id)).reduce((n, b) => n + b.price[currency], 0);
+  const price = offer.price;
+  const total = price + offer.bumps.filter((b) => picked.includes(b.id)).reduce((n, b) => n + b.price, 0);
   const stripePromise = useMemo(() => (publishableKey ? stripeFor(publishableKey) : null), [publishableKey]);
-  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder };
+  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer };
 
   return (
     <div className={s.form}>
@@ -96,7 +99,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
               setInfo(next);
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
-              pixel("InitiateCheckout", { content_name: funnel.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant() });
+              pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant() });
               track({ funnel: funnel.slug, page: "checkout", lang, abCookie: AB.cookie });
             }}
           />
@@ -116,7 +119,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
           <label className={s.product}>
             <input type="radio" checked readOnly className={s.radio} />
             <span className={s.productText}>
-              <span className={s.productName}>{funnel.orderName}</span>
+              <span className={s.productName}>{offer.name}</span>
             </span>
             <span className={s.productPrice}>{fmt(price, currency, lang)}</span>
           </label>
@@ -228,6 +231,7 @@ type PayState = {
   picked: string[];
   setPicked: (ids: string[]) => void;
   total: number;
+  offer: OrderOffer;
 };
 
 function CardPay(props: PayState) {
@@ -340,6 +344,7 @@ function PayBody({
   picked,
   setPicked,
   total,
+  offer,
   onCard,
   cardPaying,
   cardOff,
@@ -382,7 +387,7 @@ function PayBody({
   }
 
   const toggle = (id: string, on: boolean) => setPicked(on ? [...picked, id] : picked.filter((x) => x !== id));
-  const chosen = funnel.bumps.filter((b) => picked.includes(b.id));
+  const chosen = offer.bumps.filter((b) => picked.includes(b.id));
 
   return (
     <>
@@ -392,7 +397,7 @@ function PayBody({
         </div>
       )}
 
-      {funnel.bumps.map((b) => {
+      {offer.bumps.map((b) => {
         const on = picked.includes(b.id);
         return (
           <label key={b.id} className={`${s.bump} ${on ? s.bumpOn : ""}`}>
@@ -406,14 +411,14 @@ function PayBody({
                 </svg>
               </span>
               <input type="checkbox" checked={on} onChange={(e) => toggle(b.id, e.target.checked)} className={s.bumpCheck} />
-              <span className={s.bumpTitle}>{t.bumps[b.id].headline}</span>
-              <span className={s.bumpPrice}>{fmt(b.price[currency], currency, lang)}</span>
+              <span className={s.bumpTitle}>{b.headline}</span>
+              <span className={s.bumpPrice}>{fmt(b.price, currency, lang)}</span>
             </span>
             <span className={s.bumpBody}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
               <span className={s.bumpText}>
-                {t.bumps[b.id].body.map((p, i) => (
+                {b.body.map((p, i) => (
                   <span key={i} className={s.bumpPara}>
                     {i === 0 && <span className={s.oto}>{t.oto}</span>} <Rich text={p} currency={currency} />
                   </span>
@@ -441,13 +446,13 @@ function PayBody({
         </summary>
         <div className={s.sumBody}>
           <div className={s.sumRow}>
-            <span>{funnel.orderName}</span>
-            <span>{fmt(funnel.price[currency], currency, lang)}</span>
+            <span>{offer.name}</span>
+            <span>{fmt(offer.price, currency, lang)}</span>
           </div>
           {chosen.map((b) => (
             <div key={b.id} className={s.sumRow}>
               <span>{b.name}</span>
-              <span>{fmt(b.price[currency], currency, lang)}</span>
+              <span>{fmt(b.price, currency, lang)}</span>
             </div>
           ))}
           <div className={`${s.sumRow} ${s.sumTotal}`}>

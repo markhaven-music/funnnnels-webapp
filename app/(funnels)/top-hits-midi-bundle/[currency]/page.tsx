@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getFunnel, resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { bullets, letter } from "../copy";
 import { funnel } from "../funnel";
@@ -38,10 +39,12 @@ export const metadata: Metadata = {
 export default async function TopHitsPage({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
+  // The bundle's price as dashboard → Products has it; saving there revalidates the page.
+  const price = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency];
 
   return (
     <main className={`${s.page} ${fontVars}`}>
-      <Tracking value={funnel.price[currency]} currency={currency} />
+      <Tracking value={price} currency={currency} />
       <Beacon funnel={funnel.slug} page="landing" />
       <div className={s.topbar}>MORE BLACK FRIDAY: 90% Sale Ends Soon</div>
 
@@ -88,7 +91,7 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
             </ul>
           </div>
 
-          <ValueStack currency={currency} />
+          <ValueStack currency={currency} price={price} />
           <div className={s.ctaBox}>
             <GetThePack />
           </div>
@@ -127,7 +130,7 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
         </div>
 
         <div className={s.wrap}>
-          <ValueStack currency={currency} />
+          <ValueStack currency={currency} price={price} />
           <YesButton />
 
           <div className={s.songsSection}>
@@ -141,15 +144,15 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
             <Tracklist />
           </div>
 
-          <ValueStack currency={currency} />
+          <ValueStack currency={currency} price={price} />
           <YesButton />
 
-          <Compare currency={currency} />
+          <Compare currency={currency} price={price} />
         </div>
       </section>
 
       <section className={s.light}>
-        <Faq currency={currency} />
+        <Faq currency={currency} price={price} />
       </section>
 
       <footer className={s.footer}>

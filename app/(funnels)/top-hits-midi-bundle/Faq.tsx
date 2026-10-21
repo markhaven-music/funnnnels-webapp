@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import type { Currency } from "@/lib/geo";
+import { restate } from "@/lib/restate";
 import { faq } from "./copy";
+import { funnel } from "./funnel";
 import { Rich } from "./Rich";
 import s from "./landing.module.css";
 
-export function Faq({ currency }: { currency: Currency }) {
+// price: the bundle's, as dashboard → Products has it (the answers say it).
+export function Faq({ currency, price }: { currency: Currency; price: number }) {
   const [open, setOpen] = useState<number | null>(null);
   return (
     <div className={s.faq}>
@@ -26,7 +29,7 @@ export function Faq({ currency }: { currency: Currency }) {
               <div className={s.faqPanelInner}>
                 {item.a.map((p, j) => (
                   <p key={j}>
-                    <Rich text={p} currency={currency} />
+                    <Rich text={restate(p, funnel.price[currency], price)} currency={currency} />
                   </p>
                 ))}
               </div>

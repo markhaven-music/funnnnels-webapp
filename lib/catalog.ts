@@ -1,112 +1,179 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { funnel as drumKit } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { funnel as jazz } from "@/app/(funnels)/jazz-midi-pack/funnel";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import type { Money } from "@/lib/launch";
-import { SHOP_SLUG } from "@/lib/shop";
+import { signedDownload } from "@/lib/products";
+import { presignedDownload, r2Configured } from "@/lib/r2";
+import { SHOP_SLUG, imageUrl } from "@/lib/shop";
 import { supabase } from "@/lib/supabase";
 
-// Dashboard → Products, as in ClickFunnels: one product per zip a buyer
-// downloads, wherever it's sold. HUSTLE is one product, used as an add-on in
-// two funnels; TOP HITS is one, the main product of its funnel and an upsell
-// in the Drum Kit's. Each use says the funnel, the role (main, add-on, upsell,
-// or free: a bonus, or a file another add-on brings), the name and price it's
-// sold at there, and how many paid orders it was in (lib/sales.ts).
+// Products as in ClickFunnels: one per zip a buyer downloads, in `catalog`,
+// used by the funnels through `funnel_items` (db/catalog.sql): each funnel's
+// main product, add-ons and upsells, with the name and price they're sold at
+// there. Dashboard → Products edits both; the funnels and their checkout read
+// them (lib/funnels.ts resolveFunnel), and the downloads find the zip here.
 //
-// The funnels' products come from their funnel.ts (read-only here: their
-// prices live there) and the launch kit's from `products`; the shop's own are
-// made and edited in the dashboard (lib/shop.ts). Jazz's old €9 Chord Pack
-// add-on isn't offered any more, so it only shows as the bonus it became.
+// What stays in each funnel.ts: the pages, their words in every language,
+// and the free files (the Jazz bonuses, the files an add-on brings), which
+// are listed here as uses but have no price of their own.
 
-export type Role = "Main" | "Add-on" | "Upsell" | "Bonus" | "Included";
+export type FileStore = "supabase" | "r2" | "local";
+export type StoredFile = { store: FileStore; path: string };
+export type ItemRole = "main" | "bump" | "upsell";
 
-export type ProductUse = {
-  funnel: string; // slug
-  funnelName: string;
-  role: Role;
-  soldAs: string; // the name the funnel gives it
-  price: Money | null; // null: free with something else
-  sold: number | null; // paid orders it was in; null when free
-  with?: string; // what it comes with (a bonus, an included file)
-  manage: string; // where it's managed in the dashboard
-};
-
-export type CatalogProduct = {
-  id: string; // the zip's file name
-  name: string;
-  cover: string | null;
-  uses: ProductUse[];
-  sold: number; // paid orders, all uses together
-};
-
-// The covers the funnels already show, by zip.
-const COVERS: Record<string, string> = {
-  "MIDI Drum Kit - Bundle.zip": "/funnels/midi-drum-kit/kit-box.webp",
-  "EXPLORER Expansions (House, Lofi, Afrobeat).zip": "/funnels/midi-drum-kit/bump-expansions.webp",
-  "HUSTLE MIDI Bundle.zip": "/funnels/midi-drum-kit/bump-hustle.webp",
-  "The Chord Progressions Bible.zip": "/funnels/midi-drum-kit/bump-chords.webp",
-  "Drum Loops for Songwriting.zip": "/funnels/jazz-midi-pack/bonus-5-360.webp",
-  "Emotional Keys MIDI Bundle.zip": "/funnels/top-hits-midi-bundle/bump-emotional-keys.webp",
-  "Famous Beats Bundle (320 MIDI Beats).zip": "/funnels/midi-drum-kit/bonus-famous.webp",
-  "TOP HITS MIDI Bundle.zip": "/funnels/top-hits-midi-bundle/product.webp",
-  "Jazz MIDI Pack.zip": "/funnels/jazz-midi-pack/box-520.webp",
-  "Jazz MIDI Chord Pack.zip": "/funnels/jazz-midi-pack/bonus-1-360.webp",
-  "Anime & Video Game MIDI Chord Pack.zip": "/funnels/jazz-midi-pack/bonus-3-360.webp",
-};
-
-type Item = { id: string; name: string; price: Money };
-
-/** A funnel as this file reads it: what it sells, and the zip behind each file key. */
-type Source = {
-  slug: string;
+/** A product as a funnel sells it (a row of funnel_items, with the product's picture). */
+export type FunnelItem = {
+  funnel: string;
+  role: ItemRole;
+  key: string; // what orders carry: "pack", an add-on's or upsell's id
+  product: string; // catalog slug
   name: string;
   price: Money;
-  files: Readonly<Record<string, string>>;
-  bumps: readonly Item[];
-  offers: readonly Item[];
-  includes?: Readonly<Record<string, readonly string[]>>; // files an add-on brings besides its own
-  bonuses?: readonly { id: string; name: string }[]; // free with the main product
-  manage: string;
+  position: number;
+  image: string | null; // the product's picture, for an add-on the funnel's code has none for
+  tagline: string;
 };
 
-const CODE: Source[] = [
-  { slug: jazz.slug, name: jazz.product, price: jazz.price, files: { ...jazz.files, ...jazz.remoteFiles }, bumps: [], offers: [], bonuses: jazz.bonuses, manage: `/funnels/${jazz.slug}` },
-  { slug: topHits.slug, name: topHits.product, price: topHits.price, files: topHits.files, bumps: topHits.bumps, offers: topHits.offers, manage: `/funnels/${topHits.slug}` },
-  { slug: drumKit.slug, name: drumKit.product, price: drumKit.price, files: drumKit.files, bumps: drumKit.bumps, offers: drumKit.offers, includes: drumKit.includes, manage: `/funnels/${drumKit.slug}` },
-];
-
-type KitRow = {
-  slug: string;
+type ItemRow = {
+  funnel: string;
+  role: ItemRole;
+  key: string;
+  product: string;
   name: string;
   price_eur_cents: number;
   price_usd_cents: number;
-  bump: { id: string; name: string; eur_cents: number; usd_cents: number } | null;
-  files: Record<string, string>;
+  position: number;
+  catalog: { tagline: string; image: { sm: string; lg: string } | null; cover: string | null } | null;
 };
 
-/** Launch-kit products (dashboard → Launches): the pack and its add-on, once their zips are uploaded. */
-async function kitSources(): Promise<Source[]> {
-  const { data, error } = await supabase().from("products").select("slug, name, price_eur_cents, price_usd_cents, bump, files").order("created_at");
+const units = (cents: number) => cents / 100;
+
+const toItem = (r: ItemRow): FunnelItem => ({
+  funnel: r.funnel,
+  role: r.role,
+  key: r.key,
+  product: r.product,
+  name: r.name,
+  price: { eur: units(r.price_eur_cents), usd: units(r.price_usd_cents) },
+  position: r.position,
+  image: r.catalog?.image ? imageUrl(r.catalog.image.sm) : (r.catalog?.cover ?? null),
+  tagline: r.catalog?.tagline ?? "",
+});
+
+/** What a funnel sells (every funnel's, without `funnel`), in order. */
+export async function funnelItems(funnel?: string): Promise<FunnelItem[]> {
+  let q = supabase().from("funnel_items").select("*, catalog(tagline, image, cover)");
+  if (funnel) q = q.eq("funnel", funnel);
+  const { data, error } = await q.order("position");
   if (error) throw error;
-  const money = (eur: number, usd: number) => ({ eur: eur / 100, usd: usd / 100 });
-  return ((data ?? []) as KitRow[]).map((r) => ({
-    slug: r.slug,
-    name: r.name,
-    price: money(r.price_eur_cents, r.price_usd_cents),
-    files: r.files ?? {},
-    bumps: r.bump ? [{ id: r.bump.id, name: r.bump.name, price: money(r.bump.eur_cents, r.bump.usd_cents) }] : [],
-    offers: [],
-    manage: "/?nav=launches",
-  }));
+  return (data as ItemRow[]).map(toItem);
 }
 
-/** Paid orders per "<funnel>/<file key>": the pack, each add-on ticked, each upsell taken. */
+// ─── the funnels' code, read for what it doesn't keep in the tables ─────
+
+/** The zips the code funnels name, by file name → their catalog product (seeded by db/catalog.sql). */
+const ZIP_PRODUCT: Record<string, string> = {
+  "Jazz MIDI Pack.zip": "jazz-midi-pack",
+  "TOP HITS MIDI Bundle.zip": "top-hits",
+  "MIDI Drum Kit - Bundle.zip": "midi-drum-kit",
+  "The Chord Progressions Bible.zip": "chord-bible",
+  "Emotional Keys MIDI Bundle.zip": "emotional-keys",
+  "HUSTLE MIDI Bundle.zip": "hustle",
+  "Famous Beats Bundle (320 MIDI Beats).zip": "famous-beats",
+  "EXPLORER Expansions (House, Lofi, Afrobeat).zip": "expansions",
+  "Jazz MIDI Chord Pack.zip": "jazz-chord-pack",
+  "Anime & Video Game MIDI Chord Pack.zip": "anime-pack",
+  "Drum Loops for Songwriting.zip": "drum-loops",
+};
+
+type CodeFunnel = {
+  slug: string;
+  name: string;
+  files: Readonly<Record<string, string>>;
+  includes?: Readonly<Record<string, readonly string[]>>;
+  bonuses?: readonly { id: string; name: string }[];
+};
+
+export const CODE_FUNNELS: CodeFunnel[] = [
+  { slug: jazz.slug, name: jazz.product, files: { ...jazz.files, ...jazz.remoteFiles }, bonuses: jazz.bonuses },
+  { slug: topHits.slug, name: topHits.product, files: topHits.files },
+  { slug: drumKit.slug, name: drumKit.product, files: drumKit.files, includes: drumKit.includes },
+];
+
+const zipOf = (p: string) => p.split("/").pop() ?? p;
+
+/** The product behind a funnel's file key: its funnel_items row, else the zip its code names. */
+async function productOf(funnel: string, key: string): Promise<string | null> {
+  const { data, error } = await supabase().from("funnel_items").select("product").eq("funnel", funnel).eq("key", key).limit(1);
+  if (error) throw error;
+  if (data?.[0]) return data[0].product as string;
+  const code = CODE_FUNNELS.find((f) => f.slug === funnel)?.files[key];
+  return code ? (ZIP_PRODUCT[zipOf(code)] ?? null) : null;
+}
+
+/** Where a product's zip is. */
+export async function catalogFile(slug: string): Promise<StoredFile | null> {
+  const { data, error } = await supabase().from("catalog").select("store, file").eq("slug", slug).maybeSingle();
+  if (error) throw error;
+  return data?.file ? { store: data.store as FileStore, path: data.file as string } : null;
+}
+
+/**
+ * The zip a funnel hands out for a file key: the product's as Products has it
+ * (a zip replaced there reaches every funnel), else the file the funnel's
+ * code names (`fallback`), so a database hiccup never stops a download.
+ */
+export async function fileFor(funnel: string, key: string, fallback?: StoredFile): Promise<StoredFile | null> {
+  try {
+    const product = await productOf(funnel, key);
+    const file = product ? await catalogFile(product) : null;
+    if (file) return file;
+  } catch (err) {
+    console.error(`catalog: no file for ${funnel}/${key} from the database`, err);
+  }
+  return fallback ?? null;
+}
+
+/** The answer to a paid download: a short-lived link to the zip, or the zip itself when it ships with the deployment. */
+export async function deliver(file: StoredFile): Promise<Response | null> {
+  const name = zipOf(file.path);
+  if (file.store === "r2") {
+    if (!r2Configured()) return null;
+    return new Response(null, { status: 303, headers: { location: presignedDownload(file.path, name), "cache-control": "private, no-store" } });
+  }
+  if (file.store === "supabase") {
+    const link = await signedDownload(file.path);
+    return link ? new Response(null, { status: 303, headers: { location: link, "cache-control": "private, no-store" } }) : null;
+  }
+  const data = await readFile(path.join(/*turbopackIgnore: true*/ process.cwd(), file.path)).catch(() => null);
+  if (!data) return null;
+  return new Response(new Uint8Array(data), {
+    headers: { "content-type": "application/zip", "content-disposition": `attachment; filename="${name.replace(/"/g, "")}"`, "cache-control": "private, no-store" },
+  });
+}
+
+// ─── dashboard → Products ──────────────────────────────────────
+
+export type UseRole = "Main" | "Add-on" | "Upsell" | "Bonus" | "Included" | "Shop";
+
+export type ProductUse = {
+  funnel: string; // slug, or "shop"
+  funnelName: string;
+  role: UseRole;
+  key: string | null; // the funnel_items key of a priced use
+  soldAs: string;
+  price: Money | null; // null: free with something else
+  sold: number | null; // paid orders it was in; null when free
+  with?: string;
+};
+
+export const ROLE_NAME: Record<ItemRole, UseRole> = { main: "Main", bump: "Add-on", upsell: "Upsell" };
+
+/** Paid orders per "<funnel>/<key>" (the shop's per "shop/<slug>"). */
 async function soldCounts(): Promise<Map<string, number>> {
-  const { data, error } = await supabase()
-    .from("orders")
-    .select("funnel, items, offer")
-    .eq("status", "succeeded")
-    .neq("funnel", SHOP_SLUG)
-    .limit(20000);
+  const { data, error } = await supabase().from("orders").select("funnel, items, offer").eq("status", "succeeded").limit(20000);
   if (error) throw error;
   const sold = new Map<string, number>();
   const add = (k: string) => sold.set(k, (sold.get(k) ?? 0) + 1);
@@ -117,41 +184,125 @@ async function soldCounts(): Promise<Map<string, number>> {
   return sold;
 }
 
-const zipOf = (path: string) => path.split("/").pop() ?? path;
-const ROLE_ORDER: Role[] = ["Main", "Add-on", "Upsell", "Bonus", "Included"];
-
-/** Every zip the funnels and launches sell, each with where and how. Main products first. */
-export async function funnelCatalog(): Promise<CatalogProduct[]> {
-  const [sold, kits] = await Promise.all([soldCounts(), kitSources()]);
-  const byZip = new Map<string, CatalogProduct>();
-  const named = new Map<string, number>();
-  const use = (src: Source, key: string, u: Pick<ProductUse, "role" | "soldAs" | "price" | "with">, paid: boolean) => {
-    const path = src.files[key];
-    if (!path) return; // no zip behind it (yet)
-    const id = zipOf(path);
-    const p = byZip.get(id) ?? { id, name: id.replace(/\.zip$/i, ""), cover: COVERS[id] ?? null, uses: [], sold: 0 };
-    const n = paid ? (sold.get(`${src.slug}/${key}`) ?? 0) : null;
-    p.uses.push({ ...u, funnel: src.slug, funnelName: src.name, manage: src.manage, sold: n });
-    // Named as buyers see it: by the funnel it's the main product of, else by
-    // its first add-on or upsell, unless that one is several zips sold
-    // together; else by its file.
-    const rank = u.role === "Main" ? 2 : paid && !src.includes?.[key]?.length ? 1 : 0;
-    if (rank > (named.get(id) ?? 0)) {
-      p.name = u.soldAs;
-      named.set(id, rank);
-    }
-    p.sold += n ?? 0;
-    byZip.set(id, p);
-  };
-  for (const src of [...CODE, ...kits]) {
-    use(src, "pack", { role: "Main", soldAs: src.name, price: src.price }, true);
-    for (const b of src.bumps) {
-      use(src, b.id, { role: "Add-on", soldAs: b.name, price: b.price }, true);
-      for (const key of src.includes?.[b.id] ?? []) use(src, key, { role: "Included", soldAs: b.name, price: null, with: b.name }, false);
-    }
-    for (const o of src.offers) use(src, o.id, { role: "Upsell", soldAs: o.name, price: o.price }, true);
-    for (const x of src.bonuses ?? []) use(src, x.id, { role: "Bonus", soldAs: x.name, price: null, with: src.name }, false);
+/** Every product's uses: its funnel_items, the free files the funnels' code gives with something, and the shop. */
+export async function productUses(shop: { slug: string; status: string; price: Money | null }[]): Promise<Record<string, ProductUse[]>> {
+  const [items, sold] = await Promise.all([funnelItems(), soldCounts()]);
+  const names = Object.fromEntries(CODE_FUNNELS.map((f) => [f.slug, f.name]));
+  const uses: Record<string, ProductUse[]> = {};
+  const push = (slug: string, u: ProductUse) => (uses[slug] ??= []).push(u);
+  const order: ItemRole[] = ["main", "bump", "upsell"];
+  for (const it of [...items].sort((a, b) => order.indexOf(a.role) - order.indexOf(b.role))) {
+    push(it.product, {
+      funnel: it.funnel,
+      funnelName: names[it.funnel] ?? it.funnel,
+      role: ROLE_NAME[it.role],
+      key: it.key,
+      soldAs: it.name,
+      price: it.price,
+      sold: sold.get(`${it.funnel}/${it.key}`) ?? 0,
+    });
   }
-  const rank = (p: CatalogProduct) => Math.min(...p.uses.map((u) => ROLE_ORDER.indexOf(u.role)));
-  return [...byZip.values()].sort((a, b) => rank(a) - rank(b));
+  for (const f of CODE_FUNNELS) {
+    const product = (key: string) => (f.files[key] ? ZIP_PRODUCT[zipOf(f.files[key])] : undefined);
+    for (const b of f.bonuses ?? []) {
+      const p = product(b.id);
+      if (p) push(p, { funnel: f.slug, funnelName: f.name, role: "Bonus", key: null, soldAs: b.name, price: null, sold: null, with: f.name });
+    }
+    for (const [bump, keys] of Object.entries(f.includes ?? {})) {
+      const by = items.find((i) => i.funnel === f.slug && i.key === bump);
+      for (const key of keys) {
+        const p = product(key);
+        if (p) push(p, { funnel: f.slug, funnelName: f.name, role: "Included", key: null, soldAs: by?.name ?? bump, price: null, sold: null, with: by?.name ?? bump });
+      }
+    }
+  }
+  for (const s of shop) {
+    if (s.status === "live") push(s.slug, { funnel: SHOP_SLUG, funnelName: "Shop", role: "Shop", key: null, soldAs: "", price: s.price, sold: sold.get(`${SHOP_SLUG}/${s.slug}`) ?? 0 });
+  }
+  return uses;
 }
+
+/** The funnels a product can be added to as an add-on (the ones whose order form shows add-ons). */
+export const ADD_ON_FUNNELS = CODE_FUNNELS.map((f) => ({ slug: f.slug, name: f.name }));
+
+// ─── editing what a funnel sells ───────────────────────────────
+
+const KEY = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+// Jazz's checkout (the CheckoutWidget) shows one add-on.
+const ONE_ADD_ON = new Set<string>([jazz.slug]);
+
+type Price = { eur: number; usd: number };
+const okPrice = (p: Price) => p.eur >= 0.5 && p.usd >= 0.5;
+
+/** A placement's new name and price. */
+export async function updateItem(funnel: string, role: ItemRole, key: string, name: string, price: Price): Promise<string | null> {
+  if (!name.trim()) return "It needs a name.";
+  if (!okPrice(price)) return "Prices are 0.50 at least.";
+  const { data, error } = await supabase()
+    .from("funnel_items")
+    .update({ name: name.trim().slice(0, 120), price_eur_cents: Math.round(price.eur * 100), price_usd_cents: Math.round(price.usd * 100), updated_at: new Date().toISOString() })
+    .eq("funnel", funnel)
+    .eq("role", role)
+    .eq("key", key)
+    .select("key");
+  if (error) throw error;
+  return data?.length ? null : "Not found.";
+}
+
+/**
+ * A product as a funnel's add-on (after the others), or back as an upsell its
+ * code has a page for. The key is the product's slug, as orders will carry it.
+ */
+export async function addItem(funnel: string, product: string, role: "bump" | "upsell", price: Price): Promise<string | null> {
+  const code = CODE_FUNNELS.find((f) => f.slug === funnel);
+  if (!code) return "Unknown funnel.";
+  if (!okPrice(price)) return "Prices are 0.50 at least.";
+  const db = supabase();
+  const [{ data: p }, { data: items }] = await Promise.all([
+    db.from("catalog").select("slug, name, file").eq("slug", product).maybeSingle(),
+    db.from("funnel_items").select("role, key, product, position").eq("funnel", funnel),
+  ]);
+  if (!p) return "Unknown product.";
+  if (!p.file) return "Upload its zip first: buyers would get nothing.";
+  const rows = (items ?? []) as { role: ItemRole; key: string; product: string; position: number }[];
+  if (rows.some((r) => r.product === product && r.role === role)) return `${code.name} already sells it as ${role === "bump" ? "an add-on" : "an upsell"}.`;
+  let key = product;
+  if (role === "upsell") {
+    // Only an upsell whose page the funnel's code has (lib/funnels.ts withItems keeps those).
+    const page = CODE_UPSELLS[funnel]?.find((u) => ZIP_PRODUCT[zipOf(code.files[u] ?? "")] === product);
+    if (!page) return "This funnel has no upsell page for it yet: an upsell needs its own page.";
+    key = page;
+  } else {
+    if (ONE_ADD_ON.has(funnel) && rows.some((r) => r.role === "bump")) return `${code.name}'s checkout shows one add-on: remove the one it has first.`;
+    // A key the code already uses for another file would hand out that file.
+    const taken = code.files[product] && ZIP_PRODUCT[zipOf(code.files[product])] !== product;
+    if (!KEY.test(key) || key.length > 24 || taken || rows.some((r) => r.key === key)) return "This product's URL can't be an add-on id here (24 characters at most).";
+  }
+  const position = Math.max(-1, ...rows.filter((r) => r.role === role).map((r) => r.position)) + 1;
+  const { error } = await db.from("funnel_items").insert({
+    funnel,
+    role,
+    key,
+    product,
+    name: p.name,
+    price_eur_cents: Math.round(price.eur * 100),
+    price_usd_cents: Math.round(price.usd * 100),
+    position,
+  });
+  if (error) throw error;
+  return null;
+}
+
+/** An add-on or upsell out of a funnel (its past orders keep their downloads). The main product stays. */
+export async function removeItem(funnel: string, role: ItemRole, key: string): Promise<string | null> {
+  if (role === "main") return "A funnel's main product stays: rename it or change its price instead.";
+  const { data, error } = await supabase().from("funnel_items").delete().eq("funnel", funnel).eq("role", role).eq("key", key).select("key");
+  if (error) throw error;
+  return data?.length ? null : "Not found.";
+}
+
+/** The upsells each code funnel has a page for, by key. */
+const CODE_UPSELLS: Record<string, string[]> = {
+  [topHits.slug]: topHits.offers.map((o) => o.id),
+  [drumKit.slug]: drumKit.offers.map((o) => o.id),
+};

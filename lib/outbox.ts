@@ -174,11 +174,14 @@ function receiptEmail(group: OrderRow[], f: Product, shop: Record<string, ShopLa
   const c = mailCopy(main.lang).receipt;
   const buttons: CardButton[] = [];
   const text: string[] = [c.title, "", c.lead, ""];
+  // The add-ons' and upsells' names as dashboard → Products has them (an add-on added there is on no shelf).
+  const names: Record<string, string> = Object.fromEntries([...(f.bumps ?? []), ...(f.bump ? [f.bump] : []), ...(f.offers ?? [])].map((x) => [x.id, x.name]));
   for (const o of group) {
     const shelf = shelfOf(o.funnel, { id: o.id, items: o.items, offer: o.offer }) ?? kitShelf(o, f, shop);
     for (const file of shelf.files) {
-      buttons.push({ label: c.download(file.label), url: file.href, primary: buttons.length === 0 });
-      text.push(`${c.download(file.label)}: ${file.href}`);
+      const label = names[file.key] ?? file.label;
+      buttons.push({ label: c.download(label), url: file.href, primary: buttons.length === 0 });
+      text.push(`${c.download(label)}: ${file.href}`);
     }
   }
   const orders = group.map((o) => c.order(o.id, money(o.amount_cents / 100, o.currency), o.provider === "paypal"));

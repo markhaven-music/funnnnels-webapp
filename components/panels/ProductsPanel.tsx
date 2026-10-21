@@ -2,23 +2,26 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { I } from "@/components/icons";
-import type { CatalogProduct } from "@/lib/catalog";
+import type { ProductUse } from "@/lib/catalog";
 import { money, type Money } from "@/lib/launch";
 import { SHOP_URL } from "@/lib/liveUrl";
 import type { ShopProduct, ShopStats } from "@/lib/shop";
 import c from "./shop.module.css";
 
-// Dashboard → Products: everything sold, as in ClickFunnels: one product per
-// zip, with every place it's sold.
-//   your products (lib/shop.ts): made and edited here: name, prices,
-//     description, a square picture, the paid zip, Draft or Live (= in the
-//     shop, whose page and order are dashboard → Shop)
-//   the funnels' and launches' zips (lib/catalog.ts): each with the funnels
-//     that sell it, as main product, add-on, upsell or bonus, and what it sold
-// A product goes live only with its zip; one that sold can't be deleted
-// (its buyers keep their download), only put back to Draft.
+// Dashboard → Products, as in ClickFunnels: one product per zip, and every
+// place it's sold (lib/catalog.ts). For each product:
+//   its name, words, picture and zip (lib/shop.ts: the zip reaches every
+//     funnel that sells it, and past buyers);
+//   each funnel that sells it, as main product, add-on or upsell, with the
+//     name and price it has there: saved straight to that checkout, whose
+//     pages refresh (lib/funnels.ts reads them); the free uses (a bonus, a
+//     file another add-on brings) are listed too;
+//   another funnel to sell it in, as an add-on;
+//   the shop: in it or not, at its shop price.
+// A product leaves for good only if it never sold and no funnel sells it.
 
-type ShopData = { products: ShopProduct[]; stats: ShopStats };
+type Entry = ShopProduct & { uses: ProductUse[]; sold: number };
+type Data = { products: Entry[]; funnels: { slug: string; name: string }[]; shop: ShopStats };
 
 async function send<T>(url: string, method: string, body?: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -43,16 +46,37 @@ const slugify = (s: string) =>
     .replace(/-+/g, "-")
     .slice(0, 60);
 
+const ROLE_ORDER = ["Main", "Add-on", "Upsell", "Shop", "Bonus", "Included"];
+const rank = (p: Entry) => Math.min(...p.uses.map((u) => ROLE_ORDER.indexOf(u.role)), ROLE_ORDER.length);
+const funnelCount = (p: Entry) => new Set(p.uses.filter((u) => u.role !== "Shop").map((u) => u.funnel)).size;
+
+/** "Main in TOP HITS MIDI Bundle · Upsell in MIDI Drum Kit · In the shop" */
+function where(p: Entry): string {
+  const seen = new Set<string>();
+  const said = p.uses
+    .map((u) => (u.role === "Shop" ? "In the shop" : `${u.role} in ${u.funnelName}`))
+    .filter((x) => !seen.has(x) && seen.add(x))
+    .join(" · ");
+  return said || (p.status === "live" ? "In the shop" : "Not sold anywhere yet");
+}
+
+/** Its price where it's sold, "from …" when the places differ, "free bonus" when it's only ever given away. */
+function priceOf(p: Entry): string {
+  const paid = p.uses.flatMap((u) => (u.price ? [u.price] : []));
+  if (!paid.length) return p.uses.length ? "free bonus" : p.price ? prices(p.price) : "—";
+  const low = paid.reduce((a, b) => (b.eur < a.eur ? b : a));
+  return paid.every((m) => m.eur === low.eur && m.usd === low.usd) ? prices(low) : `from ${prices(low)}`;
+}
+
 export function ProductsPanel() {
-  const [data, setData] = useState<ShopData | null>(null);
-  const [catalog, setCatalog] = useState<CatalogProduct[] | null>(null);
+  const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      setData(await send<ShopData>("/api/shop", "GET"));
+      setData(await send<Data>("/api/products", "GET"));
       setError(null);
     } catch (err) {
       setError((err as Error).message);
@@ -60,31 +84,23 @@ export function ProductsPanel() {
   }, []);
   useEffect(() => {
     load();
-    send<{ products: CatalogProduct[] }>("/api/products", "GET")
-      .then((r) => setCatalog(r.products))
-      .catch((err) => setError((err as Error).message));
     // ?nav=products&product=<slug> (the Shop's "Edit") opens that product.
     const want = new URLSearchParams(window.location.search).get("product");
     if (want) setSelected(want);
   }, [load]);
 
-  const products = data?.products ?? [];
+  const products = [...(data?.products ?? [])].sort((a, b) => rank(a) - rank(b) || a.position - b.position);
   const live = products.filter((p) => p.status === "live").length;
-  const replace = (p: ShopProduct) => setData((d) => d && { ...d, products: d.products.map((x) => (x.slug === p.slug ? p : x)) });
-  const toggle = (id: string) => setSelected(selected === id ? null : id);
+  const toggle = (slug: string) => setSelected(selected === slug ? null : slug);
 
-  const stats =
-    data && catalog
-      ? [
-          { label: "PRODUCTS", value: String(products.length + catalog.length), sub: "one per zip buyers download" },
-          { label: "IN THE SHOP", value: String(live), sub: `${products.length - live} draft${products.length - live === 1 ? "" : "s"}` },
-          {
-            label: "SOLD",
-            value: String(Object.values(data.stats.sold).reduce((n, x) => n + x, 0) + catalog.reduce((n, p) => n + p.sold, 0)),
-            sub: "times, in paid orders recorded in Orders",
-          },
-        ]
-      : [];
+  const stats = data
+    ? [
+        { label: "PRODUCTS", value: String(products.length), sub: "one per zip buyers download" },
+        { label: "IN FUNNELS", value: String(products.filter((p) => funnelCount(p) > 0).length), sub: "main product, add-on, upsell or bonus" },
+        { label: "IN THE SHOP", value: String(live), sub: `${data.shop.orders} shop order${data.shop.orders === 1 ? "" : "s"}` },
+        { label: "SOLD", value: String(products.reduce((n, p) => n + p.sold, 0)), sub: "times, in paid orders recorded in Orders" },
+      ]
+    : [];
 
   return (
     <main className="main">
@@ -92,8 +108,8 @@ export function ProductsPanel() {
         <div>
           <h1 className="page-title">Products</h1>
           <p className="page-sub">
-            Everything you sell, one product per zip, with every place it&rsquo;s sold: as a funnel&rsquo;s main
-            product, an add-on, an upsell, a bonus, or in the shop.
+            Everything you sell, one product per zip, with every place it&rsquo;s sold: a funnel&rsquo;s main product,
+            an add-on, an upsell, a bonus, or the shop. Names and prices saved here are what the checkouts charge.
           </p>
         </div>
         <div className="cta-group">
@@ -134,66 +150,51 @@ export function ProductsPanel() {
       <div className={c.panel}>
         <div className={c.panelHead}>
           <p className={c.h2}>All products</p>
-          <span className={c.mono}>{data && catalog ? `${products.length + catalog.length}` : "Loading…"}</span>
+          <span className={c.mono}>{data ? String(products.length) : "Loading…"}</span>
         </div>
-        <div className={c.rows}>
-          {products.map((p) => (
-            <div key={p.slug}>
-              <div className={`${c.row} ${selected === p.slug ? c.rowOn : ""}`}>
-                {p.image ? <img className={c.thumb} src={p.image.sm} alt="" width={44} height={44} /> : <span className={c.thumb} />}
-                <button type="button" className={c.rowMain} onClick={() => toggle(p.slug)}>
-                  <span className={c.rowName}>{p.name}</span>
-                  <span className={c.mono}>Shop · /shop/{p.slug}</span>
-                </button>
-                <span className={c.mono}>{prices(p.price)}</span>
-                <span className={`${c.chip} ${c[`chip_${p.status}`]}`}>{p.status === "live" ? "In the shop" : "Draft"}</span>
-                <span className={c.mono} title="Paid orders that included it">
-                  {data?.stats.sold[p.slug] ?? 0} sold
-                </span>
-                <button type="button" className={c.rowLink} onClick={() => toggle(p.slug)}>
-                  {selected === p.slug ? "Close" : "Edit"}
-                </button>
-              </div>
-              {selected === p.slug && (
-                <Editor
-                  p={p}
-                  sold={data?.stats.sold[p.slug] ?? 0}
-                  onSaved={replace}
-                  onDeleted={async () => {
-                    setSelected(null);
-                    await load();
-                  }}
-                />
-              )}
-            </div>
-          ))}
-          {(catalog ?? []).map((p) => (
-            <div key={p.id}>
-              <div className={`${c.row} ${selected === p.id ? c.rowOn : ""}`}>
-                {p.cover ? <img className={c.thumb} src={p.cover} alt="" width={44} height={44} /> : <span className={c.thumb} />}
-                <button type="button" className={c.rowMain} onClick={() => toggle(p.id)}>
-                  <span className={c.rowName}>{p.name}</span>
-                  <span className={c.mono}>{where(p)}</span>
-                </button>
-                <span className={c.mono}>{price(p)}</span>
-                <span className={`${c.chip} ${c.chip_funnel}`}>
-                  {funnelCount(p)} funnel{funnelCount(p) === 1 ? "" : "s"}
-                </span>
-                <span className={c.mono} title="Paid orders it was in, every funnel together">
-                  {p.sold} sold
-                </span>
-                <button type="button" className={c.rowLink} onClick={() => toggle(p.id)}>
-                  {selected === p.id ? "Close" : "Details"}
-                </button>
-              </div>
-              {selected === p.id && <Uses p={p} />}
-            </div>
-          ))}
-        </div>
-        {data && catalog && products.length + catalog.length === 0 && (
+        {data && products.length === 0 ? (
           <div className={c.empty}>
             <p className={c.h2}>No products yet</p>
             <p className={c.sub}>Click New product: name it and price it, add a square picture and the zip buyers download.</p>
+          </div>
+        ) : (
+          <div className={c.rows}>
+            {products.map((p) => (
+              <div key={p.slug}>
+                <div className={`${c.row} ${selected === p.slug ? c.rowOn : ""}`}>
+                  {p.image ? <img className={c.thumb} src={p.image.sm} alt="" width={44} height={44} /> : <span className={c.thumb} />}
+                  <button type="button" className={c.rowMain} onClick={() => toggle(p.slug)}>
+                    <span className={c.rowName}>{p.name}</span>
+                    <span className={c.mono}>{where(p)}</span>
+                  </button>
+                  <span className={c.mono}>{priceOf(p)}</span>
+                  {funnelCount(p) > 0 ? (
+                    <span className={`${c.chip} ${c.chip_funnel}`}>
+                      {funnelCount(p)} funnel{funnelCount(p) === 1 ? "" : "s"}
+                    </span>
+                  ) : (
+                    <span className={`${c.chip} ${c[`chip_${p.status}`]}`}>{p.status === "live" ? "In the shop" : "Draft"}</span>
+                  )}
+                  <span className={c.mono} title="Paid orders it was in, every place together">
+                    {p.sold} sold
+                  </span>
+                  <button type="button" className={c.rowLink} onClick={() => toggle(p.slug)}>
+                    {selected === p.slug ? "Close" : "Edit"}
+                  </button>
+                </div>
+                {selected === p.slug && data && (
+                  <Editor
+                    p={p}
+                    funnels={data.funnels}
+                    onSaved={load}
+                    onDeleted={async () => {
+                      setSelected(null);
+                      await load();
+                    }}
+                  />
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -201,52 +202,8 @@ export function ProductsPanel() {
   );
 }
 
-// ─── the funnels' products ─────────────────────────────────────
-
-const funnelCount = (p: CatalogProduct) => new Set(p.uses.map((u) => u.funnel)).size;
-
-/** "Main in TOP HITS MIDI Bundle · Upsell in MIDI Drum Kit" */
-function where(p: CatalogProduct): string {
-  const seen = new Set<string>();
-  return p.uses
-    .map((u) => `${u.role} in ${u.funnelName}`)
-    .filter((x) => !seen.has(x) && seen.add(x))
-    .join(" · ");
-}
-
-/** Its price where it's sold, "from …" when the funnels differ, "free" when it's only ever a bonus. */
-function price(p: CatalogProduct): string {
-  const paid = p.uses.flatMap((u) => (u.price ? [u.price] : []));
-  if (!paid.length) return "free bonus";
-  const low = paid.reduce((a, b) => (b.eur < a.eur ? b : a));
-  return paid.every((m) => m.eur === low.eur && m.usd === low.usd) ? prices(low) : `from ${prices(low)}`;
-}
-
-function Uses({ p }: { p: CatalogProduct }) {
-  return (
-    <div className={c.extras}>
-      {p.uses.map((u, i) => (
-        <div key={i} className={c.use}>
-          <span>
-            {u.funnelName}
-            {u.soldAs !== p.name && <span className={c.dim}> · as &ldquo;{u.soldAs}&rdquo;</span>}
-          </span>
-          <span className={c.mono}>{u.role}</span>
-          <span className={c.mono}>{u.price ? prices(u.price) : `free with ${u.with}`}</span>
-          <span className={c.mono}>{u.sold === null ? "" : `${u.sold} sold`}</span>
-          <a className={c.rowLink} href={u.manage}>
-            {u.manage.startsWith("/funnels/") ? "Funnel" : "Launches"} →
-          </a>
-        </div>
-      ))}
-      <p className={c.note} style={{ padding: "6px 0 8px" }}>
-        Its name and price in each funnel are set in that funnel, so they&rsquo;re read-only here.
-      </p>
-    </div>
-  );
-}
-
 // ─── new product ───────────────────────────────────────────────
+
 
 function MoneyInputs({ label, value, onChange }: { label: string; value: Money; onChange: (m: Money) => void }) {
   return (
@@ -337,7 +294,57 @@ function NewProduct({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
 
 // ─── editing a product ─────────────────────────────────────────
 
-function Editor({ p, sold, onSaved, onDeleted }: { p: ShopProduct; sold: number; onSaved: (p: ShopProduct) => void; onDeleted: () => void }) {
+function Editor({ p, funnels, onSaved, onDeleted }: { p: Entry; funnels: Data["funnels"]; onSaved: () => void; onDeleted: () => void }) {
+  return (
+    <div className={c.panel} style={{ margin: "4px 0 12px", background: "var(--bg-2)" }}>
+      <div className={c.editor}>
+        <div className={c.media}>
+          <Picture p={p} onSaved={onSaved} />
+          {p.status === "live" && (
+            <a className="btn ghost" href={`${SHOP_URL}/${p.slug}`} target="_blank" rel="noopener">
+              <I.eye size={14} /> Its shop page
+            </a>
+          )}
+        </div>
+        <div className={c.form}>
+          <Details p={p} onSaved={onSaved} />
+          <Zip p={p} onSaved={onSaved} />
+          <Uses p={p} onSaved={onSaved} />
+          <AddToFunnel p={p} funnels={funnels} onSaved={onSaved} />
+          <Danger p={p} onDeleted={onDeleted} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Two money fields that may stay empty (null: no price). */
+function MaybePrice({ label, value, onChange }: { label: string; value: Money | null; onChange: (m: Money | null) => void }) {
+  const set = (cur: "eur" | "usd", n: number) => {
+    const next = { eur: value?.eur ?? NaN, usd: value?.usd ?? NaN, [cur]: n };
+    onChange(Number.isNaN(next.eur) && Number.isNaN(next.usd) ? null : next);
+  };
+  return (
+    <>
+      {(["eur", "usd"] as const).map((cur) => (
+        <label key={cur} className={c.field}>
+          {label} {cur === "eur" ? "€ (Europe)" : "$ (everyone else)"}
+          <input
+            className={c.input}
+            type="number"
+            min="0.5"
+            step="0.01"
+            value={value && !Number.isNaN(value[cur]) ? value[cur] : ""}
+            onChange={(e) => set(cur, e.target.valueAsNumber)}
+          />
+        </label>
+      ))}
+    </>
+  );
+}
+
+/** Its name and words (the shop, and an add-on the funnel's copy has no words for), and the shop. */
+function Details({ p, onSaved }: { p: Entry; onSaved: () => void }) {
   const [f, setF] = useState({ name: p.name, tagline: p.tagline, description: p.description, price: p.price, status: p.status });
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -348,8 +355,8 @@ function Editor({ p, sold, onSaved, onDeleted }: { p: ShopProduct; sold: number;
     setMsg(null);
     try {
       const { product } = await send<{ product: ShopProduct }>(`/api/shop/products/${p.slug}`, "PATCH", f);
-      onSaved(product);
-      setMsg({ ok: true, text: product.status === "live" ? "Saved. The shop shows it within a minute." : "Saved as a draft: the shop doesn't show it." });
+      onSaved();
+      setMsg({ ok: true, text: product.status === "live" ? "Saved. The shop shows it within a minute." : "Saved." });
     } catch (err) {
       setMsg({ ok: false, text: (err as Error).message });
     } finally {
@@ -358,58 +365,186 @@ function Editor({ p, sold, onSaved, onDeleted }: { p: ShopProduct; sold: number;
   }
 
   return (
-    <div className={c.panel} style={{ margin: "4px 0 12px", background: "var(--bg-2)" }}>
-      <div className={c.editor}>
-        <div className={c.media}>
-          <Picture p={p} onSaved={onSaved} />
-          {p.status === "live" && (
-            <a className="btn ghost" href={`${SHOP_URL}/${p.slug}`} target="_blank" rel="noopener">
-              <I.eye size={14} /> Open its page
-            </a>
-          )}
-        </div>
-        <form className={c.form} onSubmit={save}>
-          <div className={c.fields}>
-            <label className={c.field}>
-              Name
-              <input className={c.input} required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
-            </label>
-            <label className={c.field}>
-              Status
-              <select className={c.select} value={f.status} onChange={(e) => setF({ ...f, status: e.target.value as ShopProduct["status"] })}>
-                <option value="draft">Draft: only here</option>
-                <option value="live" disabled={!p.file}>
-                  Live: in the shop{p.file ? "" : " (upload the zip first)"}
-                </option>
-              </select>
-            </label>
-          </div>
-          <label className={c.field}>
-            Tagline (one line, under the name)
-            <input className={c.input} value={f.tagline} onChange={(e) => setF({ ...f, tagline: e.target.value })} />
-          </label>
-          <div className={c.fields}>
-            <MoneyInputs label="Price" value={f.price} onChange={(price) => setF({ ...f, price })} />
-          </div>
-          <label className={c.field}>
-            Description (plain text: a blank line starts a paragraph, lines starting with &ldquo;- &rdquo; make a list)
-            <textarea className={c.textarea} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
-          </label>
-          <Zip p={p} onSaved={onSaved} />
-          <div className={c.actions}>
-            <button type="submit" className="btn primary" disabled={busy}>
-              {busy ? "Saving…" : "Save"}
-            </button>
-            {msg && <span className={msg.ok ? c.ok : c.error}>{msg.text}</span>}
-          </div>
-          <Danger p={p} sold={sold} onDeleted={onDeleted} />
-        </form>
+    <form className={c.form} onSubmit={save}>
+      <p className={c.legend}>Product</p>
+      <label className={c.field}>
+        Name (in Products and the shop; each funnel has its own below)
+        <input className={c.input} required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+      </label>
+      <label className={c.field}>
+        Tagline (one line, under the name in the shop; the text of an add-on its funnel has no words for)
+        <input className={c.input} value={f.tagline} onChange={(e) => setF({ ...f, tagline: e.target.value })} />
+      </label>
+      <label className={c.field}>
+        Description, for the shop (plain text: a blank line starts a paragraph, lines starting with &ldquo;- &rdquo; make a list)
+        <textarea className={c.textarea} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
+      </label>
+      <p className={c.legend}>Shop</p>
+      <label className={c.field} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <input type="checkbox" checked={f.status === "live"} disabled={!p.file} onChange={(e) => setF({ ...f, status: e.target.checked ? "live" : "draft" })} />
+        In the shop{p.file ? "" : " (upload its zip first)"}
+      </label>
+      <div className={c.fields}>
+        <MaybePrice label="Shop price" value={f.price} onChange={(price) => setF({ ...f, price })} />
+      </div>
+      <div className={c.actions}>
+        <button type="submit" className="btn primary" disabled={busy}>
+          {busy ? "Saving…" : "Save"}
+        </button>
+        {msg && <span className={msg.ok ? c.ok : c.error}>{msg.text}</span>}
+      </div>
+    </form>
+  );
+}
+
+/** Every place it's sold: the priced ones editable, the free ones listed. */
+function Uses({ p, onSaved }: { p: Entry; onSaved: () => void }) {
+  const funnels = p.uses.filter((u) => u.role !== "Shop");
+  if (!funnels.length) return null;
+  return (
+    <div>
+      <p className={c.legend}>In funnels</p>
+      <div className={c.extras} style={{ margin: "10px 0 0" }}>
+        {funnels.map((u) => (u.key ? <PricedUse key={`${u.funnel}/${u.role}/${u.key}`} u={u} onSaved={onSaved} /> : <FreeUse key={`${u.funnel}/${u.role}/${u.soldAs}`} u={u} />))}
+      </div>
+      <p className={c.note} style={{ marginTop: 8 }}>
+        A price saved here is what that checkout charges from now on, and its order form and upsell page say it. Their
+        words state the price too, and follow it; reread any line that does math with it (&ldquo;90% off&rdquo;,
+        &ldquo;€0.08 per hit&rdquo;, &ldquo;usually €147&rdquo;) after a change.
+      </p>
+    </div>
+  );
+}
+
+const API_ROLE = { Main: "main", "Add-on": "bump", Upsell: "upsell" } as const;
+
+function PricedUse({ u, onSaved }: { u: ProductUse; onSaved: () => void }) {
+  const [f, setF] = useState({ name: u.soldAs, price: u.price as Money | null });
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const role = API_ROLE[u.role as keyof typeof API_ROLE];
+  const changed = f.name !== u.soldAs || f.price?.eur !== u.price?.eur || f.price?.usd !== u.price?.usd;
+
+  async function act(method: "PATCH" | "DELETE") {
+    setBusy(true);
+    setMsg(null);
+    try {
+      await send("/api/products/items", method, { funnel: u.funnel, role, key: u.key, name: f.name, price: f.price });
+      setMsg({ ok: true, text: method === "DELETE" ? "Taken out of the funnel." : "Saved: the checkout charges it now." });
+      onSaved();
+    } catch (err) {
+      setMsg({ ok: false, text: (err as Error).message });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className={c.useEdit}>
+      <div className={c.useHead}>
+        <span>
+          <b>{u.funnelName}</b> <span className={c.dim}>· {u.role}</span>
+        </span>
+        <span className={c.mono}>{u.sold ?? 0} sold</span>
+      </div>
+      <div className={c.fields}>
+        <label className={c.field}>
+          Name at this checkout
+          <input className={c.input} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+        </label>
+        <MaybePrice label="Price" value={f.price} onChange={(price) => setF({ ...f, price })} />
+      </div>
+      <div className={c.actions}>
+        <button type="button" className="btn primary" disabled={busy || !changed} onClick={() => act("PATCH")}>
+          Save
+        </button>
+        {u.role !== "Main" && (
+          <button type="button" className={`btn ghost ${c.danger}`} disabled={busy} onClick={() => act("DELETE")}>
+            Take out of {u.funnelName}
+          </button>
+        )}
+        {msg && <span className={msg.ok ? c.ok : c.error}>{msg.text}</span>}
       </div>
     </div>
   );
 }
 
-/** A square crop of the picture at `size` px, as webp (jpeg where the browser can't write webp). */
+function FreeUse({ u }: { u: ProductUse }) {
+  return (
+    <div className={c.use}>
+      <span>
+        {u.funnelName}
+        <span className={c.dim}> · {u.role === "Bonus" ? `free bonus with ${u.with}` : `comes with ${u.with}`}</span>
+      </span>
+      <span className={c.mono}>{u.role}</span>
+      <span className={c.mono}>free</span>
+      <span />
+      <span className={c.mono}>in its funnel&rsquo;s code</span>
+    </div>
+  );
+}
+
+/** Sell it in another funnel, as an add-on (or an upsell its funnel has a page for). */
+function AddToFunnel({ p, funnels, onSaved }: { p: Entry; funnels: Data["funnels"]; onSaved: () => void }) {
+  const [funnel, setFunnel] = useState("");
+  const [role, setRole] = useState<"bump" | "upsell">("bump");
+  const [price, setPrice] = useState<Money | null>(p.price ?? p.uses.find((u) => u.price)?.price ?? null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function add() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      await send("/api/products/items", "POST", { funnel, product: p.slug, role, price });
+      setMsg({ ok: true, text: "Added: its checkout offers it now." });
+      setFunnel("");
+      onSaved();
+    } catch (err) {
+      setMsg({ ok: false, text: (err as Error).message });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div>
+      <p className={c.legend}>Sell it in a funnel</p>
+      <div className={c.fields} style={{ marginTop: 10 }}>
+        <label className={c.field}>
+          Funnel
+          <select className={c.select} value={funnel} onChange={(e) => setFunnel(e.target.value)}>
+            <option value="">Pick a funnel…</option>
+            {funnels.map((f) => (
+              <option key={f.slug} value={f.slug}>
+                {f.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className={c.field}>
+          As
+          <select className={c.select} value={role} onChange={(e) => setRole(e.target.value as "bump" | "upsell")}>
+            <option value="bump">An add-on (a tick-box at its checkout)</option>
+            <option value="upsell">An upsell (needs its page)</option>
+          </select>
+        </label>
+        <MaybePrice label="Price" value={price} onChange={setPrice} />
+      </div>
+      <div className={c.actions} style={{ marginTop: 10 }}>
+        <button type="button" className="btn ghost" disabled={busy || !funnel || !price} onClick={add}>
+          <I.plus size={13} /> Add to the funnel
+        </button>
+        {msg && <span className={msg.ok ? c.ok : c.error}>{msg.text}</span>}
+      </div>
+      <p className={c.note} style={{ marginTop: 6 }}>
+        A new add-on shows its picture, &ldquo;YES! Add {p.name}!&rdquo; in the page&rsquo;s language and the
+        product&rsquo;s tagline (in English) as its text.
+      </p>
+    </div>
+  );
+}
+
 async function square(bitmap: ImageBitmap, size: number, type: "image/webp" | "image/jpeg"): Promise<Blob> {
   const side = Math.min(bitmap.width, bitmap.height);
   const canvas = document.createElement("canvas");
@@ -434,7 +569,7 @@ async function put(url: string, body: Blob, type: string) {
   }
 }
 
-function Picture({ p, onSaved }: { p: ShopProduct; onSaved: (p: ShopProduct) => void }) {
+function Picture({ p, onSaved }: { p: Entry; onSaved: () => void }) {
   const [state, setState] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -454,8 +589,8 @@ function Picture({ p, onSaved }: { p: ShopProduct; onSaved: (p: ShopProduct) => 
       setState("Uploading…");
       const t = await send<{ sm: { path: string; signedUrl: string }; lg: { path: string; signedUrl: string } }>(`/api/shop/products/${p.slug}/files`, "POST", { kind: "image", ext });
       await Promise.all([put(t.sm.signedUrl, sm, type), put(t.lg.signedUrl, lg, type)]);
-      const { product } = await send<{ product: ShopProduct }>(`/api/shop/products/${p.slug}/files`, "PUT", { kind: "image", sm: t.sm.path, lg: t.lg.path });
-      onSaved(product);
+      await send<{ product: ShopProduct }>(`/api/shop/products/${p.slug}/files`, "PUT", { kind: "image", sm: t.sm.path, lg: t.lg.path });
+      onSaved();
       setState(Math.min(bitmap.width, bitmap.height) < 600 ? "Saved. It's under 600 px, so it may look soft." : null);
     } catch (err) {
       setError((err as Error).message);
@@ -485,7 +620,9 @@ function Picture({ p, onSaved }: { p: ShopProduct; onSaved: (p: ShopProduct) => 
   );
 }
 
-function Zip({ p, onSaved }: { p: ShopProduct; onSaved: (p: ShopProduct) => void }) {
+const STORES = { supabase: "uploaded here", r2: "in Cloudflare R2", local: "shipped with the site" } as const;
+
+function Zip({ p, onSaved }: { p: Entry; onSaved: () => void }) {
   const [state, setState] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -499,8 +636,8 @@ function Zip({ p, onSaved }: { p: ShopProduct; onSaved: (p: ShopProduct) => void
         const j = await res.json().catch(() => ({}));
         throw new Error(j.message ?? j.error ?? `Upload failed (${res.status})`);
       }
-      const { product } = await send<{ product: ShopProduct }>(`/api/shop/products/${p.slug}/files`, "PUT", { kind: "zip", path: t.path });
-      onSaved(product);
+      await send<{ product: ShopProduct }>(`/api/shop/products/${p.slug}/files`, "PUT", { kind: "zip", path: t.path });
+      onSaved();
       setState(null);
     } catch (err) {
       setError((err as Error).message);
@@ -512,11 +649,14 @@ function Zip({ p, onSaved }: { p: ShopProduct; onSaved: (p: ShopProduct) => void
     <div className={c.fileRow}>
       <div>
         <div>Paid file</div>
-        <div className={c.mono}>{state ?? p.file ?? "No zip yet: it can't go live without one"}</div>
+        <div className={c.mono}>
+          {state ?? (p.file ? `${p.file} · ${STORES[p.store]}` : "No zip yet: it can't be sold without one")}
+        </div>
         {error && <div className={c.error}>{error}</div>}
         <div className={c.note}>
-          Private: buyers get a 60-second link on the thank-you page, after Stripe or PayPal confirms the payment. A new
-          zip reaches past buyers too. 50 MB at most on the current Supabase plan.
+          Private: buyers get a short-lived link once Stripe or PayPal confirms the payment. A new zip reaches every
+          funnel that sells it, and past buyers too. Uploads go to Supabase, 50 MB at most on the current plan: for a
+          bigger one, ask Claude Code to put it in Cloudflare R2.
         </div>
       </div>
       <label className="btn ghost" style={{ cursor: "pointer" }}>
@@ -536,12 +676,13 @@ function Zip({ p, onSaved }: { p: ShopProduct; onSaved: (p: ShopProduct) => void
   );
 }
 
-function Danger({ p, sold, onDeleted }: { p: ShopProduct; sold: number; onDeleted: () => void }) {
+function Danger({ p, onDeleted }: { p: Entry; onDeleted: () => void }) {
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  if (sold > 0) {
-    return <p className={c.note}>Sold {sold} time{sold === 1 ? "" : "s"}, so it stays: put it back to Draft to take it out of the shop. Its buyers keep their download.</p>;
+  if (p.uses.some((u) => u.role !== "Shop")) return null;
+  if (p.sold > 0) {
+    return <p className={c.note}>Sold {p.sold} time{p.sold === 1 ? "" : "s"}, so it stays: take it out of the shop instead. Its buyers keep their download.</p>;
   }
   return confirm ? (
     <div className={c.actions}>

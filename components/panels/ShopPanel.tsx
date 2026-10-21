@@ -46,7 +46,6 @@ export function ShopPanel() {
 
   const all = data?.products ?? [];
   const live = all.filter((p) => p.status === "live");
-  const drafts = all.length - live.length;
 
   async function move(i: number, by: -1 | 1) {
     const next = [...live];
@@ -63,7 +62,7 @@ export function ShopPanel() {
         { label: "ORDERS", value: String(s.orders), sub: `${s.last7} in the last 7 days` },
         { label: "REVENUE · EUR", value: cents(s.eurCents, "eur"), sub: "paid by European buyers" },
         { label: "REVENUE · USD", value: cents(s.usdCents, "usd"), sub: "paid by everyone else" },
-        { label: "IN THE SHOP", value: String(live.length), sub: `${drafts} draft${drafts === 1 ? "" : "s"} not shown` },
+        { label: "IN THE SHOP", value: String(live.length), sub: `of ${all.length} products` },
       ]
     : [];
 
@@ -122,7 +121,7 @@ export function ShopPanel() {
                   <span className={c.rowName}>{p.name}</span>
                   <span className={c.mono}>/shop/{p.slug}</span>
                 </a>
-                <span className={c.mono}>{prices(p.price)}</span>
+                <span className={c.mono}>{p.price ? prices(p.price) : "—"}</span>
                 <span className={c.mono} title="Paid orders that included it">
                   {s?.sold[p.slug] ?? 0} sold
                 </span>

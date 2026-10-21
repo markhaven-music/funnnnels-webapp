@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Instrument_Serif } from "next/font/google";
-import { CURRENCIES, formatPrice, type Currency } from "@/lib/geo";
+import { getFunnel, resolveFunnel } from "@/lib/funnels";
+import { CURRENCIES, type Currency } from "@/lib/geo";
+import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
 import { funnel } from "../../funnel";
 import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content";
 import { Checkout, OrderSummary, Shield, fill, isSectionType, type Ctx } from "../../sections";
 import { Tracking } from "../../Tracking";
+import { splitName } from "../../../_kit/KitBox";
 import { Beacon } from "../../../Beacon";
 import s from "../../jazz.module.css";
 
@@ -43,14 +46,17 @@ function pick<T extends Section["type"]>(sections: Section[], type: T): SectionP
 export default async function OrderPage({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
-  const amount = funnel.price[currency];
+  // Its price (and an add-on, if Jazz is given one) as dashboard → Products has it.
+  const f = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
+  const amount = f.price[currency];
   const sections = await getPublishedBlocks(funnel.slug, DEFAULT_SECTIONS, valid, { strict: true });
   const ctx: Ctx = {
-    price: formatPrice(amount, currency),
+    price: money(amount, currency),
     amount,
     currency,
     country: FALLBACK_COUNTRY[currency],
     publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null,
+    bump: f.bump ? { name: f.bump.name, price: f.bump.price[currency], pitch: f.bump.pitch, cover: splitName(f.bump.name) } : null,
   };
   const offer = pick(sections, "s_offer");
   const guarantee = pick(sections, "s_guarantee");

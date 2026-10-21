@@ -5,7 +5,9 @@ import { BUCKET as FILES_BUCKET, filePath } from "@/lib/products";
 import { supabase } from "@/lib/supabase";
 
 // The shop: products sold side by side at /shop, with a cart (app/shop),
-// next to the funnels. Tables shop_products + shop_settings (db/shop.sql).
+// next to the funnels. Its products are the catalog's (db/catalog.sql: one
+// product per zip, the funnels' too); the Live ones are in the shop, at
+// their shop price. shop_settings holds the page's heading (db/shop.sql).
 //
 // One order is one payment for several products. Stripe's metadata.items and
 // PayPal's order lines (sku = slug) say which; it's recorded in `orders` like
@@ -41,10 +43,13 @@ export type ShopItem = {
   image: ShopImage | null;
 };
 
-/** …and as the dashboard edits it. */
-export type ShopProduct = ShopItem & {
+/** …and as dashboard → Products edits it: any product of the catalog, in the shop (Live) or not. */
+export type ShopProduct = Omit<ShopItem, "price"> & {
+  price: Money | null; // the shop price, set once it's put in the shop
   status: "draft" | "live";
   file: string | null; // the zip's name, or null before the upload
+  store: "supabase" | "r2" | "local"; // where the zip is (lib/catalog.ts)
+  uploaded: boolean; // the picture was uploaded here (else it's a funnel's)
   position: number;
   createdAt: string;
   updatedAt: string;
@@ -57,10 +62,12 @@ type Row = {
   name: string;
   tagline: string;
   description: string;
-  price_eur_cents: number;
-  price_usd_cents: number;
+  price_eur_cents: number | null;
+  price_usd_cents: number | null;
   image: { sm: string; lg: string } | null;
+  cover: string | null;
   file: string | null;
+  store: "supabase" | "r2" | "local";
   status: "draft" | "live";
   position: number;
   created_at: string;
@@ -78,22 +85,26 @@ function toProduct(r: Row): ShopProduct {
     name: r.name,
     tagline: r.tagline,
     description: r.description,
-    price: { eur: units(r.price_eur_cents), usd: units(r.price_usd_cents) },
-    image: r.image ? { sm: imageUrl(r.image.sm), lg: imageUrl(r.image.lg) } : null,
+    price: r.price_eur_cents && r.price_usd_cents ? { eur: units(r.price_eur_cents), usd: units(r.price_usd_cents) } : null,
+    // An uploaded picture, else the one its funnel shows (a file in /public).
+    image: r.image ? { sm: imageUrl(r.image.sm), lg: imageUrl(r.image.lg) } : r.cover ? { sm: r.cover, lg: r.cover } : null,
     status: r.status,
     file: r.file ? (r.file.split("/").pop() ?? r.file) : null,
+    store: r.store,
+    uploaded: Boolean(r.image),
     position: r.position,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
 }
 
+// Live products always have a shop price (db/catalog.sql catalog_shop_priced).
 const toItem = ({ slug, name, tagline, description, price, image }: ShopProduct): ShopItem => ({
   slug,
   name,
   tagline,
   description,
-  price,
+  price: price!,
   image,
 });
 
@@ -103,7 +114,7 @@ const toItem = ({ slug, name, tagline, description, price, image }: ShopProduct)
 
 export async function liveProducts(): Promise<ShopItem[]> {
   const { data, error } = await supabase()
-    .from("shop_products")
+    .from("catalog")
     .select("*")
     .eq("status", "live")
     .order("position")
@@ -114,7 +125,7 @@ export async function liveProducts(): Promise<ShopItem[]> {
 
 export async function liveProduct(slug: string): Promise<ShopItem | null> {
   if (!SLUG.test(slug)) return null;
-  const { data, error } = await supabase().from("shop_products").select("*").eq("slug", slug).eq("status", "live").maybeSingle();
+  const { data, error } = await supabase().from("catalog").select("*").eq("slug", slug).eq("status", "live").maybeSingle();
   if (error) throw error;
   return data ? toItem(toProduct(data as Row)) : null;
 }
@@ -155,7 +166,7 @@ export async function priceCart(
   const slugs = Array.isArray(raw) ? [...new Set(raw.filter((s): s is string => typeof s === "string" && SLUG.test(s)))] : [];
   if (slugs.length === 0) return { error: "Your cart is empty." };
   if (slugs.length > MAX_ITEMS) return { error: `One order takes ${MAX_ITEMS} products at most. Split it in two.` };
-  const { data, error } = await supabase().from("shop_products").select("*").in("slug", slugs).eq("status", "live");
+  const { data, error } = await supabase().from("catalog").select("*").in("slug", slugs).eq("status", "live");
   if (error) throw error;
   const found = new Map((data as Row[]).map((r) => [r.slug, toItem(toProduct(r))]));
   if (found.size !== slugs.length) return { error: "Something in your cart isn't for sale any more. Refresh the page and check your cart." };
@@ -170,12 +181,12 @@ export type ShopLabel = { name: string; image: ShopImage | null };
 export async function shopLabels(slugs: readonly string[]): Promise<Record<string, ShopLabel>> {
   const wanted = [...new Set(slugs)].filter((s) => SLUG.test(s));
   if (!wanted.length) return {};
-  const { data, error } = await supabase().from("shop_products").select("slug, name, image").in("slug", wanted);
+  const { data, error } = await supabase().from("catalog").select("slug, name, image, cover").in("slug", wanted);
   if (error) throw error;
   return Object.fromEntries(
-    (data as Pick<Row, "slug" | "name" | "image">[]).map((r) => [
+    (data as Pick<Row, "slug" | "name" | "image" | "cover">[]).map((r) => [
       r.slug,
-      { name: r.name, image: r.image ? { sm: imageUrl(r.image.sm), lg: imageUrl(r.image.lg) } : null },
+      { name: r.name, image: r.image ? { sm: imageUrl(r.image.sm), lg: imageUrl(r.image.lg) } : r.cover ? { sm: r.cover, lg: r.cover } : null },
     ]),
   );
 }
@@ -186,12 +197,12 @@ export function orderTitle(items: readonly string[], labels: Record<string, Shop
   return items.length > 1 ? `${first} + ${items.length - 1} more` : first;
 }
 
-/** Where a product's zip is in the private bucket, or null. */
-export async function shopFile(slug: string): Promise<string | null> {
+/** Where a product's zip is (lib/catalog.ts deliver hands it out), or null. */
+export async function shopFile(slug: string): Promise<{ store: Row["store"]; path: string } | null> {
   if (!SLUG.test(slug)) return null;
-  const { data, error } = await supabase().from("shop_products").select("file").eq("slug", slug).maybeSingle();
+  const { data, error } = await supabase().from("catalog").select("store, file").eq("slug", slug).maybeSingle();
   if (error) throw error;
-  return data?.file ?? null;
+  return data?.file ? { store: data.store, path: data.file } : null;
 }
 
 // ─── dashboard ─────────────────────────────────────────────────
@@ -225,14 +236,14 @@ export async function shopStats(): Promise<ShopStats> {
 }
 
 export async function listShopProducts(): Promise<ShopProduct[]> {
-  const { data, error } = await supabase().from("shop_products").select("*").order("position").order("created_at");
+  const { data, error } = await supabase().from("catalog").select("*").order("position").order("created_at");
   if (error) throw error;
   return (data as Row[]).map(toProduct);
 }
 
 /** One product, with where its files are in storage. */
 export async function getShopProduct(slug: string): Promise<(ShopProduct & { filePath: string | null; imagePaths: ShopImage | null }) | null> {
-  const { data, error } = await supabase().from("shop_products").select("*").eq("slug", slug).maybeSingle();
+  const { data, error } = await supabase().from("catalog").select("*").eq("slug", slug).maybeSingle();
   if (error) throw error;
   if (!data) return null;
   const r = data as Row;
@@ -244,7 +255,7 @@ export type ShopProductInput = {
   name: string;
   tagline: string;
   description: string;
-  price: Money;
+  price: Money | null; // the shop price; may stay empty while it isn't in the shop
   status: "draft" | "live";
 };
 
@@ -258,7 +269,7 @@ export function parseShopProduct(raw: unknown): ShopProductInput {
     name: String(p.name ?? "").trim().slice(0, 120),
     tagline: String(p.tagline ?? "").trim().slice(0, 200),
     description: String(p.description ?? "").trim().slice(0, 6000),
-    price: { eur: num(price.eur), usd: num(price.usd) },
+    price: p.price == null || (price.eur === "" && price.usd === "") ? null : { eur: num(price.eur), usd: num(price.usd) },
     status: p.status === "live" ? "live" : "draft",
   };
 }
@@ -271,24 +282,25 @@ export function checkShopProduct(p: ShopProductInput, current: { file: string | 
     if (SHOP_PATHS.has(p.slug)) errors.push(`"${p.slug}" is taken by the shop's own pages. Pick another URL.`);
   }
   if (!p.name) errors.push("The product needs a name.");
-  for (const c of CURRENCIES) if (!(p.price[c] >= 0.5)) errors.push(`${c.toUpperCase()} price is required (0.50 at least).`);
+  if (p.price) for (const c of CURRENCIES) if (!(p.price[c] >= 0.5)) errors.push(`Shop ${c.toUpperCase()} price: 0.50 at least.`);
+  if (p.status === "live" && !p.price) errors.push("Give it a shop price before you put it in the shop.");
   // A live product without its zip would take money and hand over nothing.
-  if (p.status === "live" && !current?.file) errors.push("Upload the product's .zip before you put it live.");
+  if (p.status === "live" && !current?.file) errors.push("Upload the product's .zip before you put it in the shop.");
   return errors;
 }
 
 export async function createShopProduct(p: ShopProductInput): Promise<ShopProduct> {
   const db = supabase();
-  const { data: last } = await db.from("shop_products").select("position").order("position", { ascending: false }).limit(1).maybeSingle();
+  const { data: last } = await db.from("catalog").select("position").order("position", { ascending: false }).limit(1).maybeSingle();
   const { data, error } = await db
-    .from("shop_products")
+    .from("catalog")
     .insert({
       slug: p.slug,
       name: p.name,
       tagline: p.tagline,
       description: p.description,
-      price_eur_cents: toCents(p.price.eur),
-      price_usd_cents: toCents(p.price.usd),
+      price_eur_cents: p.price ? toCents(p.price.eur) : null,
+      price_usd_cents: p.price ? toCents(p.price.usd) : null,
       // New products start as drafts: the zip comes after.
       status: "draft",
       position: (last?.position ?? -1) + 1,
@@ -301,13 +313,13 @@ export async function createShopProduct(p: ShopProductInput): Promise<ShopProduc
 
 export async function updateShopProduct(slug: string, p: ShopProductInput): Promise<ShopProduct | null> {
   const { data, error } = await supabase()
-    .from("shop_products")
+    .from("catalog")
     .update({
       name: p.name,
       tagline: p.tagline,
       description: p.description,
-      price_eur_cents: toCents(p.price.eur),
-      price_usd_cents: toCents(p.price.usd),
+      price_eur_cents: p.price ? toCents(p.price.eur) : null,
+      price_usd_cents: p.price ? toCents(p.price.usd) : null,
       status: p.status,
       updated_at: new Date().toISOString(),
     })
@@ -318,16 +330,18 @@ export async function updateShopProduct(slug: string, p: ShopProductInput): Prom
   return data ? toProduct(data as Row) : null;
 }
 
-/** Remove a product and its files. Only for products never sold: buyers' downloads would stop working. */
+/** Remove a product and its files. Only for products never sold and in no funnel: buyers' downloads would stop working. */
 export async function deleteShopProduct(slug: string): Promise<{ error: string } | null> {
-  const sold = (await shopStats()).sold[slug] ?? 0;
-  if (sold > 0) return { error: `Sold ${sold} time${sold === 1 ? "" : "s"}: put it back to Draft instead, so its buyers keep their download.` };
   const db = supabase();
+  const { count } = await db.from("funnel_items").select("key", { count: "exact", head: true }).eq("product", slug);
+  if (count) return { error: "A funnel sells it: take it out of its funnels first." };
+  const sold = (await shopStats()).sold[slug] ?? 0;
+  if (sold > 0) return { error: `Sold ${sold} time${sold === 1 ? "" : "s"}: take it out of the shop instead, so its buyers keep their download.` };
   const zips = await db.storage.from(FILES_BUCKET).list(`shop/${slug}`);
   if (zips.data?.length) await db.storage.from(FILES_BUCKET).remove(zips.data.map((f) => `shop/${slug}/${f.name}`));
   const pics = await db.storage.from(IMAGES_BUCKET).list(slug);
   if (pics.data?.length) await db.storage.from(IMAGES_BUCKET).remove(pics.data.map((f) => `${slug}/${f.name}`));
-  const { error } = await db.from("shop_products").delete().eq("slug", slug);
+  const { error } = await db.from("catalog").delete().eq("slug", slug);
   if (error) throw error;
   return null;
 }
@@ -336,7 +350,7 @@ export async function deleteShopProduct(slug: string): Promise<{ error: string }
 export async function reorderShop(slugs: string[]) {
   const db = supabase();
   for (const [position, slug] of slugs.entries()) {
-    const { error } = await db.from("shop_products").update({ position }).eq("slug", slug);
+    const { error } = await db.from("catalog").update({ position }).eq("slug", slug);
     if (error) throw error;
   }
 }
@@ -377,10 +391,10 @@ export async function attachZip(slug: string, path: string): Promise<ShopProduct
   if (!path.startsWith(`shop/${slug}/`) || !path.endsWith(".zip")) throw new Error("That file belongs to another product.");
   if (!(await exists(FILES_BUCKET, path))) throw new Error("The upload didn't arrive. Try again.");
   const db = supabase();
-  const { data, error } = await db.from("shop_products").update({ file: path, updated_at: new Date().toISOString() }).eq("slug", slug).select("*").single();
+  const { data, error } = await db.from("catalog").update({ file: path, store: "supabase", updated_at: new Date().toISOString() }).eq("slug", slug).select("*").single();
   if (error) throw error;
-  // A zip under another name replaces the old one, for past buyers too.
-  if (p.filePath && p.filePath !== path) await db.storage.from(FILES_BUCKET).remove([p.filePath]);
+  // The new zip replaces the old one, for past buyers too (a funnel's old zip in R2 or private/ stays where it is).
+  if (p.store === "supabase" && p.filePath && p.filePath !== path) await db.storage.from(FILES_BUCKET).remove([p.filePath]);
   return toProduct(data as Row);
 }
 
@@ -407,7 +421,7 @@ export async function attachImage(slug: string, paths: { sm: string; lg: string 
   if (!(await exists(IMAGES_BUCKET, paths.sm)) || !(await exists(IMAGES_BUCKET, paths.lg))) throw new Error("The upload didn't arrive. Try again.");
   const db = supabase();
   const { data, error } = await db
-    .from("shop_products")
+    .from("catalog")
     .update({ image: { sm: paths.sm, lg: paths.lg }, updated_at: new Date().toISOString() })
     .eq("slug", slug)
     .select("*")
