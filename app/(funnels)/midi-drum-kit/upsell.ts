@@ -8,10 +8,12 @@ import famousDe from "./copy/upsell-famous/de.json";
 import famousEn from "./copy/upsell-famous/en.json";
 import famousEs from "./copy/upsell-famous/es.json";
 import famousFr from "./copy/upsell-famous/fr.json";
+import famousIt from "./copy/upsell-famous/it.json";
 import topHitsDe from "./copy/upsell-tophits/de.json";
 import topHitsEn from "./copy/upsell-tophits/en.json";
 import topHitsEs from "./copy/upsell-tophits/es.json";
 import topHitsFr from "./copy/upsell-tophits/fr.json";
+import topHitsIt from "./copy/upsell-tophits/it.json";
 import { funnel } from "./funnel";
 import type { Lang } from "./i18n";
 import { AFTER_LOAD, dollarFirst, escapeAttr, faster, frenchSpaces, mapText, unitSpaces } from "./landing";
@@ -34,8 +36,8 @@ type Copy = { [key: string]: string | Record<string, string> | undefined; extra?
 // with that player's play-button colour; the TOP HITS page's player is Wistia's
 // own web component, which needs none.
 const PAGES: Record<string, { template: string; copy: Record<Lang, Copy>; poster: string | null; play?: string; beacon: Step; title: string }> = {
-  "famous-beats": { template: FAMOUS, copy: { en: famousEn, fr: famousFr, es: famousEs, de: famousDe }, poster: "vsl-famous", play: "#60615e", beacon: "upsell-1", title: "Famous Beats Bundle" },
-  "top-hits": { template: TOP_HITS, copy: { en: topHitsEn, fr: topHitsFr, es: topHitsEs, de: topHitsDe }, poster: null, beacon: "upsell-2", title: "TOP HITS MIDI Bundle" },
+  "famous-beats": { template: FAMOUS, copy: { en: famousEn, fr: famousFr, es: famousEs, de: famousDe, it: famousIt }, poster: "vsl-famous", play: "#60615e", beacon: "upsell-1", title: "Famous Beats Bundle" },
+  "top-hits": { template: TOP_HITS, copy: { en: topHitsEn, fr: topHitsFr, es: topHitsEs, de: topHitsDe, it: topHitsIt }, poster: null, beacon: "upsell-2", title: "TOP HITS MIDI Bundle" },
 };
 
 // What the buttons say while they work, per language.
@@ -60,6 +62,11 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string }> = {
     failed: "Die Zahlung ist nicht durchgegangen. Versuch es noch einmal oder überspring dieses Angebot: Deine Bestellung ist sicher.",
     noOrder: "Wir finden deine Bestellung auf dieser Seite nicht. Dein Kauf ist sicher: Mach weiter zu deinen Downloads.",
   },
+  it: {
+    busy: "Lo aggiungo al tuo ordine…",
+    failed: "Il pagamento non è andato a buon fine. Riprova, oppure salta questa offerta: il tuo ordine è al sicuro.",
+    noOrder: "Non troviamo il tuo ordine su questa pagina. Il tuo acquisto è al sicuro: continua per i tuoi download.",
+  },
 };
 
 export const offerIds = () => funnel.offers.map((o) => o.id);
@@ -80,7 +87,7 @@ export function upsellHtml(offerId: string, lang: Lang, currency: Currency): str
     if (key.startsWith("s")) return dollars(html); // a script: only its prices change
     html = mapText(html, dollars);
     if (lang === "fr") html = mapText(html, frenchSpaces);
-    if (lang === "es" || lang === "de") html = mapText(html, unitSpaces);
+    if (lang === "es" || lang === "de" || lang === "it") html = mapText(html, unitSpaces);
     return html;
   };
 

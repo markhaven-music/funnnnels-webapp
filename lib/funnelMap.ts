@@ -34,7 +34,7 @@ export type FunnelMap = {
   langs: MapLang[];
 };
 
-const LANG_LABEL: Record<string, string> = { en: "English", fr: "French", es: "Spanish", de: "German" };
+const LANG_LABEL: Record<string, string> = { en: "English", fr: "French", es: "Spanish", de: "German", it: "Italian" };
 
 // Where each language's pages are live. The brand domain forwards the funnels'
 // paths here, except the MIDI Drum Kit in English: m.thegrind.studio/midi-drum-kit

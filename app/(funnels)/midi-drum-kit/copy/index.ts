@@ -4,6 +4,7 @@ import { de } from "./de";
 import { en, type Copy } from "./en";
 import { es } from "./es";
 import { fr } from "./fr";
+import { it } from "./it";
 
 export type { Copy };
 
@@ -21,12 +22,12 @@ function mapStrings<T>(value: T, fn: (s: string) => string): T {
   return value;
 }
 
-// Spanish and German keep "27 €" and "90 %" on one line too. Spanish dollar
+// Spanish, German and Italian keep "27 €" and "90 %" on one line too. Spanish dollar
 // visitors are in Latin America, where the sign goes first: "27 {c}" becomes "{c}27" ($27).
 const unitSpaces = (s: string) => s.replace(/ (?=%|\{c\})/g, " ");
 const dollarFirst = (s: string) => s.replace(/(\d[\d.,]*) \{c\}/g, "{c}$1");
 
-const COPY: Record<Lang, Copy> = { en, fr: mapStrings(fr, frenchSpaces), es: mapStrings(es, unitSpaces), de: mapStrings(de, unitSpaces) };
+const COPY: Record<Lang, Copy> = { en, fr: mapStrings(fr, frenchSpaces), es: mapStrings(es, unitSpaces), de: mapStrings(de, unitSpaces), it: mapStrings(it, unitSpaces) };
 const COPY_USD: Partial<Record<Lang, Copy>> = { es: mapStrings(COPY.es, dollarFirst) };
 
 export const copyFor = (lang: Lang, currency?: Currency): Copy => (currency === "usd" && COPY_USD[lang]) || COPY[lang];

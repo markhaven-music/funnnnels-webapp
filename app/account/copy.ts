@@ -4,7 +4,7 @@ import type { Lang } from "@/lib/account";
 // The words of the customer login (/account) and of its email, per language.
 // French: "tu", like the funnels, and its spaces before ? ! : (frenchSpaces).
 // Spanish: "tú", neutral for Spain and Latin America, like the funnel.
-// German: "du", like the funnel.
+// German: "du", like the funnel. Italian: "tu", like the funnel.
 
 const en = {
   meta: "Your downloads · Grind Studio",
@@ -152,6 +152,42 @@ const de: Copy = {
   },
 };
 
+const it: Copy = {
+  meta: "I tuoi download · Grind Studio",
+  title: "I tuoi download",
+  lead: "Accedi con l'email che hai usato per l'acquisto. Niente password: ti mandiamo un link via email.",
+  steps: ["Inserisci la tua email", "Apri il link che ti mandiamo", "Scarica i tuoi pack"],
+  label: "L'email del tuo acquisto",
+  placeholder: "tu@email.com",
+  button: "Mandami il link",
+  busy: "Invio in corso…",
+  invalid: "Questa email non sembra corretta.",
+  failed: "Non siamo riusciti a inviare l'email. Riprova tra un minuto.",
+  wait: "Abbiamo appena mandato un link a questa email. Aspetta un minuto prima di chiederne un altro.",
+  off: "L'accesso via email non è ancora attivo. Scrivici e ti mandiamo i tuoi download.",
+  sentTitle: "Controlla la tua casella",
+  sentLead: (email: string) => `Se ${email} ha degli acquisti, il tuo link di accesso è in arrivo. Aprilo su questo dispositivo o su un altro: vale 30 minuti.`,
+  sentHelp: "Dopo un minuto non è arrivato niente? Guarda in Spam o in Promozioni, e controlla che sia l'email con cui hai pagato.",
+  again: "Usa un'altra email",
+  expired: "Questo link è scaduto. Inserisci la tua email per riceverne uno nuovo.",
+  support: "Un problema? Scrivici a",
+  hello: "I tuoi acquisti",
+  sub: (email: string) => `Tutto quello che hai comprato con ${email}.`,
+  none: "Non abbiamo trovato acquisti con questa email. Hai comprato con un'altra? Esci e usa quella, oppure scrivici.",
+  bought: (date: string) => `Acquistato il ${date}`,
+  download: "Scarica",
+  signOut: "Esci",
+  dev: "Solo in sviluppo (qui non parte nessuna email): apri il link",
+  email: {
+    subject: "Il tuo link di accesso a Grind Studio",
+    title: "I tuoi download",
+    hi: "Ciao! Clicca il pulsante per vedere i tuoi download.",
+    button: "Apri i miei download",
+    note: "Il link vale 30 minuti. Non l'hai chiesto tu? Ignora questa email: non succede nulla.",
+    help: "Un problema? Scrivici:",
+  },
+};
+
 // French spacing on every French string (functions too).
 function spaced<T>(v: T): T {
   if (typeof v === "string") return frenchSpaces(v) as T;
@@ -161,6 +197,6 @@ function spaced<T>(v: T): T {
   return v;
 }
 
-const COPY: Record<Lang, Copy> = { en, fr: spaced(fr), es, de };
+const COPY: Record<Lang, Copy> = { en, fr: spaced(fr), es, de, it };
 export const copyFor = (lang: Lang) => COPY[lang];
-export const LANG_NAMES: Record<Lang, string> = { en: "English", fr: "Français", es: "Español", de: "Deutsch" };
+export const LANG_NAMES: Record<Lang, string> = { en: "English", fr: "Français", es: "Español", de: "Deutsch", it: "Italiano" };
