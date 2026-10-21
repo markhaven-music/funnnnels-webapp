@@ -2,7 +2,7 @@ import { frenchSpaces } from "@/app/(funnels)/midi-drum-kit/landing";
 
 // The words of the emails a buyer gets by themselves (lib/outbox.ts): the
 // receipt with the downloads and the one abandoned-checkout reminder. Same
-// voice as the funnels: French "tu", Spanish "tú", German "du".
+// voice as the funnels: French "tu", Spanish "tú", German "du", Italian "tu".
 
 const en = {
   receipt: {
@@ -86,7 +86,27 @@ const de: Copy = {
   },
 };
 
-const COPY: Record<string, Copy> = { en, fr, es, de };
+const it: Copy = {
+  receipt: {
+    subject: (product) => `I tuoi download: ${product}`,
+    title: "È tuo.",
+    lead: "I tuoi file sono qui sotto. Questi link non scadono: tieni questa email e riscarica quando vuoi.",
+    download: (label) => `Scarica ${label}`,
+    order: (id, amount, paypal) => `Ordine ${id} · ${amount} · pagato con ${paypal ? "PayPal" : "carta"}`,
+    account: "Tutti i tuoi download, quando vuoi: m.thegrind.studio/account",
+    help: "Un file non si apre? Rispondi a questa email o scrivici:",
+  },
+  reminder: {
+    subject: (product) => `Il tuo ${product} ti aspetta`,
+    title: (name, product) => `${name ? `${name}, i` : "I"}l tuo ${product} ti aspetta.`,
+    lead: "Sei arrivato al pagamento e ti sei fermato. Carta rifiutata, una distrazione, una domanda? Il tuo ordine è a un clic.",
+    button: "Completa il mio ordine",
+    notes: ["Una domanda prima di comprare? Rispondi e basta: ti legge una persona vera.", "È l'unico promemoria che ti mandiamo."],
+    help: "Scrivici quando vuoi:",
+  },
+};
+
+const COPY: Record<string, Copy> = { en, fr, es, de, it };
 
 /** The words for a language (English for any other), French spacing applied. */
 export function mailCopy(lang: string | null | undefined): Copy {
