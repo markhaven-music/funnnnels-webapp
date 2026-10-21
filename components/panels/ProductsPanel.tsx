@@ -2,18 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { I } from "@/components/icons";
-import type { CatalogEntry } from "@/lib/catalog";
+import type { CatalogProduct } from "@/lib/catalog";
 import { money, type Money } from "@/lib/launch";
 import { SHOP_URL } from "@/lib/liveUrl";
 import type { ShopProduct, ShopStats } from "@/lib/shop";
 import c from "./shop.module.css";
 
-// Dashboard → Products: everything sold, in one place, as in ClickFunnels.
+// Dashboard → Products: everything sold, as in ClickFunnels: one product per
+// zip, with every place it's sold.
 //   your products (lib/shop.ts): made and edited here: name, prices,
 //     description, a square picture, the paid zip, Draft or Live (= in the
 //     shop, whose page and order are dashboard → Shop)
-//   the funnels' and launches' products (lib/catalog.ts), with their add-ons
-//     and upsells: listed with what they sold, edited where they live
+//   the funnels' and launches' zips (lib/catalog.ts): each with the funnels
+//     that sell it, as main product, add-on, upsell or bonus, and what it sold
 // A product goes live only with its zip; one that sold can't be deleted
 // (its buyers keep their download), only put back to Draft.
 
@@ -44,7 +45,7 @@ const slugify = (s: string) =>
 
 export function ProductsPanel() {
   const [data, setData] = useState<ShopData | null>(null);
-  const [funnels, setFunnels] = useState<CatalogEntry[] | null>(null);
+  const [catalog, setCatalog] = useState<CatalogProduct[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -59,8 +60,8 @@ export function ProductsPanel() {
   }, []);
   useEffect(() => {
     load();
-    send<{ funnels: CatalogEntry[] }>("/api/products", "GET")
-      .then((r) => setFunnels(r.funnels))
+    send<{ products: CatalogProduct[] }>("/api/products", "GET")
+      .then((r) => setCatalog(r.products))
       .catch((err) => setError((err as Error).message));
     // ?nav=products&product=<slug> (the Shop's "Edit") opens that product.
     const want = new URLSearchParams(window.location.search).get("product");
@@ -70,14 +71,18 @@ export function ProductsPanel() {
   const products = data?.products ?? [];
   const live = products.filter((p) => p.status === "live").length;
   const replace = (p: ShopProduct) => setData((d) => d && { ...d, products: d.products.map((x) => (x.slug === p.slug ? p : x)) });
-  const toggle = (slug: string) => setSelected(selected === slug ? null : slug);
+  const toggle = (id: string) => setSelected(selected === id ? null : id);
 
   const stats =
-    data && funnels
+    data && catalog
       ? [
-          { label: "PRODUCTS", value: String(products.length + funnels.length), sub: `${products.length} yours · ${funnels.length} in funnels` },
+          { label: "PRODUCTS", value: String(products.length + catalog.length), sub: "one per zip buyers download" },
           { label: "IN THE SHOP", value: String(live), sub: `${products.length - live} draft${products.length - live === 1 ? "" : "s"}` },
-          { label: "SOLD", value: String(Object.values(data.stats.sold).reduce((n, x) => n + x, 0) + funnels.reduce((n, f) => n + f.sold, 0)), sub: "paid orders recorded in Orders" },
+          {
+            label: "SOLD",
+            value: String(Object.values(data.stats.sold).reduce((n, x) => n + x, 0) + catalog.reduce((n, p) => n + p.sold, 0)),
+            sub: "times, in paid orders recorded in Orders",
+          },
         ]
       : [];
 
@@ -87,7 +92,8 @@ export function ProductsPanel() {
         <div>
           <h1 className="page-title">Products</h1>
           <p className="page-sub">
-            Everything you sell. Make a product here, give it a picture and its zip, and put it in the shop.
+            Everything you sell, one product per zip, with every place it&rsquo;s sold: as a funnel&rsquo;s main
+            product, an add-on, an upsell, a bonus, or in the shop.
           </p>
         </div>
         <div className="cta-group">
@@ -127,108 +133,115 @@ export function ProductsPanel() {
 
       <div className={c.panel}>
         <div className={c.panelHead}>
-          <p className={c.h2}>Your products</p>
-          <span className={c.mono}>{data ? `${products.length} · Live ones are in the shop` : "Loading…"}</span>
+          <p className={c.h2}>All products</p>
+          <span className={c.mono}>{data && catalog ? `${products.length + catalog.length}` : "Loading…"}</span>
         </div>
-        {data && products.length === 0 ? (
+        <div className={c.rows}>
+          {products.map((p) => (
+            <div key={p.slug}>
+              <div className={`${c.row} ${selected === p.slug ? c.rowOn : ""}`}>
+                {p.image ? <img className={c.thumb} src={p.image.sm} alt="" width={44} height={44} /> : <span className={c.thumb} />}
+                <button type="button" className={c.rowMain} onClick={() => toggle(p.slug)}>
+                  <span className={c.rowName}>{p.name}</span>
+                  <span className={c.mono}>Shop · /shop/{p.slug}</span>
+                </button>
+                <span className={c.mono}>{prices(p.price)}</span>
+                <span className={`${c.chip} ${c[`chip_${p.status}`]}`}>{p.status === "live" ? "In the shop" : "Draft"}</span>
+                <span className={c.mono} title="Paid orders that included it">
+                  {data?.stats.sold[p.slug] ?? 0} sold
+                </span>
+                <button type="button" className={c.rowLink} onClick={() => toggle(p.slug)}>
+                  {selected === p.slug ? "Close" : "Edit"}
+                </button>
+              </div>
+              {selected === p.slug && (
+                <Editor
+                  p={p}
+                  sold={data?.stats.sold[p.slug] ?? 0}
+                  onSaved={replace}
+                  onDeleted={async () => {
+                    setSelected(null);
+                    await load();
+                  }}
+                />
+              )}
+            </div>
+          ))}
+          {(catalog ?? []).map((p) => (
+            <div key={p.id}>
+              <div className={`${c.row} ${selected === p.id ? c.rowOn : ""}`}>
+                {p.cover ? <img className={c.thumb} src={p.cover} alt="" width={44} height={44} /> : <span className={c.thumb} />}
+                <button type="button" className={c.rowMain} onClick={() => toggle(p.id)}>
+                  <span className={c.rowName}>{p.name}</span>
+                  <span className={c.mono}>{where(p)}</span>
+                </button>
+                <span className={c.mono}>{price(p)}</span>
+                <span className={`${c.chip} ${c.chip_funnel}`}>
+                  {funnelCount(p)} funnel{funnelCount(p) === 1 ? "" : "s"}
+                </span>
+                <span className={c.mono} title="Paid orders it was in, every funnel together">
+                  {p.sold} sold
+                </span>
+                <button type="button" className={c.rowLink} onClick={() => toggle(p.id)}>
+                  {selected === p.id ? "Close" : "Details"}
+                </button>
+              </div>
+              {selected === p.id && <Uses p={p} />}
+            </div>
+          ))}
+        </div>
+        {data && catalog && products.length + catalog.length === 0 && (
           <div className={c.empty}>
             <p className={c.h2}>No products yet</p>
-            <p className={c.sub}>
-              Click New product: name it and price it, add a square picture and the zip buyers download, then set it
-              Live to put it in the shop.
-            </p>
-          </div>
-        ) : (
-          <div className={c.rows}>
-            {products.map((p) => (
-              <div key={p.slug}>
-                <div className={`${c.row} ${selected === p.slug ? c.rowOn : ""}`}>
-                  {p.image ? <img className={c.thumb} src={p.image.sm} alt="" width={44} height={44} /> : <span className={c.thumb} />}
-                  <button type="button" className={c.rowMain} onClick={() => toggle(p.slug)}>
-                    <span className={c.rowName}>{p.name}</span>
-                    <span className={c.mono}>/shop/{p.slug}</span>
-                  </button>
-                  <span className={c.mono}>{prices(p.price)}</span>
-                  <span className={`${c.chip} ${c[`chip_${p.status}`]}`}>{p.status === "live" ? "In the shop" : "Draft"}</span>
-                  <span className={c.mono} title="Paid orders that included it">
-                    {data?.stats.sold[p.slug] ?? 0} sold
-                  </span>
-                  <button type="button" className={c.rowLink} onClick={() => toggle(p.slug)}>
-                    {selected === p.slug ? "Close" : "Edit"}
-                  </button>
-                </div>
-                {selected === p.slug && (
-                  <Editor
-                    p={p}
-                    sold={data?.stats.sold[p.slug] ?? 0}
-                    onSaved={replace}
-                    onDeleted={async () => {
-                      setSelected(null);
-                      await load();
-                    }}
-                  />
-                )}
-              </div>
-            ))}
+            <p className={c.sub}>Click New product: name it and price it, add a square picture and the zip buyers download.</p>
           </div>
         )}
       </div>
-
-      <FunnelProducts entries={funnels} />
     </main>
   );
 }
 
 // ─── the funnels' products ─────────────────────────────────────
 
-function FunnelProducts({ entries }: { entries: CatalogEntry[] | null }) {
-  const [open, setOpen] = useState<string | null>(null);
+const funnelCount = (p: CatalogProduct) => new Set(p.uses.map((u) => u.funnel)).size;
+
+/** "Main in TOP HITS MIDI Bundle · Upsell in MIDI Drum Kit" */
+function where(p: CatalogProduct): string {
+  const seen = new Set<string>();
+  return p.uses
+    .map((u) => `${u.role} in ${u.funnelName}`)
+    .filter((x) => !seen.has(x) && seen.add(x))
+    .join(" · ");
+}
+
+/** Its price where it's sold, "from …" when the funnels differ, "free" when it's only ever a bonus. */
+function price(p: CatalogProduct): string {
+  const paid = p.uses.flatMap((u) => (u.price ? [u.price] : []));
+  if (!paid.length) return "free bonus";
+  const low = paid.reduce((a, b) => (b.eur < a.eur ? b : a));
+  return paid.every((m) => m.eur === low.eur && m.usd === low.usd) ? prices(low) : `from ${prices(low)}`;
+}
+
+function Uses({ p }: { p: CatalogProduct }) {
   return (
-    <div className={c.panel}>
-      <div className={c.panelHead}>
-        <p className={c.h2}>In your funnels</p>
-        <span className={c.mono}>{entries ? `${entries.length} · sold on their own pages` : "Loading…"}</span>
-      </div>
-      <p className={c.sub} style={{ margin: "-4px 0 10px" }}>
-        Each with the add-ons ticked at its checkout and the one-click upsells after it. Their prices are set in the
-        funnel itself (a launch&rsquo;s in Launches), so they&rsquo;re read-only here.
+    <div className={c.extras}>
+      {p.uses.map((u, i) => (
+        <div key={i} className={c.use}>
+          <span>
+            {u.funnelName}
+            {u.soldAs !== p.name && <span className={c.dim}> · as &ldquo;{u.soldAs}&rdquo;</span>}
+          </span>
+          <span className={c.mono}>{u.role}</span>
+          <span className={c.mono}>{u.price ? prices(u.price) : `free with ${u.with}`}</span>
+          <span className={c.mono}>{u.sold === null ? "" : `${u.sold} sold`}</span>
+          <a className={c.rowLink} href={u.manage}>
+            {u.manage.startsWith("/funnels/") ? "Funnel" : "Launches"} →
+          </a>
+        </div>
+      ))}
+      <p className={c.note} style={{ padding: "6px 0 8px" }}>
+        Its name and price in each funnel are set in that funnel, so they&rsquo;re read-only here.
       </p>
-      <div className={c.rows}>
-        {(entries ?? []).map((e) => (
-          <div key={e.slug}>
-            <div className={`${c.row} ${open === e.slug ? c.rowOn : ""}`}>
-              {e.cover ? <img className={c.thumb} src={e.cover} alt="" width={44} height={44} /> : <span className={c.thumb} />}
-              <button type="button" className={c.rowMain} onClick={() => setOpen(open === e.slug ? null : e.slug)}>
-                <span className={c.rowName}>{e.name}</span>
-                <span className={c.mono}>
-                  {e.addOns.length} add-on{e.addOns.length === 1 ? "" : "s"} · {e.upsells.length} upsell{e.upsells.length === 1 ? "" : "s"}
-                </span>
-              </button>
-              <span className={c.mono}>{prices(e.price)}</span>
-              <span className={`${c.chip} ${c.chip_funnel}`}>{e.kind === "funnel" ? "Funnel" : "Launch"}</span>
-              <span className={c.mono} title="Paid orders of the product itself">
-                {e.sold} sold
-              </span>
-              <a className={c.rowLink} href={e.manage}>
-                {e.kind === "funnel" ? "Funnel" : "Launches"} →
-              </a>
-            </div>
-            {open === e.slug && (
-              <div className={c.extras}>
-                {[...e.addOns.map((x) => ({ ...x, kind: "Add-on" })), ...e.upsells.map((x) => ({ ...x, kind: "Upsell" }))].map((x) => (
-                  <div key={x.kind + x.id} className={c.extra}>
-                    <span>{x.name}</span>
-                    <span className={c.mono}>{x.kind}</span>
-                    <span className={c.mono}>{prices(x.price)}</span>
-                    <span className={c.mono}>{x.sold} sold</span>
-                  </div>
-                ))}
-                {e.addOns.length + e.upsells.length === 0 && <p className={c.note}>No add-ons or upsells.</p>}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

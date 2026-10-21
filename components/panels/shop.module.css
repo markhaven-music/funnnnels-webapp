@@ -77,7 +77,7 @@
 }
 .row {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 130px 70px 60px 64px;
+  grid-template-columns: 44px minmax(0, 1fr) 140px 96px 60px 76px;
   gap: 12px;
   align-items: center;
   padding: 10px 0;
@@ -129,6 +129,7 @@
   border-radius: var(--radius-xs);
   background: var(--bg-3);
   color: var(--fg-1);
+  white-space: nowrap;
 }
 .chip_live {
   background: oklch(0.86 0.16 165 / 0.14);
@@ -159,7 +160,7 @@
   background: var(--bg-3);
   color: var(--fg-0);
 }
-/* a funnel product's add-ons and upsells */
+/* a product's uses: the funnels that sell it, and how */
 .extras {
   display: grid;
   margin: 0 0 10px 56px;
@@ -167,15 +168,18 @@
   background: var(--bg-2);
   border-radius: var(--radius-sm);
 }
-.extra {
+.use {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 70px 130px 60px;
+  grid-template-columns: minmax(0, 1fr) 64px 170px 60px auto;
   gap: 12px;
   align-items: center;
   padding: 8px 0;
   font-size: 13px;
 }
-.extra + .extra {
+.dim {
+  color: var(--fg-2);
+}
+.use + .use {
   border-top: 1px solid var(--line-soft);
 }
 .moves {
@@ -314,11 +318,11 @@
   .extras {
     margin-left: 0;
   }
-  .extra {
-    grid-template-columns: minmax(0, 1fr) auto;
+  .use {
+    grid-template-columns: minmax(0, 1fr) auto auto;
   }
-  .extra > :nth-child(2),
-  .extra > :nth-child(4) {
+  .use > :nth-child(2),
+  .use > :nth-child(4) {
     display: none;
   }
   .media {
