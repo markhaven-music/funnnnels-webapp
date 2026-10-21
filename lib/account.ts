@@ -115,6 +115,17 @@ const SHELVES: Record<string, Shelf> = {
   },
 };
 
+/** An order's downloads with their names, as links on the brand domain (the receipt email, lib/outbox.ts). Null for products without a shelf. */
+export function shelfOf(funnel: string, order: Pick<Order, "id" | "items" | "offer">): { name: string; files: { key: string; label: string; href: string }[] } | null {
+  const shelf = SHELVES[funnel];
+  if (!shelf) return null;
+  const o = order as Order;
+  return {
+    name: o.offer ? (shelf.labels[o.offer] ?? o.offer) : shelf.product,
+    files: shelf.unlocked(o.items).map((k) => ({ key: k, label: shelf.labels[k] ?? k, href: `${ACCOUNT_URL.replace(/\/account$/, "")}${shelf.download(o, k)}` })),
+  };
+}
+
 export type Purchase = {
   order: Order;
   funnel: string;

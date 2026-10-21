@@ -1,5 +1,8 @@
 import { checkoutPages, nextStep, offerOf, resolveFunnel } from "@/lib/funnels";
+import { after } from "next/server";
 import { recordPayPalSale } from "@/lib/analytics";
+import { getOrder } from "@/lib/orders";
+import { noteSale } from "@/lib/sales";
 import { isPayPalOrderId, paypal, paypalCheckoutUrl, paypalConfigured, PayPalError, type PayPalOrder } from "@/lib/paypal";
 
 export const runtime = "nodejs";
@@ -43,6 +46,9 @@ export async function GET(req: Request) {
     } catch (err) {
       console.error("paypal sale not recorded", err);
     }
+    // The order too (the receipt email goes from there), once the buyer is on their way.
+    const lang = pages.lang ?? "en";
+    after(async () => noteSale(await getOrder(orderId, f.slug), f.slug, lang));
   }
   // Next: the upsells (with the order and what was bought so far), then the thank-you page.
   if (offer && isPayPalOrderId(parent)) {

@@ -1,0 +1,516 @@
+import { purchasesOf, shelfOf } from "@/lib/account";
+import { checkoutPages, resolveFunnel, type Product } from "@/lib/funnels";
+import { KIT_HOME } from "@/lib/liveUrl";
+import { money } from "@/lib/launch";
+import { card, letter, type CardButton } from "@/lib/mail";
+import { mailCopy } from "@/lib/mailCopy";
+import { getLaunch } from "@/lib/products";
+import { hasPaidOrder } from "@/lib/sales";
+import { SesError, sendEmail, sesConfigured, type Email } from "@/lib/ses";
+import { supabase } from "@/lib/supabase";
+
+// The one job that sends every scheduled email, run each minute by
+// /api/cron/email (pg_cron, db/email-schedule.sql). In this order:
+//   1. receipts: an order's downloads, 5 minutes after it paid, with the
+//      one-click upsells bought right after it in the same email;
+//   2. abandoned checkouts: one reminder an hour after step 1, never to a buyer;
+//   3. sequences: the next step of every contact whose time has come;
+//   4. broadcasts and launch emails: the next batch of their audience.
+// Sends are paced to SES's per-second rate (EMAIL_RATE, 1 in the sandbox, 14
+// once production access is granted) and stop before the function's time runs out.
+
+const BRAND_ORIGIN = KIT_HOME; // m.thegrind.studio: every funnel's public home
+
+const RECEIPT_AFTER_MS = 5 * 60_000;
+const RECEIPT_GIVE_UP_MS = 3 * 86_400_000;
+const RECEIPT_TRIES = 5;
+const REMIND_AFTER_MS = 60 * 60_000;
+const REMIND_GIVE_UP_MS = 3 * 86_400_000;
+
+export type OutboxReport = {
+  receipts: number;
+  reminders: number;
+  sequence: number;
+  broadcast: number;
+  launch: number;
+  failed: number;
+  stopped?: string; // why the run ended early
+  notes: string[];
+};
+
+class Run {
+  report: OutboxReport = { receipts: 0, reminders: 0, sequence: 0, broadcast: 0, launch: 0, failed: 0, notes: [] };
+  // SES refused an unverified address: it's still in its sandbox, so mass sends wait.
+  sandbox = false;
+  private next = 0;
+  private gap: number;
+  constructor(
+    private deadline: number,
+    readonly dryRun: boolean,
+  ) {
+    const rate = Number(process.env.EMAIL_RATE) || 1;
+    this.gap = Math.ceil(1000 / Math.max(rate, 0.1)) + 20;
+  }
+  get over() {
+    return Boolean(this.report.stopped) || Date.now() > this.deadline;
+  }
+  /** Send one email at SES's pace. Throttling stops the whole run; other errors go back to the caller. */
+  async send(email: Email): Promise<string | null> {
+    if (this.dryRun) return "dry-run";
+    const wait = this.next - Date.now();
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    this.next = Date.now() + this.gap;
+    try {
+      const sent = await sendEmail(email);
+      if ("skipped" in sent) {
+        this.report.notes.push(`skipped: ${sent.skipped}`);
+        return null;
+      }
+      return sent.id;
+    } catch (err) {
+      if (err instanceof SesError && err.throttled) this.report.stopped = "SES says slow down (rate or daily quota)";
+      if (err instanceof SesError && err.sandbox && !this.sandbox) {
+        this.sandbox = true;
+        this.report.notes.push("SES is still in its sandbox: only verified addresses receive email");
+      }
+      throw err;
+    }
+  }
+}
+
+export async function runOutbox({ budgetMs = 50_000, dryRun = false } = {}): Promise<OutboxReport> {
+  const run = new Run(Date.now() + budgetMs, dryRun);
+  if (!sesConfigured()) {
+    run.report.stopped = "SES is not set up (SES_* and EMAIL_FROM)";
+    return run.report;
+  }
+  for (const step of [receipts, reminders, sequences, broadcasts, launchEmails]) {
+    if (run.over) break;
+    try {
+      await step(run);
+    } catch (err) {
+      console.error(`outbox: ${step.name} failed`, err);
+      run.report.notes.push(`${step.name}: ${String(err).slice(0, 200)}`);
+    }
+  }
+  return run.report;
+}
+
+const errorText = (err: unknown) =>
+  err instanceof SesError && err.sandbox ? "SES is still in its sandbox: only verified addresses receive email" : String(err).slice(0, 300);
+
+// ─── 1. receipts ───────────────────────────────────────────────────
+
+type OrderRow = {
+  id: string;
+  provider: "stripe" | "paypal";
+  funnel: string;
+  items: string[];
+  amount_cents: number;
+  currency: "eur" | "usd";
+  email: string | null;
+  name: string | null;
+  lang: string;
+  offer: string | null;
+  parent: string | null;
+  email_sent_at: string | null;
+  email_attempts: number;
+};
+
+async function receipts(run: Run) {
+  const db = supabase();
+  const now = Date.now();
+  const { data, error } = await db
+    .from("orders")
+    .select("id, provider, funnel, items, amount_cents, currency, email, name, lang, offer, parent, email_sent_at, email_attempts")
+    .is("email_sent_at", null)
+    .not("email", "is", null)
+    .eq("status", "succeeded")
+    .lt("email_attempts", RECEIPT_TRIES)
+    .lte("created_at", new Date(now - RECEIPT_AFTER_MS).toISOString())
+    .gte("created_at", new Date(now - RECEIPT_GIVE_UP_MS).toISOString())
+    .order("created_at")
+    .limit(100);
+  if (error) throw error;
+  const due = (data ?? []) as OrderRow[];
+
+  // The upsells waiting with their order go in its email; an upsell whose
+  // order already had its email (or isn't recorded) gets one of its own.
+  const mains = due.filter((o) => !o.offer || !due.some((m) => m.id === o.parent));
+  for (const main of mains) {
+    if (run.over) return;
+    const group = [main, ...due.filter((o) => o.offer && o.parent === main.id && o !== main)];
+    const ids = group.map((o) => o.id);
+    if (!run.dryRun) {
+      // Claim them, so a second run at the same time can't send them again.
+      const { data: claimed, error: cErr } = await db.from("orders").update({ email_sent_at: new Date().toISOString() }).in("id", ids).is("email_sent_at", null).select("id");
+      if (cErr) throw cErr;
+      if (!claimed?.some((c) => c.id === main.id)) continue;
+    }
+    const f = await resolveFunnel(main.funnel);
+    try {
+      if (!f) throw new Error(`unknown product ${main.funnel}`);
+      const id = await run.send(receiptEmail(group, f));
+      if (id === null && !run.dryRun) await db.from("orders").update({ email_sent_at: null }).in("id", ids);
+      else run.report.receipts++;
+    } catch (err) {
+      run.report.failed++;
+      if (!run.dryRun) {
+        await db
+          .from("orders")
+          .update({ email_sent_at: null, email_error: errorText(err), email_attempts: main.email_attempts + 1 })
+          .in("id", ids);
+      }
+      if (run.over) return;
+    }
+  }
+}
+
+function receiptEmail(group: OrderRow[], f: Product): Email {
+  const main = group[0];
+  const c = mailCopy(main.lang).receipt;
+  const buttons: CardButton[] = [];
+  const text: string[] = [c.title, "", c.lead, ""];
+  for (const o of group) {
+    const shelf = shelfOf(o.funnel, { id: o.id, items: o.items, offer: o.offer }) ?? kitShelf(o, f);
+    for (const file of shelf.files) {
+      buttons.push({ label: c.download(file.label), url: file.href, primary: buttons.length === 0 });
+      text.push(`${c.download(file.label)}: ${file.href}`);
+    }
+  }
+  const orders = group.map((o) => c.order(o.id, money(o.amount_cents / 100, o.currency), o.provider === "paypal"));
+  text.push("", ...orders, c.account, "", `${c.help} support@thegrind.studio`);
+  const product = main.offer ? (shelfOf(main.funnel, { id: main.id, items: main.items, offer: main.offer })?.name ?? f.product) : f.product;
+  return {
+    to: main.email!,
+    subject: c.subject(product),
+    html: card({ lang: main.lang, title: c.title, lead: c.lead, buttons, notes: [...orders, c.account], help: c.help }),
+    text: text.join("\n"),
+  };
+}
+
+/** Dashboard-made products (Launches): the pack and its add-on, downloaded from their own page. */
+function kitShelf(o: OrderRow, f: Product) {
+  const labels: Record<string, string> = { pack: f.product, ...(f.bump ? { [f.bump.id]: f.bump.name } : {}) };
+  return {
+    name: f.product,
+    files: o.items.map((k) => ({ key: k, label: labels[k] ?? k, href: `${BRAND_ORIGIN}/${f.slug}/download?order=${encodeURIComponent(o.id)}&file=${encodeURIComponent(k)}` })),
+  };
+}
+
+// ─── 2. abandoned checkouts ────────────────────────────────────────
+
+async function reminders(run: Run) {
+  const db = supabase();
+  const now = Date.now();
+  const { data, error } = await db
+    .from("checkout_starts")
+    .select("funnel, email, name, lang, started_at")
+    .is("reminder_sent_at", null)
+    .lte("started_at", new Date(now - REMIND_AFTER_MS).toISOString())
+    .gte("started_at", new Date(now - REMIND_GIVE_UP_MS).toISOString())
+    .order("started_at")
+    .limit(50);
+  if (error) throw error;
+
+  for (const row of data ?? []) {
+    if (run.over) return;
+    const mark = (at: string | null) => db.from("checkout_starts").update({ reminder_sent_at: at }).eq("funnel", row.funnel).eq("email", row.email);
+    const f = await resolveFunnel(row.funnel);
+    // Bought (our orders, or Stripe/PayPal for a sale we never saw), or left the list: never reminded.
+    const { data: contact } = await db.from("contacts").select("status").eq("email", row.email).maybeSingle();
+    const bought = (await hasPaidOrder(row.funnel, row.email)) || (await purchasesOf(row.email)).some((p) => p.funnel === row.funnel);
+    if (!f || bought || (contact && contact.status !== "subscribed")) {
+      if (!run.dryRun) await mark(new Date().toISOString());
+      continue;
+    }
+    if (!run.dryRun) {
+      const { data: claimed } = await db
+        .from("checkout_starts")
+        .update({ reminder_sent_at: new Date().toISOString() })
+        .eq("funnel", row.funnel)
+        .eq("email", row.email)
+        .is("reminder_sent_at", null)
+        .select("email");
+      if (!claimed?.length) continue;
+    }
+    const c = mailCopy(row.lang).reminder;
+    const first = (row.name ?? "").trim().split(/\s+/)[0]?.slice(0, 40) ?? "";
+    const url = `${BRAND_ORIGIN}${checkoutPages(f, row.lang).orderPage}`;
+    try {
+      const id = await run.send({
+        to: row.email,
+        subject: c.subject(f.product),
+        html: card({ lang: row.lang, title: c.title(first, f.product), lead: c.lead, buttons: [{ label: c.button, url }], notes: c.notes, help: c.help }),
+        text: [c.title(first, f.product), "", c.lead, "", `${c.button}: ${url}`, "", ...c.notes, "", "support@thegrind.studio"].join("\n"),
+      });
+      if (id === null && !run.dryRun) await mark(null);
+      else run.report.reminders++;
+    } catch (err) {
+      run.report.failed++;
+      // In the sandbox (or any refusal) the reminder stays sent: one try only, never a late one.
+      run.report.notes.push(`reminder ${row.funnel}/${row.email}: ${errorText(err)}`);
+      if (run.over) return;
+    }
+  }
+}
+
+// ─── 3. sequences ──────────────────────────────────────────────────
+
+type Step = { id: string; position: number; delay_hours: number; subject: string; body: string };
+type Sequence = { id: string; exit_tag: string | null; active: boolean; steps: Step[] };
+
+async function sequences(run: Run) {
+  const db = supabase();
+  const { data: runs, error } = await db
+    .from("sequence_runs")
+    .select("sequence_id, email, next_position, started_at")
+    .eq("status", "active")
+    .lte("next_at", new Date().toISOString())
+    .order("next_at")
+    .limit(200);
+  if (error) throw error;
+  if (!runs?.length) return;
+
+  const ids = [...new Set(runs.map((r) => r.sequence_id))];
+  const { data: seqs, error: sErr } = await db.from("sequences").select("id, exit_tag, active, sequence_steps(id, position, delay_hours, subject, body)").in("id", ids);
+  if (sErr) throw sErr;
+  const byId = new Map<string, Sequence>(
+    (seqs ?? []).map((s) => [s.id, { id: s.id, exit_tag: s.exit_tag, active: s.active, steps: [...(s.sequence_steps as Step[])].sort((a, b) => a.position - b.position) }]),
+  );
+
+  for (const r of runs) {
+    if (run.over) return;
+    const seq = byId.get(r.sequence_id);
+    if (!seq?.active) continue; // paused: the run waits
+    const setRun = (patch: Record<string, unknown>) => db.from("sequence_runs").update(patch).eq("sequence_id", r.sequence_id).eq("email", r.email);
+    const step = seq.steps[r.next_position];
+    if (!step) {
+      if (!run.dryRun) await setRun({ status: "done" });
+      continue;
+    }
+    // The first step's delay counts from the start.
+    if (r.next_position === 0 && step.delay_hours > 0) {
+      const at = Date.parse(r.started_at) + step.delay_hours * 3_600_000;
+      if (at > Date.now()) {
+        if (!run.dryRun) await setRun({ next_at: new Date(at).toISOString() });
+        continue;
+      }
+    }
+    const { data: contact } = await db.from("contacts").select("email, name, lang, status, tags").eq("email", r.email).maybeSingle();
+    if (!contact || contact.status !== "subscribed" || (seq.exit_tag && (contact.tags ?? []).includes(seq.exit_tag))) {
+      if (!run.dryRun) await setRun({ status: "exited" });
+      continue;
+    }
+
+    const sent = await sendOnce(run, "sequence", step.id, contact, () => letter({ to: contact, subject: step.subject, body: step.body, lang: contact.lang }));
+    // Not sent and not recorded (time up, the sandbox): this step again next run.
+    if (sent === "retry") {
+      if (run.over || run.sandbox) return;
+      continue;
+    }
+    const following = seq.steps[r.next_position + 1];
+    if (!run.dryRun) {
+      await setRun(
+        following
+          ? { next_position: r.next_position + 1, next_at: new Date(Date.now() + following.delay_hours * 3_600_000).toISOString() }
+          : { next_position: r.next_position + 1, status: "done" },
+      );
+    }
+    if (sent === "sent") run.report.sequence++;
+  }
+}
+
+/**
+ * One email to one contact for one broadcast/launch email/sequence step,
+ * at most once ever (email_sends): "sent", "failed" (recorded, never tried
+ * again), "skip" (already sent before), "retry" (not sent and not recorded:
+ * time up, SES skipped it or is in its sandbox).
+ */
+async function sendOnce(
+  run: Run,
+  kind: "broadcast" | "launch" | "sequence",
+  ref: string,
+  to: { email: string },
+  build: () => Email,
+  claimed = false,
+): Promise<"sent" | "failed" | "skip" | "retry"> {
+  const db = supabase();
+  if (!claimed && !run.dryRun) {
+    const { data, error } = await db.from("email_sends").upsert({ kind, ref, email: to.email }, { onConflict: "kind,ref,email", ignoreDuplicates: true }).select("email");
+    if (error) throw error;
+    if (!data?.length) return "skip";
+  }
+  const row = () => db.from("email_sends");
+  const release = () => row().delete().eq("kind", kind).eq("ref", ref).eq("email", to.email);
+  try {
+    const id = await run.send(build());
+    if (id === null) {
+      if (!run.dryRun) await release();
+      return "retry";
+    }
+    if (!run.dryRun) await row().update({ status: "sent", message_id: id }).eq("kind", kind).eq("ref", ref).eq("email", to.email);
+    return "sent";
+  } catch (err) {
+    if (run.sandbox || run.over) {
+      if (!run.dryRun) await release();
+      return "retry";
+    }
+    run.report.failed++;
+    if (!run.dryRun) await row().update({ status: "failed", error: errorText(err) }).eq("kind", kind).eq("ref", ref).eq("email", to.email);
+    return "failed";
+  }
+}
+
+// ─── 4. broadcasts and launch emails ───────────────────────────────
+
+type Audience = { tag: string | null; exclude: string | null };
+
+/**
+ * Send the next batches of one mass email until its audience is done or the
+ * run's time is up. "done", "paused" (time up: the next run goes on) or
+ * "sandbox" (SES refused an unverified address: still in its sandbox).
+ */
+async function sendToAudience(
+  run: Run,
+  kind: "broadcast" | "launch",
+  ref: string,
+  audience: Audience,
+  build: (r: { email: string; name: string | null; lang: string | null }) => Email,
+  counted: (n: number, failed: number) => Promise<void>,
+): Promise<"done" | "paused" | "sandbox"> {
+  const db = supabase();
+  if (run.sandbox) return "sandbox";
+  for (;;) {
+    if (run.over) return "paused";
+    if (run.dryRun) {
+      const { data } = await db.rpc("audience_size", { p_tag: audience.tag, p_exclude: audience.exclude });
+      run.report.notes.push(`${kind} ${ref}: would send to ${data} contacts`);
+      return "paused";
+    }
+    const { data: batch, error } = await db.rpc("claim_recipients", { p_kind: kind, p_ref: ref, p_tag: audience.tag, p_exclude: audience.exclude, lim: 25 });
+    if (error) throw error;
+    if (!batch?.length) return "done";
+    let sent = 0;
+    let failed = 0;
+    let i = 0;
+    for (; i < batch.length; i++) {
+      const outcome = await sendOnce(run, kind, ref, batch[i], () => build(batch[i]), true);
+      if (outcome === "sent") sent++;
+      if (outcome === "failed") failed++;
+      if (outcome === "retry" || run.over) {
+        i++;
+        break;
+      }
+    }
+    // Claimed but not tried (the run ended): give them back for the next run.
+    const untried = batch.slice(i).map((r: { email: string }) => r.email);
+    if (untried.length) await db.from("email_sends").delete().eq("kind", kind).eq("ref", ref).in("email", untried);
+    await counted(sent, failed);
+    if (kind === "broadcast") run.report.broadcast += sent;
+    else run.report.launch += sent;
+    if (run.sandbox) return "sandbox";
+    if (run.over) return "paused";
+  }
+}
+
+async function broadcasts(run: Run) {
+  const db = supabase();
+  const { data, error } = await db
+    .from("broadcasts")
+    .select("*")
+    .in("status", ["scheduled", "sending"])
+    .lte("send_at", new Date().toISOString())
+    .order("send_at")
+    .limit(5);
+  if (error) throw error;
+  for (const b of data ?? []) {
+    if (run.over) return;
+    if (!run.dryRun && b.status === "scheduled") await db.from("broadcasts").update({ status: "sending", error: null }).eq("id", b.id);
+    let total = { sent: b.sent_count as number, failed: b.failed_count as number };
+    const outcome = await sendToAudience(
+      run,
+      "broadcast",
+      b.id,
+      { tag: b.audience_tag, exclude: b.exclude_tag },
+      (r) => letter({ to: r, subject: b.subject, preheader: b.preheader, body: b.body, lang: r.lang }),
+      async (sent, failed) => {
+        total = { sent: total.sent + sent, failed: total.failed + failed };
+        await db.from("broadcasts").update({ sent_count: total.sent, failed_count: total.failed, updated_at: new Date().toISOString() }).eq("id", b.id);
+      },
+    );
+    if (run.dryRun) continue;
+    if (outcome === "done") await db.from("broadcasts").update({ status: "sent", sent_at: new Date().toISOString() }).eq("id", b.id);
+    if (outcome === "sandbox") {
+      // Back to draft, not left scheduled: a newsletter must not go out days late on its own.
+      await db
+        .from("broadcasts")
+        .update({ status: "draft", error: "Not sent: Amazon SES is still in its sandbox (only verified addresses receive). Schedule it again once production access is on." })
+        .eq("id", b.id);
+    }
+  }
+}
+
+async function launchEmails(run: Run) {
+  const db = supabase();
+  const { data, error } = await db
+    .from("launch_emails")
+    .select("*")
+    .in("status", ["scheduled", "sending"])
+    .lte("send_at", new Date().toISOString())
+    .order("send_at")
+    .limit(5);
+  if (error) throw error;
+  for (const e of data ?? []) {
+    if (run.over) return;
+    const l = await getLaunch(e.launch_id);
+    if (!l) continue;
+    if (!run.dryRun && e.status === "scheduled") await db.from("launch_emails").update({ status: "sending", error: null }).eq("id", e.id);
+    const vars = launchVars(l);
+    let sentCount = (e.sent_count as number | null) ?? 0;
+    const outcome = await sendToAudience(
+      run,
+      "launch",
+      e.id,
+      { tag: e.audience_tag, exclude: e.exclude_tag },
+      (r) => letter({ to: r, subject: e.subject, body: e.body, vars, lang: r.lang }),
+      async (sent) => {
+        sentCount += sent;
+        await db.from("launch_emails").update({ sent_count: sentCount }).eq("id", e.id);
+      },
+    );
+    if (run.dryRun) continue;
+    if (outcome === "done") await db.from("launch_emails").update({ status: "sent", sent_at: new Date().toISOString() }).eq("id", e.id);
+    if (outcome === "sandbox") {
+      await db.from("launch_emails").update({ status: "draft", error: "Not sent: Amazon SES is still in its sandbox. Schedule it again once production access is on." }).eq("id", e.id);
+    }
+  }
+}
+
+const both = (eur: number, usd: number) => (eur === usd ? `€${eur} / $${usd}` : `${money(eur, "eur")} / ${money(usd, "usd")}`);
+const when = (iso: string) =>
+  new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris", timeZoneName: "short" }).format(
+    new Date(iso),
+  );
+
+/** {name} {earlyprice} {fullprice} {cartopen} {deadline} {link} for a launch email. */
+function launchVars(l: NonNullable<Awaited<ReturnType<typeof getLaunch>>>): Record<string, string> {
+  return {
+    name: l.product.name,
+    earlyprice: both(l.launch.early.eur, l.launch.early.usd),
+    fullprice: both(l.product.price.eur, l.product.price.usd),
+    cartopen: when(l.launch.cartOpenAt),
+    deadline: when(l.launch.earlyBirdEndAt),
+    link: `${BRAND_ORIGIN}/${l.product.slug}`,
+  };
+}
+
+/** A test of a newsletter-type email to one address (the dashboard's "Send me a test"). */
+export async function sendTest(to: string, o: { subject: string; preheader?: string; body: string; vars?: Record<string, string> }): Promise<string> {
+  const email = letter({ to: { email: to, name: null }, subject: `[Test] ${o.subject}`, preheader: o.preheader, body: o.body, vars: o.vars });
+  const sent = await sendEmail(email);
+  if ("skipped" in sent) throw new Error(sent.skipped);
+  return sent.id;
+}
+
+export { launchVars };

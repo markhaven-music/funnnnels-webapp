@@ -90,6 +90,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
           </ol>
           <InfoStep
             t={t}
+            lang={lang}
             info={info}
             onDone={(next) => {
               setInfo(next);
@@ -173,7 +174,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
   );
 }
 
-function InfoStep({ t, info, onDone }: { t: Copy["form"]; info: Info; onDone: (info: Info) => void }) {
+function InfoStep({ t, lang, info, onDone }: { t: Copy["form"]; lang: Lang; info: Info; onDone: (info: Info) => void }) {
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.currentTarget)) as Info;
@@ -181,7 +182,7 @@ function InfoStep({ t, info, onDone }: { t: Copy["form"]; info: Info; onDone: (i
     fetch("/api/checkout/lead", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...data, funnel: funnel.slug }),
+      body: JSON.stringify({ ...data, funnel: funnel.slug, lang }),
       keepalive: true,
     }).catch(() => {});
     onDone(data);

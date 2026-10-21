@@ -214,6 +214,18 @@ export const I = {
       <path d="M4 21c1-4 4.5-6 8-6s7 2 8 6" />
     </Base>
   ),
+  receipt: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
+      <path d="M9 8h6M9 12h6M9 16h3" />
+    </Base>
+  ),
+  mail: (p: IconProps) => (
+    <Base {...p}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m3 7 9 6 9-6" />
+    </Base>
+  ),
   trash: (p: IconProps) => (
     <Base {...p}>
       <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />

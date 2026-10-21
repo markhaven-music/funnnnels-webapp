@@ -46,7 +46,7 @@ export function paypalValue(cents: number): string {
 export type PayPalOrder = {
   id: string;
   status: string; // "CREATED" | "APPROVED" | "COMPLETED" | …
-  payer?: { email_address?: string };
+  payer?: { email_address?: string; name?: { given_name?: string; surname?: string } };
   links?: { rel: string; href: string }[];
   purchase_units: {
     custom_id?: string;

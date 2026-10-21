@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Instrument_Serif } from "next/font/google";
 import { resolveFunnel } from "@/lib/funnels";
+import { after } from "next/server";
 import { reportSaleToNeo } from "@/lib/neo";
+import { noteSale } from "@/lib/sales";
 import { getOrder } from "@/lib/orders";
 import { KitPurchasePixel } from "../../_kit/KitTracking";
 import { Beacon } from "../../Beacon";
@@ -34,6 +36,7 @@ export default async function KitThankYou({
   const order = await getOrder(payment_intent ?? paypal_order, f.slug);
   // The sale also goes to neo, labelled funnnnels (lib/neo.ts).
   if (order) reportSaleToNeo(order, f.product);
+  if (order) after(() => noteSale(order, f.slug, "en"));
   const paid = order?.status === "succeeded";
   const pending = order?.status === "processing";
   const labels: Record<string, string> = { pack: f.product, ...(f.bump ? { [f.bump.id]: f.bump.name } : {}) };

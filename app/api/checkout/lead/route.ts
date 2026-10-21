@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isEmail, upsertContact } from "@/lib/contacts";
 import { resolveFunnel } from "@/lib/funnels";
+import { supabase } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 
@@ -22,15 +23,28 @@ export async function POST(req: Request) {
     .join(" ")
     .slice(0, 80);
 
+  const lang = typeof body.lang === "string" && f.langs?.includes(body.lang) ? body.lang : "en";
+
   try {
     await upsertContact({
       email,
       name: name || undefined,
       source: f.slug,
       tags: [...f.checkout.leadTags],
+      lang,
     });
   } catch (err) {
     console.error("checkout lead: contact save failed", err);
+  }
+  // The abandoned-checkout reminder's clock (lib/outbox.ts): restarted by every
+  // new attempt; a reminder already sent stays sent.
+  try {
+    const { error } = await supabase()
+      .from("checkout_starts")
+      .upsert({ funnel: f.slug, email: email.toLowerCase(), name: name || null, lang, started_at: new Date().toISOString() }, { onConflict: "funnel,email" });
+    if (error) throw error;
+  } catch (err) {
+    console.error("checkout lead: checkout start save failed", err);
   }
   return NextResponse.json({ ok: true });
 }

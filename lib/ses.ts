@@ -18,7 +18,14 @@ export function sesConfigured(): boolean {
   return Boolean(process.env.SES_REGION && process.env.SES_ACCESS_KEY_ID && process.env.SES_SECRET_ACCESS_KEY && process.env.EMAIL_FROM);
 }
 
-export type Email = { to: string; subject: string; html: string; text: string };
+export type Email = {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+  // Extra headers, e.g. List-Unsubscribe on the newsletter (lib/mail.ts).
+  headers?: Record<string, string>;
+};
 export type Sent = { id: string; to: string } | { skipped: string };
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -45,6 +52,7 @@ export async function sendEmail(email: Email): Promise<Sent> {
       Simple: {
         Subject: { Data: subject, Charset: "UTF-8" },
         Body: { Html: { Data: email.html, Charset: "UTF-8" }, Text: { Data: email.text, Charset: "UTF-8" } },
+        ...(email.headers ? { Headers: Object.entries(email.headers).map(([Name, Value]) => ({ Name, Value })) } : {}),
       },
     },
   });
@@ -70,6 +78,24 @@ export async function sendEmail(email: Email): Promise<Sent> {
     cache: "no-store",
   });
   const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`SES ${res.status}: ${JSON.stringify(json).slice(0, 300)}`);
+  if (!res.ok) throw new SesError(res.status, String(json.__type ?? json.code ?? ""), `SES ${res.status}: ${JSON.stringify(json).slice(0, 300)}`);
   return { id: json.MessageId, to };
+}
+
+export class SesError extends Error {
+  constructor(
+    readonly status: number,
+    readonly type: string,
+    message: string,
+  ) {
+    super(message);
+  }
+  /** Sending faster than the account's rate, or over its daily quota: stop for now, try later. */
+  get throttled() {
+    return this.status === 429 || /TooManyRequests|LimitExceeded|Throttl/i.test(this.type + this.message);
+  }
+  /** SES is still in its sandbox: only verified addresses can receive. */
+  get sandbox() {
+    return /not verified/i.test(this.message);
+  }
 }

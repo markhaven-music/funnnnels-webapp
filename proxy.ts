@@ -39,7 +39,7 @@ const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/to
 const LOCALIZED: Record<string, readonly string[]> = { "midi-drum-kit": DRUM_KIT_LANGS };
 const LANG_PREFIXES = new Set(["fr", "it", "de", "nl", "es"]);
 
-const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", ...LANG_PREFIXES]);
+const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", ...LANG_PREFIXES]);
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
@@ -71,6 +71,11 @@ const PUBLIC = [
   /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|upsell)$/,
   /^\/account$/, // the customer login and its API
   /^\/api\/checkout\/account\/(login|verify|session)$/,
+  // Email: Stripe's webhook, the email job (its own CRON_SECRET), unsubscribing.
+  /^\/api\/webhooks\/stripe$/,
+  /^\/api\/cron\/email$/,
+  /^\/unsubscribe$/,
+  /^\/api\/email\/unsubscribe$/,
   /^\/favicon\.ico$/,
 ];
 

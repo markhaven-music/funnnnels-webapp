@@ -8,12 +8,15 @@ import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { ABTestsPanel } from "@/components/panels/ABTestsPanel";
 import { AnalyticsPanel } from "@/components/panels/AnalyticsPanel";
+import { AutomationsPanel } from "@/components/panels/AutomationsPanel";
+import { BroadcastsPanel } from "@/components/panels/BroadcastsPanel";
 import { BrandKitPanel } from "@/components/panels/BrandKitPanel";
 import { ContactsPanel } from "@/components/panels/ContactsPanel";
 import { DomainsPanel } from "@/components/panels/DomainsPanel";
 import { IntegrationsPanel } from "@/components/panels/IntegrationsPanel";
 import { LandingPagesPanel } from "@/components/panels/LandingPagesPanel";
 import { LaunchesPanel } from "@/components/panels/LaunchesPanel";
+import { OrdersPanel } from "@/components/panels/OrdersPanel";
 import { SettingsPanel } from "@/components/panels/SettingsPanel";
 import { NAV } from "@/lib/data";
 import type { Analytics, Metrics } from "@/lib/analytics";
@@ -56,7 +59,10 @@ export function Dashboard({ funnels: rows }: Props) {
       {activeNav === "launches"     && <LaunchesPanel />}
       {activeNav === "pages"        && <LandingPagesPanel funnels={funnels} />}
       {activeNav === "ab"           && <ABTestsPanel funnels={funnels} />}
+      {activeNav === "orders"       && <OrdersPanel />}
       {activeNav === "contacts"     && <ContactsPanel />}
+      {activeNav === "broadcasts"   && <BroadcastsPanel />}
+      {activeNav === "automations"  && <AutomationsPanel />}
       {activeNav === "analytics"    && <AnalyticsPanel />}
       {activeNav === "brand"        && <BrandKitPanel />}
       {activeNav === "integrations" && <IntegrationsPanel />}
