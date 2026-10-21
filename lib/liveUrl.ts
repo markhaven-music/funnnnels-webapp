@@ -12,11 +12,11 @@ export const KIT_HOME = "https://m.thegrind.studio";
 
 export const PRODUCT_TYPE = "Product";
 
-// The shop (dashboard → Shop, app/shop) at SHOP_HOME/shop: served from this
-// deployment's own address until m.thegrind.studio forwards /shop here like
-// the funnels (a rewrite in grind-studio-landing-pages/vercel.json). The
-// receipt, the reminder and the dashboard link there.
-export const SHOP_HOME = "https://funnnnels.vercel.app";
+// The shop (dashboard → Shop, app/shop) at SHOP_HOME/shop: the brand domain,
+// which forwards /shop here like the funnels (rewrites in
+// grind-studio-landing-pages/vercel.json). The receipt, the reminder and the
+// dashboard link there.
+export const SHOP_HOME = KIT_HOME;
 export const SHOP_URL = `${SHOP_HOME}/shop`;
 
 /** A funnel whose page is rendered from code sections (Jazz) or the launch-kit template. */

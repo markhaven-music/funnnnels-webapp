@@ -18,6 +18,7 @@ const FUNNEL_HOME: Record<string, string> = {
   "top-hits-midi-bundle": "https://m.thegrind.studio",
   "midi-drum-kit": "https://m.thegrind.studio",
   account: "https://m.thegrind.studio", // the customer login (app/account)
+  shop: "https://m.thegrind.studio", // the shop (app/shop)
 };
 const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
 
@@ -58,7 +59,8 @@ function localized(pathname: string): { slug: string; lang: string; page: (typeo
 
 // The shop (app/shop, dashboard → Shop): /shop, /shop/cart and
 // /shop/<product> are cached per currency at /shop/<currency>[/…], like the
-// funnels; its thank-you page and downloads aren't. Public on every host.
+// funnels; its thank-you page and downloads aren't. Public; on the dashboard
+// hosts it redirects to the brand domain (FUNNEL_HOME).
 // Returns what follows /shop ("", "/cart", "/<product>"), or null.
 function shopPage(pathname: string): string | null {
   const m = pathname.replace(/\/$/, "").match(/^\/shop(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?$/);
