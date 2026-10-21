@@ -34,13 +34,14 @@ export type FunnelMap = {
   langs: MapLang[];
 };
 
-const LANG_LABEL: Record<string, string> = { en: "English", fr: "French" };
+const LANG_LABEL: Record<string, string> = { en: "English", fr: "French", es: "Spanish" };
 
 // Where each language's pages are live. The brand domain forwards the funnels'
 // paths here, except the MIDI Drum Kit in English: m.thegrind.studio/midi-drum-kit
-// is still the old Astro page, so its funnnnels pages are on the origin.
+// is still the old Astro page, so its funnnnels pages are on the origin. Same for
+// Spanish until grind-studio-landing-pages forwards /es/midi-drum-kit.
 const home = (slug: string, lang: string) =>
-  slug === "midi-drum-kit" && lang === "en" ? "https://funnnnels.vercel.app" : KIT_HOME;
+  slug === "midi-drum-kit" && (lang === "en" || lang === "es") ? "https://funnnnels.vercel.app" : KIT_HOME;
 
 // Screenshots in public/funnels/<slug>/ (tools/funnel-previews.sh), per language.
 const SHOTS: Record<string, Record<string, { landing: string; order?: string }>> = {

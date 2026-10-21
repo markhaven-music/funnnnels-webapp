@@ -58,7 +58,7 @@ const appearance: Appearance = {
 
 
 export function OrderForm({ lang, currency, country, publishableKey, afterOrder, keepCard }: Props) {
-  const t = copyFor(lang).form;
+  const t = copyFor(lang, currency).form;
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);

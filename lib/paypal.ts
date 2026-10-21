@@ -20,7 +20,7 @@ export function paypalConfigured(): boolean {
 const RETURN_HOSTS = new Set(["m.thegrind.studio", "jazz.thegrind.studio", "funnnnels.vercel.app", "localhost"]);
 
 /** PayPal page languages for the funnels' non-English pages. */
-export const PAYPAL_LOCALE: Record<string, string> = { fr: "fr-FR", it: "it-IT", de: "de-DE", nl: "nl-NL" };
+export const PAYPAL_LOCALE: Record<string, string> = { fr: "fr-FR", it: "it-IT", de: "de-DE", nl: "nl-NL", es: "es-ES" };
 
 /** The origin PayPal sends the buyer back to: theirs when it's one of ours, else the brand domain. */
 export function returnOrigin(raw: unknown): string {

@@ -18,14 +18,18 @@ export const dynamic = "force-dynamic";
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-poppins" });
 
 const FRENCH_COUNTRIES = new Set(["FR", "BE", "LU", "MC", "CH", "CA", "SN", "CI", "MA", "TN", "DZ"]);
+const SPANISH_COUNTRIES = new Set(["ES", "MX", "AR", "CO", "CL", "PE", "VE", "EC", "GT", "CU", "BO", "DO", "HN", "PY", "SV", "NI", "CR", "PA", "UY", "PR"]);
+const DATES: Record<Lang, string> = { en: "en-US", fr: "fr-FR", es: "es-ES" };
 
 async function guessLang(): Promise<Lang> {
   const h = await headers();
   const jar = await cookies();
   const accept = (h.get("accept-language") ?? "").toLowerCase();
   if (accept.startsWith("fr")) return "fr";
-  if (accept && !accept.startsWith("fr")) return "en";
-  return FRENCH_COUNTRIES.has(jar.get(COUNTRY_COOKIE)?.value ?? "") ? "fr" : "en";
+  if (accept.startsWith("es")) return "es";
+  if (accept) return "en";
+  const country = jar.get(COUNTRY_COOKIE)?.value ?? "";
+  return FRENCH_COUNTRIES.has(country) ? "fr" : SPANISH_COUNTRIES.has(country) ? "es" : "en";
 }
 
 async function pageState() {
@@ -48,7 +52,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   const { expired } = await searchParams;
   const { session, purchases, lang } = await pageState();
   const c = copyFor(lang);
-  const date = new Intl.DateTimeFormat(lang === "fr" ? "fr-FR" : "en-US", { day: "numeric", month: "long", year: "numeric" });
+  const date = new Intl.DateTimeFormat(DATES[lang], { day: "numeric", month: "long", year: "numeric" });
 
   return (
     <main className={`${a.page} ${poppins.variable}`} lang={lang}>

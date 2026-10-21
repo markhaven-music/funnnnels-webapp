@@ -3,6 +3,7 @@ import { beaconScript } from "@/lib/beacon";
 import { AB, AB_LANDING_CSS, AB_SCRIPT } from "./abtest";
 import { TEMPLATE } from "./cf/template";
 import en from "./copy/landing/en.json";
+import es from "./copy/landing/es.json";
 import fr from "./copy/landing/fr.json";
 import { copyFor } from "./copy";
 import { funnel } from "./funnel";
@@ -15,20 +16,23 @@ import { paths, type Lang } from "./i18n";
 // behind every button, our tracking, the visitor count (lib/beacon.ts) and the
 // button-colour test (./abtest.ts).
 
-const STRINGS: Record<Lang, Record<string, string>> = { en, fr };
+const STRINGS: Record<Lang, Record<string, string>> = { en, fr, es };
 
 // Images with words baked in, swapped per language.
 const IMAGES: Partial<Record<Lang, Record<string, string>>> = {
   fr: { "value-stack": "value-stack-fr" },
+  es: { "value-stack": "value-stack-es" },
 };
 
 // The hero video (Wistia) per language: English is ClickFunnels' (funnel.wistiaId);
 // French is the same VSL re-voiced in French with French captions
 // (vsl/script-fr.md, made with tools/vsl_captions.py). poster = its Wistia
 // thumbnail saved in public/funnels/midi-drum-kit, shown until the player loads.
+// Spanish has no VSL of its own yet: it plays the English one.
 const VIDEOS: Record<Lang, { id: string; poster: string }> = {
   en: { id: funnel.wistiaId, poster: "vsl-en" },
   fr: { id: "3774byed1i", poster: "vsl-fr" },
+  es: { id: funnel.wistiaId, poster: "vsl-en" },
 };
 
 // French: the space before : ; ! ? » % and after « stays on the line with the
@@ -39,6 +43,11 @@ export const frenchSpaces = (text: string) =>
     .replace(/« /g, "« ")
     .replace(/glisser-dépos/g, "glisser‑dépos");
 
+// Spanish: "27 €" and "90 %" stay on one line. Its dollar visitors are in
+// Latin America, where the sign goes first: "27 €" becomes "$27", not "27 $".
+export const spanishSpaces = (text: string) => text.replace(/ (?=[€%])/g, " ");
+export const dollarFirst = (text: string) => text.replace(/(\d[\d.,]*)(?:\s|&nbsp;)€/g, "$$$1");
+
 /** Apply fn to the text between tags only, never to tags or attributes. */
 export const mapText = (html: string, fn: (t: string) => string) => html.replace(/(^|>)([^<]+)/g, (_, gt, text) => gt + fn(text));
 
@@ -48,6 +57,8 @@ export function landingHtml(lang: Lang, currency: Currency): string {
   const strings = { ...STRINGS.en, ...STRINGS[lang] };
   const words = (key: string) => {
     let html = strings[key] ?? "";
+    if (lang === "es") html = mapText(html, spanishSpaces);
+    if (lang === "es" && currency === "usd") html = mapText(html, dollarFirst);
     if (currency === "usd") html = mapText(html, (t) => t.replaceAll("€", "$"));
     if (lang === "fr") html = mapText(html, frenchSpaces);
     return html;

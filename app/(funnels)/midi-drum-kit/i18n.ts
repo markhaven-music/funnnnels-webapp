@@ -6,16 +6,17 @@ import { funnel } from "./funnel";
 // /midi-drum-kit/<lang>/<currency> pages). Add a language: its copy file in
 // ./copy, an entry here, and nothing else.
 
-export const LANGS = ["en", "fr"] as const;
+export const LANGS = ["en", "fr", "es"] as const;
 export type Lang = (typeof LANGS)[number];
 
 export const isLang = (v: unknown): v is Lang => LANGS.includes(v as Lang);
 
-// Number and currency formats (€27.00 in English, 27,00 € in French).
-const LOCALE: Record<Lang, string> = { en: "en-US", fr: "fr-FR" };
+// Number and currency formats (€27.00 in English, 27,00 € in French and
+// Spanish). Spanish dollars are Latin America's: $27.00, not Spain's 27,00 US$.
+const LOCALE: Record<Lang, string> = { en: "en-US", fr: "fr-FR", es: "es-ES" };
 
 export function money(n: number, currency: Currency, lang: Lang, cents = true): string {
-  return new Intl.NumberFormat(LOCALE[lang], {
+  return new Intl.NumberFormat(lang === "es" && currency === "usd" ? "es-US" : LOCALE[lang], {
     style: "currency",
     currency: currency.toUpperCase(),
     minimumFractionDigits: cents ? 2 : 0,

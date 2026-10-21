@@ -14,8 +14,8 @@ import { supabase } from "@/lib/supabase";
 //   - the purchases are asked to Stripe (metadata.email) and read from
 //     paypal_sales, then each one is checked like on the thank-you pages.
 
-export type Lang = "en" | "fr";
-export const LANGS: readonly Lang[] = ["en", "fr"];
+export type Lang = "en" | "fr" | "es";
+export const LANGS: readonly Lang[] = ["en", "fr", "es"];
 export const isLang = (l: unknown): l is Lang => LANGS.includes(l as Lang);
 
 export const SESSION_COOKIE = "gs_account";

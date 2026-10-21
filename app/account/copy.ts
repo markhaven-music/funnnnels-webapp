@@ -3,6 +3,7 @@ import type { Lang } from "@/lib/account";
 
 // The words of the customer login (/account) and of its email, per language.
 // French: "tu", like the funnels, and its spaces before ? ! : (frenchSpaces).
+// Spanish: "tú", neutral for Spain and Latin America, like the funnel.
 
 const en = {
   meta: "Your downloads · Grind Studio",
@@ -78,6 +79,42 @@ const fr: Copy = {
   },
 };
 
+const es: Copy = {
+  meta: "Tus descargas · Grind Studio",
+  title: "Tus descargas",
+  lead: "Entra con el email que usaste al comprar. Sin contraseña: te enviamos un enlace por email.",
+  steps: ["Escribe tu email", "Abre el enlace que te enviamos", "Descarga tus packs"],
+  label: "El email con el que compraste",
+  placeholder: "tu@email.com",
+  button: "Enviarme el enlace",
+  busy: "Enviando…",
+  invalid: "Ese email no parece correcto.",
+  failed: "No pudimos enviar el email ahora mismo. Inténtalo de nuevo en un minuto.",
+  wait: "Acabamos de enviar un enlace a este email. Espera un minuto antes de pedir otro.",
+  off: "El acceso por email todavía no está activado. Escríbenos y te enviamos tus descargas.",
+  sentTitle: "Revisa tu bandeja de entrada",
+  sentLead: (email: string) => `Si ${email} tiene compras, tu enlace de acceso está en camino. Ábrelo en este dispositivo o en otro: funciona durante 30 minutos.`,
+  sentHelp: "¿No llega nada en un minuto? Mira en Spam o Promociones, y comprueba que sea el email con el que pagaste.",
+  again: "Usar otro email",
+  expired: "Ese enlace ha expirado. Escribe tu email para recibir uno nuevo.",
+  support: "¿Algún problema? Escríbenos a",
+  hello: "Tus compras",
+  sub: (email: string) => `Todo lo que compraste con ${email}.`,
+  none: "No encontramos compras con este email. ¿Compraste con otro? Cierra sesión y usa ese, o escríbenos.",
+  bought: (date: string) => `Comprado el ${date}`,
+  download: "Descargar",
+  signOut: "Cerrar sesión",
+  dev: "Solo en desarrollo (aquí no se envía ningún email): abrir el enlace",
+  email: {
+    subject: "Tu enlace de acceso a Grind Studio",
+    title: "Tus descargas",
+    hi: "¡Hola! Haz clic en el botón para ver tus descargas.",
+    button: "Abrir mis descargas",
+    note: "El enlace funciona durante 30 minutos. ¿No lo pediste? Ignora este email: no pasa nada.",
+    help: "¿Algún problema? Escríbenos:",
+  },
+};
+
 // French spacing on every French string (functions too).
 function spaced<T>(v: T): T {
   if (typeof v === "string") return frenchSpaces(v) as T;
@@ -87,6 +124,6 @@ function spaced<T>(v: T): T {
   return v;
 }
 
-const COPY: Record<Lang, Copy> = { en, fr: spaced(fr) };
+const COPY: Record<Lang, Copy> = { en, fr: spaced(fr), es };
 export const copyFor = (lang: Lang) => COPY[lang];
-export const LANG_NAMES: Record<Lang, string> = { en: "English", fr: "Français" };
+export const LANG_NAMES: Record<Lang, string> = { en: "English", fr: "Français", es: "Español" };
