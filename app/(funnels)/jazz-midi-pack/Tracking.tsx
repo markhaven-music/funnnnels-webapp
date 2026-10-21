@@ -2,6 +2,7 @@
 
 import Script from "next/script";
 import { funnel } from "./funnel";
+import { PREVIEW_JS } from "@/lib/beacon";
 
 // Meta Pixel + Clarity + Neo, as on the Grind Studio landings
 // (grind-studio-landing-pages/src/components/Tracking.astro). Browser events:
@@ -24,7 +25,7 @@ export function Tracking({ value, currency, page = "landing" }: { value: number;
     <>
       <Script id="clarity" strategy="afterInteractive">{`
         (function () {
-          if (${LOCAL}.test(location.hostname)) return;
+          if (${LOCAL}.test(location.hostname) || ${PREVIEW_JS}) return;
           (function (c, l, a, r, i, t, y) {
             c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
             t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i;
@@ -52,7 +53,7 @@ export function Tracking({ value, currency, page = "landing" }: { value: number;
         })();
       `}</Script>
       <Script id="neo" strategy="afterInteractive">{`
-        if (!${LOCAL}.test(location.hostname)) {
+        if (!${LOCAL}.test(location.hostname) && !${PREVIEW_JS}) {
           var s = document.createElement('script'); s.async = true; s.src = '${neoSnippet}';
           document.head.appendChild(s);
         }
@@ -67,6 +68,7 @@ const LOCAL = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$/)
 export const BOOT = `
   function bootPixel(id) {
     if (window.fbq) return;
+    if (${PREVIEW_JS}) { window.fbq = function () {}; return; }
     !(function (f, b, e, v, n, t, s) {
       if (f.fbq) return;
       n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };

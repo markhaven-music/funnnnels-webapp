@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Lanes } from "@/components/FunnelLanes";
+import { Lanes, previewUrl } from "@/components/FunnelLanes";
 import { I } from "@/components/icons";
 import { COLORS, type Variant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import type { Analytics, Metrics, Range, TestStats } from "@/lib/analytics";
@@ -143,7 +143,9 @@ function Variants({ test, step }: { test: TestStats; step: MapStep }) {
             <div key={v.variant} className={s.variantRow} role="row">
               <span className={s.variantName}>
                 <span className={s.swatch} style={{ background: c ? `linear-gradient(180deg, ${c.from}, ${c.to})` : "#999" }} />
-                {name(v.variant)}
+                <a href={previewUrl(step.url, v.variant)} target="_blank" rel="noreferrer" className={s.link} title={`See the ${v.variant} page (not counted as a visit)`}>
+                  {name(v.variant)}
+                </a>
                 {test.leader === v.variant && <span className={s.leading}>leading</span>}
               </span>
               {values.map((val, i) => (
@@ -311,7 +313,7 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
             </div>
           )}
           {entry && (
-            <a href={entry.url} target="_blank" rel="noreferrer" className="btn primary">
+            <a href={previewUrl(entry.url)} target="_blank" rel="noreferrer" className="btn primary" title="Not counted as a visit">
               <I.eye size={14} /> Open funnel
             </a>
           )}
@@ -345,7 +347,7 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
             </div>
             <div className={s.url}>{entry.url}</div>
             <div className={`${s.actions} ${s.center}`}>
-              <a href={entry.url} target="_blank" rel="noreferrer" className={s.btn}>
+              <a href={previewUrl(entry.url)} target="_blank" rel="noreferrer" className={s.btn} title="Not counted as a visit">
                 <I.eye size={13} /> Open page
               </a>
               <CopyButton text={entry.url} />
@@ -360,7 +362,7 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
               <div className={s.connector} aria-hidden />
               <section className={s.step}>
                 <div className={s.card}>
-                  <a href={step.url} target="_blank" rel="noreferrer" className={s.thumb} title="Open the page">
+                  <a href={previewUrl(step.url)} target="_blank" rel="noreferrer" className={s.thumb} title="Open the page (not counted as a visit)">
                     {step.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={step.image} alt="" loading="lazy" />
@@ -380,7 +382,7 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
                     </div>
                     <div className={s.path}>{step.path}</div>
                     <div className={s.actions}>
-                      <a href={step.url} target="_blank" rel="noreferrer" className={s.btn}>
+                      <a href={previewUrl(step.url)} target="_blank" rel="noreferrer" className={s.btn} title="Not counted as a visit">
                         <I.eye size={13} /> Open page
                       </a>
                       <CopyButton text={step.url} />

@@ -23,6 +23,21 @@ const GAP = 36;
 const MIN_K = 0.2;
 const MAX_K = 2;
 
+/**
+ * A page as the dashboard opens it: not counted as a visit, no Pixel (lib/beacon.ts
+ * PREVIEW_JS); with a variant, in that colour of the test.
+ */
+export function previewUrl(url: string, variant?: string): string {
+  try {
+    const u = new URL(url);
+    if (variant) u.searchParams.set("ab", variant);
+    u.searchParams.set("preview", "1");
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 const int = (n: number) => n.toLocaleString("en-US");
 const eur = (n: number, digits = 0) =>
   new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
@@ -263,7 +278,7 @@ function Branches({ lanes, colors, join = false }: { lanes: number; colors: stri
 function PageLabel({ step }: { step: MapStep }) {
   return (
     <div className={s.page}>
-      <a href={step.url} target="_blank" rel="noreferrer" className={s.thumb} title="Open the page">
+      <a href={previewUrl(step.url)} target="_blank" rel="noreferrer" className={s.thumb} title="Open the page (not counted as a visit)">
         {step.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={step.image} alt="" loading="lazy" draggable={false} />
@@ -277,7 +292,7 @@ function PageLabel({ step }: { step: MapStep }) {
       </div>
       <div className={s.path}>{step.path}</div>
       <div className={s.pageActions}>
-        <a href={step.url} target="_blank" rel="noreferrer" className={s.btn}>
+        <a href={previewUrl(step.url)} target="_blank" rel="noreferrer" className={s.btn} title="Not counted as a visit">
           <I.eye size={12} /> Open
         </a>
         {step.editUrl && (
@@ -402,6 +417,9 @@ export function Lanes({ test, steps, entryUrl }: { test: TestStats; steps: MapSt
                           </div>
                         ))}
                       </dl>
+                      <a href={previewUrl(step.url, l.variant)} target="_blank" rel="noreferrer" className={s.see} title="Not counted as a visit">
+                        <I.eye size={12} /> See the {l.variant} page
+                      </a>
                     </section>
                   </div>
                 );

@@ -7,7 +7,10 @@
 // before anything paints, and the CSS below colours the buttons from it.
 // The colour travels with the order (Stripe metadata.variant, PayPal
 // custom_id "v") and with the Pixel events (ab_btn), so sales can be counted
-// per colour. ?ab=green|yellow|orange forces one (to preview it).
+// per colour. ?ab=green|yellow|orange forces one. With ?preview=1 too (the
+// funnel map's lanes) it's only shown: the visitor's own colour stays in the
+// cookie, the tab keeps the shown one (sessionStorage ab_preview) for the
+// order page, and nothing is counted (lib/beacon.ts PREVIEW_JS).
 
 export const AB = {
   cookie: "ab_btn",
@@ -20,15 +23,21 @@ const LIST = AB.variants.join("|");
 /** Runs first thing in <head> / at the top of the page. */
 export const AB_SCRIPT = `(function(){try{
 var re=/(?:^|; )${AB.cookie}=(${LIST})(?:;|$)/,q=(location.search.match(/[?&]ab=(${LIST})(?:&|$)/)||[])[1];
-var v=q||(document.cookie.match(re)||[])[1];
+var pre=/[?&]preview=1(?:&|$)/.test(location.search),v=null;
+try{if(/[?&]preview=0(?:&|$)/.test(location.search))sessionStorage.removeItem('ab_preview');else if(pre&&q)sessionStorage.setItem('ab_preview',q);v=sessionStorage.getItem('ab_preview');}catch(e){if(pre)v=q;}
+if(v&&!/^(${LIST})$/.test(v))v=null;
+if(!v){v=q||(document.cookie.match(re)||[])[1];
 if(!v){var all=${JSON.stringify(AB.variants)};v=all[Math.floor(Math.random()*all.length)];}
-document.cookie='${AB.cookie}='+v+'; path=/; max-age=15552000; samesite=lax';
+document.cookie='${AB.cookie}='+v+'; path=/; max-age=15552000; samesite=lax';}
 document.documentElement.setAttribute('data-ab-btn',v);window.__abBtn=v;
 }catch(e){}})();`;
 
 /** The visitor's colour, in the browser (null before the script ran). */
 export function readVariant(): Variant | null {
   if (typeof document === "undefined") return null;
+  // A preview's colour (see AB_SCRIPT).
+  const shown = (window as unknown as { __abBtn?: string }).__abBtn;
+  if (shown && (AB.variants as readonly string[]).includes(shown)) return shown as Variant;
   const m = document.cookie.match(new RegExp(`(?:^|; )${AB.cookie}=(${LIST})(?:;|$)`));
   return (m?.[1] as Variant) ?? null;
 }

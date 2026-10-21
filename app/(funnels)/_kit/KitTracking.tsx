@@ -3,6 +3,7 @@
 import Script from "next/script";
 import { BOOT } from "../jazz-midi-pack/Tracking";
 import { BRAND } from "./brand";
+import { PREVIEW_JS } from "@/lib/beacon";
 import { purchaseEventId } from "@/lib/neoIds";
 
 // Meta Pixel + Clarity + Neo, as on the Jazz page (../jazz-midi-pack/Tracking.tsx),
@@ -18,7 +19,7 @@ export function KitTracking({ product, value, currency }: { product: string; val
     <>
       <Script id="kit-tracking" strategy="afterInteractive">{`
         (function () {
-          if (${OFF}.test(location.hostname)) return;
+          if (${OFF}.test(location.hostname) || ${PREVIEW_JS}) return;
           (function (c, l, a, r, i, t, y) {
             c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
             t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i;
@@ -49,7 +50,7 @@ export function KitPurchasePixel({ product, orderId, value, currency }: { produc
   return (
     <Script id="kit-purchase" strategy="afterInteractive">{`
       (function () {
-        if (${OFF}.test(location.hostname)) return;
+        if (${OFF}.test(location.hostname) || ${PREVIEW_JS}) return;
         var key = 'px-purchase-${orderId}';
         try { if (localStorage.getItem(key)) return; localStorage.setItem(key, '1'); } catch (e) {}
         ${BOOT}

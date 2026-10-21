@@ -1,6 +1,6 @@
 import { getFunnel, nextStep } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
-import { beaconScript, type Step } from "@/lib/beacon";
+import { beaconScript, PREVIEW_JS, type Step } from "@/lib/beacon";
 import { AB } from "./abtest";
 import { TEMPLATE as FAMOUS } from "./cf/upsell-famous";
 import { TEMPLATE as TOP_HITS } from "./cf/upsell-tophits";
@@ -125,7 +125,7 @@ function headScripts(): string {
   const { metaPixelId, clarityId, neoSnippet } = funnel.tracking;
   return `<script>
 (function () {
-  if (${OFF}.test(location.hostname)) return;
+  if (${OFF}.test(location.hostname) || ${PREVIEW_JS}) return;
   window.clarity = window.clarity || function () { (clarity.q = clarity.q || []).push(arguments); };
   clarity('set', 'landing', location.pathname.replace(/\\/$/, '') || '/');
   if (!window.fbq) {

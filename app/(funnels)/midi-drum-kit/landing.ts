@@ -1,5 +1,5 @@
 import type { Currency } from "@/lib/geo";
-import { beaconScript } from "@/lib/beacon";
+import { beaconScript, PREVIEW_JS } from "@/lib/beacon";
 import { AB, AB_LANDING_CSS, AB_SCRIPT } from "./abtest";
 import { TEMPLATE } from "./cf/template";
 import de from "./copy/landing/de.json";
@@ -255,7 +255,7 @@ function headScripts(currency: Currency): string {
   const params = JSON.stringify({ content_name: funnel.product, content_type: "product", value: funnel.price[currency], currency: currency.toUpperCase() });
   return `<script>
 (function () {
-  if (${OFF}.test(location.hostname)) return;
+  if (${OFF}.test(location.hostname) || ${PREVIEW_JS}) return;
   window.clarity = window.clarity || function () { (clarity.q = clarity.q || []).push(arguments); };
   clarity('set', 'landing', location.pathname.replace(/\\/$/, '') || '/');
   var params = ${params};
