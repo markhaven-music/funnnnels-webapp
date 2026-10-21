@@ -89,7 +89,7 @@ export function IntegrationsPanel() {
               key={int.id}
               style={{
                 background: "var(--bg-1)",
-                border: `1px solid ${isConnected ? int.color.replace(")", " / 0.4)") : "var(--line-soft)"}`,
+                border: "1px solid transparent",
                 borderRadius: "var(--radius)",
                 padding: "18px 20px",
                 display: "flex",
@@ -102,7 +102,7 @@ export function IntegrationsPanel() {
                   style={{
                     width: 36,
                     height: 36,
-                    borderRadius: 9,
+                    borderRadius: "var(--radius-sm)",
                     background: int.color.replace(")", " / 0.15)"),
                     color: int.color,
                     display: "flex",

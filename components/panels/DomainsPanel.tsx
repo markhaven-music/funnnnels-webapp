@@ -71,7 +71,7 @@ export function DomainsPanel() {
             gap: 10,
             marginBottom: 20,
             background: "var(--bg-1)",
-            border: "1px solid var(--line-soft)",
+            border: "1px solid transparent",
             borderRadius: "var(--radius)",
             padding: "14px 16px",
           }}
@@ -85,7 +85,7 @@ export function DomainsPanel() {
               flex: 1,
               background: "var(--bg-2)",
               border: "1px solid var(--line)",
-              borderRadius: 8,
+              borderRadius: "var(--radius-sm)",
               padding: "6px 10px",
               color: "var(--fg-0)",
               fontSize: 13,
@@ -118,7 +118,7 @@ export function DomainsPanel() {
           <div
             style={{
               background: "var(--bg-1)",
-              border: "1px solid var(--line-soft)",
+              border: "1px solid transparent",
               borderRadius: "var(--radius)",
               overflow: "hidden",
               marginBottom: 20,
@@ -179,7 +179,7 @@ export function DomainsPanel() {
             <div
               style={{
                 background: "oklch(0.82 0.16 75 / 0.08)",
-                border: "1px solid oklch(0.82 0.16 75 / 0.25)",
+                border: "1px solid transparent",
                 borderRadius: "var(--radius)",
                 padding: "12px 16px",
                 fontSize: 13,
@@ -192,7 +192,7 @@ export function DomainsPanel() {
                   fontFamily: "var(--font-mono)",
                   background: "oklch(0 0 0 / 0.2)",
                   padding: "1px 5px",
-                  borderRadius: 4,
+                  borderRadius: "var(--radius-xs)",
                 }}
               >
                 cname.funnnnels.com

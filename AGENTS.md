@@ -9,6 +9,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 Any page a buyer sees (landing, order, upsell, thank-you) follows [docs/page-speed.md](docs/page-speed.md): 90+ on Google PageSpeed mobile, checked on pagespeed.web.dev after the deploy.
 
 <!-- BEGIN AWS Agent Toolkit rules -->
+# The dashboard has design rules
+
+funnnnels' own screens follow [docs/design.md](docs/design.md): card borders the colour of the card, nearly square corners, real numbers only.
+
 # AWS Guidance
 
 - Where these AWS rules conflict with the project's own instructions, the

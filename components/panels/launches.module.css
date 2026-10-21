@@ -9,7 +9,7 @@
 .card {
   text-align: left;
   background: var(--bg-1);
-  border: 1px solid var(--line-soft);
+  border: 1px solid transparent;
   border-radius: var(--radius);
   padding: 16px 18px;
   color: var(--fg-0);
@@ -18,9 +18,11 @@
   display: grid;
   gap: 6px;
 }
-.card:hover,
+.card:hover {
+  background: var(--bg-2);
+}
 .cardOn {
-  border-color: var(--accent-dim);
+  background: oklch(0.74 0.19 295 / 0.1);
 }
 .cardName {
   font-size: 15px;
@@ -37,7 +39,7 @@
   font-size: 11px;
   letter-spacing: 0.04em;
   padding: 2px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--line);
   color: var(--fg-1);
 }
@@ -56,7 +58,7 @@
 
 .panel {
   background: var(--bg-1);
-  border: 1px solid var(--line-soft);
+  border: 1px solid transparent;
   border-radius: var(--radius);
   padding: 18px 20px;
   margin-bottom: 16px;
@@ -106,7 +108,7 @@
   position: relative;
   display: flex;
   height: 54px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--line);
 }
@@ -171,7 +173,7 @@
 }
 .stat {
   background: var(--bg-1);
-  border: 1px solid var(--line-soft);
+  border: 1px solid transparent;
   border-radius: var(--radius);
   padding: 14px 16px;
 }
@@ -202,13 +204,13 @@
 .barTrack {
   height: 10px;
   background: var(--bg-2);
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
   overflow: hidden;
 }
 .barFill {
   height: 100%;
   background: var(--accent);
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
 }
 
 /* forms */
@@ -232,7 +234,7 @@
 .select {
   background: var(--bg-2);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 7px 10px;
   color: var(--fg-0);
   font-size: 13px;
@@ -279,8 +281,9 @@
   font-size: 13px;
   line-height: 1.5;
   color: var(--fg-1);
-  border: 1px dashed var(--amber);
-  border-radius: 8px;
+  border: 1px solid transparent;
+  background: oklch(0.82 0.16 75 / 0.08);
+  border-radius: var(--radius);
   padding: 10px 12px;
   margin-bottom: 12px;
 }

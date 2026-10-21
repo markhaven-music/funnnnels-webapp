@@ -119,6 +119,17 @@ export type TestStats = {
   daysToGo: number | null;
 };
 
+/** One UTC day, all funnels together. */
+export type Day = {
+  day: string; // "2026-10-21"
+  orders: number; // the orders themselves, not their upsells
+  upsells: number;
+  revenue: number; // in euros, upsells included
+  visitors: number; // of the landings
+  orderViews: number;
+  checkouts: number;
+};
+
 export type Analytics = {
   range: Range;
   since: string | null;
@@ -127,6 +138,12 @@ export type Analytics = {
   usdToEur: number;
   funnels: FunnelStats[];
   test: TestStats | null;
+  /** Day by day over the range (dashboard home), oldest first. */
+  days: Day[];
+  /** The same number of days just before the range, for the comparisons; null for "all". */
+  previous: Day[] | null;
+  /** When the last order or upsell was paid (ms), whatever the range. */
+  lastSale: number | null;
   sources: { stripe: boolean; paypal: boolean };
   errors: string[];
 };
@@ -190,6 +207,49 @@ async function viewTotals(since: string | null): Promise<ViewRow[]> {
   const { data, error } = await supabase().rpc("page_view_totals", { p_since: since });
   if (error) throw error;
   return ((data ?? []) as ViewRow[]).map((r) => ({ ...r, views: Number(r.views) }));
+}
+
+type DayRow = { day: string; funnel: string; page: Step; views: number };
+
+async function viewDays(since: string | null): Promise<DayRow[]> {
+  const { data, error } = await supabase().rpc("page_view_days", { p_since: since });
+  if (error) throw error;
+  return ((data ?? []) as DayRow[]).map((r) => ({ ...r, views: Number(r.views) }));
+}
+
+const dayOf = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+
+/** Every UTC day from `first` to `last` ("2026-10-14"), both included. */
+function dayList(first: string, last: string): string[] {
+  const out: string[] = [];
+  for (let t = Date.parse(`${first}T00:00:00Z`); t <= Date.parse(`${last}T00:00:00Z`); t += DAY) out.push(dayOf(t));
+  return out;
+}
+
+/** The range day by day, and as many days before it (none for "all"). */
+function daily(range: Range, since: string | null, now: number, rows: DayRow[], sales: Sale[], rate: number, trackingSince: string | null) {
+  const today = dayOf(now);
+  const first = since ?? [trackingSince, ...sales.map((s) => dayOf(s.created))].filter(Boolean).sort()[0] ?? today;
+  const days = dayList(first, today);
+  const before = since ? dayList(dayOf(Date.parse(`${first}T00:00:00Z`) - days.length * DAY), dayOf(Date.parse(`${first}T00:00:00Z`) - DAY)) : [];
+  const by = new Map<string, Day>(
+    [...before, ...days].map((day) => [day, { day, orders: 0, upsells: 0, revenue: 0, visitors: 0, orderViews: 0, checkouts: 0 }]),
+  );
+  for (const r of rows) {
+    const d = by.get(r.day);
+    if (!d) continue;
+    if (r.page === "landing") d.visitors += r.views;
+    else if (r.page === "order") d.orderViews += r.views;
+    else if (r.page === "checkout") d.checkouts += r.views;
+  }
+  for (const s of sales) {
+    const d = by.get(dayOf(s.created));
+    if (!d) continue;
+    if (s.offer) d.upsells += 1;
+    else d.orders += 1;
+    d.revenue += s.currency === "usd" ? s.amount * rate : s.amount;
+  }
+  return { days: days.map((d) => by.get(d)!), previous: range === "all" ? null : before.map((d) => by.get(d)!) };
 }
 
 async function stripeSales(slug: string): Promise<Sale[]> {
@@ -272,9 +332,13 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
   ].map((f) => ({ ...f, url: `${KIT_HOME}/${f.slug}` }));
 
   const hasStripe = stripeConfigured();
-  const [views, allViews, rate, trackingSince, testStart, paypal, ...stripeLists] = await Promise.all([
+  // The day-by-day rows reach back one range more, for the comparison.
+  const span = range === "7d" ? 7 : 28;
+  const before = since ? dayOf(Date.parse(`${since}T00:00:00Z`) - span * DAY) : null;
+  const [views, allViews, dayRows, rate, trackingSince, testStart, paypal, ...stripeLists] = await Promise.all([
     soft("visitors", viewTotals(since), []),
     range === "all" ? Promise.resolve(null) : soft("visitors (all time)", viewTotals(null), []),
+    soft("visitors per day", viewDays(before), []),
     usdToEur(),
     soft("tracking start", firstDay(), null),
     soft("test start", firstDay("midi-drum-kit"), null),
@@ -318,6 +382,8 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
     usdToEur: rate,
     funnels,
     test: buttonTest(allViews ?? views, allSales, rate, testStart, now),
+    ...daily(range, since, now, dayRows, allSales, rate, trackingSince),
+    lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
     errors,
   };

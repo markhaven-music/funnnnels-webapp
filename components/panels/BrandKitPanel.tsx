@@ -61,7 +61,7 @@ export function BrandKitPanel() {
         <section
           style={{
             background: "var(--bg-1)",
-            border: "1px solid var(--line-soft)",
+            border: "1px solid transparent",
             borderRadius: "var(--radius)",
             padding: "20px 22px",
             display: "flex",
@@ -81,7 +81,7 @@ export function BrandKitPanel() {
                 onChange={(e) =>
                   setSettings((s) => s && { ...s, brandPrimary: e.target.value })
                 }
-                style={{ width: 36, height: 36, border: "none", background: "none", cursor: "pointer", borderRadius: 8 }}
+                style={{ width: 36, height: 36, border: "none", background: "none", cursor: "pointer", borderRadius: "var(--radius-sm)" }}
               />
               <input
                 type="text"
@@ -102,7 +102,7 @@ export function BrandKitPanel() {
                 onChange={(e) =>
                   setSettings((s) => s && { ...s, brandAccent: e.target.value })
                 }
-                style={{ width: 36, height: 36, border: "none", background: "none", cursor: "pointer", borderRadius: 8 }}
+                style={{ width: 36, height: 36, border: "none", background: "none", cursor: "pointer", borderRadius: "var(--radius-sm)" }}
               />
               <input
                 type="text"
@@ -119,7 +119,7 @@ export function BrandKitPanel() {
         <section
           style={{
             background: "var(--bg-1)",
-            border: "1px solid var(--line-soft)",
+            border: "1px solid transparent",
             borderRadius: "var(--radius)",
             padding: "20px 22px",
             display: "flex",
@@ -149,7 +149,7 @@ export function BrandKitPanel() {
         <section
           style={{
             background: "var(--bg-1)",
-            border: "1px solid var(--line-soft)",
+            border: "1px solid transparent",
             borderRadius: "var(--radius)",
             padding: "20px 22px",
             display: "flex",
@@ -175,7 +175,7 @@ export function BrandKitPanel() {
             <img
               src={settings.logoUrl}
               alt="Logo preview"
-              style={{ maxHeight: 48, maxWidth: 160, objectFit: "contain", borderRadius: 6 }}
+              style={{ maxHeight: 48, maxWidth: 160, objectFit: "contain", borderRadius: "var(--radius-sm)" }}
             />
           )}
         </section>
@@ -204,7 +204,7 @@ function FieldRow({ label, children }: { label: string; children: React.ReactNod
 const inputStyle: React.CSSProperties = {
   background: "var(--bg-2)",
   border: "1px solid var(--line)",
-  borderRadius: 8,
+  borderRadius: "var(--radius-sm)",
   padding: "7px 10px",
   color: "var(--fg-0)",
   fontSize: 13,

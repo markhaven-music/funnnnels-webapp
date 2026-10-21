@@ -95,3 +95,19 @@ as $$
 $$;
 revoke all on function public.count_bot_view(text, text, text) from public, anon, authenticated;
 grant execute on function public.count_bot_view(text, text, text) to service_role;
+
+-- Visitors per day and funnel step, for the dashboard home's charts
+-- (applied as migrations "page_view_days" and "page_view_days_grants").
+create function public.page_view_days(p_since date)
+returns table (day date, funnel text, page text, views bigint)
+language sql
+stable
+set search_path = ''
+as $$
+  select day, funnel, page, sum(views)::bigint
+  from public.page_views
+  where p_since is null or day >= p_since
+  group by day, funnel, page;
+$$;
+revoke all on function public.page_view_days(date) from public, anon, authenticated;
+grant execute on function public.page_view_days(date) to service_role;

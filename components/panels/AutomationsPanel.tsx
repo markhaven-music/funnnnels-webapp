@@ -100,7 +100,7 @@ export function AutomationsPanel() {
         </div>
         {!loading && list.length === 0 && <p className={e.hint}>None yet. A welcome series for new contacts, or a follow-up after a purchase, starts here.</p>}
         {list.map((s) => (
-          <button key={s.id} type="button" className={e.rowButton} style={{ gridTemplateColumns: "60px minmax(0,2fr) minmax(0,1.4fr) 90px 160px", borderRadius: 8 }} onClick={() => setOpen(s)}>
+          <button key={s.id} type="button" className={e.rowButton} style={{ gridTemplateColumns: "60px minmax(0,2fr) minmax(0,1.4fr) 90px 160px", borderRadius: "var(--radius-sm)" }} onClick={() => setOpen(s)}>
             <span className={`${e.chip} ${s.active ? e.chip_on : ""}`}>{s.active ? "on" : "off"}</span>
             <span className={`${e.cell} ${e.strong}`}>{s.name}</span>
             <span className={`${e.cell} ${e.dim}`}>

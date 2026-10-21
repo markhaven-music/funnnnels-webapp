@@ -29,12 +29,13 @@ const NAV_LABELS: Record<string, string> = Object.fromEntries(
 
 type Props = { funnels: StoredFunnel[] };
 
-// The cards' visits, CVR and revenue: the last 28 days from dashboard → Analytics.
+// The cards' visits, CVR and revenue, and the home's charts until another
+// range is picked: the last 28 days from dashboard → Analytics.
 const CARD_RANGE = "28d";
 
 export function Dashboard({ funnels: rows }: Props) {
   const [activeNav, setActiveNav] = useState<string>("home");
-  const [stats, setStats] = useState<Record<string, Metrics>>({});
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   // ?nav=analytics (from a funnel map) opens that panel.
   useEffect(() => {
     const nav = new URLSearchParams(window.location.search).get("nav");
@@ -43,10 +44,13 @@ export function Dashboard({ funnels: rows }: Props) {
   useEffect(() => {
     fetch(`/api/analytics?range=${CARD_RANGE}`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
-      .then((a) => a && setStats(Object.fromEntries(a.funnels.map((f) => [f.slug, f.total]))))
+      .then((a) => a && setAnalytics(a))
       .catch(() => {});
   }, []);
-  const funnels = useMemo(() => withStats(rows, stats, CARD_RANGE), [rows, stats]);
+  const funnels = useMemo(() => {
+    const stats: Record<string, Metrics> = Object.fromEntries((analytics?.funnels ?? []).map((f) => [f.slug, f.total]));
+    return withStats(rows, stats, CARD_RANGE);
+  }, [rows, analytics]);
   const topBarLabel = NAV_LABELS[activeNav] ?? "Dashboard";
 
   return (
@@ -54,7 +58,7 @@ export function Dashboard({ funnels: rows }: Props) {
       <Brand />
       <Sidebar funnelCount={funnels.length} active={activeNav} onNav={setActiveNav} />
       <TopBar trail={[{ label: topBarLabel }]} />
-      {activeNav === "home"         && <DashboardHome funnels={funnels} />}
+      {activeNav === "home"         && <DashboardHome funnels={funnels} analytics={analytics} />}
       {activeNav === "funnels"      && <MainPanel funnels={funnels} />}
       {activeNav === "launches"     && <LaunchesPanel />}
       {activeNav === "pages"        && <LandingPagesPanel funnels={funnels} />}
