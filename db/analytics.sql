@@ -69,3 +69,29 @@ alter table public.page_views add constraint page_views_page_check
   check (page in ('landing', 'order', 'checkout', 'upsell-1', 'upsell-2', 'thank-you'));
 alter table public.paypal_sales add column offer text not null default '';
 alter table public.paypal_sales add column parent text;
+
+-- Bots (migration "funnel_analytics_bots", 2026-10-21): beacons that
+-- lib/bots.ts turned away (Meta's ad reviewers, crawlers, headless browsers)
+-- are not counted in page_views; this only notes how many, and why.
+create table public.bot_views (
+  day date not null,
+  funnel text not null,
+  page text not null,
+  reason text not null,
+  views integer not null default 0,
+  primary key (day, funnel, page, reason)
+);
+alter table public.bot_views enable row level security;
+
+create function public.count_bot_view(p_funnel text, p_page text, p_reason text)
+returns void
+language sql
+set search_path = ''
+as $$
+  insert into public.bot_views (day, funnel, page, reason, views)
+  values ((now() at time zone 'utc')::date, p_funnel, p_page, p_reason, 1)
+  on conflict (day, funnel, page, reason)
+  do update set views = public.bot_views.views + 1;
+$$;
+revoke all on function public.count_bot_view(text, text, text) from public, anon, authenticated;
+grant execute on function public.count_bot_view(text, text, text) to service_role;

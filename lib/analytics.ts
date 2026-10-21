@@ -30,6 +30,12 @@ export async function countPageView(v: { funnel: string; page: Step; lang: strin
   if (error) throw error;
 }
 
+/** Note a beacon turned away as a bot (lib/bots.ts), for the record only. */
+export async function countBotView(v: { funnel: string; page: string; reason: string }) {
+  const { error } = await supabase().rpc("count_bot_view", { p_funnel: v.funnel, p_page: v.page, p_reason: v.reason });
+  if (error) throw error;
+}
+
 /** Note a captured PayPal order (safe to call twice for the same order). */
 export async function recordPayPalSale(order: PayPalOrder, lang: string) {
   const unit = order.purchase_units[0];

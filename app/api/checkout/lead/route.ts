@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { botReason } from "@/lib/bots";
 import { isEmail, upsertContact } from "@/lib/contacts";
 import { resolveFunnel } from "@/lib/funnels";
 import { supabase } from "@/lib/supabase";
@@ -22,6 +23,9 @@ export async function POST(req: Request) {
     .filter(Boolean)
     .join(" ")
     .slice(0, 80);
+
+  // A bot filling the form (Meta's ad review) is no lead: no contact, no reminder.
+  if (botReason(req)) return NextResponse.json({ ok: true });
 
   const lang = typeof body.lang === "string" && f.langs?.includes(body.lang) ? body.lang : "en";
 

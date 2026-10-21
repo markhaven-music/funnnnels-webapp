@@ -44,6 +44,7 @@ export function track({ funnel, page, lang = "en", abCookie }: BeaconOptions): v
       v: abCookie ? readCookie(abCookie) : "",
       c: readCookie("visitor_country"),
       h: location.hostname,
+      ...(navigator.webdriver ? { w: 1 } : {}),
     });
     if (!navigator.sendBeacon?.(BEACON_URL, body)) {
       fetch(BEACON_URL, { method: "POST", body, keepalive: true }).catch(() => {});
@@ -60,7 +61,7 @@ export function beaconScript({ funnel, page, lang = "en", abCookie }: BeaconOpti
 var o=${o},k='fv:'+o.f+':'+o.l+':'+o.p,d=new Date().toDateString();
 try{if(localStorage.getItem(k)===d)return;localStorage.setItem(k,d);}catch(e){}
 var c=function(n){return(document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'))||[])[1]||'';};
-o.v=${abCookie ? `c(${JSON.stringify(abCookie)})` : "''"};o.c=c('visitor_country');o.h=location.hostname;
+o.v=${abCookie ? `c(${JSON.stringify(abCookie)})` : "''"};o.c=c('visitor_country');o.h=location.hostname;if(navigator.webdriver)o.w=1;
 var b=JSON.stringify(o),u=${JSON.stringify(BEACON_URL)};
 if(!(navigator.sendBeacon&&navigator.sendBeacon(u,b)))fetch(u,{method:'POST',body:b,keepalive:true}).catch(function(){});
 }catch(e){}})();`;
