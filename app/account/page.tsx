@@ -19,7 +19,8 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700
 
 const FRENCH_COUNTRIES = new Set(["FR", "BE", "LU", "MC", "CH", "CA", "SN", "CI", "MA", "TN", "DZ"]);
 const SPANISH_COUNTRIES = new Set(["ES", "MX", "AR", "CO", "CL", "PE", "VE", "EC", "GT", "CU", "BO", "DO", "HN", "PY", "SV", "NI", "CR", "PA", "UY", "PR"]);
-const DATES: Record<Lang, string> = { en: "en-US", fr: "fr-FR", es: "es-ES" };
+const GERMAN_COUNTRIES = new Set(["DE", "AT", "CH", "LI"]);
+const DATES: Record<Lang, string> = { en: "en-US", fr: "fr-FR", es: "es-ES", de: "de-DE" };
 
 async function guessLang(): Promise<Lang> {
   const h = await headers();
@@ -27,9 +28,10 @@ async function guessLang(): Promise<Lang> {
   const accept = (h.get("accept-language") ?? "").toLowerCase();
   if (accept.startsWith("fr")) return "fr";
   if (accept.startsWith("es")) return "es";
+  if (accept.startsWith("de")) return "de";
   if (accept) return "en";
   const country = jar.get(COUNTRY_COOKIE)?.value ?? "";
-  return FRENCH_COUNTRIES.has(country) ? "fr" : SPANISH_COUNTRIES.has(country) ? "es" : "en";
+  return FRENCH_COUNTRIES.has(country) ? "fr" : SPANISH_COUNTRIES.has(country) ? "es" : GERMAN_COUNTRIES.has(country) ? "de" : "en";
 }
 
 async function pageState() {

@@ -4,15 +4,17 @@ import { beaconScript, type Step } from "@/lib/beacon";
 import { AB } from "./abtest";
 import { TEMPLATE as FAMOUS } from "./cf/upsell-famous";
 import { TEMPLATE as TOP_HITS } from "./cf/upsell-tophits";
+import famousDe from "./copy/upsell-famous/de.json";
 import famousEn from "./copy/upsell-famous/en.json";
 import famousEs from "./copy/upsell-famous/es.json";
 import famousFr from "./copy/upsell-famous/fr.json";
+import topHitsDe from "./copy/upsell-tophits/de.json";
 import topHitsEn from "./copy/upsell-tophits/en.json";
 import topHitsEs from "./copy/upsell-tophits/es.json";
 import topHitsFr from "./copy/upsell-tophits/fr.json";
 import { funnel } from "./funnel";
 import type { Lang } from "./i18n";
-import { AFTER_LOAD, dollarFirst, escapeAttr, faster, frenchSpaces, mapText, spanishSpaces } from "./landing";
+import { AFTER_LOAD, dollarFirst, escapeAttr, faster, frenchSpaces, mapText, unitSpaces } from "./landing";
 
 // The one-click upsell pages after the order (funnel.offers): ClickFunnels'
 // own pages, 1:1 (./cf/upsell-*.ts, made by tools/cf_clone.mjs --oto), with
@@ -32,8 +34,8 @@ type Copy = { [key: string]: string | Record<string, string> | undefined; extra?
 // with that player's play-button colour; the TOP HITS page's player is Wistia's
 // own web component, which needs none.
 const PAGES: Record<string, { template: string; copy: Record<Lang, Copy>; poster: string | null; play?: string; beacon: Step; title: string }> = {
-  "famous-beats": { template: FAMOUS, copy: { en: famousEn, fr: famousFr, es: famousEs }, poster: "vsl-famous", play: "#60615e", beacon: "upsell-1", title: "Famous Beats Bundle" },
-  "top-hits": { template: TOP_HITS, copy: { en: topHitsEn, fr: topHitsFr, es: topHitsEs }, poster: null, beacon: "upsell-2", title: "TOP HITS MIDI Bundle" },
+  "famous-beats": { template: FAMOUS, copy: { en: famousEn, fr: famousFr, es: famousEs, de: famousDe }, poster: "vsl-famous", play: "#60615e", beacon: "upsell-1", title: "Famous Beats Bundle" },
+  "top-hits": { template: TOP_HITS, copy: { en: topHitsEn, fr: topHitsFr, es: topHitsEs, de: topHitsDe }, poster: null, beacon: "upsell-2", title: "TOP HITS MIDI Bundle" },
 };
 
 // What the buttons say while they work, per language.
@@ -52,6 +54,11 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string }> = {
     busy: "Añadiéndolo a tu pedido…",
     failed: "El pago no se completó. Inténtalo de nuevo o salta esta oferta: tu pedido está a salvo.",
     noOrder: "No encontramos tu pedido en esta página. Tu compra está a salvo: continúa para ver tus descargas.",
+  },
+  de: {
+    busy: "Wird zu deiner Bestellung hinzugefügt…",
+    failed: "Die Zahlung ist nicht durchgegangen. Versuch es noch einmal oder überspring dieses Angebot: Deine Bestellung ist sicher.",
+    noOrder: "Wir finden deine Bestellung auf dieser Seite nicht. Dein Kauf ist sicher: Mach weiter zu deinen Downloads.",
   },
 };
 
@@ -73,7 +80,7 @@ export function upsellHtml(offerId: string, lang: Lang, currency: Currency): str
     if (key.startsWith("s")) return dollars(html); // a script: only its prices change
     html = mapText(html, dollars);
     if (lang === "fr") html = mapText(html, frenchSpaces);
-    if (lang === "es") html = mapText(html, spanishSpaces);
+    if (lang === "es" || lang === "de") html = mapText(html, unitSpaces);
     return html;
   };
 

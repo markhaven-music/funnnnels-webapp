@@ -16,7 +16,7 @@ const RANGES: { id: Range; label: string }[] = [
   { id: "all", label: "ALL" },
 ];
 
-const LANG_NAMES: Record<string, string> = { en: "English", fr: "French", es: "Spanish", "?": "Language not recorded" };
+const LANG_NAMES: Record<string, string> = { en: "English", fr: "French", es: "Spanish", de: "German", "?": "Language not recorded" };
 
 const int = (n: number) => n.toLocaleString("en-US");
 const eur = (n: number, cents = false) =>
