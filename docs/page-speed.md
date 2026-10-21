@@ -73,6 +73,19 @@ to 82–90 (FCP 1.1 s, LCP 3.4 s); rule 11 is the next step.
     - No more than 2–3× the width they take on screen.
     - A 700 px logo shown at 100 px wastes 20–40 KB on a phone's connection.
     - Use `dwebp` + `cwebp -resize <w> 0 -q 80`.
+13. **A stand-in font the size of the web font.** Web fonts load after the
+    first paint (rule 1), so the first screen is drawn in a stand-in font and
+    re-wraps when Poppins or Inter arrive. Big headlines then push everything
+    down or up: the Spanish page lost 15 points to it (CLS 0.18), while
+    English and French happened to wrap the same.
+    - Give each web font a `"<font> Fallback"` face: Arial, or Liberation Sans
+      on Linux, with `size-adjust` and `ascent`/`descent`/`line-gap-override`.
+    - Take the numbers from Next:
+      `getFallbackFontOverrideMetrics("Poppins")` in
+      `next/dist/compiled/@next/font/dist/google/get-fallback-font-override-metrics.js`.
+    - Put it after the web font in every stack: `"Poppins", "Poppins Fallback", sans-serif`.
+    - `FALLBACK_FONTS` in `landing.ts`. A new language or headline gets a
+      PageSpeed run: a text that wraps badly shows up as CLS, not on a fast Mac.
 
 All of this is already applied to cloned pages by `faster()` in
 `app/(funnels)/midi-drum-kit/landing.ts`. Run every new ClickFunnels clone
