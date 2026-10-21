@@ -13,11 +13,13 @@ CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
+# The window is taller than the picture: a preview's "not counted" tag sits at its
+# bottom edge, and only the top 1280×800 is kept.
 shot() { # slug file url
-  "$CHROME" --headless=new --disable-gpu --hide-scrollbars --window-size=1280,800 \
+  "$CHROME" --headless=new --disable-gpu --hide-scrollbars --window-size=1280,880 \
     --virtual-time-budget=15000 --user-data-dir="$TMP/profile-$1-$2" \
     --screenshot="$TMP/$1-$2.png" "$3" >/dev/null 2>&1
-  cwebp -quiet -q 82 -resize 720 0 "$TMP/$1-$2.png" -o "public/funnels/$1/$2.webp"
+  cwebp -quiet -q 82 -crop 0 0 1280 800 -resize 720 0 "$TMP/$1-$2.png" -o "public/funnels/$1/$2.webp"
   echo "public/funnels/$1/$2.webp"
 }
 
@@ -26,6 +28,9 @@ shot midi-drum-kit preview "https://funnnnels.vercel.app/fr/midi-drum-kit?countr
 shot midi-drum-kit order "https://funnnnels.vercel.app/fr/midi-drum-kit/order?country=FR"
 shot midi-drum-kit preview-en "https://funnnnels.vercel.app/midi-drum-kit?country=US"
 shot midi-drum-kit order-en "https://funnnnels.vercel.app/midi-drum-kit/order?country=US"
+# thanks = the thank-you step: ?preview=1 shows it as a buyer of everything sees it (no order needed).
+shot midi-drum-kit thanks "https://funnnnels.vercel.app/fr/midi-drum-kit/thank-you?country=FR&preview=1"
+shot midi-drum-kit thanks-en "https://funnnnels.vercel.app/midi-drum-kit/thank-you?country=US&preview=1"
 shot top-hits-midi-bundle preview "https://funnnnels.vercel.app/top-hits-midi-bundle?country=US"
 shot top-hits-midi-bundle order "https://funnnnels.vercel.app/top-hits-midi-bundle/order?country=US"
 shot jazz-midi-pack preview "https://funnnnels.vercel.app/jazz-midi-pack?country=US"

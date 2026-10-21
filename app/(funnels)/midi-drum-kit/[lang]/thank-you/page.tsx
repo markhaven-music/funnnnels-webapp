@@ -45,14 +45,17 @@ export default async function ThankYou({
   searchParams,
 }: {
   params: Params;
-  searchParams: Promise<{ payment_intent?: string; paypal_order?: string; u?: string }>;
+  searchParams: Promise<{ payment_intent?: string; paypal_order?: string; u?: string; preview?: string }>;
 }) {
   const { lang } = await params;
   if (!isLang(lang)) notFound();
   const c = copyFor(lang).thanks;
-  const { payment_intent, paypal_order, u } = await searchParams;
+  const { payment_intent, paypal_order, u, preview } = await searchParams;
   const order = await getOrder(payment_intent ?? paypal_order, funnel.slug);
-  const paid = order?.status === "succeeded";
+  // The dashboard's preview (?preview=1, not counted: lib/beacon.ts) with no order:
+  // the page as someone who bought everything sees it, its buttons inert.
+  const sample = !order && preview === "1";
+  const paid = sample || order?.status === "succeeded";
   const pending = order?.status === "processing";
 
   // The upsells bought after this order, each checked with its provider.
@@ -71,7 +74,11 @@ export default async function ThankYou({
     for (const o of [order, ...upsells]) await noteSale(o, funnel.slug, lang);
   });
 
-  const downloads = paid && order ? [order, ...upsells].flatMap((o) => unlocked(o.items).map((key) => ({ order: o.id, key }))) : [];
+  const downloads = sample
+    ? unlocked(["pack", ...funnel.bumps.map((b) => b.id), ...funnel.offers.map((o) => o.id)]).map((key) => ({ order: "preview", key }))
+    : paid && order
+      ? [order, ...upsells].flatMap((o) => unlocked(o.items).map((key) => ({ order: o.id, key })))
+      : [];
 
   return (
     <main className={`${t.page} ${poppins.variable}`} lang={lang}>
@@ -96,7 +103,7 @@ export default async function ThankYou({
         {downloads.length > 0 && (
           <div className={t.list}>
             {downloads.map((d) => (
-              <a key={`${d.order}-${d.key}`} className={d.key === "pack" ? t.main : t.btn} href={`/${funnel.slug}/download?order=${d.order}&file=${d.key}`}>
+              <a key={`${d.order}-${d.key}`} className={d.key === "pack" ? t.main : t.btn} href={sample ? undefined : `/${funnel.slug}/download?order=${d.order}&file=${d.key}`}>
                 <svg viewBox="0 0 512 512" aria-hidden width="16" height="16">
                   <path
                     fill="currentColor"
@@ -108,6 +115,7 @@ export default async function ThankYou({
             ))}
           </div>
         )}
+        {sample && <p className={t.note}>{c.receipt("Stripe", null)}</p>}
         {paid && order && (
           <p className={t.note}>{c.receipt(order.provider === "paypal" ? "PayPal" : "Stripe", order.email)}</p>
         )}

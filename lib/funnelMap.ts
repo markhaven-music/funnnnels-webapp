@@ -43,10 +43,10 @@ const home = (slug: string, lang: string) =>
   slug === "midi-drum-kit" && lang === "en" ? "https://funnnnels.vercel.app" : KIT_HOME;
 
 // Screenshots in public/funnels/<slug>/ (tools/funnel-previews.sh), per language.
-const SHOTS: Record<string, Record<string, { landing: string; order?: string }>> = {
+const SHOTS: Record<string, Record<string, { landing: string; order?: string; thanks?: string }>> = {
   "jazz-midi-pack": { en: { landing: "preview", order: "order" } },
   "top-hits-midi-bundle": { en: { landing: "preview", order: "order" } },
-  "midi-drum-kit": { fr: { landing: "preview", order: "order" }, en: { landing: "preview-en", order: "order-en" } },
+  "midi-drum-kit": { fr: { landing: "preview", order: "order", thanks: "thanks" }, en: { landing: "preview-en", order: "order-en", thanks: "thanks-en" } },
 };
 
 function codeMap(f: Product, editable: Set<string>): FunnelMap {
@@ -81,7 +81,7 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
           ...step("upsell", `Upsell ${i + 1}: ${o.name}`, `/${f.slug}/${o.path}`, img(o.path), null),
           offer: { id: o.id, page: `upsell-${i + 1}`, live: upsellsOn(f) },
         })),
-        step("thank-you", "Thank-you page", f.checkout.thankYou, null, null),
+        step("thank-you", "Thank-you page", f.checkout.thankYou, img(shots?.thanks), null),
       ];
       return { lang, label: LANG_LABEL[lang] ?? lang.toUpperCase(), steps };
     }),
