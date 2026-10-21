@@ -32,9 +32,11 @@ const en = {
   dev: "Dev only (no email is sent here): open the link",
   email: {
     subject: "Your Grind Studio sign-in link",
+    title: "Your downloads",
     hi: "Hi! Tap the button to see your downloads.",
     button: "Open my downloads",
     note: "The link works for 30 minutes. Didn't ask for it? Ignore this email: nothing happens.",
+    help: "A problem? Write to us:",
   },
 };
 
@@ -68,9 +70,11 @@ const fr: Copy = {
   dev: "Dev seulement (aucun email n'est envoyé ici) : ouvrir le lien",
   email: {
     subject: "Ton lien de connexion Grind Studio",
+    title: "Tes téléchargements",
     hi: "Salut ! Clique sur le bouton pour retrouver tes téléchargements.",
     button: "Voir mes téléchargements",
     note: "Le lien marche pendant 30 minutes. Tu n'as rien demandé ? Ignore cet email : il ne se passe rien.",
+    help: "Un problème ? Écris-nous :",
   },
 };
 

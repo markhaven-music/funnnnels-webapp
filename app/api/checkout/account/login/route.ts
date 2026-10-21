@@ -46,13 +46,19 @@ export async function POST(req: Request) {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+// A tall card on black, like the funnels: brand, title, one line, the button,
+// then the fine print under a rule. Tables and inline styles for mail apps.
 function emailHtml(link: string, c: ReturnType<typeof copyFor>["email"], lang: string): string {
-  return `<!doctype html><html lang="${lang}"><body style="margin:0;background:#0b0b0b;padding:32px 16px;font-family:Arial,Helvetica,sans-serif">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#161616;border:1px solid #2a2a2a;border-radius:16px">
-<tr><td style="padding:28px 28px 8px;text-align:center;color:#fff;font-size:15px;font-weight:700;letter-spacing:.18em">GRIND ◆ STUDIO</td></tr>
-<tr><td style="padding:12px 28px 4px;text-align:center;color:#e8e8e8;font-size:16px;line-height:1.5">${esc(c.hi)}</td></tr>
-<tr><td style="padding:20px 28px;text-align:center"><a href="${esc(link)}" style="display:inline-block;background:#22c55e;color:#04140a;font-weight:700;font-size:16px;text-decoration:none;padding:14px 26px;border-radius:10px">${esc(c.button)}</a></td></tr>
-<tr><td style="padding:0 28px 26px;text-align:center;color:#9a9a9a;font-size:13px;line-height:1.5">${esc(c.note)}<br><br><a href="mailto:${SUPPORT}" style="color:#9a9a9a">${SUPPORT}</a></td></tr>
-</table></td></tr></table></body></html>`;
+  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#0b0b0b;font-family:Arial,Helvetica,sans-serif">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#0b0b0b" style="background:#0b0b0b"><tr><td align="center" style="padding:64px 16px 72px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#161616;border:1px solid #2a2a2a;border-radius:20px">
+<tr><td style="padding:48px 36px 0;text-align:center;color:#fff;font-size:15px;font-weight:700;letter-spacing:.2em">GRIND ◆ STUDIO</td></tr>
+<tr><td style="padding:44px 36px 0;text-align:center;color:#fff;font-size:28px;line-height:1.25;font-weight:800">${esc(c.title)}</td></tr>
+<tr><td style="padding:16px 36px 0;text-align:center;color:#d6d6d6;font-size:17px;line-height:1.6">${esc(c.hi)}</td></tr>
+<tr><td style="padding:40px 36px 0;text-align:center"><a href="${esc(link)}" style="display:inline-block;background:#22c55e;color:#04140a;font-weight:700;font-size:17px;text-decoration:none;padding:18px 34px;border-radius:12px">${esc(c.button)}</a></td></tr>
+<tr><td style="padding:40px 36px 0;text-align:center;color:#9a9a9a;font-size:14px;line-height:1.6">${esc(c.note)}</td></tr>
+<tr><td style="padding:36px 36px 44px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:1px solid #2a2a2a;padding-top:28px;text-align:center;color:#7a7a7a;font-size:13px;line-height:1.6">${esc(c.help)}<br><a href="mailto:${SUPPORT}" style="color:#d6d6d6;text-decoration:none;font-weight:700">${SUPPORT}</a></td></tr></table></td></tr>
+</table>
+<p style="margin:28px 0 0;color:#555;font-size:12px">© ${new Date().getFullYear()} GRIND STUDIO</p>
+</td></tr></table></body></html>`;
 }
