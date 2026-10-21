@@ -36,6 +36,7 @@ export function KitCheckout({
       thankYou={`/${slug}/thank-you`}
       publishableKey={publishableKey}
       europe={currency === "eur"}
+      deferStripe
     />
   );
 }

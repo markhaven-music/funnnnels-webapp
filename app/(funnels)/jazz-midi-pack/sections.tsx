@@ -544,6 +544,7 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       thankYou={funnel.checkout.thankYou}
       publishableKey={ctx.publishableKey}
       europe={ctx.currency === "eur"}
+      deferStripe
     />
   );
 }

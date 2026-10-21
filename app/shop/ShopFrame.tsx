@@ -15,7 +15,8 @@ export function ShopFrame({ children }: { children: React.ReactNode }) {
       <header className={s.top}>
         <div className={`${s.wrap} ${s.bar}`}>
           <a href="/shop" className={s.logo}>
-            GRIND <span className={s.dia}>◆</span> STUDIO
+            {/* The Grind Studio wordmark, white, at 2× its height here. */}
+            <img src="/funnels/shop/logo.webp" alt={BRAND.name} width={360} height={42} />
           </a>
           <CartLink />
         </div>

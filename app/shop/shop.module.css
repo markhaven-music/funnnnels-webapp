@@ -46,14 +46,13 @@
   height: 64px;
 }
 .logo {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.26em;
-  text-decoration: none;
+  display: block;
+  line-height: 0;
 }
-.dia {
-  color: var(--brass);
+.logo img {
+  display: block;
+  width: auto;
+  height: 21px;
 }
 .cartLink {
   position: relative;

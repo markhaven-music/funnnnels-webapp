@@ -44,8 +44,9 @@ type Props = {
   // the shop's checkout APIs as `items` (their slugs); `price` is the cart's
   // total, and the cart page shows the products, so there's no order box.
   cart?: { slug: string; name: string; price: number }[];
-  // Load Stripe.js once the buyer starts on step 1, not with the page (the
-  // shop's cart, whose first screen is the cart itself: docs/page-speed.md).
+  // Load Stripe.js (~200 KB, about half a second of a phone's processor) once
+  // the buyer starts on step 1, not with the page: it's only needed at step 2
+  // (docs/page-speed.md rule 4). Jazz, the launch kit and the shop's cart.
   deferStripe?: boolean;
 };
 
