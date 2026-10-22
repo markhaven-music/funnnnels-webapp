@@ -31,8 +31,10 @@ alter table public.catalog add constraint catalog_price_eur_check check (price_e
 alter table public.catalog add constraint catalog_price_usd_check check (price_usd_cents is null or price_usd_cents > 0);
 alter table public.catalog add constraint catalog_shop_priced check (status <> 'live' or (price_eur_cents is not null and price_usd_cents is not null));
 
--- The code deployed before this migration still says shop_products: a view
--- under the old name until the new code is live (dropped by "catalog_drop_view").
+-- The code deployed before this migration (up to 490f54f) still says
+-- shop_products: a view under the old name, kept so a rollback to it still
+-- works. Nothing since d52d4bc reads it; drop it once that rollback isn't
+-- wanted any more (drop view public.shop_products).
 -- security_invoker: the table's RLS applies, so the public keys get nothing.
 create view public.shop_products with (security_invoker = true) as select * from public.catalog;
 revoke all on public.shop_products from anon, authenticated;
