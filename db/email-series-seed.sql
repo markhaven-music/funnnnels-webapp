@@ -111,29 +111,29 @@ J'espère que ça t'aidera dans ton workflow.
 
 À bientôt,
 L'équipe Grind Studio$body$),
-  (1, 23, $body$Astuce rapide : le dossier « Fragments » 📂$body$, $body$Salut !
+  (1, 23, $body$Astuce rapide : le dossier « Fragments » 📂$body$, $body$Salut !
 
 Ça fait 24 heures que tu as pris le **MIDI Drum Kit Bundle**.
 
 J'espère que tu as déjà glissé quelques fichiers dans ta DAW et que tu as commencé à cuisiner.
 
-Je voulais t'envoyer un petit email pour être sûr que tu tires vraiment le maximum de ce pack, parce qu'il y a une fonction « cachée » que beaucoup de producteurs ne voient pas.
+Je voulais t'envoyer un petit email pour être sûr que tu tires vraiment le maximum de ce pack, parce qu'il y a une fonction « cachée » que beaucoup de producteurs ne voient pas.
 
 Tu as sûrement remarqué que le pack est divisé en **Full Patterns** et **Fragments**.
 
-La plupart des gens glissent juste le « Full Pattern » et s'arrêtent là.
+La plupart des gens glissent juste le « Full Pattern » et s'arrêtent là.
 
-Ça marche très bien pour aller vite, mais si tu veux libérer la vraie puissance de ce bundle (et avoir des bounces uniques à l'infini), essaie ce workflow :
+Ça marche très bien pour aller vite, mais si tu veux libérer la vraie puissance de ce bundle (et avoir des bounces uniques à l'infini), essaie ce workflow :
 
-**La méthode « Mix & Match » :**
+**La méthode « Mix & Match » :**
 
-Au lieu d'utiliser une seule boucle complète, construis tes drums comme un puzzle :
+Au lieu d'utiliser une seule boucle complète, construis tes drums comme un puzzle :
 
-**La base :** glisse un pattern de kick du dossier A.
+**La base :** glisse un pattern de kick du dossier A.
 
-**Le groove :** glisse un fragment de hi-hat du dossier B.
+**Le groove :** glisse un fragment de hi-hat du dossier B.
 
-**La sauce :** glisse un fragment de percussion/snare du dossier C.
+**La sauce :** glisse un fragment de percussion/snare du dossier C.
 
 Comme ce sont des fichiers MIDI (pas des boucles audio), ils se calent instantanément sur ton tempo et marchent avec les sons de batterie que tu choisis.
 
@@ -141,24 +141,24 @@ En mélangeant les fragments, tu n'utilises pas juste les patterns qu'on t'a don
 
 Tu crées des milliers de combinaisons sur mesure que personne d'autre n'a.
 
-**💡 Astuce de pro :**
+**💡 Astuce de pro :**
 Comme le MIDI, ce ne sont que des données brutes, essaie de glisser un **pattern MIDI de hi-hat** sur un instrument mélodique (comme un pluck ou un VST de piano). Ça crée des textures rythmiques complexes, parfaites pour des mélodies de fond.
 
 Si tu as déjà fait un truc de fou avec le kit, réponds à cet email et envoie-le-moi. J'adorerais entendre ce que tu prépares.
 
 Bonne prod,
 Grind Studio$body$),
-  (2, 48, $body$Tu as regardé le dossier « Bonus » ?$body$, $body$Salut,
+  (2, 48, $body$Tu as regardé le dossier « Bonus » ?$body$, $body$Salut,
 
 Je sais que quand tu télécharges un gros bundle, c'est facile de se perdre dans les dossiers principaux et d'oublier le reste.
 
-Mais je voulais te rappeler que tu as une arme secrète sur ton disque dur en ce moment :
+Mais je voulais te rappeler que tu as une arme secrète sur ton disque dur en ce moment :
 
-**Les bonus « Beat Starters » et « Famous Beats ».**
+**Les bonus « Beat Starters » et « Famous Beats ».**
 
 On les a inclus pour les jours où tu t'assois devant l'ordi avec zéro idée (on a tous ces jours-là).
 
-La prochaine fois que tu as le « blocage créatif », essaie ça :
+La prochaine fois que tu as le « blocage créatif », essaie ça :
 
 Ouvre le **Bonus N°2 (Beat Starters)**.
 
@@ -166,9 +166,9 @@ Glisse un MIDI de progression d'accords au hasard dans ton synthé préféré.
 
 Ensuite, glisse tes **patterns MIDI de batterie** en dessous.
 
-En 30 secondes environ, tu sautes la phase « fixer un écran vide » et tu passes direct à la partie fun.
+En 30 secondes environ, tu sautes la phase « fixer un écran vide » et tu passes direct à la partie fun.
 
-Ne laisse pas ces bonus prendre la poussière ! Ils sont là pour te faire gagner du temps.
+Ne laisse pas ces bonus prendre la poussière ! Ils sont là pour te faire gagner du temps.
 
 À bientôt,
 Grind Studio$body$)
@@ -425,5 +425,12 @@ Non lasciare che quei bonus prendano polvere! Sono lì per farti risparmiare tem
 A presto,
 Grind Studio$body$)
 ) as v(position, delay_hours, subject, body);
+
+-- French: a no-break space before : ; ! ? » and after « (landing.ts frenchSpaces).
+update public.sequence_steps st
+set subject = replace(regexp_replace(st.subject, ' ([:;!?»])', chr(160) || '\1', 'g'), '« ', '«' || chr(160)),
+    body = replace(regexp_replace(st.body, ' ([:;!?»])', chr(160) || '\1', 'g'), '« ', '«' || chr(160))
+from public.sequences s
+where s.id = st.sequence_id and s.name = 'MIDI Drum Kit · after purchase (French)';
 
 commit;
