@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { botReason } from "@/lib/bots";
 import { isEmail, upsertContact } from "@/lib/contacts";
 import { resolveFunnel } from "@/lib/funnels";
+import { COUNTRY_COOKIE, currencyFor, visitorCountry } from "@/lib/geo";
 import { supabase } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -28,6 +29,9 @@ export async function POST(req: Request) {
   if (botReason(req)) return NextResponse.json({ ok: true });
 
   const lang = typeof body.lang === "string" && f.langs?.includes(body.lang) ? body.lang : "en";
+  // The price the order page showed: proxy.ts picked it by country and left the country in this cookie.
+  const cookie = req.headers.get("cookie")?.match(new RegExp(`(?:^|; )${COUNTRY_COOKIE}=([A-Z]{2})(?:;|$)`))?.[1];
+  const currency = currencyFor(visitorCountry(req.headers, cookie));
 
   try {
     await upsertContact({
@@ -40,12 +44,12 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("checkout lead: contact save failed", err);
   }
-  // The abandoned-checkout reminder's clock (lib/outbox.ts): restarted by every
-  // new attempt; a reminder already sent stays sent.
+  // The abandoned-checkout emails' clock (lib/outbox.ts): restarted by every
+  // new attempt; reminders already sent stay sent.
   try {
     const { error } = await supabase()
       .from("checkout_starts")
-      .upsert({ funnel: f.slug, email: email.toLowerCase(), name: name || null, lang, started_at: new Date().toISOString() }, { onConflict: "funnel,email" });
+      .upsert({ funnel: f.slug, email: email.toLowerCase(), name: name || null, lang, currency, started_at: new Date().toISOString() }, { onConflict: "funnel,email" });
     if (error) throw error;
   } catch (err) {
     console.error("checkout lead: checkout start save failed", err);

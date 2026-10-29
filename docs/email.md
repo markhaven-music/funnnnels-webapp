@@ -9,8 +9,9 @@ Vercel), from one job:
 | What | When | Where it's edited |
 | --- | --- | --- |
 | Receipt with the downloads | 5 min after a paid order, upsells bought right after it in the same email | `lib/mailCopy.ts` (EN/FR/ES/DE) |
-| Abandoned checkout | 1 h after step 1 of a checkout, once, never to a buyer | `lib/mailCopy.ts` |
-| Sequences | a contact gets the trigger tag → step 1, step 2 N hours later… | Dashboard → Automations |
+| Abandoned checkout | MIDI Drum Kit: 3 emails, 15 min after step 1, then 6 h, then 18 h later (ClickFunnels' words, EN/FR/ES/DE/IT); other funnels: 1 email after 1 h. Stops when they buy | `lib/abandonCopy.ts`, `lib/mailCopy.ts` |
+| After a Drum Kit purchase | "How to use" 1 h after, "Fragments" tip 24 h after, "Bonus" folder 48 h later: one sequence per language (`db/email-series-seed.sql`) | Dashboard → Automations |
+| Sequences | a contact gets the trigger tag → step 1, step 2 N hours later…; a sequence can be for one language | Dashboard → Automations |
 | Broadcasts | now or at a time, to a tag or everyone subscribed | Dashboard → Broadcasts |
 | Launch emails | their scheduled time | Dashboard → Launches |
 
@@ -39,6 +40,17 @@ Newsletter-type emails carry an unsubscribe link and one-click
   destination: `https://funnnnels.com/api/webhooks/stripe`, event
   `payment_intent.succeeded`; put its signing secret in Vercel as
   `STRIPE_WEBHOOK_SECRET` (Production) and redeploy.
+
+## From ClickFunnels
+
+On 2026-10-29 the automations of the ClickFunnels workspace (24 workflows, 98
+emails) were read; two came over: the Meta Ads funnel's abandoned checkout and
+the Drum Kit's after-purchase emails (`db/email-series.sql`,
+`db/email-series-seed.sql`). Left in ClickFunnels: the abandoned-checkout copies
+of old price tests (same three emails), the "Backup Link" emails (the receipt
+has the downloads), the Grind Minute newsletter (44 emails every 3 days) and
+the free-pack lead sequences (Rolls, Mystery Hooks, ESSENTIAL), whose opt-in
+pages aren't in funnnnels.
 
 ## Testing
 

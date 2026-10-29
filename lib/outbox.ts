@@ -1,5 +1,7 @@
+import { ABANDON_SERIES_FUNNELS, abandonSeries, statedPrice } from "@/lib/abandonCopy";
 import { purchasesOf, shelfOf } from "@/lib/account";
 import { checkoutPages, resolveFunnel, type Product } from "@/lib/funnels";
+import type { Currency } from "@/lib/geo";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { money } from "@/lib/launch";
 import { card, clickUrl, letter, type CardButton } from "@/lib/mail";
@@ -14,7 +16,8 @@ import { supabase } from "@/lib/supabase";
 // /api/cron/email (pg_cron, db/email-schedule.sql). In this order:
 //   1. receipts: an order's downloads, 5 minutes after it paid, with the
 //      one-click upsells bought right after it in the same email;
-//   2. abandoned checkouts: one reminder an hour after step 1, never to a buyer;
+//   2. abandoned checkouts: the MIDI Drum Kit's three emails (15 min, 6 h, 18 h
+//      apart), the others' one reminder an hour after step 1, never to a buyer;
 //   3. sequences: the next step of every contact whose time has come;
 //   4. broadcasts and launch emails: the next batch of their audience.
 // Sends are paced to SES's per-second rate (EMAIL_RATE, 1 in the sandbox, 14
@@ -26,6 +29,7 @@ const RECEIPT_AFTER_MS = 5 * 60_000;
 const RECEIPT_GIVE_UP_MS = 3 * 86_400_000;
 const RECEIPT_TRIES = 5;
 const REMIND_AFTER_MS = 60 * 60_000;
+const FIRST_SERIES_MS = 15 * 60_000; // the earliest first reminder (lib/abandonCopy.ts)
 const REMIND_GIVE_UP_MS = 3 * 86_400_000;
 
 export type OutboxReport = {
@@ -213,61 +217,91 @@ function kitShelf(o: OrderRow, f: Product, shop: Record<string, ShopLabel>) {
 }
 
 // ─── 2. abandoned checkouts ────────────────────────────────────────
+// A funnel with a series (lib/abandonCopy.ts: the MIDI Drum Kit's three emails
+// from ClickFunnels) sends them one after the other; the others send the one
+// reminder of lib/mailCopy.ts an hour after step 1. checkout_starts.reminders
+// counts what went out (db/email-series.sql); a buyer or someone who left the
+// list gets nothing more.
+
+const REMINDERS_DONE = 3;
 
 async function reminders(run: Run) {
   const db = supabase();
   const now = Date.now();
   const { data, error } = await db
     .from("checkout_starts")
-    .select("funnel, email, name, lang, started_at")
-    .is("reminder_sent_at", null)
-    .lte("started_at", new Date(now - REMIND_AFTER_MS).toISOString())
+    .select("funnel, email, name, lang, currency, started_at, reminders, reminder_sent_at")
+    .lt("reminders", REMINDERS_DONE)
+    .lte("started_at", new Date(now - FIRST_SERIES_MS).toISOString())
     .gte("started_at", new Date(now - REMIND_GIVE_UP_MS).toISOString())
     .order("started_at")
-    .limit(50);
+    .limit(100);
   if (error) throw error;
 
   for (const row of data ?? []) {
     if (run.over) return;
-    const mark = (at: string | null) => db.from("checkout_starts").update({ reminder_sent_at: at }).eq("funnel", row.funnel).eq("email", row.email);
+    const sent: number = row.reminders;
+    const series = ABANDON_SERIES_FUNNELS.has(row.funnel) ? abandonSeries(row.lang) : null;
+    const at = (patch: Record<string, unknown>) => db.from("checkout_starts").update(patch).eq("funnel", row.funnel).eq("email", row.email);
+    const done = () => (run.dryRun ? null : at({ reminders: REMINDERS_DONE }));
+    if (sent >= (series?.length ?? 1)) {
+      await done();
+      continue;
+    }
+    const wait = series ? series[sent].after * 60_000 : REMIND_AFTER_MS;
+    if (Date.parse(sent === 0 ? row.started_at : (row.reminder_sent_at ?? row.started_at)) + wait > now) continue;
+
     const f = await resolveFunnel(row.funnel);
-    // Bought (our orders, or Stripe/PayPal for a sale we never saw), or left the list: never reminded.
+    // Bought (our orders, or Stripe/PayPal for a sale we never saw), or left the list: nothing more.
     const { data: contact } = await db.from("contacts").select("status").eq("email", row.email).maybeSingle();
     const bought = (await hasPaidOrder(row.funnel, row.email)) || (await purchasesOf(row.email)).some((p) => p.funnel === row.funnel);
     if (!f || bought || (contact && contact.status !== "subscribed")) {
-      if (!run.dryRun) await mark(new Date().toISOString());
+      await done();
       continue;
     }
     if (!run.dryRun) {
       const { data: claimed } = await db
         .from("checkout_starts")
-        .update({ reminder_sent_at: new Date().toISOString() })
+        .update({ reminders: sent + 1, reminder_sent_at: new Date().toISOString() })
         .eq("funnel", row.funnel)
         .eq("email", row.email)
-        .is("reminder_sent_at", null)
+        .eq("reminders", sent)
         .select("email");
       if (!claimed?.length) continue;
     }
-    const c = mailCopy(row.lang).reminder;
     const first = (row.name ?? "").trim().split(/\s+/)[0]?.slice(0, 40) ?? "";
     const url = `${f.home ?? BRAND_ORIGIN}${checkoutPages(f, row.lang).orderPage}`;
-    try {
-      const id = await run.send({
+    // The series' emails count apart in Insights (<funnel>/1, /2, /3); the single reminder is <funnel>.
+    const ref = series ? `${row.funnel}/${sent + 1}` : row.funnel;
+    let email: Email;
+    if (series) {
+      const m = series[sent];
+      // The price they saw at checkout; before the currency was saved, English is dollars, the others euros.
+      const currency: Currency = row.currency === "eur" || row.currency === "usd" ? row.currency : row.lang && row.lang !== "en" ? "eur" : "usd";
+      const price = statedPrice(f.price[currency], currency, row.lang);
+      email = letter({ to: { email: row.email, name: row.name }, subject: m.subject(first), preheader: m.preheader, body: m.body({ name: first, url, price }), lang: row.lang, track: { kind: "reminder", ref } });
+    } else {
+      const c = mailCopy(row.lang).reminder;
+      email = {
         to: row.email,
         subject: c.subject(f.product),
-        html: card({ lang: row.lang, title: c.title(first, f.product), lead: c.lead, buttons: [{ label: c.button, url: clickUrl({ kind: "reminder", ref: row.funnel }, row.email, url) }], notes: c.notes, help: c.help }),
+        html: card({ lang: row.lang, title: c.title(first, f.product), lead: c.lead, buttons: [{ label: c.button, url: clickUrl({ kind: "reminder", ref }, row.email, url) }], notes: c.notes, help: c.help }),
         text: [c.title(first, f.product), "", c.lead, "", `${c.button}: ${url}`, "", ...c.notes, "", "support@thegrind.studio"].join("\n"),
-      });
-      if (id === null && !run.dryRun) await mark(null);
+      };
+    }
+    try {
+      const id = await run.send(email);
+      // Not sent (time up): this one again next run.
+      if (id === null && !run.dryRun) await at({ reminders: sent, reminder_sent_at: row.reminder_sent_at });
       else {
         run.report.reminders++;
         // For dashboard → Email → Insights: sent, and the orders that followed.
-        if (!run.dryRun) await db.from("email_sends").upsert({ kind: "reminder", ref: row.funnel, email: row.email, status: "sent", message_id: id }, { onConflict: "kind,ref,email", ignoreDuplicates: true });
+        if (!run.dryRun) await db.from("email_sends").upsert({ kind: "reminder", ref, email: row.email, status: "sent", message_id: id }, { onConflict: "kind,ref,email", ignoreDuplicates: true });
       }
     } catch (err) {
       run.report.failed++;
-      // In the sandbox (or any refusal) the reminder stays sent: one try only, never a late one.
-      run.report.notes.push(`reminder ${row.funnel}/${row.email}: ${errorText(err)}`);
+      // A refusal counts as sent: never a late or doubled reminder.
+      run.report.notes.push(`reminder ${ref}/${row.email}: ${errorText(err)}`);
       if (run.over) return;
     }
   }

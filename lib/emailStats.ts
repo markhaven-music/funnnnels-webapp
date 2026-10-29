@@ -110,7 +110,7 @@ export async function getEmailInsights(range: Range): Promise<EmailInsights> {
   }
   const reminder = counts();
   for (const [key, c] of per) if (key.startsWith("reminder:")) merge(reminder, c);
-  automations.push({ kind: "reminder", id: "reminder", name: "Abandoned-checkout reminder", detail: "1 hour after an unpaid checkout", at: null, ...reminder });
+  automations.push({ kind: "reminder", id: "reminder", name: "Abandoned-checkout reminder", detail: "After an unpaid checkout (MIDI Drum Kit: 3 emails)", at: null, ...reminder });
 
   // A broadcast SES held back lately: it went back to draft with a note.
   const held = (broadcasts.data ?? []).find((b) => b.status === "draft" && SANDBOX.test(b.error ?? "") && Date.now() - Date.parse(b.updated_at) < RECENT_MS);

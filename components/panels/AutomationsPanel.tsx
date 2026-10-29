@@ -24,15 +24,17 @@ const BUILT_IN = [
     id: null,
     name: "Receipt with the downloads",
     when: "5 minutes after every paid order, with the upsells bought right after it",
-    detail: "In the buyer's language (EN, FR, ES, DE). The links don't expire.",
+    detail: "In the buyer's language (EN, FR, ES, DE, IT). The links don't expire.",
   },
   {
     id: "reminder", // its numbers in dashboard → Email → Insights
     name: "Abandoned checkout",
-    when: "1 hour after someone types their email at checkout and doesn't pay",
-    detail: "Once per product and person, never to a buyer or an unsubscribed contact, given up after 3 days.",
+    when: "after someone types their email at checkout and doesn't pay: MIDI Drum Kit 3 emails (15 min, then 6 h, then 18 h later), the other products 1 email after an hour",
+    detail: "In their language, stopped as soon as they buy, never to an unsubscribed contact, given up after 3 days. The Drum Kit's words are ClickFunnels' (lib/abandonCopy.ts).",
   },
 ];
+
+const LANG_NAMES: Record<string, string> = { en: "English", fr: "French", es: "Spanish", de: "German", it: "Italian" };
 
 const delayLabel = (h: number) => (h === 0 ? "right away" : h % 24 === 0 ? `${h / 24} day${h === 24 ? "" : "s"} later` : `${h} hour${h === 1 ? "" : "s"} later`);
 
@@ -114,6 +116,7 @@ export function AutomationsPanel() {
             <span className={`${e.cell} ${e.strong}`}>{s.name}</span>
             <span className={`${e.cell} ${e.dim}`}>
               when tagged {s.triggerTag}
+              {s.lang ? ` · ${LANG_NAMES[s.lang] ?? s.lang} contacts` : ""}
               {s.exitTag ? ` · stops at ${s.exitTag}` : ""}
             </span>
             <span className={e.mono}>
@@ -135,6 +138,7 @@ function Editor({ s, onDone }: { s: Sequence | null; onDone: () => void }) {
     name: s?.name ?? "",
     triggerTag: s?.triggerTag ?? "",
     exitTag: s?.exitTag ?? "",
+    lang: s?.lang ?? "",
     active: s?.active ?? false,
     steps: s?.steps.length ? s.steps : ([{ delayHours: 0, subject: "", body: "" }] as SequenceStep[]),
   });
@@ -150,7 +154,7 @@ function Editor({ s, onDone }: { s: Sequence | null; onDone: () => void }) {
     setBusy(true);
     setError("");
     try {
-      const body = { ...f, active, exitTag: f.exitTag || null };
+      const body = { ...f, active, exitTag: f.exitTag || null, lang: f.lang || null };
       if (s) await call(`/api/sequences/${s.id}`, "PUT", body);
       else await call("/api/sequences", "POST", body);
       onDone();
@@ -203,6 +207,17 @@ function Editor({ s, onDone }: { s: Sequence | null; onDone: () => void }) {
           <label className={e.label}>
             Stops when they get the tag (optional)
             <TagSelect value={f.exitTag || null} onChange={(v) => setF({ ...f, exitTag: v ?? "" })} tags={tags} none="Never stops early" />
+          </label>
+          <label className={e.label}>
+            For contacts in
+            <select className={e.input} value={f.lang} onChange={(ev) => setF({ ...f, lang: ev.target.value })}>
+              <option value="">Every language</option>
+              {Object.keys(LANG_NAMES).map((l) => (
+                <option key={l} value={l}>
+                  {LANG_NAMES[l]}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
         <datalist id="seq-tags">

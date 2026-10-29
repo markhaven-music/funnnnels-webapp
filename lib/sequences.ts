@@ -3,7 +3,8 @@ import { supabase } from "@/lib/supabase";
 // Sequences (dashboard → Automations): when a contact gets a tag, they get
 // step 1, then step 2 some hours later, and so on, until the end or until
 // they get the exit tag. Starting is done by the database (start_sequences
-// trigger, db/email.sql); sending by lib/outbox.ts.
+// trigger, db/email.sql); sending by lib/outbox.ts. A sequence can be for one
+// language (db/email-series.sql): then only contacts in that language start it.
 
 export type SequenceStep = { id?: string; delayHours: number; subject: string; body: string };
 
@@ -12,6 +13,7 @@ export type Sequence = {
   name: string;
   triggerTag: string;
   exitTag: string | null;
+  lang: string | null; // null: every language
   active: boolean;
   steps: SequenceStep[];
   // How many contacts are in it right now, and have finished it.
@@ -25,6 +27,7 @@ type Row = {
   name: string;
   trigger_tag: string;
   exit_tag: string | null;
+  lang: string | null;
   active: boolean;
   created_at: string;
   sequence_steps: { id: string; position: number; delay_hours: number; subject: string; body: string }[];
@@ -44,6 +47,7 @@ export async function listSequences(): Promise<Sequence[]> {
     name: r.name,
     triggerTag: r.trigger_tag,
     exitTag: r.exit_tag,
+    lang: r.lang,
     active: r.active,
     steps: [...r.sequence_steps].sort((a, b) => a.position - b.position).map((s) => ({ id: s.id, delayHours: s.delay_hours, subject: s.subject, body: s.body })),
     running: count(r.id, ["active"]),
@@ -52,13 +56,16 @@ export async function listSequences(): Promise<Sequence[]> {
   }));
 }
 
-export type SequenceInput = { name: string; triggerTag: string; exitTag: string | null; active: boolean; steps: SequenceStep[] };
+export const SEQUENCE_LANGS = ["en", "fr", "es", "de", "it"] as const;
+
+export type SequenceInput = { name: string; triggerTag: string; exitTag: string | null; lang: string | null; active: boolean; steps: SequenceStep[] };
 
 export function parseSequence(raw: unknown): SequenceInput | string {
   const b = (raw ?? {}) as Record<string, unknown>;
   const name = String(b.name ?? "").trim().slice(0, 120);
   const triggerTag = String(b.triggerTag ?? "").trim().slice(0, 80);
   const exitTag = String(b.exitTag ?? "").trim().slice(0, 80) || null;
+  const lang = (SEQUENCE_LANGS as readonly string[]).includes(String(b.lang)) ? String(b.lang) : null;
   const steps = (Array.isArray(b.steps) ? b.steps : []).slice(0, 30).map((s: Record<string, unknown>) => ({
     id: typeof s.id === "string" ? s.id : undefined,
     delayHours: Math.max(0, Math.min(24 * 365, Math.round(Number(s.delayHours) || 0))),
@@ -69,13 +76,13 @@ export function parseSequence(raw: unknown): SequenceInput | string {
   if (!triggerTag) return "Pick the tag that starts it.";
   const active = b.active === true;
   if (active && (!steps.length || steps.some((s) => !s.subject.trim() || !s.body.trim()))) return "Every email needs a subject and a body before you switch it on.";
-  return { name, triggerTag, exitTag, active, steps };
+  return { name, triggerTag, exitTag, lang, active, steps };
 }
 
 /** Create (no id) or replace a sequence and its steps. Steps keep their ids, so nobody gets a step twice. */
 export async function saveSequence(id: string | null, s: SequenceInput): Promise<string> {
   const db = supabase();
-  const row = { name: s.name, trigger_tag: s.triggerTag, exit_tag: s.exitTag, active: s.active };
+  const row = { name: s.name, trigger_tag: s.triggerTag, exit_tag: s.exitTag, lang: s.lang, active: s.active };
   let seqId = id;
   if (seqId) {
     const { error } = await db.from("sequences").update(row).eq("id", seqId);
