@@ -1,6 +1,8 @@
 # Email
 
-Everything goes out through Amazon SES (eu-west-1, `lib/ses.ts`), from one job:
+Everything goes out through Amazon SES (eu-west-1, `lib/ses.ts`; out of the
+sandbox since 2026-10-27, 50,000 a day at 14 a second, `EMAIL_RATE=14` in
+Vercel), from one job:
 `/api/cron/email` → `lib/outbox.ts`, called every minute by Supabase pg_cron
 (`db/email-schedule.sql`). Tables: `db/orders.sql`, `db/email.sql`.
 
@@ -33,10 +35,6 @@ Newsletter-type emails carry an unsubscribe link and one-click
 
 ## Still to switch on
 
-- **SES production access.** Until then SES only delivers to verified
-  addresses: receipts are retried 5 times then left, broadcasts go back to
-  draft with a note. Appeal text: `docs/ses-appeal.md`. Once approved, set
-  `EMAIL_RATE=14` (or the rate AWS grants) in Vercel and redeploy.
 - **Stripe webhook.** Stripe Dashboard → Developers → Webhooks → Add
   destination: `https://funnnnels.com/api/webhooks/stripe`, event
   `payment_intent.succeeded`; put its signing secret in Vercel as
