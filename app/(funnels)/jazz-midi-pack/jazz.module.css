@@ -173,7 +173,7 @@
   background: #000;
   box-shadow: 0 0 0 6px rgb(243 235 220 / 0.04), 0 30px 90px -40px rgb(226 169 59 / 0.45);
 }
-.vsl iframe,
+.vsl video,
 .vslPoster {
   position: absolute;
   inset: 0;

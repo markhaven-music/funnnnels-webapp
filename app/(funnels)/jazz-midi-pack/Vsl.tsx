@@ -1,28 +1,40 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { funnel } from "./funnel";
 import s from "./jazz.module.css";
 
-// The hero video (vsl/script-en.md, made with tools/jazz_vsl.py, on Wistia).
-// Until the visitor taps play it's only the poster: Wistia's player costs a
-// phone ≈760 ms of processor (docs/page-speed.md), so it loads on the tap,
-// already playing.
+// The hero video (vsl/script-en.md, made with tools/jazz_vsl.py, hosted on
+// Wistia). It plays Wistia's MP4 files in a plain <video>: Wistia's own player
+// took too long to start on the tap, and costs a phone ≈760 ms of processor
+// (docs/page-speed.md). preload="none" keeps the page from downloading any of
+// the video until the visitor taps play; the poster on top is the LCP image.
 const DIR = "/funnels/jazz-midi-pack";
 
 export function Vsl() {
+  const video = useRef<HTMLVideoElement>(null);
   const [on, setOn] = useState(false);
-  const { wistiaId, poster } = funnel.vsl;
+  const { poster, mp4 } = funnel.vsl;
+
+  // play() inside the tap itself, so iOS lets it start with sound.
+  function play() {
+    setOn(true);
+    video.current?.play().catch(() => {});
+  }
+
   return (
     <div className={s.vsl}>
-      {on ? (
-        <iframe
-          src={`https://fast.wistia.net/embed/iframe/${wistiaId}?autoplay=1&playerColor=e2a93b`}
-          title="Jazz MIDI Pack: same chords, played like a pianist"
-          allow="autoplay; fullscreen"
-          allowFullScreen
-        />
-      ) : (
-        <button type="button" className={s.vslPoster} onClick={() => setOn(true)} aria-label="Play the video" data-vsl>
+      <video
+        ref={video}
+        controls={on}
+        playsInline
+        preload="none"
+        title="Jazz MIDI Pack: same chords, played like a pianist"
+      >
+        <source src={mp4.p1080} type="video/mp4" media="(min-width: 1000px)" />
+        <source src={mp4.p720} type="video/mp4" />
+      </video>
+      {!on && (
+        <button type="button" className={s.vslPoster} onClick={play} aria-label="Play the video" data-vsl>
           <img
             src={`${DIR}/${poster}-960.webp`}
             srcSet={`${DIR}/${poster}-960.webp 960w, ${DIR}/${poster}-1600.webp 1600w`}
