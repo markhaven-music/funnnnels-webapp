@@ -160,6 +160,63 @@
   background: #0b0a08;
   box-shadow: 0 0 0 6px rgb(243 235 220 / 0.04), 0 30px 90px -40px rgb(226 169 59 / 0.45);
 }
+/* the hero video: a poster until the tap, then Wistia's player (Vsl.tsx) */
+.vsl {
+  position: relative;
+  width: 100%;
+  max-width: 920px;
+  aspect-ratio: 16 / 9;
+  margin-top: 26px;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: #000;
+  box-shadow: 0 0 0 6px rgb(243 235 220 / 0.04), 0 30px 90px -40px rgb(226 169 59 / 0.45);
+}
+.vsl iframe,
+.vslPoster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.vslPoster {
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+.vslPoster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.vslPlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(56px, 12%, 104px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--brass);
+  box-shadow: 0 0 0 10px rgb(226 169 59 / 0.22), 0 10px 40px rgb(0 0 0 / 0.5);
+  transition: transform 0.15s ease;
+}
+.vslPlay::after {
+  content: "";
+  position: absolute;
+  left: 38%;
+  top: 29%;
+  width: 34%;
+  height: 42%;
+  background: var(--ink);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.vslPoster:hover .vslPlay {
+  transform: translate(-50%, -50%) scale(1.06);
+}
 .heroBullets {
   display: grid;
   gap: 8px;

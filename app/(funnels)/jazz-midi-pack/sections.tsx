@@ -9,6 +9,7 @@ import { Cta } from "./Cta";
 import { PlayableRoll } from "./PlayableRoll";
 import { ProductBox, Scene } from "./ProductBox";
 import { CheckoutWidget } from "./CheckoutWidget";
+import { Vsl } from "./Vsl";
 import s from "./jazz.module.css";
 import e from "./edit.module.css";
 
@@ -154,7 +155,6 @@ function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch
   // Pages published before the centered hero have no `pre`: they get its default copy.
   const p = raw.pre === undefined ? { ...HERO_DEFAULT, tag: raw.tag, hud: raw.hud, daws: raw.daws, ticks: raw.ticks } : raw;
   const set = (k: string) => patch && ((v: string) => patch({ ...p, [k]: v }));
-  const hud = listOps(p.hud, "hud", patch && ((x) => patch({ ...p, ...x })));
   const bullets = listOps(p.bullets, "bullets", patch && ((x) => patch({ ...p, ...x })));
   return (
     <section id="hero" className={s.hero}>
@@ -177,16 +177,7 @@ function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch
         </h1>
         {patch && <p className={e.hint}>*word* = highlighted, _word_ = underlined</p>}
         <T v={p.sub} set={set("sub")} ctx={ctx} as="p" className={s.heroSub} />
-        <div className={s.heroFrame}>
-          <ProductBox variant="hero" priority />
-          {[s.hudA, s.hudB, s.hudC].map((cls, i) =>
-            p.hud[i] !== undefined ? (
-              <span key={i} className={`${s.hud} ${cls}`}>
-                <T v={p.hud[i]} set={hud.set && ((v) => hud.set!(i, v))} ctx={ctx} />
-              </span>
-            ) : null,
-          )}
-        </div>
+        <Vsl />
         <ul className={s.heroBullets}>
           {p.bullets.map((b, i) => (
             <li key={i}>

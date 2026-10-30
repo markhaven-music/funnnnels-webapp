@@ -20,6 +20,9 @@ export const funnel = {
   },
   tagline: "26 progressions × 13 voicings × 8 rhythms, all 12 keys",
   price: { eur: 27, usd: 27 },
+  // The hero video: Wistia media + its poster in public/funnels/jazz-midi-pack
+  // (<poster>-960.webp, <poster>-1600.webp). Script: vsl/script-en.md.
+  vsl: { wistiaId: "mfktzuq63b", poster: "vsl-en" },
   // The old €9 tick-box offer. Since 2026-10-16 the checkout no longer shows it
   // (the Chord Pack is bonus 1); it stays so orders that bought it still verify.
   bump: {
