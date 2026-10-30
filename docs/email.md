@@ -8,7 +8,8 @@ Vercel), from one job:
 
 | What | When | Where it's edited |
 | --- | --- | --- |
-| Receipt with the downloads | 5 min after a paid order, upsells bought right after it in the same email | `lib/mailCopy.ts` (EN/FR/ES/DE) |
+| Receipt with the downloads | 5 min after a paid order, upsells bought right after it in the same email | `lib/mailCopy.ts` (EN/FR/ES/DE/IT) |
+| 💾 Backup Link | 10 min after the receipt: the same download links again and the account page, for buyers whose receipt got buried (ClickFunnels did it) | `lib/backupCopy.ts` |
 | Abandoned checkout | MIDI Drum Kit: 3 emails, 15 min after step 1, then 6 h, then 18 h later (ClickFunnels' words, EN/FR/ES/DE/IT); other funnels: 1 email after 1 h. Stops when they buy | `lib/abandonCopy.ts`, `lib/mailCopy.ts` |
 | After a Drum Kit purchase | "How to use" 1 h after, "Fragments" tip 24 h after, "Bonus" folder 48 h later: one sequence per language (`db/email-series-seed.sql`) | Dashboard → Automations |
 | Sequences | a contact gets the trigger tag → step 1, step 2 N hours later…; a sequence can be for one language | Dashboard → Automations |
@@ -44,13 +45,18 @@ Newsletter-type emails carry an unsubscribe link and one-click
 ## From ClickFunnels
 
 On 2026-10-29 the automations of the ClickFunnels workspace (24 workflows, 98
-emails) were read; two came over: the Meta Ads funnel's abandoned checkout and
+emails) were read; three came over (the backup link on 2026-10-30): the Meta Ads funnel's abandoned checkout and
 the Drum Kit's after-purchase emails (`db/email-series.sql`,
 `db/email-series-seed.sql`). Left in ClickFunnels: the abandoned-checkout copies
-of old price tests (same three emails), the "Backup Link" emails (the receipt
-has the downloads), the Grind Minute newsletter (44 emails every 3 days) and
+of old price tests (same three emails), the Grind Minute newsletter (44 emails every 3 days) and
 the free-pack lead sequences (Rolls, Mystery Hooks, ESSENTIAL), whose opt-in
 pages aren't in funnnnels.
+
+On 2026-10-30 its 4,718 contacts were imported (dashboard → Contacts: source
+`clickfunnels`, its tags kept, `clickfunnels` on all, `buyer` on the 649 who
+spent money; unsubscribed and undeliverable (`bounced`) stay so). The import
+starts no sequence. ClickFunnels keeps sending its own emails until it ends on
+2026-11-16.
 
 ## Testing
 

@@ -1,5 +1,6 @@
 import { ABANDON_SERIES_FUNNELS, abandonSeries, statedPrice } from "@/lib/abandonCopy";
 import { purchasesOf, shelfOf } from "@/lib/account";
+import { backupCopy } from "@/lib/backupCopy";
 import { checkoutPages, resolveFunnel, type Product } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { KIT_HOME } from "@/lib/liveUrl";
@@ -15,7 +16,8 @@ import { supabase } from "@/lib/supabase";
 // The one job that sends every scheduled email, run each minute by
 // /api/cron/email (pg_cron, db/email-schedule.sql). In this order:
 //   1. receipts: an order's downloads, 5 minutes after it paid, with the
-//      one-click upsells bought right after it in the same email;
+//      one-click upsells bought right after it in the same email, and their
+//      "💾 Backup Link" 10 minutes later (ClickFunnels' habit, for buried emails);
 //   2. abandoned checkouts: the MIDI Drum Kit's three emails (15 min, 6 h, 18 h
 //      apart), the others' one reminder an hour after step 1, never to a buyer;
 //   3. sequences: the next step of every contact whose time has come;
@@ -28,12 +30,16 @@ const BRAND_ORIGIN = KIT_HOME; // m.thegrind.studio: every funnel's public home
 const RECEIPT_AFTER_MS = 5 * 60_000;
 const RECEIPT_GIVE_UP_MS = 3 * 86_400_000;
 const RECEIPT_TRIES = 5;
+const BACKUP_AFTER_MS = 10 * 60_000;
+// Receipts older than this get no backup (those sent before it existed included).
+const BACKUP_GIVE_UP_MS = 6 * 3_600_000;
 const REMIND_AFTER_MS = 60 * 60_000;
 const FIRST_SERIES_MS = 15 * 60_000; // the earliest first reminder (lib/abandonCopy.ts)
 const REMIND_GIVE_UP_MS = 3 * 86_400_000;
 
 export type OutboxReport = {
   receipts: number;
+  backups: number;
   reminders: number;
   sequence: number;
   broadcast: number;
@@ -44,7 +50,7 @@ export type OutboxReport = {
 };
 
 class Run {
-  report: OutboxReport = { receipts: 0, reminders: 0, sequence: 0, broadcast: 0, launch: 0, failed: 0, notes: [] };
+  report: OutboxReport = { receipts: 0, backups: 0, reminders: 0, sequence: 0, broadcast: 0, launch: 0, failed: 0, notes: [] };
   // SES refused an unverified address: it's still in its sandbox, so mass sends wait.
   sandbox = false;
   private next = 0;
@@ -89,7 +95,7 @@ export async function runOutbox({ budgetMs = 50_000, dryRun = false } = {}): Pro
     run.report.stopped = "SES is not set up (SES_* and EMAIL_FROM)";
     return run.report;
   }
-  for (const step of [receipts, reminders, sequences, broadcasts, launchEmails]) {
+  for (const step of [receipts, backups, reminders, sequences, broadcasts, launchEmails]) {
     if (run.over) break;
     try {
       await step(run);
@@ -173,34 +179,90 @@ async function receipts(run: Run) {
   }
 }
 
+/** Every file of an order and the upsells sent with it: its label and its download link (they don't expire). */
+function downloads(group: OrderRow[], f: Product, shop: Record<string, ShopLabel>): { label: string; href: string }[] {
+  // The add-ons' and upsells' names as dashboard → Products has them (an add-on added there is on no shelf).
+  const names: Record<string, string> = Object.fromEntries([...(f.bumps ?? []), ...(f.bump ? [f.bump] : []), ...(f.offers ?? [])].map((x) => [x.id, x.name]));
+  return group.flatMap((o) => {
+    const shelf = shelfOf(o.funnel, { id: o.id, items: o.items, offer: o.offer }) ?? kitShelf(o, f, shop);
+    return shelf.files.map((file) => ({ label: names[file.key] ?? file.label, href: file.href }));
+  });
+}
+
+/** What the order is called in its emails' subject. */
+function orderProduct(main: OrderRow, f: Product, shop: Record<string, ShopLabel>): string {
+  return main.offer
+    ? (shelfOf(main.funnel, { id: main.id, items: main.items, offer: main.offer })?.name ?? f.product)
+    : f.kind === "shop"
+      ? orderTitle(main.items, shop)
+      : f.product;
+}
+
 function receiptEmail(group: OrderRow[], f: Product, shop: Record<string, ShopLabel>): Email {
   const main = group[0];
   const c = mailCopy(main.lang).receipt;
   const buttons: CardButton[] = [];
   const text: string[] = [c.title, "", c.lead, ""];
-  // The add-ons' and upsells' names as dashboard → Products has them (an add-on added there is on no shelf).
-  const names: Record<string, string> = Object.fromEntries([...(f.bumps ?? []), ...(f.bump ? [f.bump] : []), ...(f.offers ?? [])].map((x) => [x.id, x.name]));
-  for (const o of group) {
-    const shelf = shelfOf(o.funnel, { id: o.id, items: o.items, offer: o.offer }) ?? kitShelf(o, f, shop);
-    for (const file of shelf.files) {
-      const label = names[file.key] ?? file.label;
-      buttons.push({ label: c.download(label), url: file.href, primary: buttons.length === 0 });
-      text.push(`${c.download(label)}: ${file.href}`);
-    }
+  for (const file of downloads(group, f, shop)) {
+    buttons.push({ label: c.download(file.label), url: file.href, primary: buttons.length === 0 });
+    text.push(`${c.download(file.label)}: ${file.href}`);
   }
   const orders = group.map((o) => c.order(o.id, money(o.amount_cents / 100, o.currency), o.provider === "paypal"));
   text.push("", ...orders, c.account, "", `${c.help} support@thegrind.studio`);
-  const product = main.offer
-    ? (shelfOf(main.funnel, { id: main.id, items: main.items, offer: main.offer })?.name ?? f.product)
-    : f.kind === "shop"
-      ? orderTitle(main.items, shop)
-      : f.product;
   return {
     to: main.email!,
-    subject: c.subject(product),
+    subject: c.subject(orderProduct(main, f, shop)),
     html: card({ lang: main.lang, title: c.title, lead: c.lead, buttons, notes: [...orders, c.account], help: c.help }),
     text: text.join("\n"),
   };
+}
+
+// ─── 1b. backup links ──────────────────────────────────────────────
+
+async function backups(run: Run) {
+  const db = supabase();
+  const now = Date.now();
+  const { data, error } = await db
+    .from("orders")
+    .select("id, provider, funnel, items, amount_cents, currency, email, name, lang, offer, parent, email_sent_at, email_attempts")
+    .is("backup_sent_at", null)
+    .not("email", "is", null)
+    .eq("status", "succeeded")
+    .lte("email_sent_at", new Date(now - BACKUP_AFTER_MS).toISOString())
+    .gte("email_sent_at", new Date(now - BACKUP_GIVE_UP_MS).toISOString())
+    .order("email_sent_at")
+    .limit(100);
+  if (error) throw error;
+  const due = (data ?? []) as OrderRow[];
+
+  // Like the receipt: the upsells sent with their order are in its backup.
+  const mains = due.filter((o) => !o.offer || !due.some((m) => m.id === o.parent));
+  for (const main of mains) {
+    if (run.over) return;
+    const group = [main, ...due.filter((o) => o.offer && o.parent === main.id && o !== main)];
+    const ids = group.map((o) => o.id);
+    if (!run.dryRun) {
+      const { data: claimed, error: cErr } = await db.from("orders").update({ backup_sent_at: new Date().toISOString() }).in("id", ids).is("backup_sent_at", null).select("id");
+      if (cErr) throw cErr;
+      if (!claimed?.some((c) => c.id === main.id)) continue;
+    }
+    const f = await resolveFunnel(main.funnel);
+    try {
+      if (!f) throw new Error(`unknown product ${main.funnel}`);
+      const shop = f.kind === "shop" ? await shopLabels(group.flatMap((o) => o.items)) : {};
+      const c = backupCopy(main.lang);
+      const first = (main.name ?? "").trim().split(/\s+/)[0]?.slice(0, 40) ?? "";
+      const body = [c.intro(first), ...downloads(group, f, shop).map((d) => `[button: ${c.button(d.label)}](${d.href})`), c.outro].join("\n\n");
+      const id = await run.send(letter({ to: { email: main.email!, name: main.name }, subject: c.subject(orderProduct(main, f, shop)), body, lang: main.lang }));
+      if (id === null && !run.dryRun) await db.from("orders").update({ backup_sent_at: null }).in("id", ids);
+      else run.report.backups++;
+    } catch (err) {
+      // One try only: a backup is a second chance, never a late one.
+      run.report.failed++;
+      run.report.notes.push(`backup ${main.id}: ${errorText(err)}`);
+      if (run.over) return;
+    }
+  }
 }
 
 /** Dashboard-made products (Launches, and the shop's), downloaded from their own page. */

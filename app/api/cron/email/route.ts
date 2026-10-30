@@ -11,7 +11,7 @@ export async function GET(req: Request) {
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) return new Response("Unauthorized", { status: 401 });
   const dryRun = new URL(req.url).searchParams.get("dryRun") === "1";
   const report = await runOutbox({ budgetMs: 45_000, dryRun });
-  const total = report.receipts + report.reminders + report.sequence + report.broadcast + report.launch;
+  const total = report.receipts + report.backups + report.reminders + report.sequence + report.broadcast + report.launch;
   if (total || report.failed || report.stopped) console.log(`email job${dryRun ? " (dry run)" : ""}`, JSON.stringify(report));
   return Response.json({ dryRun, ...report });
 }

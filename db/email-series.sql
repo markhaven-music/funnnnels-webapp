@@ -38,3 +38,7 @@ begin
 end;
 $$;
 revoke execute on function public.start_sequences() from public, anon, authenticated;
+
+-- ─── the backup link (2026-10-30) ─────────────────────────────────
+-- When the "💾 Backup Link" email went out, 10 minutes after the receipt (lib/outbox.ts).
+alter table public.orders add column if not exists backup_sent_at timestamptz;
