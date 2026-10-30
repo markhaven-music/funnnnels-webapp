@@ -20,18 +20,9 @@ export const funnel = {
   },
   tagline: "The most used jazz progressions, 13 voicings × 8 rhythms, all 12 keys",
   price: { eur: 27, usd: 27 },
-  // The hero video: Wistia media mnet4ow8rz, played from its MP4 files (720p
-  // on phones, 1080p on wide screens) in a plain <video>, without Wistia's
-  // player. Poster in public/funnels/jazz-midi-pack (<poster>-960.webp,
-  // <poster>-1600.webp). Script: vsl/script-en.md.
-  vsl: {
-    wistiaId: "mnet4ow8rz",
-    poster: "vsl-en",
-    mp4: {
-      p720: "https://embed-ssl.wistia.com/deliveries/9055f47566d42e87a77fa357b161692b4f0b5f94/file.mp4",
-      p1080: "https://embed-ssl.wistia.com/deliveries/aa7ddf55e37c0d9bc385477bb64d02a96265bc10/file.mp4",
-    },
-  },
+  // The hero video: Wistia media, in Wistia's player (Vsl.tsx). Its thumbnail
+  // is public/funnels/jazz-midi-pack/vsl-en-1600.webp. Script: vsl/script-en.md.
+  vsl: { wistiaId: "mnet4ow8rz" },
   // The old €9 tick-box offer. Since 2026-10-16 the checkout no longer shows it
   // (the Chord Pack is bonus 1); it stays so orders that bought it still verify.
   bump: {
