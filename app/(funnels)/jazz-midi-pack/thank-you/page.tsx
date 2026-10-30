@@ -51,7 +51,7 @@ export default async function ThankYou({
         <div className={s.heroBg} aria-hidden />
         <header className={`${s.wrap} ${s.topbar}`}>
           <span className={s.logo}>
-            GRIND <span className={s.dia}>◆</span> STUDIO
+            <img src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
           </span>
         </header>
         <div className={`${s.wrap} ${s.col} ${s.thanks}`} style={{ position: "relative" }}>

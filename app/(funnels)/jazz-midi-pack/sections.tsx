@@ -162,7 +162,7 @@ function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch
       <div className={s.topband}>
         <header className={`${s.wrap} ${s.topbar}`}>
           <span className={s.logo}>
-            GRIND <span className={s.dia}>◆</span> STUDIO
+            <img src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
           </span>
           <span className={s.tag}>
             <span className={s.dot} aria-hidden />

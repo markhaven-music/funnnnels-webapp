@@ -68,7 +68,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       <div className={s.topband}>
         <header className={`${s.wrap} ${s.topbar}`}>
           <a href={`/${funnel.slug}`} className={s.logo} style={{ textDecoration: "none" }}>
-            GRIND <span className={s.dia}>◆</span> STUDIO
+            <img src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
           </a>
           <span className={s.tag}>
             <LockGlyph /> Secure checkout

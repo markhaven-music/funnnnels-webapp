@@ -74,14 +74,20 @@
   padding-top: 18px;
   padding-bottom: 18px;
 }
+/* The GRIND STUDIO wordmark (the one the shop and the Drum Kit use). */
 .logo {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.26em;
+  display: block;
+  line-height: 0;
 }
-.dia {
-  color: var(--brass);
+.logo img {
+  display: block;
+  width: auto;
+  height: 20px;
+}
+@media (max-width: 480px) {
+  .logo img {
+    height: 16px;
+  }
 }
 .tag {
   display: inline-flex;
