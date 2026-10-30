@@ -7,7 +7,14 @@
 import rolls from "./rolls.json";
 
 export type RollId = keyof typeof rolls;
-export type Roll = { file: string; bpm: number; beats: number; notes: number[][]; chords: (number | string)[][] };
+export type Roll = {
+  file: string;
+  bpm: number;
+  beats: number;
+  notes: number[][];
+  chords: (number | string)[][];
+  drums?: number[][]; // [beat, pitch]: drawn, not played
+};
 
 const BASE = "/funnels/jazz-midi-pack/piano/";
 const NAMES = ["C", "Ds", "Fs", "A"]; // C, D#, F#, A
@@ -88,8 +95,7 @@ function unisons(notes: number[][]) {
   return out;
 }
 
-async function play(id: RollId, scope: HTMLElement) {
-  const roll = rolls[id] as Roll;
+async function play(roll: Roll, scope: HTMLElement) {
   const my = ++token;
   const ac = audio(); // created inside the click: required on iOS
   scope.setAttribute("data-state", "loading");
@@ -129,8 +135,14 @@ async function play(id: RollId, scope: HTMLElement) {
 }
 
 /** Play/stop toggle for the scope element that holds a roll. */
-export function toggle(id: RollId, scope: HTMLElement) {
+export function toggle(id: RollId | Roll, scope: HTMLElement) {
   const same = current?.scope === scope;
   stop();
-  if (!same) void play(id, scope);
+  if (!same) void play(typeof id === "string" ? (rolls[id] as Roll) : id, scope);
+}
+
+/** Plays a roll in a scope, stopping whatever plays (the pack browser's rows). */
+export function start(roll: Roll, scope: HTMLElement) {
+  stop();
+  void play(roll, scope);
 }

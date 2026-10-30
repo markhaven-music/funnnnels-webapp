@@ -45,7 +45,7 @@ const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
 export const metadata: Metadata = {
   title: "Jazz MIDI Pack · GRIND STUDIO",
   description:
-    "26 jazz progressions voiced the way a pianist plays them. 3,536 MIDI files: 13 voicings, 8 rhythms, all 12 keys, bass lines, lofi / neo soul / trap soul / deep house loops.",
+    "The most used jazz progressions, voiced the way a pianist plays them. 3,536 MIDI files: 13 voicings, 8 rhythms, all 12 keys, bass lines, lofi / neo soul / trap soul / deep house loops.",
   openGraph: {
     title: "Jazz chords that sound played, not programmed.",
     description: "3,536 MIDI files by GRIND STUDIO. Drag into your DAW.",

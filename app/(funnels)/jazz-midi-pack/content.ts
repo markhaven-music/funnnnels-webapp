@@ -18,7 +18,7 @@ export type SectionProps = {
   s_letter: { eyebrow: string; title: string; paras: Para[] };
   s_compare_rolls: { beforeLabel: string; beforeText: string; afterLabel: string; afterText: string; note: string };
   s_product: { eyebrow: string; title: string; titleEm: string; lead: string; ticks: string[] };
-  s_previews: { eyebrow: string; title: string; sub: string; items: { roll: RollId; title: string; meta: string }[] };
+  s_previews: { eyebrow: string; title: string; sub: string; items?: { roll: RollId; title: string; meta: string }[] };
   s_steps: { eyebrow: string; title: string; steps: { title: string; text: string }[] };
   s_inside: { eyebrow: string; title: string };
   // A comparison chart: one column per way to get voicings, the last one is the pack.
@@ -64,7 +64,7 @@ export const DEFAULT_SECTIONS: Section[] = [
       sub: "Voiced note by note: chords that sound played, not programmed",
       bullets: [
         "{files} Drag-And-Drop Jazz MIDI Files",
-        "26 Progressions × 13 Voicings × 8 Rhythms",
+        "The Most Used Jazz Progressions × 13 Voicings × 8 Rhythms",
         "Voice-Led Like A Pianist: No Jumping Chords",
         "Chord Names In Every File, No Theory Needed",
         "All 12 Keys, Bass Lines And Genre Loops",
@@ -90,7 +90,7 @@ export const DEFAULT_SECTIONS: Section[] = [
         { style: "p", text: "When a jazz player moves from Dm7 to G7, two fingers stay put. The seventh drops a half step. The hand barely moves." },
         { style: "p", text: "That’s voice leading. It’s why a player sounds smooth and a chord plugin sounds like a grid. Learning it takes months of theory and a piano you might not play." },
         { style: "p", text: "We’re GRIND STUDIO. Our MIDI Drum Kit is in the sessions of 2,847 producers. This one is for what sits on top of the drums." },
-        { style: "hit", text: "So we voiced 26 jazz progressions the way a pianist would. Note by note." },
+        { style: "hit", text: "So we took the most used jazz progressions, the ones everyone wants and nobody can write, and voiced every one the way a pianist would. Note by note." },
         { style: "p", text: "Same chords. Hear the difference." },
       ],
     },
@@ -113,7 +113,7 @@ export const DEFAULT_SECTIONS: Section[] = [
       eyebrow: "Introducing",
       title: "The Jazz",
       titleEm: "MIDI Pack",
-      lead: "{files} MIDI files. 26 jazz progressions, each voiced 13 ways, in 8 rhythms and all 12 keys. Plus bass lines, combo loops and full lofi, neo soul, trap soul and deep house loops.",
+      lead: "{files} MIDI files. The most used jazz progressions, the ones everyone wants and nobody can write, each voiced 13 ways, in 8 rhythms and all 12 keys. Plus bass lines, combo loops and full lofi, neo soul, trap soul and deep house loops.",
       ticks: [
         "No theory needed: every file shows its chord names",
         "Your sounds: Rhodes, piano, pads, synths",
@@ -125,16 +125,9 @@ export const DEFAULT_SECTIONS: Section[] = [
     id: "previews",
     type: "s_previews",
     props: {
-      eyebrow: "Real files, real piano",
-      title: "Press play. This is the MIDI you get.",
-      sub: "Each preview is a file from the pack, note for note, played on a grand piano sample. In your DAW it plays through your sound. The genre loops also ship with their drum MIDI.",
-      items: [
-        { roll: "ballad", title: "Ballad Arpeggios · ii–V–I", meta: "C · 70 bpm" },
-        { roll: "neosoul", title: "Neo Soul loop · I–vi–ii–V", meta: "C · 88 bpm" },
-        { roll: "lofi", title: "Lofi loop · Autumn Leaves type", meta: "Gm · 82 bpm" },
-        { roll: "bossa", title: "Bossa Nova · Tritone Turnaround", meta: "C · 135 bpm" },
-        { roll: "blues", title: "Swing Comping · Jazz Blues in F", meta: "F · 150 bpm" },
-      ],
+      eyebrow: "The whole pack, open",
+      title: "Browse all {files} files. Press play on any of them.",
+      sub: "Every folder and every file of the pack, note for note, played on a grand piano sample. In your DAW they play through your sounds. Drum MIDI is shown here, not played.",
     },
   },
   {
@@ -238,7 +231,7 @@ export const DEFAULT_SECTIONS: Section[] = [
       title: "Everything in the pack. {price}.",
       stack: [
         "{files} MIDI files in 5 folders",
-        "26 progressions × 13 voicings × 8 rhythms",
+        "The most used jazz progressions × 13 voicings × 8 rhythms",
         "All 12 keys, as voice-led pads",
         "Walking, two-feel and bossa bass lines",
         "Lofi, neo soul, trap soul and deep house loops, drums included",
@@ -289,7 +282,7 @@ export const DEFAULT_SECTIONS: Section[] = [
   {
     id: "final",
     type: "s_final",
-    props: { title: "26 progressions. 13 voicings. Your sounds. {price}.", note: "{days}-day satisfaction guarantee · instant download" },
+    props: { title: "The progressions everyone wants. 13 voicings. Your sounds. {price}.", note: "{days}-day satisfaction guarantee · instant download" },
   },
 ];
 

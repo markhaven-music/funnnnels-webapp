@@ -10,6 +10,7 @@ import { PlayableRoll } from "./PlayableRoll";
 import { ProductBox, Scene } from "./ProductBox";
 import { CheckoutWidget } from "./CheckoutWidget";
 import { Vsl } from "./Vsl";
+import { PackBrowser } from "./PackBrowser";
 import s from "./jazz.module.css";
 import e from "./edit.module.css";
 
@@ -193,7 +194,9 @@ function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch
       </div>
       <div className={`${s.wrap} ${s.dawStrip}`}>
         <span className={s.mono}>Works in</span>
-        <T v={p.daws} set={set("daws")} ctx={ctx} />
+        {/* The DAW logos the Drum Kit shows; the typed list is their alt text. */}
+        <img className={s.dawLogos} src="/funnels/midi-drum-kit/daws.webp" alt={p.daws} width={1000} height={63} loading="lazy" />
+        {patch && <T v={p.daws} set={set("daws")} ctx={ctx} />}
       </div>
     </section>
   );
@@ -286,26 +289,15 @@ function Product({ p, patch, ctx }: { p: SectionProps["s_product"]; patch?: Patc
   );
 }
 
+// The whole pack, browsable (PackBrowser). Since 2026-10-30 in place of five
+// hand-picked previews ("either you allow the person to browse the whole pack
+// or remove this"); old pages' `items` are ignored.
 function Previews({ p, patch, ctx }: { p: SectionProps["s_previews"]; patch?: Patch; ctx: Ctx }) {
-  const ops = listOps(p.items, "items", patch);
   return (
     <section className={s.sec}>
       <div className={s.wrap}>
         <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} patch={patch} ctx={ctx} />
-        <div className={s.previews}>
-          {p.items.map((it, i) => (
-            <div key={i} className={e.item}>
-              <PlayableRoll id={it.roll} title={fill(it.title, ctx)} meta={it.meta} variant="mini" />
-              {patch && (
-                <div className={e.itemBar}>
-                  <T v={it.title} set={(v) => ops.set!(i, { ...it, title: v })} ctx={ctx} />
-                  <T v={it.meta} set={(v) => ops.set!(i, { ...it, meta: v })} ctx={ctx} />
-                  <Remove onClick={() => ops.remove!(i)} />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        <PackBrowser />
       </div>
     </section>
   );
@@ -372,7 +364,7 @@ function Inside({ p, patch, ctx }: { p: SectionProps["s_inside"]; patch?: Patch;
             </ul>
           </div>
           <div className={`${s.listBox} ${s.listWide}`}>
-            <h3>26 progressions</h3>
+            <h3>The progressions everyone wants</h3>
             <ol className={s.progGrid}>{funnel.progressions.map((x) => <li key={x}>{x}</li>)}</ol>
           </div>
         </div>

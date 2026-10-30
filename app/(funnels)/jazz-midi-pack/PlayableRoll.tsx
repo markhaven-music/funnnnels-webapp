@@ -50,11 +50,14 @@ export function PlayableRoll({
   );
 }
 
-function Svg({ roll, chordsRow }: { roll: Roll; chordsRow: boolean }) {
+// Drum-only files (the genre loops' Drums.mid) draw their hits, one row per drum.
+export function Svg({ roll, chordsRow }: { roll: Roll; chordsRow: boolean }) {
   const W = 1000;
   const top = chordsRow ? 26 : 0;
   const H = (chordsRow ? 230 : 120) + top;
-  const pitches = roll.notes.map((n) => n[2]);
+  const drumsOnly = roll.notes.length === 0;
+  const hits = drumsOnly ? (roll.drums ?? []).map(([b, p]) => [b, 0.25, p]) : [];
+  const pitches = (drumsOnly ? hits : roll.notes).map((n) => n[2]);
   const lo = Math.min(...pitches) - 1;
   const hi = Math.max(...pitches) + 1;
   const row = (H - top) / (hi - lo + 1);
@@ -66,7 +69,7 @@ function Svg({ roll, chordsRow }: { roll: Roll; chordsRow: boolean }) {
         {Array.from({ length: roll.beats / 4 + 1 }, (_, i) => (
           <line key={i} x1={x(i * 4)} x2={x(i * 4)} y1={0} y2={H} className={s.bar} />
         ))}
-        {roll.notes.map(([start, len, p], i) => (
+        {(drumsOnly ? hits : roll.notes).map(([start, len, p], i) => (
           <rect
             key={i}
             x={x(start) + 1.5}
@@ -74,7 +77,7 @@ function Svg({ roll, chordsRow }: { roll: Roll; chordsRow: boolean }) {
             width={Math.max(3, x(len) - 3)}
             height={Math.max(2.5, row - 2)}
             rx={Math.min(3, row / 3)}
-            className={p <= bassMax && p < 52 ? s.bass : s.note}
+            className={drumsOnly ? s.drum : p <= bassMax && p < 52 ? s.bass : s.note}
           />
         ))}
       </svg>

@@ -4,7 +4,8 @@ The hero video of /jazz-midi-pack. Every claim is in `../BRIEF.md`; voice is
 "Diretto" (producer to producer, short sentences, no hype, no fake urgency,
 no "worth $X"). Structure: hear it first (before / after), the problem, the
 mechanism (voice leading), the pack, what's inside, more demos, how easy it
-is, bonuses, price, guarantee, one call to action.
+is, bonuses, one payment (no amount: the page shows each visitor's own
+price), guarantee, one call to action.
 
 [DEMO: id] = a real file from the pack (rolls.json), played on the Salamander
 piano, its piano roll on screen with the playhead and chord names. Not read
@@ -43,7 +44,7 @@ That's called voice leading. Watch the top note. In root position, it jumps up t
 
 [SHOW: image stage-2200]
 
-So we did it for you. We're GRIND STUDIO. Our MIDI Drum Kit is in the sessions of 2,847 producers. This pack is for what sits on top of the drums. It's called the Jazz MIDI Pack. We took 26 jazz progressions, and voiced every one the way a pianist would. Note by note.
+So we did it for you. We're GRIND STUDIO. Our MIDI Drum Kit is in the sessions of 2,847 producers. This pack is for what sits on top of the drums. It's called the Jazz MIDI Pack. We took the most used jazz progressions, the ones everyone wants and nobody can write, and voiced every one the way a pianist would. Note by note.
 
 [SHOW: image box-900]
 
@@ -51,7 +52,7 @@ That's 3,536 MIDI files, in five folders.
 
 [SHOW: image daw-1600]
 
-Folder one: the chords, in each progression's original key. Twenty-six progressions, each in 13 voicings and 8 rhythms. Ballad arpeggios, pads, bossa nova, swing comping, Charleston, and Freddie Green four to the bar.
+Folder one: the chords, in each progression's original key. Every progression, in 13 voicings and 8 rhythms. Ballad arpeggios, pads, bossa nova, swing comping, Charleston, and Freddie Green four to the bar.
 
 The 13 voicings go from Best Voicing, the one you just heard, to rootless Bill Evans voicings, drop two, quartal voicings, shells, two-hand spreads, and every inversion. The progressions are the ones jazz is built on. Two-five-ones in major and minor. Turnarounds. Tritone subs. Backdoor. Lady Bird. Autumn Leaves type changes. Rhythm changes. Jazz blues. Coltrane changes. A Train.
 
@@ -59,11 +60,7 @@ Folder two: every progression in all 12 keys, as voice-led pads. Folder three: b
 
 [SHOW: none]
 
-Here's what that sounds like. Real files from the pack, played on a grand piano. Neo soul.
-
-[DEMO: neosoul]
-
-Lofi. Autumn Leaves type.
+Here's what that sounds like. Real files from the pack, played on a grand piano. Lofi. Autumn Leaves type.
 
 [DEMO: lofi]
 
@@ -101,9 +98,9 @@ Four: the Emotional Keys MIDI Bundle. Three volumes of songstarters, progression
 
 And five: 47 drum loops to write over.
 
-[SHOW: card €27 · $27]
+[SHOW: card One payment]
 
-All of it, the pack and the five bonuses, is 27 euros in Europe, 27 dollars everywhere else. One payment. No subscription. You download it right after you pay.
+All of it, the pack and the five bonuses, is one payment. Your price is right below this video. No subscription. You download it right after you pay.
 
 [SHOW: none]
 

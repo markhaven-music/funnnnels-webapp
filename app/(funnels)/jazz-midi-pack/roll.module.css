@@ -99,6 +99,18 @@
 .mini .svgWrap {
   height: 84px;
 }
+.browse .svgWrap {
+  height: clamp(150px, 26vw, 210px);
+}
+.play:disabled {
+  border-color: #3a342b;
+  background: none;
+  color: #8f8676;
+  cursor: default;
+}
+.play:disabled .ico {
+  border-left-color: #8f8676;
+}
 .svgWrap svg {
   display: block;
   width: 100%;
@@ -114,6 +126,9 @@
 }
 .bass {
   fill: #a24a35;
+}
+.drum {
+  fill: #c9bfae;
 }
 .muted .note {
   fill: #8f8676;

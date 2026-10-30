@@ -18,18 +18,18 @@ export const funnel = {
     privacy: "https://www.thegrind.studio/privacy-policy",
     refund: "https://www.thegrind.studio/refund-policy",
   },
-  tagline: "26 progressions × 13 voicings × 8 rhythms, all 12 keys",
+  tagline: "The most used jazz progressions, 13 voicings × 8 rhythms, all 12 keys",
   price: { eur: 27, usd: 27 },
-  // The hero video: Wistia media mfktzuq63b, played from its MP4 files (720p
+  // The hero video: Wistia media mnet4ow8rz, played from its MP4 files (720p
   // on phones, 1080p on wide screens) in a plain <video>, without Wistia's
   // player. Poster in public/funnels/jazz-midi-pack (<poster>-960.webp,
   // <poster>-1600.webp). Script: vsl/script-en.md.
   vsl: {
-    wistiaId: "mfktzuq63b",
+    wistiaId: "mnet4ow8rz",
     poster: "vsl-en",
     mp4: {
-      p720: "https://embed-ssl.wistia.com/deliveries/62e3306c44e55c0b12e8f4ce41fcfc69ada52c3b/file.mp4",
-      p1080: "https://embed-ssl.wistia.com/deliveries/1123ea70c522b8bd2dd1d6e932fa1373917a96e9/file.mp4",
+      p720: "https://embed-ssl.wistia.com/deliveries/9055f47566d42e87a77fa357b161692b4f0b5f94/file.mp4",
+      p1080: "https://embed-ssl.wistia.com/deliveries/aa7ddf55e37c0d9bc385477bb64d02a96265bc10/file.mp4",
     },
   },
   // The old €9 tick-box offer. Since 2026-10-16 the checkout no longer shows it
