@@ -12,6 +12,7 @@ Vercel), from one job:
 | 💾 Backup Link | 10 min after the receipt: the same download links again and the account page, for buyers whose receipt got buried (ClickFunnels did it) | `lib/backupCopy.ts` |
 | Abandoned checkout | MIDI Drum Kit: 3 emails, 15 min after step 1, then 6 h, then 18 h later (ClickFunnels' words, EN/FR/ES/DE/IT); other funnels: 1 email after 1 h. Stops when they buy | `lib/abandonCopy.ts`, `lib/mailCopy.ts` |
 | After a Drum Kit purchase | "How to use" 1 h after, "Fragments" tip 24 h after, "Bonus" folder 48 h later: one sequence per language (`db/email-series-seed.sql`) | Dashboard → Automations |
+| Grind Minute | 42 production tips, the first 8 days after any purchase (tag `buyer`), then one every 3 days: one sequence per language, words in `db/grind-minute/*.txt` | Dashboard → Automations |
 | Sequences | a contact gets the trigger tag → step 1, step 2 N hours later…; a sequence can be for one language | Dashboard → Automations |
 | Broadcasts | now or at a time, to a tag or everyone subscribed | Dashboard → Broadcasts |
 | Launch emails | their scheduled time | Dashboard → Launches |
@@ -45,11 +46,10 @@ Newsletter-type emails carry an unsubscribe link and one-click
 ## From ClickFunnels
 
 On 2026-10-29 the automations of the ClickFunnels workspace (24 workflows, 98
-emails) were read; three came over (the backup link on 2026-10-30): the Meta Ads funnel's abandoned checkout and
+emails) were read; four came over (the backup link and Grind Minute on 2026-10-30): the Meta Ads funnel's abandoned checkout and
 the Drum Kit's after-purchase emails (`db/email-series.sql`,
 `db/email-series-seed.sql`). Left in ClickFunnels: the abandoned-checkout copies
-of old price tests (same three emails), the Grind Minute newsletter (44 emails every 3 days) and
-the free-pack lead sequences (Rolls, Mystery Hooks, ESSENTIAL), whose opt-in
+of old price tests (same three emails) and the free-pack lead sequences (Rolls, Mystery Hooks, ESSENTIAL), whose opt-in
 pages aren't in funnnnels.
 
 On 2026-10-30 its 4,718 contacts were imported (dashboard → Contacts: source

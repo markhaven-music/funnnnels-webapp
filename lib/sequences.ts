@@ -66,7 +66,7 @@ export function parseSequence(raw: unknown): SequenceInput | string {
   const triggerTag = String(b.triggerTag ?? "").trim().slice(0, 80);
   const exitTag = String(b.exitTag ?? "").trim().slice(0, 80) || null;
   const lang = (SEQUENCE_LANGS as readonly string[]).includes(String(b.lang)) ? String(b.lang) : null;
-  const steps = (Array.isArray(b.steps) ? b.steps : []).slice(0, 30).map((s: Record<string, unknown>) => ({
+  const steps = (Array.isArray(b.steps) ? b.steps : []).slice(0, 60).map((s: Record<string, unknown>) => ({
     id: typeof s.id === "string" ? s.id : undefined,
     delayHours: Math.max(0, Math.min(24 * 365, Math.round(Number(s.delayHours) || 0))),
     subject: String(s.subject ?? "").slice(0, 200),
