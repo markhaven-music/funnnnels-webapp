@@ -78,13 +78,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
 
       <section id="buy" className={`${s.sec} ${s.order} ${s.orderPage}`}>
         <div className={s.wrap}>
-          <div className={s.secHead}>
-            <p className={s.eyebrow}>{funnel.product}</p>
-            <h1 className={s.h2}>Complete your order.</h1>
-            <p className={s.sub}>
-              {ctx.price}, one payment. Your download buttons appear right after you pay.
-            </p>
-          </div>
+          {/* No heading above the box and the form ("you can eliminate it"); the h1 stays for screen readers. */}
+          <h1 className={s.srOnly}>Complete your Jazz MIDI Pack order</h1>
           <div className={s.orderGrid}>
             <OrderSummary p={offer} ctx={ctx} />
             <div className={s.orderForm}>

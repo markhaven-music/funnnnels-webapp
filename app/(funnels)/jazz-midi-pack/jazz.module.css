@@ -566,10 +566,11 @@
   font-weight: 700;
 }
 .numList,
+/* No numbers on the progressions: counting them to 26 reads as few ("they sound too few"). */
 .progGrid {
   margin: 0;
-  padding-left: 1.6em;
-  list-style: decimal;
+  padding-left: 1.1em;
+  list-style: "◆  ";
   color: var(--cream-2);
   font-size: 15px;
 }
@@ -838,6 +839,14 @@
 }
 .payList .tick {
   margin-top: 3px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 /* the order page: no big section gap above the form */
 .orderPage {

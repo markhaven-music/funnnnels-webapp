@@ -70,8 +70,10 @@ const appearance: Appearance = {
     spacingUnit: "4px",
   },
   rules: {
-    ".Input": { border: "1px solid #3a342b", boxShadow: "none", padding: "14px" },
-    ".Input:focus": { border: "1px solid #d9a441", boxShadow: "none" },
+    // white fields, like the name and email ones (checkout.module.css .input)
+    ".Input": { backgroundColor: "#ffffff", color: "#1a1206", border: "1px solid #d9d2c4", boxShadow: "none", padding: "14px" },
+    ".Input::placeholder": { color: "#857b6c" },
+    ".Input:focus": { border: "1px solid #d9a441", boxShadow: "0 0 0 3px rgba(226, 169, 59, 0.35)" },
     ".Tab": { border: "1px solid #3a342b", boxShadow: "none" },
     ".Tab--selected": { border: "1px solid #d9a441" },
   },

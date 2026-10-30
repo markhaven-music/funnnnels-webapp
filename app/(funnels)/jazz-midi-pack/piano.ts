@@ -141,7 +141,12 @@ export function toggle(id: RollId | Roll, scope: HTMLElement) {
   if (!same) void play(typeof id === "string" ? (rolls[id] as Roll) : id, scope);
 }
 
-/** Plays a roll in a scope, stopping whatever plays (the pack browser's rows). */
+/** Starts the audio inside a tap, for a play that waits on a fetch (iOS). */
+export function unlock() {
+  audio();
+}
+
+/** Plays a roll in a scope, stopping whatever plays (the pack player). */
 export function start(roll: Roll, scope: HTMLElement) {
   stop();
   void play(roll, scope);

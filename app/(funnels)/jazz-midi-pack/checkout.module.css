@@ -108,23 +108,27 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
+/* White fields on the dark card, like the ClickFunnels checkout ("fields li
+   voglio bianchi come clickfunnels"); Stripe's card fields match (appearance
+   in CheckoutWidget.tsx). */
 .input {
   min-width: 0;
   min-height: 52px;
   padding: 0 16px;
   border-radius: 12px;
-  border: 1px solid var(--rule);
-  background: var(--ink);
-  color: var(--cream);
+  border: 1px solid #d9d2c4;
+  background: #fff;
+  color: #1a1206;
   font: inherit;
   font-size: 16px; /* no iOS zoom */
 }
 .input::placeholder {
-  color: var(--cream-3);
+  color: #857b6c;
 }
 .input:focus {
   outline: none;
   border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgb(226 169 59 / 0.35);
 }
 
 

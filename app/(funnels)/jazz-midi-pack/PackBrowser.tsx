@@ -2,30 +2,44 @@
 
 import { useEffect, useRef, useState } from "react";
 import rolls from "./rolls.json";
-import { start, toggle, type Roll } from "./piano";
+import { start, stop, toggle, unlock, type Roll } from "./piano";
 import { Svg } from "./PlayableRoll";
 import r from "./roll.module.css";
 import b from "./browse.module.css";
 
-// The whole pack, folder by folder, every file playable: the notes of all
-// 3,536 files come from tools/extract_browse.py (public/funnels/jazz-midi-pack/
-// browse). The folder tree (3 KB) loads when the browser nears the screen and
-// a folder's files when it's opened, so the page carries none of it. A file
-// plays on the grand piano sample like the other rolls; drums are drawn, not
-// played.
-type Node = { n: string; c?: Node[]; k?: number; f?: number };
+// The whole pack as a player: pick one of the five folders, then what the
+// folder varies (Progression · Voicing · Rhythm, Progression · Key, …), and
+// that file plays, drawn as a piano roll, with its place in the pack under it.
+// The notes of all 3,536 files come from tools/extract_browse.py
+// (public/funnels/jazz-midi-pack/browse): pack.json (the choices, ≈22 KB
+// gzipped) loads when the player nears the screen and a folder's files when
+// one of them is picked, so the page carries none of it. Drums are drawn, not
+// played (the player has only the piano sample).
+type Dim = { label: string; opts: string[] };
+type Folder = { label: string; folder: string; what: string; dims: Dim[]; files: Record<string, [number, number]> };
+type Pack = { total: number; folders: Folder[]; paths: string[] };
+type Shown = { roll: Roll; labels: string[]; path: string };
 
 const DIR = "/funnels/jazz-midi-pack/browse";
-const count = (x: Node): number => x.f ?? (x.c ?? []).reduce((a, c) => a + count(c), 0);
+const FIRST: Shown = {
+  roll: rolls.ballad as Roll,
+  labels: ["ii-V-I Major", "Best Voicing", "Ballad Arpeggios"],
+  path: "1 Chords in Original Key/01 ii-V-I Major/01 Best Voicing",
+};
 const fmt = (n: number) => n.toLocaleString("en-US");
+// Short choices (keys, parts, genres, rhythms) as buttons; long lists as a menu.
+const asChips = (d: Dim) => d.opts.length <= 8 || d.opts.every((o) => o.length <= 3);
 
 export function PackBrowser() {
   const root = useRef<HTMLDivElement>(null);
   const scope = useRef<HTMLDivElement>(null);
-  const [tree, setTree] = useState<Node>();
-  const [path, setPath] = useState<number[]>([]);
-  const [files, setFiles] = useState<Record<number, Roll[]>>({});
-  const [roll, setRoll] = useState<Roll>(rolls.ballad as Roll);
+  const chunks = useRef(new Map<number, Promise<Roll[]>>());
+  const seq = useRef(0);
+  const [pack, setPack] = useState<Pack>();
+  const [tab, setTab] = useState(0);
+  const [sel, setSel] = useState<number[][]>([]);
+  const [shown, setShown] = useState<Shown>(FIRST);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const el = root.current;
@@ -34,9 +48,12 @@ export function PackBrowser() {
       (es) => {
         if (!es.some((e) => e.isIntersecting)) return;
         io.disconnect();
-        fetch(`${DIR}/index.json`)
+        fetch(`${DIR}/pack.json`)
           .then((res) => res.json())
-          .then(setTree)
+          .then((p: Pack) => {
+            setSel(p.folders.map((f) => f.dims.map(() => 0)));
+            setPack(p);
+          })
           .catch(() => {});
       },
       { rootMargin: "600px" },
@@ -45,101 +62,132 @@ export function PackBrowser() {
     return () => io.disconnect();
   }, []);
 
-  const trail = tree ? path.reduce<Node[]>((acc, i) => [...acc, acc[acc.length - 1].c![i]], [tree]) : [];
-  const here = trail[trail.length - 1];
-  const k = here?.k;
-
-  useEffect(() => {
-    if (k === undefined || files[k]) return;
-    fetch(`${DIR}/${k}.json`)
-      .then((res) => res.json())
-      .then((list: Roll[]) => setFiles((f) => ({ ...f, [k]: list })))
-      .catch(() => {});
-  }, [k, files]);
-
-  // Play inside the tap itself (iOS), then show the file.
-  function pick(f: Roll) {
-    if (scope.current && f.notes.length) start(f, scope.current);
-    setRoll(f);
+  function chunk(k: number) {
+    let p = chunks.current.get(k);
+    if (!p) {
+      p = fetch(`${DIR}/${k}.json`).then((res) => res.json());
+      chunks.current.set(k, p);
+      p.catch(() => chunks.current.delete(k));
+    }
+    return p;
   }
 
+  // Every choice plays what it picked: the audio starts inside the tap (iOS),
+  // the file follows its folder's fetch.
+  function choose(t: number, s: number[]) {
+    if (!pack) return;
+    const folder = pack.folders[t];
+    const at = folder.files[s.join(".")];
+    setTab(t);
+    setSel((all) => all.map((x, i) => (i === t ? s : x)));
+    if (!at) return;
+    unlock();
+    stop();
+    const my = ++seq.current;
+    setLoading(true);
+    chunk(at[0])
+      .then((list) => {
+        if (my !== seq.current) return;
+        const f = list[at[1]];
+        setShown({ roll: f, labels: folder.dims.map((d, i) => d.opts[s[i]]), path: pack.paths[at[0]] });
+        setLoading(false);
+        if (f.notes.length && scope.current) start(f, scope.current);
+      })
+      .catch(() => my === seq.current && setLoading(false));
+  }
+
+  const folder = pack?.folders[tab];
+  const cur = sel[tab] ?? [];
+  const { roll } = shown;
   const drumsOnly = roll.notes.length === 0;
-  const list = k === undefined ? undefined : files[k];
 
   return (
-    <div ref={root} className={b.browser}>
+    <div ref={root} className={b.player}>
+      <div className={b.tabs} role="tablist" aria-label="Folders of the pack">
+        {(pack?.folders ?? []).map((f, i) => (
+          <button
+            key={f.label}
+            type="button"
+            role="tab"
+            aria-selected={i === tab}
+            className={b.tab}
+            onClick={() => i !== tab && choose(i, sel[i])}
+          >
+            <span className={b.tabN}>{i + 1}</span>
+            <span className={b.tabLabel}>{f.label}</span>
+            <span className={b.tabCount}>{fmt(Object.keys(f.files).length)} files</span>
+          </button>
+        ))}
+        {!pack && <span className={b.wait}>Opening the pack…</span>}
+      </div>
+
+      {folder && (
+        <div className={b.pick}>
+          <p className={b.what}>{folder.what}</p>
+          {folder.dims.map((d, di) => (
+            <div key={d.label} className={b.dim}>
+              <span className={b.dimLabel} id={`dim-${tab}-${di}`}>
+                {d.label}
+              </span>
+              {asChips(d) ? (
+                <div className={b.chips} role="group" aria-labelledby={`dim-${tab}-${di}`}>
+                  {d.opts.map((o, oi) => (
+                    <button
+                      key={o}
+                      type="button"
+                      className={b.chip}
+                      aria-pressed={cur[di] === oi}
+                      onClick={() => choose(tab, cur.map((x, i) => (i === di ? oi : x)))}
+                    >
+                      {o}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <select
+                  className={b.select}
+                  aria-labelledby={`dim-${tab}-${di}`}
+                  value={cur[di] ?? 0}
+                  onChange={(e) => choose(tab, cur.map((x, i) => (i === di ? Number(e.target.value) : x)))}
+                >
+                  {d.opts.map((o, oi) => (
+                    <option key={o} value={oi}>
+                      {o}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       <div ref={scope} className={`${r.scope} ${r.browse} ${r.brass} ${b.viewer}`}>
         <div className={r.head}>
           <button
             type="button"
             className={r.play}
             aria-pressed="false"
-            disabled={drumsOnly}
+            disabled={drumsOnly || loading}
             onClick={() => scope.current && toggle(roll, scope.current)}
           >
             <span className={r.ico} aria-hidden />
-            <span className={r.lPlay}>{drumsOnly ? "Drums" : "Play"}</span>
+            <span className={r.lPlay}>{loading ? "Loading" : drumsOnly ? "Drums" : "Play"}</span>
             <span className={r.lStop}>Stop</span>
             <span className={r.lLoad}>Loading</span>
           </button>
           <span className={r.text}>
-            <span className={b.now}>{roll.file}</span>
-            {drumsOnly && <span className={r.file}>Drum MIDI: it plays through your drum kit in the DAW</span>}
+            <span className={b.now}>{shown.labels.join(" · ")}</span>
+            <span className={r.file}>
+              {drumsOnly ? "Drum MIDI: it plays through your drum kit in the DAW" : `${roll.bpm} bpm`}
+            </span>
           </span>
-          <span className={r.meta}>{roll.bpm} bpm</span>
         </div>
         <Svg roll={roll} chordsRow={!drumsOnly} />
       </div>
-
-      <nav className={b.crumbs} aria-label="Folder">
-        <button type="button" onClick={() => setPath([])} aria-current={path.length === 0 ? "page" : undefined}>
-          Jazz MIDI Pack
-        </button>
-        {trail.slice(1).map((n, i) => (
-          <span key={i} className={b.crumb}>
-            <span aria-hidden>/</span>
-            <button
-              type="button"
-              onClick={() => setPath(path.slice(0, i + 1))}
-              aria-current={i === path.length - 1 ? "page" : undefined}
-            >
-              {n.n}
-            </button>
-          </span>
-        ))}
-      </nav>
-
-      <ul className={b.list}>
-        {!tree && <li className={b.wait}>Opening the pack…</li>}
-        {here?.c?.map((c, i) => (
-          <li key={c.n}>
-            <button type="button" className={b.row} onClick={() => setPath([...path, i])}>
-              <span className={b.folder} aria-hidden />
-              <span className={b.name}>{c.n}</span>
-              <span className={b.count}>{fmt(count(c))} files</span>
-            </button>
-          </li>
-        ))}
-        {k !== undefined && !list && <li className={b.wait}>Loading the files…</li>}
-        {list?.map((f) => (
-          <li key={f.file}>
-            <button
-              type="button"
-              className={`${b.row} ${f.file === roll.file ? b.on : ""}`}
-              onClick={() => pick(f)}
-            >
-              <span className={f.notes.length ? b.tri : b.drum} aria-hidden />
-              <span className={b.name}>{f.file.replace(/\.mid$/, "")}</span>
-              <span className={b.count}>{f.bpm} bpm</span>
-            </button>
-          </li>
-        ))}
-      </ul>
-      {tree && (
-        <p className={b.total}>
-          {fmt(count(tree))} files in {tree.c?.length} folders. Tap a folder, then a file.
-        </p>
-      )}
+      <p className={b.path}>
+        <span className={b.pathLabel}>In the pack</span> Jazz MIDI Pack / {shown.path.split("/").join(" / ")} / {roll.file}
+      </p>
     </div>
   );
 }

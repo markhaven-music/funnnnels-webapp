@@ -365,7 +365,7 @@ function Inside({ p, patch, ctx }: { p: SectionProps["s_inside"]; patch?: Patch;
           </div>
           <div className={`${s.listBox} ${s.listWide}`}>
             <h3>The progressions everyone wants</h3>
-            <ol className={s.progGrid}>{funnel.progressions.map((x) => <li key={x}>{x}</li>)}</ol>
+            <ul className={s.progGrid}>{funnel.progressions.map((x) => <li key={x}>{x}</li>)}</ul>
           </div>
         </div>
       </div>
