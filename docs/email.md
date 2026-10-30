@@ -12,7 +12,7 @@ Vercel), from one job:
 | 💾 Backup Link | 10 min after the receipt: the same download links again and the account page, for buyers whose receipt got buried (ClickFunnels did it) | `lib/backupCopy.ts` |
 | Abandoned checkout | MIDI Drum Kit: 3 emails, 15 min after step 1, then 6 h, then 18 h later (ClickFunnels' words, EN/FR/ES/DE/IT); other funnels: 1 email after 1 h. Stops when they buy | `lib/abandonCopy.ts`, `lib/mailCopy.ts` |
 | After a Drum Kit purchase | "How to use" 1 h after, "Fragments" tip 24 h after, "Bonus" folder 48 h later: one sequence per language (`db/email-series-seed.sql`) | Dashboard → Automations |
-| Grind Minute | 42 production tips, the first 8 days after any purchase (tag `buyer`), then one every 3 days: one sequence per language, words in `db/grind-minute/*.txt` | Dashboard → Automations |
+| Grind Minute | 42 production tips to every new contact (tag `checkout-started`: anyone who types their email at a checkout, buyers included, as ClickFunnels sent it to buyers, checkout opt-ins and free-pack leads), the first 4 days after (after the abandoned-checkout emails and the Drum Kit's after-purchase ones), then one every 3 days: one sequence per language, words in `db/grind-minute/*.txt` | Dashboard → Automations |
 | Sequences | a contact gets the trigger tag → step 1, step 2 N hours later…; a sequence can be for one language | Dashboard → Automations |
 | Broadcasts | now or at a time, to a tag or everyone subscribed | Dashboard → Broadcasts |
 | Launch emails | their scheduled time | Dashboard → Launches |
