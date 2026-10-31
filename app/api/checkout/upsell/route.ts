@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { checkoutPages, offerOf, resolveFunnel, upsellsOn } from "@/lib/funnels";
@@ -7,6 +7,7 @@ import { cleanVisitorId } from "@/lib/neoIds";
 import { getOrder, notePayPalOrder } from "@/lib/orders";
 import { PAYPAL_LOCALE, isPayPalOrderId, paypal, paypalConfigured, paypalValue, returnOrigin, type PayPalOrder } from "@/lib/paypal";
 import { stripe, stripeConfigured } from "@/lib/stripe";
+import { recordStripePayment } from "@/lib/stripeSales";
 
 export const runtime = "nodejs";
 
@@ -74,7 +75,11 @@ export async function POST(req: Request) {
         // Two taps within the same minute make one charge.
         { idempotencyKey: `upsell-${parent.id}-${offer.id}-${Math.floor(Date.now() / 60_000)}` },
       );
-      if (up.status === "succeeded" || up.status === "processing") return NextResponse.json({ status: "paid", id: up.id });
+      if (up.status === "succeeded" || up.status === "processing") {
+        // Into our orders now, not when (or if) the buyer reaches the thank-you page.
+        after(() => recordStripePayment(up.id));
+        return NextResponse.json({ status: "paid", id: up.id });
+      }
       if (up.status === "requires_action" && up.client_secret) {
         return NextResponse.json({ status: "action", clientSecret: up.client_secret, paymentMethod: card, publishableKey });
       }

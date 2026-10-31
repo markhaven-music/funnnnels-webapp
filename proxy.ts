@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { COUNTRY_COOKIE, currencyFor, visitorCountry } from "@/lib/geo";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
@@ -95,6 +95,14 @@ const PUBLIC = [
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Stripe sends a card buyer back with ?payment_intent=…&redirect_status=succeeded
+  // (to the first upsell, or the thank-you page): the order is recorded on
+  // arrival, before any upsell, after the page is on its way (lib/stripeSales.ts).
+  const paid = request.nextUrl.searchParams.get("payment_intent");
+  if (paid && request.nextUrl.searchParams.get("redirect_status") === "succeeded") {
+    after(() => import("@/lib/stripeSales").then((m) => m.recordStripePayment(paid)));
+  }
   const host = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
 
   const slug = kitSlug(pathname);

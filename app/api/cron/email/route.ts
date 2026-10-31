@@ -1,4 +1,5 @@
 import { runOutbox } from "@/lib/outbox";
+import { sweepStripe } from "@/lib/stripeSales";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -10,8 +11,17 @@ export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) return new Response("Unauthorized", { status: 401 });
   const dryRun = new URL(req.url).searchParams.get("dryRun") === "1";
-  const report = await runOutbox({ budgetMs: 45_000, dryRun });
+  // First the card orders nobody told us about (a tab closed before any of our
+  // pages), so their receipts go out in this same run.
+  const recovered = dryRun
+    ? 0
+    : await sweepStripe().catch((err) => {
+        console.error("stripe sweep failed", err);
+        return 0;
+      });
+  if (recovered) console.log(`stripe sweep: ${recovered} order(s) recorded`);
+  const report = await runOutbox({ budgetMs: 40_000, dryRun });
   const total = report.receipts + report.backups + report.reminders + report.sequence + report.broadcast + report.launch;
   if (total || report.failed || report.stopped) console.log(`email job${dryRun ? " (dry run)" : ""}`, JSON.stringify(report));
-  return Response.json({ dryRun, ...report });
+  return Response.json({ dryRun, recovered, ...report });
 }

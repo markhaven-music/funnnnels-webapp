@@ -9,16 +9,18 @@ import { supabase } from "@/lib/supabase";
 // right after ride in the same email), and how the abandoned-checkout
 // reminder knows someone bought.
 //
-// Called from every place that learns about a payment: the Stripe webhook
-// (even if the buyer closed the tab), the PayPal return, and the thank-you
-// pages. Safe to call again and again for the same order.
+// Called from every place that learns about a payment: the page Stripe sends
+// a card buyer back to, a one-click upsell's charge, the email job's sweep of
+// Stripe (lib/stripeSales.ts), the Stripe webhook, the PayPal return, and the
+// thank-you pages. Safe to call again and again for the same order: true only
+// the first time.
 //
 // Stripe or PayPal stays the judge of whether an order paid: downloads ask
 // them, never this table.
-export async function recordSale(order: Order, funnel: string, lang?: string | null): Promise<void> {
-  if (order.status !== "succeeded") return;
+export async function recordSale(order: Order, funnel: string, lang?: string | null): Promise<boolean> {
+  if (order.status !== "succeeded") return false;
   const f = await resolveFunnel(funnel);
-  if (!f) return;
+  if (!f) return false;
   const email = order.email?.trim().toLowerCase() || null;
   const language = order.lang || lang || "en";
 
@@ -56,6 +58,7 @@ export async function recordSale(order: Order, funnel: string, lang?: string | n
       console.error(`order ${order.id}: tagging the buyer failed`, err);
     }
   }
+  return Boolean(inserted?.length);
 }
 
 /** recordSale for pages and routes: never throws, only logs. */
