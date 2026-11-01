@@ -20,9 +20,11 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 JAZZ = os.path.join(ROOT, "app", "(funnels)", "jazz-midi-pack")
 PUB = os.path.join(ROOT, "public", "funnels", "jazz-midi-pack")
 SCRIPT = os.path.join(JAZZ, "vsl", "script-en.md")
-VOICE = "xAsWBWOYOkb6aUNS79oD"  # "Matter of fact Producer"
-MODEL = "eleven_multilingual_v2"
-SETTINGS = {"stability": 0.5, "similarity_boost": 0.8, "style": 0.2, "use_speaker_boost": True}
+# "Aaron Sage - Friendly & Conversational", picked by the user on 2026-11-01 over the
+# generated "Matter of fact Producer" (xAsWBWOYOkb6aUNS79oD), which sounded "robotic and weird"
+VOICE = "ZEBslWM12xCQWILoQtiP"
+MODEL = "eleven_v4"
+SETTINGS = {"stability": 0.5, "similarity_boost": 0.75}
 
 SR = 44100
 FPS = 30

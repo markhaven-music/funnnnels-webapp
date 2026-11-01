@@ -22,7 +22,9 @@ export const funnel = {
   price: { eur: 27, usd: 27 },
   // The hero video: Wistia media, in Wistia's player (Vsl.tsx). Its thumbnail
   // is public/funnels/jazz-midi-pack/vsl-en-1600.webp. Script: vsl/script-en.md.
-  vsl: { wistiaId: "mnet4ow8rz" },
+  // lh4kzjb92h since 2026-11-01: voice Aaron on eleven_v4 and the demos on the
+  // sine synth (the old cut mnet4ow8rz sounded "robotic and weird").
+  vsl: { wistiaId: "lh4kzjb92h" },
   // The old €9 tick-box offer. Since 2026-10-16 the checkout no longer shows it
   // (the Chord Pack is bonus 1); it stays so orders that bought it still verify.
   bump: {

@@ -10,8 +10,8 @@ price), guarantee, one call to action.
 [DEMO: id] = a real file from the pack (rolls.json), played on the page's warm
 sine synth, its piano roll on screen with the playhead and chord names. Not read
 aloud. Numbers are written as digits here and on screen; the voice gets
-them spelled out (SPOKEN in the tool). Made by `tools/jazz_vsl.py` (voice: ElevenLabs "Matter of fact
-Producer", eleven_multilingual_v2).
+them spelled out (SPOKEN in the tool). Made by `tools/jazz_vsl.py` (voice: ElevenLabs "Aaron Sage -
+Friendly & Conversational", eleven_v4).
 
 [SHOW: x] = what's on screen from that paragraph on, under the captions:
 `roll before|after` (a still piano roll), `compare` (both, top note traced),
@@ -54,7 +54,7 @@ That's 3,536 MIDI files, in five folders.
 
 Folder one: the chords, in each progression's original key. Every progression, in 13 voicings and 8 rhythms. Ballad arpeggios, pads, bossa nova, swing comping, Charleston, and Freddie Green four to the bar.
 
-The 13 voicings go from Best Voicing, the one you just heard, to rootless Bill Evans voicings, drop two, quartal voicings, shells, two-hand spreads, and every inversion. The progressions are the ones jazz is built on. Two-five-ones in major and minor. Turnarounds. Tritone subs. Backdoor. Lady Bird. Autumn Leaves type changes. Rhythm changes. Jazz blues. Coltrane changes. A Train.
+The 13 voicings go from Best Voicing, the one you just heard, to rootless Bill Evans voicings, drop two, voicings stacked in fourths, shells, two-hand spreads, and every inversion. The progressions are the ones jazz is built on. Two-five-ones in major and minor. Turnarounds. Tritone subs. Backdoor. Lady Bird. Autumn Leaves type changes. Rhythm changes. Jazz blues. Coltrane changes. A Train.
 
 Folder two: every progression in all 12 keys, as voice-led pads. Folder three: bass lines. Walking, two-feel and bossa nova bass, for every progression. Folder four: combo loops. Piano, walking bass and ride cymbal, together. And folder five: genre loops. Every progression as lofi hip hop, neo soul, trap soul and deep house, with separate chords, bass and drum MIDI, plus a full multitrack file.
 
