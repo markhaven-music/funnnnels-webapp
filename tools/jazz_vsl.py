@@ -398,14 +398,23 @@ def render(work):
 
 
 def poster(work):
-    """1920×1080: the stage scene and the promise, above where the page puts its play button."""
-    frame = Image.new("RGBA", (W, H), INK + (255,))
-    stage = pub("stage-2200")
-    frame.alpha_composite(cover(stage))
+    """1920×1080: the promise alone, in the captions' type, like the Drum Kit VSL's
+    thumbnail (the user wanted "the text not the ai gen image", 2026-11-01). One line
+    above Wistia's play button (the middle of the frame), one below it, clear of the
+    time bar (the bottom 10%)."""
+    frame = Image.new("RGB", (W, H), INK)
     d = ImageDraw.Draw(frame)
-    d.text((110, 200), "Same chords.", font=serif(124), fill=CREAM, anchor="ls")
-    d.text((110, 336), "Played like a pianist.", font=serif(116, 1), fill=BRASS_HI, anchor="ls")
-    frame.convert("RGB").save(f"{work}/poster.png")
+    f = font(124, 0)
+    space = f.getlength(" ")
+    for y, words in ((250, ["Same", "chords."]), (820, ["Played", "like", "a", "pianist."])):
+        widths = [f.getlength(w) for w in words]
+        x = (W - sum(widths) - space * (len(words) - 1)) / 2
+        for w, wd in zip(words, widths):
+            if w == "pianist.":
+                d.rounded_rectangle((x - 18, y - f.size * 0.82, x + wd + 18, y + f.size * 0.28), 10, fill=BRASS)
+            d.text((x, y), w, font=f, fill=INK if w == "pianist." else CREAM, anchor="ls")
+            x += wd + space
+    frame.save(f"{work}/poster.png")
     print(f"{work}/poster.png")
 
 

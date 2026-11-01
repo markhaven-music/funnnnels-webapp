@@ -21,7 +21,8 @@ export const funnel = {
   tagline: "The most used jazz progressions, 13 voicings × 8 rhythms, all 12 keys",
   price: { eur: 27, usd: 27 },
   // The hero video: Wistia media, in Wistia's player (Vsl.tsx). Its thumbnail
-  // is public/funnels/jazz-midi-pack/vsl-en-1600.webp. Script: vsl/script-en.md.
+  // is public/funnels/jazz-midi-pack/vsl-en-1600.webp (text only since 2026-11-01,
+  // Wistia still nzofclfzt2). Script: vsl/script-en.md.
   // lh4kzjb92h since 2026-11-01: voice Aaron on eleven_v4 and the demos on the
   // sine synth (the old cut mnet4ow8rz sounded "robotic and weird").
   vsl: { wistiaId: "lh4kzjb92h" },
