@@ -126,6 +126,15 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
 - Every name has a record built on a progression in the download. The modern ones were checked on Hooktheory for
   the songs section, below; Miles Davis = So What (Modal So What), John Coltrane = Giant Steps (Coltrane Changes),
   Charlie Parker = Blues for Alice (Bird Blues in F), Duke Ellington = Take the "A" Train (II7#11).
+- Quotes (checked word for word on the pages linked, 2026-11-01; a "…" marks a trim, never a changed word):
+  Robert Glasper (NPR Jazz Night in America, 2017), Pharrell Williams (Interview Magazine, 2003, about the Isley
+  Brothers, Donny Hathaway and Stevie Wonder), Terrace Martin (NPR Microphone Check, 2015), Masego (Dummy, 2018, on
+  how "Trap House Jazz" started), Tom Misch (EARMILK, 2014; the "etc" is his), Jacob Collier (NPR TED Radio Hour,
+  2022). Left out: Tyler, the Creator "I love chords" (only in press write-ups of Rick Rubin's podcast, no
+  transcript), Thundercat (weak), Questlove (argues the other way). No checkable chord quote found for Kanye,
+  J Dilla, Kendrick, SZA, Frank Ocean, Kenny Beats, Anderson .Paak, Bruno Mars, Quincy Jones, Madlib or Nujabes.
+- Kill Bill: the cited analysis (The Mix Review) gives plain chords, ii-V-I-VI; the 7ths come from chord charts.
+  Leave the Door Open: the progression is the verse loop, not the whole song.
 - The song checks, from the old section:
 - Kill Bill (SZA): Ab major, verse/chorus/bridge ii7 V7 I V7/ii = Bbm7 Eb7 Abmaj7 F7 (hooktheory.com/theorytab/view/sza/kill-bill).
   File: MIDI Chord Pack, 9 - Ab Major, "Major Prog 5 (ii-V-I-VI)" (Bbm9 Eb13 Abmaj9 F7b9).
