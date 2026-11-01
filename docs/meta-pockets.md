@@ -153,6 +153,36 @@ E23. Small towns. *Only person making beats in your town?*
 E24. Cover singers. *Sing covers and want your own original beats instead?*
 E25. Gift buyers (Nov–Dec). *Your kid wants to make beats? Start them with the drums.*
 
+## 25 competitor pockets (people who already pay for something close)
+
+Name the brand only to describe the person, never to knock the product. Add "Not affiliated with [brand]" in the primary text. A brand can report its trademark to Meta, and IP strikes are what gets ad accounts restricted, so pause a pocket at the first rejection instead of rewording around it. Facts to check before running are marked *(check)*.
+
+C1. Cymatics. *Downloaded every Cymatics kit and still programming drums by hand?*
+C2. Splice. *Paying for Splice? It gives you sounds. The bounce is in the pattern.*
+C3. Unison MIDI Chord Pack. *Love the Unison MIDI Chord Pack? This is the same idea for drums.*
+C4. Unison Drum Monkey *(check: it is Unison's drum generator)*. *Using Drum Monkey for patterns? These are modeled after real hits.*
+C5. Loopcloud. *Digging through Loopcloud for drum loops you can't edit?*
+C6. WavSupply. *Bought kits from WavSupply and your drums still sound stiff?*
+C7. ADSR Sounds. *Bought packs on ADSR and still building hats from scratch?*
+C8. Native Instruments expansions. *Got the NI expansions and still finger-drumming every hat?*
+C9. Scaler. *Use Scaler for chords? Here's the drums side.*
+C10. Captain Beat (Mixed In Key). *Use Captain Beat and want patterns from real hits?*
+C11. AI MIDI generators. *Tried AI drum generators and the patterns felt random?*
+C12. XLN XO. *Use XO and want trap patterns that already bounce?*
+C13. EZdrummer. *Use EZdrummer grooves for rock? Here are the trap grooves.*
+C14. Superior Drummer. *Superior Drummer user curious about trap?*
+C15. Addictive Drums. *Use Addictive Drums and want hip-hop grooves?*
+C16. FL Studio FPC. *Still using the FPC default patterns?*
+C17. Battery. *Load your drums in Battery and program every hit by hand?*
+C18. Free MIDI packs. *Downloaded free MIDI drum packs that all sound the same?*
+C19. Producer-store kits. *Paid $60 for a producer's drum kit and got sounds, not patterns?*
+C20. Online courses. *Took a drum programming course and still start from an empty grid?*
+C21. Busy Works Beats viewers. *Learned FL Studio from Busy Works Beats?*
+C22. Roland TR-8S *(check: driven by MIDI from the DAW)*. *Own a TR-8S? Drive it from your DAW with 1050 trap patterns.*
+C23. Output Arcade. *Use Arcade for loops and want your own drum patterns?*
+C24. Ghosthack. *Bought Ghosthack packs and still stuck on drums?*
+C25. Looperman. *Grabbing drum loops from Looperman?*
+
 ## Batch 1 (2026-11-01)
 
 Six pockets: the five you named plus one experimental. Each pocket is its own ad set with two ads: the callout on the Logic laptop photo and on the Ableton iMac photo. Targeting: US, broad, Advantage+ audience with no interests, so the callout does the targeting. Link: m.thegrind.studio/en/midi-drum-kit with `utm_campaign=pockets_1101&utm_content=<pocket>_<photo>`.
