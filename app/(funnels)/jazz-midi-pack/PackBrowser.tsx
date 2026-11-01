@@ -14,7 +14,7 @@ import b from "./browse.module.css";
 // (public/funnels/jazz-midi-pack/browse): pack.json (the choices, ≈22 KB
 // gzipped) loads when the player nears the screen and a folder's files when
 // one of them is picked, so the page carries none of it. Drums are drawn, not
-// played (the player has only the piano sample).
+// played (the player has only the sine synth).
 type Dim = { label: string; opts: string[] };
 type Folder = { label: string; folder: string; what: string; dims: Dim[]; files: Record<string, [number, number]> };
 type Pack = { total: number; folders: Folder[]; paths: string[] };

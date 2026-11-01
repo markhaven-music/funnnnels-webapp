@@ -78,21 +78,6 @@ BONUS = [
 ]
 
 
-# The landing's "songs you know": for each song, the bundle file with its
-# progression, in the song's key (chords checked on Hooktheory 2026-11-01,
-# BRIEF.md "Songs"). Written to song-rolls.json, keyed by the song.
-SONG_OUT = os.path.join(os.path.dirname(__file__), "..", "app", "(funnels)", "jazz-midi-pack", "song-rolls.json")
-CP_AB = (f"{PRIV}/Jazz MIDI Chord Pack.zip", "Jazz MIDI Chord Pack/9 - Ab Major - F Minor/6 Progressions")
-CP_D = (f"{PRIV}/Jazz MIDI Chord Pack.zip", "Jazz MIDI Chord Pack/3 - D Major - B Minor/6 Progressions")
-AN_AB = (f"{PRIV}/Anime & Video Game MIDI Chord Pack.zip", "Anime & Video Game MIDI Chord Pack/9 - Ab Major - F Minor/6 Progressions")
-SONGS = {
-    "kill-bill": (CP_AB, "1 Jazz Essentials/Major Progressions/Major Prog 5 (ii-V-I-VI).mid"),
-    "say-so": (CP_D, "1 Jazz Essentials/Major Progressions/Major Prog 1 (ii-V-I-I).mid"),
-    "leave-the-door-open": (AN, "1 Anime/Major Progressions/Major Prog 1 (IV-V-iii-vi Royal Road).mid"),
-    "just-the-two-of-us": (AN_AB, "1 Anime/Major Progressions/Major Prog 3 (IV-III7-vi-I7 Marusa).mid"),
-}
-
-
 def read(src, rel):
     if src.endswith(".zip"):
         with zipfile.ZipFile(src) as z:
@@ -198,15 +183,6 @@ def main():
         bonuses.append(rolls)
     with open(BONUS_OUT, "w") as f:
         json.dump(bonuses, f, separators=(",", ":"))
-    songs = {}
-    for key, ((src, base), rel) in SONGS.items():
-        path = f"{base}/{rel}"
-        roll = parse(path, read(src, path), 32, trim=True)
-        roll["file"] = os.path.basename(rel)
-        songs[key] = roll
-        print(f"  {key:22} {roll['bpm']:>3} bpm {roll['beats']:>3} beats  {[c[1] for c in roll['chords']]}")
-    with open(SONG_OUT, "w") as f:
-        json.dump(songs, f, separators=(",", ":"))
 
 
 if __name__ == "__main__":

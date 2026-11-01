@@ -1,0 +1,93 @@
+/* "Played by the greats": the Drum Kit's wall of producers, as names set in
+   type (no logos, no boxes), then the quotes, each set apart by space.
+   Phone: one quote under the other. Desktop: two columns. */
+.names {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px 38px;
+  margin: 34px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.names li {
+  position: relative;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(22px, 4.6vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: var(--cream-2);
+  opacity: 0.72;
+}
+.quotesTitle {
+  margin-top: 80px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(24px, 4.2vw, 32px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.quotes {
+  display: grid;
+  gap: 48px;
+  margin: 34px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.quote {
+  position: relative;
+}
+.quote blockquote {
+  margin: 0;
+}
+.quote blockquote p {
+  font-size: clamp(20px, 3.4vw, 25px);
+  font-weight: 600;
+  line-height: 1.32;
+  color: var(--cream);
+}
+.quote blockquote p::before {
+  content: "“";
+  display: block;
+  height: 34px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--brass);
+}
+.who {
+  margin-top: 14px;
+  color: var(--cream);
+}
+.role {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--mute);
+}
+.source {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--mute);
+}
+.note {
+  max-width: 760px;
+  margin-top: 56px;
+  font-size: 14px;
+  color: var(--mute);
+}
+
+@media (min-width: 900px) {
+  .names {
+    gap: 18px 52px;
+    margin-top: 44px;
+  }
+  .quotes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 56px 72px;
+  }
+}

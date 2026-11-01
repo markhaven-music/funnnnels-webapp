@@ -2,8 +2,8 @@
 
   voice   each paragraph of app/(funnels)/jazz-midi-pack/vsl/script-en.md
           through ElevenLabs (with word timings), cached in <work>/voice
-  render  the soundtrack (voice + the [DEMO] files played on the Salamander
-          piano samples the page uses) and the picture (captions in the style
+  render  the soundtrack (voice + the [DEMO] files played on the warm sine
+          synth the page uses, piano.ts) and the picture (captions in the style
           of the Drum Kit VSL: the word being said in a box, the coming ones
           dim; the [SHOW] visuals above them; full-screen piano rolls with a
           playhead during the demos), encoded with ffmpeg
@@ -138,17 +138,6 @@ def voiced(work, text):
 # ---------------------------------------------------------------- piano
 
 ROLLS = json.load(open(os.path.join(JAZZ, "rolls.json")))
-NAMES = ["C", "Ds", "Fs", "A"]
-_samples = {}
-
-
-def sample(midi):
-    base = 21 + round((min(93, max(21, midi)) - 21) / 3) * 3
-    if base not in _samples:
-        name = f"{NAMES[[0, 3, 6, 9].index(base % 12)]}{base // 12 - 1}"
-        _samples[base] = np.frombuffer(run("ffmpeg", "-v", "error", "-i", f"{PUB}/piano/{name}.mp3", "-f", "f32le",
-                                           "-ac", "1", "-ar", str(SR), "-"), np.float32)
-    return base, _samples[base]
 
 
 def roll(rid):
@@ -169,22 +158,30 @@ def roll(rid):
     return {"bpm": r["bpm"], "beats": beats, "notes": notes, "chords": chords, "file": r["file"]}
 
 
+# The page's synth (piano.ts): per note two sines 5 cents apart, under C3 a
+# quiet 2nd and 3rd; 18 ms attack, a slow fall to 62 %, a 0.11 s release.
+UPPER = [(1, 0.5), (2 ** (5 / 1200), 0.5)]
+BASS = [(1, 0.42), (2 ** (5 / 1200), 0.42), (2, 0.12), (3, 0.04)]
+
+
 def piano(rid):
     r = roll(rid)
     spb = 60 / r["bpm"]
     dur = r["beats"] * spb
     out = np.zeros(int((dur + 1.2) * SR), np.float32)
     for s, l, p in r["notes"]:
-        base, smp = sample(p)
-        rate = 2 ** ((p - base) / 12)
         hold = max(l * spb, 0.12)
-        n = int((hold + 0.6) * SR)
-        src = np.interp(np.arange(n) * rate, np.arange(len(smp)), smp, right=0).astype(np.float32)
-        env = np.full(n, 0.4 if p < 48 else 0.28, np.float32)
+        n = int((hold + 0.8) * SR)
+        t = np.arange(n) / SR
+        f = 440 * 2 ** ((p - 69) / 12)
+        tone = sum(lv * np.sin(2 * np.pi * f * ratio * t) for ratio, lv in (BASS if p < 48 else UPPER))
+        vel = 0.3 if p < 48 else 0.2
+        env = vel * (0.62 + 0.38 * np.exp(-np.maximum(t - 0.018, 0) / 0.4))
+        env = np.where(t < 0.018, vel * t / 0.018, env)
         k = int(hold * SR)
-        env[k:] *= np.exp(-np.arange(n - k) / SR / 0.09)
+        env[k:] = env[k] * np.exp(-(t[k:] - t[k]) / 0.11)
         i = int(s * spb * SR)
-        out[i:i + n] += (src * env)[: len(out) - i]
+        out[i:i + n] += (tone * env).astype(np.float32)[: len(out) - i]
     return out, dur
 
 

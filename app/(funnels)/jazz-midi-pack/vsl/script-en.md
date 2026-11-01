@@ -7,8 +7,8 @@ mechanism (voice leading), the pack, what's inside, more demos, how easy it
 is, bonuses, one payment (no amount: the page shows each visitor's own
 price), guarantee, one call to action.
 
-[DEMO: id] = a real file from the pack (rolls.json), played on the Salamander
-piano, its piano roll on screen with the playhead and chord names. Not read
+[DEMO: id] = a real file from the pack (rolls.json), played on the page's warm
+sine synth, its piano roll on screen with the playhead and chord names. Not read
 aloud. Numbers are written as digits here and on screen; the voice gets
 them spelled out (SPOKEN in the tool). Made by `tools/jazz_vsl.py` (voice: ElevenLabs "Matter of fact
 Producer", eleven_multilingual_v2).
@@ -28,7 +28,7 @@ Listen to these two.
 
 [SHOW: none]
 
-Same eight chords. Same rhythm. Same piano. The first one sounds like a ringtone. The second sounds like someone who can actually play. The difference isn't the chords. It's how the notes move from one chord to the next. And by the end of this video, you'll have it in your DAW, without learning jazz piano.
+Same eight chords. Same rhythm. Same sound. The first one sounds like a ringtone. The second sounds like someone who can actually play. The difference isn't the chords. It's how the notes move from one chord to the next. And by the end of this video, you'll have it in your DAW, without learning jazz piano.
 
 [SHOW: roll before]
 

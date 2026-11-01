@@ -83,8 +83,8 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
           <a href={`mailto:${funnel.support}`}>{funnel.support}</a>
         </p>
         <p className={s.legal}>
-          Piano previews use the Salamander Grand Piano samples by Alexander Holm (CC BY 3.0). The MIDI files
-          contain no audio. Individual results vary.
+          The previews play the MIDI files on a simple sine synth. The MIDI files contain no audio. Individual
+          results vary.
         </p>
       </footer>
       <StickyCta price={price} />

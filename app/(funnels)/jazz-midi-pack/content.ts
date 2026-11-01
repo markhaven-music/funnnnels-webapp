@@ -17,16 +17,24 @@ export type SectionProps = {
   s_hero: { tag: string; pre: string; headline: string; sub: string; bullets: string[]; ticks: string[]; hud: string[]; daws: string };
   s_letter: { eyebrow: string; title: string; paras: Para[] };
   s_compare_rolls: { beforeLabel: string; beforeText: string; afterLabel: string; afterText: string; note: string };
-  // Songs the buyer knows, each beside the bundle file with its progression in
-  // the same key. `roll` is the file's key in song-rolls.json; `chords` are the
-  // record's, split on "·". Every song is checked in BRIEF.md "Songs".
-  s_songs: {
+  // The Drum Kit's "What's the secret of the 0.1%": what people think it is,
+  // crossed out, then what it is.
+  s_secret: { eyebrow: string; title: string; lead: string; myths: string[]; answer: string };
+  // The Drum Kit's "Patterns used by the best producers of all time" and its
+  // producer quotes. The names are set in type, not their logos. Each name has
+  // a record built on a progression from the download, and each quote a
+  // source. Both are checked in BRIEF.md "Greats".
+  s_greats: {
     eyebrow: string;
     title: string;
-    sub: string;
-    items: { roll: string; song: string; artist: string; chords: string; text: string; file: string }[];
+    names: string[];
+    quotesTitle: string;
+    quotes: { quote: string; name: string; role: string; source: string }[];
     note: string;
   };
+  // The Drum Kit's "Why Patterns and Fragments? Easy.": what each way the pack
+  // varies a progression is for.
+  s_why: { eyebrow: string; title: string; cols: { count: string; name: string; what: string; list: string; perfect: string }[]; foot: string };
   s_product: { eyebrow: string; title: string; titleEm: string; lead: string; ticks: string[] };
   s_previews: { eyebrow: string; title: string; sub: string; items?: { roll: RollId; title: string; meta: string }[] };
   s_steps: { eyebrow: string; title: string; steps: { title: string; text: string }[] };
@@ -49,8 +57,10 @@ export type Section<T extends SectionType = SectionType> = { id: string; type: T
 export const SECTION_LABELS: Record<SectionType, string> = {
   s_hero: "Hero",
   s_letter: "Problem letter",
+  s_secret: "The secret",
   s_compare_rolls: "Before / after",
-  s_songs: "Songs you know",
+  s_greats: "Played by the greats",
+  s_why: "Why voicings and rhythms",
   s_product: "Product intro",
   s_previews: "Previews",
   s_steps: "How it works",
@@ -74,16 +84,27 @@ export const DEFAULT_SECTIONS: Section[] = [
       headline: "*The Jazz Progressions* Everyone Wants And _Nobody Can Write_, As Drag-And-Drop MIDI",
       sub: "Voiced like a real pianist, note by note: chords that sound played, not programmed",
       bullets: [
-        "ii-V-Is, Tritone Subs, Rhythm Changes, Coltrane Changes",
-        "Every Progression × 13 Voicings × 8 Rhythms × 12 Keys",
+        "{files} Drag-And-Drop Jazz MIDI Files",
+        "The Most Used Jazz Progressions × 13 Voicings × 8 Rhythms",
         "Voice-Led Like A Pianist: No Jumping Chords",
         "Chord Names In Every File, No Theory Needed",
-        "Bass Lines + Lofi, Neo Soul, Trap Soul & House Loops",
-        "+ 5 Free Bonuses With 4,197 More MIDI Files",
+        "All 12 Keys, Bass Lines And Genre Loops",
+        "5 Free Bonuses Included",
       ],
       ticks: ["Any DAW", "Chord names in every file", "{days}-day guarantee"],
       hud: [".mid · drag & drop", "13 voicings", "chords on the timeline"],
       daws: "Ableton Live · Logic · FL Studio · Cubase · Studio One · Reaper · Bitwig · GarageBand",
+    },
+  },
+  {
+    id: "secret",
+    type: "s_secret",
+    props: {
+      eyebrow: "The secret",
+      title: "What makes jazz chords sound *expensive*?",
+      lead: "Most producers think it’s one of these:",
+      myths: ["More notes in every chord", "Chord names you can’t pronounce", "An expensive piano plugin"],
+      answer: "It’s none of them. It’s where each note goes when the chord changes.",
     },
   },
   {
@@ -118,47 +139,15 @@ export const DEFAULT_SECTIONS: Section[] = [
     },
   },
   {
-    id: "songs",
-    type: "s_songs",
+    id: "greats",
+    type: "s_greats",
     props: {
-      eyebrow: "Songs you know",
-      title: "The chords behind Kill Bill, Say So and Leave the Door Open. *Already in your download.*",
-      sub: "Each song next to the file in the bundle that plays its progression, in the same key. Press play, then drag it into your DAW.",
-      items: [
-        {
-          roll: "kill-bill",
-          song: "Kill Bill",
-          artist: "SZA",
-          chords: "Bbm7 · Eb7 · Abmaj7 · F7",
-          text: "The whole song loops these four chords.",
-          file: "MIDI Chord Pack · Ab major",
-        },
-        {
-          roll: "say-so",
-          song: "Say So",
-          artist: "Doja Cat",
-          chords: "Em7 · A7 · Dmaj7",
-          text: "Three chords, the same in the verse and the chorus.",
-          file: "MIDI Chord Pack · D major",
-        },
-        {
-          roll: "leave-the-door-open",
-          song: "Leave the Door Open",
-          artist: "Silk Sonic",
-          chords: "Fmaj7 · G7 · Em7 · Am7",
-          text: "Up two chords, then down to the minor one. Verse and chorus both run on it.",
-          file: "Anime & Video Games MIDI Pack · C major",
-        },
-        {
-          roll: "just-the-two-of-us",
-          song: "Just the Two of Us",
-          artist: "Grover Washington Jr. & Bill Withers",
-          chords: "Dbmaj7 · C7 · Fm7",
-          text: "Borrowed so often it has its own name: the Just the Two of Us progression.",
-          file: "Anime & Video Games MIDI Pack · Ab major",
-        },
-      ],
-      note: "Song titles only name the chord progression. The files are chord progressions, not recordings of the songs, and GRIND STUDIO has no connection to the artists.",
+      eyebrow: "Played by the greats",
+      title: "Progressions used by the greatest artists of all time.",
+      names: ["SZA", "Doja Cat", "Silk Sonic", "Bill Withers", "Miles Davis", "John Coltrane", "Charlie Parker", "Duke Ellington"],
+      quotesTitle: "In their own words:",
+      quotes: [],
+      note: "Each name has a record built on a progression from your download. None of these artists is connected to GRIND STUDIO or endorses this pack.",
     },
   },
   {
@@ -182,7 +171,32 @@ export const DEFAULT_SECTIONS: Section[] = [
     props: {
       eyebrow: "The whole pack, open",
       title: "Browse all {files} files. Press play on any of them.",
-      sub: "Every folder and every file of the pack, note for note, played on a grand piano sample. In your DAW they play through your sounds. Drum MIDI is shown here, not played.",
+      sub: "Every folder and every file of the pack, note for note, played on a warm sine synth. In your DAW they play through your sounds. Drum MIDI is shown here, not played.",
+    },
+  },
+  {
+    id: "why",
+    type: "s_why",
+    props: {
+      eyebrow: "Voicings and rhythms",
+      title: "Why 13 voicings and 8 rhythms? *Easy.*",
+      cols: [
+        {
+          count: "13",
+          name: "Voicings",
+          what: "Which notes, where. The same progression stacked 13 ways.",
+          list: "Rootless · Drop 2 · Quartal · Shell · Spread over two hands · Close and voice-led · and 7 more",
+          perfect: "Finding the colour that sits with your sound: dark and low, wide and open, or close and soft.",
+        },
+        {
+          count: "8",
+          name: "Rhythms",
+          what: "When the notes play. The same voicing played 8 ways.",
+          list: "Pads · Ballad arpeggios · Swing comping · Bossa nova · Charleston · Anticipations · and 2 more",
+          perfect: "Dropping in a part that already grooves, instead of block chords you chop up by hand.",
+        },
+      ],
+      foot: "Every progression × 13 voicings × 8 rhythms: 2,704 files in the first folder alone.",
     },
   },
   {

@@ -99,19 +99,34 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   (0 bad files, no hanging notes).
 
 ## Previews
-- Real files from the pack, notes extracted by `tools/extract_rolls.py`, played on Salamander Grand Piano
-  samples (Alexander Holm, CC BY 3.0, credited in the footer). Drums are not played.
+- Real files from the pack, notes extracted by `tools/extract_rolls.py`, played on a warm sine synth (`piano.ts`:
+  two sines 5 cents apart per note, under C3 a quiet 2nd and 3rd so bass lines sound on a phone speaker). Since
+  2026-11-01, in place of the Salamander Grand Piano samples ("usa un sine synth invece del piano, è più warm");
+  the VSL demos use the same synth (`tools/jazz_vsl.py`). Drums are not played.
 - 2026-10-16: Neo Soul loops fixed in `make_pack.py`. The bass approach note on beat 4-and used to be a half
   step below the next root even when it rubbed against a chord note still ringing (C# under Am7 in loop 05).
   It now takes the first clean option: a half step below, a half step above, the next root's fifth, or the
   nearest ringing chord tone. 48 files changed (Bass + Full in 24 loops), 0 clashes left, zip rebuilt.
-- The player merges unisons (bass + chord root on the same pitch at the same time) into one piano note.
+- The player merges unisons (bass + chord root on the same pitch at the same time) into one note.
 
-## Songs (section "Songs you know", added 2026-11-01)
-The user asked for social proof from songs the buyers know ("musicisti, songwriters, produttori, beatmakers ...
-non conoscono i nomi jazz", "qualcosa di più moderno"). Record chords from Hooktheory TheoryTabs, checked 2026-11-01;
-each song is next to the bundle file with the same progression in the same key (`song-rolls.json`,
-`tools/extract_rolls.py` SONGS).
+## Sections modelled on the Drum Kit page (2026-11-01)
+"add some sections modeled after the other landing pages we have":
+- The secret (`s_secret`, after the hero): the Drum Kit's "What's the secret of the 0.1%". Three usual guesses
+  crossed out (more notes, chord names, an expensive plugin), then the answer the letter explains: where each note
+  goes when the chord changes.
+- Why 13 voicings and 8 rhythms? Easy. (`s_why`, after the pack browser): the Drum Kit's "Why Patterns and
+  Fragments? Easy.". Counts and names from `browse/pack.json`; 2,704 = folder 1 (26 × 13 × 8, but the page never
+  says 26).
+
+## Greats (section "Played by the greats", `s_greats`, 2026-11-01)
+"This section makes no sense i wanted a social proof section with logos + reviews": it replaced "Songs you know"
+(each song beside its bundle file). Modelled on the Drum Kit's "Patterns used by the best producers of all time"
+(producer logos) and its producer quotes. The names are set in type, not their logos (an artist's logo would read
+as an endorsement). No customer reviews: none exist for this pack (see Brand proof).
+- Every name has a record built on a progression in the download. The modern ones were checked on Hooktheory for
+  the songs section, below; Miles Davis = So What (Modal So What), John Coltrane = Giant Steps (Coltrane Changes),
+  Charlie Parker = Blues for Alice (Bird Blues in F), Duke Ellington = Take the "A" Train (II7#11).
+- The song checks, from the old section:
 - Kill Bill (SZA): Ab major, verse/chorus/bridge ii7 V7 I V7/ii = Bbm7 Eb7 Abmaj7 F7 (hooktheory.com/theorytab/view/sza/kill-bill).
   File: MIDI Chord Pack, 9 - Ab Major, "Major Prog 5 (ii-V-I-VI)" (Bbm9 Eb13 Abmaj9 F7b9).
 - Say So (Doja Cat): D major, verse and chorus ii7 V11 I7 = Em7 A11 Dmaj7 (hooktheory.com/theorytab/view/doja-cat/say-so);
@@ -123,7 +138,5 @@ each song is next to the bundle file with the same progression in the same key (
   (hooktheory.com/theorytab/view/grover-washington-jr-and-bill-withers/just-the-two-of-us). Wikipedia names the
   progression after it (also called Marusa). File: Anime & Video Games MIDI Pack, 9 - Ab Major, "Major Prog 3
   (IV-III7-vi-I7 Marusa)" (Dbmaj9 C7b9 Fm9 Ab9).
-- Left out: Kiss Me More (ii-V-I-IV per The Mix Review, not a file match), YOASOBI "Yoru ni Kakeru" (no source
-  found for its progression).
-- Titles only: no artwork, logos or photos, never "used by" / "approved by". The section's note says the files are
-  progressions, not the songs, and GRIND STUDIO has no connection to the artists.
+- The section's note says the names have records built on progressions from the download, the quotes are from
+  linked interviews, and none of the artists is connected to GRIND STUDIO or endorses the pack.
