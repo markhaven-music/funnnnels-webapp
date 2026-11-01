@@ -6,24 +6,27 @@ import { toggle, type Roll, type RollId } from "./piano";
 import s from "./roll.module.css";
 
 // A real file from the pack, drawn as a piano roll (chord names on top) with
-// a play button that plays its notes on a grand piano sample.
+// a play button that plays its notes on a grand piano sample. `roll` instead
+// of `id`: a file from elsewhere (the bonuses, BonusPlayer.tsx).
 export function PlayableRoll({
   id,
+  roll: given,
   title,
   meta,
   variant = "full",
   tone = "brass",
   playLabel = "Play it",
 }: {
-  id: RollId;
+  id?: RollId;
+  roll?: Roll;
   title?: string;
   meta?: string;
-  variant?: "full" | "mini";
+  variant?: "full" | "mini" | "short";
   tone?: "brass" | "muted";
   playLabel?: string;
 }) {
   const scope = useRef<HTMLDivElement>(null);
-  const roll = rolls[id] as Roll;
+  const roll = given ?? (rolls[id!] as Roll);
 
   return (
     <div ref={scope} className={`${s.scope} ${s[variant]} ${s[tone]}`}>
@@ -32,7 +35,7 @@ export function PlayableRoll({
           type="button"
           className={s.play}
           aria-pressed="false"
-          onClick={() => scope.current && toggle(id, scope.current)}
+          onClick={() => scope.current && toggle(given ?? id!, scope.current)}
         >
           <span className={s.ico} aria-hidden />
           <span className={s.lPlay}>{playLabel}</span>
@@ -45,7 +48,7 @@ export function PlayableRoll({
         </span>
         {meta && <span className={s.meta}>{meta}</span>}
       </div>
-      <Svg roll={roll} chordsRow={variant === "full"} />
+      <Svg roll={roll} chordsRow={variant === "full" || (variant === "short" && roll.chords.length > 1)} />
     </div>
   );
 }

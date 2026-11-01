@@ -97,6 +97,16 @@
   margin-top: 14px;
 }
 
+/* bonuses 1-4: their files one under the other (two or three across on
+   wider screens), each with its own Play */
+.rolls {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 /* bonus 5: four drum loop clips */
 .loops {
   display: grid;
@@ -193,14 +203,21 @@
   .inside {
     grid-column: 2;
   }
+  .preview {
+    margin-top: 22px;
+  }
+  .rolls,
+  .loops {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 1000px) {
   .bonus {
-    grid-template-columns: 170px minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-columns: 170px minmax(0, 1fr);
     align-items: center;
-    gap: 30px;
-    padding: 28px 30px;
+    gap: 0 34px;
+    padding: 30px;
   }
   .cover {
     grid-row: auto;
@@ -213,7 +230,10 @@
     font-size: 21px;
   }
   .preview {
-    grid-column: auto;
-    margin-top: 0;
+    grid-column: 1 / -1;
+    margin-top: 26px;
+  }
+  .rolls {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

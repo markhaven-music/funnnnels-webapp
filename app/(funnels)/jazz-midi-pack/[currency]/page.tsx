@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     "The most used jazz progressions, voiced the way a pianist plays them. 3,536 MIDI files: 13 voicings, 8 rhythms, all 12 keys, bass lines, lofi / neo soul / trap soul / deep house loops.",
   openGraph: {
     title: "The jazz progressions everyone wants, as drag-and-drop MIDI.",
-    description: "7,733 MIDI files by GRIND STUDIO, voiced like a real pianist. Drag into your DAW.",
+    description: "3,536 jazz MIDI files + 5 bonuses by GRIND STUDIO, voiced like a real pianist. Drag into your DAW.",
     type: "website",
     url: "https://m.thegrind.studio/jazz-midi-pack",
     images: [{ url: "https://m.thegrind.studio/funnels/jazz-midi-pack/vsl-en-1600.webp", width: 1600, height: 900 }],

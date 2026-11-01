@@ -33,7 +33,7 @@ export const funnel = {
       "All 12 major/minor key pairs in six folders: best voicing, best voicing with a smooth bass, sevenths, extended, altered & borrowed chords, and progressions. Same voice-leading as the main pack.",
   },
   // Free with every pack. `id` is the download key in `files` or `remoteFiles`.
-  // `midi` and `inside` are counted from the files (2026-11-01); the bonus
+  // `midi`, `count` and `inside` are counted from the files (2026-11-01); the bonus
   // cards show `inside` and play the roll `bonus<n>` (rolls.json) or, for the
   // drum loops, the clips in public/funnels/jazz-midi-pack/loops.
   // `value`: what each item is worth in the offer summary's value stack, the
@@ -43,6 +43,7 @@ export const funnel = {
     {
       id: "chord-pack",
       name: "MIDI Chord Pack (Jazz Edition)",
+      count: "2,304 MIDI files",
       midi: 2304,
       value: 47,
       inside: ["2,304 MIDI files", "All 12 major/minor key pairs", "6 folders per key: best voicing, smooth bass, sevenths, extended, altered, progressions"],
@@ -50,6 +51,7 @@ export const funnel = {
     {
       id: "bible",
       name: "The Chord Progressions Bible",
+      count: "150 MIDI files + 258 WAV loops",
       midi: 150,
       value: 37,
       inside: ["150 MIDI files: 50 progressions × block chords, arpeggio, arrangement", "258 piano and e-piano WAV loops", "PDF cheat sheet"],
@@ -57,6 +59,7 @@ export const funnel = {
     {
       id: "anime-pack",
       name: "Anime & Video Games MIDI Pack",
+      count: "1,548 MIDI files",
       midi: 1548,
       value: 47,
       inside: ["1,548 MIDI files in all 12 keys", "Anime: royal road, Marusa, Komuro, Canon", "Video game: victory fanfare, Lydian wonder, boss battle, dungeon"],
@@ -64,6 +67,7 @@ export const funnel = {
     {
       id: "emotional-keys",
       name: "Emotional Keys MIDI Bundle",
+      count: "195 MIDI files",
       midi: 195,
       value: 27,
       inside: ["195 MIDI files in 3 volumes", "Each: 20 songstarters, 20 chord progressions, 25 melodies", "An MP3 preview of every file"],
@@ -71,6 +75,7 @@ export const funnel = {
     {
       id: "drum-loops",
       name: "Drum Loops for Songwriting",
+      count: "47 WAV loops",
       midi: 0,
       value: 27,
       inside: ["47 WAV drum loops, BPM in every name", "Pop & ballads, hip hop & trap, dance & electronic, vintage & rock"],

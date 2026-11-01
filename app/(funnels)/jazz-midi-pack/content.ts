@@ -58,7 +58,7 @@ export const DEFAULT_SECTIONS: Section[] = [
     id: "hero",
     type: "s_hero",
     props: {
-      tag: "{total} MIDI files",
+      tag: "{files} MIDI files",
       pre: "For producers who don’t play jazz piano",
       headline: "*The Jazz Progressions* Everyone Wants And _Nobody Can Write_, As Drag-And-Drop MIDI",
       sub: "Voiced like a real pianist, note by note: chords that sound played, not programmed",
@@ -68,7 +68,7 @@ export const DEFAULT_SECTIONS: Section[] = [
         "Voice-Led Like A Pianist: No Jumping Chords",
         "Chord Names In Every File, No Theory Needed",
         "Bass Lines + Lofi, Neo Soul, Trap Soul & House Loops",
-        "5 Free Bonuses: {total} MIDI Files In Total",
+        "+ 5 Free Bonuses With 4,197 More MIDI Files",
       ],
       ticks: ["Any DAW", "Chord names in every file", "{days}-day guarantee"],
       hud: [".mid · drag & drop", "13 voicings", "chords on the timeline"],
@@ -198,7 +198,7 @@ export const DEFAULT_SECTIONS: Section[] = [
           ],
         },
       ],
-      note: "{total} MIDI files for {price}. Under half a cent a file.",
+      note: "{files} files for {price}. Less than a cent a file.",
     },
   },
   {
@@ -237,7 +237,7 @@ export const DEFAULT_SECTIONS: Section[] = [
     type: "s_offer",
     props: {
       eyebrow: "Everything you get",
-      title: "The whole bundle, {total} MIDI files. Today {price}.",
+      title: "{files} jazz MIDI files + 4,197 in the bonuses. Today {price}.",
       stack: [
         "{files} MIDI files in 5 folders",
         "The most used jazz progressions × 13 voicings × 8 rhythms",

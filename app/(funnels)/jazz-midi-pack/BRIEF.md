@@ -53,9 +53,11 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   arrangement: 150 MIDI files, plus e-piano WAV loops and "The Ultimate Chord Progression - Cheat Sheet.pdf".
   Bonuses 2, 4, 5 come from ~/Desktop/midi jazz pack bonuses and are served from Cloudflare R2 (lib/r2.ts):
   the Bible zip alone is 1.07 GB.
-  Each bonus card shows what's inside (`funnel.ts` bonuses[].inside) and a preview to play: one real file per MIDI
-  bonus on the piano (rolls.json bonus1-4: Chord Pack "Lady Bird", Bible "I-V-vi-IV arrangement", Anime "Royal
-  Road", Emotional Keys songstarter "Ocean", first 8 bars), and four 8-second clips of real drum loops
+  Each bonus card shows what's inside (`funnel.ts` bonuses[].inside) and previews to play: 5-6 real files per MIDI
+  bonus on the piano (bonus-rolls.json from tools/extract_rolls.py BONUS: chord pack ii-V-I, Lady Bird, tritone sub,
+  backdoor, Coltrane, line cliché; Bible I-V-vi-IV as block chords / arpeggio / arrangement + 2 more; anime Royal
+  Road, Marusa, Komuro, sad anime, victory fanfare, final boss; 6 Emotional Keys songstarters; leading empty bars cut,
+  8 bars at most), and four 8-second clips of real drum loops
   (public/funnels/jazz-midi-pack/loops: Modern Pop 90, Hip Hop 91, UK Garage 134, 70s Acoustic 104 bpm).
   Emotional Keys per volume: 20 songstarters, 20 chord progressions, 20 melodies, 5 bonus melodies.
 - No checkout add-on since 2026-10-16: the Chord Pack (the old €9 add-on) became bonus 1. The server still
@@ -83,7 +85,11 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
 ## Brand proof
 - GRIND STUDIO's MIDI Drum Kit is in the sessions of 2,847 producers (same claim as the Grind landings,
   `site.ts` → `producers`).
-- No Jazz-pack testimonials exist yet: none on the page until real ones arrive.
+- 4,700+ producers on the GRIND STUDIO email list (4,732 contacts in funnnnels on 2026-11-01).
+- No Jazz-pack testimonials exist yet: none on the page until real ones arrive. The 8 reviews on the Drum Kit and
+  Top Hits order pages are the same quotes and names with "patterns" swapped for "chords", so they are not used
+  here. Social proof = the `Proof` strip (the two numbers above + the guarantee), under the hero and the checkout.
+- Counts on the page: 3,536 = the pack; the bonuses add 4,197 MIDI; 7,733 only as "in total".
 
 ## Before / after (measured by `tools/extract_rolls.py` data, 2026-10-12)
 - File pair: "02 Pads - 05 I-vi-ii-V Turnaround", Root Position vs Best Voicing (same 8 chords, same rhythm).

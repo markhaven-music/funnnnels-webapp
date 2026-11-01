@@ -99,6 +99,10 @@
 .mini .svgWrap {
   height: 84px;
 }
+/* the bonus files: many on the page, so lower */
+.short .svgWrap {
+  height: clamp(120px, 20vw, 150px);
+}
 .browse .svgWrap {
   height: clamp(150px, 26vw, 210px);
 }
@@ -154,6 +158,12 @@
 }
 .muted .chords span {
   color: #c9bfae;
+}
+/* the bonus files' rolls are narrow: smaller chord names so they don't run into each other */
+.short .chords span {
+  padding-left: 4px;
+  font-size: 10px;
+  letter-spacing: -0.02em;
 }
 .playhead {
   position: absolute;

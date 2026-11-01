@@ -304,6 +304,53 @@
   height: auto;
 }
 
+/* social proof: three real numbers in a row */
+.proof {
+  position: relative; /* above the hero's background */
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.proof li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid rgb(226 169 59 / 0.35);
+  border-radius: 12px;
+  background: rgb(226 169 59 / 0.07);
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--cream);
+}
+.proof b {
+  flex: none;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--brass-hi);
+}
+.orderForm .proof {
+  margin-top: 18px;
+}
+@media (min-width: 720px) {
+  .hero .proof {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 1000px;
+    margin: 30px auto 0;
+  }
+  .hero .proof li {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+    align-items: center;
+  }
+}
+
 /* ─── sections ───────────────────────────── */
 .sec {
   padding: clamp(56px, 9vw, 104px) 0;
@@ -804,59 +851,12 @@
   height: auto;
 }
 
-/* the order page's first line: product and price */
-.orderHead {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 18px;
-  padding: 12px 16px 12px 12px;
-  border: 1px solid rgb(226 169 59 / 0.5);
-  border-radius: 14px;
-  background:
-    radial-gradient(80% 120% at 0% 50%, rgb(226 169 59 / 0.14), transparent 70%),
-    var(--ink-2);
-}
-.orderHead img {
-  flex: none;
-  width: 40px;
-  height: auto;
-}
-.orderHead p {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.3;
-}
-.orderHead p b {
-  font-family: var(--font-display), var(--font-sans), sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-}
-.orderHead p span {
-  font-size: 13px;
-  color: var(--mute);
-}
-.orderHead .orderHeadPrice {
-  flex: none;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 8px;
-  margin-left: auto;
-  white-space: nowrap;
-}
-.orderHeadPrice s {
-  font-family: var(--font-display), var(--font-sans), sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--mute);
-  text-decoration-color: var(--red);
-  text-decoration-thickness: 2px;
-}
-.orderHead .orderHeadPrice b {
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--brass-hi);
+/* the order page: white text on the dark, like the checkout card (2026-11-01) */
+.orderMain,
+.orderMain .band {
+  --cream: #fff;
+  --cream-2: #fff;
+  --mute: rgb(255 255 255 / 0.78);
 }
 
 /* the order page's bonus list: each one's value crossed out, "Free" */

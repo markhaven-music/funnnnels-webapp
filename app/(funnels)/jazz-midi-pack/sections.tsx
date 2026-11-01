@@ -8,7 +8,7 @@ import { DEFAULT_SECTIONS, type ChartCell, type Section, type SectionProps, type
 import { Cta } from "./Cta";
 import { PlayableRoll } from "./PlayableRoll";
 import { LoopList } from "./LoopList";
-import type { RollId } from "./piano";
+import { BonusPlayer } from "./BonusPlayer";
 import { money } from "@/lib/launch";
 import { ProductBox, Scene } from "./ProductBox";
 import { CheckoutWidget } from "./CheckoutWidget";
@@ -219,6 +219,9 @@ function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch
         {/* The DAW logos the Drum Kit shows; the typed list is their alt text. */}
         <img className={s.dawLogos} src="/funnels/midi-drum-kit/daws.webp" alt={p.daws} width={1000} height={63} loading="lazy" />
         {patch && <T v={p.daws} set={set("daws")} ctx={ctx} />}
+      </div>
+      <div className={s.wrap}>
+        <Proof />
       </div>
     </section>
   );
@@ -492,21 +495,32 @@ function Math_({ p: raw, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patc
 
 const DIR = "/funnels/jazz-midi-pack";
 
-// One real file of each MIDI bonus (rolls.json bonus1–4), played on the piano.
-const BONUS_ROLLS: { id: RollId; title: string }[] = [
-  { id: "bonus1", title: "Lady Bird turnaround" },
-  { id: "bonus2", title: "I-V-vi-IV, piano arrangement" },
-  { id: "bonus3", title: "Royal Road (IV-V-iii-vi)" },
-  { id: "bonus4", title: "Songstarter “Ocean”" },
-];
-
 const VALUE_TOTAL = funnel.value.pack + funnel.bonuses.reduce((sum, x) => sum + x.value, 0);
 
 /** "€47" in the visitor's currency: the value stack's numbers. */
 const worth = (n: number, ctx: Ctx) => money(n, ctx.currency);
 
-// Each bonus: its cover, what it holds (counted from the files) and a preview
-// you can play: a real file on the piano, or for the drum loops four clips.
+/** Social proof from real numbers (BRIEF.md "Brand proof"): no Jazz reviews
+ * exist yet, and invented ones never go on the page. Under the hero and next
+ * to the checkout. */
+export function Proof() {
+  return (
+    <ul className={s.proof}>
+      <li>
+        <b>2,847</b> producers have the GRIND STUDIO MIDI Drum Kit in their sessions
+      </li>
+      <li>
+        <b>4,700+</b> producers on the GRIND STUDIO email list
+      </li>
+      <li>
+        <b>{funnel.guaranteeDays} days</b> satisfaction guarantee on every file
+      </li>
+    </ul>
+  );
+}
+
+// Each bonus: its cover, what it holds (counted from the files) and previews
+// you can play: 5-6 real files on the piano, or for the drum loops four clips.
 function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patch; ctx: Ctx }) {
   const ops = listOps(p.items, "items", patch);
   return (
@@ -554,11 +568,7 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
                   )}
                 </div>
                 <div className={bn.preview}>
-                  {BONUS_ROLLS[i] ? (
-                    <PlayableRoll id={BONUS_ROLLS[i].id} variant="mini" title={BONUS_ROLLS[i].title} playLabel="Play" />
-                  ) : i === 4 ? (
-                    <LoopList />
-                  ) : null}
+                  {i < 4 ? <BonusPlayer bonus={i} /> : i === 4 ? <LoopList /> : null}
                 </div>
                 <Remove onClick={ops.remove && (() => ops.remove!(i))} />
               </li>
@@ -594,6 +604,7 @@ export function ValueStack({ p, patch, ctx }: { p: SectionProps["s_offer"]; patc
             <span className={vs.itemText}>
               <span className={vs.kicker}>Bonus #{i + 1}</span>
               <span className={vs.itemName}>{x.name}</span>
+              <span className={vs.itemCount}>{x.count}</span>
             </span>
             <span className={vs.itemValue}>{worth(x.value, ctx)} value</span>
           </li>
@@ -611,24 +622,6 @@ export function ValueStack({ p, patch, ctx }: { p: SectionProps["s_offer"]; patc
         </p>
         <p className={vs.save}>You save {worth(VALUE_TOTAL - ctx.amount, ctx)}</p>
       </div>
-    </div>
-  );
-}
-
-/** The order page's first line: what's being bought and its price, above the form. */
-export function OrderHead({ ctx }: { ctx: Ctx }) {
-  return (
-    <div className={s.orderHead}>
-      <img src={`${DIR}/box-160.webp`} width={160} height={228} alt="" />
-      <p>
-        <b>
-          {funnel.product} + {funnel.bonuses.length} free bonuses
-        </b>
-        <span>{fill("{total} MIDI files · instant download", ctx)}</span>
-      </p>
-      <p className={s.orderHeadPrice}>
-        <s>{worth(VALUE_TOTAL, ctx)}</s> <b>{ctx.price}</b>
-      </p>
     </div>
   );
 }
@@ -684,6 +677,7 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       publishableKey={ctx.publishableKey}
       europe={ctx.currency === "eur"}
       deferStripe
+      secureRow={false}
     />
   );
 }

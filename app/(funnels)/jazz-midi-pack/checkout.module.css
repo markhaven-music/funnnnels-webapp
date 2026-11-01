@@ -4,9 +4,10 @@
   --ink-2: #1b1814;
   --ink-3: #26221c;
   --rule: #3a342b;
-  --cream: #f1e8d8;
-  --cream-2: #c9bfae;
-  --cream-3: #8f8676;
+  /* white text on the dark card, black on the white fields (2026-11-01) */
+  --cream: #ffffff;
+  --cream-2: #ffffff;
+  --cream-3: rgb(255 255 255 / 0.78);
   --brass: #d9a441;
   --brass-2: #f0c46a;
 
@@ -118,12 +119,12 @@
   border-radius: 12px;
   border: 1px solid #d9d2c4;
   background: #fff;
-  color: #1a1206;
+  color: #000;
   font: inherit;
   font-size: 16px; /* no iOS zoom */
 }
 .input::placeholder {
-  color: #857b6c;
+  color: #6b6b6b;
 }
 .input:focus {
   outline: none;

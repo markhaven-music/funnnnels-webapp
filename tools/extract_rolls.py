@@ -31,21 +31,51 @@ FILES = {
     "blues": f"{C}/16 Jazz Blues in F/01 Best Voicing/03 Swing Comping - 16 Jazz Blues in F - Best Voicing - 150bpm.mid",
 }
 
-# The free bonuses: one real file each, drawn and played on the landing's
-# bonus cards. Sources: the bonus zips in private/ and Mark's bonus folder.
+# The free bonuses: a few real files each, to pick and play on the landing's
+# bonus cards (BonusPlayer.tsx). Sources: the bonus zips in private/ and
+# Mark's bonus folder. Written to bonus-rolls.json, one list per bonus, so the
+# pack's rolls.json (loaded with every page) stays small. Empty bars at the
+# start are cut ("c'è un silenzio all'inizio"), then 8 bars at most.
 PRIV = os.path.join(os.path.dirname(__file__), "..", "private", "jazz-midi-pack")
 BON = os.path.expanduser("~/Desktop/midi jazz pack bonuses/bonuses")
-BONUS = {
-    # (zip or folder, path inside it, beats kept or None)
-    "bonus1": (f"{PRIV}/Jazz MIDI Chord Pack.zip",
-               "Jazz MIDI Chord Pack/1 - C Major - A Minor/6 Progressions/2 Advanced Jazz/Major Progressions/Major Prog 4 (I-bIII7-bVI-bII7 Lady Bird).mid", 32),
-    "bonus2": (f"{BON}/2. BONUS #1 - The Chord Progressions Bible/The Chord Progressions Bible/MIDI Files",
-               "Major/Arrangement/I-V-vi-IV_arrangement.mid", 32),
-    "bonus3": (f"{PRIV}/Anime & Video Game MIDI Chord Pack.zip",
-               "Anime & Video Game MIDI Chord Pack/1 - C Major - A Minor/6 Progressions/1 Anime/Major Progressions/Major Prog 1 (IV-V-iii-vi Royal Road).mid", 32),
-    "bonus4": (f"{BON}/3. BONUS #2 - Emotional Keys MIDI Bundle/Emotional Keys Vol.1",
-               "01 - Songstarters/EmotionalKeys01_Em_141_Ocean.mid", 32),
-}
+BONUS_OUT = os.path.join(os.path.dirname(__file__), "..", "app", "(funnels)", "jazz-midi-pack", "bonus-rolls.json")
+CP = (f"{PRIV}/Jazz MIDI Chord Pack.zip", "Jazz MIDI Chord Pack/1 - C Major - A Minor/6 Progressions")
+BI = (f"{BON}/2. BONUS #1 - The Chord Progressions Bible/The Chord Progressions Bible/MIDI Files", "")
+AN = (f"{PRIV}/Anime & Video Game MIDI Chord Pack.zip", "Anime & Video Game MIDI Chord Pack/1 - C Major - A Minor/6 Progressions")
+EK = (f"{BON}/3. BONUS #2 - Emotional Keys MIDI Bundle", "")
+BONUS = [
+    [  # 1 MIDI Chord Pack (Jazz Edition), C major / A minor
+        (CP, "1 Jazz Essentials/Major Progressions/Major Prog 1 (ii-V-I-I).mid", "ii-V-I"),
+        (CP, "2 Advanced Jazz/Major Progressions/Major Prog 4 (I-bIII7-bVI-bII7 Lady Bird).mid", "Lady Bird"),
+        (CP, "2 Advanced Jazz/Major Progressions/Major Prog 1 (ii-bII7-I Tritone Sub).mid", "Tritone sub"),
+        (CP, "2 Advanced Jazz/Major Progressions/Major Prog 2 (iv-bVII7-I Backdoor).mid", "Backdoor"),
+        (CP, "2 Advanced Jazz/Major Progressions/Major Prog 7 (ii-bIII7-bVI-VII7-III-V7-I Coltrane).mid", "Coltrane changes"),
+        (CP, "1 Jazz Essentials/Minor Progressions/Minor Prog 6 (i-i(maj7)-i7-i6 Line Cliche).mid", "Minor line cliché"),
+    ],
+    [  # 2 The Chord Progressions Bible: one progression three ways, then more
+        (BI, "Major/Base/I-V-vi-IV.mid", "I-V-vi-IV, block chords"),
+        (BI, "Major/Arpeggio/I-V-vi-IV_arpeggio.mid", "I-V-vi-IV, arpeggio"),
+        (BI, "Major/Arrangement/I-V-vi-IV_arrangement.mid", "I-V-vi-IV, arrangement"),
+        (BI, "Major/Arrangement/vi-IV-I-V_arrangement.mid", "vi-IV-I-V, arrangement"),
+        (BI, "Minor/Arrangement/i-VI-VII-VII_arrangement.mid", "i-VI-VII, arrangement"),
+    ],
+    [  # 3 Anime & Video Games MIDI Pack, C major / A minor
+        (AN, "1 Anime/Major Progressions/Major Prog 1 (IV-V-iii-vi Royal Road).mid", "Royal Road"),
+        (AN, "1 Anime/Major Progressions/Major Prog 3 (IV-III7-vi-I7 Marusa).mid", "Marusa"),
+        (AN, "1 Anime/Major Progressions/Major Prog 4 (vi-IV-V-I Komuro).mid", "Komuro"),
+        (AN, "1 Anime/Minor Progressions/Minor Prog 1 (i-VI-III-VII Sad Anime).mid", "Sad anime"),
+        (AN, "2 Video Game/Major Progressions/Major Prog 1 (I-bVI-bVII-I Victory Fanfare).mid", "Victory fanfare"),
+        (AN, "2 Video Game/Minor Progressions/Minor Prog 4 (i-VI-iv-V Final Boss).mid", "Final boss"),
+    ],
+    [  # 4 Emotional Keys MIDI Bundle: songstarters from the three volumes
+        (EK, "Emotional Keys Vol.1/01 - Songstarters/EmotionalKeys01_Em_141_Ocean.mid", "Ocean"),
+        (EK, "Emotional Keys Vol.1/01 - Songstarters/EmotionalKeys01_C_104_LikeAStar.mid", "Like A Star"),
+        (EK, "Emotional Keys Vol.2/01 - Songstarters/EmotionalKeys02_D_91_WhiteRose.mid", "White Rose"),
+        (EK, "Emotional Keys Vol.2/01 - Songstarters/EmotionalKeys02_Bbm_133_BlueMood.mid", "Blue Mood"),
+        (EK, "Emotional Keys Vol.3/01 - Songstarters/EmotionalKeys03_Am_86_AloneAgain.mid", "Alone Again"),
+        (EK, "Emotional Keys Vol.3/01 - Songstarters/EmotionalKeys03_G_76_FlowersInTheSky.mid", "Flowers In The Sky"),
+    ],
+]
 
 
 def read(src, rel):
@@ -65,7 +95,7 @@ def vlq(data, i):
             return v, i
 
 
-def parse(path, data=None, max_beats=None):
+def parse(path, data=None, max_beats=None, trim=False):
     data = data if data is not None else open(path, "rb").read()
     _, ntracks, tpb = struct.unpack(">HHH", data[8:14])
     i, tempo, notes, markers = 14, 500000, [], []
@@ -107,6 +137,14 @@ def parse(path, data=None, max_beats=None):
                 notes.append((open_[d1].pop(0), tick, d1))
         i = end
     bar = tpb * 4
+    if trim:  # empty bars at the start: cut, so play sounds at once
+        shift = min(s for s, _, _ in notes) // bar * bar
+        if shift:
+            notes = [(s - shift, e - shift, p) for s, e, p in notes]
+            before = [m for t, m in markers if t <= shift]
+            markers = [(t - shift, m) for t, m in markers if t > shift]
+            if before:
+                markers.insert(0, (0, before[-1]))
     if max_beats:  # a long file: its first bars only
         cut = max_beats * tpb
         notes = [(s, min(e, cut), p) for s, e, p in notes if s < cut]
@@ -129,14 +167,22 @@ def main():
         out[key] = roll
         print(f"{key:8} {roll['bpm']:>3} bpm {roll['beats']:>3} beats {len(roll['notes']):>4} notes "
               f"{len(roll['chords']):>3} chords  {roll['chords'][:4]}")
-    for key, (src, rel, beats) in BONUS.items():
-        roll = parse(rel, read(src, rel), beats)
-        roll["file"] = os.path.basename(rel)
-        out[key] = roll
-        print(f"{key:8} {roll['bpm']:>3} bpm {roll['beats']:>3} beats {len(roll['notes']):>4} notes "
-              f"{len(roll['chords']):>3} chords  {roll['chords'][:4]}")
     with open(OUT, "w") as f:
         json.dump(out, f, separators=(",", ":"))
+    bonuses = []
+    for files in BONUS:
+        rolls = []
+        for (src, base), rel, title in files:
+            path = f"{base}/{rel}" if base else rel
+            roll = parse(path, read(src, path), 32, trim=True)
+            roll["file"] = os.path.basename(rel)
+            roll["title"] = title
+            rolls.append(roll)
+            print(f"  {title:22} {roll['bpm']:>3} bpm {roll['beats']:>3} beats {len(roll['notes']):>4} notes "
+                  f"first {roll['notes'][0][0]}  {[c[1] for c in roll['chords'][:4]]}")
+        bonuses.append(rolls)
+    with open(BONUS_OUT, "w") as f:
+        json.dump(bonuses, f, separators=(",", ":"))
 
 
 if __name__ == "__main__":
