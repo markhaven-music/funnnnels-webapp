@@ -33,13 +33,50 @@ export const funnel = {
       "All 12 major/minor key pairs in six folders: best voicing, best voicing with a smooth bass, sevenths, extended, altered & borrowed chords, and progressions. Same voice-leading as the main pack.",
   },
   // Free with every pack. `id` is the download key in `files` or `remoteFiles`.
+  // `midi` and `inside` are counted from the files (2026-11-01); the bonus
+  // cards show `inside` and play the roll `bonus<n>` (rolls.json) or, for the
+  // drum loops, the clips in public/funnels/jazz-midi-pack/loops.
+  // `value`: what each item is worth in the offer summary's value stack, the
+  // same number in € and $ (the user asked for a crossed-out total on
+  // 2026-11-01, "come pagina MIDI Drum Kit").
   bonuses: [
-    { id: "chord-pack", name: "MIDI Chord Pack (Jazz Edition)" },
-    { id: "bible", name: "The Chord Progressions Bible" },
-    { id: "anime-pack", name: "Anime & Video Games MIDI Pack" },
-    { id: "emotional-keys", name: "Emotional Keys MIDI Bundle" },
-    { id: "drum-loops", name: "Drum Loops for Songwriting" },
+    {
+      id: "chord-pack",
+      name: "MIDI Chord Pack (Jazz Edition)",
+      midi: 2304,
+      value: 47,
+      inside: ["2,304 MIDI files", "All 12 major/minor key pairs", "6 folders per key: best voicing, smooth bass, sevenths, extended, altered, progressions"],
+    },
+    {
+      id: "bible",
+      name: "The Chord Progressions Bible",
+      midi: 150,
+      value: 37,
+      inside: ["150 MIDI files: 50 progressions × block chords, arpeggio, arrangement", "258 piano and e-piano WAV loops", "PDF cheat sheet"],
+    },
+    {
+      id: "anime-pack",
+      name: "Anime & Video Games MIDI Pack",
+      midi: 1548,
+      value: 47,
+      inside: ["1,548 MIDI files in all 12 keys", "Anime: royal road, Marusa, Komuro, Canon", "Video game: victory fanfare, Lydian wonder, boss battle, dungeon"],
+    },
+    {
+      id: "emotional-keys",
+      name: "Emotional Keys MIDI Bundle",
+      midi: 195,
+      value: 27,
+      inside: ["195 MIDI files in 3 volumes", "Each: 20 songstarters, 20 chord progressions, 25 melodies", "An MP3 preview of every file"],
+    },
+    {
+      id: "drum-loops",
+      name: "Drum Loops for Songwriting",
+      midi: 0,
+      value: 27,
+      inside: ["47 WAV drum loops, BPM in every name", "Pop & ballads, hip hop & trap, dance & electronic, vintage & rock"],
+    },
   ],
+  value: { pack: 97 },
   // Paid downloads, served from /private only after Stripe confirms payment.
   files: {
     pack: "private/jazz-midi-pack/Jazz MIDI Pack.zip",
@@ -68,6 +105,8 @@ export const funnel = {
   // Counted from ~/Desktop/Jazz MIDI Pack on 2026-10-10.
   counts: {
     files: 3536,
+    // the pack + the bonuses' MIDI (3,536 + 2,304 + 150 + 1,548 + 195)
+    total: 7733,
     progressions: 26,
     voicings: 13,
     rhythms: 8,

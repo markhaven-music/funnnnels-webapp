@@ -12,6 +12,7 @@ The page draws piano rolls from it and plays the notes on a real piano sample
 import json
 import os
 import struct
+import zipfile
 
 PACK = os.path.expanduser("~/Desktop/Jazz MIDI Pack")
 OUT = os.path.join(os.path.dirname(__file__), "..", "app", "(funnels)", "jazz-midi-pack", "rolls.json")
@@ -30,6 +31,29 @@ FILES = {
     "blues": f"{C}/16 Jazz Blues in F/01 Best Voicing/03 Swing Comping - 16 Jazz Blues in F - Best Voicing - 150bpm.mid",
 }
 
+# The free bonuses: one real file each, drawn and played on the landing's
+# bonus cards. Sources: the bonus zips in private/ and Mark's bonus folder.
+PRIV = os.path.join(os.path.dirname(__file__), "..", "private", "jazz-midi-pack")
+BON = os.path.expanduser("~/Desktop/midi jazz pack bonuses/bonuses")
+BONUS = {
+    # (zip or folder, path inside it, beats kept or None)
+    "bonus1": (f"{PRIV}/Jazz MIDI Chord Pack.zip",
+               "Jazz MIDI Chord Pack/1 - C Major - A Minor/6 Progressions/2 Advanced Jazz/Major Progressions/Major Prog 4 (I-bIII7-bVI-bII7 Lady Bird).mid", 32),
+    "bonus2": (f"{BON}/2. BONUS #1 - The Chord Progressions Bible/The Chord Progressions Bible/MIDI Files",
+               "Major/Arrangement/I-V-vi-IV_arrangement.mid", 32),
+    "bonus3": (f"{PRIV}/Anime & Video Game MIDI Chord Pack.zip",
+               "Anime & Video Game MIDI Chord Pack/1 - C Major - A Minor/6 Progressions/1 Anime/Major Progressions/Major Prog 1 (IV-V-iii-vi Royal Road).mid", 32),
+    "bonus4": (f"{BON}/3. BONUS #2 - Emotional Keys MIDI Bundle/Emotional Keys Vol.1",
+               "01 - Songstarters/EmotionalKeys01_Em_141_Ocean.mid", 32),
+}
+
+
+def read(src, rel):
+    if src.endswith(".zip"):
+        with zipfile.ZipFile(src) as z:
+            return z.read(rel)
+    return open(os.path.join(src, rel), "rb").read()
+
 
 def vlq(data, i):
     v = 0
@@ -41,8 +65,8 @@ def vlq(data, i):
             return v, i
 
 
-def parse(path):
-    data = open(path, "rb").read()
+def parse(path, data=None, max_beats=None):
+    data = data if data is not None else open(path, "rb").read()
     _, ntracks, tpb = struct.unpack(">HHH", data[8:14])
     i, tempo, notes, markers = 14, 500000, [], []
     for _ in range(ntracks):
@@ -83,6 +107,10 @@ def parse(path):
                 notes.append((open_[d1].pop(0), tick, d1))
         i = end
     bar = tpb * 4
+    if max_beats:  # a long file: its first bars only
+        cut = max_beats * tpb
+        notes = [(s, min(e, cut), p) for s, e, p in notes if s < cut]
+        markers = [(t, m) for t, m in markers if t < cut]
     last = max(e for _, e, _ in notes)
     beats = -(-last // bar) * 4
     return {
@@ -97,6 +125,12 @@ def main():
     out = {}
     for key, rel in FILES.items():
         roll = parse(os.path.join(PACK, rel))
+        roll["file"] = os.path.basename(rel)
+        out[key] = roll
+        print(f"{key:8} {roll['bpm']:>3} bpm {roll['beats']:>3} beats {len(roll['notes']):>4} notes "
+              f"{len(roll['chords']):>3} chords  {roll['chords'][:4]}")
+    for key, (src, rel, beats) in BONUS.items():
+        roll = parse(rel, read(src, rel), beats)
         roll["file"] = os.path.basename(rel)
         out[key] = roll
         print(f"{key:8} {roll['bpm']:>3} bpm {roll['beats']:>3} beats {len(roll['notes']):>4} notes "

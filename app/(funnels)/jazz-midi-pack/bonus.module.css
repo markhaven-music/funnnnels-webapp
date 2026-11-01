@@ -1,0 +1,219 @@
+/* The bonus cards: cover, what's inside, a preview to play. Phone: the cover
+   beside the name, the rest full width. Desktop: cover | inside | preview.
+   Colours come from the page (.page in jazz.module.css). */
+.bonuses {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bonus {
+  position: relative;
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 6px 16px;
+  align-items: start;
+  padding: 20px 18px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--ink-3), var(--ink-2));
+}
+.cover {
+  grid-row: span 2;
+}
+.cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 12px 18px rgb(0 0 0 / 0.55));
+}
+/* phone: label and name beside the cover, the rest under both */
+.info {
+  display: contents;
+}
+.label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+.price {
+  padding: 4px 8px 3px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass));
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #1a1206;
+}
+.price s {
+  margin-right: 3px;
+  font-weight: 700;
+  opacity: 0.6;
+}
+.bonus h3 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+}
+.text,
+.inside,
+.preview {
+  grid-column: 1 / -1;
+}
+.text {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--cream-2);
+}
+.inside {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cream);
+}
+.inside li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+.inside li > svg {
+  margin-top: 3px;
+}
+.preview {
+  margin-top: 14px;
+}
+
+/* bonus 5: four drum loop clips */
+.loops {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.loopBtn {
+  display: grid;
+  grid-template-columns: 34px minmax(84px, auto) minmax(0, 1fr);
+  grid-template-areas: "ico name wave" "ico bpm wave";
+  column-gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 8px 14px 8px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--cream);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.loopBtn:hover {
+  border-color: rgb(226 169 59 / 0.5);
+}
+.loopBtn[aria-pressed="true"] {
+  border-color: var(--brass);
+  background: rgb(226 169 59 / 0.1);
+}
+.icoPlay,
+.icoStop {
+  grid-area: ico;
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass));
+}
+.icoPlay::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 54%;
+  translate: -50% -50%;
+  border-left: 11px solid #1a1206;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+}
+.icoStop::after {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border-radius: 2px;
+  background: #1a1206;
+}
+.loopName {
+  grid-area: name;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.loopBpm {
+  grid-area: bpm;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--mute);
+}
+.wave {
+  grid-area: wave;
+  display: block;
+  width: 100%;
+  height: 34px;
+}
+.wave rect {
+  fill: rgb(243 235 220 / 0.28);
+}
+.wave .waveOn {
+  fill: var(--brass-hi);
+}
+
+@media (min-width: 720px) {
+  .bonus {
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: 6px 26px;
+    padding: 26px;
+  }
+  .cover {
+    grid-row: span 4;
+  }
+  .text,
+  .inside {
+    grid-column: 2;
+  }
+}
+
+@media (min-width: 1000px) {
+  .bonus {
+    grid-template-columns: 170px minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: center;
+    gap: 30px;
+    padding: 28px 30px;
+  }
+  .cover {
+    grid-row: auto;
+  }
+  .info {
+    display: block;
+  }
+  .bonus h3 {
+    margin-top: 8px;
+    font-size: 21px;
+  }
+  .preview {
+    grid-column: auto;
+    margin-top: 0;
+  }
+}

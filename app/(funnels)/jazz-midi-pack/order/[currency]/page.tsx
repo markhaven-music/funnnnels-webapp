@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Instrument_Serif } from "next/font/google";
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
 import { funnel } from "../../funnel";
 import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content";
-import { Checkout, OrderSummary, Shield, fill, isSectionType, type Ctx } from "../../sections";
+import { Checkout, OrderHead, OrderSummary, Seal, fill, isSectionType, type Ctx } from "../../sections";
 import { Tracking } from "../../Tracking";
 import { splitName } from "../../../_kit/KitBox";
 import { Beacon } from "../../../Beacon";
+import { display } from "../../fonts";
 import s from "../../jazz.module.css";
-
-const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif" });
 
 // The order page, like the ClickFunnels funnels: every CTA on the landing comes
 // here. Cached on the CDN per currency like the landing (proxy.ts rewrites
@@ -62,7 +60,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   const guarantee = pick(sections, "s_guarantee");
 
   return (
-    <main className={`${s.page} ${serif.variable}`}>
+    <main className={`${s.page} ${display.variable}`}>
       <Tracking value={amount} currency={currency} page="order" />
       <Beacon funnel={funnel.slug} page="order" />
       <div className={s.topband}>
@@ -80,6 +78,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
         <div className={s.wrap}>
           {/* No heading above the box and the form ("you can eliminate it"); the h1 stays for screen readers. */}
           <h1 className={s.srOnly}>Complete your Jazz MIDI Pack order</h1>
+          <OrderHead ctx={ctx} />
           <div className={s.orderGrid}>
             <OrderSummary p={offer} ctx={ctx} />
             <div className={s.orderForm}>
@@ -90,10 +89,14 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       </section>
 
       <section className={`${s.sec} ${s.band}`}>
-        <div className={`${s.wrap} ${s.col} ${s.guarantee}`}>
-          <Shield big />
-          <h2 className={s.h2}>{fill(guarantee.title, ctx)}</h2>
-          <p className={s.sub}>{fill(guarantee.text, ctx)}</p>
+        <div className={s.wrap}>
+          <div className={s.guarantee}>
+            <Seal />
+            <div>
+              <h2 className={s.h2}>{fill(guarantee.title, ctx)}</h2>
+              <p className={s.sub}>{fill(guarantee.text, ctx)}</p>
+            </div>
+          </div>
         </div>
       </section>
 

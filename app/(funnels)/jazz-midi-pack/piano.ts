@@ -97,6 +97,7 @@ function unisons(notes: number[][]) {
 
 async function play(roll: Roll, scope: HTMLElement) {
   const my = ++token;
+  window.dispatchEvent(new Event("jazz:piano")); // a drum loop clip playing (LoopList) stops
   const ac = audio(); // created inside the click: required on iOS
   scope.setAttribute("data-state", "loading");
   scope.querySelectorAll("[aria-pressed]").forEach((el) => el.setAttribute("aria-pressed", "true"));

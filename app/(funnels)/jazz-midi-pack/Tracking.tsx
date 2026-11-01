@@ -12,6 +12,8 @@ import { PREVIEW_JS } from "@/lib/beacon";
 // checkout widget (step 1 → 2) and Purchase from the thank-you page, with the
 // "purchase_<order id>" as eventID, the id neo's server-side Purchase uses (lib/neo.ts).
 // Local previews never reach Meta / Clarity / Neo.
+// Their scripts load once the page has shown (docs/page-speed.md rule 4): the
+// fbq / clarity stubs queue every call until then, so nothing is lost.
 // page="order": the order page sends PageView + OrderPageView instead of ViewContent.
 export function Tracking({ value, currency, page = "landing" }: { value: number; currency: string; page?: "landing" | "order" }) {
   const { metaPixelId, clarityId, neoSnippet } = funnel.tracking;
@@ -29,7 +31,7 @@ export function Tracking({ value, currency, page = "landing" }: { value: number;
           (function (c, l, a, r, i, t, y) {
             c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
             t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i;
-            y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+            ${AFTER_LOAD}(function () { y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y); });
           })(window, document, 'clarity', 'script', '${clarityId}');
           var q = new URLSearchParams(location.search);
           clarity('set', 'landing', location.pathname.replace(/\\/$/, '') || '/');
@@ -54,8 +56,10 @@ export function Tracking({ value, currency, page = "landing" }: { value: number;
       `}</Script>
       <Script id="neo" strategy="afterInteractive">{`
         if (!${LOCAL}.test(location.hostname) && !${PREVIEW_JS}) {
-          var s = document.createElement('script'); s.async = true; s.src = '${neoSnippet}';
-          document.head.appendChild(s);
+          ${AFTER_LOAD}(function () {
+            var s = document.createElement('script'); s.async = true; s.src = '${neoSnippet}';
+            document.head.appendChild(s);
+          });
         }
       `}</Script>
     </>
@@ -63,6 +67,12 @@ export function Tracking({ value, currency, page = "landing" }: { value: number;
 }
 
 const LOCAL = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$/);
+
+// Runs fn once the page has loaded (now, if it already has).
+const AFTER_LOAD = `(function (fn) {
+  if (document.readyState === 'complete') setTimeout(fn, 0);
+  else addEventListener('load', function () { setTimeout(fn, 0); });
+})`;
 
 // Creates fbq synchronously (so events queue) and loads fbevents.js off localhost.
 export const BOOT = `
@@ -76,7 +86,7 @@ export const BOOT = `
       n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
       t = b.createElement(e); t.async = !0; t.src = v;
       s = b.getElementsByTagName(e)[0];
-      if (!${LOCAL}.test(location.hostname)) s.parentNode.insertBefore(t, s);
+      if (!${LOCAL}.test(location.hostname)) ${AFTER_LOAD}(function () { s.parentNode.insertBefore(t, s); });
     })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', id);
     fbq('track', 'PageView');

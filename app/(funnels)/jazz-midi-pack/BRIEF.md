@@ -29,8 +29,14 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   GarageBand).
 
 ## Offer
-- €27 in Europe, $27 elsewhere. One payment, instant download. No strike-through price: the pack was never
-  sold higher, so none is shown (no fake urgency, no "worth $997").
+- €27 in Europe, $27 elsewhere. One payment, instant download. No fake urgency (no timer, no "sale ends").
+- Value stack (the user's call, 2026-11-01: "prezzo sbarrato totale VALUE = TOT e offerta, come pagina MIDI Drum
+  Kit"): each item shows what it's worth, the same number in € and $ (`funnel.ts` value / bonuses[].value):
+  Jazz MIDI Pack 97, Chord Pack 47, Bible 37, Anime pack 47, Emotional Keys 27, Drum Loops 27. Total value 282,
+  crossed out, "Today" 27, "You save" 255. It reads as the bundle's worth, never as an earlier price of the pack.
+- Bundle total: 7,733 MIDI files = 3,536 (pack) + 2,304 + 150 + 1,548 + 195 (bonuses). The bonuses add 4,197 MIDI
+  files, 305 WAV loops (258 Bible piano/e-piano loops + 47 drum loops) and a PDF. Counted 2026-11-01.
+- Angle (2026-11-01): the jazz progressions everyone wants and nobody can write. Never say how many progressions.
 - Five free bonuses with every pack (since 2026-10-16), on the same download page:
   1. MIDI Chord Pack (Jazz Edition): the Jazz MIDI Chord Pack, 2,304 MIDI files, 12 major/minor key pairs,
      six folders (best voicing, best voicing + smooth bass, sevenths, extended, altered & borrowed, progressions).
@@ -47,7 +53,11 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   arrangement: 150 MIDI files, plus e-piano WAV loops and "The Ultimate Chord Progression - Cheat Sheet.pdf".
   Bonuses 2, 4, 5 come from ~/Desktop/midi jazz pack bonuses and are served from Cloudflare R2 (lib/r2.ts):
   the Bible zip alone is 1.07 GB.
-  No "worth $X" values on the bonuses either.
+  Each bonus card shows what's inside (`funnel.ts` bonuses[].inside) and a preview to play: one real file per MIDI
+  bonus on the piano (rolls.json bonus1-4: Chord Pack "Lady Bird", Bible "I-V-vi-IV arrangement", Anime "Royal
+  Road", Emotional Keys songstarter "Ocean", first 8 bars), and four 8-second clips of real drum loops
+  (public/funnels/jazz-midi-pack/loops: Modern Pop 90, Hip Hop 91, UK Garage 134, 70s Acoustic 104 bpm).
+  Emotional Keys per volume: 20 songstarters, 20 chord progressions, 20 melodies, 5 bonus melodies.
 - No checkout add-on since 2026-10-16: the Chord Pack (the old €9 add-on) became bonus 1. The server still
   knows the old add-on so orders that bought it keep verifying.
 - EU withdrawal waiver: a notice under the pay button (clicking it is the consent), no tick box.

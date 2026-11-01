@@ -4,7 +4,7 @@
 // funnnnels.com → Jazz MIDI Pack, not here.
 //
 // Text can use tokens that stay correct per visitor: {price} (€27 or $27),
-// {files} (3,536), {days} (14).
+// {files} (3,536), {total} (7,733: the pack + the bonuses' MIDI), {days} (14).
 import type { RollId } from "./piano";
 
 export type Para = { style: "p" | "bold" | "pull" | "hit"; text: string };
@@ -58,17 +58,17 @@ export const DEFAULT_SECTIONS: Section[] = [
     id: "hero",
     type: "s_hero",
     props: {
-      tag: "{files} MIDI files",
+      tag: "{total} MIDI files",
       pre: "For producers who don’t play jazz piano",
-      headline: "Write *Jazz Chords* Like A *Real Pianist* With Drag-And-Drop MIDI, _EASILY!_",
-      sub: "Voiced note by note: chords that sound played, not programmed",
+      headline: "*The Jazz Progressions* Everyone Wants And _Nobody Can Write_, As Drag-And-Drop MIDI",
+      sub: "Voiced like a real pianist, note by note: chords that sound played, not programmed",
       bullets: [
-        "{files} Drag-And-Drop Jazz MIDI Files",
-        "The Most Used Jazz Progressions × 13 Voicings × 8 Rhythms",
+        "ii-V-Is, Tritone Subs, Rhythm Changes, Coltrane Changes",
+        "Every Progression × 13 Voicings × 8 Rhythms × 12 Keys",
         "Voice-Led Like A Pianist: No Jumping Chords",
         "Chord Names In Every File, No Theory Needed",
-        "All 12 Keys, Bass Lines And Genre Loops",
-        "5 Free Bonuses Included",
+        "Bass Lines + Lofi, Neo Soul, Trap Soul & House Loops",
+        "5 Free Bonuses: {total} MIDI Files In Total",
       ],
       ticks: ["Any DAW", "Chord names in every file", "{days}-day guarantee"],
       hud: [".mid · drag & drop", "13 voicings", "chords on the timeline"],
@@ -171,6 +171,15 @@ export const DEFAULT_SECTIONS: Section[] = [
           ],
         },
         {
+          label: "Bass lines and full loops",
+          cells: [
+            { ok: false, text: "Another instrument to learn" },
+            { ok: false, text: "Book a bass player too" },
+            { ok: null, text: "Chords, mostly" },
+            { ok: true, text: "Walking, two-feel and bossa bass, plus loops with drums" },
+          ],
+        },
+        {
           label: "Chords in your track today",
           cells: [
             { ok: false, text: "You still play every chord in" },
@@ -189,7 +198,7 @@ export const DEFAULT_SECTIONS: Section[] = [
           ],
         },
       ],
-      note: "{files} files for {price}. Less than a cent a file.",
+      note: "{total} MIDI files for {price}. Under half a cent a file.",
     },
   },
   {
@@ -198,27 +207,27 @@ export const DEFAULT_SECTIONS: Section[] = [
     props: {
       eyebrow: "Free with the pack",
       title: "Five bonuses. All in the {price}.",
-      sub: "Every order gets them, on the same download page as the pack.",
+      sub: "4,197 more MIDI files, 305 WAV loops and a PDF, on the same download page as the pack. Press play on any of them.",
       items: [
         {
           name: "MIDI Chord Pack (Jazz Edition)",
-          text: "2,304 MIDI files. All 12 major/minor key pairs in six folders: best voicing, best voicing with a smooth bass, sevenths, extended, altered & borrowed chords, and progressions.",
+          text: "Jazz chords and progressions in every key, voiced the same way as the pack.",
         },
         {
           name: "The Chord Progressions Bible",
-          text: "The 50 most used chord progressions of all time. Each one as block chords, arpeggios and a piano arrangement: 150 MIDI files, e-piano WAV loops and a PDF cheat sheet.",
+          text: "The 50 most used chord progressions of all time, three ways each.",
         },
         {
           name: "Anime & Video Games MIDI Pack",
-          text: "1,548 MIDI files in all 12 keys. Add9, extended and borrowed chords, plus anime progressions (royal road, Komuro, Canon) and video game ones (victory fanfare, boss battle, dungeon).",
+          text: "Anime and video game progressions, from royal road to boss battle, in every key.",
         },
         {
           name: "Emotional Keys MIDI Bundle",
-          text: "Three volumes, 195 MIDI files: songstarters, chord progressions, melodies and bonus melodies, with an MP3 preview of each.",
+          text: "Piano ideas to start a song from: songstarters, chords and melodies.",
         },
         {
           name: "Drum Loops for Songwriting",
-          text: "47 WAV drum loops to write over: modern pop and ballads, hip hop, trap and R&B, dance and electronic, vintage and rock.",
+          text: "Drums to write over while the chords take shape.",
         },
       ],
     },
@@ -227,8 +236,8 @@ export const DEFAULT_SECTIONS: Section[] = [
     id: "offer",
     type: "s_offer",
     props: {
-      eyebrow: "Get the pack",
-      title: "Everything in the pack. {price}.",
+      eyebrow: "Everything you get",
+      title: "The whole bundle, {total} MIDI files. Today {price}.",
       stack: [
         "{files} MIDI files in 5 folders",
         "The most used jazz progressions × 13 voicings × 8 rhythms",

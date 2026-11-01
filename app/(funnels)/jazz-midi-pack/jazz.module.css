@@ -1,17 +1,23 @@
-/* Jazz MIDI Pack landing. Grind Studio landing rules: dark, one accent
-   (brass), mobile first with a real desktop layout, text ≥ 17px, no pills,
-   no gradient text, no glassmorphism. */
+/* Jazz MIDI Pack landing. Grind Studio landing rules: dark, mobile first with
+   a real desktop layout, text ≥ 17px, no pills, no gradient text, no
+   glassmorphism. Colours: the box's black and brass, with jazz-club midnight
+   blue for every other section (.band); green ✓, red ✗. One type family for
+   headlines (Poppins, --font-display), Geist for text, Geist Mono for data. */
 .page {
-  --ink: #0e0c09;
+  --ink: #0b0a08;
   --ink-2: #16130f;
   --ink-3: #1f1b15;
   --rule: #332d24;
+  --navy: #0c1427;
+  --navy-2: #131e38;
+  --navy-rule: #253457;
   --cream: #f3ebdc;
   --cream-2: #cfc5b3;
   --mute: #9a907f;
   --brass: #e2a93b;
   --brass-hi: #f6d58a;
-  --red: #c4553c;
+  --brass-deep: #a86c0e;
+  --red: #e0573f;
   --green: #3fd16b; /* checks only, like the Grind Studio Drum Kit page */
   min-height: 100vh;
   background: var(--ink);
@@ -51,8 +57,8 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(70% 55% at 80% 18%, rgb(226 169 59 / 0.22), transparent 70%),
-    radial-gradient(50% 40% at 10% 90%, rgb(196 85 60 / 0.14), transparent 70%),
+    radial-gradient(70% 55% at 80% 18%, rgb(226 169 59 / 0.24), transparent 70%),
+    radial-gradient(60% 50% at 8% 85%, rgb(46 82 170 / 0.28), transparent 70%),
     linear-gradient(to bottom, transparent 0 calc(100% - 1px), var(--rule) calc(100% - 1px));
   pointer-events: none;
 }
@@ -210,13 +216,14 @@
   text-align: center;
 }
 .display {
-  font-family: var(--font-serif), Georgia, serif;
-  font-weight: 400;
-  font-size: clamp(44px, 11.5vw, 84px);
-  line-height: 0.98;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-weight: 800;
+  font-size: clamp(38px, 9vw, 64px);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
 }
 .display em {
+  font-style: normal;
   color: var(--brass-hi);
 }
 .lead {
@@ -301,34 +308,55 @@
 .sec {
   padding: clamp(56px, 9vw, 104px) 0;
 }
+/* every other section: midnight blue, a brass glow in the corner; the cards
+   and lines inside it take the blue too */
 .band {
-  background: var(--ink-2);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
+  --ink: #0a1122;
+  --ink-2: var(--navy-2);
+  --ink-3: #1a2747;
+  --rule: var(--navy-rule);
+  --mute: #93a0bd;
+  background:
+    radial-gradient(55% 45% at 92% 0%, rgb(226 169 59 / 0.12), transparent 70%),
+    radial-gradient(50% 40% at 0% 100%, rgb(46 82 170 / 0.22), transparent 70%),
+    var(--navy);
+  border-top: 1px solid var(--navy-rule);
+  border-bottom: 1px solid var(--navy-rule);
 }
 .secHead {
-  max-width: 760px;
-  margin-bottom: 28px;
+  max-width: 820px;
+  margin-bottom: 32px;
 }
 .eyebrow {
-  margin-bottom: 10px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
   text-transform: uppercase;
   color: var(--brass);
 }
+.eyebrow::before {
+  content: "";
+  flex: none;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+}
 .h2 {
-  font-family: var(--font-serif), Georgia, serif;
-  font-weight: 400;
-  font-size: clamp(36px, 7vw, 58px);
-  line-height: 1.02;
-  letter-spacing: -0.015em;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-weight: 700;
+  font-size: clamp(29px, 5.4vw, 46px);
+  line-height: 1.14;
+  letter-spacing: -0.022em;
   text-wrap: balance;
 }
 .hl {
-  font-style: italic;
+  font-style: normal;
   color: var(--brass-hi);
 }
 .sub {
@@ -349,12 +377,14 @@
   color: var(--cream);
 }
 .pull {
-  margin: 10px 0;
-  padding-left: 16px;
-  border-left: 3px solid var(--brass);
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: clamp(26px, 5vw, 34px);
-  line-height: 1.15;
+  margin: 12px 0;
+  padding: 4px 0 4px 18px;
+  border-left: 4px solid var(--brass);
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-weight: 700;
+  font-size: clamp(23px, 4.4vw, 30px);
+  line-height: 1.22;
+  letter-spacing: -0.015em;
   color: var(--cream);
 }
 .hit {
@@ -449,20 +479,26 @@
   list-style: none;
 }
 .steps li {
-  padding: 22px;
+  padding: 24px 22px;
   border: 1px solid var(--rule);
-  border-radius: 16px;
+  border-top: 3px solid var(--brass);
+  border-radius: 14px;
   background: var(--ink);
 }
 .stepN {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--brass);
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--brass-hi);
 }
 .steps h3 {
-  margin-top: 8px;
+  margin-top: 12px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
   font-size: 20px;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 .steps p {
   margin-top: 6px;
@@ -494,17 +530,20 @@
 .cellCount {
   display: block;
   margin-top: 4px;
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: 46px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 40px;
+  font-weight: 800;
   line-height: 1;
+  letter-spacing: -0.03em;
   color: var(--brass-hi);
 }
 .cellBig .cellCount {
-  font-size: clamp(56px, 12vw, 88px);
+  font-size: clamp(52px, 10vw, 76px);
 }
 .cell h3 {
   margin-top: 10px;
-  font-size: 19px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 18px;
   font-weight: 700;
 }
 .cell p {
@@ -525,7 +564,8 @@
 }
 .listBox h3 {
   margin-bottom: 12px;
-  font-size: 19px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 18px;
   font-weight: 700;
 }
 .numList,
@@ -578,131 +618,150 @@
 }
 
 /* math */
-/* comparison chart (Do the math). Phone: each row is its label on a full
-   line, then one cell per column. Desktop: a real table, labels on the left. */
+/* comparison chart (Do the math). Phone: each row's label on a full line,
+   then the alternatives as ✓/✗ only and the pack's answer in a brass box.
+   Desktop: a real table, labels on the left, the pack's column a raised brass
+   card (chWinBg, behind the cells, spanning every row). */
 .chart {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
-  border: 1px solid var(--rule);
-  border-radius: 16px;
-  background: var(--ink);
-  overflow: hidden;
+  grid-template-columns: repeat(var(--alts, 3), minmax(0, 1fr)) minmax(0, 1.9fr);
+  column-gap: 4px;
 }
 .chRow {
   display: contents;
 }
-.chCorner {
+.chCorner,
+.chWinBg {
   display: none;
 }
 .chHead {
-  padding: 14px 8px 12px;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 0 2px 12px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 12px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--mute);
+}
+.chHead.chWin {
+  margin-bottom: 4px;
+  padding: 12px 8px;
+  border: 1px solid rgb(226 169 59 / 0.7);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgb(226 169 59 / 0.3), rgb(226 169 59 / 0.12));
+  font-size: 14px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--mute);
+  color: var(--brass-hi);
+}
+.chBox {
+  display: block;
+  width: 44px;
+  height: auto;
+  filter: drop-shadow(0 8px 12px rgb(0 0 0 / 0.6));
 }
 .chLabel {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  padding: 14px 12px 2px;
+  padding: 16px 2px 8px;
   border-top: 1px solid var(--rule);
-  font-size: 16px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 15px;
   font-weight: 700;
   color: var(--cream);
 }
 .chCell {
+  position: relative;
+  z-index: 1;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px 8px 14px;
-  font-size: 13px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 0 14px;
+  font-size: 14px;
   line-height: 1.35;
   color: var(--cream-2);
 }
-.chHead.chWin {
-  color: var(--brass-hi);
-}
-.chWin {
-  background: rgb(226 169 59 / 0.1);
+/* the alternatives' words: desktop only (screen readers always) */
+.chAlt {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .chCell.chWin {
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgb(226 169 59 / 0.6);
+  border-radius: 10px;
+  background: rgb(226 169 59 / 0.13);
+  font-weight: 700;
   color: var(--cream);
-  font-weight: 600;
+}
+.chCell.chWin .mark {
+  margin-top: -2px;
+}
+@media (max-width: 719px) {
+  .chart {
+    grid-template-columns: repeat(var(--alts, 3), minmax(0, 1fr)) minmax(0, 2.7fr);
+  }
+  .chCell.chWin {
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    line-height: 1.3;
+  }
 }
 .mark {
   display: inline-grid;
   place-items: center;
   flex: none;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
 }
 .markYes {
   color: var(--green);
-  background: rgb(63 209 107 / 0.14);
+  background: rgb(63 209 107 / 0.15);
 }
 .markNo {
-  color: #ef8c74;
-  background: rgb(196 85 60 / 0.16);
+  color: #ff8a73;
+  background: rgb(224 87 63 / 0.2);
 }
 .markMeh {
   color: var(--mute);
-  background: rgb(243 235 220 / 0.07);
+  background: rgb(243 235 220 / 0.08);
+}
+/* the pack's ticks: solid */
+.chWin .markYes {
+  color: #06210f;
+  background: var(--green);
+  box-shadow: 0 0 14px rgb(63 209 107 / 0.45);
 }
 .chNote {
-  margin-top: 18px;
-  font-size: 17px;
-  color: var(--cream-2);
+  margin-top: 30px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(20px, 3.4vw, 26px);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: var(--cream);
 }
 
-/* bonuses: three covers in cards (phone: stacked, desktop: three across) */
-.bonuses {
-  display: grid;
-  gap: 14px;
-  padding: 0;
-  list-style: none;
-}
-.bonus {
-  position: relative;
-  display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
-  column-gap: 16px;
-  align-items: start;
-  align-content: start;
-  padding: 18px;
-  border: 1px solid var(--rule);
-  border-radius: 16px;
-  background: var(--ink-2);
-}
-.bonusImg {
-  grid-row: span 3;
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 12px 18px rgb(0 0 0 / 0.55));
-}
-.bonusN {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--brass);
-}
-.bonus h3 {
-  margin-top: 4px;
-  font-size: 19px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-.bonus p {
-  margin-top: 6px;
-  font-size: 15px;
-  color: var(--cream-2);
-}
 /* the bonuses again, small, next to the checkout */
 .bonusMini {
   margin-top: 22px;
@@ -712,7 +771,7 @@
   background: var(--ink-2);
 }
 .bonusMiniHead {
-  font-family: var(--font-mono);
+  font-family: var(--font-display), var(--font-sans), sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -739,6 +798,100 @@
   height: auto;
 }
 
+/* the order page's first line: product and price */
+.orderHead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 12px 16px 12px 12px;
+  border: 1px solid rgb(226 169 59 / 0.5);
+  border-radius: 14px;
+  background:
+    radial-gradient(80% 120% at 0% 50%, rgb(226 169 59 / 0.14), transparent 70%),
+    var(--ink-2);
+}
+.orderHead img {
+  flex: none;
+  width: 40px;
+  height: auto;
+}
+.orderHead p {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+.orderHead p b {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+.orderHead p span {
+  font-size: 13px;
+  color: var(--mute);
+}
+.orderHead .orderHeadPrice {
+  flex: none;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+.orderHeadPrice s {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--mute);
+  text-decoration-color: var(--red);
+  text-decoration-thickness: 2px;
+}
+.orderHead .orderHeadPrice b {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--brass-hi);
+}
+
+/* the order page's bonus list: each one's value crossed out, "Free" */
+.bonusMiniValue {
+  margin-left: auto;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--brass-hi);
+  white-space: nowrap;
+}
+.bonusMiniValue s {
+  margin-right: 4px;
+  font-weight: 700;
+  color: var(--mute);
+}
+.totalMini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgb(226 169 59 / 0.55);
+  border-radius: 12px;
+  background: rgb(226 169 59 / 0.1);
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+.totalMini s {
+  color: var(--mute);
+  text-decoration-color: var(--red);
+  text-decoration-thickness: 2px;
+}
+.totalMini b {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--brass-hi);
+}
+
 /* order */
 .order {
   background:
@@ -757,38 +910,12 @@
   display: flex;
   flex-direction: column;
 }
-/* the landing's offer recap: price + one button to the order page */
-.priceCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 28px 22px 24px;
-  border: 1px solid rgb(226 169 59 / 0.45);
-  border-radius: 18px;
-  text-align: center;
-  background:
-    radial-gradient(80% 60% at 50% 0%, rgb(226 169 59 / 0.14), transparent 70%),
-    var(--ink-2);
-}
-.priceBig {
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: 64px;
-  line-height: 1;
-  color: var(--cream);
-}
-.priceNote {
-  margin-top: 8px;
-  font-size: 15px;
-  color: var(--cream-2);
-}
-.priceCta {
-  width: 100%;
-  margin-top: 22px;
-}
 .payList {
   display: grid;
   gap: 8px;
-  margin-top: 16px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 18px auto 0;
   padding: 0;
   list-style: none;
   text-align: left;
@@ -800,8 +927,13 @@
   gap: 10px;
   align-items: flex-start;
 }
-.payList .tick {
-  margin-top: 3px;
+.payList .tick,
+.payList .shield {
+  margin-top: 2px;
+}
+.payList .shield {
+  width: 20px;
+  height: 20px;
 }
 .srOnly {
   position: absolute;
@@ -833,22 +965,50 @@
   height: 22px;
   color: var(--brass);
 }
-.shieldBig {
-  width: 56px;
-  height: 56px;
-  margin-bottom: 14px;
-  color: var(--brass);
-}
 
-/* guarantee */
+/* guarantee: the seal and the promise on one brass-edged card */
 .guarantee {
-  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 22px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 22px;
+  border: 1px solid rgb(226 169 59 / 0.55);
+  border-radius: 18px;
+  text-align: center;
+  background:
+    radial-gradient(70% 80% at 0% 50%, rgb(226 169 59 / 0.16), transparent 70%),
+    #0a1122;
+  box-shadow: 0 30px 80px -40px rgb(226 169 59 / 0.5);
 }
 .guarantee a {
   color: var(--brass-hi);
+}
+.seal {
+  flex: none;
+  width: 150px;
+  height: 150px;
+  filter: drop-shadow(0 10px 30px rgb(226 169 59 / 0.35));
+}
+.sealRing {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.sealDays {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.sealUnit {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
 }
 
 /* after */
@@ -880,6 +1040,7 @@
   border-radius: 8px;
   background: var(--brass);
   color: #1a1206;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
   font-weight: 800;
   font-size: 15px;
 }
@@ -1109,34 +1270,77 @@
     grid-template-columns: repeat(2, 1fr);
   }
   .chart {
-    grid-template-columns: minmax(150px, 1.25fr) repeat(var(--cols, 4), minmax(0, 1fr));
+    grid-template-columns: minmax(170px, 1.3fr) repeat(var(--alts, 3), minmax(0, 1fr)) minmax(0, 1.15fr);
+    column-gap: 0;
+    padding: 18px 0;
   }
   .chCorner {
     display: block;
   }
+  /* out of the flow: with no row given it runs the chart's full height,
+     padding included, so it stands out above and below the rows */
+  .chWinBg {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    grid-column: -2 / -1;
+    border: 1px solid rgb(226 169 59 / 0.75);
+    border-radius: 16px;
+    background:
+      radial-gradient(120% 50% at 50% 0%, rgb(226 169 59 / 0.3), transparent 70%),
+      linear-gradient(180deg, #2a2112, #17130c);
+    box-shadow: 0 0 0 4px rgb(226 169 59 / 0.08), 0 30px 70px -20px rgb(226 169 59 / 0.45);
+  }
   .chHead {
-    padding: 20px 16px 16px;
-    font-size: 12px;
+    align-items: flex-start;
+    padding: 0 16px 18px;
+    font-size: 14px;
+    text-align: left;
+  }
+  .chHead.chWin {
+    align-items: center;
+    margin: 0;
+    padding: 0 16px 18px;
+    border: 0;
+    background: none;
+    font-size: 15px;
+    text-align: center;
+  }
+  .chBox {
+    width: 64px;
   }
   .chLabel {
     grid-column: auto;
-    padding: 18px 16px;
+    padding: 20px 16px 20px 0;
     font-size: 17px;
   }
   .chCell {
-    flex-direction: row;
     align-items: flex-start;
+    justify-content: flex-start;
     gap: 10px;
-    padding: 18px 16px;
+    padding: 20px 16px;
     border-top: 1px solid var(--rule);
     font-size: 15px;
   }
-  .chWin {
-    border-left: 1px solid rgb(226 169 59 / 0.55);
+  .chAlt {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
   }
-  .chHead.chWin {
-    font-size: 13px;
-    box-shadow: inset 0 3px 0 var(--brass);
+  .chCell.chWin {
+    margin: 0;
+    padding: 20px 18px;
+    border: 0;
+    border-top: 1px solid rgb(226 169 59 / 0.22);
+    border-radius: 0;
+    background: none;
+    font-size: 16px;
   }
   .bento {
     grid-template-columns: repeat(2, 1fr);
@@ -1155,6 +1359,16 @@
   }
   .after {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .guarantee {
+    flex-direction: row;
+    gap: 36px;
+    padding: 36px 44px;
+    text-align: left;
+  }
+  .seal {
+    width: 180px;
+    height: 180px;
   }
 }
 
@@ -1194,43 +1408,22 @@
     flex-direction: column;
     justify-content: flex-end;
   }
+  /* the progressions in two columns, so the three boxes end level */
   .lists {
-    grid-template-columns: 1fr 1fr 1.4fr;
+    grid-template-columns: 1fr 1fr 1.7fr;
   }
   .listWide {
     grid-column: span 1;
   }
   .progGrid {
-    columns: 1;
-  }
-  .bonuses {
-    grid-template-columns: repeat(6, 1fr);
-    gap: 18px;
-  }
-  /* 3 on the first row, 2 wider ones under them */
-  .bonus {
-    grid-column: span 2;
-  }
-  .bonus:nth-child(n + 4) {
-    grid-column: span 3;
-  }
-  .bonus {
-    grid-template-columns: 1fr;
-    padding: 26px 24px 28px;
-  }
-  .bonusImg {
-    grid-row: auto;
-    width: 100%;
-    height: 300px;
-    object-fit: contain;
-    margin: 0 auto 18px;
+    columns: 2;
+    column-gap: 24px;
   }
   .orderGrid {
     grid-template-columns: 0.85fr 1.15fr;
     gap: 56px;
   }
-  .orderForm,
-  .priceCard {
+  .orderForm {
     order: 0;
     position: sticky;
     top: 24px;
@@ -1263,7 +1456,11 @@
     align-items: flex-start;
     text-align: left;
   }
+  /* the button lines up with the title, not centred in the column */
+  .finalIn a[data-cta] {
+    margin-inline: 0;
+  }
   .finalIn h2 {
-    max-width: 13em;
+    max-width: 15em;
   }
 }

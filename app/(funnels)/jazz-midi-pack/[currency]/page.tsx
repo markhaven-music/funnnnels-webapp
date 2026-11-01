@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Instrument_Serif, Poppins } from "next/font/google";
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
@@ -11,6 +10,7 @@ import { SectionView, isSectionType, type Ctx } from "../sections";
 import { StickyCta } from "../StickyCta";
 import { Tracking } from "../Tracking";
 import { Beacon } from "../../Beacon";
+import { display } from "../fonts";
 import s from "../jazz.module.css";
 
 // Copy rules: grind-studio-landing-pages/docs/copy-style.md ("Diretto").
@@ -22,15 +22,6 @@ import s from "../jazz.module.css";
 // visitor's one and rewrites /jazz-midi-pack to it, so the address bar never
 // changes. Publishing from the editor refreshes both (lib/pages.ts
 // revalidateFunnelPages); the hourly revalidate is only a safety net.
-
-// The hero headline: a heavy geometric sans, like the Grind Studio Drum Kit page.
-const display = Poppins({ subsets: ["latin"], weight: "800", variable: "--font-display" });
-const serif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
-  variable: "--font-serif",
-});
 
 export const revalidate = 3600;
 
@@ -47,9 +38,11 @@ export const metadata: Metadata = {
   description:
     "The most used jazz progressions, voiced the way a pianist plays them. 3,536 MIDI files: 13 voicings, 8 rhythms, all 12 keys, bass lines, lofi / neo soul / trap soul / deep house loops.",
   openGraph: {
-    title: "Jazz chords that sound played, not programmed.",
-    description: "3,536 MIDI files by GRIND STUDIO. Drag into your DAW.",
+    title: "The jazz progressions everyone wants, as drag-and-drop MIDI.",
+    description: "7,733 MIDI files by GRIND STUDIO, voiced like a real pianist. Drag into your DAW.",
     type: "website",
+    url: "https://m.thegrind.studio/jazz-midi-pack",
+    images: [{ url: "https://m.thegrind.studio/funnels/jazz-midi-pack/vsl-en-1600.webp", width: 1600, height: 900 }],
   },
 };
 
@@ -76,7 +69,7 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
   };
 
   return (
-    <main className={`${s.page} ${serif.variable} ${display.variable}`}>
+    <main className={`${s.page} ${display.variable}`}>
       <Tracking value={amount} currency={currency} />
       <Beacon funnel={funnel.slug} page="landing" />
       {sections.map((section) => (

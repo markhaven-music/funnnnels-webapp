@@ -7,11 +7,16 @@ import { funnel } from "./funnel";
 import { DEFAULT_SECTIONS, type ChartCell, type Section, type SectionProps, type SectionType } from "./content";
 import { Cta } from "./Cta";
 import { PlayableRoll } from "./PlayableRoll";
+import { LoopList } from "./LoopList";
+import type { RollId } from "./piano";
+import { money } from "@/lib/launch";
 import { ProductBox, Scene } from "./ProductBox";
 import { CheckoutWidget } from "./CheckoutWidget";
 import { Vsl } from "./Vsl";
 import { PackBrowser } from "./PackBrowser";
 import s from "./jazz.module.css";
+import bn from "./bonus.module.css";
+import vs from "./value.module.css";
 import e from "./edit.module.css";
 
 export type Ctx = {
@@ -33,10 +38,12 @@ export function fill(text: string, ctx: Ctx) {
   return text
     .replaceAll("{price}", ctx.price)
     .replaceAll("{files}", n.files.toLocaleString("en-US"))
+    .replaceAll("{total}", n.total.toLocaleString("en-US"))
     .replaceAll("{days}", String(funnel.guaranteeDays));
 }
 
-/** Editable (with patch) or plain text with tokens filled in. */
+/** Editable (with patch) or plain text with tokens filled in. `emph`: brass
+ * highlights on the live page (see Emph). */
 function T({
   v,
   set,
@@ -44,6 +51,7 @@ function T({
   as: Tag = "span",
   className,
   placeholder,
+  emph,
 }: {
   v: string;
   set?: (next: string) => void;
@@ -51,9 +59,23 @@ function T({
   as?: ElementType;
   className?: string;
   placeholder?: string;
+  emph?: boolean;
 }) {
   if (set) return <EditableText as={Tag} value={v} onChange={set} className={`${className ?? ""} ${e.text}`} placeholder={placeholder} />;
-  return <Tag className={className}>{fill(v, ctx)}</Tag>;
+  return <Tag className={className}>{emph ? <Emph text={fill(v, ctx)} /> : fill(v, ctx)}</Tag>;
+}
+
+/** A title's highlight: *words* in brass, or with no markup, the last of two or
+ * more sentences ("Five folders. Every one does a job."). */
+function Emph({ text }: { text: string }) {
+  if (/\*[^*]+\*/.test(text)) return <Marked text={text} />;
+  const m = text.match(/^(.*[.!?:])\s+(\S[^]*)$/);
+  if (!m) return <>{text}</>;
+  return (
+    <>
+      {m[1]} <span className={s.hl2}>{m[2]}</span>
+    </>
+  );
 }
 
 /** Helpers to edit one item of a list prop. */
@@ -87,7 +109,7 @@ function Head({ eyebrow, title, sub, patch, ctx }: { eyebrow: string; title: str
   return (
     <div className={s.secHead}>
       <T v={eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
-      <T v={title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
+      <T v={title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
       {sub !== undefined && <T v={sub} set={patch && ((v) => patch({ sub: v }))} ctx={ctx} as="p" className={s.sub} />}
     </div>
   );
@@ -101,9 +123,9 @@ function Tick() {
   );
 }
 
-export function Shield({ big }: { big?: boolean }) {
+export function Shield() {
   return (
-    <svg className={big ? s.shieldBig : s.shield} viewBox="0 0 24 24" aria-hidden>
+    <svg className={s.shield} viewBox="0 0 24 24" aria-hidden>
       <path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5z" fill="currentColor" opacity=".18" />
       <path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5z" fill="none" stroke="currentColor" strokeWidth="1.6" />
       <path d="M8 12l3 3 5-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -210,7 +232,7 @@ function Letter({ p, patch, ctx }: { p: SectionProps["s_letter"]; patch?: Patch;
     <section className={s.sec}>
       <div className={`${s.wrap} ${s.col}`}>
         <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
-        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
+        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
         <div className={s.letter}>
           {p.paras.map((para, i) => (
             <div key={i} className={e.row}>
@@ -220,6 +242,7 @@ function Letter({ p, patch, ctx }: { p: SectionProps["s_letter"]; patch?: Patch;
                 ctx={ctx}
                 as={para.style === "bold" ? "b" : "p"}
                 className={PARA_CLASS[para.style]}
+                emph={para.style === "pull"}
               />
               {patch && (
                 <select
@@ -403,6 +426,10 @@ function Mark({ ok, onClick }: { ok: boolean | null; onClick?: () => void }) {
   );
 }
 
+// The chart. Desktop: a table whose last column (the pack) is a raised brass
+// card behind its cells (chWinBg). Phone: each row's label on
+// its own line, the alternatives as ✓/✗ only (their text stays for screen
+// readers), the pack's answer in full.
 function Math_({ p: raw, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patch; ctx: Ctx }) {
   // Pages published before the chart hold cards, not rows: they show the default chart.
   const p = { ...raw, cols: raw.cols ?? MATH_DEFAULT.cols, rows: raw.rows ?? MATH_DEFAULT.rows, note: raw.note ?? MATH_DEFAULT.note };
@@ -412,15 +439,18 @@ function Math_({ p: raw, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patc
     rows.set!(r, { ...p.rows[r], cells: p.rows[r].cells.map((x, j) => (j === c ? cell : x)) });
   const next = (ok: boolean | null) => (ok === true ? false : ok === false ? null : true);
   const win = (i: number) => (i === last ? s.chWin : "");
+  const vars = { "--alts": last } as CSSProperties;
   return (
     <section className={`${s.sec} ${s.band}`}>
       <div className={s.wrap}>
         <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
-        <div className={s.chart} role="table" aria-label={fill(p.title, ctx)} style={{ "--cols": p.cols.length } as CSSProperties}>
+        <div className={s.chart} role="table" aria-label={fill(p.title, ctx)} style={vars}>
+          <span className={s.chWinBg} aria-hidden />
           <div className={s.chRow} role="row">
             <span className={s.chCorner} role="columnheader" />
             {p.cols.map((c, i) => (
               <span key={i} role="columnheader" className={`${s.chHead} ${win(i)}`}>
+                {i === last && <img className={s.chBox} src={`${DIR}/box-160.webp`} width={160} height={228} alt="" loading="lazy" decoding="async" />}
                 <T v={c} set={patch && ((v) => patch({ cols: p.cols.map((x, j) => (j === i ? v : x)) }))} ctx={ctx} />
               </span>
             ))}
@@ -434,9 +464,15 @@ function Math_({ p: raw, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patc
               {p.cols.map((_, c) => {
                 const cell = row.cells[c] ?? { ok: null, text: "" };
                 return (
-                  <span key={c} role="cell" className={`${s.chCell} ${win(c)} ${r === p.rows.length - 1 ? s.chEnd : ""}`}>
+                  <span key={c} role="cell" className={`${s.chCell} ${win(c)}`}>
                     <Mark ok={cell.ok} onClick={patch && (() => setCell(r, c, { ...cell, ok: next(cell.ok) }))} />
-                    <T v={cell.text} set={patch && ((v) => setCell(r, c, { ...cell, text: v }))} ctx={ctx} placeholder="Text" />
+                    <T
+                      v={cell.text}
+                      set={patch && ((v) => setCell(r, c, { ...cell, text: v }))}
+                      ctx={ctx}
+                      className={c === last ? undefined : s.chAlt}
+                      placeholder="Text"
+                    />
                   </span>
                 );
               })}
@@ -447,7 +483,8 @@ function Math_({ p: raw, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patc
           onClick={rows.add && (() => rows.add!({ label: "New row", cells: p.cols.map(() => ({ ok: true, text: "" })) }))}
           label="row"
         />
-        <T v={p.note} set={patch && ((v) => patch({ note: v }))} ctx={ctx} as="p" className={s.chNote} />
+        <T v={p.note} set={patch && ((v) => patch({ note: v }))} ctx={ctx} as="p" className={s.chNote} emph />
+        <Cta className={s.ctaBlock} inner={`${ctx.price} · instant download`} />
       </div>
     </section>
   );
@@ -455,34 +492,78 @@ function Math_({ p: raw, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patc
 
 const DIR = "/funnels/jazz-midi-pack";
 
+// One real file of each MIDI bonus (rolls.json bonus1–4), played on the piano.
+const BONUS_ROLLS: { id: RollId; title: string }[] = [
+  { id: "bonus1", title: "Lady Bird turnaround" },
+  { id: "bonus2", title: "I-V-vi-IV, piano arrangement" },
+  { id: "bonus3", title: "Royal Road (IV-V-iii-vi)" },
+  { id: "bonus4", title: "Songstarter “Ocean”" },
+];
+
+const VALUE_TOTAL = funnel.value.pack + funnel.bonuses.reduce((sum, x) => sum + x.value, 0);
+
+/** "€47" in the visitor's currency: the value stack's numbers. */
+const worth = (n: number, ctx: Ctx) => money(n, ctx.currency);
+
+// Each bonus: its cover, what it holds (counted from the files) and a preview
+// you can play: a real file on the piano, or for the drum loops four clips.
 function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patch; ctx: Ctx }) {
   const ops = listOps(p.items, "items", patch);
   return (
     <section className={s.sec}>
       <div className={s.wrap}>
         <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} patch={patch} ctx={ctx} />
-        <ol className={s.bonuses}>
-          {p.items.map((it, i) => (
-            <li key={i} className={s.bonus}>
-              {i < 5 && (
-                <img
-                  className={s.bonusImg}
-                  src={`${DIR}/bonus-${i + 1}-360.webp`}
-                  srcSet={`${DIR}/bonus-${i + 1}-360.webp 360w, ${DIR}/bonus-${i + 1}-640.webp 640w`}
-                  sizes="(min-width: 1000px) 300px, 60vw"
-                  width={640}
-                  height={960}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-              )}
-              <span className={s.bonusN}>Bonus {i + 1}</span>
-              <T v={it.name} set={ops.set && ((v) => ops.set!(i, { ...it, name: v }))} ctx={ctx} as="h3" />
-              <T v={it.text} set={ops.set && ((v) => ops.set!(i, { ...it, text: v }))} ctx={ctx} as="p" />
-              <Remove onClick={ops.remove && (() => ops.remove!(i))} />
-            </li>
-          ))}
+        <ol className={bn.bonuses}>
+          {p.items.map((it, i) => {
+            const known = funnel.bonuses[i];
+            return (
+              <li key={i} className={bn.bonus}>
+                <div className={bn.cover}>
+                  {i < 5 && (
+                    <img
+                      src={`${DIR}/bonus-${i + 1}-360.webp`}
+                      srcSet={`${DIR}/bonus-${i + 1}-360.webp 360w, ${DIR}/bonus-${i + 1}-640.webp 640w`}
+                      sizes="(min-width: 1000px) 200px, 96px"
+                      width={640}
+                      height={960}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
+                </div>
+                <div className={bn.info}>
+                  <p className={bn.label}>
+                    <span>Bonus {i + 1}</span>
+                    {known && (
+                      <span className={bn.price}>
+                        <s>{worth(known.value, ctx)}</s> Free
+                      </span>
+                    )}
+                  </p>
+                  <T v={it.name} set={ops.set && ((v) => ops.set!(i, { ...it, name: v }))} ctx={ctx} as="h3" />
+                  <T v={it.text} set={ops.set && ((v) => ops.set!(i, { ...it, text: v }))} ctx={ctx} as="p" className={bn.text} />
+                  {known && (
+                    <ul className={bn.inside}>
+                      {known.inside.map((x) => (
+                        <li key={x}>
+                          <Tick /> {x}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div className={bn.preview}>
+                  {BONUS_ROLLS[i] ? (
+                    <PlayableRoll id={BONUS_ROLLS[i].id} variant="mini" title={BONUS_ROLLS[i].title} playLabel="Play" />
+                  ) : i === 4 ? (
+                    <LoopList />
+                  ) : null}
+                </div>
+                <Remove onClick={ops.remove && (() => ops.remove!(i))} />
+              </li>
+            );
+          })}
         </ol>
         <Add onClick={ops.add && (() => ops.add!({ name: "New bonus", text: "What it is." }))} label="bonus" />
       </div>
@@ -490,7 +571,69 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
   );
 }
 
-/** What the order includes: the box, the stack, the bonuses, the guarantee. On the landing's recap and the order page. */
+/** The bundle, item by item with what each is worth, the total crossed out and
+ * today's price: the offer summary, like the MIDI Drum Kit page's value stack. */
+export function ValueStack({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx }) {
+  return (
+    <div className={vs.stack}>
+      <div className={vs.main}>
+        <div className={vs.mainBox}>
+          <span className={vs.ribbon}>{worth(funnel.value.pack, ctx)} value</span>
+          <img src={`${DIR}/box-520.webp`} width={520} height={741} alt="The Jazz MIDI Pack box" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <p className={vs.kicker}>The pack</p>
+          <p className={vs.mainName}>{funnel.product}</p>
+          <TickList items={p.stack} k="stack" patch={patch} ctx={ctx} className={s.stack} />
+        </div>
+      </div>
+      <ol className={vs.list}>
+        {funnel.bonuses.map((x, i) => (
+          <li key={x.id}>
+            <img src={`${DIR}/bonus-${i + 1}-360.webp`} width={360} height={540} alt="" loading="lazy" decoding="async" />
+            <span className={vs.itemText}>
+              <span className={vs.kicker}>Bonus #{i + 1}</span>
+              <span className={vs.itemName}>{x.name}</span>
+            </span>
+            <span className={vs.itemValue}>{worth(x.value, ctx)} value</span>
+          </li>
+        ))}
+      </ol>
+      <div className={vs.total}>
+        <span className={vs.bracket} aria-hidden />
+        <p className={vs.totalLine}>
+          Total value: <span>{worth(VALUE_TOTAL, ctx)}</span>
+        </p>
+        <p className={vs.today}>
+          <span className={vs.todayLabel}>Today</span>
+          <s className={vs.old}>{worth(VALUE_TOTAL, ctx)}</s>
+          <span className={vs.now}>{ctx.price}</span>
+        </p>
+        <p className={vs.save}>You save {worth(VALUE_TOTAL - ctx.amount, ctx)}</p>
+      </div>
+    </div>
+  );
+}
+
+/** The order page's first line: what's being bought and its price, above the form. */
+export function OrderHead({ ctx }: { ctx: Ctx }) {
+  return (
+    <div className={s.orderHead}>
+      <img src={`${DIR}/box-160.webp`} width={160} height={228} alt="" />
+      <p>
+        <b>
+          {funnel.product} + {funnel.bonuses.length} free bonuses
+        </b>
+        <span>{fill("{total} MIDI files · instant download", ctx)}</span>
+      </p>
+      <p className={s.orderHeadPrice}>
+        <s>{worth(VALUE_TOTAL, ctx)}</s> <b>{ctx.price}</b>
+      </p>
+    </div>
+  );
+}
+
+/** What the order includes: the box, the stack, the bonuses with their value, the total, the guarantee. On the order page. */
 export function OrderSummary({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx }) {
   return (
     <div className={s.orderSummary}>
@@ -503,10 +646,21 @@ export function OrderSummary({ p, patch, ctx }: { p: SectionProps["s_offer"]; pa
             <li key={x.id}>
               <img src={`${DIR}/bonus-${i + 1}-360.webp`} width={36} height={54} alt="" loading="lazy" />
               <span>{x.name}</span>
+              <span className={s.bonusMiniValue}>
+                <s>{worth(x.value, ctx)}</s> Free
+              </span>
             </li>
           ))}
         </ul>
       </div>
+      <p className={s.totalMini}>
+        <span>
+          Total value <s>{worth(VALUE_TOTAL, ctx)}</s>
+        </span>
+        <span>
+          Today <b>{ctx.price}</b>
+        </span>
+      </p>
       <p className={s.guaranteeMini}>
         <Shield /> <T v={p.guarantee} set={patch && ((v) => patch({ guarantee: v }))} ctx={ctx} />
       </p>
@@ -534,44 +688,73 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
   );
 }
 
-// The landing's offer: a recap and one button to the order page (the checkout
-// has its own page since 2026-10-16).
+// The landing's offer: the value stack and one button to the order page (the
+// checkout has its own page since 2026-10-16).
 function Offer({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx }) {
   return (
     <section id="buy" className={`${s.sec} ${s.order}`}>
       <div className={s.wrap}>
         <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
-        <div className={s.orderGrid}>
-          <OrderSummary p={p} patch={patch} ctx={ctx} />
-          <div className={s.priceCard}>
-            <p className={s.priceBig}>{ctx.price}</p>
-            <p className={s.priceNote}>One payment · instant download · yours to keep</p>
-            <Cta className={s.priceCta} inner="Card or PayPal · secure checkout" />
-            <ul className={s.payList}>
-              <li>
-                <Tick /> Card, Apple Pay, Google Pay or PayPal
-              </li>
-              <li>
-                <Tick /> Download buttons right after you pay
-              </li>
-              <li>
-                <Tick /> {funnel.bonuses.length} bonuses included
-              </li>
-            </ul>
-          </div>
-        </div>
+        <ValueStack p={p} patch={patch} ctx={ctx} />
+        <Cta className={s.ctaBlock} inner="Card or PayPal · secure checkout" />
+        <ul className={s.payList}>
+          <li>
+            <Tick /> Card, Apple Pay, Google Pay or PayPal
+          </li>
+          <li>
+            <Tick /> Download buttons right after you pay
+          </li>
+          <li>
+            <Shield /> <T v={p.guarantee} set={patch && ((x) => patch({ guarantee: x }))} ctx={ctx} />
+          </li>
+        </ul>
       </div>
     </section>
+  );
+}
+
+/** The guarantee seal: "{days} days" in a brass ring, the words around it. */
+export function Seal() {
+  const ring = "SATISFACTION GUARANTEE · SATISFACTION GUARANTEE · ";
+  return (
+    <svg className={s.seal} viewBox="0 0 200 200" role="img" aria-label={`${funnel.guaranteeDays}-day satisfaction guarantee`}>
+      <defs>
+        <linearGradient id="jz-seal" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#f6d58a" />
+          <stop offset=".5" stopColor="#e2a93b" />
+          <stop offset="1" stopColor="#a86c0e" />
+        </linearGradient>
+        <path id="jz-seal-arc" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0" />
+      </defs>
+      <circle cx="100" cy="100" r="98" fill="url(#jz-seal)" />
+      <circle cx="100" cy="100" r="88" fill="#0b0a08" />
+      <circle cx="100" cy="100" r="60" fill="none" stroke="url(#jz-seal)" strokeWidth="1.5" />
+      <text className={s.sealRing} fill="#f6d58a">
+        <textPath href="#jz-seal-arc" textLength="462">
+          {ring}
+        </textPath>
+      </text>
+      <text x="100" y="108" textAnchor="middle" className={s.sealDays} fill="#f6d58a">
+        {funnel.guaranteeDays}
+      </text>
+      <text x="100" y="134" textAnchor="middle" className={s.sealUnit} fill="#f3ebdc">
+        DAYS
+      </text>
+    </svg>
   );
 }
 
 function Guarantee({ p, patch, ctx }: { p: SectionProps["s_guarantee"]; patch?: Patch; ctx: Ctx }) {
   return (
     <section className={`${s.sec} ${s.band}`}>
-      <div className={`${s.wrap} ${s.col} ${s.guarantee}`}>
-        <Shield big />
-        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
-        <T v={p.text} set={patch && ((v) => patch({ text: v }))} ctx={ctx} as="p" className={s.sub} />
+      <div className={s.wrap}>
+        <div className={s.guarantee}>
+          <Seal />
+          <div>
+            <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
+            <T v={p.text} set={patch && ((v) => patch({ text: v }))} ctx={ctx} as="p" className={s.sub} />
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -639,7 +822,7 @@ function Final({ p, patch, ctx }: { p: SectionProps["s_final"]; patch?: Patch; c
         <Scene name="stage" alt="" />
       </div>
       <div className={`${s.wrap} ${s.finalIn}`}>
-        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
+        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
         <Cta className={s.ctaBlock} inner={`${ctx.price} · instant download`} note={fill(p.note, ctx)} />
         {patch && <T v={p.note} set={(v) => patch({ note: v })} ctx={ctx} as="p" className={e.hint} />}
       </div>

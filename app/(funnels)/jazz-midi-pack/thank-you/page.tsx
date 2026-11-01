@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Instrument_Serif } from "next/font/google";
 import { ACCOUNT_URL } from "@/lib/account";
 import { after } from "next/server";
 import { reportSaleToNeo } from "@/lib/neo";
@@ -8,10 +7,9 @@ import { getOrder } from "@/lib/orders";
 import { funnel, unlocked } from "../funnel";
 import { PurchasePixel } from "../PurchasePixel";
 import { Beacon } from "../../Beacon";
+import { display } from "../fonts";
 import s from "../jazz.module.css";
 import b from "../btn.module.css";
-
-const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif" });
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -44,7 +42,7 @@ export default async function ThankYou({
   const pending = order?.status === "processing";
 
   return (
-    <main className={`${s.page} ${serif.variable}`}>
+    <main className={`${s.page} ${display.variable}`}>
       <Beacon funnel={funnel.slug} page="thank-you" />
       {paid && order && <PurchasePixel orderId={order.id} value={order.amount} currency={order.currency} />}
       <section className={s.hero}>
