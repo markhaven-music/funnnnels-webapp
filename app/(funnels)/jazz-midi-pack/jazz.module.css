@@ -308,6 +308,12 @@
 .sec {
   padding: clamp(56px, 9vw, 104px) 0;
 }
+/* drawn a screen at a time (docs/page-speed.md rule 5); nothing in a section
+   is fixed or reaches outside it. Not the order page's checkout. */
+.sec:not(.orderPage) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
 /* every other section: midnight blue, a brass glow in the corner; the cards
    and lines inside it take the blue too */
 .band {
