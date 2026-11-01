@@ -25,7 +25,9 @@ export function Tracking({ value, currency, page = "landing" }: { value: number;
   });
   return (
     <>
-      <Script id="clarity" strategy="afterInteractive">{`
+      {/* Not id="clarity": a script with that id is window.clarity (named access), so the stub keeps the
+          element and every clarity() call throws. */}
+      <Script id="clarity-tag" strategy="afterInteractive">{`
         (function () {
           if (${LOCAL}.test(location.hostname) || ${PREVIEW_JS}) return;
           (function (c, l, a, r, i, t, y) {
