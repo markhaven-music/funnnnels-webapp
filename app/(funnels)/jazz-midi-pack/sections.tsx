@@ -316,24 +316,26 @@ function Songs({ p, patch, ctx }: { p: SectionProps["s_songs"]; patch?: Patch; c
             const roll = SONG_ROLLS[it.roll];
             return (
               <li key={i} className={sg.song}>
-                <div className={sg.name}>
+                <div className={sg.about}>
                   <T v={it.song} set={set("song")} ctx={ctx} as="h3" className={sg.title} />
                   <T v={it.artist} set={set("artist")} ctx={ctx} as="p" className={sg.artist} />
+                  <p className={sg.label}>On the record</p>
+                  {patch ? (
+                    <T v={it.chords} set={set("chords")} ctx={ctx} as="p" />
+                  ) : (
+                    <p className={sg.chords}>
+                      {it.chords.split("·").map((c, j) => (
+                        <span key={j}>{c.trim()}</span>
+                      ))}
+                    </p>
+                  )}
+                  <T v={it.text} set={set("text")} ctx={ctx} as="p" className={sg.text} />
                 </div>
-                <p className={sg.label}>On the record</p>
-                {patch ? (
-                  <T v={it.chords} set={set("chords")} ctx={ctx} as="p" />
-                ) : (
-                  <p className={sg.chords}>
-                    {it.chords.split("·").map((c) => (
-                      <span key={c}>{c.trim()}</span>
-                    ))}
-                  </p>
-                )}
-                <T v={it.text} set={set("text")} ctx={ctx} as="p" className={sg.text} />
-                <p className={sg.label}>In your download</p>
-                {patch && <T v={it.file} set={set("file")} ctx={ctx} as="p" />}
-                {roll && <PlayableRoll roll={roll} title={fill(it.file, ctx)} variant="short" playLabel="Play" />}
+                <div className={sg.file}>
+                  <p className={sg.label}>In your download</p>
+                  {patch && <T v={it.file} set={set("file")} ctx={ctx} as="p" />}
+                  {roll && <PlayableRoll roll={roll} title={fill(it.file, ctx)} variant="short" playLabel="Play" />}
+                </div>
                 <Remove onClick={ops.remove && (() => ops.remove!(i))} />
               </li>
             );

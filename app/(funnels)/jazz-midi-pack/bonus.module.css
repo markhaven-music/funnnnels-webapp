@@ -1,9 +1,11 @@
-/* The bonus cards: cover, what's inside, a preview to play. Phone: the cover
-   beside the name, the rest full width. Desktop: cover | inside | preview.
+/* The bonuses: cover, what's inside, previews to play. No cards: each bonus
+   is set apart by space ("non mi piacciono i bordi che si vedono"). Phone:
+   the cover beside the name, the rest full width. Desktop: cover | inside,
+   previews under both.
    Colours come from the page (.page in jazz.module.css). */
 .bonuses {
   display: grid;
-  gap: 16px;
+  gap: 72px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -14,10 +16,6 @@
   grid-template-columns: 84px minmax(0, 1fr);
   gap: 6px 16px;
   align-items: start;
-  padding: 20px 18px;
-  border: 1px solid var(--rule);
-  border-radius: 16px;
-  background: linear-gradient(160deg, var(--ink-3), var(--ink-2));
 }
 .cover {
   grid-row: span 2;
@@ -46,7 +44,7 @@
 }
 .price {
   padding: 4px 8px 3px;
-  border-radius: 5px;
+  border-radius: 3px;
   background: linear-gradient(180deg, var(--brass-hi), var(--brass));
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -123,9 +121,9 @@
   align-items: center;
   width: 100%;
   padding: 8px 14px 8px 8px;
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  background: var(--ink);
+  border: 0;
+  border-radius: 4px;
+  background: #15120e;
   color: var(--cream);
   font: inherit;
   text-align: left;
@@ -133,11 +131,10 @@
   -webkit-tap-highlight-color: transparent;
 }
 .loopBtn:hover {
-  border-color: rgb(226 169 59 / 0.5);
+  background: #1d1914;
 }
 .loopBtn[aria-pressed="true"] {
-  border-color: var(--brass);
-  background: rgb(226 169 59 / 0.1);
+  background: rgb(226 169 59 / 0.14);
 }
 .icoPlay,
 .icoStop {
@@ -194,7 +191,6 @@
   .bonus {
     grid-template-columns: 140px minmax(0, 1fr);
     gap: 6px 26px;
-    padding: 26px;
   }
   .cover {
     grid-row: span 4;
@@ -217,7 +213,6 @@
     grid-template-columns: 170px minmax(0, 1fr);
     align-items: center;
     gap: 0 34px;
-    padding: 30px;
   }
   .cover {
     grid-row: auto;

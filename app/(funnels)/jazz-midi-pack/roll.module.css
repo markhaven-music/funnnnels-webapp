@@ -2,8 +2,7 @@
   --brass: #e2a93b;
   --brass-hi: #f6d58a;
   position: relative;
-  border: 1px solid #3a342b;
-  border-radius: 16px;
+  border-radius: 4px;
   background: #15120e;
   overflow: hidden;
 }
@@ -13,7 +12,6 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-bottom: 1px solid #2c271f;
 }
 .play {
   display: inline-flex;
@@ -21,22 +19,22 @@
   gap: 8px;
   min-height: 40px;
   padding: 0 14px 0 10px;
-  border: 1px solid var(--brass);
-  border-radius: 10px;
-  background: rgb(226 169 59 / 0.12);
-  color: #f1e8d8;
+  border: 0;
+  border-radius: 4px;
+  background: var(--brass);
+  color: #1a1206;
   font: inherit;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
 }
 .play:hover {
-  background: rgb(226 169 59 / 0.22);
+  background: var(--brass-hi);
 }
 .ico {
   width: 0;
   height: 0;
-  border-left: 10px solid var(--brass-hi);
+  border-left: 10px solid #1a1206;
   border-top: 6px solid transparent;
   border-bottom: 6px solid transparent;
 }
@@ -48,8 +46,8 @@
   width: 10px;
   height: 10px;
   border: 0;
-  background: var(--brass-hi);
-  border-radius: 2px;
+  background: #1a1206;
+  border-radius: 1px;
 }
 .scope[data-state="playing"] .lPlay,
 .scope[data-state="loading"] .lPlay {
@@ -107,8 +105,7 @@
   height: clamp(150px, 26vw, 210px);
 }
 .play:disabled {
-  border-color: #3a342b;
-  background: none;
+  background: #2a251d;
   color: #8f8676;
   cursor: default;
 }

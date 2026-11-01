@@ -68,16 +68,17 @@ const appearance: Appearance = {
     colorText: "#ffffff",
     colorTextSecondary: "#ffffff",
     colorDanger: "#f08a76",
-    borderRadius: "12px",
+    borderRadius: "4px",
     spacingUnit: "4px",
   },
   rules: {
-    // white fields, like the name and email ones (checkout.module.css .input)
-    ".Input": { backgroundColor: "#ffffff", color: "#000000", border: "1px solid #d9d2c4", boxShadow: "none", padding: "14px" },
+    // white fields, like the name and email ones (checkout.module.css .input);
+    // no visible borders ("non mi piacciono i bordi che si vedono")
+    ".Input": { backgroundColor: "#ffffff", color: "#000000", border: "1px solid #ffffff", boxShadow: "none", padding: "14px" },
     ".Input::placeholder": { color: "#6b6b6b" },
-    ".Input:focus": { border: "1px solid #d9a441", boxShadow: "0 0 0 3px rgba(226, 169, 59, 0.35)" },
-    ".Tab": { border: "1px solid #3a342b", boxShadow: "none" },
-    ".Tab--selected": { border: "1px solid #d9a441" },
+    ".Input:focus": { border: "1px solid #ffffff", boxShadow: "0 0 0 3px rgba(226, 169, 59, 0.35)" },
+    ".Tab": { border: "1px solid #12100d", backgroundColor: "#12100d", boxShadow: "none" },
+    ".Tab--selected": { border: "1px solid #ffffff", backgroundColor: "#ffffff", color: "#000000" },
   },
 };
 

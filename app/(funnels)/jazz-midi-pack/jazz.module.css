@@ -100,8 +100,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  border: 1px solid var(--rule);
-  border-radius: 8px;
+  border-radius: 3px;
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--cream-2);
@@ -118,7 +117,6 @@
 .topband {
   position: relative;
   z-index: 1;
-  border-bottom: 1px solid var(--rule);
   background: rgb(22 19 15 / 0.85);
 }
 .heroCenter {
@@ -166,11 +164,10 @@
   max-width: 960px;
   margin-top: 26px;
   padding: 18px 0 8px;
-  border: 1px solid var(--rule);
-  border-radius: 18px;
+  border-radius: 4px;
   /* flat behind the render: its haze would show as a box over a gradient */
   background: #0b0a08;
-  box-shadow: 0 0 0 6px rgb(243 235 220 / 0.04), 0 30px 90px -40px rgb(226 169 59 / 0.45);
+  box-shadow: 0 30px 90px -40px rgb(226 169 59 / 0.45);
 }
 /* the hero video: a poster until the tap, then Wistia's player (Vsl.tsx) */
 .vsl {
@@ -180,10 +177,9 @@
   aspect-ratio: 16 / 9;
   margin-top: 26px;
   overflow: hidden;
-  border: 1px solid var(--rule);
-  border-radius: 6px;
+  border-radius: 4px;
   background: #000;
-  box-shadow: 0 0 0 6px rgb(243 235 220 / 0.04), 0 30px 90px -40px rgb(226 169 59 / 0.45);
+  box-shadow: 0 30px 90px -40px rgb(226 169 59 / 0.45);
 }
 .vsl iframe {
   position: absolute;
@@ -261,8 +257,7 @@
   position: absolute;
   z-index: 2;
   padding: 6px 9px;
-  border: 1px solid var(--rule);
-  border-radius: 8px;
+  border-radius: 3px;
   background: rgb(14 12 9 / 0.88);
   font-family: var(--font-mono);
   font-size: 11px;
@@ -310,7 +305,7 @@
   z-index: 1;
   display: grid;
   gap: 10px;
-  margin: 26px 0 0;
+  margin: 30px 0 0;
   padding: 0;
   list-style: none;
 }
@@ -318,10 +313,6 @@
   display: flex;
   align-items: baseline;
   gap: 10px;
-  padding: 14px 16px;
-  border: 1px solid rgb(226 169 59 / 0.35);
-  border-radius: 12px;
-  background: rgb(226 169 59 / 0.07);
   font-size: 14px;
   line-height: 1.35;
   color: var(--cream);
@@ -373,8 +364,6 @@
     radial-gradient(55% 45% at 92% 0%, rgb(226 169 59 / 0.12), transparent 70%),
     radial-gradient(50% 40% at 0% 100%, rgb(46 82 170 / 0.22), transparent 70%),
     var(--navy);
-  border-top: 1px solid var(--navy-rule);
-  border-bottom: 1px solid var(--navy-rule);
 }
 .secHead {
   max-width: 820px;
@@ -431,8 +420,7 @@
 }
 .pull {
   margin: 12px 0;
-  padding: 4px 0 4px 18px;
-  border-left: 4px solid var(--brass);
+  padding: 4px 0;
   font-family: var(--font-display), var(--font-sans), sans-serif;
   font-weight: 700;
   font-size: clamp(23px, 4.4vw, 30px);
@@ -466,7 +454,7 @@
   display: inline-block;
   margin-right: 8px;
   padding: 2px 8px;
-  border-radius: 6px;
+  border-radius: 3px;
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
@@ -527,16 +515,9 @@
 /* steps */
 .steps {
   display: grid;
-  gap: 14px;
+  gap: 34px 48px;
   padding: 0;
   list-style: none;
-}
-.steps li {
-  padding: 24px 22px;
-  border: 1px solid var(--rule);
-  border-top: 3px solid var(--brass);
-  border-radius: 14px;
-  background: var(--ink);
 }
 .stepN {
   font-family: var(--font-display), var(--font-sans), sans-serif;
@@ -561,19 +542,10 @@
 /* inside */
 .bento {
   display: grid;
-  gap: 12px;
+  gap: 34px 48px;
 }
 .cell {
   position: relative;
-  padding: 22px;
-  border: 1px solid var(--rule);
-  border-radius: 16px;
-  background: linear-gradient(160deg, var(--ink-3), var(--ink-2));
-}
-.cellBig {
-  background:
-    radial-gradient(80% 80% at 100% 0%, rgb(226 169 59 / 0.16), transparent 70%),
-    linear-gradient(160deg, var(--ink-3), var(--ink-2));
 }
 .cellN {
   font-family: var(--font-mono);
@@ -606,14 +578,8 @@
 }
 .lists {
   display: grid;
-  gap: 12px;
-  margin-top: 12px;
-}
-.listBox {
-  padding: 22px;
-  border: 1px solid var(--rule);
-  border-radius: 16px;
-  background: var(--ink-2);
+  gap: 34px 48px;
+  margin-top: 56px;
 }
 .listBox h3 {
   margin-bottom: 12px;
@@ -651,11 +617,7 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 7px 0;
-  border-bottom: 1px solid var(--rule);
-}
-.rhythms li:last-child {
-  border-bottom: 0;
+  padding: 5px 0;
 }
 .rhythms .mono {
   color: var(--mute);
@@ -707,9 +669,8 @@
 .chHead.chWin {
   margin-bottom: 4px;
   padding: 12px 8px;
-  border: 1px solid rgb(226 169 59 / 0.7);
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgb(226 169 59 / 0.3), rgb(226 169 59 / 0.12));
+  border-radius: 3px;
+  background: linear-gradient(180deg, #4a3816, #2e2412);
   font-size: 14px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -726,7 +687,6 @@
   display: flex;
   align-items: center;
   padding: 16px 2px 8px;
-  border-top: 1px solid var(--rule);
   font-family: var(--font-display), var(--font-sans), sans-serif;
   font-size: 15px;
   font-weight: 700;
@@ -758,9 +718,9 @@
   justify-content: flex-start;
   margin-bottom: 14px;
   padding: 10px 12px;
-  border: 1px solid rgb(226 169 59 / 0.6);
-  border-radius: 10px;
-  background: rgb(226 169 59 / 0.13);
+  border-radius: 3px;
+  /* solid, not a tint: a see-through brass turns grey on the blue band */
+  background: #2e2412;
   font-weight: 700;
   color: var(--cream);
 }
@@ -817,11 +777,7 @@
 
 /* the bonuses again, small, next to the checkout */
 .bonusMini {
-  margin-top: 22px;
-  padding: 14px 16px;
-  border: 1px solid var(--rule);
-  border-radius: 12px;
-  background: var(--ink-2);
+  margin-top: 28px;
 }
 .bonusMiniHead {
   font-family: var(--font-display), var(--font-sans), sans-serif;
@@ -880,9 +836,8 @@
   gap: 12px;
   margin-top: 12px;
   padding: 14px 16px;
-  border: 1px solid rgb(226 169 59 / 0.55);
-  border-radius: 12px;
-  background: rgb(226 169 59 / 0.1);
+  border-radius: 3px;
+  background: rgb(226 169 59 / 0.12);
   font-family: var(--font-display), var(--font-sans), sans-serif;
   font-size: 15px;
   font-weight: 700;
@@ -957,13 +912,9 @@
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  margin-top: 22px;
-  padding: 14px 16px;
-  border: 1px solid rgb(226 169 59 / 0.4);
-  border-radius: 12px;
+  margin-top: 24px;
   font-size: 15px;
   color: var(--cream-2);
-  background: rgb(226 169 59 / 0.06);
 }
 .shield {
   flex: none;
@@ -980,14 +931,7 @@
   gap: 22px;
   max-width: 900px;
   margin: 0 auto;
-  padding: 32px 22px;
-  border: 1px solid rgb(226 169 59 / 0.55);
-  border-radius: 18px;
   text-align: center;
-  background:
-    radial-gradient(70% 80% at 0% 50%, rgb(226 169 59 / 0.16), transparent 70%),
-    #0a1122;
-  box-shadow: 0 30px 80px -40px rgb(226 169 59 / 0.5);
 }
 .guarantee a {
   color: var(--brass-hi);
@@ -1020,7 +964,7 @@
 /* after */
 .after {
   display: grid;
-  gap: 12px;
+  gap: 26px 40px;
   padding: 0;
   list-style: none;
   counter-reset: step;
@@ -1028,22 +972,19 @@
 .after li {
   counter-increment: step;
   position: relative;
-  padding: 18px 20px 18px 62px;
-  border: 1px solid var(--rule);
-  border-radius: 14px;
+  padding: 2px 0 0 48px;
   color: var(--cream-2);
-  background: var(--ink-2);
 }
 .after li::before {
   content: counter(step);
   position: absolute;
-  left: 18px;
-  top: 16px;
-  width: 30px;
-  height: 30px;
+  left: 0;
+  top: 0;
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 3px;
   background: var(--brass);
   color: #1a1206;
   font-family: var(--font-display), var(--font-sans), sans-serif;
@@ -1056,11 +997,7 @@
 
 /* faq */
 .faq {
-  margin-top: 24px;
-  border-top: 1px solid var(--rule);
-}
-.faq details {
-  border-bottom: 1px solid var(--rule);
+  margin-top: 12px;
 }
 .faq summary {
   position: relative;
@@ -1102,8 +1039,7 @@
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--rule);
-  border-radius: 16px;
+  border-radius: 4px;
 }
 
 /* final: the club stage render. Phone: a band on top fading into the ink,
@@ -1150,7 +1086,6 @@
 /* footer */
 .footer {
   padding: 32px 20px 120px;
-  border-top: 1px solid var(--rule);
   text-align: center;
   font-size: 13px;
   color: var(--mute);
@@ -1172,8 +1107,8 @@
   bottom: 0;
   z-index: 50;
   padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--rule);
   background: rgb(14 12 9 / 0.96);
+  box-shadow: 0 -14px 34px rgb(0 0 0 / 0.5);
   transform: translateY(110%);
   transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -1229,8 +1164,9 @@
   justify-content: center;
   min-height: 56px;
   padding: 0 22px;
-  border: 1px solid var(--brass);
-  border-radius: 14px;
+  border-radius: 6px;
+  background: rgb(226 169 59 / 0.16);
+  color: var(--brass-hi);
   font-weight: 700;
   text-decoration: none;
 }
@@ -1246,7 +1182,6 @@
     grid-template-columns: auto minmax(0, 1fr);
     column-gap: 16px;
     align-items: baseline;
-    padding: 18px;
   }
   .cell .cellN {
     grid-column: 1 / -1;
@@ -1293,12 +1228,11 @@
     left: 0;
     right: 0;
     grid-column: -2 / -1;
-    border: 1px solid rgb(226 169 59 / 0.75);
-    border-radius: 16px;
+    border-radius: 4px;
     background:
       radial-gradient(120% 50% at 50% 0%, rgb(226 169 59 / 0.3), transparent 70%),
       linear-gradient(180deg, #2a2112, #17130c);
-    box-shadow: 0 0 0 4px rgb(226 169 59 / 0.08), 0 30px 70px -20px rgb(226 169 59 / 0.45);
+    box-shadow: 0 30px 70px -20px rgb(226 169 59 / 0.45);
   }
   .chHead {
     align-items: flex-start;
@@ -1320,7 +1254,7 @@
   }
   .chLabel {
     grid-column: auto;
-    padding: 20px 16px 20px 0;
+    padding: 20px 16px;
     font-size: 17px;
   }
   .chCell {
@@ -1328,7 +1262,6 @@
     justify-content: flex-start;
     gap: 10px;
     padding: 20px 16px;
-    border-top: 1px solid var(--rule);
     font-size: 15px;
   }
   .chAlt {
@@ -1339,11 +1272,13 @@
     clip-path: none;
     white-space: normal;
   }
+  /* rows told apart by tone, not lines (child 1 is chWinBg, 2 the heads) */
+  .chRow:nth-child(odd) > * {
+    background: rgb(243 235 220 / 0.035);
+  }
   .chCell.chWin {
     margin: 0;
     padding: 20px 18px;
-    border: 0;
-    border-top: 1px solid rgb(226 169 59 / 0.22);
     border-radius: 0;
     background: none;
     font-size: 16px;
@@ -1368,8 +1303,7 @@
   }
   .guarantee {
     flex-direction: row;
-    gap: 36px;
-    padding: 36px 44px;
+    gap: 44px;
     text-align: left;
   }
   .seal {

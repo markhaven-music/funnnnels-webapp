@@ -9,8 +9,7 @@
   display: grid;
   gap: 18px;
   padding: 24px 20px;
-  border: 1px solid rgb(226 169 59 / 0.55);
-  border-radius: 18px;
+  border-radius: 4px;
   background:
     radial-gradient(90% 60% at 50% 0%, rgb(226 169 59 / 0.18), transparent 70%),
     var(--ink-2);
@@ -32,7 +31,7 @@
   top: 18px;
   left: -18px;
   padding: 7px 12px 6px;
-  border-radius: 5px;
+  border-radius: 3px;
   background: linear-gradient(180deg, var(--brass-hi), var(--brass));
   font-family: var(--font-display), var(--font-sans), sans-serif;
   font-size: 14px;
@@ -71,8 +70,7 @@
   gap: 14px;
   align-items: center;
   padding: 10px 16px 10px 10px;
-  border: 1px solid var(--rule);
-  border-radius: 12px;
+  border-radius: 3px;
   background: var(--ink-2);
 }
 .list img {
@@ -166,24 +164,21 @@
   text-decoration-color: var(--red);
   text-decoration-thickness: 4px;
 }
-/* today's price in a brass ring */
+/* today's price, glowing */
 .now {
-  padding: 4px 26px;
-  border: 3px solid var(--brass);
-  border-radius: 50%;
   font-family: var(--font-display), var(--font-sans), sans-serif;
   font-size: clamp(46px, 9vw, 66px);
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.03em;
   color: var(--brass-hi);
-  box-shadow: 0 0 0 6px rgb(226 169 59 / 0.1), 0 0 44px rgb(226 169 59 / 0.35);
+  text-shadow: 0 0 44px rgb(226 169 59 / 0.45);
 }
 .save {
   display: inline-block;
   margin-top: 18px;
   padding: 8px 16px 7px;
-  border-radius: 6px;
+  border-radius: 3px;
   background: linear-gradient(180deg, var(--brass-hi), var(--brass));
   font-family: var(--font-display), var(--font-sans), sans-serif;
   font-size: 14px;

@@ -12,8 +12,7 @@
   --brass-2: #f0c46a;
 
   width: 100%;
-  border: 1px solid var(--rule);
-  border-radius: 20px;
+  border-radius: 4px;
   overflow: hidden;
   background: var(--ink-2);
   color: var(--cream);
@@ -31,7 +30,6 @@
   letter-spacing: 0.02em;
   color: var(--cream-2);
   background: var(--ink-3);
-  border-bottom: 1px solid var(--rule);
 }
 
 /* ─── step tabs ─────────────────────────── */
@@ -41,7 +39,7 @@
   padding: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-bottom: 1px solid var(--rule);
+  background: var(--ink);
 }
 .tab {
   width: 100%;
@@ -57,12 +55,11 @@
   cursor: pointer;
 }
 .tabs li + li .tab {
-  border-left: 1px solid var(--rule);
   cursor: default;
 }
 .tabOn {
   color: var(--cream);
-  box-shadow: inset 0 -2px 0 var(--brass);
+  background: var(--ink-2);
 }
 .tabNum {
   flex: none;
@@ -73,11 +70,10 @@
   place-items: center;
   font-size: 13px;
   font-weight: 700;
-  border: 1px solid var(--rule);
+  background: var(--ink-3);
 }
 .tabOn .tabNum {
   background: var(--brass);
-  border-color: var(--brass);
   color: var(--ink);
 }
 .tabTitle {
@@ -116,8 +112,8 @@
   min-width: 0;
   min-height: 52px;
   padding: 0 16px;
-  border-radius: 12px;
-  border: 1px solid #d9d2c4;
+  border-radius: 4px;
+  border: 0;
   background: #fff;
   color: #000;
   font: inherit;
@@ -128,7 +124,6 @@
 }
 .input:focus {
   outline: none;
-  border-color: var(--brass);
   box-shadow: 0 0 0 3px rgb(226 169 59 / 0.35);
 }
 
@@ -173,7 +168,6 @@
   flex-direction: column;
   gap: 8px;
   padding: 14px 0 2px;
-  border-top: 1px solid var(--rule);
 }
 .sumRow {
   display: flex;
@@ -184,7 +178,6 @@
 }
 .sumTotal {
   padding-top: 8px;
-  border-top: 1px solid var(--rule);
   font-size: 17px;
   font-weight: 800;
   color: var(--cream);
@@ -203,8 +196,7 @@
   flex-direction: column;
   gap: 3px;
   padding: 14px 16px;
-  border: 3px solid var(--cream);
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--ink);
 }
 .orderText {
@@ -275,22 +267,22 @@
   gap: 8px;
   min-height: 48px;
   padding: 0 12px;
-  border: 1px solid var(--rule);
-  border-radius: 6px;
+  border: 0;
+  border-radius: 4px;
   background: var(--ink);
   color: var(--cream-2);
   font: inherit;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 .method:hover {
   color: var(--cream);
 }
 .methodOn {
-  border: 2px solid var(--cream);
-  color: var(--cream);
+  background: #fff;
+  color: #000;
 }
 .ppGlyph {
   flex: none;
@@ -300,8 +292,7 @@
   align-items: flex-start;
   gap: 10px;
   padding: 14px 16px;
-  border: 1px solid var(--rule);
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--ink);
   font-size: 13px;
   line-height: 1.5;

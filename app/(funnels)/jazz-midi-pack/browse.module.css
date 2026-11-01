@@ -3,8 +3,7 @@
 .player {
   max-width: 920px;
   margin: 0 auto;
-  border: 1px solid #3a342b;
-  border-radius: 6px;
+  border-radius: 4px;
   background: #15120e;
   overflow: hidden;
 }
@@ -12,7 +11,7 @@
 .tabs {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  border-bottom: 1px solid #2c271f;
+  background: #0f0d0a;
 }
 .tab {
   display: grid;
@@ -22,23 +21,17 @@
   align-items: baseline;
   padding: 12px 12px 11px;
   border: 0;
-  border-right: 1px solid #2c271f;
-  border-bottom: 2px solid transparent;
   background: none;
   color: #a69c8b;
   font: inherit;
   text-align: left;
   cursor: pointer;
 }
-.tab:last-child {
-  border-right: 0;
-}
 .tab:hover {
   background: rgb(226 169 59 / 0.06);
 }
 .tab[aria-selected="true"] {
-  border-bottom-color: var(--brass);
-  background: rgb(226 169 59 / 0.1);
+  background: #15120e;
   color: #f1e8d8;
 }
 .tabN {
@@ -62,7 +55,6 @@
   display: grid;
   gap: 12px;
   padding: 14px;
-  border-bottom: 1px solid #2c271f;
 }
 .what {
   font-size: 14px;
@@ -89,19 +81,18 @@
 .chip {
   min-height: 36px;
   padding: 0 12px;
-  border: 1px solid #3a342b;
-  border-radius: 6px;
-  background: #100e0b;
+  border: 0;
+  border-radius: 3px;
+  background: #241f18;
   color: #e6dccb;
   font: inherit;
   font-size: 13px;
   cursor: pointer;
 }
 .chip:hover {
-  border-color: rgb(226 169 59 / 0.6);
+  background: #2f281f;
 }
 .chip[aria-pressed="true"] {
-  border-color: var(--brass);
   background: var(--brass);
   color: #1a1206;
   font-weight: 700;
@@ -110,12 +101,12 @@
   width: 100%;
   min-height: 40px;
   padding: 0 36px 0 12px;
-  border: 1px solid #3a342b;
-  border-radius: 6px;
+  border: 0;
+  border-radius: 3px;
   background:
     linear-gradient(45deg, transparent 50%, var(--brass) 50%) right 18px center / 6px 6px no-repeat,
     linear-gradient(-45deg, transparent 50%, var(--brass) 50%) right 12px center / 6px 6px no-repeat,
-    #100e0b;
+    #241f18;
   color: #f1e8d8;
   font: inherit;
   font-size: 14px;
@@ -135,7 +126,6 @@
 }
 .path {
   padding: 10px 14px 12px;
-  border-top: 1px solid #2c271f;
   font-family: var(--font-mono);
   font-size: 11px;
   line-height: 1.5;
