@@ -17,6 +17,16 @@ export type SectionProps = {
   s_hero: { tag: string; pre: string; headline: string; sub: string; bullets: string[]; ticks: string[]; hud: string[]; daws: string };
   s_letter: { eyebrow: string; title: string; paras: Para[] };
   s_compare_rolls: { beforeLabel: string; beforeText: string; afterLabel: string; afterText: string; note: string };
+  // Songs the buyer knows, each beside the bundle file with its progression in
+  // the same key. `roll` is the file's key in song-rolls.json; `chords` are the
+  // record's, split on "·". Every song is checked in BRIEF.md "Songs".
+  s_songs: {
+    eyebrow: string;
+    title: string;
+    sub: string;
+    items: { roll: string; song: string; artist: string; chords: string; text: string; file: string }[];
+    note: string;
+  };
   s_product: { eyebrow: string; title: string; titleEm: string; lead: string; ticks: string[] };
   s_previews: { eyebrow: string; title: string; sub: string; items?: { roll: RollId; title: string; meta: string }[] };
   s_steps: { eyebrow: string; title: string; steps: { title: string; text: string }[] };
@@ -40,6 +50,7 @@ export const SECTION_LABELS: Record<SectionType, string> = {
   s_hero: "Hero",
   s_letter: "Problem letter",
   s_compare_rolls: "Before / after",
+  s_songs: "Songs you know",
   s_product: "Product intro",
   s_previews: "Previews",
   s_steps: "How it works",
@@ -104,6 +115,50 @@ export const DEFAULT_SECTIONS: Section[] = [
       afterLabel: "After",
       afterText: "Best Voicing. The first folder of every progression.",
       note: "Same eight chords, same rhythm. Watch the top note. Before, it jumps up to seven semitones from chord to chord. After, it only moves between B and C, while the roots hold the bottom.",
+    },
+  },
+  {
+    id: "songs",
+    type: "s_songs",
+    props: {
+      eyebrow: "Songs you know",
+      title: "The chords behind Kill Bill, Say So and Leave the Door Open. *Already in your download.*",
+      sub: "Each song next to the file in the bundle that plays its progression, in the same key. Press play, then drag it into your DAW.",
+      items: [
+        {
+          roll: "kill-bill",
+          song: "Kill Bill",
+          artist: "SZA",
+          chords: "Bbm7 · Eb7 · Abmaj7 · F7",
+          text: "The whole song loops these four chords.",
+          file: "MIDI Chord Pack · Ab major",
+        },
+        {
+          roll: "say-so",
+          song: "Say So",
+          artist: "Doja Cat",
+          chords: "Em7 · A7 · Dmaj7",
+          text: "Three chords, the same in the verse and the chorus.",
+          file: "MIDI Chord Pack · D major",
+        },
+        {
+          roll: "leave-the-door-open",
+          song: "Leave the Door Open",
+          artist: "Silk Sonic",
+          chords: "Fmaj7 · G7 · Em7 · Am7",
+          text: "Up two chords, then down to the minor one. Verse and chorus both run on it.",
+          file: "Anime & Video Games MIDI Pack · C major",
+        },
+        {
+          roll: "just-the-two-of-us",
+          song: "Just the Two of Us",
+          artist: "Grover Washington Jr. & Bill Withers",
+          chords: "Dbmaj7 · C7 · Fm7",
+          text: "Borrowed so often it has its own name: the Just the Two of Us progression.",
+          file: "Anime & Video Games MIDI Pack · Ab major",
+        },
+      ],
+      note: "Song titles only name the chord progression. The files are chord progressions, not recordings of the songs, and GRIND STUDIO has no connection to the artists.",
     },
   },
   {

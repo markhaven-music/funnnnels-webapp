@@ -106,3 +106,24 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   It now takes the first clean option: a half step below, a half step above, the next root's fifth, or the
   nearest ringing chord tone. 48 files changed (Bass + Full in 24 loops), 0 clashes left, zip rebuilt.
 - The player merges unisons (bass + chord root on the same pitch at the same time) into one piano note.
+
+## Songs (section "Songs you know", added 2026-11-01)
+The user asked for social proof from songs the buyers know ("musicisti, songwriters, produttori, beatmakers ...
+non conoscono i nomi jazz", "qualcosa di più moderno"). Record chords from Hooktheory TheoryTabs, checked 2026-11-01;
+each song is next to the bundle file with the same progression in the same key (`song-rolls.json`,
+`tools/extract_rolls.py` SONGS).
+- Kill Bill (SZA): Ab major, verse/chorus/bridge ii7 V7 I V7/ii = Bbm7 Eb7 Abmaj7 F7 (hooktheory.com/theorytab/view/sza/kill-bill).
+  File: MIDI Chord Pack, 9 - Ab Major, "Major Prog 5 (ii-V-I-VI)" (Bbm9 Eb13 Abmaj9 F7b9).
+- Say So (Doja Cat): D major, verse and chorus ii7 V11 I7 = Em7 A11 Dmaj7 (hooktheory.com/theorytab/view/doja-cat/say-so);
+  chord sheets write A7, the page does too. File: MIDI Chord Pack, 3 - D Major, "Major Prog 1 (ii-V-I-I)" (Em9 A13 Dmaj9).
+- Leave the Door Open (Silk Sonic): A minor, verse VI7 VII v7 i7, chorus VI7 VII v7 i = Fmaj7 G7 Em7 Am7, the "royal
+  road" IV-V-iii-vi of C (hooktheory.com/theorytab/view/silk-sonic/leave-the-door-open).
+  File: Anime & Video Games MIDI Pack, 1 - C Major, "Major Prog 1 (IV-V-iii-vi Royal Road)" (Fmaj9 G13 Em7 Am9).
+- Just the Two of Us (Grover Washington Jr. & Bill Withers): F minor, VI7 V7 i7 = Dbmaj7 C7 Fm7
+  (hooktheory.com/theorytab/view/grover-washington-jr-and-bill-withers/just-the-two-of-us). Wikipedia names the
+  progression after it (also called Marusa). File: Anime & Video Games MIDI Pack, 9 - Ab Major, "Major Prog 3
+  (IV-III7-vi-I7 Marusa)" (Dbmaj9 C7b9 Fm9 Ab9).
+- Left out: Kiss Me More (ii-V-I-IV per The Mix Review, not a file match), YOASOBI "Yoru ni Kakeru" (no source
+  found for its progression).
+- Titles only: no artwork, logos or photos, never "used by" / "approved by". The section's note says the files are
+  progressions, not the songs, and GRIND STUDIO has no connection to the artists.

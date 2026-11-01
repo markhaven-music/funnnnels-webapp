@@ -1,0 +1,83 @@
+/* "Songs you know": one card per song, its chords on the record, then the
+   bundle file that plays them. Phone: one column. Desktop: two.
+   Colours come from the page (.page in jazz.module.css). */
+.songs {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.song {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 18px 18px;
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--brass);
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--ink-3), var(--ink-2));
+}
+.name {
+  margin-bottom: 4px;
+}
+.title {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(25px, 4.6vw, 32px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.artist {
+  margin-top: 4px;
+  color: var(--mute);
+}
+.label {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+/* the record's chords, one box each, in the order they're played */
+.chords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chords span {
+  padding: 5px 10px 4px;
+  border: 1px solid rgb(226 169 59 / 0.45);
+  border-radius: 4px;
+  background: rgb(226 169 59 / 0.08);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--brass-hi);
+}
+/* grows, so the file and its roll sit at the bottom of every card and line
+   up side by side */
+.text {
+  flex: 1;
+  margin-bottom: 8px;
+  color: var(--cream-2);
+}
+.note {
+  max-width: 760px;
+  margin-top: 22px;
+  font-size: 14px;
+  color: var(--mute);
+}
+
+@media (min-width: 900px) {
+  .songs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .song {
+    padding: 28px 26px 24px;
+  }
+}

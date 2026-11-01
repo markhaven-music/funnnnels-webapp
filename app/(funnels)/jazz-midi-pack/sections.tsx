@@ -14,8 +14,11 @@ import { ProductBox, Scene } from "./ProductBox";
 import { CheckoutWidget } from "./CheckoutWidget";
 import { Vsl } from "./Vsl";
 import { PackBrowser } from "./PackBrowser";
+import songRolls from "./song-rolls.json";
+import type { Roll } from "./piano";
 import s from "./jazz.module.css";
 import bn from "./bonus.module.css";
+import sg from "./songs.module.css";
 import vs from "./value.module.css";
 import e from "./edit.module.css";
 
@@ -290,6 +293,57 @@ function CompareRolls({ p, patch, ctx }: { p: SectionProps["s_compare_rolls"]; p
           <PlayableRoll id="after" playLabel="Play after" />
         </figure>
         <T v={p.note} set={set("note")} ctx={ctx} as="p" className={s.baNote} />
+      </div>
+    </section>
+  );
+}
+
+const SONG_ROLLS = songRolls as unknown as Record<string, Roll>;
+
+// Hits the buyer knows ("progressioni nei pezzi che i nostri ideal customers
+// conoscono"): the song's chords on the record, then the bundle file with the
+// same progression in the same key, to play. Song titles only: no artwork, no
+// "used by". Every song is checked in BRIEF.md "Songs".
+function Songs({ p, patch, ctx }: { p: SectionProps["s_songs"]; patch?: Patch; ctx: Ctx }) {
+  const ops = listOps(p.items, "items", patch);
+  return (
+    <section className={s.sec}>
+      <div className={s.wrap}>
+        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} patch={patch} ctx={ctx} />
+        <ol className={sg.songs}>
+          {p.items.map((it, i) => {
+            const set = (k: keyof typeof it) => ops.set && ((v: string) => ops.set!(i, { ...it, [k]: v }));
+            const roll = SONG_ROLLS[it.roll];
+            return (
+              <li key={i} className={sg.song}>
+                <div className={sg.name}>
+                  <T v={it.song} set={set("song")} ctx={ctx} as="h3" className={sg.title} />
+                  <T v={it.artist} set={set("artist")} ctx={ctx} as="p" className={sg.artist} />
+                </div>
+                <p className={sg.label}>On the record</p>
+                {patch ? (
+                  <T v={it.chords} set={set("chords")} ctx={ctx} as="p" />
+                ) : (
+                  <p className={sg.chords}>
+                    {it.chords.split("·").map((c) => (
+                      <span key={c}>{c.trim()}</span>
+                    ))}
+                  </p>
+                )}
+                <T v={it.text} set={set("text")} ctx={ctx} as="p" className={sg.text} />
+                <p className={sg.label}>In your download</p>
+                {patch && <T v={it.file} set={set("file")} ctx={ctx} as="p" />}
+                {roll && <PlayableRoll roll={roll} title={fill(it.file, ctx)} variant="short" playLabel="Play" />}
+                <Remove onClick={ops.remove && (() => ops.remove!(i))} />
+              </li>
+            );
+          })}
+        </ol>
+        <Add
+          onClick={ops.add && (() => ops.add!({ roll: "", song: "Song", artist: "Artist", chords: "Chord · Chord", text: "What it does.", file: "Where it is" }))}
+          label="song"
+        />
+        <T v={p.note} set={patch && ((v) => patch({ note: v }))} ctx={ctx} as="p" className={sg.note} />
       </div>
     </section>
   );
@@ -828,6 +882,7 @@ const VIEWS: { [K in SectionType]: (a: { p: SectionProps[K]; patch?: Patch; ctx:
   s_hero: Hero,
   s_letter: Letter,
   s_compare_rolls: CompareRolls,
+  s_songs: Songs,
   s_product: Product,
   s_previews: Previews,
   s_steps: Steps,
