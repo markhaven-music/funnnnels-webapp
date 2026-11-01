@@ -183,41 +183,50 @@ C23. Output Arcade. *Use Arcade for loops and want your own drum patterns?*
 C24. Ghosthack. *Bought Ghosthack packs and still stuck on drums?*
 C25. Looperman. *Grabbing drum loops from Looperman?*
 
-## Batch 1 (2026-11-01)
+## How the image and copy work (agreed 2026-11-01)
 
-Six pockets: the five you named plus one experimental. Each pocket is its own ad set with two ads: the callout on the Logic laptop photo and on the Ableton iMac photo. Targeting: US, broad, Advantage+ audience with no interests, so the callout does the targeting. Link: m.thegrind.studio/en/midi-drum-kit with `utm_campaign=pockets_1101&utm_content=<pocket>_<photo>`.
+- **Image**: pure black, the laptop with the piano roll blurred behind, the line dead centre in Bebas Neue caps with a few words in the accent colour, GRIND ◆ STUDIO at the top, "MIDI DRUM KIT · $27" at the bottom. Nothing else on the image. Template: `render-w1.mjs` in the session scratchpad.
+- **The line** always opens with a question that names the person, then gives one honest piece of advice in normal spoken English, the way a producer friend would say it. No slogans, no hype words, no clipped copywriting.
+- **Primary text**: the same line, then two plain sentences about the kit, then "$27, one payment. Works in any DAW." (plus "Not affiliated with…" where a brand or artist is named).
+- **One flexible ad per pocket** with 6 images (1:1, 4:5, 9:16 × orange and green). Meta picks the format and colour per placement.
 
-| Ad set | Image callout | Orange line | Headline under the image |
-| --- | --- | --- | --- |
-| PK_NEWTRAP | Thinking about making trap beats but don't know where to start? | Start with the drums. They're already programmed. | Trap drums for beginners |
-| PK_VET10 | Making trap for 10+ years but your drums still sound like 2016? | Patterns modeled after today's Billboard producers. | New patterns for trap veterans |
-| PK_HIPHOP2TRAP | Make hip-hop beats but want to start making trap? | The trap drums are already programmed. Just drag. | Trap drums for hip-hop producers |
-| PK_ROCK2HIPHOP | Play rock but curious about making hip-hop? | You already know rhythm. Here are the trap patterns. | Trap drums for rock players |
-| PK_METROFAN | Love how Metro Boomin's drums bounce? | It's the pattern, not the samples. Here are 1050 of them. | 1050 patterns with the bounce |
-| PK_DRUMLINE | Played drumline? Now making beats? | Trap hat rolls are rudiments on a grid. These are done. | Rudiments, already programmed |
+## Wave 1 (2026-11-01, built paused)
 
-Primary texts:
+Campaign `GrindStudio_Pockets_W1_2026-11-01` (120254488878320422): 30 ad sets at €1/day (€30/day), US, broad, Advantage+ audience, optimised for purchases. Each ad set holds one flexible ad. Link: m.thegrind.studio/en/midi-drum-kit with `utm_campaign=pockets_w1&utm_content=<pocket>`.
 
-**PK_NEWTRAP**: Thinking about making trap beats but don't know where to start? Start with the drums. They're the hardest part to get right, and you don't need theory for them.
-1050 MIDI drum patterns for trap, drill and hip-hop: hats, kicks, snares, 808s and rolls, already programmed. Drag one into FL Studio, Ableton, Logic or any DAW, pick your sounds, build the beat on top.
-$27, one payment.
+Read after 7–10 days on clicks, landing page views and checkouts per pocket (€1/day gives roughly one sale every 25 days). The top 5 move to €5–8/day. The bottom 25 make room for wave 2.
 
-**PK_VET10**: Making trap for 10+ years? You can program drums. The problem is that the patterns you reach for are the ones you learned years ago.
-1050 MIDI drum patterns modeled after today's Billboard producers. Hats from basic to hyper-complex, roll ups and roll downs, kick and 808 together. Drag them in, take them apart, keep the ideas.
-$27, one payment.
+| # | Ad set | Line on the image |
+| --- | --- | --- |
+| 1 | W1_newtrap_US | Are you just getting into making trap beats? Start with a few good drum patterns instead of an empty grid. |
+| 5 | W1_vet10_US | Have you been making trap for 10+ years? It might be time to refresh the drum patterns you always go back to. |
+| 15 | W1_hiphop2trap_US | Do you make hip-hop and want to try trap? Learn how the drums are programmed first. That’s where the difference is. |
+| 17 | W1_rock2hiphop_US | Do you produce rock music but you’ve been curious about hip-hop? The drums are the first thing worth figuring out. |
+| 51 | W1_metrofan_US | Are you a big Metro Boomin fan? Pay attention to his drum patterns, not just the sounds he picks. |
+| E1 | W1_drumline_US | Did you play in a drumline and now you’re making beats? Trap hi-hats will feel pretty familiar. |
+| 2 | W1_flnew_US | Are you new to FL Studio? Don’t begin every beat with an empty piano roll. Drag in a drum pattern and build from there. |
+| 7 | W1_tutorials_US | Have you been watching drum tutorials every night? Opening a few real patterns will teach you more than another video. |
+| 8 | W1_loops_US | Got a folder full of unfinished loops? Most of the time, the drums are what’s missing. |
+| 10 | W1_kits_US | Do you buy a new drum kit every month? New sounds won’t fix a drum pattern that doesn’t move. |
+| 18 | W1_metal_US | Do you make metal but secretly listen to trap? Try making a trap beat, and start with the drums. |
+| 19 | W1_edm_US | Do you make EDM and want to try trap? The drums are really the only big change. |
+| 21 | W1_rnb_US | Do you make R&B? Don’t spend the whole night on hi-hats. Drag in a drum pattern and get back to the chords. |
+| 23 | W1_drill_US | Thinking about trying drill after making trap? Look at how the drum patterns are built before anything else. |
+| 28 | W1_songwriter_US | Do you write your songs on guitar? A simple drum pattern under your demo makes a big difference. |
+| 31 | W1_rapper_US | Do you rap and make your own beats? Use drum patterns that are already done and spend that time writing. |
+| 33 | W1_drummer_US | Do you play drums? Trap drums are programmed, not played, so it helps to look at a few patterns first. |
+| 34 | W1_keys_US | Do you play keys? Play the chords like you always do and drag in the drums. |
+| 38 | W1_typebeat_US | Uploading type beats every week? You don’t have to rebuild the drums from scratch every single time. |
+| 39 | W1_beatstars_US | Selling beats on BeatStars? You don’t need to program the drums from zero for every beat. |
+| 52 | W1_fan808_US | Are you a big 808 Mafia fan? Pay attention to the drum patterns, not just the samples. |
+| 69 | W1_flstudio_US | Making trap in FL Studio? You can drag MIDI drum patterns straight into the piano roll. |
+| 80 | W1_splice_US | Do you use Splice a lot? The sounds are only half of it. The other half is the drum pattern. |
+| 85 | W1_afterwork_US | Making beats after work? Don’t spend the one hour you have programming hi-hats. |
+| 88 | W1_late_US | Still up at 3 AM trying to fix the drums? Use a pattern that already works and go to sleep. |
+| 93 | W1_hats_US | Tired of stiff hi-hats? Most of the time it’s the pattern, not the sound. |
+| E7 | W1_caraudio_US | Into car audio? Make your own 808 beats and use them to test the system. |
+| E15 | W1_anime_US | Making anime type beats? Finding the sample is the easy part. Getting the drums right is the hard part. |
+| C1 | W1_cymatics_US | Are you a big Cymatics fan? Kits give you great sounds, but you still need the drum patterns. |
+| C13 | W1_ezdrummer_US | Do you use EZdrummer for rock? Trap drum grooves work exactly the same way. |
 
-**PK_HIPHOP2TRAP**: Make hip-hop beats but want to start making trap? The sounds are easy to find. The drum programming is what makes it trap: the hat rolls, where the 808 lands, the bounce.
-1050 MIDI drum patterns for trap, drill and hip-hop, already programmed. Drag one under your next beat and see how it's built.
-$27, one payment.
-
-**PK_ROCK2HIPHOP**: Play rock but curious about making hip-hop? You already have the hard part: rhythm. What's missing is how trap drums are programmed, and learning that by ear takes months.
-1050 MIDI drum patterns for trap and hip-hop. Drag one into your DAW and look at it: where the hats roll, where the 808 sits.
-$27, one payment.
-
-**PK_METROFAN**: Love how Metro Boomin's drums bounce? The bounce isn't the samples. It's the pattern: where the kick lands, how the hats move, what the snare leaves out.
-1050 MIDI drum patterns modeled after Billboard producers. Drag them into any DAW and use your own sounds.
-$27, one payment. Grind Studio is not affiliated with or endorsed by Metro Boomin.
-
-**PK_DRUMLINE**: Played drumline? Then you already know trap hi-hats. Rolls, accents, flams: it's rudiments on a grid.
-What's new is the DAW. 1050 MIDI drum patterns for trap, drill and hip-hop, with the rolls and accents already programmed. Drag one in and you'll recognize every hit.
-$27, one payment.
+The first build (`GrindStudio_Pockets_2026-11-01`, 6 ad sets at €8 with the old Impact template) never ran and is replaced by wave 1.
