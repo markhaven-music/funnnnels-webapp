@@ -171,24 +171,33 @@ export function Wallet({
 }) {
   const stripe = useStripe();
   const elements = useElements();
+  // Out of the layout until a wallet shows: on a device without Apple Pay or
+  // Google Pay Stripe still leaves an empty 8px frame, which with the form's
+  // gaps made a band of space above the card fields ("crea troppo spazio").
+  const [shown, setShown] = useState(false);
   return (
-    <ExpressCheckoutElement
-      options={{
-        buttonHeight: 48,
-        buttonType: { applePay: "buy", googlePay: "buy" },
-        paymentMethods: { applePay: "auto", googlePay: "auto", link: "never", paypal: "never", amazonPay: "never", klarna: "never" },
-      }}
-      onReady={(e) => onReady(Boolean(e.availablePaymentMethods))}
-      onConfirm={async (e) => {
-        if (!stripe || !elements) return;
-        onError(null);
-        try {
-          await pay(stripe, elements);
-        } catch (err) {
-          onError((err as Error).message);
-          e.paymentFailed({ reason: "fail" });
-        }
-      }}
-    />
+    <div style={shown ? undefined : { position: "absolute", width: "100%", height: 0, overflow: "hidden" }}>
+      <ExpressCheckoutElement
+        options={{
+          buttonHeight: 48,
+          buttonType: { applePay: "buy", googlePay: "buy" },
+          paymentMethods: { applePay: "auto", googlePay: "auto", link: "never", paypal: "never", amazonPay: "never", klarna: "never" },
+        }}
+        onReady={(e) => {
+          setShown(Boolean(e.availablePaymentMethods));
+          onReady(Boolean(e.availablePaymentMethods));
+        }}
+        onConfirm={async (e) => {
+          if (!stripe || !elements) return;
+          onError(null);
+          try {
+            await pay(stripe, elements);
+          } catch (err) {
+            onError((err as Error).message);
+            e.paymentFailed({ reason: "fail" });
+          }
+        }}
+      />
+    </div>
   );
 }
