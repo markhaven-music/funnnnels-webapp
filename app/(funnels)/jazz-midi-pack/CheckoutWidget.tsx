@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { CardFields, cardElements, payWithCard, payWithWallet, Wallet, type CardLook } from "../CardFields";
+import { OwnerSkip } from "../OwnerSkip";
 import s from "./checkout.module.css";
 import b from "./btn.module.css";
 import { Arrow } from "./Cta";
@@ -261,6 +262,7 @@ function InfoStep({
         </span>
       </button>
       <p className={s.fine}>We respect your privacy. Your download link goes to this email.</p>
+      <OwnerSkip onSkip={() => onDone(info)} />
     </form>
   );
 }

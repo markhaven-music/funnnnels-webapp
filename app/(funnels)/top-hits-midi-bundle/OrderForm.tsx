@@ -8,6 +8,7 @@ import { cookieCountry, type Currency } from "@/lib/geo";
 import { track } from "@/lib/beacon";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
+import { OwnerSkip } from "../OwnerSkip";
 import type { OrderOffer } from "../midi-drum-kit/offer";
 import { funnel } from "./funnel";
 import { Rich } from "./Rich";
@@ -195,6 +196,7 @@ function InfoStep({ info, slug, onDone }: { info: Info; slug: string; onDone: (i
         GO TO STEP 2
       </button>
       <p className={s.respect}>We respect your privacy &amp; information.</p>
+      <OwnerSkip onSkip={() => onDone(info)} />
     </form>
   );
 }

@@ -9,6 +9,7 @@ import { track } from "@/lib/beacon";
 import { AB, readVariant } from "./abtest";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
+import { OwnerSkip } from "../OwnerSkip";
 import { Rich } from "../top-hits-midi-bundle/Rich";
 import s from "../top-hits-midi-bundle/order.module.css";
 import d from "./order.module.css";
@@ -196,6 +197,7 @@ function InfoStep({ t, lang, info, onDone }: { t: Copy["form"]; lang: Lang; info
         {t.next}
       </button>
       <p className={s.respect}>{t.respect}</p>
+      <OwnerSkip onSkip={() => onDone(info)} />
     </form>
   );
 }
