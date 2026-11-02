@@ -7,7 +7,7 @@ import c from "./card.module.css";
 // The card fields as ClickFunnels' checkout draws them (measured on the live
 // /spot-available-midi-drum-kit-ad-15m30 at 1366px): the card number on top
 // with a card icon, expiry and CVV side by side under it, the words inside the
-// fields, no labels and no "you allow Grind Studio to charge your card" notice.
+// fields, no labels, no "you allow Grind Studio to charge your card" notice.
 // Stripe's own fields (iframes), so card numbers never touch our server.
 //
 // They live in their own <Elements> (cardElements below, no amount); the Apple
@@ -46,7 +46,8 @@ export function CardFields({ words, look, className }: { words: CardWords; look:
     <div className={`${c.box} ${className ?? ""}`}>
       <div className={`${c.field} ${c.number}`}>
         <CardIcon />
-        <CardNumberElement className={c.el} options={{ style, placeholder: words.number, showIcon: false }} />
+        {/* No Link "Autofill" button inside the field: ClickFunnels has none. */}
+        <CardNumberElement className={c.el} options={{ style, placeholder: words.number, showIcon: false, disableLink: true }} />
       </div>
       <div className={`${c.field} ${c.expiry}`}>
         <CardExpiryElement className={c.el} options={{ style, placeholder: words.expiry }} />
