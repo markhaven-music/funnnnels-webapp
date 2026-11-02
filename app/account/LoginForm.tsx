@@ -62,7 +62,7 @@ export function LoginForm({ lang, words: w }: { lang: Lang; words: Words }) {
           <path fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" d="m3.5 7 8.5 6.5L20.5 7" />
         </svg>
         <h2 className={a.sentTitle}>{w.sentTitle}</h2>
-        <p className={a.text}>
+        <p className={a.text} data-clarity-mask="True">
           {before}
           <b>{email.trim().toLowerCase()}</b>
           {after}
@@ -81,7 +81,7 @@ export function LoginForm({ lang, words: w }: { lang: Lang; words: Words }) {
   }
 
   return (
-    <form className={a.form} onSubmit={submit} noValidate>
+    <form className={a.form} onSubmit={submit} noValidate data-clarity-mask="True">
       <label className={a.label} htmlFor="email">
         {w.label}
       </label>

@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 import { LANG_COOKIE, LANGS, SESSION_COOKIE, isLang, purchaseLang, purchasesOf, readSession, type Lang } from "@/lib/account";
 import { COUNTRY_COOKIE } from "@/lib/geo";
 import { SUPPORT } from "@/lib/ses";
+import { Clarity } from "@/app/(funnels)/Clarity";
 import { LANG_NAMES, copyFor } from "./copy";
 import { LoginForm } from "./LoginForm";
 import a from "./account.module.css";
@@ -60,6 +61,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
 
   return (
     <main className={`${a.page} ${poppins.variable}`} lang={lang}>
+      <Clarity />
       <header className={a.top}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={a.logo} src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
@@ -83,7 +85,9 @@ export default async function Account({ searchParams }: { searchParams: Promise<
       {session ? (
         <section className={a.library}>
           <h1 className={a.title}>{c.hello}</h1>
-          <p className={a.lead}>{c.sub(session.e)}</p>
+          <p className={a.lead} data-clarity-mask="True">
+            {c.sub(session.e)}
+          </p>
           {purchases.length === 0 && <p className={a.none}>{c.none}</p>}
           <ul className={a.items}>
             {purchases.map((p) => (

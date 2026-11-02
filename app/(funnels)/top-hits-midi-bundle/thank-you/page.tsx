@@ -9,6 +9,7 @@ import { funnel } from "../funnel";
 import { fontVars } from "../fonts";
 import { PurchasePixel } from "../Tracking";
 import { Beacon } from "../../Beacon";
+import { Clarity } from "../../Clarity";
 import s from "../order.module.css";
 import t from "./thanks.module.css";
 
@@ -62,6 +63,7 @@ export default async function ThankYou({
   return (
     <main className={`${s.page} ${fontVars}`}>
       <Beacon funnel={funnel.slug} page="thank-you" />
+      <Clarity purchase={paid && !!order} />
       {paid && order && <PurchasePixel orderId={order.id} value={order.amount} currency={order.currency} />}
       {upsells.map((up) => (
         <PurchasePixel key={up.id} orderId={up.id} value={up.amount} currency={up.currency} />
@@ -89,7 +91,7 @@ export default async function ThankYou({
           </div>
         )}
         {paid && (
-          <p className={t.note}>
+          <p className={t.note} data-clarity-mask="True">
             {order?.provider === "paypal" ? "PayPal" : "Stripe"} has emailed your receipt{order?.email ? ` to ${order.email}` : ""}. A file
             doesn&apos;t open? Email <a href={`mailto:${funnel.support}`}>{funnel.support}</a> and we fix it.
           </p>

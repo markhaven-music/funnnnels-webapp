@@ -71,7 +71,7 @@ export function Tracking({ value, currency, page = "landing" }: { value: number;
 const LOCAL = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$/);
 
 // Runs fn once the page has loaded (now, if it already has).
-const AFTER_LOAD = `(function (fn) {
+export const AFTER_LOAD = `(function (fn) {
   if (document.readyState === 'complete') setTimeout(fn, 0);
   else addEventListener('load', function () { setTimeout(fn, 0); });
 })`;

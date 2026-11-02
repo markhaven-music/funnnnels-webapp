@@ -8,6 +8,7 @@ import { noteSale } from "@/lib/sales";
 import { getOrder } from "@/lib/orders";
 import { KitPurchasePixel } from "../../_kit/KitTracking";
 import { Beacon } from "../../Beacon";
+import { Clarity } from "../../Clarity";
 import { BRAND } from "../../_kit/brand";
 import s from "../../jazz-midi-pack/jazz.module.css";
 import b from "../../jazz-midi-pack/btn.module.css";
@@ -44,6 +45,7 @@ export default async function KitThankYou({
   return (
     <main className={`${s.page} ${serif.variable}`}>
       <Beacon funnel={f.slug} page="thank-you" />
+      <Clarity purchase={paid && !!order} />
       {paid && order && <KitPurchasePixel product={f.product} orderId={order.id} value={order.amount} currency={order.currency} />}
       <section className={s.hero}>
         <div className={s.heroBg} aria-hidden />
@@ -88,7 +90,7 @@ export default async function KitThankYou({
             </div>
           )}
           {paid && (
-            <p className={s.sub}>
+            <p className={s.sub} data-clarity-mask="True">
               {order?.provider === "paypal" ? "PayPal" : "Stripe"} has emailed your receipt
               {order?.email ? ` to ${order.email}` : ""}. A file doesn&rsquo;t open? Email{" "}
               <a href={`mailto:${BRAND.support}`}>{BRAND.support}</a> and we fix it.

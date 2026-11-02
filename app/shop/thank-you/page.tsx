@@ -3,6 +3,7 @@ import { after } from "next/server";
 import { BRAND } from "@/app/(funnels)/_kit/brand";
 import { KitPurchasePixel } from "@/app/(funnels)/_kit/KitTracking";
 import { Beacon } from "@/app/(funnels)/Beacon";
+import { Clarity } from "@/app/(funnels)/Clarity";
 import b from "@/app/(funnels)/jazz-midi-pack/btn.module.css";
 import { reportSaleToNeo } from "@/lib/neo";
 import { getOrder } from "@/lib/orders";
@@ -37,6 +38,7 @@ export default async function ShopThankYou({
   return (
     <ShopFrame>
       <Beacon funnel={SHOP_SLUG} page="thank-you" />
+      <Clarity purchase={paid && !!order} />
       {paid && order && <KitPurchasePixel product={title} orderId={order.id} value={order.amount} currency={order.currency} />}
       {paid && order && <ClearCart slugs={order.items} />}
       <section className={`${s.wrap} ${s.thanks}`}>
@@ -75,7 +77,7 @@ export default async function ShopThankYou({
           </div>
         )}
         {paid && (
-          <p className={s.fine}>
+          <p className={s.fine} data-clarity-mask="True">
             {order?.provider === "paypal" ? "PayPal" : "Stripe"} has emailed your receipt
             {order?.email ? ` to ${order.email}` : ""}. A file doesn&rsquo;t open? Email <a href={`mailto:${BRAND.support}`}>{BRAND.support}</a> and we fix it.
           </p>
