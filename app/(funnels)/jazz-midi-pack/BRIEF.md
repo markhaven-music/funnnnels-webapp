@@ -109,16 +109,13 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   nearest ringing chord tone. 48 files changed (Bass + Full in 24 loops), 0 clashes left, zip rebuilt.
 - The player merges unisons (bass + chord root on the same pitch at the same time) into one note.
 
-## Sections modelled on the Drum Kit page (2026-11-01)
-"add some sections modeled after the other landing pages we have":
-- The secret (`s_secret`, after the hero): the Drum Kit's "What's the secret of the 0.1%". Three usual guesses
-  crossed out (more notes, chord names, an expensive plugin), then the answer the letter explains: where each note
-  goes when the chord changes.
-- Why 13 voicings and 8 rhythms? Easy. (`s_why`, after the pack browser): the Drum Kit's "Why Patterns and
-  Fragments? Easy.". Counts and names from `browse/pack.json`; 2,704 = folder 1 (26 × 13 × 8, but the page never
-  says 26).
+## Sections added on 2026-11-01, taken out on 2026-11-02
+"The secret", "Played by the greats" and "Why 13 voicings and 8 rhythms? Easy." (modelled on the Drum Kit page)
+were on the page for a day. The user: "you replaced a lot of sections while i didnt ask u to do that"; asked
+what to undo, they picked "Togli sezioni nuove" and "rimetti le sezioni di prima". The page is back to the 14
+sections it had that morning, in the same order. The code is in git at 08e0c7a. The checks below stay for reuse.
 
-## Greats (section "Played by the greats", `s_greats`, 2026-11-01)
+### Greats research (2026-11-01)
 "This section makes no sense i wanted a social proof section with logos + reviews": it replaced "Songs you know"
 (each song beside its bundle file). Modelled on the Drum Kit's "Patterns used by the best producers of all time"
 (producer logos) and its producer quotes. The names are set in type, not their logos (an artist's logo would read

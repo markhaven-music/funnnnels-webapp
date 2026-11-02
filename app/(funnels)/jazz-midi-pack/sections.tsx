@@ -16,8 +16,6 @@ import { Vsl } from "./Vsl";
 import { PackBrowser } from "./PackBrowser";
 import s from "./jazz.module.css";
 import bn from "./bonus.module.css";
-import gr from "./greats.module.css";
-import ex from "./explain.module.css";
 import vs from "./value.module.css";
 import e from "./edit.module.css";
 
@@ -292,127 +290,6 @@ function CompareRolls({ p, patch, ctx }: { p: SectionProps["s_compare_rolls"]; p
           <PlayableRoll id="after" playLabel="Play after" />
         </figure>
         <T v={p.note} set={set("note")} ctx={ctx} as="p" className={s.baNote} />
-      </div>
-    </section>
-  );
-}
-
-// The Drum Kit's "What's the secret of the 0.1%": the usual guesses, crossed
-// out, then the answer the letter below explains.
-function Secret({ p, patch, ctx }: { p: SectionProps["s_secret"]; patch?: Patch; ctx: Ctx }) {
-  const set = (k: string) => patch && ((v: string) => patch({ [k]: v }));
-  const ops = listOps(p.myths, "myths", patch);
-  return (
-    <section className={s.sec}>
-      <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
-        <T v={p.lead} set={set("lead")} ctx={ctx} as="p" className={ex.lead} />
-        <ul className={ex.myths}>
-          {p.myths.map((m, i) => (
-            <li key={i}>
-              <Cross />
-              <T v={m} set={ops.set && ((v) => ops.set!(i, v))} ctx={ctx} className={ex.myth} />
-              <Remove onClick={ops.remove && (() => ops.remove!(i))} />
-            </li>
-          ))}
-        </ul>
-        <Add onClick={ops.add && (() => ops.add!("Another guess"))} label="guess" />
-        <T v={p.answer} set={set("answer")} ctx={ctx} as="p" className={ex.answer} emph />
-      </div>
-    </section>
-  );
-}
-
-function Cross() {
-  return (
-    <svg className={ex.cross} viewBox="0 0 20 20" width="20" height="20" aria-hidden>
-      <path d="M5 5l10 10M15 5L5 15" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-// The Drum Kit's "Patterns used by the best producers of all time" and its
-// producer quotes: names set in type (not their logos), then what top
-// producers said about jazz chords, each linked to the interview.
-function Greats({ p, patch, ctx }: { p: SectionProps["s_greats"]; patch?: Patch; ctx: Ctx }) {
-  const set = (k: string) => patch && ((v: string) => patch({ [k]: v }));
-  const names = listOps(p.names, "names", patch);
-  const quotes = listOps(p.quotes, "quotes", patch);
-  return (
-    <section className={s.sec}>
-      <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
-        <ul className={gr.names}>
-          {p.names.map((n, i) => (
-            <li key={i}>
-              <T v={n} set={names.set && ((v) => names.set!(i, v))} ctx={ctx} />
-              <Remove onClick={names.remove && (() => names.remove!(i))} />
-            </li>
-          ))}
-        </ul>
-        <Add onClick={names.add && (() => names.add!("Name"))} label="name" />
-        {(p.quotes.length > 0 || patch) && <T v={p.quotesTitle} set={set("quotesTitle")} ctx={ctx} as="h3" className={gr.quotesTitle} />}
-        <ul className={gr.quotes}>
-          {p.quotes.map((q, i) => {
-            const setQ = (k: keyof typeof q) => quotes.set && ((v: string) => quotes.set!(i, { ...q, [k]: v }));
-            return (
-              <li key={i} className={gr.quote}>
-                <blockquote>
-                  <T v={q.quote} set={setQ("quote")} ctx={ctx} as="p" />
-                </blockquote>
-                <p className={gr.who}>
-                  <T v={q.name} set={setQ("name")} ctx={ctx} as="b" />
-                  <T v={q.role} set={setQ("role")} ctx={ctx} className={gr.role} />
-                </p>
-                {patch ? (
-                  <T v={q.source} set={setQ("source")} ctx={ctx} as="p" className={gr.source} placeholder="Source URL" />
-                ) : (
-                  q.source && (
-                    <a className={gr.source} href={q.source} target="_blank" rel="noopener nofollow">
-                      Source
-                    </a>
-                  )
-                )}
-                <Remove onClick={quotes.remove && (() => quotes.remove!(i))} />
-              </li>
-            );
-          })}
-        </ul>
-        <Add onClick={quotes.add && (() => quotes.add!({ quote: "Quote", name: "Name", role: "Role", source: "" }))} label="quote" />
-        <T v={p.note} set={set("note")} ctx={ctx} as="p" className={gr.note} />
-        <Cta className={s.ctaBlock} inner={`${ctx.price} · instant download`} />
-      </div>
-    </section>
-  );
-}
-
-// The Drum Kit's "Why Patterns and Fragments? Easy.": what the voicings and the
-// rhythms are each for.
-function Why({ p, patch, ctx }: { p: SectionProps["s_why"]; patch?: Patch; ctx: Ctx }) {
-  const ops = listOps(p.cols, "cols", patch);
-  return (
-    <section className={s.sec}>
-      <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
-        <div className={ex.cols}>
-          {p.cols.map((c, i) => {
-            const set = (k: keyof typeof c) => ops.set && ((v: string) => ops.set!(i, { ...c, [k]: v }));
-            return (
-              <div key={i} className={ex.col}>
-                <T v={c.count} set={set("count")} ctx={ctx} as="p" className={ex.count} />
-                <T v={c.name} set={set("name")} ctx={ctx} as="h3" className={ex.name} />
-                <T v={c.what} set={set("what")} ctx={ctx} as="p" className={ex.what} />
-                <T v={c.list} set={set("list")} ctx={ctx} as="p" className={ex.list} />
-                <p className={ex.perfect}>
-                  <span className={ex.label}>Perfect for</span>
-                  <T v={c.perfect} set={set("perfect")} ctx={ctx} />
-                </p>
-              </div>
-            );
-          })}
-        </div>
-        <T v={p.foot} set={patch && ((v) => patch({ foot: v }))} ctx={ctx} as="p" className={ex.foot} />
-        <Cta className={s.ctaBlock} inner={`${ctx.price} · instant download`} />
       </div>
     </section>
   );
@@ -950,10 +827,7 @@ function Final({ p, patch, ctx }: { p: SectionProps["s_final"]; patch?: Patch; c
 const VIEWS: { [K in SectionType]: (a: { p: SectionProps[K]; patch?: Patch; ctx: Ctx }) => ReactNode } = {
   s_hero: Hero,
   s_letter: Letter,
-  s_secret: Secret,
   s_compare_rolls: CompareRolls,
-  s_greats: Greats,
-  s_why: Why,
   s_product: Product,
   s_previews: Previews,
   s_steps: Steps,

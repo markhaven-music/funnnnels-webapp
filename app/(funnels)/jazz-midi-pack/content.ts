@@ -17,24 +17,6 @@ export type SectionProps = {
   s_hero: { tag: string; pre: string; headline: string; sub: string; bullets: string[]; ticks: string[]; hud: string[]; daws: string };
   s_letter: { eyebrow: string; title: string; paras: Para[] };
   s_compare_rolls: { beforeLabel: string; beforeText: string; afterLabel: string; afterText: string; note: string };
-  // The Drum Kit's "What's the secret of the 0.1%": what people think it is,
-  // crossed out, then what it is.
-  s_secret: { eyebrow: string; title: string; lead: string; myths: string[]; answer: string };
-  // The Drum Kit's "Patterns used by the best producers of all time" and its
-  // producer quotes. The names are set in type, not their logos. Each name has
-  // a record built on a progression from the download, and each quote a
-  // source. Both are checked in BRIEF.md "Greats".
-  s_greats: {
-    eyebrow: string;
-    title: string;
-    names: string[];
-    quotesTitle: string;
-    quotes: { quote: string; name: string; role: string; source: string }[];
-    note: string;
-  };
-  // The Drum Kit's "Why Patterns and Fragments? Easy.": what each way the pack
-  // varies a progression is for.
-  s_why: { eyebrow: string; title: string; cols: { count: string; name: string; what: string; list: string; perfect: string }[]; foot: string };
   s_product: { eyebrow: string; title: string; titleEm: string; lead: string; ticks: string[] };
   s_previews: { eyebrow: string; title: string; sub: string; items?: { roll: RollId; title: string; meta: string }[] };
   s_steps: { eyebrow: string; title: string; steps: { title: string; text: string }[] };
@@ -57,10 +39,7 @@ export type Section<T extends SectionType = SectionType> = { id: string; type: T
 export const SECTION_LABELS: Record<SectionType, string> = {
   s_hero: "Hero",
   s_letter: "Problem letter",
-  s_secret: "The secret",
   s_compare_rolls: "Before / after",
-  s_greats: "Played by the greats",
-  s_why: "Why voicings and rhythms",
   s_product: "Product intro",
   s_previews: "Previews",
   s_steps: "How it works",
@@ -97,17 +76,6 @@ export const DEFAULT_SECTIONS: Section[] = [
     },
   },
   {
-    id: "secret",
-    type: "s_secret",
-    props: {
-      eyebrow: "The secret",
-      title: "What makes jazz chords sound *expensive*?",
-      lead: "Most producers think it’s one of these:",
-      myths: ["More notes in every chord", "Chord names you can’t pronounce", "An expensive piano plugin"],
-      answer: "It’s none of them. It’s where each note goes when the chord changes.",
-    },
-  },
-  {
     id: "letter",
     type: "s_letter",
     props: {
@@ -139,55 +107,6 @@ export const DEFAULT_SECTIONS: Section[] = [
     },
   },
   {
-    id: "greats",
-    type: "s_greats",
-    props: {
-      eyebrow: "Played by the greats",
-      title: "Progressions used by the greatest artists of all time.",
-      names: ["SZA", "Doja Cat", "Silk Sonic", "Bill Withers", "Miles Davis", "John Coltrane", "Charlie Parker", "Duke Ellington"],
-      quotesTitle: "What top producers say about chords:",
-      quotes: [
-        {
-          quote: "If you’re a hip-hop producer that wants a lot of melodic stuff happening, you’re probably going to go to jazz first.",
-          name: "Robert Glasper",
-          role: "Grammy-winning pianist and producer",
-          source: "https://www.npr.org/event/music/524393926/jazz-is-the-mother-of-hip-hop-how-sampling-connects-genres",
-        },
-        {
-          quote: "Those chord changes. They take you away.",
-          name: "Pharrell Williams",
-          role: "Producer, “Happy”",
-          source: "https://www.interviewmagazine.com/music/new-again-pharrell-williams",
-        },
-        {
-          quote: "My favorite chord progressions are 1-4-5, which is the blues, or jazz, 2-5-1.",
-          name: "Terrace Martin",
-          role: "Producer for Kendrick Lamar",
-          source: "https://www.npr.org/sections/microphonecheck/2015/02/11/385218373/terrace-martin-everything-got-a-little-bit-of-funk-in-it",
-        },
-        {
-          quote: "It was some real slapping beats with some very pretty chords.",
-          name: "Masego",
-          role: "Singer and producer, “Tadow”",
-          source: "https://www.dummymag.com/features/i-just-get-very-nerdy-masego-talks-trap-house-jazz-and-female-influence",
-        },
-        {
-          quote: "I’ve always had a crazy obsession with chords and jazz and soul etc is heaven when it comes to chords.",
-          name: "Tom Misch",
-          role: "Guitarist and producer, “Geography”",
-          source: "https://earmilk.com/2014/09/29/tom-misch-talks-about-his-love-of-chords-dilla-and-sixth-form-interview/",
-        },
-        {
-          quote: "…the language of musical harmony is an absolutely extraordinary one.",
-          name: "Jacob Collier",
-          role: "Grammy-winning multi-instrumentalist",
-          source: "https://www.npr.org/2022/06/17/1105496521/jacob-collier-the-whimsical-process-of-creating-art",
-        },
-      ],
-      note: "Each name has a record built on a progression from your download. The quotes are from the linked interviews. None of these artists is connected to GRIND STUDIO or endorses this pack.",
-    },
-  },
-  {
     id: "product",
     type: "s_product",
     props: {
@@ -209,31 +128,6 @@ export const DEFAULT_SECTIONS: Section[] = [
       eyebrow: "The whole pack, open",
       title: "Browse all {files} files. Press play on any of them.",
       sub: "Every folder and every file of the pack, note for note, played on a warm sine synth. In your DAW they play through your sounds. Drum MIDI is shown here, not played.",
-    },
-  },
-  {
-    id: "why",
-    type: "s_why",
-    props: {
-      eyebrow: "Voicings and rhythms",
-      title: "Why 13 voicings and 8 rhythms? *Easy.*",
-      cols: [
-        {
-          count: "13",
-          name: "Voicings",
-          what: "Which notes, where. The same progression stacked 13 ways.",
-          list: "Rootless · Drop 2 · Quartal · Shell · Spread over two hands · Close and voice-led · and 7 more",
-          perfect: "Finding the colour that sits with your sound: dark and low, wide and open, or close and soft.",
-        },
-        {
-          count: "8",
-          name: "Rhythms",
-          what: "When the notes play. The same voicing played 8 ways.",
-          list: "Pads · Ballad arpeggios · Swing comping · Bossa nova · Charleston · Anticipations · and 2 more",
-          perfect: "Dropping in a part that already grooves, instead of block chords you chop up by hand.",
-        },
-      ],
-      foot: "Every progression × 13 voicings × 8 rhythms: 2,704 files in the first folder alone.",
     },
   },
   {
