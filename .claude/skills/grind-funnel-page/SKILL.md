@@ -100,7 +100,11 @@ a request conflict, the request wins; say which rule you are breaking.
 ## 6. Images
 
 - Every image references the brand, the music or the kit (the box, the
-  wordmark, a piano roll, a DAW). No generic objects. AI renders are fine for
+  wordmark, a piano roll, a DAW). No generic objects. A picture beside copy
+  shows what that copy says: steps get the folder path and the file's roll,
+  "after you pay" gets the download list, a bonus gets its cover. When no
+  real picture says it, build one from the pack's data in HTML rather than
+  reuse a pretty but unrelated render. AI renders are fine for
   the box and scenes, always optimised webp in the sizes the page needs.
 - Static files go under `public/funnels/<slug>/`; a new top-level folder would
   be taken as a launch-kit slug.

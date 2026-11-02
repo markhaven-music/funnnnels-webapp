@@ -212,3 +212,12 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   full width in the panel, then the copy, as the Drum Kit does. The letter | rolls pair and the hero stay on the
   black page. "togli anche lo sticky bottom part": the sticky bottom bar is gone from the landing. "che è sto
   spazio enorme": the bonus cover now spans both grid rows, so the files follow the text with no gap.
+- "images must be relevant to the content of the other column" (2026-11-02): the DAW photo beside "how it works"
+  and the box beside "after you pay" are gone. Beside the three steps: the folder path to a real file and that
+  file's roll (HowShot, from rolls.json "ballad"); beside the four steps after paying: the download list a buyer
+  gets (DownloadShot, the pack and the five bonuses from funnel.ts). Both HTML from the pack's data, no image file.
+- "qua è tutto decentrato senza colonne senza immagini non si capisce niente" (the folders, 2026-11-02): each
+  folder is a panel with one of its real files drawn as a roll on the left (folder-rolls.json: the first file of
+  the folder's first path in browse/pack.json, regenerate with the snippet in git history of this commit) and the
+  number, count, name and what-for on the right. "Pure qua… controlla questi errori" (the chart): the four heads
+  share one baseline (the pack's box 48px), every cell is vertically centred.

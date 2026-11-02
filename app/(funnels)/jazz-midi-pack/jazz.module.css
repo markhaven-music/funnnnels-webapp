@@ -1304,21 +1304,22 @@
   }
   .chHead {
     align-items: flex-start;
-    padding: 0 16px 18px;
+    justify-content: flex-end;
+    padding: 18px 16px;
     font-size: 14px;
     text-align: left;
   }
   .chHead.chWin {
     align-items: center;
     margin: 0;
-    padding: 0 16px 18px;
+    padding: 18px 16px;
     border: 0;
     background: none;
     font-size: 15px;
     text-align: center;
   }
   .chBox {
-    width: 64px;
+    width: 48px;
   }
   .chLabel {
     grid-column: auto;
@@ -1326,10 +1327,10 @@
     font-size: 17px;
   }
   .chCell {
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-start;
     gap: 10px;
-    padding: 20px 16px;
+    padding: 18px 16px;
     font-size: 15px;
   }
   .chAlt {
@@ -1559,6 +1560,7 @@
 }
 .sideImg {
   order: 2;
+  min-width: 0; /* a nowrap line inside must not widen the column */
   margin: 0;
 }
 .sideImg img {
@@ -1587,43 +1589,6 @@
   }
   .after {
     grid-template-columns: 1fr;
-  }
-  .bento {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-  .cell,
-  .cellBig {
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    grid-template-rows: auto auto;
-    grid-column: auto;
-    grid-row: auto;
-    column-gap: 48px;
-    align-items: start;
-    padding: 26px 0;
-  }
-  .cellN {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .cellCount,
-  .cellBig .cellCount {
-    grid-column: 1;
-    grid-row: 2;
-    font-size: 64px;
-  }
-  .cell h3 {
-    grid-column: 2;
-    grid-row: 1;
-    margin-top: 0;
-    font-size: 24px;
-  }
-  .cell p {
-    grid-column: 2;
-    grid-row: 2;
-    margin-top: 0;
-    font-size: 17px;
   }
   .lists {
     grid-template-columns: 1fr;
@@ -1680,5 +1645,143 @@
   }
   .footer {
     padding-bottom: 48px;
+  }
+}
+
+/* Illustrations built from the pack's data (sections.tsx HowShot,
+   DownloadShot), beside the copy they show */
+.illus {
+  min-width: 0;
+  overflow: hidden;
+  padding: 18px 18px 20px;
+  border-radius: 4px;
+  background: #15120e;
+}
+.tree {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--cream-2);
+}
+.tree li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.treeIco {
+  display: inline-block;
+  width: 16px;
+  color: var(--mute);
+}
+.treeFile {
+  font-weight: 700;
+  color: var(--brass);
+}
+.treeFile .treeIco {
+  color: var(--brass);
+}
+.illusArrow {
+  margin: 6px 0 8px;
+  text-align: center;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--brass);
+}
+.illusTitle {
+  margin-bottom: 14px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+}
+.dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dl li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: #1c1712;
+}
+.dlIco {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brass);
+  color: #1a1206;
+  font-weight: 800;
+}
+.dl b {
+  display: block;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.dl small {
+  font-size: 12px;
+  color: var(--mute);
+}
+
+/* The five folders as panels (Inside): one real file's roll beside the number,
+   the count, the name and what the folder is for. Phone: the roll on top. */
+.folders {
+  display: grid;
+  gap: 20px;
+}
+.folder {
+  display: grid;
+  gap: 18px;
+}
+.folderRoll {
+  overflow: hidden;
+}
+.folderFile {
+  padding: 8px 12px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.folderText .cellCount {
+  margin-top: 6px;
+  font-size: 40px;
+}
+.folderText .cellCount small {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--cream-2);
+}
+.folderText h3 {
+  margin-top: 10px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+}
+.folderText p {
+  margin-top: 6px;
+  font-size: 16px;
+  color: var(--cream-2);
+}
+@media (min-width: 1000px) {
+  .folder {
+    grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
+    gap: 48px;
+    align-items: center;
+  }
+  .folderText .cellCount {
+    font-size: 48px;
   }
 }

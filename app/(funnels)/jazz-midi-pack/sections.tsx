@@ -6,7 +6,11 @@ import { EditableText } from "@/components/blocks/EditableText";
 import { funnel } from "./funnel";
 import { DEFAULT_SECTIONS, type ChartCell, type Section, type SectionProps, type SectionType } from "./content";
 import { Cta } from "./Cta";
-import { PlayableRoll } from "./PlayableRoll";
+import { PlayableRoll, Svg } from "./PlayableRoll";
+import rolls from "./rolls.json";
+import folderRolls from "./folder-rolls.json";
+import type { Roll } from "./piano";
+import r from "./roll.module.css";
 import { SoundPicker } from "./SoundPicker";
 import rv from "./reviews.module.css";
 import { LoopList } from "./LoopList";
@@ -548,6 +552,56 @@ function Previews({ p, patch, ctx }: { p: SectionProps["s_previews"]; patch?: Pa
   );
 }
 
+// The pictures beside the copy show what the copy says ("images must be
+// relevant to the content of the other column", 2026-11-02), built from the
+// pack's own data, no image files: the folder path to a file and that file's
+// roll beside "how it works"; the download list a buyer gets beside "after
+// you pay".
+function HowShot() {
+  const path = ["Jazz MIDI Pack", "1 Chords in Original Key", "01 ii-V-I Major", "01 Best Voicing"];
+  const roll = rolls.ballad as Roll;
+  return (
+    <div className={s.illus} aria-hidden>
+      <ol className={s.tree}>
+        {path.map((p, i) => (
+          <li key={p} style={{ paddingLeft: i * 14 }}>
+            <span className={s.treeIco}>▸</span>
+            {p}
+          </li>
+        ))}
+        <li className={s.treeFile} style={{ paddingLeft: path.length * 14 }}>
+          <span className={s.treeIco}>♪</span>
+          {roll.file}
+        </li>
+      </ol>
+      <p className={s.illusArrow}>↓</p>
+      <div className={`${r.scope} ${r.short} ${r.brass}`}>
+        <Svg roll={roll} chordsRow />
+      </div>
+    </div>
+  );
+}
+
+function DownloadShot() {
+  const rows: [string, string][] = [[funnel.product, `${n.files.toLocaleString("en-US")} MIDI files · .zip`], ...funnel.bonuses.map((b) => [b.name, b.count] as [string, string])];
+  return (
+    <div className={s.illus} aria-hidden>
+      <p className={s.illusTitle}>Your files are ready</p>
+      <ul className={s.dl}>
+        {rows.map(([name, meta]) => (
+          <li key={name}>
+            <span className={s.dlIco}>↓</span>
+            <span>
+              <b>{name}</b>
+              <small>{meta}</small>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function Steps({ p, patch, ctx }: { p: SectionProps["s_steps"]; patch?: Patch; ctx: Ctx }) {
   const ops = listOps(p.steps, "steps", patch);
   const h = parts(p, patch);
@@ -556,11 +610,9 @@ function Steps({ p, patch, ctx }: { p: SectionProps["s_steps"]; patch?: Patch; c
       <div className={s.wrap}>
         <div className={`${s.side} ${s.panel}`}>
         <Part k="shot" h={h}>
-          <figure className={`${s.dawShot} ${s.sideImg}`}>
-            <Scene name="daw" alt="A laptop with the DAW piano roll showing gold jazz voicings under Dm9, G13 and Cmaj9, next to the Jazz MIDI Pack box"
-              sizes="(min-width: 1000px) 45vw, 100vw"
-            />
-          </figure>
+          <div className={s.sideImg}>
+            <HowShot />
+          </div>
         </Part>
         <div className={s.sideText}>
         <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
@@ -607,16 +659,29 @@ function Inside({ p, patch, ctx }: { p: SectionProps["s_inside"]; patch?: Patch;
         <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
         {patch && <p className={e.hint}>The folders, voicings and progressions below come from the pack itself.</p>}
         {folders.length > 0 && (
-          <div className={s.bento}>
-            {folders.map((f) => (
-              <div key={f.name} className={h.host(`${s.cell} ${f.i === 0 ? s.cellBig : ""}`)}>
-                <span className={s.cellN}>{String(f.i + 1).padStart(2, "0")}</span>
-                <span className={s.cellCount}>{f.files.toLocaleString("en-US")}</span>
-                <h3>{f.name}</h3>
-                <p>{f.what}</p>
-                <Drop onClick={h.x(f.k)} />
-              </div>
-            ))}
+          <div className={s.folders}>
+            {/* each folder beside one of its real files (folder-rolls.json, from the
+                pack browser's data): "senza colonne senza immagini non si capisce niente" */}
+            {folders.map((f) => {
+              const roll = folderRolls[f.i] as Roll;
+              return (
+                <div key={f.name} className={h.host(`${s.folder} ${s.panel}`)}>
+                  <div className={`${r.scope} ${r.short} ${r.brass} ${s.folderRoll}`}>
+                    <Svg roll={roll} chordsRow={roll.chords.length > 0} />
+                    <p className={s.folderFile}>{roll.file}</p>
+                  </div>
+                  <div className={s.folderText}>
+                    <span className={s.cellN}>{String(f.i + 1).padStart(2, "0")}</span>
+                    <span className={s.cellCount}>
+                      {f.files.toLocaleString("en-US")} <small>files</small>
+                    </span>
+                    <h3>{f.name}</h3>
+                    <p>{f.what}</p>
+                  </div>
+                  <Drop onClick={h.x(f.k)} />
+                </div>
+              );
+            })}
           </div>
         )}
         {h.any("voicings", "rhythms", "progressions") && (
@@ -1100,9 +1165,9 @@ function After({ p, patch, ctx }: { p: SectionProps["s_after"]; patch?: Patch; c
       <div className={s.wrap}>
         <div className={`${s.side} ${s.panel}`}>
         <Part k="box" h={h}>
-          <figure className={s.sideImg}>
-            <img src={`${DIR}/box-900.webp`} width={900} height={1282} alt="The Jazz MIDI Pack box" loading="lazy" decoding="async" />
-          </figure>
+          <div className={s.sideImg}>
+            <DownloadShot />
+          </div>
         </Part>
         <div className={s.sideText}>
         <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
