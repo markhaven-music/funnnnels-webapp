@@ -183,11 +183,16 @@ C23. Output Arcade. *Use Arcade for loops and want your own drum patterns?*
 C24. Ghosthack. *Bought Ghosthack packs and still stuck on drums?*
 C25. Looperman. *Grabbing drum loops from Looperman?*
 
-## How the image and copy work (agreed 2026-11-01)
+## How the image and copy work (agreed 2026-11-01, lines rewritten 2026-11-02)
 
-- **Image**: pure black, the laptop with the piano roll blurred behind, the line dead centre in Bebas Neue caps with a few words in the accent colour, GRIND ◆ STUDIO at the top, "MIDI DRUM KIT · $27" at the bottom. Nothing else on the image. Template: `render-w1.mjs` in the session scratchpad.
-- **The line** always opens with a question that names the person, then gives one honest piece of advice in normal spoken English, the way a producer friend would say it. No slogans, no hype words, no clipped copywriting.
-- **Primary text**: the same line, then two plain sentences about the kit, then "$27, one payment. Works in any DAW." (plus "Not affiliated with…" where a brand or artist is named).
+- **Image**: pure black, the laptop with the piano roll blurred behind, the GRIND ◆ STUDIO logo and the line centred together as one block, Bebas Neue caps with a few words in the accent colour. No price line, nothing else on the image. Template: `render-w1.mjs` in the session scratchpad.
+- **The line** has four parts, in this order, and reads like a friend talking:
+  1. A question that names the person *and* ties them to making beats, which is what the kit is for: "Do you play drums and you're thinking about becoming a beatmaker?", never just "Do you play drums?".
+  2. Why we asked, in their situation: "Then you already have more sounds than you'll ever need."
+  3. What we made for it: "we made 1050 drum patterns and complete beats that work with the sounds you already have". The kit is patterns *and* complete MIDI drum beats, say both.
+  4. The benefit, spelled out, so the person thinks "ah ok, I'll click": "so you fix the pattern instead of the sound, and the beat starts to bounce". Advice with no kit behind it was rejected ("ma perché devo cliccare?").
+- **Words**: plain spoken English a kid would understand. No idioms ("eats the night"), no cryptic lines ("Trap just puts them somewhere else"), no slogans or hype, no clipped copywriting, and nothing that isn't true ("the drums are programmed, not played" was cut). "Bounce" and "stiff" stay: they are the words of the page and of the winning ads.
+- **Primary text**: the same line, then one paragraph that names the kit and what is in it (single parts and complete beats, any DAW; the licence for beat sellers; "one payment, no subscription" for Splice), then "$27, one payment. Works in any DAW." (plus "Not affiliated with…" where a brand or artist is named).
 - **One flexible ad per pocket** with 6 images (1:1, 4:5, 9:16 × orange and green). Meta picks the format and colour per placement.
 
 ## Wave 1 (2026-11-01, built paused)
@@ -198,35 +203,37 @@ Read after 7–10 days on clicks, landing page views and checkouts per pocket (�
 
 | # | Ad set | Line on the image |
 | --- | --- | --- |
-| 1 | W1_newtrap_US | Are you just getting into making trap beats? Start with a few good drum patterns instead of an empty grid. |
-| 5 | W1_vet10_US | Have you been making trap for 10+ years? It might be time to refresh the drum patterns you always go back to. |
-| 15 | W1_hiphop2trap_US | Do you make hip-hop and want to try trap? Learn how the drums are programmed first. That’s where the difference is. |
-| 17 | W1_rock2hiphop_US | Do you produce rock music but you’ve been curious about hip-hop? The drums are the first thing worth figuring out. |
-| 51 | W1_metrofan_US | Are you a big Metro Boomin fan? Pay attention to his drum patterns, not just the sounds he picks. |
-| E1 | W1_drumline_US | Did you play in a drumline and now you’re making beats? Trap hi-hats will feel pretty familiar. |
-| 2 | W1_flnew_US | Are you new to FL Studio? Don’t begin every beat with an empty piano roll. Drag in a drum pattern and build from there. |
-| 7 | W1_tutorials_US | Have you been watching drum tutorials every night? Opening a few real patterns will teach you more than another video. |
-| 8 | W1_loops_US | Got a folder full of unfinished loops? Most of the time, the drums are what’s missing. |
-| 10 | W1_kits_US | Do you buy a new drum kit every month? New sounds won’t fix a drum pattern that doesn’t move. |
-| 18 | W1_metal_US | Do you make metal but secretly listen to trap? Try making a trap beat, and start with the drums. |
-| 19 | W1_edm_US | Do you make EDM and want to try trap? The drums are really the only big change. |
-| 21 | W1_rnb_US | Do you make R&B? Don’t spend the whole night on hi-hats. Drag in a drum pattern and get back to the chords. |
-| 23 | W1_drill_US | Thinking about trying drill after making trap? Look at how the drum patterns are built before anything else. |
-| 28 | W1_songwriter_US | Do you write your songs on guitar? A simple drum pattern under your demo makes a big difference. |
-| 31 | W1_rapper_US | Do you rap and make your own beats? Use drum patterns that are already done and spend that time writing. |
-| 33 | W1_drummer_US | Do you play drums? Trap drums are programmed, not played, so it helps to look at a few patterns first. |
-| 34 | W1_keys_US | Do you play keys? Play the chords like you always do and drag in the drums. |
-| 38 | W1_typebeat_US | Uploading type beats every week? You don’t have to rebuild the drums from scratch every single time. |
-| 39 | W1_beatstars_US | Selling beats on BeatStars? You don’t need to program the drums from zero for every beat. |
-| 52 | W1_fan808_US | Are you a big 808 Mafia fan? Pay attention to the drum patterns, not just the samples. |
-| 69 | W1_flstudio_US | Making trap in FL Studio? You can drag MIDI drum patterns straight into the piano roll. |
-| 80 | W1_splice_US | Do you use Splice a lot? The sounds are only half of it. The other half is the drum pattern. |
-| 85 | W1_afterwork_US | Making beats after work? Don’t spend the one hour you have programming hi-hats. |
-| 88 | W1_late_US | Still up at 3 AM trying to fix the drums? Use a pattern that already works and go to sleep. |
-| 93 | W1_hats_US | Tired of stiff hi-hats? Most of the time it’s the pattern, not the sound. |
-| E7 | W1_caraudio_US | Into car audio? Make your own 808 beats and use them to test the system. |
-| E15 | W1_anime_US | Making anime type beats? Finding the sample is the easy part. Getting the drums right is the hard part. |
-| C1 | W1_cymatics_US | Are you a big Cymatics fan? Kits give you great sounds, but you still need the drum patterns. |
-| C13 | W1_ezdrummer_US | Do you use EZdrummer for rock? Trap drum grooves work exactly the same way. |
+| 1 | W1_newtrap_US | Are you just getting into making trap beats? The drums are where most beginners get stuck. We made 1050 drum patterns and complete trap beats you just drag into your DAW, so the hardest part is already done. |
+| 5 | W1_vet10_US | Have you been making trap for 10+ years? After that long you keep using the same drum patterns without noticing. We made 1050 new patterns and complete drum beats based on today’s Billboard producers, so your beats sound new again. |
+| 15 | W1_hiphop2trap_US | Do you make hip-hop and want to try trap? You can keep your sounds, the drums are what change. We made 1050 real trap drum patterns and complete beats you can drag in, so you get them right without guessing. |
+| 17 | W1_rock2hiphop_US | Do you produce rock music but you want to try making hip-hop beats? You already have the rhythm, only the drum patterns are different. We made 1050 drum patterns and complete beats you can drag in, so you don’t spend months learning them by ear. |
+| 51 | W1_metrofan_US | Are you a big Metro Boomin fan and you make beats yourself? What makes his beats bounce isn’t the samples, it’s the drum patterns. We made 1050 patterns and complete drum beats based on Billboard producers, so you can see how that bounce is made. |
+| E1 | W1_drumline_US | Did you play in a drumline and now you make beats? Trap hi-hat rolls are the same rudiments you already know, just in a DAW. We made 1050 trap patterns and complete beats with the rolls already in, so the drums become the easiest part of your beats. |
+| 2 | W1_flnew_US | Are you new to FL Studio and trying to make your first trap beat? The empty piano roll is where most people give up. We made 1050 drum patterns and complete beats you drag straight into it, so you have a beat playing in minutes. |
+| 7 | W1_tutorials_US | Watching drum tutorials every night to get your beats right? A video shows you one pattern and you have to copy it by eye. We made 1050 real MIDI patterns and complete beats you can open and see exactly where every hit goes. You learn a lot faster that way. |
+| 8 | W1_loops_US | Got a folder full of loops that never became beats? The loop usually isn’t the problem. The problem is making the drums for the rest of the song. We made 1050 patterns, fills and complete beats, so you drag one in for each part and the loop becomes a beat. |
+| 10 | W1_kits_US | Do you buy a new drum sample kit every month and your beats still don’t sound right? The sounds aren’t the problem. The problem is where you put them. We made 1050 drum patterns and complete beats for the kits you already own, so they finally sound good. |
+| 18 | W1_metal_US | Do you make metal but you’ve been wanting to try a trap beat? You already know kicks and subdivisions well, so the drums are the easiest place to start. We made 1050 trap drum patterns and complete beats you can open and see how they’re made. |
+| 19 | W1_edm_US | Do you make EDM and want to try trap? You can keep your sounds as they are. The drums are the only big change, and we made 1050 trap patterns and complete beats you can drag in, so your first trap beat sounds like trap. |
+| 21 | W1_rnb_US | Do you make R&B and need trap drums under it? Your time is better spent on the chords and the vocal than on hi-hats. We made 1050 drum patterns and complete beats you just drag in, so you spend your time on the part you’re good at. |
+| 23 | W1_drill_US | Thinking about trying drill after making trap? The sounds are close to what you already use. The drum pattern is what makes it drill, and we made real drill patterns and complete beats you can drag in, so you get it right instead of guessing. |
+| 28 | W1_songwriter_US | Do you write songs on guitar and want modern drums under your demos? With just guitar and voice, people can’t hear what the finished song will sound like. We made 1050 drum patterns and complete beats you drag under the demo, so they hear the song the way you hear it in your head. |
+| 31 | W1_rapper_US | Do you rap and make your own beats? Every hour you spend on hi-hats is an hour you’re not writing. We made 1050 drum patterns and complete beats that are already done, so the beat is ready in minutes and you can spend your time writing. |
+| 33 | W1_drummer_US | Do you play drums and you’re thinking about becoming a beatmaker? Trap hats roll faster than you’d ever play them, and the 808 is a bass note, not a kick, so you can’t make them the way you’d play them. We made 1050 patterns and complete drum beats you can open and see how they’re made. |
+| 34 | W1_keys_US | Do you play keys and make your own beats? The chords take you minutes and the drums take you an hour. We made 1050 drum patterns and complete beats you drag under your chords, so the whole beat is done as fast as the chords. |
+| 38 | W1_typebeat_US | Uploading type beats every week? The drums take the longest and start sounding the same. We made 1050 drum patterns and complete beats, so every beat gets a different one, you upload faster, and no two beats sound the same. |
+| 39 | W1_beatstars_US | Selling beats on BeatStars? Every beat you sell needs drums, and making them from zero takes most of your time. We made 1050 patterns and complete drum beats with a commercial license, so you can finish more beats in the same time. |
+| 52 | W1_fan808_US | Are you a big 808 Mafia fan and you make beats yourself? What gives their beats the bounce isn’t only the samples, it’s the drum patterns. We made 1050 patterns and complete drum beats based on Billboard producers, so you can see how that bounce is made. |
+| 69 | W1_flstudio_US | Making trap in FL Studio? You can drag a MIDI file straight into the piano roll and get a whole drum pattern instead of clicking in every hat. We made 1050 drum patterns and complete beats, so you save most of the time you spend on drums. |
+| 80 | W1_splice_US | Do you use Splice a lot for your beats? Then you already have more sounds than you’ll ever need. What your beats are probably missing is the drum pattern, so we made 1050 drum patterns and complete beats that work with the sounds you already have. |
+| 85 | W1_afterwork_US | Making beats after work? You get an hour, maybe two, and programming hi-hats takes most of it. We made 1050 drum patterns and complete beats you just drag in, so you can spend the whole hour on the beat itself. |
+| 88 | W1_late_US | Still up at 3 AM trying to fix the drums on a beat? Moving the same hats around for the fifth time won’t fix them. We made 1050 patterns and complete beats that already work, so you drag one in, finish the beat, and go to sleep. |
+| 93 | W1_hats_US | Tired of stiff hi-hats in your beats? Straight hats on every 8th note make the whole beat stiff. We made 1050 patterns and complete beats with the rolls and accents already in, so you fix the pattern instead of the sound, and the beat starts to bounce. |
+| E7 | W1_caraudio_US | Into car audio and want to make your own 808 beats? The rattle comes from where the 808 and the kick are placed. We made 1050 patterns and complete beats with the kick and 808 made together, so you can put the 808 exactly where your system hits hardest. |
+| E15 | W1_anime_US | Making anime type beats? The sample is the easy part. The drums under it are the hard part, so we made 1050 trap drum patterns and complete beats you drag under the sample, and the beat is done. |
+| C1 | W1_cymatics_US | Are you a big Cymatics fan and you make beats with their kits? The kits give you the sounds, but a kit doesn’t tell you where to put them. We made 1050 drum patterns and complete beats for the kits you already own, so they finally sound the way you want. |
+| C13 | W1_ezdrummer_US | Do you use EZdrummer for rock and want to try a trap beat? You already make drums by dragging in MIDI grooves. We made 1050 trap grooves and complete beats that work exactly the same way, so you can make a trap beat tonight the same way you already work. |
+
+The lines above are the 2026-11-02 rewrite; the 2026-11-01 lines gave advice with nothing behind the click. The 30 ads were rebuilt on 2026-11-02 as `W1_<pocket>_flex_v2` (a Meta creative is immutable, so each got a new creative and a new ad; the 2026-11-01 ads are archived). Everything is still paused.
 
 The first build (`GrindStudio_Pockets_2026-11-01`, 6 ad sets at €8 with the old Impact template) never ran and is replaced by wave 1.
