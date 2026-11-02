@@ -67,6 +67,22 @@ spent money; unsubscribed and undeliverable (`bounced`) stay so). The import
 starts no sequence. ClickFunnels keeps sending its own emails until it ends on
 2026-11-16.
 
+On 2026-11-02 the 15 broadcasts ClickFunnels had scheduled for Nov 16–30 (the
+TOP HITS launch and the Drum Kit emails between them) were moved into
+Dashboard → Broadcasts, word for word, at the same times (ClickFunnels'
+workspace clock is Budapest: 09:00 = 08:00 UTC, 12:00 = 11:00 UTC), and turned
+back to drafts in ClickFunnels. Links now go to m.thegrind.studio
+(`/top-hits-midi-bundle`, `/en/midi-drum-kit`) with
+`utm_source=email&utm_medium=broadcast&utm_campaign=<name>`. ClickFunnels left
+out buyers by product; here the TOP HITS emails leave out
+`buyer-top-hits-midi-bundle` and the Drum Kit ones `owns-midi-drum-kit` (put
+on ClickFunnels' Drum Kit buyers, the `grindstudio-buyer` / `mididrumkit-buyer`
+tags, and given to new Drum Kit buyers; no sequence starts on it, unlike
+`buyer-midi-drum-kit`). "A Sunday with the classics" (Nov 22) sells the Famous
+Beats Bundle alone, which funnnnels has no page for: it's a draft here and
+still scheduled in ClickFunnels. The broadcasts of Nov 3–15 stay in
+ClickFunnels.
+
 ## Testing
 
 Off production every email goes to `EMAIL_TEST_TO` with `[test → <real address>]`
