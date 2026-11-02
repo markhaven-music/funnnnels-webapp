@@ -66,6 +66,7 @@ const GEIST: CardLook = {
   fontCss: "https://fonts.googleapis.com/css2?family=Geist:wght@400&display=swap",
   color: "#000000",
   placeholder: "#6b6b6b",
+  focus: "#000000",
 };
 
 export function CheckoutWidget(props: Props) {
@@ -329,11 +330,7 @@ function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromis
             <span>or pay by card</span>
           </div>
         )}
-        <CardFields
-          words={{ number: "Card number", expiry: "MM / YY", cvc: "CVV" }}
-          look={GEIST}
-          className={s.cardFields}
-        />
+        <CardFields words={{ number: "Card number", expiry: "MM / YY", cvc: "CVV" }} look={GEIST} />
       </div>
       <PayStepBody
         {...props}

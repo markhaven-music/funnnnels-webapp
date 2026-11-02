@@ -473,10 +473,6 @@
 .cardPane[hidden] {
   display: none;
 }
-/* The card fields (../CardFields.tsx): focus ring in the page's yellow. */
-.cardFields {
-  --card-focus: var(--brass);
-}
 .orCard {
   display: flex;
   align-items: center;
