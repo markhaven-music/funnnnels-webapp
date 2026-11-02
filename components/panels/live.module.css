@@ -497,6 +497,15 @@
 .muted {
   color: var(--fg-3);
 }
+.link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+  text-underline-offset: 3px;
+}
+.link:hover {
+  text-decoration-color: currentColor;
+}
 .amount {
   font-family: var(--font-mono);
   font-size: 12px;

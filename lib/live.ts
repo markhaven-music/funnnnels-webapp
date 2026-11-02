@@ -121,6 +121,7 @@ export type LiveVisitor = {
   page: string;
   lang: string;
   path: string;
+  url: string; // the page they're on, "" if unknown
   country: string;
   region: string;
   city: string;
@@ -138,7 +139,7 @@ export type LiveVisitor = {
 
 type Base = { id: string; at: string; funnel: string; funnelName: string; lang: string };
 export type LiveEvent =
-  | (Base & { kind: "view"; visitor: string; page: string; path: string; country: string; city: string; source: string; campaign: string })
+  | (Base & { kind: "view"; visitor: string; page: string; path: string; url: string; country: string; city: string; source: string; campaign: string })
   | (Base & { kind: "checkout"; who: string })
   | (Base & { kind: "order" | "upsell"; who: string; amount: number; currency: string; country: string; offer: string })
   | (Base & { kind: "click"; who: string; url: string });
@@ -160,6 +161,9 @@ function funnelNames(): (slug: string) => string {
 }
 
 const testEmail = (e: string | null) => !!e && /@example\.com$/i.test(e);
+
+// The page as the visitor's browser had it: its host and path (LIVE_JS h, u).
+const pageUrl = (host: string, path: string) => (host && path ? `https://${host}${path}` : "");
 
 /** @param day the viewer's midnight (ISO), for "today". */
 export async function getLive(day: string | null): Promise<Live> {
@@ -233,6 +237,7 @@ export async function getLive(day: string | null): Promise<Live> {
       page: v.page,
       lang: v.lang,
       path: v.path,
+      url: pageUrl(v.host, v.path),
       country: v.country,
       region: v.region,
       city: v.city,
@@ -261,6 +266,7 @@ export async function getLive(day: string | null): Promise<Live> {
         lang: v.lang,
         page: v.page,
         path: v.path,
+        url: pageUrl(v.host, v.path),
         country: v.country,
         city: v.city,
         source: v.source,

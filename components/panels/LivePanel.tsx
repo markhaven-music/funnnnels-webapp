@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { previewUrl } from "@/components/FunnelLanes";
 import { I } from "@/components/icons";
 import { ASTRO_FUNNEL, ME_PATH, STEPS } from "@/lib/beacon";
 import type { Live, LiveEvent, LiveVisitor } from "@/lib/live";
@@ -30,6 +31,16 @@ function pageLabel(funnel: string, page: string, path = "") {
   if (funnel === "shop" && page === "landing") return !path || /^\/shop\/?$/.test(path) ? "Shop" : "Product page";
   if (funnel === "shop" && page === "order") return "Cart";
   return STEP_LABEL[page] ?? page;
+}
+
+// A page they're on, opened from here: in a new tab, not counted as a visit (?preview=1).
+function PageLink({ url, children }: { url: string; children: React.ReactNode }) {
+  if (!url) return <>{children}</>;
+  return (
+    <a className={s.link} href={previewUrl(url)} target="_blank" rel="noreferrer" title={url}>
+      {children}
+    </a>
+  );
 }
 
 const flag = (cc: string) => (/^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map((c) => 0x1f1a5 + c.charCodeAt(0))) : "");
@@ -391,12 +402,13 @@ function Countries({ visitors }: { visitors: LiveVisitor[] }) {
 
 function Pages({ visitors }: { visitors: LiveVisitor[] }) {
   const funnels = useMemo(() => {
-    const by = new Map<string, { slug: string; name: string; now: number; steps: Map<string, { now: number; recent: number }> }>();
+    const by = new Map<string, { slug: string; name: string; now: number; steps: Map<string, { now: number; recent: number; url: string }> }>();
     for (const v of visitors) {
       const f = by.get(v.funnel) ?? { slug: v.funnel, name: v.funnelName, now: 0, steps: new Map() };
       // The Astro landings are one page each, told apart by their path.
       const key = v.funnel === ASTRO_FUNNEL ? v.path || "/" : v.page;
-      const step = f.steps.get(key) ?? { now: 0, recent: 0 };
+      // Visitors come latest first: the step links to the page the latest one is on.
+      const step = f.steps.get(key) ?? { now: 0, recent: 0, url: v.url };
       step.recent++;
       if (v.active) {
         step.now++;
@@ -421,7 +433,9 @@ function Pages({ visitors }: { visitors: LiveVisitor[] }) {
             .sort(([a], [b]) => STEPS.indexOf(a as (typeof STEPS)[number]) - STEPS.indexOf(b as (typeof STEPS)[number]))
             .map(([page, n]) => (
               <div key={page} className={s.step}>
-                <span className={s.stepName}>{pageLabel(f.slug, page, page)}</span>
+                <span className={s.stepName}>
+                  <PageLink url={n.url}>{pageLabel(f.slug, page, page)}</PageLink>
+                </span>
                 <span className={s.bar}>
                   <span className={s.barRecent} style={{ width: `${(n.recent / max) * 100}%` }} />
                   <span className={s.barNow} style={{ width: `${(n.now / max) * 100}%` }} />
@@ -456,7 +470,9 @@ function VisitorRow({ v, now }: { v: LiveVisitor; now: number }) {
         </div>
       </div>
       <div className={s.cell}>
-        <div className={s.main}>{pageLabel(v.funnel, v.page, v.path)}</div>
+        <div className={s.main}>
+          <PageLink url={v.url}>{pageLabel(v.funnel, v.page, v.path)}</PageLink>
+        </div>
         <div className={s.small}>
           {v.funnelName}
           {v.lang && v.lang !== "en" && <code>{v.lang.toUpperCase()}</code>}
@@ -497,7 +513,10 @@ function EventRow({ e, fresh }: { e: LiveEvent; fresh: boolean }) {
       text = (
         <>
           <span className={s.flag}>{flag(e.country)}</span>
-          <b>{place(e.city, e.country)}</b> opened <b>{pageLabel(e.funnel, e.page, e.path)}</b>
+          <b>{place(e.city, e.country)}</b> opened{" "}
+          <b>
+            <PageLink url={e.url}>{pageLabel(e.funnel, e.page, e.path)}</PageLink>
+          </b>
           <span className={s.muted}>
             {" "}
             · {e.funnelName}
@@ -541,7 +560,11 @@ function EventRow({ e, fresh }: { e: LiveEvent; fresh: boolean }) {
       } catch {}
       text = (
         <>
-          <b>{e.who}</b> clicked an email<span className={s.muted}> · {where}</span>
+          <b>{e.who}</b> clicked an email
+          <span className={s.muted}>
+            {" "}
+            · <PageLink url={e.url}>{where}</PageLink>
+          </span>
         </>
       );
       break;
