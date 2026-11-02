@@ -156,17 +156,22 @@
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   flex-wrap: wrap;
 }
-/* The pay button (step 2) is bigger than step 1's ("solo il bottone dello step 2 deve essere + grande"). */
+/* The pay button (step 2), sized as ClickFunnels' order page draws it (measured
+   on /spot-available-midi-drum-kit-ad-15m30): Inter 900 30.4px, 25px 20px
+   padding, its "Get Instant Access" line 7px under it. */
 .ctaPay {
-  padding: 30px 20px;
-  font-size: 30px;
+  row-gap: 7px;
+  padding: 25px 20px;
+  border: 0;
+  font: 900 30.4px/30.4px var(--inter);
+  letter-spacing: 0.96px;
 }
 /* The line under the pay button ("Get Instant Access"), as on ClickFunnels' order page. */
 .ctaSub {
   flex-basis: 100%;
-  font: 500 19px/1.2 var(--inter);
-  letter-spacing: 0.02em;
-  opacity: 0.85;
+  font: 600 18px/18px var(--inter);
+  letter-spacing: 0.32px;
+  color: rgba(255, 255, 255, 0.8);
   text-shadow: none;
 }
 .cta:hover {
