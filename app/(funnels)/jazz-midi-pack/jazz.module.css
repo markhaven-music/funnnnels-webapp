@@ -68,10 +68,25 @@
   --mute: rgb(255 255 255 / 0.62);
   background: var(--navy);
 }
+/* the Jazz hero: near-black, a whisper of yellow at the top and, as the
+   texture, the pack's own "after" roll (sections.tsx heroRollTile) repeated
+   down the hero and fading out before the bullets; no glow orbs, no grid
+   ("cambia sfondo hero, mettilo più scuro e cool senza sembrare troppo AI"). */
 .jazz .heroBg {
   background:
-    radial-gradient(70% 55% at 50% 0%, rgb(var(--y-rgb) / 0.26), transparent 70%),
-    linear-gradient(to bottom, transparent 0 calc(100% - 1px), var(--rule) calc(100% - 1px));
+    radial-gradient(60% 40% at 50% 0%, rgb(var(--y-rgb) / 0.1), transparent 70%),
+    linear-gradient(to bottom, transparent 0 calc(100% - 1px), var(--rule) calc(100% - 1px)),
+    #050505;
+}
+.jazz .heroBg::after {
+  content: none;
+}
+.heroRoll {
+  position: absolute;
+  inset: 0;
+  background-size: 100% auto;
+  background-repeat: repeat-y;
+  mask: linear-gradient(to bottom, #000 0, #000 45%, transparent 85%);
 }
 .jazz .chHead.chWin {
   background: rgb(var(--y-rgb) / 0.2);
