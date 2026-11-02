@@ -110,12 +110,17 @@ const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&gt;/g, ">").rep
 type Href = (url: string) => string;
 const plainHref: Href = (u) => esc(u);
 
+// Links in the letter's text: FL Studio / Matrix green ("verde matrix in tema
+// con FL STUDIO… bit darker", 2026-11-02), a shade under the neon so it still
+// reads on white; bold to carry the colour. The footer's links stay grey.
+const LINK = "color:#00b034;font-weight:700;text-decoration:underline";
+
 function inline(s: string, href: Href): string {
   // Escape first, then add the few marks we allow.
   return esc(s)
     .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, t, u) => `<a href="${href(unesc(u))}" style="color:#111;text-decoration:underline">${t}</a>`)
-    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, (_, pre, u) => `${pre}<a href="${href(unesc(u))}" style="color:#111;text-decoration:underline">${u}</a>`);
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, t, u) => `<a href="${href(unesc(u))}" style="${LINK}">${t}</a>`)
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, (_, pre, u) => `${pre}<a href="${href(unesc(u))}" style="${LINK}">${u}</a>`);
 }
 
 const BUTTON = /^\[button:\s*(.+?)\]\((https?:\/\/\S+)\)$/i;
