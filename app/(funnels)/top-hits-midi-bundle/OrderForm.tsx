@@ -7,7 +7,7 @@ import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
 import { track } from "@/lib/beacon";
 import { pixel } from "../jazz-midi-pack/Tracking";
-import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet, type CardLook } from "../CardFields";
+import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
 import { withSkin, type Styles } from "../skin";
 import type { OrderOffer } from "../midi-drum-kit/offer";
@@ -36,8 +36,8 @@ type Info = { firstName: string; lastName: string; email: string };
 // itself the form (the Famous Beats Bundle's order page).
 export type Sells = { slug: string; tagline: string; thankYou: string };
 // skin: a stylesheet (CSS module) whose classes join the ones of
-// ./order.module.css with the same name, and look: the card fields' colours,
-// for a page drawn in its own style (the Famous Beats Bundle's, like its landing).
+// ./order.module.css with the same name, for a page drawn in its own style
+// (the Famous Beats Bundle's, like its landing).
 type Props = {
   currency: Currency;
   country: string;
@@ -47,10 +47,9 @@ type Props = {
   offer: OrderOffer;
   sells?: Sells;
   skin?: Styles;
-  look?: CardLook;
 };
 
-const Skin = createContext<{ s: Styles; look: CardLook }>({ s: base, look: INTER });
+const Skin = createContext<Styles>(base);
 
 const TOP_HITS: Sells = { slug: funnel.slug, tagline: funnel.tagline, thankYou: funnel.checkout.thankYou };
 
@@ -62,9 +61,8 @@ function stripeFor(key: string) {
 
 const money = (n: number, c: Currency) => `${c === "eur" ? "€" : "$"}${n.toFixed(2)}`;
 
-export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer, sells = TOP_HITS, skin, look = INTER }: Props) {
+export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer, sells = TOP_HITS, skin }: Props) {
   const s = useMemo(() => withSkin(base, skin), [skin]);
-  const theme = useMemo(() => ({ s, look }), [s, look]);
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);
@@ -80,7 +78,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
   const state: PayState = { currency, country, info, method, picked, setPicked, total, next, offer, slug: sells.slug };
 
   return (
-    <Skin.Provider value={theme}>
+    <Skin.Provider value={s}>
       <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
         {step === 1 ? (
           <>
@@ -161,7 +159,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
             </div>
 
             {stripePromise ? (
-              <Elements stripe={stripePromise} options={cardElements(look, "en")}>
+              <Elements stripe={stripePromise} options={cardElements(INTER, "en")}>
                 <CardPay {...state} stripePromise={stripePromise} />
               </Elements>
             ) : (
@@ -178,7 +176,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
 }
 
 function InfoStep({ info, slug, onDone }: { info: Info; slug: string; onDone: (info: Info) => void }) {
-  const { s } = useContext(Skin);
+  const s = useContext(Skin);
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.currentTarget)) as Info;
@@ -236,7 +234,7 @@ type PayState = {
 };
 
 function CardPay({ stripePromise, ...props }: PayState & { stripePromise: ReturnType<typeof loadStripe> }) {
-  const { s, look } = useContext(Skin);
+  const s = useContext(Skin);
   const stripe = useStripe();
   const elements = useElements();
   const [paying, setPaying] = useState(false);
@@ -289,7 +287,7 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
             <span>or pay by card</span>
           </div>
         )}
-        <CardFields words={{ number: "Card number", expiry: "MM / YY", cvc: "CVV" }} look={look} />
+        <CardFields words={{ number: "Card number", expiry: "MM / YY", cvc: "CVV" }} look={INTER} />
       </div>
       <PayBody {...props} onCard={payByCard} cardPaying={paying || !stripe} cardError={error} />
     </>
@@ -311,7 +309,7 @@ function PayBody({
   cardOff,
   cardError,
 }: PayState & { onCard?: () => void; cardPaying?: boolean; cardOff?: boolean; cardError?: string | null }) {
-  const { s } = useContext(Skin);
+  const s = useContext(Skin);
   const [paypalBusy, setPaypalBusy] = useState(false);
   const [paypalError, setPaypalError] = useState<string | null>(null);
   const paypal = method === "paypal";
@@ -441,7 +439,7 @@ function PayBody({
 
 // ClickFunnels' red arrow: Font Awesome's long-arrow-alt-right at 16px, wobbling.
 function BumpArrow() {
-  const { s } = useContext(Skin);
+  const s = useContext(Skin);
   return (
     <svg viewBox="0 0 448 512" className={s.bumpArrow} aria-hidden>
       <path

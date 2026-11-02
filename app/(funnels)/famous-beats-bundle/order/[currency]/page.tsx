@@ -7,7 +7,6 @@ import { ReservedTimer } from "../../../top-hits-midi-bundle/ReservedTimer";
 import { Check } from "../../../top-hits-midi-bundle/sections";
 import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
 import base from "../../../top-hits-midi-bundle/order.module.css";
-import type { CardLook } from "../../../CardFields";
 import { Beacon } from "../../../Beacon";
 import { withSkin } from "../../../skin";
 import { orderBullets, reviews } from "../../copy";
@@ -33,16 +32,6 @@ const IMG = "/funnels/top-hits-midi-bundle";
 const OWN = `/funnels/${funnel.slug}`;
 const s = withSkin(base, skin);
 
-// The card fields (Stripe's iframes) in the same colours as the form's own.
-const LOOK: CardLook = {
-  font: "'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  fontCss: "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400&display=swap",
-  color: "#eef2f8",
-  placeholder: "#808b9c",
-  focus: "#ffb43b",
-  field: "#0b101a",
-  edge: "rgba(255, 255, 255, 0.12)",
-};
 
 export const metadata: Metadata = {
   title: "Order Famous Beats Bundle",
@@ -85,6 +74,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
           <img
             className={s.productImg}
             src={`${OWN}/product.webp`}
+            srcSet={`${OWN}/product-720.webp 720w, ${OWN}/product.webp 944w`}
+            sizes="(max-width: 769px) 100vw, 535px"
             alt="Famous Beats Bundle: 32 packs, 320 MIDI transcriptions"
             width={944}
             height={1172}
@@ -112,7 +103,6 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
             offer={offer}
             sells={{ slug: funnel.slug, tagline: funnel.tagline, thankYou: funnel.checkout.thankYou }}
             skin={skin}
-            look={LOOK}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.paylogos} src={`${IMG}/payment-logos.webp`} alt="PayPal, Visa, Mastercard, American Express, Discover" width={190} height={22} />

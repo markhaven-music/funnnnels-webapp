@@ -1,8 +1,9 @@
 /* The Famous Beats Bundle's order page in its landing's look (theme "aurora",
    grind-studio-landing-pages/src/styles/aurora.css, values read on the live
    page): navy-black page, dark panels with a hairline edge and 24px corners,
-   Inter Tight, gold only as light (text, icons, glows), the CTA a white key
-   with dark text, a 3D lip and a gold glow.
+   Inter Tight, gold as light (text, icons, glows). The checkout card is white
+   so it stands out ("il checkout widget non contrasta... rimetti sfondo
+   bianco"), its buttons the landing's 3D key in orange.
    A skin over TOP HITS' order template (../top-hits-midi-bundle/order.module.css):
    every class here joins the template's class of the same name (../skin.ts),
    and every rule starts with .page.page so it wins over the template's. */
@@ -12,13 +13,13 @@
   --anton: var(--font-jet), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --ink: #04060b;
   --paper: #eef2f8;
-  --soft: rgb(222 230 244 / 0.8);
-  --mute: #a7b1c2;
-  --dim: #808b9c;
-  --line: rgb(255 255 255 / 0.086);
+  --soft: rgb(232 238 248 / 0.92);
+  --mute: #c3cbd8;
+  --dim: #9aa5b6;
+  --line: rgb(255 255 255 / 0.16);
   --gold: #ffb43b;
   --gold-2: #ffd27a;
-  --panel: linear-gradient(180deg, rgb(12 17 27) 0%, rgb(8 11 18) 100%);
+  --panel: linear-gradient(180deg, rgb(22 30 46) 0%, rgb(14 19 30) 100%);
   background:
     radial-gradient(60rem 28rem at 50% -6rem, rgb(255 106 26 / 0.13), transparent 70%),
     var(--ink);
@@ -44,8 +45,8 @@
   padding: 11px 15px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: rgb(255 255 255 / 0.045);
-  color: var(--soft);
+  background: rgb(255 255 255 / 0.07);
+  color: var(--paper);
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -80,24 +81,23 @@
   color: var(--gold);
 }
 
-/* ── the form panel ── */
+/* ── the checkout card: white, so it stands out on the dark page ── */
 .page.page .form {
-  border: 1px solid var(--line);
   border-radius: 24px;
-  background: var(--panel);
-  box-shadow: rgb(255 255 255 / 0.05) 0 1px 0 0 inset, rgb(0 0 0 / 0.9) 0 40px 90px -50px;
-  color: var(--paper);
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.9), 0 30px 80px -30px rgb(255 140 30 / 0.45), 0 24px 60px -20px rgb(0 0 0 / 0.9);
+  color: #1d2533;
 }
 .page.page .steps {
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid #e3e6ec;
 }
 .page.page .steps li {
-  background: transparent;
-  color: var(--dim);
+  background: #eef0f4;
+  color: #8a93a3;
 }
 .page.page .steps li.stepOn {
-  background: rgb(255 255 255 / 0.04);
-  color: var(--paper);
+  background: #ffffff;
+  color: #0a0d14;
 }
 .page.page .stepOn::after {
   display: none;
@@ -108,160 +108,148 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: rgb(255 255 255 / 0.06);
-  color: var(--dim);
+  background: #dfe3ea;
+  color: #6b7486;
   font-size: 15px;
 }
 .page.page .stepOn .stepNum {
-  background: rgb(255 180 59 / 0.14);
+  background: #0a0d14;
   color: var(--gold);
-  box-shadow: 0 0 14px -2px rgb(255 180 59 / 0.55);
+}
+.page.page .stepTitle {
+  font-weight: 700;
 }
 .page.page .stepSub {
-  color: var(--dim);
+  color: #6b7486;
 }
 .page.page .fields {
-  border: 1px solid rgb(255 255 255 / 0.12);
+  border: 1.5px solid #c9ced8;
   border-radius: 12px;
-  background: #0b101a;
 }
 .page.page .input {
-  border-color: rgb(255 255 255 / 0.12);
-  background: #0b101a;
-  color: var(--paper);
+  border-color: #c9ced8;
+  color: #0a0d14;
 }
 .page.page .input::placeholder {
-  color: var(--dim);
+  color: #5c6577;
 }
 .page.page .input:focus {
-  outline-color: var(--gold);
+  outline-color: #e8890c;
 }
 .page.page .respect {
-  color: var(--dim);
+  color: #5c6577;
 }
 
-/* The landing's CTA: a white key, dark label, 3D lip, gold glow. */
+/* The buttons: the landing's key (3D lip, glow, breathing light) in ClickFunnels' orange, white label. */
 .page.page .cta {
   margin-bottom: 7px;
   border-radius: 20px;
-  background: linear-gradient(180deg, #ffffff 0%, #fbf7ef 46%, #eadfc9 100%);
+  background: linear-gradient(180deg, #ffb64a 0%, #ff8a1f 48%, #e56a05 100%);
   box-shadow:
-    inset 0 2px 0 rgb(255 255 255 / 0.6),
+    inset 0 2px 0 rgb(255 255 255 / 0.5),
     inset 0 -4px 0 rgb(0 0 0 / 0.14),
-    0 7px 0 #9a8257,
-    0 22px 48px -12px rgb(255 160 40 / 0.5),
-    0 0 42px -8px rgb(255 160 40 / 0.5);
-  color: #0a0d14;
+    0 7px 0 #a84a00,
+    0 22px 48px -12px rgb(255 130 20 / 0.6),
+    0 0 42px -8px rgb(255 130 20 / 0.55);
+  color: #ffffff;
   font-weight: 800;
-  letter-spacing: -0.03em;
-  text-shadow: none;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 2px rgb(120 50 0 / 0.45);
 }
 .page.page .cta:active {
   transform: translateY(5px);
   box-shadow:
-    inset 0 2px 0 rgb(255 255 255 / 0.6),
+    inset 0 2px 0 rgb(255 255 255 / 0.5),
     inset 0 -4px 0 rgb(0 0 0 / 0.14),
-    0 2px 0 #9a8257,
-    0 12px 30px -12px rgb(255 160 40 / 0.5);
+    0 2px 0 #a84a00,
+    0 12px 30px -12px rgb(255 130 20 / 0.6);
 }
 .page.page .ctaPay {
   font-weight: 800;
-  letter-spacing: -0.02em;
 }
 .page.page .ctaSub {
-  color: rgb(10 13 20 / 0.72);
+  color: rgb(255 255 255 / 0.92);
   font-weight: 700;
-  letter-spacing: 0.01em;
+  text-shadow: none;
 }
 
 /* step 2 */
 .page.page .back {
-  color: var(--soft);
+  color: #1d2533;
 }
 .page.page .product,
 .page.page .summary,
-.page.page .method,
-.page.page .notConnected,
-.page.page .paypalNote {
-  border: 1px solid var(--line);
+.page.page .method {
+  border: 1.5px solid #d3d8e1;
   border-radius: 14px;
-  background: rgb(255 255 255 / 0.035);
-  color: var(--soft);
+  background: #ffffff;
 }
 .page.page .radio {
-  accent-color: var(--gold);
+  accent-color: #e8890c;
 }
 .page.page .productName {
-  color: var(--paper);
-  font-weight: 600;
+  color: #0a0d14;
+  font-weight: 700;
 }
 .page.page .productDesc {
-  color: var(--dim);
+  color: #5c6577;
 }
 .page.page .productPrice {
-  color: var(--paper);
-  font-weight: 600;
+  color: #0a0d14;
+  font-weight: 700;
 }
 .page.page .label {
-  color: var(--mute);
+  color: #1d2533;
+  font-weight: 700;
 }
-.page.page .label::after,
-.page.page .orCard::before,
-.page.page .orCard::after {
-  background: var(--line);
+.page.page .label::after {
+  background: #d3d8e1;
 }
 .page.page .method {
-  color: var(--mute);
+  color: #3a4354;
 }
 .page.page .methodOn {
-  border-color: var(--gold);
-  color: var(--paper);
-  box-shadow: 0 0 16px -6px rgb(255 180 59 / 0.6);
+  border-color: #0a0d14;
+  color: #0a0d14;
 }
-.page.page .orCard {
-  color: var(--dim);
+.page.page .notConnected,
+.page.page .paypalNote {
+  border-radius: 12px;
 }
 
-/* The add-ons: a warm-lit panel, gold headline, gold tick box. */
+/* The add-ons: a warm cream panel in an orange dashed frame. */
 .page.page .bump {
-  border: 1px dashed rgb(255 180 59 / 0.55);
+  border: 2px dashed #ff8a1f;
   border-radius: 16px;
-  background: rgb(255 180 59 / 0.06);
-  box-shadow: 0 0 30px -14px rgb(255 160 40 / 0.6);
-  color: var(--soft);
+  background: #fff6e6;
+  box-shadow: none;
+  color: #1d2533;
 }
 .page.page .bumpTitle {
-  color: var(--gold-2);
+  color: #0a0d14;
 }
 .page.page .bumpPrice {
-  color: var(--paper);
+  color: #0a0d14;
+  font-weight: 700;
 }
 .page.page .bumpArrow {
-  color: var(--gold);
+  color: #e8590c;
 }
 .page.page .bumpCheck {
-  border-color: var(--gold);
-  background-color: transparent;
-}
-.page.page .bumpCheck:checked {
-  background-color: var(--gold);
+  border: 1.5px solid #0a0d14;
 }
 .page.page .oto {
-  color: #ff8a4c;
+  color: #d63a0a;
 }
 
 .page.page .summary > summary {
-  color: var(--paper);
-}
-.page.page .sumBody,
-.page.page .sumTotal {
-  border-color: var(--line);
+  color: #0a0d14;
 }
 .page.page .sumRow {
-  color: var(--mute);
+  color: #3a4354;
 }
 .page.page .sumTotal {
-  color: var(--paper);
+  color: #0a0d14;
 }
 
 /* ── reviews, guarantees, footer ── */

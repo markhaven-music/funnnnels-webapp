@@ -21,9 +21,8 @@ import type { PaymentMethodCreateParams, Stripe, StripeElementLocale, StripeElem
 
 export type CardWords = { number: string; expiry: string; cvc: string };
 // The words inside the fields: `font` is loaded into Stripe's iframes from
-// `fontCss`; `focus` rings the field being typed in; `field` and `edge`: the
-// boxes' fill and border, ClickFunnels' white and grey unless a page says its own.
-export type CardLook = { font: string; fontCss: string; color: string; placeholder: string; focus: string; field?: string; edge?: string };
+// `fontCss`; `focus` rings the field being typed in.
+export type CardLook = { font: string; fontCss: string; color: string; placeholder: string; focus: string };
 
 export const INTER: CardLook = {
   font: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
@@ -75,8 +74,6 @@ export function CardFields({ words, look }: { words: CardWords; look: CardLook }
   const box = (f: Field): CSSProperties => ({
     ...FIELD,
     ...PLACE[f],
-    ...(look.field ? { background: look.field } : {}),
-    ...(look.edge ? { borderColor: look.edge } : {}),
     ...(invalid[f] ? { borderColor: "#dc2626" } : {}),
     ...(focused === f ? { zIndex: 1, outline: `2px solid ${look.focus}`, outlineOffset: -2 } : {}),
   });
@@ -88,7 +85,7 @@ export function CardFields({ words, look }: { words: CardWords; look: CardLook }
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
       <div style={box("number")}>
-        <CardIcon color={look.edge ? look.placeholder : undefined} />
+        <CardIcon />
         {/* No Link "Autofill" button inside the field: ClickFunnels has none. */}
         <div style={EL}>
           <CardNumberElement options={{ style, placeholder: words.number, showIcon: false, disableLink: true }} {...events("number")} />
@@ -109,14 +106,14 @@ export function CardFields({ words, look }: { words: CardWords; look: CardLook }
 }
 
 // ClickFunnels' card icon, drawn from its pixels: a card outline, a chip, four dashes.
-function CardIcon({ color = "#384751" }: { color?: string }) {
+function CardIcon() {
   return (
     <svg
       viewBox="0 0 45 30"
       width="30"
       height="20"
       aria-hidden
-      style={{ position: "absolute", top: "50%", left: 12, color, transform: "translateY(-50%)" }}
+      style={{ position: "absolute", top: "50%", left: 12, color: "#384751", transform: "translateY(-50%)" }}
     >
       <rect x="1.5" y="1.5" width="42" height="27" rx="3" fill="none" stroke="currentColor" strokeWidth="3" />
       <rect x="6" y="9" width="10.5" height="6" rx="1" fill="currentColor" />
