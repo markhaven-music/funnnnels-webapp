@@ -134,7 +134,7 @@ export const DEFAULT_SECTIONS: Section[] = [
     props: {
       eyebrow: "The whole pack, open",
       title: "Browse all {files} files. Press play on any of them.",
-      sub: "Every folder and every file of the pack, note for note, played on a warm sine synth. In your DAW they play through your sounds. Drum MIDI is shown here, not played.",
+      sub: "Every folder and every file of the pack, note for note, played on a sine pluck or a piano, your pick. In your DAW they play through your sounds. Drum MIDI is shown here, not played.",
     },
   },
   {

@@ -494,6 +494,10 @@
   gap: 20px;
   margin-top: 34px;
 }
+.baSound {
+  grid-column: 1 / -1;
+  justify-self: end;
+}
 .baItem {
   display: flex;
   flex-direction: column;

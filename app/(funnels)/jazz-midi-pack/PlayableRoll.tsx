@@ -6,7 +6,7 @@ import { toggle, type Roll, type RollId } from "./piano";
 import s from "./roll.module.css";
 
 // A real file from the pack, drawn as a piano roll (chord names on top) with
-// a play button that plays its notes on the sine synth (piano.ts). `roll` instead
+// a play button that plays its notes on the sine pluck or the piano (piano.ts). `roll` instead
 // of `id`: a file from elsewhere (the bonuses, BonusPlayer.tsx).
 export function PlayableRoll({
   id,

@@ -7,6 +7,7 @@ import { funnel } from "./funnel";
 import { DEFAULT_SECTIONS, type ChartCell, type Section, type SectionProps, type SectionType } from "./content";
 import { Cta } from "./Cta";
 import { PlayableRoll } from "./PlayableRoll";
+import { SoundPicker } from "./SoundPicker";
 import { LoopList } from "./LoopList";
 import { BonusPlayer } from "./BonusPlayer";
 import { money } from "@/lib/launch";
@@ -423,6 +424,7 @@ function CompareRolls({ p, patch, ctx }: { p: SectionProps["s_compare_rolls"]; p
   return (
     <section className={s.sec} style={{ paddingTop: 0 }}>
       <div className={`${s.wrap} ${s.ba}`} style={{ marginTop: 0 }}>
+        {h.any("beforeRoll", "afterRoll") && <SoundPicker className={s.baSound} />}
         {h.any("before", "beforeRoll") && (
           <figure className={s.baItem}>
             <Part k="before" h={h}>

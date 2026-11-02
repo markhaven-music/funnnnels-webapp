@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import rolls from "./rolls.json";
 import { start, stop, toggle, unlock, type Roll } from "./piano";
 import { Svg } from "./PlayableRoll";
+import { SoundPicker } from "./SoundPicker";
 import r from "./roll.module.css";
 import b from "./browse.module.css";
 
@@ -182,6 +183,7 @@ export function PackBrowser() {
               {drumsOnly ? "Drum MIDI: it plays through your drum kit in the DAW" : `${roll.bpm} bpm`}
             </span>
           </span>
+          <SoundPicker />
         </div>
         <Svg roll={roll} chordsRow={!drumsOnly} />
       </div>

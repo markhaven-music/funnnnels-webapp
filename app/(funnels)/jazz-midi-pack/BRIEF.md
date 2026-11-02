@@ -178,3 +178,10 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
 - "immagine disallineata": the guarantee seal started at the centre line below 1000px because its wrapper
   (.twoBody, a size container for the bonuses' container query) shrank to zero width in the flex column; .sealWrap
   is now full width at every size.
+- "dai possibilità di scegliere tra un pluck di sine o il suono di un piano" (2026-11-02): piano.ts plays on a
+  sine pluck (one sine per note, a 6 ms hit, a ring-out of 0.32 s / 0.5 s for bass, cut at the note's end) or on
+  the Salamander Grand Piano samples, back in public/funnels/jazz-midi-pack/piano (25 mp3, 1.2 MB, fetched only
+  once the piano is chosen and only the notes a file needs). SoundPicker.tsx (Sine | Piano) sits above the
+  before/after rolls and in the pack browser's head; one pick for the whole page, kept in localStorage
+  `jazz:sound`, and a file playing restarts on the new sound. The footer credits Salamander (CC BY 3.0). The VSL
+  keeps its rendered sine demos.

@@ -208,3 +208,29 @@
     grid-template-columns: auto minmax(0, 1fr);
   }
 }
+
+/* the sound picker (SoundPicker.tsx): Sine | Piano, the pick lit in yellow */
+.sound {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 4px;
+  background: #0f0d0a;
+}
+.soundBtn {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: #a69c8b;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.soundBtn[aria-pressed="true"] {
+  background: var(--brass);
+  color: #1a1206;
+}
