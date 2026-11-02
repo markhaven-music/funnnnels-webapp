@@ -35,7 +35,6 @@ export function KitCheckout({
       bump={bump && { name: bump.name, price: bump.price[currency], pitch: bump.pitch, cover: splitName(bump.name) }}
       thankYou={`/${slug}/thank-you`}
       publishableKey={publishableKey}
-      europe={currency === "eur"}
       deferStripe
     />
   );

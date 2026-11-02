@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { loadStripe, type Appearance } from "@stripe/stripe-js";
-import { Elements, ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
 import { track } from "@/lib/beacon";
 import { pixel } from "../jazz-midi-pack/Tracking";
+import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
 import type { OrderOffer } from "../midi-drum-kit/offer";
 import { funnel } from "./funnel";
 import { Rich } from "./Rich";
@@ -14,9 +15,10 @@ import s from "./order.module.css";
 // The ClickFunnels order form of /order-top-hits-midi-bundle, step for step:
 //   1 · Your Info → first, last, email (saved as a lead), "GO TO STEP 2"
 //   2 · Payment   → product card, Card | Paypal, three tick-box offers,
-//                   Summary, "Rush My Order!"
-// Card fields are Stripe's (numbers never touch our server); PayPal sends the
-// buyer to PayPal and back (/api/checkout/paypal → /api/checkout/paypal/return).
+//                   Summary, "GET THE PACK!"
+// Both buttons are the landing's green one (./order.module.css .cta). Card
+// fields are Stripe's, laid out like ClickFunnels' (../CardFields.tsx); PayPal
+// sends the buyer to PayPal and back (/api/checkout/paypal → /api/checkout/paypal/return).
 // What it sells (`offer`: names, prices, add-ons with their words) comes from
 // the server page, as dashboard → Products has it (./offer.ts). Prices shown
 // here are only a preview: the server prices the order itself.
@@ -34,23 +36,6 @@ function stripeFor(key: string) {
   if (!stripeCache.has(key)) stripeCache.set(key, loadStripe(key));
   return stripeCache.get(key)!;
 }
-
-// Light fields like the ClickFunnels form.
-const appearance: Appearance = {
-  theme: "stripe",
-  variables: {
-    colorPrimary: "#0a0a0a",
-    colorText: "#384751",
-    colorDanger: "#dc2626",
-    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    borderRadius: "4px",
-    spacingUnit: "4px",
-  },
-  rules: {
-    ".Input": { border: "1px solid #dcdcdc", boxShadow: "none", padding: "13px" },
-    ".Input:focus": { border: "1px solid #0a0a0a", boxShadow: "none" },
-  },
-};
 
 const money = (n: number, c: Currency) => `${c === "eur" ? "€" : "$"}${n.toFixed(2)}`;
 
@@ -145,11 +130,8 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
           </div>
 
           {stripePromise ? (
-            <Elements
-              stripe={stripePromise}
-              options={{ mode: "payment", amount: Math.round(total * 100), currency, appearance, allowedPaymentMethodTypes: ["card"] }}
-            >
-              <CardPay {...state} />
+            <Elements stripe={stripePromise} options={cardElements(INTER, "en")}>
+              <CardPay {...state} stripePromise={stripePromise} />
             </Elements>
           ) : (
             <>
@@ -192,8 +174,8 @@ function InfoStep({ info, onDone }: { info: Info; onDone: (info: Info) => void }
           className={`${s.input} ${s.wide}`}
         />
       </div>
-      <button className={s.orange}>
-        <svg viewBox="0 0 448 512" className={s.orangeArrow} aria-hidden>
+      <button className={s.cta}>
+        <svg viewBox="0 0 448 512" className={s.ctaArrow} aria-hidden>
           <path
             fill="currentColor"
             d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
@@ -218,16 +200,16 @@ type PayState = {
   offer: OrderOffer;
 };
 
-function CardPay(props: PayState) {
+function CardPay({ stripePromise, ...props }: PayState & { stripePromise: ReturnType<typeof loadStripe> }) {
   const stripe = useStripe();
   const elements = useElements();
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasWallet, setHasWallet] = useState(false);
-  const europe = props.currency === "eur";
+  const billing = { name: `${props.info.firstName} ${props.info.lastName}`.trim(), email: props.info.email };
 
-  async function confirm() {
-    if (!stripe || !elements) return;
+  // The PaymentIntent, at the server's price; its client secret.
+  async function intent(): Promise<string> {
     const res = await fetch("/api/checkout/intent", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -235,23 +217,13 @@ function CardPay(props: PayState) {
         funnel: funnel.slug,
         ...props.info,
         bumps: props.picked,
-        waiver: europe,
         country: cookieCountry(props.currency, props.country),
         expected: props.total,
       }),
     });
     const json = await res.json().catch(() => ({}));
     if (!res.ok || !json.clientSecret) throw new Error(json.error ?? "Payment couldn't start.");
-    const name = `${props.info.firstName} ${props.info.lastName}`.trim();
-    const { error: payError } = await stripe.confirmPayment({
-      elements,
-      clientSecret: json.clientSecret,
-      confirmParams: {
-        return_url: new URL(props.next, window.location.origin).toString(),
-        payment_method_data: { billing_details: { name, email: props.info.email } },
-      },
-    });
-    if (payError) throw new Error(payError.message);
+    return json.clientSecret;
   }
 
   async function payByCard() {
@@ -259,9 +231,7 @@ function CardPay(props: PayState) {
     setPaying(true);
     setError(null);
     try {
-      const { error: submitError } = await elements.submit();
-      if (submitError) throw new Error(submitError.message);
-      await confirm();
+      await payWithCard(stripe, elements, billing, intent, props.next);
     } catch (err) {
       setError((err as Error).message);
       setPaying(false);
@@ -272,37 +242,18 @@ function CardPay(props: PayState) {
     <>
       {/* Hidden, not unmounted, on the Paypal tab: switching back keeps what was typed. */}
       <div hidden={props.method !== "card"} className={s.cardPane}>
-        <ExpressCheckoutElement
-          options={{
-            buttonHeight: 48,
-            buttonType: { applePay: "buy", googlePay: "buy" },
-            paymentMethods: { applePay: "auto", googlePay: "auto", link: "never", paypal: "never", amazonPay: "never", klarna: "never" },
-          }}
-          onReady={(e) => setHasWallet(Boolean(e.availablePaymentMethods))}
-          onConfirm={async (e) => {
-            setError(null);
-            try {
-              await confirm();
-            } catch (err) {
-              setError((err as Error).message);
-              e.paymentFailed({ reason: "fail" });
-            }
-          }}
-        />
+        <Elements
+          stripe={stripePromise}
+          options={{ mode: "payment", amount: Math.round(props.total * 100), currency: props.currency, allowedPaymentMethodTypes: ["card"] }}
+        >
+          <Wallet pay={(st, el) => payWithWallet(st, el, billing, intent, props.next)} onReady={setHasWallet} onError={setError} />
+        </Elements>
         {hasWallet && (
           <div className={s.orCard}>
             <span>or pay by card</span>
           </div>
         )}
-        <PaymentElement
-          options={{
-            layout: "tabs",
-            wallets: { applePay: "never", googlePay: "never", link: "never" },
-            defaultValues: {
-              billingDetails: { email: props.info.email, name: `${props.info.firstName} ${props.info.lastName}`.trim() },
-            },
-          }}
-        />
+        <CardFields words={{ number: "Card number", expiry: "MM / YY", cvc: "CVV" }} look={INTER} />
       </div>
       <PayBody {...props} onCard={payByCard} cardPaying={paying || !stripe} cardError={error} />
     </>
@@ -329,7 +280,6 @@ function PayBody({
   const busy = paypal ? paypalBusy : Boolean(cardPaying);
   const blocked = busy || (!paypal && (cardOff || !onCard));
   const error = paypal ? paypalError : cardError;
-  const europe = currency === "eur";
 
   async function payWithPayPal() {
     setPaypalBusy(true);
@@ -342,7 +292,6 @@ function PayBody({
           funnel: funnel.slug,
           ...info,
           bumps: picked,
-          waiver: europe,
           country: cookieCountry(currency, country),
           origin: window.location.origin,
           expected: total,
@@ -372,30 +321,22 @@ function PayBody({
       {offer.bumps.map((b) => {
         const on = picked.includes(b.id);
         return (
-          <label key={b.id} className={`${s.bump} ${on ? s.bumpOn : ""}`}>
+          <label key={b.id} className={s.bump}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
             <span className={s.bumpHead}>
-              <span className={s.bumpArrow} aria-hidden>
-                <svg viewBox="0 0 448 512" width="14" height="14">
-                  <path
-                    fill="currentColor"
-                    d="M313.9 216H12c-6.6 0-12 5.4-12 12v56c0 6.6 5.4 12 12 12h301.9v46.1c0 21.4 25.9 32.1 41 17L441 273c9.4-9.4 9.4-24.6 0-33.9L354.9 153c-15.1-15.1-41-4.4-41 17V216z"
-                  />
-                </svg>
-              </span>
+              {/* Gone once ticked, as on ClickFunnels. */}
+              {!on && <BumpArrow />}
               <input type="checkbox" checked={on} onChange={(e) => toggle(b.id, e.target.checked)} className={s.bumpCheck} />
               <span className={s.bumpTitle}>{b.headline}</span>
               <span className={s.bumpPrice}>{money(b.price, currency)}</span>
             </span>
-            <span className={s.bumpBody}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
-              <span className={s.bumpText}>
-                {b.body.map((p, i) => (
-                  <span key={i} className={s.bumpPara}>
-                    {i === 0 && <span className={s.oto}>ONE-TIME OFFER:</span>} <Rich text={p} currency={currency} />
-                  </span>
-                ))}
-              </span>
+            <span className={s.bumpText}>
+              {b.body.map((p, i) => (
+                <span key={i} className={s.bumpPara}>
+                  {i === 0 && <span className={s.oto}>ONE-TIME OFFER:</span>} <Rich text={p} currency={currency} />
+                </span>
+              ))}
             </span>
           </label>
         );
@@ -434,8 +375,20 @@ function PayBody({
         </div>
       </details>
 
-      <button type="button" className={`${s.orange} ${s.rush}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
-        {busy && !cardOff ? (paypal ? "Opening PayPal…" : "Processing…") : "Rush My Order!"}
+      <button type="button" className={s.cta} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
+        {busy && !cardOff ? (
+          paypal ? "Opening PayPal…" : "Processing…"
+        ) : (
+          <>
+            <svg viewBox="0 0 448 512" className={s.ctaArrow} aria-hidden>
+              <path
+                fill="currentColor"
+                d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
+              />
+            </svg>
+            GET THE PACK!
+          </>
+        )}
       </button>
       {error && (
         <p className={s.error} role="alert">
@@ -443,12 +396,19 @@ function PayBody({
         </p>
       )}
       <p className={s.respect}>We respect your privacy &amp; information.</p>
-      {europe && (
-        <p className={s.waiver}>
-          By paying you get instant access to the download and agree that your 14-day right of withdrawal ends once it starts.
-        </p>
-      )}
     </>
+  );
+}
+
+// ClickFunnels' red arrow: Font Awesome's long-arrow-alt-right at 16px, wobbling.
+function BumpArrow() {
+  return (
+    <svg viewBox="0 0 448 512" className={s.bumpArrow} aria-hidden>
+      <path
+        fill="currentColor"
+        d="M313.941 216H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h301.941v46.059c0 21.382 25.851 32.09 40.971 16.971l86.059-86.059c9.373-9.373 9.373-24.569 0-33.941l-86.059-86.059c-15.119-15.119-40.971-4.411-40.971 16.971V216z"
+      />
+    </svg>
   );
 }
 

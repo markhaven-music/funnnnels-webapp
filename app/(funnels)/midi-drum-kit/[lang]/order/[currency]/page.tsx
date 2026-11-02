@@ -4,6 +4,7 @@ import { getFunnel, nextStep, resolveFunnel, upsellsOn } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { Rich } from "../../../../top-hits-midi-bundle/Rich";
 import { fontVars } from "../../../../top-hits-midi-bundle/fonts";
+import { poppins } from "../../../fonts";
 import { Check } from "../../../../top-hits-midi-bundle/sections";
 import s from "../../../../top-hits-midi-bundle/order.module.css";
 import d from "../../../order.module.css";
@@ -55,7 +56,7 @@ export default async function OrderPage({ params }: { params: Params }) {
   const offer = await orderOffer(lang, currency, product, edits);
 
   return (
-    <main className={`${s.page} ${fontVars}`} lang={lang}>
+    <main className={`${s.page} ${fontVars} ${poppins.variable}`} lang={lang}>
       {/* The button-colour test: before the buttons paint (see ../../../abtest.ts). */}
       <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
       <Tracking value={offer.price} currency={currency} event={null} />

@@ -1,0 +1,53 @@
+/* ClickFunnels' card fields (./CardFields.tsx), as its checkout styles them:
+   three 50px boxes with a 2px #dbdcdd border and 5px corners, the number
+   across the top, expiry | CVV below, sharing their borders. A page can set
+   --card-edge (the border) and --card-focus. */
+.box {
+  --card-edge: #dbdcdd;
+  --card-focus: #000;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 50px;
+  padding: 0 12px;
+  border: 2px solid var(--card-edge);
+  background: #fff;
+}
+.number {
+  grid-column: 1 / -1;
+  padding-left: 52px;
+  border-radius: 5px 5px 0 0;
+}
+.expiry {
+  border-top: 0;
+  border-radius: 0 0 0 5px;
+}
+.cvc {
+  border-top: 0;
+  border-left: 0;
+  border-radius: 0 0 5px 0;
+}
+.el {
+  flex: 1;
+  min-width: 0;
+}
+.icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  color: #384751;
+  transform: translateY(-50%);
+}
+.field:has(:global(.StripeElement--focus)) {
+  z-index: 1;
+  outline: 2px solid var(--card-focus);
+  outline-offset: -2px;
+}
+.field:has(:global(.StripeElement--invalid)) {
+  border-color: #dc2626;
+}

@@ -133,24 +133,65 @@
   }
 }
 
-/* ── order bumps: arrow, tick box and headline start on the left ── */
-.bumpHead {
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
-}
-.bumpArrow {
-  justify-self: start;
-}
-
-/* ── button-colour test (./abtest.ts sets <html data-ab-btn>; same colours there) ── */
-:global(html[data-ab-btn="green"]) .cta {
-  background: linear-gradient(135deg, #16a34a 0%, #3fd468 99%);
+/* ── the buttons: the sales page's "GET THE PACK!" (#glass-btn in ./cf/template.ts):
+   12px corners, a 1px edge, a glow, Poppins 28px (24px on phones), lifting on hover,
+   in the visitor's test colour (./abtest.ts sets <html data-ab-btn>; COLORS there) ── */
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 24px 20px;
+  border: 1px solid #b04c05;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffa13d 0%, #ec6a0c 100%);
+  box-shadow: 0 8px 28px rgba(236, 106, 12, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   color: #fff;
+  font: 700 28px/1 var(--font-poppins), Poppins, var(--inter);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.cta:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+.cta:active {
+  transform: translateY(0) scale(0.99);
+}
+.cta:disabled {
+  opacity: 0.7;
+  cursor: progress;
+  transform: none;
+}
+.ctaArrow {
+  flex: none;
+  width: 0.9em;
+  height: 0.9em;
+}
+@media (max-width: 769px) {
+  .cta {
+    font-size: 24px;
+  }
+}
+:global(html[data-ab-btn="green"]) .cta {
+  border-color: #0f7a35;
+  background: linear-gradient(180deg, #3fd468 0%, #16a34a 100%);
+  box-shadow: 0 8px 28px rgba(22, 163, 74, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 :global(html[data-ab-btn="yellow"]) .cta {
-  background: linear-gradient(135deg, #f5b800 0%, #ffe14d 99%);
+  border-color: #b98900;
+  background: linear-gradient(180deg, #ffe14d 0%, #f5b800 100%);
+  box-shadow: 0 8px 28px rgba(245, 184, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   color: #1a1400;
+  text-shadow: none;
 }
 :global(html[data-ab-btn="orange"]) .cta {
-  background: linear-gradient(135deg, #ec6a0c 0%, #ffa13d 99%);
+  border-color: #b04c05;
+  background: linear-gradient(180deg, #ffa13d 0%, #ec6a0c 100%);
+  box-shadow: 0 8px 28px rgba(236, 106, 12, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }

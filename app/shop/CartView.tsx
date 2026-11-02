@@ -107,7 +107,6 @@ export function CartView({
           bump={null}
           thankYou="/shop/thank-you"
           publishableKey={publishableKey}
-          europe={currency === "eur"}
           cart={lines.map(({ slug, name, price }) => ({ slug, name, price }))}
           deferStripe
         />

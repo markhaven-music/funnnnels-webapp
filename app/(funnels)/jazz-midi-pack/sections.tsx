@@ -1042,14 +1042,12 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       product={funnel.product}
       tagline={`${funnel.tagline} + ${funnel.bonuses.length} bonuses`}
       image="/funnels/jazz-midi-pack/box-520.webp"
-      accent="#f5b800"
       currency={ctx.currency}
       country={ctx.country}
       price={ctx.amount}
       bump={ctx.bump ?? null}
       thankYou={funnel.checkout.thankYou}
       publishableKey={ctx.publishableKey}
-      europe={ctx.currency === "eur"}
       deferStripe
       secureRow={false}
     />
