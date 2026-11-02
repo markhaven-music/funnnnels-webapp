@@ -134,7 +134,7 @@
 }
 
 /* ── the buttons: the sales page's "GET THE PACK!" (#glass-btn in ./cf/template.ts):
-   12px corners, a 1px edge, a glow, Poppins 28px (24px on phones), lifting on hover,
+   12px corners, a glow, Poppins 28px (24px on phones), lifting on hover,
    in the visitor's test colour (./abtest.ts sets <html data-ab-btn>; COLORS there) ── */
 .cta {
   display: flex;
@@ -143,7 +143,9 @@
   gap: 10px;
   width: 100%;
   padding: 24px 20px;
-  border: 1px solid #b04c05;
+  /* no visible edge: the landing's dark 1px edge vanishes on black, but on the
+     order form's white card it reads as an outline */
+  border: 1px solid transparent;
   border-radius: 12px;
   background: linear-gradient(180deg, #ffa13d 0%, #ec6a0c 100%);
   box-shadow: 0 8px 28px rgba(236, 106, 12, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
@@ -175,21 +177,18 @@
   }
 }
 :global(html[data-ab-btn="green"]) .cta {
-  border-color: #0f7a35;
   background: linear-gradient(180deg, #3fd468 0%, #16a34a 100%);
   box-shadow: 0 8px 28px rgba(22, 163, 74, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 :global(html[data-ab-btn="yellow"]) .cta {
-  border-color: #b98900;
   background: linear-gradient(180deg, #ffe14d 0%, #f5b800 100%);
   box-shadow: 0 8px 28px rgba(245, 184, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   color: #1a1400;
   text-shadow: none;
 }
 :global(html[data-ab-btn="orange"]) .cta {
-  border-color: #b04c05;
   background: linear-gradient(180deg, #ffa13d 0%, #ec6a0c 100%);
   box-shadow: 0 8px 28px rgba(236, 106, 12, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   color: #fff;
