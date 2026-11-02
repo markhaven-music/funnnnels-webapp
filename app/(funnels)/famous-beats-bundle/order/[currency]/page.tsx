@@ -54,7 +54,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       </div>
       <header className={s.header}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={s.logo} src={`${IMG}/logo.png`} alt="GRIND STUDIO" width={900} height={103} />
+        <img className={s.logo} src={`${OWN}/logo.webp`} alt="GRIND STUDIO" width={236} height={27} />
       </header>
 
       <div className={s.secure}>
@@ -75,7 +75,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
             className={s.productImg}
             src={`${OWN}/product.webp`}
             srcSet={`${OWN}/product-720.webp 720w, ${OWN}/product.webp 944w`}
-            sizes="(max-width: 769px) 100vw, 535px"
+            sizes="(max-width: 769px) calc(100vw - 30px), 535px"
             alt="Famous Beats Bundle: 32 packs, 320 MIDI transcriptions"
             width={944}
             height={1172}
@@ -114,11 +114,11 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
           {reviews.map((r) => (
             <figure key={r.name} className={s.review}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className={s.stars} src={`${IMG}/stars.png`} alt="5 stars" width={300} height={99} />
+              <img className={s.stars} src={`${IMG}/stars.png`} alt="5 stars" width={300} height={99} loading="lazy" decoding="async" />
               <blockquote className={s.quote}>&quot;{r.quote}&quot;</blockquote>
               <figcaption className={s.who}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`${IMG}/icon-${r.icon}.png`} alt="" width={50} height={50} />
+                <img src={`${IMG}/icon-${r.icon}.png`} alt="" width={50} height={50} loading="lazy" decoding="async" />
                 <span>
                   <span className={s.name}>{r.name}</span>
                   <span className={s.role}>{r.role}</span>
@@ -133,7 +133,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
         <div className={s.gGrid}>
           <div className={s.g}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`${IMG}/badge-guarantee.png`} alt="100% money back guarantee" width={86} height={86} />
+            <img src={`${OWN}/badge-guarantee.webp`} alt="100% money back guarantee" width={86} height={86} loading="lazy" decoding="async" />
             <div>
               <h3>Quality Guarantee</h3>
               <p>
@@ -145,7 +145,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
           </div>
           <div className={s.g}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`${IMG}/badge-secure.png`} alt="Secure payments" width={86} height={86} />
+            <img src={`${OWN}/badge-secure.webp`} alt="Secure payments" width={86} height={86} loading="lazy" decoding="async" />
             <div>
               <h3>Secure Payments</h3>
               <p>

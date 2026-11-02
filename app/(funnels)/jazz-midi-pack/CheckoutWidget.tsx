@@ -410,7 +410,7 @@ function PayStepBody({
     <>
       {paypal && (
         <div className={s.paypalNote}>
-          <PayPalGlyph /> After you click the button, you finish paying on PayPal&rsquo;s secure page, then
+          <PayPalGlyph /> After you click <b>Pay with PayPal</b> below, you finish paying on PayPal&rsquo;s secure page, then
           come straight back to your download.
         </div>
       )}

@@ -79,7 +79,7 @@ export const en = {
     cardNumber: "Card number",
     cardExpiry: "MM / YY",
     cardCvc: "CVV",
-    paypalNote: "After you click the button, you finish paying on PayPal’s secure page, then come straight back to your download.",
+    paypalNote: "After you click GET THE PACK! below, you finish paying on PayPal’s secure page, then come straight back to your download.",
     oto: "ONE-TIME OFFER:",
     summary: "Summary",
     total: "Total",

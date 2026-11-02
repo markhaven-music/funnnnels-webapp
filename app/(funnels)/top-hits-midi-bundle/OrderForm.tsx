@@ -349,7 +349,7 @@ function PayBody({
     <>
       {paypal && (
         <div className={s.paypalNote}>
-          <PayPalGlyph /> After you click the button, you finish paying on PayPal&rsquo;s secure page, then come straight back to
+          <PayPalGlyph /> After you click <b>GET THE PACK!</b> below, you finish paying on PayPal&rsquo;s secure page, then come straight back to
           your download.
         </div>
       )}

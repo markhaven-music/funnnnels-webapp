@@ -81,7 +81,7 @@ export const de: Copy = {
     cardNumber: "Kartennummer",
     cardExpiry: "MM / JJ",
     cardCvc: "CVV",
-    paypalNote: "Nach dem Klick schließt du die Zahlung auf der sicheren PayPal-Seite ab und kommst direkt zurück zu deinem Download.",
+    paypalNote: "Nach dem Klick auf „ICH WILL DAS PACK!“ unten schließt du die Zahlung auf der sicheren PayPal-Seite ab und kommst direkt zurück zu deinem Download.",
     oto: "EINMALIGES ANGEBOT:",
     summary: "Übersicht",
     total: "Gesamt",
