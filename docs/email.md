@@ -36,6 +36,15 @@ Newsletter-type emails carry an unsubscribe link and one-click
 `List-Unsubscribe` headers (`lib/mail.ts`); unsubscribing sets
 `contacts.status`. SES's own suppression list stops bounces and complaints.
 
+## Writing them
+
+- **One link, two at most** in broadcasts, sequences and launch emails ("if
+  they're transactional okay but in general should only be 1, 2 max",
+  2026-11-02). Receipts and the backup link carry what they need. The footer
+  doesn't count.
+- Links in the text are FL Studio / Matrix green, `#00b034`, bold and
+  underlined (`LINK` in `lib/mail.ts`); the footer's stay grey.
+
 ## Still to switch on
 
 - **Stripe webhook.** Stripe Dashboard → Developers → Webhooks → Add
