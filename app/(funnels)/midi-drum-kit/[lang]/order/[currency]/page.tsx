@@ -7,7 +7,9 @@ import { fontVars } from "../../../../top-hits-midi-bundle/fonts";
 import { Check } from "../../../../top-hits-midi-bundle/sections";
 import s from "../../../../top-hits-midi-bundle/order.module.css";
 import d from "../../../order.module.css";
-import { copyFor } from "../../../copy";
+import { copyWith } from "../../../copy";
+import { pageEdits } from "@/lib/pageTexts";
+import { copyEdits } from "../../../texts";
 import { funnel } from "../../../funnel";
 import { AB, AB_SCRIPT } from "../../../abtest";
 import { Beacon } from "../../../../Beacon";
@@ -21,7 +23,8 @@ import { Tracking } from "../../../Tracking";
 // (the same template as the TOP HITS one, so it shares its stylesheet).
 // Cached per language and currency; proxy.ts rewrites /midi-drum-kit/order and
 // /<lang>/midi-drum-kit/order here. Its prices and add-ons are dashboard →
-// Products' (../../../offer.ts); saving there revalidates it.
+// Products' (../../../offer.ts), its words can be edited from the funnel map
+// (../../../texts.ts); saving either revalidates it.
 
 export const revalidate = 3600;
 
@@ -38,16 +41,18 @@ const IMG = "/funnels/midi-drum-kit";
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { lang } = await params;
   if (!isLang(lang)) return {};
-  return { title: copyFor(lang).meta.orderTitle, robots: { index: false, follow: false } };
+  const edits = copyEdits(await pageEdits(funnel.slug, lang, true));
+  return { title: copyWith(lang, undefined, edits).meta.orderTitle, robots: { index: false, follow: false } };
 }
 
 export default async function OrderPage({ params }: { params: Params }) {
   const { lang, currency: cur } = await params;
   if (!isLang(lang) || !CURRENCIES.includes(cur as Currency)) notFound();
   const currency = cur as Currency;
-  const t = copyFor(lang);
+  const edits = copyEdits(await pageEdits(funnel.slug, lang, true));
+  const t = copyWith(lang, undefined, edits);
   const product = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
-  const offer = await orderOffer(lang, currency, product);
+  const offer = await orderOffer(lang, currency, product, edits);
 
   return (
     <main className={`${s.page} ${fontVars}`} lang={lang}>
@@ -92,6 +97,7 @@ export default async function OrderPage({ params }: { params: Params }) {
         <section id="complete-order">
           <h2 className={s.colTitle}>{t.order.completeTitle}</h2>
           <OrderForm
+            form={copyWith(lang, currency, edits).form}
             lang={lang}
             currency={currency}
             country={FALLBACK_COUNTRY[currency]}

@@ -31,3 +31,32 @@ const COPY: Record<Lang, Copy> = { en, fr: mapStrings(fr, frenchSpaces), es: map
 const COPY_USD: Partial<Record<Lang, Copy>> = { es: mapStrings(COPY.es, dollarFirst) };
 
 export const copyFor = (lang: Lang, currency?: Currency): Copy => (currency === "usd" && COPY_USD[lang]) || COPY[lang];
+
+// ─── the dashboard's edits ───────────────────────────────────
+// Funnel map → Edit (app/funnels/[id]/texts) saves texts by their path in
+// these files ("order.bullets.3", "form.bumps.hustle.body.0"); see ../texts.ts.
+
+export const RAW: Record<Lang, Copy> = { en, fr, es, de, it };
+const SPACES: Record<Lang, (s: string) => string> = { en: (s) => s, fr: frenchSpaces, es: unitSpaces, de: unitSpaces, it: unitSpaces };
+
+/** A copy of `value` (its data, not its functions) with the text at each path replaced; paths that aren't a text are left alone. */
+export function withTexts<T>(value: T, texts: Record<string, string>): T {
+  const out = JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
+  for (const [path, text] of Object.entries(texts)) {
+    const keys = path.split(".");
+    let at: Record<string, unknown> | undefined = out;
+    for (const k of keys.slice(0, -1)) at = at && typeof at[k] === "object" ? (at[k] as Record<string, unknown>) : undefined;
+    const last = keys[keys.length - 1];
+    if (at && typeof at[last] === "string") at[last] = text;
+  }
+  return out as T;
+}
+
+/** copyFor() with the dashboard's edits for this language (path → text). */
+export function copyWith(lang: Lang, currency: Currency | undefined, texts: Record<string, string>): Copy {
+  if (!Object.keys(texts).length) return copyFor(lang, currency);
+  const edited = mapStrings(withTexts(RAW[lang], texts), SPACES[lang]);
+  const c = currency === "usd" && lang === "es" ? mapStrings(edited, dollarFirst) : edited;
+  // The functions (thanks.receipt) don't survive the copy: they come back from the code.
+  return { ...c, thanks: { ...c.thanks, receipt: copyFor(lang, currency).thanks.receipt } };
+}

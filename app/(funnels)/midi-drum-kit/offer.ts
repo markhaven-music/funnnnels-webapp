@@ -1,7 +1,8 @@
 import { getFunnel, resolveFunnel, type Product } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { restate } from "@/lib/restate";
-import { copyFor } from "./copy";
+import { copyWith } from "./copy";
+import type { Texts } from "@/lib/pageTexts";
 import { funnel } from "./funnel";
 import type { Lang } from "./i18n";
 
@@ -24,10 +25,11 @@ const ADD: Record<Lang, (name: string) => string> = {
   it: (n) => `SÌ! Aggiungi ${n}!`,
 };
 
-export async function orderOffer(lang: Lang, currency: Currency, product?: Product): Promise<OrderOffer> {
+// texts: the copy's edits from the dashboard (./texts.ts copyEdits).
+export async function orderOffer(lang: Lang, currency: Currency, product?: Product, texts: Texts = {}): Promise<OrderOffer> {
   const code = getFunnel(funnel.slug)!;
   const f = product ?? (await resolveFunnel(funnel.slug)) ?? code;
-  const words = copyFor(lang, currency).form.bumps as Record<string, { headline: string; body: string[] } | undefined>;
+  const words = copyWith(lang, currency, texts).form.bumps as Record<string, { headline: string; body: string[] } | undefined>;
   return {
     product: f.product,
     // The form's own name for the kit, until the product is renamed.

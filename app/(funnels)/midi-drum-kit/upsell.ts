@@ -16,6 +16,8 @@ import topHitsEs from "./copy/upsell-tophits/es.json";
 import topHitsFr from "./copy/upsell-tophits/fr.json";
 import topHitsIt from "./copy/upsell-tophits/it.json";
 import { funnel } from "./funnel";
+import { pageEdits } from "@/lib/pageTexts";
+import { markupEdits, type TextPage } from "./texts";
 import type { Lang } from "./i18n";
 import { AFTER_LOAD, dollarFirst, escapeAttr, faster, frenchSpaces, mapText, unitSpaces } from "./landing";
 
@@ -83,7 +85,9 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
   const was = getFunnel(slug)?.offers?.find((o) => o.id === offerId)?.price[currency];
   if (!page || !offer || !product) return null;
 
-  const strings: Copy = { ...page.copy.en, ...page.copy[lang] };
+  // With the texts changed in the dashboard (funnel map → Edit, ./texts.ts); the Drum Kit's, also where TOP HITS shows the page.
+  const edits = markupEdits(await pageEdits(funnel.slug, lang, true), offerId as TextPage);
+  const strings: Copy = { ...page.copy.en, ...page.copy[lang], ...edits };
   const said = (key: string) =>
     typeof strings[key] === "string" ? restate(strings[key] as string, was ?? offer.price[currency], offer.price[currency], lang) : "";
   const dollars = (t: string) => (currency === "usd" ? t.replaceAll("€", "$") : t);

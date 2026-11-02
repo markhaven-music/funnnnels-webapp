@@ -7,7 +7,9 @@ import { after } from "next/server";
 import { reportSaleToNeo } from "@/lib/neo";
 import { noteSale } from "@/lib/sales";
 import { getOrder, type Order } from "@/lib/orders";
-import { copyFor } from "../../copy";
+import { copyWith } from "../../copy";
+import { pageEdits } from "@/lib/pageTexts";
+import { copyEdits } from "../../texts";
 import { funnel, unlocked } from "../../funnel";
 import { isLang, paths } from "../../i18n";
 import { PurchasePixel } from "../../Tracking";
@@ -29,7 +31,7 @@ type Params = Promise<{ lang: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { lang } = await params;
   if (!isLang(lang)) return {};
-  return { title: copyFor(lang).meta.thanksTitle, robots: { index: false, follow: false } };
+  return { title: copyWith(lang, undefined, copyEdits(await pageEdits(funnel.slug, lang))).meta.thanksTitle, robots: { index: false, follow: false } };
 }
 
 const LABELS: Record<string, string> = {
@@ -51,7 +53,9 @@ export default async function ThankYou({
 }) {
   const { lang } = await params;
   if (!isLang(lang)) notFound();
-  const c = copyFor(lang).thanks;
+  // With the texts changed in the dashboard (funnel map → Edit, ../../texts.ts).
+  const copy = copyWith(lang, undefined, copyEdits(await pageEdits(funnel.slug, lang)));
+  const c = copy.thanks;
   const { payment_intent, paypal_order, u, preview } = await searchParams;
   // The names dashboard → Products gives the add-ons and upsells (an added add-on too).
   const f = await resolveFunnel(funnel.slug);
@@ -145,8 +149,8 @@ export default async function ThankYou({
       </section>
 
       <footer className={t.footer}>
-        © 2026 {funnel.brand} - <a href={funnel.legal.terms}>{copyFor(lang).footer.terms}</a> - <a href={funnel.legal.privacy}>{copyFor(lang).footer.privacy}</a> -{" "}
-        <a href={funnel.legal.refund}>{copyFor(lang).footer.refund}</a> - <b>{copyFor(lang).footer.contact}</b> {funnel.support}
+        © 2026 {funnel.brand} - <a href={funnel.legal.terms}>{copy.footer.terms}</a> - <a href={funnel.legal.privacy}>{copy.footer.privacy}</a> -{" "}
+        <a href={funnel.legal.refund}>{copy.footer.refund}</a> - <b>{copy.footer.contact}</b> {funnel.support}
       </footer>
     </main>
   );

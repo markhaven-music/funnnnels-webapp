@@ -34,7 +34,8 @@ type Info = { firstName: string; lastName: string; email: string };
 // afterOrder: the page after paying (the first upsell, or the thank-you page);
 // keepCard: the card is kept for the one-click upsells (Stripe setup_future_usage,
 // which the intent route sets too: both must say the same).
-type Props = { lang: Lang; currency: Currency; country: string; publishableKey: string | null; afterOrder: string; keepCard: boolean; offer: OrderOffer };
+// form: the form's words with the dashboard's edits (../texts.ts), from the order page.
+type Props = { lang: Lang; currency: Currency; country: string; publishableKey: string | null; afterOrder: string; keepCard: boolean; offer: OrderOffer; form?: Copy["form"] };
 
 const stripeCache = new Map<string, ReturnType<typeof loadStripe>>();
 function stripeFor(key: string) {
@@ -60,8 +61,8 @@ const appearance: Appearance = {
 };
 
 
-export function OrderForm({ lang, currency, country, publishableKey, afterOrder, keepCard, offer }: Props) {
-  const t = copyFor(lang, currency).form;
+export function OrderForm({ lang, currency, country, publishableKey, afterOrder, keepCard, offer, form }: Props) {
+  const t = form ?? copyFor(lang, currency).form;
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);

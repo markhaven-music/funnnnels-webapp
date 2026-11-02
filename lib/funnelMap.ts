@@ -64,6 +64,8 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
       const shots = SHOTS[f.slug]?.[lang] ?? SHOTS[f.slug]?.en;
       const img = (name?: string) => (name ? `/funnels/${f.slug}/${name}.webp` : null);
       const edit = editable.has(f.slug) ? `/funnels/${f.slug}/edit` : null;
+      // The MIDI Drum Kit's pages are code: their words are edited page by page (app/funnels/[id]/texts).
+      const texts = (page: string) => (f.slug === "midi-drum-kit" ? `/funnels/${f.slug}/texts?page=${page}&lang=${lang}` : null);
       const step = (kind: MapStepKind, name: string, path: string, image: string | null, editUrl: string | null): MapStep => ({
         kind,
         name,
@@ -74,14 +76,14 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
       });
       const steps = [
         // Launch-kit products sell on the landing itself (#buy): no order step.
-        step("landing", f.checkout.orderPage ? "Sales page" : "Sales page + checkout", `/${f.slug}`, img(shots?.landing), edit),
+        step("landing", f.checkout.orderPage ? "Sales page" : "Sales page + checkout", `/${f.slug}`, img(shots?.landing), edit ?? texts("landing")),
         // Jazz's order page shows the same edited sections as its landing.
-        ...(f.checkout.orderPage ? [step("order", "Order page", f.checkout.orderPage, img(shots?.order), edit)] : []),
+        ...(f.checkout.orderPage ? [step("order", "Order page", f.checkout.orderPage, img(shots?.order), edit ?? texts("order"))] : []),
         ...(f.offers ?? []).map((o, i) => ({
-          ...step("upsell", `Upsell ${i + 1}: ${o.name}`, `/${f.slug}/${o.path}`, img(o.path), null),
+          ...step("upsell", `Upsell ${i + 1}: ${o.name}`, `/${f.slug}/${o.path}`, img(o.path), texts(o.id)),
           offer: { id: o.id, page: `upsell-${i + 1}`, live: upsellsOn(f) },
         })),
-        step("thank-you", "Thank-you page", f.checkout.thankYou, img(shots?.thanks), null),
+        step("thank-you", "Thank-you page", f.checkout.thankYou, img(shots?.thanks), texts("thank-you")),
       ];
       return { lang, label: LANG_LABEL[lang] ?? lang.toUpperCase(), steps };
     }),

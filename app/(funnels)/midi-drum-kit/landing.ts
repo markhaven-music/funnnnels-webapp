@@ -8,7 +8,9 @@ import en from "./copy/landing/en.json";
 import es from "./copy/landing/es.json";
 import fr from "./copy/landing/fr.json";
 import it from "./copy/landing/it.json";
-import { copyFor } from "./copy";
+import { copyWith } from "./copy";
+import type { PageEdits } from "@/lib/pageTexts";
+import { copyEdits, markupEdits } from "./texts";
 import { funnel } from "./funnel";
 import { paths, type Lang } from "./i18n";
 
@@ -65,8 +67,9 @@ export const escapeAttr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, 
 
 // price: the kit's in this currency, as dashboard → Products has it; the
 // words that say the code's price ("Only €297 €27") say this one.
-export function landingHtml(lang: Lang, currency: Currency, price: number = funnel.price[currency]): string {
-  const strings = { ...STRINGS.en, ...STRINGS[lang] };
+// edits: the texts changed in the dashboard (funnel map → Edit, ./texts.ts).
+export function landingHtml(lang: Lang, currency: Currency, price: number = funnel.price[currency], edits: PageEdits = {}): string {
+  const strings = { ...STRINGS.en, ...STRINGS[lang], ...markupEdits(edits, "landing") };
   const words = (key: string) => {
     let html = mapText(strings[key] ?? "", (t) => restate(t, funnel.price[currency], price, lang));
     if (lang === "es" || lang === "de" || lang === "it") html = mapText(html, unitSpaces);
@@ -76,7 +79,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = funn
     if (lang === "de" || lang === "it") html = mapText(html, dragDropTogether);
     return html;
   };
-  const meta = copyFor(lang).meta;
+  const meta = copyWith(lang, undefined, copyEdits(edits)).meta;
 
   let html = TEMPLATE.replace(/\{\{(t\d{3})\}\}/g, (_, key: string) => words(key))
     .replaceAll("{{ORDER}}", paths(lang).order)
