@@ -217,28 +217,48 @@
   }
 }
 
+/* desktop ("use bigger images and text for bonuses… big image that stays on
+   left column and content on other column", 2026-11-02): the cover large on
+   the left and sticky, the name, text, list and files on the right */
 @media (min-width: 1000px) {
+  .bonuses {
+    gap: 96px;
+  }
   .bonus {
-    grid-template-columns: 170px minmax(0, 1fr);
-    align-items: center;
-    gap: 0 34px;
+    grid-template-columns: minmax(0, 0.4fr) minmax(0, 0.6fr);
+    align-items: start;
+    gap: 0 56px;
   }
   .cover {
     grid-row: auto;
+    position: sticky;
+    top: 28px;
   }
   .info {
     display: block;
   }
+  .label {
+    font-size: 14px;
+  }
   .bonus h3 {
-    margin-top: 8px;
-    font-size: 21px;
+    margin-top: 10px;
+    font-size: 30px;
+  }
+  .text {
+    margin-top: 14px;
+    font-size: 18px;
+  }
+  .inside {
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 17px;
   }
   .preview {
-    grid-column: 1 / -1;
-    margin-top: 26px;
+    grid-column: 2;
+    margin-top: 30px;
   }
   .rolls {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

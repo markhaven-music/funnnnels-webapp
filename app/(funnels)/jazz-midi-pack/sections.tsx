@@ -233,7 +233,6 @@ function Head({ title, sub, two, h, patch, ctx }: { eyebrow: string; title: stri
 }
 
 /** A two-column section keeps its columns while both sides show something. */
-const twoIf = (both: boolean) => (both ? s.two : "");
 
 function Tick() {
   return (
@@ -293,6 +292,9 @@ function Marked({ text }: { text: string }) {
     </>
   );
 }
+
+// two columns only while both halves are shown (the guarantee: text | seal)
+const twoIf = (both: boolean) => (both ? s.two : "");
 
 function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch; ctx: Ctx }) {
   // Pages published before the centered hero have no `pre`: they get its default copy.
@@ -534,13 +536,11 @@ function Previews({ p, patch, ctx }: { p: SectionProps["s_previews"]; patch?: Pa
   const h = parts(p, patch);
   return (
     <section className={s.sec}>
-      <div className={`${s.wrap} ${twoIf(h.any("title", "sub") && h.on("browser"))} ${s.twoWide}`}>
-        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} two h={h} patch={patch} ctx={ctx} />
-        <div className={s.twoBody}>
-          <Part k="browser" h={h}>
-            <PackBrowser />
-          </Part>
-        </div>
+      <div className={s.wrap}>
+        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} h={h} patch={patch} ctx={ctx} />
+        <Part k="browser" h={h}>
+          <PackBrowser />
+        </Part>
       </div>
     </section>
   );
@@ -551,7 +551,15 @@ function Steps({ p, patch, ctx }: { p: SectionProps["s_steps"]; patch?: Patch; c
   const h = parts(p, patch);
   return (
     <section className={`${s.sec} ${s.band}`}>
-      <div className={s.wrap}>
+      <div className={`${s.wrap} ${s.side}`}>
+        <Part k="shot" h={h}>
+          <figure className={`${s.dawShot} ${s.sideImg}`}>
+            <Scene name="daw" alt="A laptop with the DAW piano roll showing gold jazz voicings under Dm9, G13 and Cmaj9, next to the Jazz MIDI Pack box"
+              sizes="(min-width: 1000px) 45vw, 100vw"
+            />
+          </figure>
+        </Part>
+        <div className={s.sideText}>
         <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
         <ol className={s.steps}>
           {p.steps.map((st, i) => {
@@ -577,11 +585,7 @@ function Steps({ p, patch, ctx }: { p: SectionProps["s_steps"]; patch?: Patch; c
           })}
         </ol>
         <Add onClick={ops.add && (() => ops.add!({ title: "New step", text: "What happens." }))} label="step" />
-        <Part k="shot" h={h}>
-          <figure className={s.dawShot}>
-            <Scene name="daw" alt="A laptop with the DAW piano roll showing gold jazz voicings under Dm9, G13 and Cmaj9, next to the Jazz MIDI Pack box" />
-          </figure>
-        </Part>
+        </div>
       </div>
     </section>
   );
@@ -795,9 +799,8 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
   const h = parts(p, patch);
   return (
     <section className={s.sec}>
-      <div className={`${s.wrap} ${twoIf(h.any("title", "sub"))} ${s.twoWide}`}>
-        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} two h={h} patch={patch} ctx={ctx} />
-        <div className={s.twoBody}>
+      <div className={s.wrap}>
+        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} h={h} patch={patch} ctx={ctx} />
         <ol className={bn.bonuses}>
           {p.items.map((it, i) => {
             const known = funnel.bonuses[i];
@@ -863,7 +866,6 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
           })}
         </ol>
         <Add onClick={ops.add && (() => ops.add!({ name: "New bonus", text: "What it is." }))} label="bonus" />
-        </div>
       </div>
     </section>
   );
@@ -1089,7 +1091,13 @@ function After({ p, patch, ctx }: { p: SectionProps["s_after"]; patch?: Patch; c
   const h = parts(p, patch);
   return (
     <section className={s.sec}>
-      <div className={s.wrap}>
+      <div className={`${s.wrap} ${s.side}`}>
+        <Part k="box" h={h}>
+          <figure className={s.sideImg}>
+            <img src={`${DIR}/box-900.webp`} width={900} height={1282} alt="The Jazz MIDI Pack box" loading="lazy" decoding="async" />
+          </figure>
+        </Part>
+        <div className={s.sideText}>
         <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
         <ol className={s.after}>
           {p.items.map((it, i) => (
@@ -1101,6 +1109,7 @@ function After({ p, patch, ctx }: { p: SectionProps["s_after"]; patch?: Patch; c
           ))}
         </ol>
         <Add onClick={ops.add && (() => ops.add!({ lead: "Next.", text: "What happens." }))} label="step" />
+        </div>
       </div>
     </section>
   );

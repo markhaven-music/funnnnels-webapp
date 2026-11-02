@@ -33,7 +33,7 @@ export function ProductBox({ variant = "box", priority = false }: { variant?: "h
 }
 
 /** A wide photo with the box in it: the DAW desk, the club stage. */
-export function Scene({ name, alt, className }: { name: "daw" | "stage"; alt: string; className?: string }) {
+export function Scene({ name, alt, className, sizes: sz }: { name: "daw" | "stage"; alt: string; className?: string; sizes?: string }) {
   const sizes = name === "daw" ? [900, 1600] : [1100, 2200];
   const dims = name === "daw" ? [1600, 905] : [2200, 943];
   return (
@@ -41,7 +41,7 @@ export function Scene({ name, alt, className }: { name: "daw" | "stage"; alt: st
       className={className}
       src={`${DIR}/${name}-${sizes[0]}.webp`}
       srcSet={sizes.map((w) => `${DIR}/${name}-${w}.webp ${w}w`).join(", ")}
-      sizes={name === "daw" ? "(min-width: 1160px) 1120px, 100vw" : "100vw"}
+      sizes={sz ?? (name === "daw" ? "(min-width: 1160px) 1120px, 100vw" : "100vw")}
       width={dims[0]}
       height={dims[1]}
       alt={alt}

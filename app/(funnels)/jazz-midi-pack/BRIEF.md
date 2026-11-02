@@ -194,3 +194,13 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   the pack's "after" roll tiled as a faint yellow texture lasted twenty minutes (bcdaa79) and was rejected.
 - "metti social proof reviews verso la fine": the reviews block sits after the guarantee (offer → guarantee →
   reviews → after you pay → FAQ → final), in the database and in the defaults.
+- "this too confusing. feel free to use vertical space. People love to scroll. This applies to the whole page"
+  and "Can you use the two columns in a way where there's always an image in one of the two columns?" and "use
+  bigger images and text for bonuses and I don't like the text that stays on the side. Use big image that stays on
+  left column and content on other column" (2026-11-02): from 1000px the folders are rows (number left, name and
+  text right), the voicings/rhythms/progressions lists are stacked, "How it works" is the DAW picture left (sticky)
+  and the three steps right, "After you pay" is the box left and the four steps right (`.side`, `.sideImg`,
+  `.sideText`), the bonuses have the heading on top and each bonus as the cover large and sticky on the left with
+  name, text, list and files on the right in larger type. The pack browser's heading went back on top of the
+  browser. No heading sticks on the side any more; `.two` stays only for the guarantee (text | seal). The rules of
+  the whole page are in `.claude/skills/grind-funnel-page/SKILL.md`.

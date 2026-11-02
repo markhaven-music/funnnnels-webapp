@@ -1546,3 +1546,94 @@
     grid-column: auto;
   }
 }
+
+/* Desktop uses the vertical space ("feel free to use vertical space. People
+   love to scroll. This applies to the whole page", 2026-11-02): no dense
+   grids. Two columns only as a visual beside copy: the picture on the left,
+   sticky, the copy on the right (.side: how it works, after you pay). The
+   folders, the lists, the steps and the after-you-pay steps one under the
+   other. */
+.side {
+  display: grid;
+  gap: 32px;
+}
+.sideImg {
+  order: 2;
+  margin: 0;
+}
+.sideImg img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+@media (min-width: 1000px) {
+  .side {
+    grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
+    gap: 32px 72px;
+    align-items: start;
+  }
+  .sideImg {
+    order: 0;
+    position: sticky;
+    top: 28px;
+  }
+  .side .dawShot {
+    margin-top: 0;
+  }
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .after {
+    grid-template-columns: 1fr;
+  }
+  .bento {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .cell,
+  .cellBig {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    grid-column: auto;
+    grid-row: auto;
+    column-gap: 48px;
+    align-items: start;
+    padding: 26px 0;
+  }
+  .cellN {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .cellCount,
+  .cellBig .cellCount {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 64px;
+  }
+  .cell h3 {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    font-size: 24px;
+  }
+  .cell p {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0;
+    font-size: 17px;
+  }
+  .lists {
+    grid-template-columns: 1fr;
+    gap: 64px;
+  }
+  .listWide {
+    grid-column: auto;
+  }
+  .numList {
+    columns: 2;
+    column-gap: 32px;
+  }
+}
