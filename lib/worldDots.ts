@@ -1,0 +1,86 @@
+// The land of dashboard → Live's map, as dots: an equirectangular grid of
+// 2.5° cells from 180°W to 180°E and 82.5°N to 57.5°S (no Antarctica), one
+// row of 144 bits per string, in hex, 1 = land. Made once from Natural
+// Earth's 1:50m land (world-atlas land-50m.json, d3-geo geoContains at each
+// cell's centre).
+
+export const MAP_COLS = 144;
+export const MAP_ROWS = 56;
+const STEP = 2.5;
+const TOP = 82.5;
+
+const LAND = [
+  "000000002ffcfffee0000002000000000000",
+  "000000011fcfffff000780000000c0000000",
+  "00000109900fffff80000000e002f8000000",
+  "000003c0b4003fff00000002003fe8008000",
+  "8040007c67f03ffe000000041dfffff7f800",
+  "03ffffd45a780ffc0003fe15ebffffffff7f",
+  "f0fffffffc3e1fc04003fd3fffffffffffff",
+  "00fffffff51c1f00801f7ffffffffffffffe",
+  "03ffffffc0600600003e7ffffffffffffeb8",
+  "00603fffe07e0000003e7fffffffffff80c0",
+  "00801ffff8fe00000214fffffffffffe0380",
+  "00000ffffeff80000d1fffffffffffff0300",
+  "000007ffffffc00001ffffffffffffff0000",
+  "000003fffff4400001ffffffffffffff0000",
+  "000001fffffd000000fff5f7fffffffe0000",
+  "000003fffff0000001ebe0effffffffc4000",
+  "000003ffffe000000786f6f3fffffff08000",
+  "000001ffff8000000f029ff3fffffe208000",
+  "000001ffffc0000000f007ffffffff130000",
+  "0000007fff00000007f003ffffffff040000",
+  "0000005ffe0000000ffeebffffffff800000",
+  "0000003fc10000000fffffefffffff800000",
+  "0000000f810000003ffffdf1ffffff000000",
+  "00000007800000003ffffdfe1ffffe800000",
+  "00000003880000007ffffeff0fe7e0000000",
+  "00000003d81800003ffffefe07c3d0000000",
+  "00000000780100007fffff780701e0800000",
+  "000000000e0000007fffffe00301f0c00000",
+  "00000000002800003fffff90030170400000",
+  "00000000017f00001ffffff0000100200000",
+  "00000000007f80000fbffff0008082000000",
+  "00000000007ff000001fffe0000186000000",
+  "0000000000fff000000fffc000008e800000",
+  "0000000000fff400000fff800001ce8c0000",
+  "0000000000ffff80000fff0000004283c000",
+  "0000000000ffffc00007ff0000002001e000",
+  "0000000000ffffc00007ff00000002a08000",
+  "00000000007fff800003ff00000000080000",
+  "00000000003fff000007ff100000000e0000",
+  "00000000001fff000007ff300000007e4000",
+  "00000000000fff000007fe300000007fe000",
+  "00000000000fff000007fc60000003fff000",
+  "00000000000ffc000003fc60000007fff800",
+  "00000000000ff8000003f800000003fff800",
+  "00000000001ff0000001f800000003fff800",
+  "00000000001fe0000001f000000003fff800",
+  "00000000001fe0000001c00000000383f800",
+  "00000000001f80000000000000000000f000",
+  "00000000001f000000000000000000000002",
+  "00000000003c000000000000000000002004",
+  "40000000001c000000000000000000000008",
+  "000000000018000000000000000000000010",
+  "000000000038000000000000000000000000",
+  "000000000030000000000000000000000000",
+  "000000000018000000000000000000000000",
+  "000000000000000000000000000000000000",
+];
+
+/** Where a place is on the map, in grid cells (x 0–144, y 0–56). */
+export function project(lat: number, lon: number): { x: number; y: number } {
+  return { x: (lon + 180) / STEP, y: (TOP - lat) / STEP };
+}
+
+/** One SVG path drawing every land dot (stroke it with round caps). */
+export function landPath(): string {
+  let d = "";
+  LAND.forEach((row, y) => {
+    for (let i = 0; i < row.length; i++) {
+      const bits = parseInt(row[i], 16);
+      for (let b = 0; b < 4; b++) if (bits & (8 >> b)) d += `M${i * 4 + b + 0.5} ${y + 0.5}h0`;
+    }
+  });
+  return d;
+}

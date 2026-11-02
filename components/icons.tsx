@@ -57,6 +57,11 @@ export const I = {
       <path d="M4 19V5M4 19h16M8 15v-4M12 15V9M16 15v-7" />
     </Base>
   ),
+  pulse: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M3 12h4l3-7 4 14 3-7h4" />
+    </Base>
+  ),
   abtest: (p: IconProps) => (
     <Base {...p}>
       <path d="M5 4h6v6a3 3 0 1 0 6 0V4" />

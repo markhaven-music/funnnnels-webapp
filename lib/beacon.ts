@@ -10,7 +10,7 @@
 //
 // Two copies of the same few lines: track() for the React pages and forms,
 // beaconScript() for the static HTML landing (midi-drum-kit/landing.ts).
-// Keep them in step.
+// Keep them in step. Both also run LIVE_JS, the live presence (below).
 //
 // Previews aren't counted: a page opened with ?preview=1 (the dashboard's
 // links, e.g. a colour of the A/B/C test from the funnel map) sends nothing,
@@ -57,6 +57,31 @@ export function isPreview(): boolean {
 // A small tag on previewed pages, so it's clear the visit isn't counted.
 const BADGE_JS = `(function(){var go=function(){if(document.getElementById('fv-preview'))return;var d=document.createElement('div');d.id='fv-preview';d.textContent='Preview · not counted';d.style.cssText='position:fixed;left:10px;bottom:10px;z-index:2147483647;font:600 12px/1 system-ui,sans-serif;color:#fff;background:rgba(17,17,17,.82);padding:7px 10px;border-radius:3px;pointer-events:none';document.body.appendChild(d);};if(document.body)go();else document.addEventListener('DOMContentLoaded',go);})();`;
 
+// Dashboard → Live: who is on a page right now. Unlike the daily count, every
+// page opened says so ("view", with where the visitor came from on the first
+// page of the tab), the tab then pings every 20 s while it's in front ("beat",
+// at most 30 minutes in a row) and says when it goes to the background
+// ("leave"). The visitor is a random id kept in localStorage, nothing more.
+// One copy for both kinds of page: the body of a function of o = {f, p, l}.
+export const LIVE_URL = "/api/checkout/here";
+const LIVE_JS = `try{
+var w=window,L=w.__fvLive,u='${LIVE_URL}',s=L&&L.s,id=function(){return(Math.random().toString(36).slice(2,10)+Date.now().toString(36)).slice(0,20);};
+if(!s){try{s=localStorage.getItem('fv:sid')||'';if(!/^[a-z0-9]{8,24}$/.test(s)){s=id();localStorage.setItem('fv:sid',s);}}catch(e){s=id();}}
+var send=function(b){b.i=s;var j=JSON.stringify(b);if(!(navigator.sendBeacon&&navigator.sendBeacon(u,j)))fetch(u,{method:'POST',body:j,keepalive:true}).catch(function(){});};
+var v={k:'view',f:o.f,p:o.p,l:o.l,h:location.hostname,u:location.pathname,r:'='};
+if(!L){var q=new URLSearchParams(location.search),n=['utm_source','utm_medium','utm_campaign','utm_content'],r='';
+for(var x=0;x<4;x++){var y=q.get(n[x]);if(y)v['smca'.charAt(x)]=y.slice(0,120);}
+if(q.get('fbclid'))v.fb=1;if(q.get('gclid'))v.g=1;
+try{r=document.referrer?new URL(document.referrer).hostname:'';}catch(e){}
+v.r=r===location.hostname?'=':r;}
+if(navigator.webdriver)v.w=1;
+send(v);
+if(L)return;
+L=w.__fvLive={s:s,n:0};
+setInterval(function(){if(document.visibilityState==='visible'&&L.n++<90)send({k:'beat'});},20000);
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')send({k:'leave'});else{L.n=0;send({k:'beat'});}});
+}catch(e){}`;
+
 const readCookie = (name: string) =>
   (document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`)) ?? [])[1] ?? "";
 
@@ -66,6 +91,7 @@ export function track({ funnel, page, lang = "en", abCookie }: BeaconOptions): v
       new Function(BADGE_JS)();
       return;
     }
+    new Function("o", LIVE_JS)({ f: funnel, p: page, l: lang });
     const key = `fv:${funnel}:${lang}:${page}`;
     const today = new Date().toDateString();
     try {
@@ -97,6 +123,7 @@ export function beaconScript({ funnel, page, lang = "en", abCookie }: BeaconOpti
   return `(function(){try{
 if(${PREVIEW_JS}){${BADGE_JS}return;}
 var o=${o},k='fv:'+o.f+':'+o.l+':'+o.p,d=new Date().toDateString();
+(function(o){${LIVE_JS}})(o);
 try{if(localStorage.getItem(k)===d)return;localStorage.setItem(k,d);}catch(e){}
 var c=function(n){return(document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'))||[])[1]||'';};
 o.v=${abCookie ? `c(${JSON.stringify(abCookie)})` : "''"};o.c=c('visitor_country');o.h=location.hostname;if(navigator.webdriver)o.w=1;
