@@ -28,7 +28,7 @@
   cursor: pointer;
 }
 .tab:hover {
-  background: rgb(226 169 59 / 0.06);
+  background: rgb(var(--y-rgb) / 0.06);
 }
 .tab[aria-selected="true"] {
   background: #15120e;

@@ -60,7 +60,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   const guarantee = pick(sections, "s_guarantee");
 
   return (
-    <main className={`${s.page} ${s.orderMain} ${display.variable}`}>
+    <main className={`${s.page} ${s.jazz} ${s.orderMain} ${display.variable}`}>
       <Tracking value={amount} currency={currency} page="order" />
       <Beacon funnel={funnel.slug} page="order" />
       <div className={s.topband}>

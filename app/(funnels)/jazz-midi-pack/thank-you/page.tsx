@@ -42,7 +42,7 @@ export default async function ThankYou({
   const pending = order?.status === "processing";
 
   return (
-    <main className={`${s.page} ${display.variable}`}>
+    <main className={`${s.page} ${s.jazz} ${display.variable}`}>
       <Beacon funnel={funnel.slug} page="thank-you" />
       {paid && order && <PurchasePixel orderId={order.id} value={order.amount} currency={order.currency} />}
       <section className={s.hero}>

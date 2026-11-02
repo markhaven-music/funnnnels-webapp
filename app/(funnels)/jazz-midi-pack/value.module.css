@@ -11,7 +11,7 @@
   padding: 24px 20px;
   border-radius: 4px;
   background:
-    radial-gradient(90% 60% at 50% 0%, rgb(226 169 59 / 0.18), transparent 70%),
+    radial-gradient(90% 60% at 50% 0%, rgb(var(--y-rgb) / 0.18), transparent 70%),
     var(--ink-2);
 }
 .mainBox {
@@ -32,7 +32,7 @@
   left: -18px;
   padding: 7px 12px 6px;
   border-radius: 3px;
-  background: linear-gradient(180deg, var(--brass-hi), var(--brass));
+  background: linear-gradient(180deg, var(--y-gloss, var(--brass-hi)), var(--brass));
   font-family: var(--font-display), var(--font-sans), sans-serif;
   font-size: 14px;
   font-weight: 800;
@@ -115,7 +115,7 @@
   left: 3%;
   right: 3%;
   height: 22px;
-  border: 2px solid rgb(243 235 220 / 0.5);
+  border: 2px solid rgb(var(--cream-rgb) / 0.5);
   border-top: 0;
   border-radius: 0 0 20px 20px;
 }
@@ -126,7 +126,7 @@
   bottom: -12px;
   width: 2px;
   height: 12px;
-  background: rgb(243 235 220 / 0.5);
+  background: rgb(var(--cream-rgb) / 0.5);
 }
 .totalLine {
   font-family: var(--font-display), var(--font-sans), sans-serif;
@@ -172,14 +172,14 @@
   line-height: 1.15;
   letter-spacing: -0.03em;
   color: var(--brass-hi);
-  text-shadow: 0 0 44px rgb(226 169 59 / 0.45);
+  text-shadow: 0 0 44px rgb(var(--y-rgb) / 0.45);
 }
 .save {
   display: inline-block;
   margin-top: 18px;
   padding: 8px 16px 7px;
   border-radius: 3px;
-  background: linear-gradient(180deg, var(--brass-hi), var(--brass));
+  background: linear-gradient(180deg, var(--y-gloss, var(--brass-hi)), var(--brass));
   font-family: var(--font-display), var(--font-sans), sans-serif;
   font-size: 14px;
   font-weight: 800;

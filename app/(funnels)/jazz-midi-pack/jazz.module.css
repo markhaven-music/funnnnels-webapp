@@ -19,6 +19,9 @@
   --brass-deep: #a86c0e;
   --red: #e0573f;
   --green: #3fd16b; /* checks only, like the Grind Studio Drum Kit page */
+  --y-rgb: 226 169 59; /* the brass as r g b, for tints and glows */
+  --b-rgb: 46 82 170; /* the blue glow */
+  --cream-rgb: 243 235 220;
   min-height: 100vh;
   background: var(--ink);
   color: var(--cream);
@@ -26,6 +29,57 @@
   font-size: 17px;
   line-height: 1.6;
   overflow-x: clip;
+}
+
+/* The Jazz pages' palette since 2026-11-02 ("l'uso dei colori non mi piace, è
+   troppo pastello desaturato… una sola sfumatura di giallo"): one yellow, the
+   Drum Kit's #f5b800, white text, black bands instead of blue. --y-gloss is
+   the one lighter shade, only in gradients (the button's gloss, the price
+   tags); --y-deep and --y-lip are the button's underside. .page keeps the old
+   brass and cream for the shop and the launch kits, which share this file. */
+.jazz {
+  --y: #f5b800;
+  --y-gloss: #ffe14d;
+  --y-deep: #c99700;
+  --y-lip: #6b5000;
+  --y-glow: rgb(245 184 0 / 0.55);
+  --y-rgb: 245 184 0;
+  --b-rgb: 245 184 0;
+  --cream-rgb: 255 255 255;
+  --brass: var(--y);
+  --brass-hi: var(--y);
+  --brass-deep: var(--y-deep);
+  --cream: #fff;
+  --cream-2: rgb(255 255 255 / 0.88);
+  --mute: rgb(255 255 255 / 0.62);
+  --ink: #070707;
+  --ink-2: #141414;
+  --ink-3: #1e1e1e;
+  --rule: #2a2a2a;
+  --navy: #111111;
+  --navy-2: #191919;
+  --navy-rule: #2c2c2c;
+  --red: #ff4b3a;
+  --green: #3fd468;
+}
+.jazz .band {
+  --ink: #111111;
+  --ink-3: #1e1e1e;
+  --mute: rgb(255 255 255 / 0.62);
+  background: var(--navy);
+}
+.jazz .heroBg {
+  background:
+    radial-gradient(70% 55% at 50% 0%, rgb(var(--y-rgb) / 0.26), transparent 70%),
+    linear-gradient(to bottom, transparent 0 calc(100% - 1px), var(--rule) calc(100% - 1px));
+}
+.jazz .chHead.chWin {
+  background: rgb(var(--y-rgb) / 0.2);
+}
+.jazz .chWinBg {
+  background:
+    radial-gradient(120% 50% at 50% 0%, rgb(var(--y-rgb) / 0.3), transparent 70%),
+    rgb(var(--y-rgb) / 0.09);
 }
 .page :where(h1, h2, h3, p, ul, ol, figure, dl) {
   margin: 0;
@@ -57,8 +111,8 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(70% 55% at 80% 18%, rgb(226 169 59 / 0.24), transparent 70%),
-    radial-gradient(60% 50% at 8% 85%, rgb(46 82 170 / 0.28), transparent 70%),
+    radial-gradient(70% 55% at 80% 18%, rgb(var(--y-rgb) / 0.24), transparent 70%),
+    radial-gradient(60% 50% at 8% 85%, rgb(var(--b-rgb) / 0.28), transparent 70%),
     linear-gradient(to bottom, transparent 0 calc(100% - 1px), var(--rule) calc(100% - 1px));
   pointer-events: none;
 }
@@ -66,8 +120,8 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(rgb(243 235 220 / 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(243 235 220 / 0.04) 1px, transparent 1px);
+  background-image: linear-gradient(rgb(var(--cream-rgb) / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--cream-rgb) / 0.04) 1px, transparent 1px);
   background-size: 44px 44px;
   mask: radial-gradient(70% 60% at 60% 30%, #000, transparent);
 }
@@ -167,7 +221,7 @@
   border-radius: 4px;
   /* flat behind the render: its haze would show as a box over a gradient */
   background: #0b0a08;
-  box-shadow: 0 30px 90px -40px rgb(226 169 59 / 0.45);
+  box-shadow: 0 30px 90px -40px rgb(var(--y-rgb) / 0.45);
 }
 /* the hero video: a poster until the tap, then Wistia's player (Vsl.tsx) */
 .vsl {
@@ -179,7 +233,7 @@
   overflow: hidden;
   border-radius: 4px;
   background: #000;
-  box-shadow: 0 30px 90px -40px rgb(226 169 59 / 0.45);
+  box-shadow: 0 30px 90px -40px rgb(var(--y-rgb) / 0.45);
 }
 .vsl iframe {
   position: absolute;
@@ -361,8 +415,8 @@
   --rule: var(--navy-rule);
   --mute: #93a0bd;
   background:
-    radial-gradient(55% 45% at 92% 0%, rgb(226 169 59 / 0.12), transparent 70%),
-    radial-gradient(50% 40% at 0% 100%, rgb(46 82 170 / 0.22), transparent 70%),
+    radial-gradient(55% 45% at 92% 0%, rgb(var(--y-rgb) / 0.12), transparent 70%),
+    radial-gradient(50% 40% at 0% 100%, rgb(var(--b-rgb) / 0.22), transparent 70%),
     var(--navy);
 }
 .secHead {
@@ -466,7 +520,7 @@
   color: #ef8c74;
 }
 .good {
-  background: rgb(226 169 59 / 0.16);
+  background: rgb(var(--y-rgb) / 0.16);
   color: var(--brass-hi);
 }
 .baNote {
@@ -756,7 +810,7 @@
 }
 .markMeh {
   color: var(--mute);
-  background: rgb(243 235 220 / 0.08);
+  background: rgb(var(--cream-rgb) / 0.08);
 }
 /* the pack's ticks: solid */
 .chWin .markYes {
@@ -837,7 +891,7 @@
   margin-top: 12px;
   padding: 14px 16px;
   border-radius: 3px;
-  background: rgb(226 169 59 / 0.12);
+  background: rgb(var(--y-rgb) / 0.12);
   font-family: var(--font-display), var(--font-sans), sans-serif;
   font-size: 15px;
   font-weight: 700;
@@ -856,7 +910,7 @@
 /* order */
 .order {
   background:
-    radial-gradient(60% 40% at 80% 0%, rgb(226 169 59 / 0.12), transparent 70%),
+    radial-gradient(60% 40% at 80% 0%, rgb(var(--y-rgb) / 0.12), transparent 70%),
     var(--ink);
 }
 .orderGrid {
@@ -940,7 +994,7 @@
   flex: none;
   width: 150px;
   height: 150px;
-  filter: drop-shadow(0 10px 30px rgb(226 169 59 / 0.35));
+  filter: drop-shadow(0 10px 30px rgb(var(--y-rgb) / 0.35));
 }
 .sealRing {
   font-family: var(--font-display), var(--font-sans), sans-serif;
@@ -1049,7 +1103,7 @@
   overflow: hidden;
   padding-top: 230px;
   background:
-    radial-gradient(60% 70% at 50% 100%, rgb(226 169 59 / 0.18), transparent 70%),
+    radial-gradient(60% 70% at 50% 100%, rgb(var(--y-rgb) / 0.18), transparent 70%),
     var(--ink);
 }
 .finalBg {
@@ -1165,7 +1219,7 @@
   min-height: 56px;
   padding: 0 22px;
   border-radius: 6px;
-  background: rgb(226 169 59 / 0.16);
+  background: rgb(var(--y-rgb) / 0.16);
   color: var(--brass-hi);
   font-weight: 700;
   text-decoration: none;
@@ -1230,9 +1284,9 @@
     grid-column: -2 / -1;
     border-radius: 4px;
     background:
-      radial-gradient(120% 50% at 50% 0%, rgb(226 169 59 / 0.3), transparent 70%),
+      radial-gradient(120% 50% at 50% 0%, rgb(var(--y-rgb) / 0.3), transparent 70%),
       linear-gradient(180deg, #2a2112, #17130c);
-    box-shadow: 0 30px 70px -20px rgb(226 169 59 / 0.45);
+    box-shadow: 0 30px 70px -20px rgb(var(--y-rgb) / 0.45);
   }
   .chHead {
     align-items: flex-start;
@@ -1274,7 +1328,7 @@
   }
   /* rows told apart by tone, not lines (child 1 is chWinBg, 2 the heads) */
   .chRow:nth-child(odd) > * {
-    background: rgb(243 235 220 / 0.035);
+    background: rgb(var(--cream-rgb) / 0.035);
   }
   .chCell.chWin {
     margin: 0;
@@ -1402,5 +1456,49 @@
   }
   .finalIn h2 {
     max-width: 15em;
+  }
+}
+
+/* Below the hero, every section made of a heading and one block of content is
+   two columns on desktop ("you should use 2 columns layout on desktop",
+   2026-11-02): the heading on the left, sticky, the content on the right.
+   .twoWide gives the pack browser and the bonuses a wider right column. */
+.twoBody {
+  min-width: 0;
+  container-type: inline-size;
+}
+@media (min-width: 1000px) {
+  .two {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 24px 72px;
+    align-items: start;
+  }
+  .two.col,
+  .two.guarantee {
+    max-width: none;
+    text-align: left;
+  }
+  .twoWide {
+    grid-template-columns: minmax(0, 0.6fr) minmax(0, 1.4fr);
+  }
+  .twoHead {
+    position: sticky;
+    top: 28px;
+    grid-column: 1;
+    grid-row: 1;
+    max-width: none;
+    margin-bottom: 0;
+  }
+  .twoBody {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .sealWrap {
+    display: flex;
+    justify-content: center;
+  }
+  .two .after {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

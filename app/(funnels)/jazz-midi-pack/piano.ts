@@ -1,6 +1,7 @@
-// Plays a real file from the pack on a warm sine synth ("usa un sine synth
-// invece del piano, è più warm"): two sines a few cents apart per note, soft
-// attack, a slow fall to the sustain and a short release. Nothing to fetch, so
+// Plays a real file from the pack on plain sine waves ("usa un sine synth
+// invece del piano, è più warm", then "usa semplicemente delle sinusoidi"):
+// one sine per note, soft attack, a slow fall to the sustain and a short
+// release. Nothing to fetch, so
 // a file plays the moment it's tapped; one file plays at a time. The scope
 // element gets [data-state="playing"] and --dur (seconds) so CSS can run the
 // playhead.
@@ -76,11 +77,6 @@ function unisons(notes: number[][]) {
   return out;
 }
 
-// Partials per note, [frequency ratio, level]: two sines 5 cents apart for the
-// warmth, and under C3 a quiet 2nd and 3rd so a bass line still sounds on a
-// phone speaker, which can't play a pure sine that low.
-const UPPER = [[1, 0.5], [2 ** (5 / 1200), 0.5]];
-const BASS = [[1, 0.42], [2 ** (5 / 1200), 0.42], [2, 0.12], [3, 0.04]];
 
 function play(roll: Roll, scope: HTMLElement) {
   window.dispatchEvent(new Event("jazz:piano")); // a drum loop clip playing (LoopList) stops
@@ -101,16 +97,12 @@ function play(roll: Roll, scope: HTMLElement) {
     g.gain.setTargetAtTime(vel * 0.62, start + 0.018, 0.4);
     g.gain.setTargetAtTime(0, end, 0.11);
     g.connect(out!);
-    for (const [ratio, level] of bass ? BASS : UPPER) {
-      const o = ac.createOscillator();
-      o.frequency.value = hz(p) * ratio;
-      const lv = ac.createGain();
-      lv.gain.value = level;
-      o.connect(lv).connect(g);
-      o.start(start);
-      o.stop(end + 0.8);
-      current.oscs.push(o);
-    }
+    const o = ac.createOscillator(); // a sine, the default wave
+    o.frequency.value = hz(p);
+    o.connect(g);
+    o.start(start);
+    o.stop(end + 0.8);
+    current.oscs.push(o);
     current.gains.push(g);
   }
   scope.style.setProperty("--dur", `${dur.toFixed(2)}s`);

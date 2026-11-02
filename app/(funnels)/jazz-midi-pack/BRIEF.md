@@ -146,3 +146,19 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   (IV-III7-vi-I7 Marusa)" (Dbmaj9 C7b9 Fm9 Ab9).
 - The section's note says the names have records built on progressions from the download, the quotes are from
   linked interviews, and none of the artists is connected to GRIND STUDIO or endorses the pack.
+
+## Palette and desktop layout (2026-11-02)
+- "l'uso dei colori non mi piace è troppo pastello desaturato. la pagina deve spikare dopamina… Scegli una sola
+  sfumatura di giallo": the Jazz pages (`.jazz` in jazz.module.css) use one yellow, the Drum Kit's #f5b800, with
+  #ffe14d only as the gloss in gradients (button, price tags) and a darker shade for the button's underside. Text is
+  white (body at 88 %, muted at 62 %), the bands are black (#111) instead of midnight blue, the glows yellow.
+  `.page` keeps the old brass and cream for the shop and the launch kits, which share the file; the shared button,
+  checkout, box and roll styles read `--y*` tokens with the old values as fallbacks. The VSL thumbnail (Wistia still
+  wtda8c86j3) and the share image use the same yellow; the video's captions still have the old brass boxes.
+- "you should use 2 columns layout on desktop", then "Tutto sotto l'hero": from 1000px every section made of a
+  heading and one block (letter, pack browser, bonuses, guarantee, after you pay, FAQ) is heading left (sticky) and
+  content right (`.two`, `.twoHead`, `.twoBody`; `.twoWide` for the browser and the bonuses). The hero stays
+  centred; before/after, intro, how it works, chart and offer already had their desktop grids; the final section
+  was already text left, image right.
+- "come synth usa semplicemente delle sinusoidi": piano.ts plays one plain sine per note (no detuned pair, no
+  harmonics under C3); tools/jazz_vsl.py mirrors it for the next VSL render.

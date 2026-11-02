@@ -35,8 +35,8 @@ DEMO_BEATS = 16  # longer files are cut to their first 16 beats
 INK = (14, 12, 9)
 CREAM = (243, 235, 220)
 DIM = (90, 82, 70)
-BRASS = (226, 169, 59)
-BRASS_HI = (246, 213, 138)
+BRASS = (245, 184, 0)  # the page's one yellow since 2026-11-02 (#f5b800, the Drum Kit's)
+BRASS_HI = (255, 225, 77)
 RED = (196, 85, 60)
 GREEN = (63, 209, 107)
 RULE = (51, 45, 36)
@@ -160,10 +160,8 @@ def roll(rid):
     return {"bpm": r["bpm"], "beats": beats, "notes": notes, "chords": chords, "file": r["file"]}
 
 
-# The page's synth (piano.ts): per note two sines 5 cents apart, under C3 a
-# quiet 2nd and 3rd; 18 ms attack, a slow fall to 62 %, a 0.11 s release.
-UPPER = [(1, 0.5), (2 ** (5 / 1200), 0.5)]
-BASS = [(1, 0.42), (2 ** (5 / 1200), 0.42), (2, 0.12), (3, 0.04)]
+# The page's synth (piano.ts): one plain sine per note; 18 ms attack, a slow
+# fall to 62 %, a 0.11 s release.
 
 
 def piano(rid):
@@ -176,7 +174,7 @@ def piano(rid):
         n = int((hold + 0.8) * SR)
         t = np.arange(n) / SR
         f = 440 * 2 ** ((p - 69) / 12)
-        tone = sum(lv * np.sin(2 * np.pi * f * ratio * t) for ratio, lv in (BASS if p < 48 else UPPER))
+        tone = np.sin(2 * np.pi * f * t)  # one plain sine per note, as piano.ts
         vel = 0.3 if p < 48 else 0.2
         env = vel * (0.62 + 0.38 * np.exp(-np.maximum(t - 0.018, 0) / 0.4))
         env = np.where(t < 0.018, vel * t / 0.018, env)

@@ -9,7 +9,7 @@ export function Vsl() {
   return (
     <div className={s.vsl}>
       <iframe
-        src={`https://fast.wistia.net/embed/iframe/${funnel.vsl.wistiaId}?playerColor=e2a93b&videoFoam=false`}
+        src={`https://fast.wistia.net/embed/iframe/${funnel.vsl.wistiaId}?playerColor=f5b800&videoFoam=false`}
         title="Jazz MIDI Pack: same chords, played like a pianist"
         allow="autoplay; fullscreen"
         allowFullScreen

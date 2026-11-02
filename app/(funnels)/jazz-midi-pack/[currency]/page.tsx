@@ -69,7 +69,7 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
   };
 
   return (
-    <main className={`${s.page} ${display.variable}`}>
+    <main className={`${s.page} ${s.jazz} ${display.variable}`}>
       <Tracking value={amount} currency={currency} />
       <Beacon funnel={funnel.slug} page="landing" />
       {sections.map((section) => (

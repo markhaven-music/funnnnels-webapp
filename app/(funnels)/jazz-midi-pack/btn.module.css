@@ -3,11 +3,12 @@
    recoloured brass. Lip underneath, candy gloss, light sweep, pulsing glow,
    gentle breathing, an arrow that nudges; it sinks onto its lip when pressed. */
 .btn {
-  --brass-hi: #f6d58a;
-  --brass: #e2a93b;
-  --brass-deep: #b97d16;
-  --lip: #7a4f06;
-  --glow: rgb(230 170 60 / 0.5);
+  /* the page's yellow when it sets one (.jazz in jazz.module.css), else brass */
+  --brass-hi: var(--y-gloss, #f6d58a);
+  --brass: var(--y, #e2a93b);
+  --brass-deep: var(--y-deep, #b97d16);
+  --lip: var(--y-lip, #7a4f06);
+  --glow: var(--y-glow, rgb(230 170 60 / 0.5));
   --ink: #1a1206;
   position: relative;
   isolation: isolate;

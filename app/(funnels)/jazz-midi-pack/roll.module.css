@@ -1,6 +1,6 @@
 .scope {
-  --brass: #e2a93b;
-  --brass-hi: #f6d58a;
+  --brass: var(--y, #e2a93b);
+  --brass-hi: var(--y-gloss, #f6d58a);
   position: relative;
   border-radius: 4px;
   background: #15120e;

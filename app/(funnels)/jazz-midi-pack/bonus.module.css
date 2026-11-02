@@ -45,7 +45,7 @@
 .price {
   padding: 4px 8px 3px;
   border-radius: 3px;
-  background: linear-gradient(180deg, var(--brass-hi), var(--brass));
+  background: linear-gradient(180deg, var(--y-gloss, var(--brass-hi)), var(--brass));
   font-weight: 800;
   letter-spacing: 0.08em;
   color: #1a1206;
@@ -134,7 +134,7 @@
   background: #1d1914;
 }
 .loopBtn[aria-pressed="true"] {
-  background: rgb(226 169 59 / 0.14);
+  background: rgb(var(--y-rgb) / 0.14);
 }
 .icoPlay,
 .icoStop {
@@ -143,7 +143,7 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(180deg, var(--brass-hi), var(--brass));
+  background: linear-gradient(180deg, var(--y-gloss, var(--brass-hi)), var(--brass));
 }
 .icoPlay::after {
   content: "";
@@ -181,7 +181,7 @@
   height: 34px;
 }
 .wave rect {
-  fill: rgb(243 235 220 / 0.28);
+  fill: rgb(var(--cream-rgb) / 0.28);
 }
 .wave .waveOn {
   fill: var(--brass-hi);
@@ -230,5 +230,13 @@
   }
   .rolls {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* in the desktop two-column layout (jazz.module.css .twoBody) the column is
+   narrower than the page: two rolls per row, not three */
+@container (min-width: 600px) and (max-width: 860px) {
+  .rolls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

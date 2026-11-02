@@ -105,9 +105,10 @@ function Add({ onClick, label }: { onClick?: () => void; label: string }) {
   );
 }
 
-function Head({ eyebrow, title, sub, patch, ctx }: { eyebrow: string; title: string; sub?: string; patch?: Patch; ctx: Ctx }) {
+// two: the left column of a two-column section on desktop (jazz.module.css .two)
+function Head({ eyebrow, title, sub, two, patch, ctx }: { eyebrow: string; title: string; sub?: string; two?: boolean; patch?: Patch; ctx: Ctx }) {
   return (
-    <div className={s.secHead}>
+    <div className={two ? `${s.secHead} ${s.twoHead}` : s.secHead}>
       <T v={eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
       <T v={title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
       {sub !== undefined && <T v={sub} set={patch && ((v) => patch({ sub: v }))} ctx={ctx} as="p" className={s.sub} />}
@@ -233,10 +234,12 @@ function Letter({ p, patch, ctx }: { p: SectionProps["s_letter"]; patch?: Patch;
   const ops = listOps(p.paras, "paras", patch);
   return (
     <section className={s.sec}>
-      <div className={`${s.wrap} ${s.col}`}>
-        <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
-        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
-        <div className={s.letter}>
+      <div className={`${s.wrap} ${s.col} ${s.two}`}>
+        <div className={s.twoHead}>
+          <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
+          <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
+        </div>
+        <div className={`${s.letter} ${s.twoBody}`}>
           {p.paras.map((para, i) => (
             <div key={i} className={e.row}>
               <T
@@ -321,9 +324,11 @@ function Product({ p, patch, ctx }: { p: SectionProps["s_product"]; patch?: Patc
 function Previews({ p, patch, ctx }: { p: SectionProps["s_previews"]; patch?: Patch; ctx: Ctx }) {
   return (
     <section className={s.sec}>
-      <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} patch={patch} ctx={ctx} />
-        <PackBrowser />
+      <div className={`${s.wrap} ${s.two} ${s.twoWide}`}>
+        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} two patch={patch} ctx={ctx} />
+        <div className={s.twoBody}>
+          <PackBrowser />
+        </div>
       </div>
     </section>
   );
@@ -525,8 +530,9 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
   const ops = listOps(p.items, "items", patch);
   return (
     <section className={s.sec}>
-      <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} patch={patch} ctx={ctx} />
+      <div className={`${s.wrap} ${s.two} ${s.twoWide}`}>
+        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} two patch={patch} ctx={ctx} />
+        <div className={s.twoBody}>
         <ol className={bn.bonuses}>
           {p.items.map((it, i) => {
             const known = funnel.bonuses[i];
@@ -576,6 +582,7 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
           })}
         </ol>
         <Add onClick={ops.add && (() => ops.add!({ name: "New bonus", text: "What it is." }))} label="bonus" />
+        </div>
       </div>
     </section>
   );
@@ -669,6 +676,7 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       product={funnel.product}
       tagline={`${funnel.tagline} + ${funnel.bonuses.length} bonuses`}
       image="/funnels/jazz-midi-pack/box-520.webp"
+      accent="#f5b800"
       currency={ctx.currency}
       country={ctx.country}
       price={ctx.amount}
@@ -713,25 +721,27 @@ export function Seal() {
   return (
     <svg className={s.seal} viewBox="0 0 200 200" role="img" aria-label={`${funnel.guaranteeDays}-day satisfaction guarantee`}>
       <defs>
+        {/* the page's tokens (jazz.module.css .page / .jazz), via style: a
+            presentation attribute can't hold var() */}
         <linearGradient id="jz-seal" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f6d58a" />
-          <stop offset=".5" stopColor="#e2a93b" />
-          <stop offset="1" stopColor="#a86c0e" />
+          <stop offset="0" style={{ stopColor: "var(--brass-hi)" }} />
+          <stop offset=".5" style={{ stopColor: "var(--brass)" }} />
+          <stop offset="1" style={{ stopColor: "var(--brass-deep)" }} />
         </linearGradient>
         <path id="jz-seal-arc" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0" />
       </defs>
       <circle cx="100" cy="100" r="98" fill="url(#jz-seal)" />
-      <circle cx="100" cy="100" r="88" fill="#0b0a08" />
+      <circle cx="100" cy="100" r="88" style={{ fill: "var(--ink)" }} />
       <circle cx="100" cy="100" r="60" fill="none" stroke="url(#jz-seal)" strokeWidth="1.5" />
-      <text className={s.sealRing} fill="#f6d58a">
+      <text className={s.sealRing} style={{ fill: "var(--brass-hi)" }}>
         <textPath href="#jz-seal-arc" textLength="462">
           {ring}
         </textPath>
       </text>
-      <text x="100" y="108" textAnchor="middle" className={s.sealDays} fill="#f6d58a">
+      <text x="100" y="108" textAnchor="middle" className={s.sealDays} style={{ fill: "var(--brass-hi)" }}>
         {funnel.guaranteeDays}
       </text>
-      <text x="100" y="134" textAnchor="middle" className={s.sealUnit} fill="#f3ebdc">
+      <text x="100" y="134" textAnchor="middle" className={s.sealUnit} style={{ fill: "var(--cream)" }}>
         DAYS
       </text>
     </svg>
@@ -741,13 +751,13 @@ export function Seal() {
 function Guarantee({ p, patch, ctx }: { p: SectionProps["s_guarantee"]; patch?: Patch; ctx: Ctx }) {
   return (
     <section className={`${s.sec} ${s.band}`}>
-      <div className={s.wrap}>
-        <div className={s.guarantee}>
+      <div className={`${s.wrap} ${s.guarantee} ${s.two}`}>
+        <div className={`${s.sealWrap} ${s.twoBody}`}>
           <Seal />
-          <div>
-            <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
-            <T v={p.text} set={patch && ((v) => patch({ text: v }))} ctx={ctx} as="p" className={s.sub} />
-          </div>
+        </div>
+        <div className={s.twoHead}>
+          <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
+          <T v={p.text} set={patch && ((v) => patch({ text: v }))} ctx={ctx} as="p" className={s.sub} />
         </div>
       </div>
     </section>
@@ -758,18 +768,20 @@ function After({ p, patch, ctx }: { p: SectionProps["s_after"]; patch?: Patch; c
   const ops = listOps(p.items, "items", patch);
   return (
     <section className={s.sec}>
-      <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
-        <ol className={s.after}>
-          {p.items.map((it, i) => (
-            <li key={i}>
-              <T v={it.lead} set={ops.set && ((v) => ops.set!(i, { ...it, lead: v }))} ctx={ctx} as="b" />{" "}
-              <T v={it.text} set={ops.set && ((v) => ops.set!(i, { ...it, text: v }))} ctx={ctx} />
-              <Remove onClick={ops.remove && (() => ops.remove!(i))} />
-            </li>
-          ))}
-        </ol>
-        <Add onClick={ops.add && (() => ops.add!({ lead: "Next.", text: "What happens." }))} label="step" />
+      <div className={`${s.wrap} ${s.two}`}>
+        <Head eyebrow={p.eyebrow} title={p.title} two patch={patch} ctx={ctx} />
+        <div className={s.twoBody}>
+          <ol className={s.after}>
+            {p.items.map((it, i) => (
+              <li key={i}>
+                <T v={it.lead} set={ops.set && ((v) => ops.set!(i, { ...it, lead: v }))} ctx={ctx} as="b" />{" "}
+                <T v={it.text} set={ops.set && ((v) => ops.set!(i, { ...it, text: v }))} ctx={ctx} />
+                <Remove onClick={ops.remove && (() => ops.remove!(i))} />
+              </li>
+            ))}
+          </ol>
+          <Add onClick={ops.add && (() => ops.add!({ lead: "Next.", text: "What happens." }))} label="step" />
+        </div>
       </div>
     </section>
   );
@@ -779,10 +791,12 @@ function Faq({ p, patch, ctx }: { p: SectionProps["s_faq"]; patch?: Patch; ctx: 
   const ops = listOps(p.items, "items", patch);
   return (
     <section className={`${s.sec} ${s.band}`}>
-      <div className={`${s.wrap} ${s.col}`}>
-        <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
-        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
-        <div className={s.faq}>
+      <div className={`${s.wrap} ${s.col} ${s.two}`}>
+        <div className={s.twoHead}>
+          <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
+          <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
+        </div>
+        <div className={`${s.faq} ${s.twoBody}`}>
           {p.items.map((it, i) =>
             patch ? (
               <div key={i} className={e.faqItem}>

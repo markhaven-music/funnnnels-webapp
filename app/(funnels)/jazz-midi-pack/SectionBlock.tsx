@@ -17,7 +17,7 @@ const EDIT_CTX: Ctx = {
 
 export function SectionBlock({ section, patch }: { section: Section; patch?: (p: Record<string, unknown>) => void }) {
   return (
-    <div className={`${s.page} ${display.variable}`} style={{ minHeight: 0 }}>
+    <div className={`${s.page} ${s.jazz} ${display.variable}`} style={{ minHeight: 0 }}>
       <SectionView section={section} patch={patch} ctx={EDIT_CTX} />
     </div>
   );

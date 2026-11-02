@@ -23,7 +23,7 @@
   position: relative;
   z-index: 1;
   width: min(64vw, 340px);
-  filter: drop-shadow(0 26px 40px rgb(0 0 0 / 0.6)) drop-shadow(0 0 36px rgb(226 169 59 / 0.16));
+  filter: drop-shadow(0 26px 40px rgb(0 0 0 / 0.6)) drop-shadow(0 0 36px rgb(var(--y-rgb) / 0.16));
 }
 .floor {
   position: absolute;
@@ -33,7 +33,7 @@
   height: 34px;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(226 169 59 / 0.3), transparent);
+  background: radial-gradient(closest-side, rgb(var(--y-rgb) / 0.3), transparent);
   filter: blur(6px);
 }
 @keyframes float {

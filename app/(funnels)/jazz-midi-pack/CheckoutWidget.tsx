@@ -39,6 +39,9 @@ type Props = {
   bump: { name: string; price: number; pitch: string; cover?: [string, string] } | null;
   thankYou: string;
   publishableKey: string | null;
+  // The card form's accent (Stripe's colorPrimary and focus ring): the page's
+  // yellow. Default: the brass the launch kits use.
+  accent?: string;
   europe: boolean;
   // The shop: several products in one order. They fill the summary and go to
   // the shop's checkout APIs as `items` (their slugs); `price` is the cart's
@@ -58,6 +61,18 @@ const stripeCache = new Map<string, ReturnType<typeof loadStripe>>();
 function stripeFor(key: string) {
   if (!stripeCache.has(key)) stripeCache.set(key, loadStripe(key));
   return stripeCache.get(key)!;
+}
+
+const appearances = new Map<string, Appearance>();
+function appearanceFor(accent: string): Appearance {
+  if (!appearances.has(accent)) {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(accent.slice(i, i + 2), 16));
+    const a = structuredClone(appearance);
+    a.variables!.colorPrimary = accent;
+    a.rules![".Input:focus"].boxShadow = `0 0 0 3px rgba(${r}, ${g}, ${b}, 0.35)`;
+    appearances.set(accent, a);
+  }
+  return appearances.get(accent)!;
 }
 
 const appearance: Appearance = {
@@ -177,7 +192,7 @@ export function CheckoutWidget(props: Props) {
                   mode: "payment",
                   amount: Math.round(total * 100),
                   currency: props.currency,
-                  appearance,
+                  appearance: appearanceFor(props.accent ?? "#d9a441"),
                   // Plain card fields, as on ClickFunnels. Apple Pay / Google Pay
                   // are cards too: they show as buttons above the fields.
                   allowedPaymentMethodTypes: ["card"],
