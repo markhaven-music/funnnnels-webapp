@@ -46,6 +46,13 @@ const PAGES: Record<string, { template: string; copy: Record<Lang, Copy>; poster
   "top-hits": { template: TOP_HITS, copy: { en: topHitsEn, fr: topHitsFr, es: topHitsEs, de: topHitsDe, it: topHitsIt }, poster: null, beacon: "upsell-2", title: "TOP HITS MIDI Bundle" },
 };
 
+// The page's step in dashboard → Analytics: its place among the funnel's
+// upsells (the Famous Beats Bundle shows TOP HITS first), else the page's own.
+const beaconStep = (product: { offers?: readonly { id: string }[] }, offerId: string, fallback: Step): Step => {
+  const at = product.offers?.findIndex((o) => o.id === offerId) ?? -1;
+  return at === 0 ? "upsell-1" : at === 1 ? "upsell-2" : fallback;
+};
+
 // What the buttons say while they work, per language.
 const UI: Record<Lang, { busy: string; failed: string; noOrder: string }> = {
   en: {
@@ -110,7 +117,7 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     .replace("{{LANG}}", lang)
     .replace("{{TITLE}}", escapeAttr(page.title))
     .replace("{{DESCRIPTION}}", escapeAttr(page.title))
-    .replace("{{HEAD}}", `<script>${ORIGIN_BOUNCE_JS}</script>\n<style>${FIXES}</style>\n<script>${beaconScript({ funnel: slug, page: page.beacon, lang, abCookie: AB.cookie })}</script>\n${headScripts()}`)
+    .replace("{{HEAD}}", `<script>${ORIGIN_BOUNCE_JS}</script>\n<style>${FIXES}</style>\n<script>${beaconScript({ funnel: slug, page: beaconStep(product, offerId, page.beacon), lang, abCookie: AB.cookie })}</script>\n${headScripts()}`)
     .replace("{{BODY}}", script(slug, offerId, lang, nextStep(product, lang, offerId)));
 
   // Words outside the tagged texts: the "reserved for" timer, the progress

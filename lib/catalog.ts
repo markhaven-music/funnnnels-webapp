@@ -3,6 +3,7 @@ import path from "node:path";
 import { funnel as drumKit } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { funnel as jazz } from "@/app/(funnels)/jazz-midi-pack/funnel";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
+import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
 import type { Money } from "@/lib/launch";
 import { signedDownload } from "@/lib/products";
 import { presignedDownload, r2Configured } from "@/lib/r2";
@@ -100,6 +101,7 @@ export const CODE_FUNNELS: CodeFunnel[] = [
   { slug: jazz.slug, name: jazz.product, files: { ...jazz.files, ...jazz.remoteFiles }, bonuses: jazz.bonuses },
   { slug: topHits.slug, name: topHits.product, files: topHits.files },
   { slug: drumKit.slug, name: drumKit.product, files: drumKit.files, includes: drumKit.includes },
+  { slug: famousBeats.slug, name: famousBeats.product, files: famousBeats.files },
 ];
 
 const zipOf = (p: string) => p.split("/").pop() ?? p;
@@ -314,4 +316,5 @@ export async function removeItem(funnel: string, role: ItemRole, key: string): P
 const CODE_UPSELLS: Record<string, string[]> = {
   [topHits.slug]: topHits.offers.map((o) => o.id),
   [drumKit.slug]: drumKit.offers.map((o) => o.id),
+  [famousBeats.slug]: famousBeats.offers.map((o) => o.id),
 };

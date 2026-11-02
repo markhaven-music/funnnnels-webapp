@@ -30,7 +30,12 @@ type Method = "card" | "paypal";
 type Info = { firstName: string; lastName: string; email: string };
 // afterOrder: where Stripe sends the buyer once paid (the upsell, or the
 // thank-you page); upsell: that page's offer, skipped when ticked as an add-on.
-type Props = { currency: Currency; country: string; publishableKey: string | null; afterOrder: string; upsell: string | null; offer: OrderOffer };
+// sells: the funnel the form checks out, TOP HITS unless another funnel lends
+// itself the form (the Famous Beats Bundle's order page).
+export type Sells = { slug: string; tagline: string; thankYou: string };
+type Props = { currency: Currency; country: string; publishableKey: string | null; afterOrder: string; upsell: string | null; offer: OrderOffer; sells?: Sells };
+
+const TOP_HITS: Sells = { slug: funnel.slug, tagline: funnel.tagline, thankYou: funnel.checkout.thankYou };
 
 const stripeCache = new Map<string, ReturnType<typeof loadStripe>>();
 function stripeFor(key: string) {
@@ -40,7 +45,7 @@ function stripeFor(key: string) {
 
 const money = (n: number, c: Currency) => `${c === "eur" ? "€" : "$"}${n.toFixed(2)}`;
 
-export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer }: Props) {
+export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer, sells = TOP_HITS }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);
@@ -52,8 +57,8 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
   const [wanted, setWanted] = useState(false);
   const stripePromise = useMemo(() => (publishableKey && wanted ? stripeFor(publishableKey) : null), [publishableKey, wanted]);
   // Paid by card: the upsell, unless its product is already in the order.
-  const next = upsell && picked.includes(upsell) ? funnel.checkout.thankYou : afterOrder;
-  const state: PayState = { currency, country, info, method, picked, setPicked, total, next, offer };
+  const next = upsell && picked.includes(upsell) ? sells.thankYou : afterOrder;
+  const state: PayState = { currency, country, info, method, picked, setPicked, total, next, offer, slug: sells.slug };
 
   return (
     <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
@@ -77,13 +82,14 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
           </ol>
           <InfoStep
             info={info}
+            slug={sells.slug}
             onDone={(next) => {
               setInfo(next);
               setWanted(true);
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
               pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase() });
-              track({ funnel: funnel.slug, page: "checkout" });
+              track({ funnel: sells.slug, page: "checkout" });
             }}
           />
         </>
@@ -103,7 +109,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
             <input type="radio" checked readOnly className={s.radio} />
             <span className={s.productText}>
               <span className={s.productName}>{offer.name}</span>
-              <span className={s.productDesc}>{funnel.tagline}</span>
+              <span className={s.productDesc}>{sells.tagline}</span>
             </span>
             <span className={s.productPrice}>{money(price, currency)}</span>
           </label>
@@ -150,7 +156,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
   );
 }
 
-function InfoStep({ info, onDone }: { info: Info; onDone: (info: Info) => void }) {
+function InfoStep({ info, slug, onDone }: { info: Info; slug: string; onDone: (info: Info) => void }) {
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.currentTarget)) as Info;
@@ -158,7 +164,7 @@ function InfoStep({ info, onDone }: { info: Info; onDone: (info: Info) => void }
     fetch("/api/checkout/lead", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...data, funnel: funnel.slug }),
+      body: JSON.stringify({ ...data, funnel: slug }),
       keepalive: true,
     }).catch(() => {});
     onDone(data);
@@ -203,6 +209,7 @@ type PayState = {
   total: number;
   next: string;
   offer: OrderOffer;
+  slug: string;
 };
 
 function CardPay({ stripePromise, ...props }: PayState & { stripePromise: ReturnType<typeof loadStripe> }) {
@@ -219,7 +226,7 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        funnel: funnel.slug,
+        funnel: props.slug,
         ...props.info,
         bumps: props.picked,
         country: cookieCountry(props.currency, props.country),
@@ -274,6 +281,7 @@ function PayBody({
   setPicked,
   total,
   offer,
+  slug,
   onCard,
   cardPaying,
   cardOff,
@@ -294,7 +302,7 @@ function PayBody({
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          funnel: funnel.slug,
+          funnel: slug,
           ...info,
           bumps: picked,
           country: cookieCountry(currency, country),

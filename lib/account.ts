@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import type Stripe from "stripe";
 import { funnel as drumKit, unlocked as drumKitUnlocked } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { funnel as jazz, unlocked as jazzUnlocked } from "@/app/(funnels)/jazz-midi-pack/funnel";
+import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import { resolveFunnel } from "@/lib/funnels";
 import { SHOP_HOME } from "@/lib/liveUrl";
@@ -108,6 +109,17 @@ const SHELVES: Record<string, Shelf> = {
     unlocked: (items) => items,
     cover: () => "/funnels/top-hits-midi-bundle/product.webp",
     download: (o, file) => `/${topHits.slug}/download?order=${o.id}&file=${file}`,
+  },
+  [famousBeats.slug]: {
+    product: famousBeats.product,
+    labels: {
+      pack: famousBeats.product,
+      ...Object.fromEntries(famousBeats.bumps.map((b) => [b.id, b.name])),
+      ...Object.fromEntries(famousBeats.offers.map((o) => [o.id, o.name])),
+    },
+    unlocked: (items) => items,
+    cover: (o) => (o.offer ? (OFFER_COVERS[o.offer] ?? "/funnels/famous-beats-bundle/product.webp") : "/funnels/famous-beats-bundle/product.webp"),
+    download: (o, file) => `/${famousBeats.slug}/download?order=${o.id}&file=${file}`,
   },
   [jazz.slug]: {
     product: jazz.product,

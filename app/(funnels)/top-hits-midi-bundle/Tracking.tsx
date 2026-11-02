@@ -10,11 +10,13 @@ import { purchaseEventId } from "@/lib/neoIds";
 // or *.vercel.app (previews, and the origin m.thegrind.studio forwards to), so
 // tests don't reach the ad account. `event`: ViewContent on the landing,
 // InitiateCheckout fires from the order form, Purchase from the thank-you page.
+// `product`: the name the events carry, TOP HITS' unless a funnel that shares
+// these accounts says its own (the Famous Beats Bundle).
 const OFF = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/);
 
-export function Tracking({ value, currency, event = "ViewContent" }: { value: number; currency: string; event?: string | null }) {
+export function Tracking({ value, currency, event = "ViewContent", product = funnel.product }: { value: number; currency: string; event?: string | null; product?: string }) {
   const { metaPixelId, clarityId, neoSnippet } = funnel.tracking;
-  const params = JSON.stringify({ content_name: funnel.product, content_type: "product", value, currency: currency.toUpperCase() });
+  const params = JSON.stringify({ content_name: product, content_type: "product", value, currency: currency.toUpperCase() });
   return (
     <Script id="top-hits-tracking" strategy="afterInteractive">{`
       (function () {
@@ -43,8 +45,8 @@ export function Tracking({ value, currency, event = "ViewContent" }: { value: nu
 }
 
 /** Purchase, once per order (eventID = neo's "purchase_<order id>", lib/neo.ts), on the thank-you page. */
-export function PurchasePixel({ orderId, value, currency }: { orderId: string; value: number; currency: string }) {
-  const data = JSON.stringify({ content_name: funnel.product, content_type: "product", value, currency: currency.toUpperCase() });
+export function PurchasePixel({ orderId, value, currency, product = funnel.product }: { orderId: string; value: number; currency: string; product?: string }) {
+  const data = JSON.stringify({ content_name: product, content_type: "product", value, currency: currency.toUpperCase() });
   return (
     <Script id="top-hits-purchase" strategy="afterInteractive">{`
       (function () {

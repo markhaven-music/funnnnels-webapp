@@ -47,6 +47,7 @@ const landingPrefix = (slug: string, lang: string, prefix: string) => (slug === 
 const SHOTS: Record<string, Record<string, { landing: string; order?: string; thanks?: string }>> = {
   "jazz-midi-pack": { en: { landing: "preview", order: "order" } },
   "top-hits-midi-bundle": { en: { landing: "preview", order: "order" } },
+  "famous-beats-bundle": { en: { landing: "preview", order: "order" } },
   "midi-drum-kit": { fr: { landing: "preview", order: "order", thanks: "thanks" }, en: { landing: "preview-en", order: "order-en", thanks: "thanks-en" } },
 };
 

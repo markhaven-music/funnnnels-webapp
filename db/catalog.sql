@@ -94,3 +94,11 @@ insert into public.funnel_items (funnel, role, key, product, name, price_eur_cen
   ('midi-drum-kit',        'bump',   'chords',         'chord-bible',    'Chord Progressions Bundle (750 Songs)',          2500, 2500, 2),
   ('midi-drum-kit',        'upsell', 'famous-beats',   'famous-beats',   'Famous Beats Bundle (320 MIDI Beats)',           2700, 2700, 0),
   ('midi-drum-kit',        'upsell', 'top-hits',       'top-hits',       'TOP HITS MIDI Bundle (1000 Chord Progressions)', 2700, 2700, 1);
+
+-- The Famous Beats Bundle, moved from ClickFunnels on 2026-11-02 (its funnel.ts).
+insert into public.funnel_items (funnel, role, key, product, name, price_eur_cents, price_usd_cents, position) values
+  ('famous-beats-bundle',  'main',   'pack',           'famous-beats',   'Famous Beats Bundle',                            2700, 2700, 0),
+  ('famous-beats-bundle',  'bump',   'emotional-keys', 'emotional-keys', 'Emotional Keys MIDI Bundle',                      700,  700, 0),
+  ('famous-beats-bundle',  'bump',   'drum-kit',       'midi-drum-kit',  'MIDI Drum Kit Bundle',                           2500, 2500, 1),
+  ('famous-beats-bundle',  'bump',   'hustle',         'hustle',         'HUSTLE Bundle (31 MIDI Packs)',                  2500, 2500, 2),
+  ('famous-beats-bundle',  'upsell', 'top-hits',       'top-hits',       'TOP HITS MIDI Bundle (1000 Chord Progressions)', 2700, 2700, 0);

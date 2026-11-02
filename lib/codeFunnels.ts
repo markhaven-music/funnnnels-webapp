@@ -22,6 +22,12 @@ const CARDS: CodeCard[] = [
     image: "/funnels/top-hits-midi-bundle/preview.webp",
     steps: 3,
   },
+  {
+    id: "famous-beats-bundle",
+    name: "Famous Beats Bundle",
+    image: "/funnels/famous-beats-bundle/preview.webp",
+    steps: 3,
+  },
 ];
 
 // The cards show a screenshot of the first page: public/funnels/<slug>/preview.webp,

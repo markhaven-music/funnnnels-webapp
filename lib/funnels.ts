@@ -1,4 +1,5 @@
 import { funnel as jazz } from "@/app/(funnels)/jazz-midi-pack/funnel";
+import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
 import { funnel as drumKit } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
@@ -14,7 +15,8 @@ import { SHOP_SLUG } from "@/lib/shop";
 //
 // Two kinds share one shape:
 //   code  hand-built pages with their funnel.ts: the Jazz MIDI Pack, the
-//         TOP HITS MIDI Bundle and the MIDI Drum Kit (app/(funnels)/<slug>).
+//         TOP HITS MIDI Bundle, the MIDI Drum Kit and the Famous Beats Bundle
+//         (app/(funnels)/<slug>).
 //         No launch: always full price.
 //   kit   products made in the dashboard (Launches): a row in `products`, the
 //         template page in app/(funnels)/[slug], zips in Supabase Storage, and
@@ -103,7 +105,22 @@ const DRUM_KIT: Product = {
   offers: drumKit.offers,
 };
 
-const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS, [DRUM_KIT.slug]: DRUM_KIT };
+const FAMOUS_BEATS: Product = {
+  kind: "code",
+  slug: famousBeats.slug,
+  product: famousBeats.product,
+  brand: famousBeats.brand,
+  tagline: famousBeats.tagline,
+  price: famousBeats.price,
+  bump: null,
+  bumps: famousBeats.bumps.map(({ id, name, price, pitch, image }) => ({ id, name, price, pitch, image })),
+  checkout: famousBeats.checkout,
+  optin: null,
+  launch: null,
+  offers: famousBeats.offers,
+};
+
+const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS, [DRUM_KIT.slug]: DRUM_KIT, [FAMOUS_BEATS.slug]: FAMOUS_BEATS };
 
 // Named for the abandoned-checkout reminder ("Your GRIND STUDIO order is
 // waiting"); the receipt names the products themselves.
