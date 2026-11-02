@@ -94,6 +94,15 @@
 .preview {
   margin-top: 14px;
 }
+/* a bonus whose cover was removed in the editor: one column */
+.bonus.bare {
+  grid-template-columns: minmax(0, 1fr);
+}
+.bare .text,
+.bare .inside,
+.bare .preview {
+  grid-column: 1;
+}
 
 /* bonuses 1-4: their files one under the other (two or three across on
    wider screens), each with its own Play */

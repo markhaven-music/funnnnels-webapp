@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import b from "./btn.module.css";
 import { funnel } from "./funnel";
 
@@ -9,12 +10,15 @@ export function Cta({
   note,
   className,
   href = funnel.checkout.orderPage,
+  children,
 }: {
   label?: string;
   inner?: string;
   note?: string;
   className?: string;
   href?: string;
+  /** Editor only: the button's remove × (sections.tsx Drop). */
+  children?: ReactNode;
 }) {
   return (
     <div className={className}>
@@ -27,6 +31,7 @@ export function Cta({
         {inner && <span className={b.inner}>{inner}</span>}
       </a>
       {note && <p className={b.note}>{note}</p>}
+      {children}
     </div>
   );
 }

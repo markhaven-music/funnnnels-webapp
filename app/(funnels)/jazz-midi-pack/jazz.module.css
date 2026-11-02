@@ -384,7 +384,7 @@
 }
 @media (min-width: 720px) {
   .hero .proof {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
     max-width: 1000px;
     margin: 30px auto 0;
   }
@@ -1121,6 +1121,12 @@
   height: 100%;
   object-fit: cover;
   object-position: 80% 40%;
+}
+/* the stage picture removed in the editor: no band kept for it on the phone */
+@media (max-width: 999px) {
+  .final.finalBare {
+    padding-top: clamp(56px, 9vw, 104px);
+  }
 }
 .finalIn {
   position: relative;

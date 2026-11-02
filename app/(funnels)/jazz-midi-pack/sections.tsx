@@ -62,6 +62,8 @@ function T({
   emph?: boolean;
 }) {
   if (set) return <EditableText as={Tag} value={v} onChange={set} className={`${className ?? ""} ${e.text}`} placeholder={placeholder} />;
+  // An emptied text is gone from the page (no stray eyebrow rule or margins).
+  if (!v.trim()) return null;
   return <Tag className={className}>{emph ? <Emph text={fill(v, ctx)} /> : fill(v, ctx)}</Tag>;
 }
 
@@ -105,17 +107,131 @@ function Add({ onClick, label }: { onClick?: () => void; label: string }) {
   );
 }
 
-// two: the left column of a two-column section on desktop (jazz.module.css .two).
-// The eyebrow is kept in the data but no longer shown ("togli sti titoli sopra
-// le headlines", 2026-11-02).
-function Head({ title, sub, two, patch, ctx }: { eyebrow: string; title: string; sub?: string; two?: boolean; patch?: Patch; ctx: Ctx }) {
+// ─── removable parts ──────────────────────────────────────────
+// Every element of a section has a key. The keys in the section's `hide` list
+// (or a list item's) don't render, in the editor or on the live page. In the
+// editor each part shows a × on hover, and "Removed:" under the section brings
+// a part back.
+
+type Parts = {
+  edit: boolean;
+  hidden: string[];
+  on: (k: string) => boolean;
+  /** Some of these parts still show. */
+  any: (...k: string[]) => boolean;
+  /** The ×'s click: removes part k. Undefined outside the editor. */
+  x: (k: string) => (() => void) | undefined;
+  back: (k: string) => void;
+  /** An element that holds its own × (a list item, a box): its class plus edit.module.css .host. */
+  host: (className?: string) => string | undefined;
+};
+
+function parts(p: { hide?: string[] }, patch?: Patch): Parts {
+  const hidden = p.hide ?? [];
+  const on = (k: string) => !hidden.includes(k);
+  return {
+    edit: !!patch,
+    hidden,
+    on,
+    any: (...k) => k.some(on),
+    x: (k) => patch && (() => patch({ hide: [...hidden, k] })),
+    back: (k) => patch?.({ hide: hidden.filter((x) => x !== k) }),
+    host: (className) => (patch ? `${className ?? ""} ${e.host}` : className),
+  };
+}
+
+const ALL = parts({});
+
+/** A part in its own box: in the editor a wrapper holds its ×. */
+function Part({ k, h, children, left }: { k: string; h: Parts; children: ReactNode; left?: boolean }) {
+  if (!h.on(k)) return null;
+  const x = h.x(k);
+  if (!x) return children;
   return (
-    <div className={two ? `${s.secHead} ${s.twoHead}` : s.secHead}>
-      <T v={title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
-      {sub !== undefined && <T v={sub} set={patch && ((v) => patch({ sub: v }))} ctx={ctx} as="p" className={s.sub} />}
+    <div className={e.part}>
+      {children}
+      <Drop onClick={x} left={left} />
     </div>
   );
 }
+
+/** The × in the corner of a part, shown on hover. `left`: the left corner;
+ * `inside`: within the box (a section's background picture). */
+function Drop({ onClick, left, inside }: { onClick?: () => void; left?: boolean; inside?: boolean }) {
+  if (!onClick) return null;
+  const at = left ? e.dropLeft : inside ? e.dropIn : "";
+  return (
+    <button type="button" className={`${e.remove} ${e.drop} ${at}`} onClick={onClick} title="Remove" aria-label="Remove">
+      ×
+    </button>
+  );
+}
+
+const PART_LABELS: Record<string, string> = {
+  title: "headline",
+  pre: "line above the headline",
+  sub: "subheadline",
+  cta: "button",
+  worksIn: "“Works in”",
+  daws: "DAW logos",
+  producers: "2,847 producers",
+  emailList: "4,700+ on the email list",
+  guaranteeDays: "guarantee days",
+  before: "before caption",
+  beforeRoll: "before piano roll",
+  after: "after caption",
+  afterRoll: "after piano roll",
+  box: "pack box",
+  packName: "pack name",
+  browser: "pack browser",
+  shot: "DAW picture",
+  n: "number",
+  label: "bonus label",
+  inside: "what’s inside",
+  preview: "previews",
+  total: "total value",
+  payWays: "payment methods line",
+  download: "download line",
+  guarantee: "guarantee line",
+  picture: "stage picture",
+};
+
+/** Editor only: what was removed, each a button that brings it back. `wrap`: a box around it. */
+function Removed({ h, wrap }: { h: Parts; wrap?: string }) {
+  if (!h.edit || !h.hidden.length) return null;
+  const list = (
+    <div className={e.removed}>
+      <span>Removed:</span>
+      {h.hidden.map((k) => (
+        <button key={k} type="button" onClick={() => h.back(k)} title="Bring it back">
+          ↺ {PART_LABELS[k] ?? k.replace("-", " ")}
+        </button>
+      ))}
+    </div>
+  );
+  return wrap ? <div className={wrap}>{list}</div> : list;
+}
+
+// two: the left column of a two-column section on desktop (jazz.module.css .two).
+// The eyebrow is kept in the data but no longer shown ("togli sti titoli sopra
+// le headlines", 2026-11-02).
+function Head({ title, sub, two, h, patch, ctx }: { eyebrow: string; title: string; sub?: string; two?: boolean; h: Parts; patch?: Patch; ctx: Ctx }) {
+  return (
+    <div className={two ? `${s.secHead} ${s.twoHead}` : s.secHead}>
+      <Part k="title" h={h}>
+        <T v={title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
+      </Part>
+      {sub !== undefined && (
+        <Part k="sub" h={h}>
+          <T v={sub} set={patch && ((v) => patch({ sub: v }))} ctx={ctx} as="p" className={s.sub} />
+        </Part>
+      )}
+    </div>
+  );
+}
+
+/** A two-column section keeps its columns while both sides show something. */
+const twoIf = (both: boolean) => (both ? s.two : "");
 
 function Tick() {
   return (
@@ -178,31 +294,44 @@ function Marked({ text }: { text: string }) {
 
 function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch; ctx: Ctx }) {
   // Pages published before the centered hero have no `pre`: they get its default copy.
-  const p = raw.pre === undefined ? { ...HERO_DEFAULT, tag: raw.tag, hud: raw.hud, daws: raw.daws, ticks: raw.ticks } : raw;
+  const p = raw.pre === undefined ? { ...HERO_DEFAULT, tag: raw.tag, hud: raw.hud, daws: raw.daws, ticks: raw.ticks, hide: raw.hide } : raw;
   const set = (k: string) => patch && ((v: string) => patch({ ...p, [k]: v }));
   const bullets = listOps(p.bullets, "bullets", patch && ((x) => patch({ ...p, ...x })));
+  const h = parts(p, patch && ((x) => patch({ ...p, ...x })));
   return (
     <section id="hero" className={s.hero}>
       <div className={s.heroBg} aria-hidden />
       <div className={s.topband}>
         <header className={`${s.wrap} ${s.topbar}`}>
-          <span className={s.logo}>
-            <img src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
-          </span>
-          <span className={s.tag}>
-            <span className={s.dot} aria-hidden />
-            <T v={p.tag} set={set("tag")} ctx={ctx} />
-          </span>
+          <Part k="logo" h={h}>
+            <span className={s.logo}>
+              <img src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
+            </span>
+          </Part>
+          <Part k="tag" h={h}>
+            <span className={s.tag}>
+              <span className={s.dot} aria-hidden />
+              <T v={p.tag} set={set("tag")} ctx={ctx} />
+            </span>
+          </Part>
         </header>
       </div>
       <div className={`${s.wrap} ${s.heroCenter}`}>
-        <T v={p.pre} set={set("pre")} ctx={ctx} as="p" className={s.heroPre} />
-        <h1 className={s.heroHead}>
-          {patch ? <T v={p.headline} set={set("headline")} ctx={ctx} /> : <Marked text={fill(p.headline, ctx)} />}
-        </h1>
-        {patch && <p className={e.hint}>*word* = highlighted, _word_ = underlined</p>}
-        <T v={p.sub} set={set("sub")} ctx={ctx} as="p" className={s.heroSub} />
-        <Vsl />
+        <Part k="pre" h={h}>
+          <T v={p.pre} set={set("pre")} ctx={ctx} as="p" className={s.heroPre} />
+        </Part>
+        <Part k="headline" h={h}>
+          <h1 className={s.heroHead}>
+            {patch ? <T v={p.headline} set={set("headline")} ctx={ctx} /> : <Marked text={fill(p.headline, ctx)} />}
+          </h1>
+          {patch && <p className={e.hint}>*word* = highlighted, _word_ = underlined</p>}
+        </Part>
+        <Part k="sub" h={h}>
+          <T v={p.sub} set={set("sub")} ctx={ctx} as="p" className={s.heroSub} />
+        </Part>
+        <Part k="video" h={h}>
+          <Vsl />
+        </Part>
         <ul className={s.heroBullets}>
           {p.bullets.map((b, i) => (
             <li key={i}>
@@ -213,17 +342,31 @@ function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch
           ))}
         </ul>
         <Add onClick={bullets.add && (() => bullets.add!("New bullet"))} label="bullet" />
-        <Cta className={s.heroCta} inner={`${ctx.price} · instant download`} />
+        {h.on("cta") && (
+          <Cta className={h.host(s.heroCta)} inner={`${ctx.price} · instant download`}>
+            <Drop onClick={h.x("cta")} />
+          </Cta>
+        )}
         <TickList items={p.ticks} k="ticks" patch={patch && ((x) => patch({ ...p, ...x }))} ctx={ctx} className={s.proofRow} />
       </div>
-      <div className={`${s.wrap} ${s.dawStrip}`}>
-        <span className={s.mono}>Works in</span>
-        {/* The DAW logos the Drum Kit shows; the typed list is their alt text. */}
-        <img className={s.dawLogos} src="/funnels/midi-drum-kit/daws.webp" alt={p.daws} width={1000} height={63} loading="lazy" />
-        {patch && <T v={p.daws} set={set("daws")} ctx={ctx} />}
-      </div>
+      {h.any("worksIn", "daws") && (
+        <div className={`${s.wrap} ${s.dawStrip}`}>
+          <Part k="worksIn" h={h}>
+            <span className={s.mono}>Works in</span>
+          </Part>
+          {/* The DAW logos the Drum Kit shows; the typed list is their alt text. */}
+          <Part k="daws" h={h}>
+            <img className={s.dawLogos} src="/funnels/midi-drum-kit/daws.webp" alt={p.daws} width={1000} height={63} loading="lazy" />
+            {patch && (
+              <p className={e.hint}>
+                The logos’ alt text, not shown on the page: <T v={p.daws} set={set("daws")} ctx={ctx} />
+              </p>
+            )}
+          </Part>
+        </div>
+      )}
       <div className={s.wrap}>
-        <Proof />
+        <Proof h={h} />
       </div>
     </section>
   );
@@ -233,10 +376,13 @@ const PARA_CLASS = { p: undefined, bold: undefined, pull: s.pull, hit: s.hit } a
 
 function Letter({ p, patch, ctx }: { p: SectionProps["s_letter"]; patch?: Patch; ctx: Ctx }) {
   const ops = listOps(p.paras, "paras", patch);
+  const h = parts(p, patch);
   return (
     <section className={s.sec}>
       <div className={`${s.wrap} ${s.col}`}>
-        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
+        <Part k="title" h={h}>
+          <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
+        </Part>
         <div className={s.letter}>
           {p.paras.map((para, i) => (
             <div key={i} className={e.row}>
@@ -273,24 +419,39 @@ function Letter({ p, patch, ctx }: { p: SectionProps["s_letter"]; patch?: Patch;
 
 function CompareRolls({ p, patch, ctx }: { p: SectionProps["s_compare_rolls"]; patch?: Patch; ctx: Ctx }) {
   const set = (k: string) => patch && ((v: string) => patch({ [k]: v }));
+  const h = parts(p, patch);
   return (
     <section className={s.sec} style={{ paddingTop: 0 }}>
       <div className={`${s.wrap} ${s.ba}`} style={{ marginTop: 0 }}>
-        <figure className={s.baItem}>
-          <figcaption className={s.baCap}>
-            <T v={p.beforeLabel} set={set("beforeLabel")} ctx={ctx} className={s.bad} />{" "}
-            <T v={p.beforeText} set={set("beforeText")} ctx={ctx} />
-          </figcaption>
-          <PlayableRoll id="before" tone="muted" playLabel="Play before" />
-        </figure>
-        <figure className={s.baItem}>
-          <figcaption className={s.baCap}>
-            <T v={p.afterLabel} set={set("afterLabel")} ctx={ctx} className={s.good} />{" "}
-            <T v={p.afterText} set={set("afterText")} ctx={ctx} />
-          </figcaption>
-          <PlayableRoll id="after" playLabel="Play after" />
-        </figure>
-        <T v={p.note} set={set("note")} ctx={ctx} as="p" className={s.baNote} />
+        {h.any("before", "beforeRoll") && (
+          <figure className={s.baItem}>
+            <Part k="before" h={h}>
+              <figcaption className={s.baCap}>
+                <T v={p.beforeLabel} set={set("beforeLabel")} ctx={ctx} className={s.bad} />{" "}
+                <T v={p.beforeText} set={set("beforeText")} ctx={ctx} />
+              </figcaption>
+            </Part>
+            <Part k="beforeRoll" h={h}>
+              <PlayableRoll id="before" tone="muted" playLabel="Play before" />
+            </Part>
+          </figure>
+        )}
+        {h.any("after", "afterRoll") && (
+          <figure className={s.baItem}>
+            <Part k="after" h={h}>
+              <figcaption className={s.baCap}>
+                <T v={p.afterLabel} set={set("afterLabel")} ctx={ctx} className={s.good} />{" "}
+                <T v={p.afterText} set={set("afterText")} ctx={ctx} />
+              </figcaption>
+            </Part>
+            <Part k="afterRoll" h={h}>
+              <PlayableRoll id="after" playLabel="Play after" />
+            </Part>
+          </figure>
+        )}
+        <Part k="note" h={h}>
+          <T v={p.note} set={set("note")} ctx={ctx} as="p" className={s.baNote} />
+        </Part>
       </div>
     </section>
   );
@@ -298,17 +459,28 @@ function CompareRolls({ p, patch, ctx }: { p: SectionProps["s_compare_rolls"]; p
 
 function Product({ p, patch, ctx }: { p: SectionProps["s_product"]; patch?: Patch; ctx: Ctx }) {
   const set = (k: string) => patch && ((v: string) => patch({ [k]: v }));
+  const h = parts(p, patch);
   return (
     <section className={`${s.sec} ${s.band}`}>
-      <div className={`${s.wrap} ${s.introGrid}`}>
-        <ProductBox />
+      <div className={h.on("box") ? `${s.wrap} ${s.introGrid}` : s.wrap}>
+        <Part k="box" h={h}>
+          <ProductBox />
+        </Part>
         <div>
-          <h2 className={s.h2}>
-            <T v={p.title} set={set("title")} ctx={ctx} /> <T v={p.titleEm} set={set("titleEm")} ctx={ctx} as="em" className={s.hl} />
-          </h2>
-          <T v={p.lead} set={set("lead")} ctx={ctx} as="p" className={s.lead} />
+          <Part k="title" h={h}>
+            <h2 className={s.h2}>
+              <T v={p.title} set={set("title")} ctx={ctx} /> <T v={p.titleEm} set={set("titleEm")} ctx={ctx} as="em" className={s.hl} />
+            </h2>
+          </Part>
+          <Part k="lead" h={h}>
+            <T v={p.lead} set={set("lead")} ctx={ctx} as="p" className={s.lead} />
+          </Part>
           <TickList items={p.ticks} k="ticks" patch={patch} ctx={ctx} className={s.ticks} />
-          <Cta className={s.ctaBlock} inner={`${ctx.price} · instant download`} />
+          {h.on("cta") && (
+            <Cta className={h.host(s.ctaBlock)} inner={`${ctx.price} · instant download`}>
+              <Drop onClick={h.x("cta")} />
+            </Cta>
+          )}
         </div>
       </div>
     </section>
@@ -319,12 +491,15 @@ function Product({ p, patch, ctx }: { p: SectionProps["s_product"]; patch?: Patc
 // hand-picked previews ("either you allow the person to browse the whole pack
 // or remove this"); old pages' `items` are ignored.
 function Previews({ p, patch, ctx }: { p: SectionProps["s_previews"]; patch?: Patch; ctx: Ctx }) {
+  const h = parts(p, patch);
   return (
     <section className={s.sec}>
-      <div className={`${s.wrap} ${s.two} ${s.twoWide}`}>
-        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} two patch={patch} ctx={ctx} />
+      <div className={`${s.wrap} ${twoIf(h.any("title", "sub") && h.on("browser"))} ${s.twoWide}`}>
+        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} two h={h} patch={patch} ctx={ctx} />
         <div className={s.twoBody}>
-          <PackBrowser />
+          <Part k="browser" h={h}>
+            <PackBrowser />
+          </Part>
         </div>
       </div>
     </section>
@@ -333,24 +508,40 @@ function Previews({ p, patch, ctx }: { p: SectionProps["s_previews"]; patch?: Pa
 
 function Steps({ p, patch, ctx }: { p: SectionProps["s_steps"]; patch?: Patch; ctx: Ctx }) {
   const ops = listOps(p.steps, "steps", patch);
+  const h = parts(p, patch);
   return (
     <section className={`${s.sec} ${s.band}`}>
       <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
+        <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
         <ol className={s.steps}>
-          {p.steps.map((st, i) => (
-            <li key={i}>
-              <span className={s.stepN}>{String(i + 1).padStart(2, "0")}</span>
-              <T v={st.title} set={ops.set && ((v) => ops.set!(i, { ...st, title: v }))} ctx={ctx} as="h3" />
-              <T v={st.text} set={ops.set && ((v) => ops.set!(i, { ...st, text: v }))} ctx={ctx} as="p" />
-              <Remove onClick={ops.remove && (() => ops.remove!(i))} />
-            </li>
-          ))}
+          {p.steps.map((st, i) => {
+            const ih = parts(st, ops.set && ((x) => ops.set!(i, { ...st, ...x })));
+            return (
+              <li key={i}>
+                {ih.on("n") && (
+                  <span className={ih.host(s.stepN)}>
+                    {String(i + 1).padStart(2, "0")}
+                    <Drop onClick={ih.x("n")} />
+                  </span>
+                )}
+                <Part k="title" h={ih}>
+                  <T v={st.title} set={ops.set && ((v) => ops.set!(i, { ...st, title: v }))} ctx={ctx} as="h3" />
+                </Part>
+                <Part k="text" h={ih}>
+                  <T v={st.text} set={ops.set && ((v) => ops.set!(i, { ...st, text: v }))} ctx={ctx} as="p" />
+                </Part>
+                <Remove onClick={ops.remove && (() => ops.remove!(i))} />
+                <Removed h={ih} />
+              </li>
+            );
+          })}
         </ol>
         <Add onClick={ops.add && (() => ops.add!({ title: "New step", text: "What happens." }))} label="step" />
-        <figure className={s.dawShot}>
-          <Scene name="daw" alt="A laptop with the DAW piano roll showing gold jazz voicings under Dm9, G13 and Cmaj9, next to the Jazz MIDI Pack box" />
-        </figure>
+        <Part k="shot" h={h}>
+          <figure className={s.dawShot}>
+            <Scene name="daw" alt="A laptop with the DAW piano roll showing gold jazz voicings under Dm9, G13 and Cmaj9, next to the Jazz MIDI Pack box" />
+          </figure>
+        </Part>
       </div>
     </section>
   );
@@ -360,42 +551,58 @@ const VOICINGS = ["Best Voicing", "Best Voicing + Smooth Bass", "Rootless (Bill 
 const RHYTHMS = [["Ballad Arpeggios", "70"], ["Pads", "90"], ["Bossa Nova", "135"], ["Swing Comping", "150"], ["Charleston", "130"], ["Anticipations", "130"], ["Reverse Charleston", "130"], ["Freddie Green 4 to the Bar", "140"]];
 
 function Inside({ p, patch, ctx }: { p: SectionProps["s_inside"]; patch?: Patch; ctx: Ctx }) {
+  const h = parts(p, patch);
+  const folders = funnel.folders.map((f, i) => ({ ...f, k: `folder-${i + 1}`, i })).filter((f) => h.on(f.k));
   return (
     <section className={s.sec}>
       <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
+        <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
         {patch && <p className={e.hint}>The folders, voicings and progressions below come from the pack itself.</p>}
-        <div className={s.bento}>
-          {funnel.folders.map((f, i) => (
-            <div key={f.name} className={`${s.cell} ${i === 0 ? s.cellBig : ""}`}>
-              <span className={s.cellN}>{String(i + 1).padStart(2, "0")}</span>
-              <span className={s.cellCount}>{f.files.toLocaleString("en-US")}</span>
-              <h3>{f.name}</h3>
-              <p>{f.what}</p>
-            </div>
-          ))}
-        </div>
-        <div className={s.lists}>
-          <div className={s.listBox}>
-            <h3>13 voicings</h3>
-            <ol className={s.numList}>{VOICINGS.map((v) => <li key={v}>{v}</li>)}</ol>
+        {folders.length > 0 && (
+          <div className={s.bento}>
+            {folders.map((f) => (
+              <div key={f.name} className={h.host(`${s.cell} ${f.i === 0 ? s.cellBig : ""}`)}>
+                <span className={s.cellN}>{String(f.i + 1).padStart(2, "0")}</span>
+                <span className={s.cellCount}>{f.files.toLocaleString("en-US")}</span>
+                <h3>{f.name}</h3>
+                <p>{f.what}</p>
+                <Drop onClick={h.x(f.k)} />
+              </div>
+            ))}
           </div>
-          <div className={s.listBox}>
-            <h3>8 rhythms</h3>
-            <ul className={s.rhythms}>
-              {RHYTHMS.map(([r, bpm]) => (
-                <li key={r}>
-                  <span>{r}</span>
-                  <span className={s.mono}>{bpm} bpm</span>
-                </li>
-              ))}
-            </ul>
+        )}
+        {h.any("voicings", "rhythms", "progressions") && (
+          <div className={s.lists}>
+            {h.on("voicings") && (
+              <div className={h.host(s.listBox)}>
+                <h3>13 voicings</h3>
+                <ol className={s.numList}>{VOICINGS.map((v) => <li key={v}>{v}</li>)}</ol>
+                <Drop onClick={h.x("voicings")} />
+              </div>
+            )}
+            {h.on("rhythms") && (
+              <div className={h.host(s.listBox)}>
+                <h3>8 rhythms</h3>
+                <ul className={s.rhythms}>
+                  {RHYTHMS.map(([r, bpm]) => (
+                    <li key={r}>
+                      <span>{r}</span>
+                      <span className={s.mono}>{bpm} bpm</span>
+                    </li>
+                  ))}
+                </ul>
+                <Drop onClick={h.x("rhythms")} />
+              </div>
+            )}
+            {h.on("progressions") && (
+              <div className={h.host(`${s.listBox} ${s.listWide}`)}>
+                <h3>The progressions everyone wants</h3>
+                <ul className={s.progGrid}>{funnel.progressions.map((x) => <li key={x}>{x}</li>)}</ul>
+                <Drop onClick={h.x("progressions")} />
+              </div>
+            )}
           </div>
-          <div className={`${s.listBox} ${s.listWide}`}>
-            <h3>The progressions everyone wants</h3>
-            <ul className={s.progGrid}>{funnel.progressions.map((x) => <li key={x}>{x}</li>)}</ul>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );
@@ -445,51 +652,66 @@ function Math_({ p: raw, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patc
   const next = (ok: boolean | null) => (ok === true ? false : ok === false ? null : true);
   const win = (i: number) => (i === last ? s.chWin : "");
   const vars = { "--alts": last } as CSSProperties;
+  const h = parts(p, patch);
+  // A column goes with its cell in every row.
+  const dropCol = (i: number) =>
+    patch && p.cols.length > 1
+      ? () => patch({ cols: p.cols.filter((_, j) => j !== i), rows: p.rows.map((r) => ({ ...r, cells: r.cells.filter((_, j) => j !== i) })) })
+      : undefined;
   return (
     <section className={`${s.sec} ${s.band}`}>
       <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
-        <div className={s.chart} role="table" aria-label={fill(p.title, ctx)} style={vars}>
-          <span className={s.chWinBg} aria-hidden />
-          <div className={s.chRow} role="row">
-            <span className={s.chCorner} role="columnheader" />
-            {p.cols.map((c, i) => (
-              <span key={i} role="columnheader" className={`${s.chHead} ${win(i)}`}>
-                {i === last && <img className={s.chBox} src={`${DIR}/box-160.webp`} width={160} height={228} alt="" loading="lazy" decoding="async" />}
-                <T v={c} set={patch && ((v) => patch({ cols: p.cols.map((x, j) => (j === i ? v : x)) }))} ctx={ctx} />
-              </span>
+        <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
+        <Part k="chart" h={h} left>
+          <div className={s.chart} role="table" aria-label={fill(p.title, ctx)} style={vars}>
+            <span className={s.chWinBg} aria-hidden />
+            <div className={s.chRow} role="row">
+              <span className={s.chCorner} role="columnheader" />
+              {p.cols.map((c, i) => (
+                <span key={i} role="columnheader" className={h.host(`${s.chHead} ${win(i)}`)}>
+                  {i === last && <img className={s.chBox} src={`${DIR}/box-160.webp`} width={160} height={228} alt="" loading="lazy" decoding="async" />}
+                  <T v={c} set={patch && ((v) => patch({ cols: p.cols.map((x, j) => (j === i ? v : x)) }))} ctx={ctx} />
+                  <Drop onClick={dropCol(i)} />
+                </span>
+              ))}
+            </div>
+            {p.rows.map((row, r) => (
+              <div key={r} className={s.chRow} role="row">
+                <span role="rowheader" className={s.chLabel}>
+                  <T v={row.label} set={rows.set && ((v) => rows.set!(r, { ...row, label: v }))} ctx={ctx} />
+                  <Remove onClick={rows.remove && (() => rows.remove!(r))} />
+                </span>
+                {p.cols.map((_, c) => {
+                  const cell = row.cells[c] ?? { ok: null, text: "" };
+                  return (
+                    <span key={c} role="cell" className={`${s.chCell} ${win(c)}`}>
+                      <Mark ok={cell.ok} onClick={patch && (() => setCell(r, c, { ...cell, ok: next(cell.ok) }))} />
+                      <T
+                        v={cell.text}
+                        set={patch && ((v) => setCell(r, c, { ...cell, text: v }))}
+                        ctx={ctx}
+                        className={c === last ? undefined : s.chAlt}
+                        placeholder="Text"
+                      />
+                    </span>
+                  );
+                })}
+              </div>
             ))}
           </div>
-          {p.rows.map((row, r) => (
-            <div key={r} className={s.chRow} role="row">
-              <span role="rowheader" className={s.chLabel}>
-                <T v={row.label} set={rows.set && ((v) => rows.set!(r, { ...row, label: v }))} ctx={ctx} />
-                <Remove onClick={rows.remove && (() => rows.remove!(r))} />
-              </span>
-              {p.cols.map((_, c) => {
-                const cell = row.cells[c] ?? { ok: null, text: "" };
-                return (
-                  <span key={c} role="cell" className={`${s.chCell} ${win(c)}`}>
-                    <Mark ok={cell.ok} onClick={patch && (() => setCell(r, c, { ...cell, ok: next(cell.ok) }))} />
-                    <T
-                      v={cell.text}
-                      set={patch && ((v) => setCell(r, c, { ...cell, text: v }))}
-                      ctx={ctx}
-                      className={c === last ? undefined : s.chAlt}
-                      placeholder="Text"
-                    />
-                  </span>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+        </Part>
         <Add
           onClick={rows.add && (() => rows.add!({ label: "New row", cells: p.cols.map(() => ({ ok: true, text: "" })) }))}
           label="row"
         />
-        <T v={p.note} set={patch && ((v) => patch({ note: v }))} ctx={ctx} as="p" className={s.chNote} emph />
-        <Cta className={s.ctaBlock} inner={`${ctx.price} · instant download`} />
+        <Part k="note" h={h}>
+          <T v={p.note} set={patch && ((v) => patch({ note: v }))} ctx={ctx} as="p" className={s.chNote} emph />
+        </Part>
+        {h.on("cta") && (
+          <Cta className={h.host(s.ctaBlock)} inner={`${ctx.price} · instant download`}>
+            <Drop onClick={h.x("cta")} />
+          </Cta>
+        )}
       </div>
     </section>
   );
@@ -505,18 +727,23 @@ const worth = (n: number, ctx: Ctx) => money(n, ctx.currency);
 /** Social proof from real numbers (BRIEF.md "Brand proof"): no Jazz reviews
  * exist yet, and invented ones never go on the page. Under the hero and next
  * to the checkout. */
-export function Proof() {
+export function Proof({ h = ALL }: { h?: Parts }) {
+  const items: [string, ReactNode][] = [
+    ["producers", <><b>2,847</b> producers have the GRIND STUDIO MIDI Drum Kit in their sessions</>],
+    ["emailList", <><b>4,700+</b> producers on the GRIND STUDIO email list</>],
+    ["guaranteeDays", <><b>{funnel.guaranteeDays} days</b> satisfaction guarantee on every file</>],
+  ];
+  const shown = items.filter(([k]) => h.on(k));
+  if (!shown.length) return null;
+  // --n: as many columns as numbers left (jazz.module.css .hero .proof)
   return (
-    <ul className={s.proof}>
-      <li>
-        <b>2,847</b> producers have the GRIND STUDIO MIDI Drum Kit in their sessions
-      </li>
-      <li>
-        <b>4,700+</b> producers on the GRIND STUDIO email list
-      </li>
-      <li>
-        <b>{funnel.guaranteeDays} days</b> satisfaction guarantee on every file
-      </li>
+    <ul className={s.proof} style={{ "--n": shown.length } as CSSProperties}>
+      {shown.map(([k, body]) => (
+        <li key={k} className={h.host()}>
+          {body}
+          <Drop onClick={h.x(k)} />
+        </li>
+      ))}
     </ul>
   );
 }
@@ -525,55 +752,72 @@ export function Proof() {
 // you can play: 5-6 real files on the synth, or for the drum loops four clips.
 function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patch; ctx: Ctx }) {
   const ops = listOps(p.items, "items", patch);
+  const h = parts(p, patch);
   return (
     <section className={s.sec}>
-      <div className={`${s.wrap} ${s.two} ${s.twoWide}`}>
-        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} two patch={patch} ctx={ctx} />
+      <div className={`${s.wrap} ${twoIf(h.any("title", "sub"))} ${s.twoWide}`}>
+        <Head eyebrow={p.eyebrow} title={p.title} sub={p.sub} two h={h} patch={patch} ctx={ctx} />
         <div className={s.twoBody}>
         <ol className={bn.bonuses}>
           {p.items.map((it, i) => {
             const known = funnel.bonuses[i];
+            const ih = parts(it, ops.set && ((x) => ops.set!(i, { ...it, ...x })));
             return (
-              <li key={i} className={bn.bonus}>
-                <div className={bn.cover}>
-                  {i < 5 && (
-                    <img
-                      src={`${DIR}/bonus-${i + 1}-360.webp`}
-                      srcSet={`${DIR}/bonus-${i + 1}-360.webp 360w, ${DIR}/bonus-${i + 1}-640.webp 640w`}
-                      sizes="(min-width: 1000px) 200px, 96px"
-                      width={640}
-                      height={960}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  )}
-                </div>
-                <div className={bn.info}>
-                  <p className={bn.label}>
-                    <span>Bonus {i + 1}</span>
-                    {known && (
-                      <span className={bn.price}>
-                        <s>{worth(known.value, ctx)}</s> Free
-                      </span>
+              <li key={i} className={ih.on("cover") ? bn.bonus : `${bn.bonus} ${bn.bare}`}>
+                {ih.on("cover") && (
+                  <div className={ih.host(bn.cover)}>
+                    {i < 5 && (
+                      <img
+                        src={`${DIR}/bonus-${i + 1}-360.webp`}
+                        srcSet={`${DIR}/bonus-${i + 1}-360.webp 360w, ${DIR}/bonus-${i + 1}-640.webp 640w`}
+                        sizes="(min-width: 1000px) 200px, 96px"
+                        width={640}
+                        height={960}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
                     )}
-                  </p>
-                  <T v={it.name} set={ops.set && ((v) => ops.set!(i, { ...it, name: v }))} ctx={ctx} as="h3" />
-                  <T v={it.text} set={ops.set && ((v) => ops.set!(i, { ...it, text: v }))} ctx={ctx} as="p" className={bn.text} />
-                  {known && (
-                    <ul className={bn.inside}>
+                    <Drop onClick={ih.x("cover")} />
+                  </div>
+                )}
+                <div className={bn.info}>
+                  {ih.on("label") && (
+                    <p className={ih.host(bn.label)}>
+                      <span>Bonus {i + 1}</span>
+                      {known && (
+                        <span className={bn.price}>
+                          <s>{worth(known.value, ctx)}</s> Free
+                        </span>
+                      )}
+                      <Drop onClick={ih.x("label")} />
+                    </p>
+                  )}
+                  <Part k="name" h={ih}>
+                    <T v={it.name} set={ops.set && ((v) => ops.set!(i, { ...it, name: v }))} ctx={ctx} as="h3" />
+                  </Part>
+                  <Part k="text" h={ih}>
+                    <T v={it.text} set={ops.set && ((v) => ops.set!(i, { ...it, text: v }))} ctx={ctx} as="p" className={bn.text} />
+                  </Part>
+                  {known && ih.on("inside") && (
+                    <ul className={ih.host(bn.inside)}>
                       {known.inside.map((x) => (
                         <li key={x}>
                           <Tick /> {x}
                         </li>
                       ))}
+                      <Drop onClick={ih.x("inside")} />
                     </ul>
                   )}
                 </div>
-                <div className={bn.preview}>
-                  {i < 4 ? <BonusPlayer bonus={i} /> : i === 4 ? <LoopList /> : null}
-                </div>
+                {ih.on("preview") && (
+                  <div className={ih.host(bn.preview)}>
+                    {i < 4 ? <BonusPlayer bonus={i} /> : i === 4 ? <LoopList /> : null}
+                    <Drop onClick={ih.x("preview")} />
+                  </div>
+                )}
                 <Remove onClick={ops.remove && (() => ops.remove!(i))} />
+                <Removed h={ih} />
               </li>
             );
           })}
@@ -587,45 +831,59 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
 
 /** The bundle, item by item with what each is worth, the total crossed out and
  * today's price: the offer summary, like the MIDI Drum Kit page's value stack. */
-export function ValueStack({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx }) {
+export function ValueStack({ p, patch, ctx, h = ALL }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx; h?: Parts }) {
+  const bonuses = funnel.bonuses.map((x, i) => ({ ...x, i, k: `bonus-${i + 1}` })).filter((x) => h.on(x.k));
+  // The total adds up what's listed: a removed bonus row leaves it.
+  const total = funnel.value.pack + bonuses.reduce((sum, x) => sum + x.value, 0);
   return (
     <div className={vs.stack}>
       <div className={vs.main}>
-        <div className={vs.mainBox}>
-          <span className={vs.ribbon}>{worth(funnel.value.pack, ctx)} value</span>
-          <img src={`${DIR}/box-520.webp`} width={520} height={741} alt="The Jazz MIDI Pack box" loading="lazy" decoding="async" />
-        </div>
+        {h.on("box") && (
+          <div className={h.host(vs.mainBox)}>
+            <span className={vs.ribbon}>{worth(funnel.value.pack, ctx)} value</span>
+            <img src={`${DIR}/box-520.webp`} width={520} height={741} alt="The Jazz MIDI Pack box" loading="lazy" decoding="async" />
+            <Drop onClick={h.x("box")} />
+          </div>
+        )}
         <div>
-          <p className={vs.kicker}>The pack</p>
-          <p className={vs.mainName}>{funnel.product}</p>
+          <Part k="packName" h={h}>
+            <p className={vs.kicker}>The pack</p>
+            <p className={vs.mainName}>{funnel.product}</p>
+          </Part>
           <TickList items={p.stack} k="stack" patch={patch} ctx={ctx} className={s.stack} />
         </div>
       </div>
-      <ol className={vs.list}>
-        {funnel.bonuses.map((x, i) => (
-          <li key={x.id}>
-            <img src={`${DIR}/bonus-${i + 1}-360.webp`} width={360} height={540} alt="" loading="lazy" decoding="async" />
-            <span className={vs.itemText}>
-              <span className={vs.kicker}>Bonus #{i + 1}</span>
-              <span className={vs.itemName}>{x.name}</span>
-              <span className={vs.itemCount}>{x.count}</span>
-            </span>
-            <span className={vs.itemValue}>{worth(x.value, ctx)} value</span>
-          </li>
-        ))}
-      </ol>
-      <div className={vs.total}>
-        <span className={vs.bracket} aria-hidden />
-        <p className={vs.totalLine}>
-          Total value: <span>{worth(VALUE_TOTAL, ctx)}</span>
-        </p>
-        <p className={vs.today}>
-          <span className={vs.todayLabel}>Today</span>
-          <s className={vs.old}>{worth(VALUE_TOTAL, ctx)}</s>
-          <span className={vs.now}>{ctx.price}</span>
-        </p>
-        <p className={vs.save}>You save {worth(VALUE_TOTAL - ctx.amount, ctx)}</p>
-      </div>
+      {bonuses.length > 0 && (
+        <ol className={vs.list}>
+          {bonuses.map((x) => (
+            <li key={x.id} className={h.host()}>
+              <img src={`${DIR}/bonus-${x.i + 1}-360.webp`} width={360} height={540} alt="" loading="lazy" decoding="async" />
+              <span className={vs.itemText}>
+                <span className={vs.kicker}>Bonus #{x.i + 1}</span>
+                <span className={vs.itemName}>{x.name}</span>
+                <span className={vs.itemCount}>{x.count}</span>
+              </span>
+              <span className={vs.itemValue}>{worth(x.value, ctx)} value</span>
+              <Drop onClick={h.x(x.k)} />
+            </li>
+          ))}
+        </ol>
+      )}
+      {h.on("total") && (
+        <div className={h.host(vs.total)}>
+          <span className={vs.bracket} aria-hidden />
+          <p className={vs.totalLine}>
+            Total value: <span>{worth(total, ctx)}</span>
+          </p>
+          <p className={vs.today}>
+            <span className={vs.todayLabel}>Today</span>
+            <s className={vs.old}>{worth(total, ctx)}</s>
+            <span className={vs.now}>{ctx.price}</span>
+          </p>
+          <p className={vs.save}>You save {worth(total - ctx.amount, ctx)}</p>
+          <Drop onClick={h.x("total")} />
+        </div>
+      )}
     </div>
   );
 }
@@ -690,23 +948,39 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
 // The landing's offer: the value stack and one button to the order page (the
 // checkout has its own page since 2026-10-16).
 function Offer({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx }) {
+  const h = parts(p, patch);
   return (
     <section id="buy" className={`${s.sec} ${s.order}`}>
       <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
-        <ValueStack p={p} patch={patch} ctx={ctx} />
-        <Cta className={s.ctaBlock} inner="Card or PayPal · secure checkout" />
-        <ul className={s.payList}>
-          <li>
-            <Tick /> Card, Apple Pay, Google Pay or PayPal
-          </li>
-          <li>
-            <Tick /> Download buttons right after you pay
-          </li>
-          <li>
-            <Shield /> <T v={p.guarantee} set={patch && ((x) => patch({ guarantee: x }))} ctx={ctx} />
-          </li>
-        </ul>
+        <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
+        <ValueStack p={p} patch={patch} ctx={ctx} h={h} />
+        {h.on("cta") && (
+          <Cta className={h.host(s.ctaBlock)} inner="Card or PayPal · secure checkout">
+            <Drop onClick={h.x("cta")} />
+          </Cta>
+        )}
+        {h.any("payWays", "download", "guarantee") && (
+          <ul className={s.payList}>
+            {h.on("payWays") && (
+              <li className={h.host()}>
+                <Tick /> Card, Apple Pay, Google Pay or PayPal
+                <Drop onClick={h.x("payWays")} />
+              </li>
+            )}
+            {h.on("download") && (
+              <li className={h.host()}>
+                <Tick /> Download buttons right after you pay
+                <Drop onClick={h.x("download")} />
+              </li>
+            )}
+            {h.on("guarantee") && (
+              <li className={h.host()}>
+                <Shield /> <T v={p.guarantee} set={patch && ((x) => patch({ guarantee: x }))} ctx={ctx} />
+                <Drop onClick={h.x("guarantee")} />
+              </li>
+            )}
+          </ul>
+        )}
       </div>
     </section>
   );
@@ -746,15 +1020,24 @@ export function Seal() {
 }
 
 function Guarantee({ p, patch, ctx }: { p: SectionProps["s_guarantee"]; patch?: Patch; ctx: Ctx }) {
+  const h = parts(p, patch);
   return (
     <section className={`${s.sec} ${s.band}`}>
-      <div className={`${s.wrap} ${s.guarantee} ${s.two}`}>
-        <div className={`${s.sealWrap} ${s.twoBody}`}>
-          <Seal />
-        </div>
+      <div className={`${s.wrap} ${s.guarantee} ${twoIf(h.on("seal") && h.any("title", "text"))}`}>
+        {h.on("seal") && (
+          <div className={`${s.sealWrap} ${s.twoBody}`}>
+            <Part k="seal" h={h}>
+              <Seal />
+            </Part>
+          </div>
+        )}
         <div className={s.twoHead}>
-          <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
-          <T v={p.text} set={patch && ((v) => patch({ text: v }))} ctx={ctx} as="p" className={s.sub} />
+          <Part k="title" h={h}>
+            <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
+          </Part>
+          <Part k="text" h={h}>
+            <T v={p.text} set={patch && ((v) => patch({ text: v }))} ctx={ctx} as="p" className={s.sub} />
+          </Part>
         </div>
       </div>
     </section>
@@ -763,10 +1046,11 @@ function Guarantee({ p, patch, ctx }: { p: SectionProps["s_guarantee"]; patch?: 
 
 function After({ p, patch, ctx }: { p: SectionProps["s_after"]; patch?: Patch; ctx: Ctx }) {
   const ops = listOps(p.items, "items", patch);
+  const h = parts(p, patch);
   return (
     <section className={s.sec}>
       <div className={s.wrap}>
-        <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
+        <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
         <ol className={s.after}>
           {p.items.map((it, i) => (
             <li key={i}>
@@ -784,10 +1068,13 @@ function After({ p, patch, ctx }: { p: SectionProps["s_after"]; patch?: Patch; c
 
 function Faq({ p, patch, ctx }: { p: SectionProps["s_faq"]; patch?: Patch; ctx: Ctx }) {
   const ops = listOps(p.items, "items", patch);
+  const h = parts(p, patch);
   return (
     <section className={`${s.sec} ${s.band}`}>
       <div className={`${s.wrap} ${s.col}`}>
-        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
+        <Part k="title" h={h}>
+          <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
+        </Part>
         <div className={s.faq}>
           {p.items.map((it, i) =>
             patch ? (
@@ -816,15 +1103,31 @@ function Faq({ p, patch, ctx }: { p: SectionProps["s_faq"]; patch?: Patch; ctx: 
 }
 
 function Final({ p, patch, ctx }: { p: SectionProps["s_final"]; patch?: Patch; ctx: Ctx }) {
+  const h = parts(p, patch);
+  // The stage picture is a background (no hover reaches it): its × sits in
+  // the section's corner.
   return (
-    <section className={`${s.sec} ${s.final}`}>
-      <div className={s.finalBg} aria-hidden>
-        <Scene name="stage" alt="" />
-      </div>
+    <section className={h.host(h.on("picture") ? `${s.sec} ${s.final}` : `${s.sec} ${s.final} ${s.finalBare}`)}>
+      {h.on("picture") && (
+        <div className={s.finalBg} aria-hidden>
+          <Scene name="stage" alt="" />
+        </div>
+      )}
+      {h.on("picture") && <Drop onClick={h.x("picture")} inside />}
       <div className={`${s.wrap} ${s.finalIn}`}>
-        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
-        <Cta className={s.ctaBlock} inner={`${ctx.price} · instant download`} note={fill(p.note, ctx)} />
-        {patch && <T v={p.note} set={(v) => patch({ note: v })} ctx={ctx} as="p" className={e.hint} />}
+        <Part k="title" h={h}>
+          <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
+        </Part>
+        {h.on("cta") && (
+          <Cta className={h.host(s.ctaBlock)} inner={`${ctx.price} · instant download`} note={h.on("note") ? fill(p.note, ctx) : undefined}>
+            <Drop onClick={h.x("cta")} />
+          </Cta>
+        )}
+        {patch && (
+          <Part k="note" h={h}>
+            <T v={p.note} set={(v) => patch({ note: v })} ctx={ctx} as="p" className={e.hint} />
+          </Part>
+        )}
       </div>
     </section>
   );
@@ -853,5 +1156,10 @@ export function isSectionType(t: string): t is SectionType {
 
 export function SectionView({ section, patch, ctx }: { section: Section; patch?: Patch; ctx: Ctx }) {
   const View = VIEWS[section.type] as (a: { p: unknown; patch?: Patch; ctx: Ctx }) => ReactNode;
-  return <View p={section.props} patch={patch} ctx={ctx} />;
+  return (
+    <>
+      <View p={section.props} patch={patch} ctx={ctx} />
+      <Removed h={parts(section.props, patch)} wrap={s.wrap} />
+    </>
+  );
 }
