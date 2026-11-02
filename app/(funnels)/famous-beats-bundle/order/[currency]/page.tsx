@@ -2,21 +2,24 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
-import { reviews } from "../../../top-hits-midi-bundle/copy";
-import { fontVars } from "../../../top-hits-midi-bundle/fonts";
 import { OrderForm } from "../../../top-hits-midi-bundle/OrderForm";
 import { ReservedTimer } from "../../../top-hits-midi-bundle/ReservedTimer";
 import { Check } from "../../../top-hits-midi-bundle/sections";
 import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
-import s from "../../../top-hits-midi-bundle/order.module.css";
+import base from "../../../top-hits-midi-bundle/order.module.css";
+import type { CardLook } from "../../../CardFields";
 import { Beacon } from "../../../Beacon";
-import { orderBullets } from "../../copy";
+import { withSkin } from "../../../skin";
+import { orderBullets, reviews } from "../../copy";
 import { funnel } from "../../funnel";
+import { fontVars } from "../../fonts";
 import { orderOffer } from "../../offer";
+import skin from "../../order.module.css";
 
 // The order page, a copy of ClickFunnels' /order-famous-beats-bundle: the
 // same ClickFunnels template as TOP HITS', so it's TOP HITS' page and form
-// with this bundle's picture, words and checkout.
+// with this bundle's picture, words and checkout, drawn in its landing's look
+// (../../order.module.css, a skin over the template's stylesheet).
 // Cached per currency like the landing (proxy.ts rewrites /famous-beats-bundle/order).
 
 export const revalidate = 3600;
@@ -28,6 +31,18 @@ export function generateStaticParams() {
 const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
 const IMG = "/funnels/top-hits-midi-bundle";
 const OWN = `/funnels/${funnel.slug}`;
+const s = withSkin(base, skin);
+
+// The card fields (Stripe's iframes) in the same colours as the form's own.
+const LOOK: CardLook = {
+  font: "'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontCss: "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400&display=swap",
+  color: "#eef2f8",
+  placeholder: "#808b9c",
+  focus: "#ffb43b",
+  field: "#0b101a",
+  edge: "rgba(255, 255, 255, 0.12)",
+};
 
 export const metadata: Metadata = {
   title: "Order Famous Beats Bundle",
@@ -96,6 +111,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
             upsell={product.offers?.[0]?.id ?? null}
             offer={offer}
             sells={{ slug: funnel.slug, tagline: funnel.tagline, thankYou: funnel.checkout.thankYou }}
+            skin={skin}
+            look={LOOK}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.paylogos} src={`${IMG}/payment-logos.webp`} alt="PayPal, Visa, Mastercard, American Express, Discover" width={190} height={22} />
@@ -155,7 +172,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
         <a href={funnel.legal.privacy}>Privacy Policy</a> - <a href={funnel.legal.refund}>Refund Policy</a> -{" "}
         <b>Contact:</b> <a href={`mailto:${funnel.support}`}>{funnel.support}</a>
       </footer>
-      <ReservedTimer />
+      <ReservedTimer skin={skin} />
     </main>
   );
 }

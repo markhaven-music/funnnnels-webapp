@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import s from "./order.module.css";
+import { withSkin, type Styles } from "../skin";
+import base from "./order.module.css";
 
 // ClickFunnels' "YOUR COPY IS RESERVED FOR" box: ten minutes from page load,
 // counting down to 00:00:00 (it only stops; nothing expires).
 const START = 10 * 60 * 1000;
 
-export function ReservedTimer() {
+// skin: a stylesheet whose classes join ./order.module.css's (the Famous Beats Bundle's).
+export function ReservedTimer({ skin }: { skin?: Styles }) {
+  const s = withSkin(base, skin);
   const [left, setLeft] = useState(START);
   useEffect(() => {
     const end = Date.now() + START;

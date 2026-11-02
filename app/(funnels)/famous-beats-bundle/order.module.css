@@ -1,0 +1,354 @@
+/* The Famous Beats Bundle's order page in its landing's look (theme "aurora",
+   grind-studio-landing-pages/src/styles/aurora.css, values read on the live
+   page): navy-black page, dark panels with a hairline edge and 24px corners,
+   Inter Tight, gold only as light (text, icons, glows), the CTA a white key
+   with dark text, a 3D lip and a gold glow.
+   A skin over TOP HITS' order template (../top-hits-midi-bundle/order.module.css):
+   every class here joins the template's class of the same name (../skin.ts),
+   and every rule starts with .page.page so it wins over the template's. */
+
+.page.page {
+  --inter: var(--font-tight), "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --anton: var(--font-jet), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ink: #04060b;
+  --paper: #eef2f8;
+  --soft: rgb(222 230 244 / 0.8);
+  --mute: #a7b1c2;
+  --dim: #808b9c;
+  --line: rgb(255 255 255 / 0.086);
+  --gold: #ffb43b;
+  --gold-2: #ffd27a;
+  --panel: linear-gradient(180deg, rgb(12 17 27) 0%, rgb(8 11 18) 100%);
+  background:
+    radial-gradient(60rem 28rem at 50% -6rem, rgb(255 106 26 / 0.13), transparent 70%),
+    var(--ink);
+  color: var(--paper);
+}
+
+/* ── top: the ribbon, logo, "Secure Checkout" ── */
+.page.page .redbar {
+  padding: 8px 16px;
+  background: #0b0f18;
+  color: var(--gold-2);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.page.page .header {
+  background: transparent;
+  border-bottom: 0;
+}
+.page.page .secure {
+  max-width: 1100px;
+  padding: 11px 15px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.045);
+  color: var(--soft);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.page.page .secure svg {
+  width: 15px;
+  height: 17px;
+  margin-right: 10px;
+  color: var(--gold);
+}
+
+/* ── the two columns ── */
+.page.page .colTitle {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--paper);
+}
+@media (max-width: 769px) {
+  .page.page .colTitle {
+    font-size: 22px;
+  }
+}
+.page.page .dl {
+  color: var(--soft);
+}
+.page.page .list li {
+  font-weight: 600;
+  color: var(--soft);
+}
+.page.page .list svg {
+  color: var(--gold);
+}
+
+/* ── the form panel ── */
+.page.page .form {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel);
+  box-shadow: rgb(255 255 255 / 0.05) 0 1px 0 0 inset, rgb(0 0 0 / 0.9) 0 40px 90px -50px;
+  color: var(--paper);
+}
+.page.page .steps {
+  border-bottom: 1px solid var(--line);
+}
+.page.page .steps li {
+  background: transparent;
+  color: var(--dim);
+}
+.page.page .steps li.stepOn {
+  background: rgb(255 255 255 / 0.04);
+  color: var(--paper);
+}
+.page.page .stepOn::after {
+  display: none;
+}
+.page.page .stepNum {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.06);
+  color: var(--dim);
+  font-size: 15px;
+}
+.page.page .stepOn .stepNum {
+  background: rgb(255 180 59 / 0.14);
+  color: var(--gold);
+  box-shadow: 0 0 14px -2px rgb(255 180 59 / 0.55);
+}
+.page.page .stepSub {
+  color: var(--dim);
+}
+.page.page .fields {
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 12px;
+  background: #0b101a;
+}
+.page.page .input {
+  border-color: rgb(255 255 255 / 0.12);
+  background: #0b101a;
+  color: var(--paper);
+}
+.page.page .input::placeholder {
+  color: var(--dim);
+}
+.page.page .input:focus {
+  outline-color: var(--gold);
+}
+.page.page .respect {
+  color: var(--dim);
+}
+
+/* The landing's CTA: a white key, dark label, 3D lip, gold glow. */
+.page.page .cta {
+  margin-bottom: 7px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbf7ef 46%, #eadfc9 100%);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.6),
+    inset 0 -4px 0 rgb(0 0 0 / 0.14),
+    0 7px 0 #9a8257,
+    0 22px 48px -12px rgb(255 160 40 / 0.5),
+    0 0 42px -8px rgb(255 160 40 / 0.5);
+  color: #0a0d14;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-shadow: none;
+}
+.page.page .cta:active {
+  transform: translateY(5px);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.6),
+    inset 0 -4px 0 rgb(0 0 0 / 0.14),
+    0 2px 0 #9a8257,
+    0 12px 30px -12px rgb(255 160 40 / 0.5);
+}
+.page.page .ctaPay {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.page.page .ctaSub {
+  color: rgb(10 13 20 / 0.72);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* step 2 */
+.page.page .back {
+  color: var(--soft);
+}
+.page.page .product,
+.page.page .summary,
+.page.page .method,
+.page.page .notConnected,
+.page.page .paypalNote {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.035);
+  color: var(--soft);
+}
+.page.page .radio {
+  accent-color: var(--gold);
+}
+.page.page .productName {
+  color: var(--paper);
+  font-weight: 600;
+}
+.page.page .productDesc {
+  color: var(--dim);
+}
+.page.page .productPrice {
+  color: var(--paper);
+  font-weight: 600;
+}
+.page.page .label {
+  color: var(--mute);
+}
+.page.page .label::after,
+.page.page .orCard::before,
+.page.page .orCard::after {
+  background: var(--line);
+}
+.page.page .method {
+  color: var(--mute);
+}
+.page.page .methodOn {
+  border-color: var(--gold);
+  color: var(--paper);
+  box-shadow: 0 0 16px -6px rgb(255 180 59 / 0.6);
+}
+.page.page .orCard {
+  color: var(--dim);
+}
+
+/* The add-ons: a warm-lit panel, gold headline, gold tick box. */
+.page.page .bump {
+  border: 1px dashed rgb(255 180 59 / 0.55);
+  border-radius: 16px;
+  background: rgb(255 180 59 / 0.06);
+  box-shadow: 0 0 30px -14px rgb(255 160 40 / 0.6);
+  color: var(--soft);
+}
+.page.page .bumpTitle {
+  color: var(--gold-2);
+}
+.page.page .bumpPrice {
+  color: var(--paper);
+}
+.page.page .bumpArrow {
+  color: var(--gold);
+}
+.page.page .bumpCheck {
+  border-color: var(--gold);
+  background-color: transparent;
+}
+.page.page .bumpCheck:checked {
+  background-color: var(--gold);
+}
+.page.page .oto {
+  color: #ff8a4c;
+}
+
+.page.page .summary > summary {
+  color: var(--paper);
+}
+.page.page .sumBody,
+.page.page .sumTotal {
+  border-color: var(--line);
+}
+.page.page .sumRow {
+  color: var(--mute);
+}
+.page.page .sumTotal {
+  color: var(--paper);
+}
+
+/* ── reviews, guarantees, footer ── */
+.page.page .reviews {
+  background: transparent;
+}
+.page.page .review {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel);
+}
+.page.page .quote {
+  color: var(--soft);
+  letter-spacing: -0.02em;
+}
+.page.page .name {
+  color: var(--paper);
+}
+.page.page .role {
+  color: var(--dim);
+  letter-spacing: 0;
+}
+.page.page .guarantee {
+  max-width: 1100px;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel);
+}
+@media (max-width: 1140px) {
+  .page.page .guarantee {
+    margin: 0 16px;
+  }
+}
+.page.page .g h3 {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--paper);
+}
+.page.page .g p {
+  color: var(--mute);
+  line-height: 1.45;
+}
+.page.page .footer {
+  padding-top: 30px;
+  color: var(--dim);
+  font-size: 11px;
+}
+.page.page .footer a {
+  color: var(--soft);
+}
+
+/* ── "YOUR COPY IS RESERVED FOR": a dark panel, gold mono digits ── */
+.page.page .timer {
+  border: 1px solid rgb(255 180 59 / 0.28);
+  border-radius: 18px;
+  background: rgb(10 14 22 / 0.94);
+  box-shadow: 0 0 40px -12px rgb(255 160 40 / 0.55), 0 20px 50px -20px rgb(0 0 0 / 0.9);
+  color: var(--mute);
+  backdrop-filter: blur(8px);
+}
+.page.page .timerTitle {
+  color: var(--mute);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.page.page .timerTitle::before {
+  background: var(--gold);
+  opacity: 1;
+  box-shadow: 0 0 10px 2px rgb(255 180 59 / 0.6);
+}
+.page.page .timerNum {
+  color: var(--gold);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 18px rgb(255 180 59 / 0.35);
+}
+.page.page .timerLabel {
+  color: var(--dim);
+}
+.page.page .timerSep {
+  color: rgb(255 255 255 / 0.25);
+}
+@media (max-width: 769px) {
+  .page.page .timerNum {
+    font-size: 24px;
+  }
+}

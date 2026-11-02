@@ -1,18 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 // "pure": Stripe.js loads when loadStripe is called, not as soon as this file does.
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
 import { track } from "@/lib/beacon";
 import { pixel } from "../jazz-midi-pack/Tracking";
-import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
+import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet, type CardLook } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
+import { withSkin, type Styles } from "../skin";
 import type { OrderOffer } from "../midi-drum-kit/offer";
 import { funnel } from "./funnel";
 import { Rich } from "./Rich";
-import s from "./order.module.css";
+import base from "./order.module.css";
 
 // The ClickFunnels order form of /order-top-hits-midi-bundle, step for step:
 //   1 · Your Info → first, last, email (saved as a lead), "GO TO STEP 2"
@@ -34,7 +35,22 @@ type Info = { firstName: string; lastName: string; email: string };
 // sells: the funnel the form checks out, TOP HITS unless another funnel lends
 // itself the form (the Famous Beats Bundle's order page).
 export type Sells = { slug: string; tagline: string; thankYou: string };
-type Props = { currency: Currency; country: string; publishableKey: string | null; afterOrder: string; upsell: string | null; offer: OrderOffer; sells?: Sells };
+// skin: a stylesheet (CSS module) whose classes join the ones of
+// ./order.module.css with the same name, and look: the card fields' colours,
+// for a page drawn in its own style (the Famous Beats Bundle's, like its landing).
+type Props = {
+  currency: Currency;
+  country: string;
+  publishableKey: string | null;
+  afterOrder: string;
+  upsell: string | null;
+  offer: OrderOffer;
+  sells?: Sells;
+  skin?: Styles;
+  look?: CardLook;
+};
+
+const Skin = createContext<{ s: Styles; look: CardLook }>({ s: base, look: INTER });
 
 const TOP_HITS: Sells = { slug: funnel.slug, tagline: funnel.tagline, thankYou: funnel.checkout.thankYou };
 
@@ -46,7 +62,9 @@ function stripeFor(key: string) {
 
 const money = (n: number, c: Currency) => `${c === "eur" ? "€" : "$"}${n.toFixed(2)}`;
 
-export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer, sells = TOP_HITS }: Props) {
+export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer, sells = TOP_HITS, skin, look = INTER }: Props) {
+  const s = useMemo(() => withSkin(base, skin), [skin]);
+  const theme = useMemo(() => ({ s, look }), [s, look]);
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);
@@ -62,102 +80,105 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
   const state: PayState = { currency, country, info, method, picked, setPicked, total, next, offer, slug: sells.slug };
 
   return (
-    <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
-      {step === 1 ? (
-        <>
-          <ol className={s.steps}>
-            <li className={s.stepOn}>
-              <span className={s.stepNum}>1</span>
-              <span>
-                <span className={s.stepTitle}>Your Info</span>
-                <span className={s.stepSub}>Name &amp; Email</span>
-              </span>
-            </li>
-            <li>
-              <span className={s.stepNum}>2</span>
-              <span>
-                <span className={s.stepTitle}>Payment</span>
-                <span className={s.stepSub}>Payment Info</span>
-              </span>
-            </li>
-          </ol>
-          <InfoStep
-            info={info}
-            slug={sells.slug}
-            onDone={(next) => {
-              setInfo(next);
-              setWanted(true);
-              setStep(2);
-              window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
-              pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase() });
-              track({ funnel: sells.slug, page: "checkout" });
-            }}
-          />
-        </>
-      ) : (
-        <div className={s.body}>
-          <button type="button" className={s.back} onClick={() => setStep(1)}>
-            <svg viewBox="0 0 448 512" width="14" height="14" aria-hidden>
-              <path
-                fill="currentColor"
-                d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"
-              />
-            </svg>
-            Go Back
-          </button>
-
-          <label className={s.product}>
-            <input type="radio" checked readOnly className={s.radio} />
-            <span className={s.productText}>
-              <span className={s.productName}>{offer.name}</span>
-              <span className={s.productDesc}>{sells.tagline}</span>
-            </span>
-            <span className={s.productPrice}>{money(price, currency)}</span>
-          </label>
-
-          <p className={s.label}>
-            <span>PAYMENT INFORMATION</span>
-          </p>
-          <div className={s.methods} role="radiogroup" aria-label="Payment method">
-            <button
-              type="button"
-              role="radio"
-              aria-checked={method === "card"}
-              className={`${s.method} ${method === "card" ? s.methodOn : ""}`}
-              onClick={() => setMethod("card")}
-            >
-              <CardGlyph /> Card
+    <Skin.Provider value={theme}>
+      <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
+        {step === 1 ? (
+          <>
+            <ol className={s.steps}>
+              <li className={s.stepOn}>
+                <span className={s.stepNum}>1</span>
+                <span>
+                  <span className={s.stepTitle}>Your Info</span>
+                  <span className={s.stepSub}>Name &amp; Email</span>
+                </span>
+              </li>
+              <li>
+                <span className={s.stepNum}>2</span>
+                <span>
+                  <span className={s.stepTitle}>Payment</span>
+                  <span className={s.stepSub}>Payment Info</span>
+                </span>
+              </li>
+            </ol>
+            <InfoStep
+              info={info}
+              slug={sells.slug}
+              onDone={(next) => {
+                setInfo(next);
+                setWanted(true);
+                setStep(2);
+                window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
+                pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase() });
+                track({ funnel: sells.slug, page: "checkout" });
+              }}
+            />
+          </>
+        ) : (
+          <div className={s.body}>
+            <button type="button" className={s.back} onClick={() => setStep(1)}>
+              <svg viewBox="0 0 448 512" width="14" height="14" aria-hidden>
+                <path
+                  fill="currentColor"
+                  d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"
+                />
+              </svg>
+              Go Back
             </button>
-            {PAYPAL_ON && (
+
+            <label className={s.product}>
+              <input type="radio" checked readOnly className={s.radio} />
+              <span className={s.productText}>
+                <span className={s.productName}>{offer.name}</span>
+                <span className={s.productDesc}>{sells.tagline}</span>
+              </span>
+              <span className={s.productPrice}>{money(price, currency)}</span>
+            </label>
+
+            <p className={s.label}>
+              <span>PAYMENT INFORMATION</span>
+            </p>
+            <div className={s.methods} role="radiogroup" aria-label="Payment method">
               <button
                 type="button"
                 role="radio"
-                aria-checked={method === "paypal"}
-                className={`${s.method} ${method === "paypal" ? s.methodOn : ""}`}
-                onClick={() => setMethod("paypal")}
+                aria-checked={method === "card"}
+                className={`${s.method} ${method === "card" ? s.methodOn : ""}`}
+                onClick={() => setMethod("card")}
               >
-                <PayPalGlyph /> Paypal
+                <CardGlyph /> Card
               </button>
+              {PAYPAL_ON && (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={method === "paypal"}
+                  className={`${s.method} ${method === "paypal" ? s.methodOn : ""}`}
+                  onClick={() => setMethod("paypal")}
+                >
+                  <PayPalGlyph /> Paypal
+                </button>
+              )}
+            </div>
+
+            {stripePromise ? (
+              <Elements stripe={stripePromise} options={cardElements(look, "en")}>
+                <CardPay {...state} stripePromise={stripePromise} />
+              </Elements>
+            ) : (
+              <>
+                {method === "card" && <div className={s.notConnected}>Card payments switch on once the Stripe keys are added.</div>}
+                <PayBody {...state} cardOff />
+              </>
             )}
           </div>
-
-          {stripePromise ? (
-            <Elements stripe={stripePromise} options={cardElements(INTER, "en")}>
-              <CardPay {...state} stripePromise={stripePromise} />
-            </Elements>
-          ) : (
-            <>
-              {method === "card" && <div className={s.notConnected}>Card payments switch on once the Stripe keys are added.</div>}
-              <PayBody {...state} cardOff />
-            </>
-          )}
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </Skin.Provider>
   );
 }
 
 function InfoStep({ info, slug, onDone }: { info: Info; slug: string; onDone: (info: Info) => void }) {
+  const { s } = useContext(Skin);
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.currentTarget)) as Info;
@@ -215,6 +236,7 @@ type PayState = {
 };
 
 function CardPay({ stripePromise, ...props }: PayState & { stripePromise: ReturnType<typeof loadStripe> }) {
+  const { s, look } = useContext(Skin);
   const stripe = useStripe();
   const elements = useElements();
   const [paying, setPaying] = useState(false);
@@ -267,7 +289,7 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
             <span>or pay by card</span>
           </div>
         )}
-        <CardFields words={{ number: "Card number", expiry: "MM / YY", cvc: "CVV" }} look={INTER} />
+        <CardFields words={{ number: "Card number", expiry: "MM / YY", cvc: "CVV" }} look={look} />
       </div>
       <PayBody {...props} onCard={payByCard} cardPaying={paying || !stripe} cardError={error} />
     </>
@@ -289,6 +311,7 @@ function PayBody({
   cardOff,
   cardError,
 }: PayState & { onCard?: () => void; cardPaying?: boolean; cardOff?: boolean; cardError?: string | null }) {
+  const { s } = useContext(Skin);
   const [paypalBusy, setPaypalBusy] = useState(false);
   const [paypalError, setPaypalError] = useState<string | null>(null);
   const paypal = method === "paypal";
@@ -418,6 +441,7 @@ function PayBody({
 
 // ClickFunnels' red arrow: Font Awesome's long-arrow-alt-right at 16px, wobbling.
 function BumpArrow() {
+  const { s } = useContext(Skin);
   return (
     <svg viewBox="0 0 448 512" className={s.bumpArrow} aria-hidden>
       <path

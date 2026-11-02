@@ -1,6 +1,5 @@
 // The order page's words, exactly as on ClickFunnels' /order-famous-beats-bundle.
 // Inline marks (../top-hits-midi-bundle/Rich.tsx): **bold**, __underlined__, {c} = € or $.
-// The reviews are the same as TOP HITS' order page (../top-hits-midi-bundle/copy.ts).
 
 // The left column (hidden on phones, as on ClickFunnels).
 export const orderBullets = [
@@ -17,6 +16,18 @@ export const orderBullets = [
   "Money Back Guarantee (No Risk)",
   "Limited To 1,250 Licenses",
 ];
+
+// The reviews under the form, as ClickFunnels' page has them (icons as on TOP HITS').
+export const reviews = [
+  { quote: "The drum patterns are exactly what I needed. Perfect for modern trap and drill beats.", name: "Marcus Thompson", role: "Trap Producer", icon: "youtube" },
+  { quote: "These MIDI files saved me hundreds of hours. The patterns are industry standard quality.", name: "Ardan Solis", role: "Verified Customer", icon: "instagram" },
+  { quote: "Perfect for trap. The fragments add that extra sauce to make beats stand out.", name: "Niko Varela", role: "Verified Customer", icon: "instagram" },
+  { quote: "This is what real trap production tools look like. Every pattern is a hit waiting to happen.", name: "Soraya Kenji", role: "Verified Customer", icon: "instagram" },
+  { quote: "The MIDI patterns are crazy. I've been using these on every session since I got the pack.", name: "Marek Tulan", role: "Hip-hop and Trap Beatmaker", icon: "instagram" },
+  { quote: "Finally found patterns that match the energy of modern trap. This pack is legendary.", name: "Aisha Moretti", role: "Beatmaker", icon: "instagram" },
+  { quote: "The creativity these MIDIs sparked is insane. Perfect foundation for any trap beat.", name: "Dara Kwon", role: "Trap Producer, 100M+ streams", icon: "instagram" },
+  { quote: "These patterns hit harder than anything I've found. Essential tools for modern producers.", name: "Ravi Lomax", role: "Trap Producer, 100M+ streams", icon: "instagram" },
+] as const;
 
 // Each add-on's ClickFunnels description, after the red "ONE-TIME OFFER:".
 export const bumpCopy: Record<string, string[]> = {
