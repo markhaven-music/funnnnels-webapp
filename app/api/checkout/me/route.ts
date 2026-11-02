@@ -6,7 +6,8 @@ export const runtime = "nodejs";
 // Live links it at m.thegrind.studio, where the funnel pages are), it leaves
 // fv:me in that browser's storage, and from then on the funnel pages count
 // nothing there: no Analytics visit, no Live presence, no Pixel, Clarity or
-// neo (lib/beacon.ts PREVIEW_JS). ?off=1 counts the browser again. Public.
+// neo (lib/beacon.ts PREVIEW_JS). The Astro landings on the same domain read
+// it too (their Tracking.astro). ?off=1 counts the browser again. Public.
 
 const PAGE = `<!doctype html>
 <html lang="en">
@@ -44,11 +45,11 @@ const PAGE = `<!doctype html>
   }else if(off){
     document.getElementById('m').className='off';
     t.textContent='This device is counted again';
-    p.textContent='Its visits to the funnel pages show in funnnnels\\u2019 Analytics and Live again, and reach Meta Pixel, Clarity and neo.';
+    p.textContent='Its visits to m.thegrind.studio show in funnnnels\\u2019 Analytics and Live again, and reach Meta Pixel, Clarity and neo.';
     a.textContent="Don't count it";a.href=location.pathname;
   }else{
     t.textContent="This device isn't counted";
-    p.textContent='Your visits to the funnel pages from this browser no longer show in funnnnels\\u2019 Analytics and Live, and don\\u2019t reach Meta Pixel, Clarity or neo. Pages show a small \\u201cYour device \\u00b7 not counted\\u201d tag. Do this once on every phone and computer you use.';
+    p.textContent='Your visits to m.thegrind.studio from this browser (funnels and Astro landings) no longer show in funnnnels\\u2019 Analytics and Live, and don\\u2019t reach Meta Pixel, Clarity or neo. Pages show a small \\u201cYour device \\u00b7 not counted\\u201d tag. Do this once on every phone and computer you use.';
     a.textContent='Count it again';a.href=location.pathname+'?off=1';
   }
 })();

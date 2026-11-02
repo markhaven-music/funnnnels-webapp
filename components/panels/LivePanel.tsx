@@ -2,7 +2,7 @@
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { I } from "@/components/icons";
-import { ME_PATH, STEPS } from "@/lib/beacon";
+import { ASTRO_FUNNEL, ME_PATH, STEPS } from "@/lib/beacon";
 import type { Live, LiveEvent, LiveVisitor } from "@/lib/live";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { landPath, MAP_COLS, MAP_ROWS, project } from "@/lib/worldDots";
@@ -26,6 +26,7 @@ const STEP_LABEL: Record<string, string> = {
 };
 
 function pageLabel(funnel: string, page: string, path = "") {
+  if (funnel === ASTRO_FUNNEL) return path || "/";
   if (funnel === "shop" && page === "landing") return !path || /^\/shop\/?$/.test(path) ? "Shop" : "Product page";
   if (funnel === "shop" && page === "order") return "Cart";
   return STEP_LABEL[page] ?? page;
@@ -283,8 +284,8 @@ function OwnVisits() {
       <div className={s.ownText}>
         <div className={s.cardTitle}>Your own visits</div>
         <p>
-          Open this link once on every phone and computer you use: from then on, that browser&apos;s visits to the funnel pages don&apos;t count here, in
-          Analytics, or in Meta Pixel, Clarity and neo. Bots are never counted.
+          Open this link once on every phone and computer you use: from then on, that browser&apos;s visits to m.thegrind.studio (funnels and Astro
+          landings) don&apos;t count here, in Analytics, or in Meta Pixel, Clarity and neo. Bots are never counted.
         </p>
       </div>
       <div className={s.ownActions}>
@@ -389,13 +390,15 @@ function Pages({ visitors }: { visitors: LiveVisitor[] }) {
     const by = new Map<string, { slug: string; name: string; now: number; steps: Map<string, { now: number; recent: number }> }>();
     for (const v of visitors) {
       const f = by.get(v.funnel) ?? { slug: v.funnel, name: v.funnelName, now: 0, steps: new Map() };
-      const step = f.steps.get(v.page) ?? { now: 0, recent: 0 };
+      // The Astro landings are one page each, told apart by their path.
+      const key = v.funnel === ASTRO_FUNNEL ? v.path || "/" : v.page;
+      const step = f.steps.get(key) ?? { now: 0, recent: 0 };
       step.recent++;
       if (v.active) {
         step.now++;
         f.now++;
       }
-      f.steps.set(v.page, step);
+      f.steps.set(key, step);
       by.set(v.funnel, f);
     }
     return [...by.values()].sort((a, b) => b.now - a.now || b.steps.size - a.steps.size);
@@ -414,7 +417,7 @@ function Pages({ visitors }: { visitors: LiveVisitor[] }) {
             .sort(([a], [b]) => STEPS.indexOf(a as (typeof STEPS)[number]) - STEPS.indexOf(b as (typeof STEPS)[number]))
             .map(([page, n]) => (
               <div key={page} className={s.step}>
-                <span className={s.stepName}>{pageLabel(f.slug, page)}</span>
+                <span className={s.stepName}>{pageLabel(f.slug, page, page)}</span>
                 <span className={s.bar}>
                   <span className={s.barRecent} style={{ width: `${(n.recent / max) * 100}%` }} />
                   <span className={s.barNow} style={{ width: `${(n.now / max) * 100}%` }} />

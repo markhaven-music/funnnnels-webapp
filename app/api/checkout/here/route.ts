@@ -1,4 +1,4 @@
-import { STEPS, type Step } from "@/lib/beacon";
+import { ASTRO_FUNNEL, STEPS, type Step } from "@/lib/beacon";
 import { botReason } from "@/lib/bots";
 import { resolveFunnel } from "@/lib/funnels";
 import { COUNTRY_COOKIE } from "@/lib/geo";
@@ -6,7 +6,8 @@ import { deviceOf, livePing, OFF_HOST, sourceOf } from "@/lib/live";
 
 export const runtime = "nodejs";
 
-// The pages' live ping (lib/beacon.ts LIVE_JS) for dashboard → Live: "view"
+// The pages' live ping (lib/beacon.ts LIVE_JS, and its copy in the Astro
+// landings' Tracking.astro) for dashboard → Live: "view"
 // when a page opens, "beat" every 20 s while the tab is in front, "leave"
 // when it goes to the background. Public, like the checkout; under
 // /api/checkout/ because m.thegrind.studio forwards that path here. Always
@@ -50,9 +51,11 @@ export async function POST(req: Request) {
     if (process.env.NODE_ENV === "production" && OFF_HOST.test(host)) return done();
     const page = body.p as Step;
     if (!STEPS.includes(page)) return done();
-    const f = await resolveFunnel(body.f).catch(() => undefined);
-    if (!f) return done();
-    const lang = typeof body.l === "string" && (body.l === "en" || f.langs?.includes(body.l)) ? body.l : "en";
+    // The Astro landings aren't funnels here: one "astro" funnel, a page per path.
+    const astro = body.f === ASTRO_FUNNEL;
+    const f = astro ? null : await resolveFunnel(body.f).catch(() => undefined);
+    if (!astro && !f) return done();
+    const lang = typeof body.l === "string" && (body.l === "en" || f?.langs?.includes(body.l)) ? body.l : "en";
     // Meta's ad reviewers and other bots never show up as visitors.
     if (botReason(req, { webdriver: body.w === 1 })) return done();
 
@@ -67,7 +70,7 @@ export async function POST(req: Request) {
       kind: "view",
       sid,
       host,
-      funnel: f.slug,
+      funnel: f?.slug ?? ASTRO_FUNNEL,
       page,
       lang,
       path: path.startsWith("/") ? path : "",

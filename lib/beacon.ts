@@ -78,6 +78,10 @@ const BADGE_JS = `(function(){var go=function(){if(document.getElementById('fv-p
 // ("leave"). The visitor is a random id kept in localStorage, nothing more.
 // One copy for both kinds of page: the body of a function of o = {f, p, l}.
 export const LIVE_URL = "/api/checkout/here";
+// The Astro landings on the same domain (grind-studio-landing-pages, CTAs to
+// ClickFunnels) send the same pings from a copy of LIVE_JS in their
+// Tracking.astro, as this funnel, with the page told apart by its path.
+export const ASTRO_FUNNEL = "astro";
 const LIVE_JS = `try{
 var w=window,L=w.__fvLive,u='${LIVE_URL}',s=L&&L.s,id=function(){return(Math.random().toString(36).slice(2,10)+Date.now().toString(36)).slice(0,20);};
 if(!s){try{s=localStorage.getItem('fv:sid')||'';if(!/^[a-z0-9]{8,24}$/.test(s)){s=id();localStorage.setItem('fv:sid',s);}}catch(e){s=id();}}

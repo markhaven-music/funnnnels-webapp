@@ -1,4 +1,5 @@
 import { usdToEur } from "@/lib/analytics";
+import { ASTRO_FUNNEL } from "@/lib/beacon";
 import { codeFunnels, getFunnel } from "@/lib/funnels";
 import { SHOP_SLUG } from "@/lib/shop";
 import { supabase } from "@/lib/supabase";
@@ -154,6 +155,7 @@ export type Live = {
 function funnelNames(): (slug: string) => string {
   const names = new Map<string, string>(codeFunnels().map((f) => [f.slug, f.product]));
   names.set(SHOP_SLUG, "Shop");
+  names.set(ASTRO_FUNNEL, "Astro landings");
   return (slug) => names.get(slug) ?? slug.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
 }
 
