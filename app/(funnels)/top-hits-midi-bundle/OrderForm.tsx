@@ -392,6 +392,7 @@ function PayBody({
               />
             </svg>
             GET THE PACK!
+            <span className={s.ctaSub}>Get Instant Access</span>
           </>
         )}
       </button>

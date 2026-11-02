@@ -85,6 +85,7 @@ export const it: Copy = {
     summary: "Riepilogo",
     total: "Totale",
     pay: "PRENDI IL PACK!",
+    paySub: "Ottieni l'accesso immediato",
     processing: "Pagamento in corso…",
     openingPaypal: "Apertura di PayPal…",
     paymentFailed: "Non è stato possibile avviare il pagamento.",

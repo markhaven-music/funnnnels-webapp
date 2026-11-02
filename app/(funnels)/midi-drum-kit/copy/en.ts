@@ -85,6 +85,8 @@ export const en = {
     total: "Total",
     // The sales page's button (copy/landing t011), as on ClickFunnels' order page.
     pay: "GET THE PACK!",
+    // Under it, as on ClickFunnels' order page.
+    paySub: "Get Instant Access",
     processing: "Processing…",
     openingPaypal: "Opening PayPal…",
     paymentFailed: "Payment couldn't start.",

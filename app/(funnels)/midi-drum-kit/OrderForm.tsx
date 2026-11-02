@@ -424,6 +424,7 @@ function PayBody({
               />
             </svg>
             {t.pay}
+            <span className={d.ctaSub}>{t.paySub}</span>
           </>
         )}
       </button>

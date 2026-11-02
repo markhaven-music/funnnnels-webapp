@@ -86,6 +86,7 @@ export const de: Copy = {
     summary: "Übersicht",
     total: "Gesamt",
     pay: "ICH WILL DAS PACK!",
+    paySub: "Erhalte sofortigen Zugriff",
     processing: "Zahlung läuft…",
     openingPaypal: "PayPal wird geöffnet…",
     paymentFailed: "Die Zahlung konnte nicht gestartet werden.",
