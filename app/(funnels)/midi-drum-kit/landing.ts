@@ -306,4 +306,21 @@ document.addEventListener('click', function (e) {
   var open = item.classList.toggle('elAccordionItemOpen');
   body.style.display = open ? 'block' : 'none';
 });
+// The pictures below the first screen are lazy (they don't slow the first
+// paint), and the sections they're in are only laid out near the screen
+// (LATER_CSS), so a picture was asked for only once its section showed: a
+// scroll found empty boxes ("why is the loading blocking"). Once the page has
+// shown, they all load in the background, top to bottom, six at a time.
+addEventListener('load', function () {
+  var queue = [].slice.call(document.querySelectorAll('img[loading="lazy"]'));
+  function next() {
+    var img = queue.shift();
+    if (!img) return;
+    if (img.complete) return next();
+    img.addEventListener('load', next, { once: true });
+    img.addEventListener('error', next, { once: true });
+    img.loading = 'eager';
+  }
+  setTimeout(function () { for (var i = 0; i < 6; i++) next(); }, 500);
+});
 </script>`;
