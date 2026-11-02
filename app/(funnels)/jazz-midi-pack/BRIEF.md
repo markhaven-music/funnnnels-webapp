@@ -155,11 +155,15 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   `.page` keeps the old brass and cream for the shop and the launch kits, which share the file; the shared button,
   checkout, box and roll styles read `--y*` tokens with the old values as fallbacks. The VSL thumbnail (Wistia still
   wtda8c86j3) and the share image use the same yellow; the video's captions still have the old brass boxes.
-- "you should use 2 columns layout on desktop", then "Tutto sotto l'hero": from 1000px the pack browser, the
-  bonuses and the guarantee are heading left (sticky) and content right (`.two`, `.twoHead`, `.twoBody`;
-  `.twoWide` for the browser and the bonuses). The letter, after you pay and FAQ were two columns for an hour and
-  went back to one ("ma che hai fatto"): with no visual, the heading sat alone over a void. The hero stays
-  centred; before/after, intro, how it works, chart and offer already had their desktop grids; the final section
-  was already text left, image right.
+- "you should use 2 columns layout on desktop" meant the Drum Kit landing's pattern ("intendevo 2 colonne come il
+  layout della landing di midi drum kit"): copy beside a visual, in a centred container, sides alternating; the
+  hero centred. On the Jazz page from 1000px: the letter beside the before/after rolls (`.pair` in
+  [currency]/page.tsx and jazz.module.css: the rolls stacked on the right, sticky while the letter scrolls); the
+  pack browser, the bonuses and the guarantee heading left, content right (`.two`, `.twoHead`, `.twoBody`,
+  `.twoWide`). Intro (box | text), chart and offer already had their grids; the final section was already text
+  left, image right. A first try had every text-only section as heading left + body right: the heading sat
+  alone over a void ("ma che hai fatto"); after you pay and the FAQ stay one column.
+- "togli sti titoli sopra le headlines": the eyebrow lines ("WHY YOUR CHORDS SOUND STIFF", "INTRODUCING"…) are
+  no longer drawn. The text stays in the blocks' `eyebrow` props and in the editor's data, unused.
 - "come synth usa semplicemente delle sinusoidi": piano.ts plays one plain sine per note (no detuned pair, no
   harmonics under C3); tools/jazz_vsl.py mirrors it for the next VSL render.

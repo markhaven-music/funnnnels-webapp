@@ -72,9 +72,23 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
     <main className={`${s.page} ${s.jazz} ${display.variable}`}>
       <Tracking value={amount} currency={currency} />
       <Beacon funnel={funnel.slug} page="landing" />
-      {sections.map((section) => (
-        <SectionView key={section.id} section={section} ctx={ctx} />
-      ))}
+      {sections.map((section, i) => {
+        // Desktop, like the Drum Kit page's copy-beside-a-picture blocks: the
+        // letter beside the before/after rolls it talks about, text left, rolls
+        // right (.pair in jazz.module.css). The rolls block that follows the
+        // letter is drawn inside the pair and skipped on its own turn.
+        const next = sections[i + 1];
+        if (section.type === "s_letter" && next?.type === "s_compare_rolls") {
+          return (
+            <div key={section.id} className={s.pair}>
+              <SectionView section={section} ctx={ctx} />
+              <SectionView section={next} ctx={ctx} />
+            </div>
+          );
+        }
+        if (section.type === "s_compare_rolls" && sections[i - 1]?.type === "s_letter") return null;
+        return <SectionView key={section.id} section={section} ctx={ctx} />;
+      })}
       <footer className={s.footer}>
         <p>
           © 2026 {funnel.brand} · <a href={funnel.legal.terms} rel="noopener">Terms</a> ·{" "}

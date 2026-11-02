@@ -105,11 +105,12 @@ function Add({ onClick, label }: { onClick?: () => void; label: string }) {
   );
 }
 
-// two: the left column of a two-column section on desktop (jazz.module.css .two)
-function Head({ eyebrow, title, sub, two, patch, ctx }: { eyebrow: string; title: string; sub?: string; two?: boolean; patch?: Patch; ctx: Ctx }) {
+// two: the left column of a two-column section on desktop (jazz.module.css .two).
+// The eyebrow is kept in the data but no longer shown ("togli sti titoli sopra
+// le headlines", 2026-11-02).
+function Head({ title, sub, two, patch, ctx }: { eyebrow: string; title: string; sub?: string; two?: boolean; patch?: Patch; ctx: Ctx }) {
   return (
     <div className={two ? `${s.secHead} ${s.twoHead}` : s.secHead}>
-      <T v={eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
       <T v={title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
       {sub !== undefined && <T v={sub} set={patch && ((v) => patch({ sub: v }))} ctx={ctx} as="p" className={s.sub} />}
     </div>
@@ -235,7 +236,6 @@ function Letter({ p, patch, ctx }: { p: SectionProps["s_letter"]; patch?: Patch;
   return (
     <section className={s.sec}>
       <div className={`${s.wrap} ${s.col}`}>
-        <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
         <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
         <div className={s.letter}>
           {p.paras.map((para, i) => (
@@ -303,7 +303,6 @@ function Product({ p, patch, ctx }: { p: SectionProps["s_product"]; patch?: Patc
       <div className={`${s.wrap} ${s.introGrid}`}>
         <ProductBox />
         <div>
-          <T v={p.eyebrow} set={set("eyebrow")} ctx={ctx} as="p" className={s.eyebrow} />
           <h2 className={s.h2}>
             <T v={p.title} set={set("title")} ctx={ctx} /> <T v={p.titleEm} set={set("titleEm")} ctx={ctx} as="em" className={s.hl} />
           </h2>
@@ -788,7 +787,6 @@ function Faq({ p, patch, ctx }: { p: SectionProps["s_faq"]; patch?: Patch; ctx: 
   return (
     <section className={`${s.sec} ${s.band}`}>
       <div className={`${s.wrap} ${s.col}`}>
-        <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
         <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
         <div className={s.faq}>
           {p.items.map((it, i) =>

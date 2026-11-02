@@ -1501,3 +1501,31 @@
     justify-content: center;
   }
 }
+
+/* The letter beside the before/after rolls on desktop ([currency]/page.tsx
+   pairs the two blocks), as the Drum Kit page sets its copy beside a picture
+   ("intendevo 2 colonne come il layout della landing di midi drum kit"): text
+   left, the rolls right, stacked and sticky while the letter scrolls. */
+@media (min-width: 1000px) {
+  .pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 24px;
+    max-width: 1160px;
+    margin: 0 auto;
+    align-items: start;
+  }
+  .pair > section:last-child {
+    position: sticky;
+    top: 0;
+    padding-top: clamp(56px, 9vw, 104px) !important; /* level with the letter (the block's own top padding is 0) */
+    content-visibility: visible;
+  }
+  .pair .ba {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .pair .baNote {
+    grid-column: auto;
+  }
+}
