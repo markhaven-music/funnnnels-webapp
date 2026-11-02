@@ -352,7 +352,7 @@ function PayBody({
           <PayPalGlyph />
           {/* One flex item: the note box is a flex row, so a bare <b> would become a column of its own. */}
           <span>
-            After you click <b>GET THE PACK!</b> below, you finish paying on PayPal&rsquo;s secure page, then come straight back to your
+            After you click{" "}<b>GET THE PACK!</b>{" "}below, you finish paying on PayPal&rsquo;s secure page, then come straight back to your
             download.
           </span>
         </div>
