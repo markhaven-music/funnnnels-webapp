@@ -54,7 +54,13 @@ export type PayPalOrder = {
     // The order's lines, when it has them (the shop: sku = the product's slug).
     items?: { name: string; sku?: string; quantity: string; unit_amount: { currency_code: string; value: string } }[];
     payments?: {
-      captures?: { id: string; status: string; amount: { currency_code: string; value: string } }[];
+      captures?: {
+        id: string;
+        status: string;
+        amount: { currency_code: string; value: string };
+        // What PayPal kept and what reached us (the fee in the sale's currency).
+        seller_receivable_breakdown?: { paypal_fee?: { currency_code: string; value: string } };
+      }[];
     };
   }[];
 };

@@ -111,3 +111,9 @@ as $$
 $$;
 revoke all on function public.page_view_days(date) from public, anon, authenticated;
 grant execute on function public.page_view_days(date) to service_role;
+
+-- Processor fees (migration "paypal_sales_fees", 2026-11-03), for the net
+-- revenue: PayPal's fee on each capture, in the sale's currency, read from the
+-- capture's seller_receivable_breakdown. Null until known; lib/analytics.ts
+-- fills the missing ones from PayPal. Stripe's fees are read from Stripe.
+alter table public.paypal_sales add column fee_cents integer check (fee_cents >= 0);

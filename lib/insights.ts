@@ -100,6 +100,11 @@ export function insights(a: Analytics, now = Date.now()): Insight[] {
     say(6, "up", `${upsells} upsell${upsells === 1 ? "" : "s"} on ${orders} orders${extra > 0 ? `: ${eur(extra)} on top` : ""}.`);
   }
 
+  // What the processors keep.
+  const net = sum(days, "net");
+  if (revenue > 0 && orders >= 5)
+    say(7, "info", `Stripe and PayPal kept ${eur(revenue - net)} in fees, ${pct((revenue - net) / revenue)} of revenue: ${eur(net)} net.`);
+
   // The A/B test, once it has an answer.
   if (a.test?.verdict === "winner" && a.test.leader) {
     const lead = a.test.variants.find((v) => v.variant === a.test!.leader);

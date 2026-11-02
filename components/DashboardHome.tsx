@@ -108,6 +108,15 @@ function buildKpis(a: Analytics): Kpi[] {
       spark: days.map((d) => d.revenue),
     },
     {
+      id: "net",
+      label: "Net revenue",
+      value: eur(sum(days, "net")),
+      unit: sum(days, "revenue") > 0 ? `${eur(sum(days, "revenue") - sum(days, "net"))} fees` : undefined,
+      change: changeOf(sum(days, "net"), previous && sum(previous, "net")),
+      color: "oklch(0.66 0.16 295)",
+      spark: days.map((d) => d.net),
+    },
+    {
       id: "sales",
       label: "Sales",
       value: orders.toLocaleString("en-US"),
@@ -251,6 +260,7 @@ function FunnelRevenue({ a }: { a: Analytics }) {
             <span>{f.name}</span>
             <span className={s.hmeta}>
               {f.total.orders} order{f.total.orders === 1 ? "" : "s"} · {f.total.visitors.toLocaleString("en-US")} visitors
+              {f.total.revenue > 0 && ` · ${eur(f.total.net)} net`}
             </span>
           </div>
           <div className={s.htrack}>
@@ -417,10 +427,10 @@ export function DashboardHome({ funnels, analytics }: Props) {
 
       <div className={!current && shown ? s.stale : undefined}>
         {/* KPI tiles */}
-        <div className="stats" style={{ gridTemplateColumns: "repeat(4, 1fr)", marginBottom: 12 }}>
+        <div className={`stats ${s.kpis}`}>
           {kpis
             ? kpis.map((k) => <StatCard key={k.id} k={k} range={data!.range} />)
-            : ["Revenue", "Sales", "Visitors", "Conversion"].map((l) => (
+            : ["Revenue", "Net revenue", "Sales", "Visitors", "Conversion"].map((l) => (
                 <div key={l} className="stat">
                   <div className="stat-label">{l}</div>
                   <div className="v">—</div>

@@ -22,6 +22,22 @@
   transition: opacity 0.2s;
 }
 
+/* Revenue, net revenue, sales, visitors, conversion. */
+.kpis {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-bottom: 12px;
+}
+@media (max-width: 1100px) {
+  .kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .vs {
   color: var(--fg-3);
 }

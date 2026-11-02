@@ -3,8 +3,9 @@ import type { Step } from "@/lib/beacon";
 import { codeFunnels } from "@/lib/funnels";
 import { KIT_HOME, SHOP_URL } from "@/lib/liveUrl";
 import { SHOP_SLUG } from "@/lib/shop";
-import type { PayPalOrder } from "@/lib/paypal";
+import { paypal, paypalConfigured, type PayPalOrder } from "@/lib/paypal";
 import { stripe, stripeConfigured } from "@/lib/stripe";
+import type Stripe from "stripe";
 import { supabase } from "@/lib/supabase";
 
 // Dashboard → Analytics: visitors, checkout starts, orders and revenue per
@@ -13,6 +14,8 @@ import { supabase } from "@/lib/supabase";
 //   Stripe orders              Stripe itself: succeeded PaymentIntents with
 //                              metadata.funnel (+ .variant, .lang)
 //   PayPal orders              paypal_sales, noted at capture
+//   processor fees             Stripe: each charge's balance transaction;
+//                              PayPal: the capture's paypal_fee (paypal_sales.fee_cents)
 // Tables: db/analytics.sql.
 
 // Visitors count from this day on. The bot filter (lib/bots.ts) went live on
@@ -71,6 +74,7 @@ export async function recordPayPalSale(order: PayPalOrder, lang: string) {
         offer: typeof meta.u === "string" ? meta.u : "",
         parent: typeof meta.p === "string" ? meta.p : null,
         amount_cents: Math.round(Number(capture.amount.value) * 100),
+        fee_cents: paypalFeeCents(order),
         currency,
         // For the customer login (lib/account.ts): the email typed at the
         // checkout, and the PayPal account's.
@@ -80,6 +84,14 @@ export async function recordPayPalSale(order: PayPalOrder, lang: string) {
       { onConflict: "order_id", ignoreDuplicates: true },
     );
   if (error) throw error;
+}
+
+/** PayPal's fee on a captured order, in cents of the sale's currency; null when PayPal doesn't say. */
+function paypalFeeCents(order: PayPalOrder): number | null {
+  const capture = order.purchase_units[0]?.payments?.captures?.[0];
+  const fee = capture?.seller_receivable_breakdown?.paypal_fee;
+  if (!capture || !fee || fee.currency_code !== capture.amount.currency_code) return null;
+  return Math.round(Number(fee.value) * 100);
 }
 
 // ─── reading ───────────────────────────────────────────────────
@@ -94,8 +106,16 @@ export type Metrics = {
   eur: number; // revenue in euros, upsells included
   usd: number; // revenue in dollars, upsells included
   revenue: number; // both, in euros
-  // Each one-click upsell (funnel.offers id): how many took it, and its revenue.
-  offers: Record<string, { orders: number; eur: number; usd: number; revenue: number }>;
+  // Stripe's and PayPal's fees, in each currency and both in euros, and the
+  // revenue less them (what reaches the bank). Sales whose fee isn't known yet
+  // count with none, and are counted in feesUnknown.
+  feeEur: number;
+  feeUsd: number;
+  fees: number;
+  net: number;
+  feesUnknown: number;
+  // Each one-click upsell (funnel.offers id): how many took it, its revenue, and that less the fees.
+  offers: Record<string, Offer>;
   // The orders and revenue since visitors were first counted, for the rates
   // (orders / visitors, revenue / visitor): Stripe remembers older sales, the
   // visitor count doesn't go back that far.
@@ -104,6 +124,8 @@ export type Metrics = {
   ratedUsd: number;
   ratedRevenue: number;
 };
+
+export type Offer = { orders: number; eur: number; usd: number; revenue: number; feeEur: number; feeUsd: number; net: number };
 
 export type FunnelStats = {
   slug: string;
@@ -137,6 +159,7 @@ export type Day = {
   orders: number; // the orders themselves, not their upsells
   upsells: number;
   revenue: number; // in euros, upsells included
+  net: number; // the same less Stripe's and PayPal's fees
   visitors: number; // of the landings
   orderViews: number;
   checkouts: number;
@@ -161,7 +184,8 @@ export type Analytics = {
 };
 
 // offer: the upsell's id for a one-click upsell, "" for an order.
-type Sale = { funnel: string; lang: string; variant: string; offer: string; amount: number; currency: string; created: number; rated?: boolean };
+// fee: the processor's, in the sale's currency; null when not known.
+type Sale = { funnel: string; lang: string; variant: string; offer: string; amount: number; fee: number | null; currency: string; created: number; rated?: boolean };
 type ViewRow = { funnel: string; page: Step; lang: string; variant: string; views: number };
 
 const DAY = 86_400_000;
@@ -185,6 +209,11 @@ const empty = (): Metrics => ({
   eur: 0,
   usd: 0,
   revenue: 0,
+  feeEur: 0,
+  feeUsd: 0,
+  fees: 0,
+  net: 0,
+  feesUnknown: 0,
   ratedOrders: 0,
   ratedEur: 0,
   ratedUsd: 0,
@@ -200,15 +229,19 @@ function addView(m: Metrics, page: Step, n: number) {
   else if (page.startsWith("upsell-")) m.upsellViews[page] = (m.upsellViews[page] ?? 0) + n;
 }
 
+const emptyOffer = (): Offer => ({ orders: 0, eur: 0, usd: 0, revenue: 0, feeEur: 0, feeUsd: 0, net: 0 });
+
 function addSale(m: Metrics, s: Sale) {
+  const fee = s.fee ?? 0;
   if (s.offer) {
-    const o = (m.offers[s.offer] ??= { orders: 0, eur: 0, usd: 0, revenue: 0 });
+    const o = (m.offers[s.offer] ??= emptyOffer());
     o.orders += 1;
-    if (s.currency === "eur") o.eur += s.amount;
-    if (s.currency === "usd") o.usd += s.amount;
+    if (s.currency === "eur") (o.eur += s.amount), (o.feeEur += fee);
+    if (s.currency === "usd") (o.usd += s.amount), (o.feeUsd += fee);
   } else m.orders += 1;
-  if (s.currency === "eur") m.eur += s.amount;
-  if (s.currency === "usd") m.usd += s.amount;
+  if (s.currency === "eur") (m.eur += s.amount), (m.feeEur += fee);
+  if (s.currency === "usd") (m.usd += s.amount), (m.feeUsd += fee);
+  if (s.fee === null) m.feesUnknown += 1;
   if (!s.rated) return;
   if (!s.offer) m.ratedOrders += 1;
   if (s.currency === "eur") m.ratedEur += s.amount;
@@ -245,7 +278,7 @@ function daily(range: Range, since: string | null, now: number, rows: DayRow[], 
   const days = dayList(first, today);
   const before = since ? dayList(dayOf(Date.parse(`${first}T00:00:00Z`) - days.length * DAY), dayOf(Date.parse(`${first}T00:00:00Z`) - DAY)) : [];
   const by = new Map<string, Day>(
-    [...before, ...days].map((day) => [day, { day, orders: 0, upsells: 0, revenue: 0, visitors: 0, orderViews: 0, checkouts: 0 }]),
+    [...before, ...days].map((day) => [day, { day, orders: 0, upsells: 0, revenue: 0, net: 0, visitors: 0, orderViews: 0, checkouts: 0 }]),
   );
   for (const r of rows) {
     const d = by.get(r.day);
@@ -259,7 +292,9 @@ function daily(range: Range, since: string | null, now: number, rows: DayRow[], 
     if (!d) continue;
     if (s.offer) d.upsells += 1;
     else d.orders += 1;
-    d.revenue += s.currency === "usd" ? s.amount * rate : s.amount;
+    const r = s.currency === "usd" ? rate : 1;
+    d.revenue += s.amount * r;
+    d.net += (s.amount - (s.fee ?? 0)) * r;
   }
   return { days: days.map((d) => by.get(d)!), previous: range === "all" ? null : before.map((d) => by.get(d)!) };
 }
@@ -271,6 +306,8 @@ async function stripeSales(slug: string): Promise<Sale[]> {
     const res = await stripe().paymentIntents.search({
       query: `status:'succeeded' AND metadata['funnel']:'${slug}'`,
       limit: 100,
+      // The fee is on the charge's balance transaction.
+      expand: ["data.latest_charge.balance_transaction"],
       ...(page ? { page } : {}),
     });
     for (const pi of res.data) {
@@ -280,6 +317,7 @@ async function stripeSales(slug: string): Promise<Sale[]> {
         variant: pi.metadata.variant || "",
         offer: pi.metadata.offer || "",
         amount: pi.amount_received / 100,
+        fee: stripeFee(pi),
         currency: pi.currency,
         created: pi.created * 1000,
       });
@@ -290,18 +328,55 @@ async function stripeSales(slug: string): Promise<Sale[]> {
   return out;
 }
 
+/**
+ * Stripe's fee on a payment, in the payment's currency. The balance
+ * transaction is in the account's currency, so a sale in another one is
+ * converted back at the rate Stripe used. Null while Stripe hasn't made it.
+ */
+function stripeFee(pi: Stripe.PaymentIntent): number | null {
+  const charge = pi.latest_charge;
+  const bt = charge && typeof charge !== "string" ? charge.balance_transaction : null;
+  if (!bt || typeof bt === "string") return null;
+  return bt.fee / 100 / (bt.currency === pi.currency ? 1 : bt.exchange_rate || 1);
+}
+
 async function paypalSales(): Promise<Sale[]> {
-  const { data, error } = await supabase().from("paypal_sales").select("funnel, lang, variant, offer, amount_cents, currency, created_at").limit(10000);
+  const { data, error } = await supabase()
+    .from("paypal_sales")
+    .select("order_id, funnel, lang, variant, offer, amount_cents, fee_cents, currency, created_at")
+    .limit(10000);
   if (error) throw error;
-  return (data ?? []).map((r) => ({
+  const rows = data ?? [];
+  await fillPayPalFees(rows);
+  return rows.map((r) => ({
     funnel: r.funnel,
     lang: r.lang,
     variant: r.variant,
     offer: r.offer ?? "",
     amount: r.amount_cents / 100,
+    fee: r.fee_cents === null ? null : r.fee_cents / 100,
     currency: r.currency,
     created: Date.parse(r.created_at),
   }));
+}
+
+/** Ask PayPal for the fees not noted yet (sales from before fees were noted), a few at a time, and keep them. */
+async function fillPayPalFees(rows: { order_id: string; fee_cents: number | null }[]) {
+  if (!paypalConfigured()) return;
+  const missing = rows.filter((r) => r.fee_cents === null).slice(0, 20);
+  await Promise.all(
+    missing.map(async (r) => {
+      try {
+        const fee = paypalFeeCents(await paypal<PayPalOrder>(`/v2/checkout/orders/${r.order_id}`));
+        if (fee === null) return;
+        const { error } = await supabase().from("paypal_sales").update({ fee_cents: fee }).eq("order_id", r.order_id).is("fee_cents", null);
+        if (error) throw error;
+        r.fee_cents = fee;
+      } catch (err) {
+        console.error(`analytics: PayPal fee for ${r.order_id} failed`, err);
+      }
+    }),
+  );
 }
 
 /** USD → EUR from the ECB's daily rate (free, cached a day); a rough fixed rate if it's down. */
@@ -407,8 +482,15 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
 }
 
 function withRevenue(m: Metrics, rate: number): Metrics {
-  const offers = Object.fromEntries(Object.entries(m.offers).map(([id, o]) => [id, { ...o, revenue: o.eur + o.usd * rate }]));
-  return { ...m, revenue: m.eur + m.usd * rate, ratedRevenue: m.ratedEur + m.ratedUsd * rate, offers };
+  const offers = Object.fromEntries(
+    Object.entries(m.offers).map(([id, o]) => {
+      const revenue = o.eur + o.usd * rate;
+      return [id, { ...o, revenue, net: revenue - (o.feeEur + o.feeUsd * rate) }];
+    }),
+  );
+  const revenue = m.eur + m.usd * rate;
+  const fees = m.feeEur + m.feeUsd * rate;
+  return { ...m, revenue, fees, net: revenue - fees, ratedRevenue: m.ratedEur + m.ratedUsd * rate, offers };
 }
 
 // ─── the A/B test ──────────────────────────────────────────────

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 import { I } from "@/components/icons";
 import { COLORS, type Variant } from "@/app/(funnels)/midi-drum-kit/abtest";
-import type { Metrics, TestStats } from "@/lib/analytics";
+import type { Metrics, Offer, TestStats } from "@/lib/analytics";
 import type { MapStep } from "@/lib/funnelMap";
 import s from "./funnelLanes.module.css";
 
@@ -68,17 +68,19 @@ function laneRows(step: MapStep, m: Metrics, hasOrderStep: boolean): Row[] {
     ];
   }
   if (step.kind === "upsell" && step.offer) {
-    const o = m.offers[step.offer.id] ?? { orders: 0, revenue: 0 };
+    const o = m.offers[step.offer.id] ?? { orders: 0, revenue: 0, net: 0 };
     return [
       { label: "Visitors", value: int(m.upsellViews[step.offer.page] ?? 0) },
       { label: "Took it", value: int(o.orders) },
       { label: "Revenue", value: eur(o.revenue) },
+      { label: "Net", value: eur(o.net) },
     ];
   }
   if (step.kind === "thank-you") {
     return [
       { label: "Visitors", value: int(m.thankYouViews) },
       { label: "Revenue", value: eur(m.revenue) },
+      { label: "Net", value: eur(m.net) },
     ];
   }
   return [];
@@ -112,11 +114,8 @@ function together(ms: Metrics[]): Metrics {
   for (const m of ms) {
     add(out.upsellViews, m.upsellViews);
     for (const [id, o] of Object.entries(m.offers)) {
-      const t = (out.offers[id] ??= { orders: 0, eur: 0, usd: 0, revenue: 0 });
-      t.orders += o.orders;
-      t.eur += o.eur;
-      t.usd += o.usd;
-      t.revenue += o.revenue;
+      const t = (out.offers[id] ??= { orders: 0, eur: 0, usd: 0, revenue: 0, feeEur: 0, feeUsd: 0, net: 0 });
+      for (const k of Object.keys(t) as (keyof Offer)[]) t[k] += o[k];
     }
   }
   return out;
@@ -456,6 +455,10 @@ export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope
                   <div className={s.row}>
                     <dt>Revenue</dt>
                     <dd>{eur(m.revenue)}</dd>
+                  </div>
+                  <div className={s.row}>
+                    <dt>Net of fees</dt>
+                    <dd>{eur(m.net)}</dd>
                   </div>
                   <div className={s.row}>
                     <dt>Chance it&apos;s the best</dt>

@@ -63,15 +63,17 @@ function stepStats(step: MapStep, m: Metrics, hasOrderStep: boolean): Stat[] {
       { label: "Checkouts", value: int(m.checkouts) + pct(m.checkouts, m.orderViews), tone: "amber" },
       { label: "Orders", value: int(m.orders) + pct(m.ratedOrders, m.checkouts), tone: "mint" },
       { label: "Revenue", value: eur(m.revenue), tone: "accent" },
+      { label: "Net", value: eur(m.net), tone: "accent" },
     ];
   }
   if (step.kind === "upsell" && step.offer) {
     const views = m.upsellViews[step.offer.page] ?? 0;
-    const o = m.offers[step.offer.id] ?? { orders: 0, revenue: 0 };
+    const o = m.offers[step.offer.id] ?? { orders: 0, revenue: 0, net: 0 };
     return [
       { label: "Visitors", value: int(views), tone: "sky" },
       { label: "Took it", value: int(o.orders) + pct(o.orders, views), tone: "mint" },
       { label: "Revenue", value: eur(o.revenue), tone: "accent" },
+      { label: "Net", value: eur(o.net), tone: "accent" },
     ];
   }
   if (step.kind === "thank-you") {
@@ -79,6 +81,7 @@ function stepStats(step: MapStep, m: Metrics, hasOrderStep: boolean): Stat[] {
       { label: "Visitors", value: int(m.thankYouViews), tone: "sky" },
       { label: "Orders", value: int(m.orders), tone: "mint" },
       { label: "Revenue", value: eur(m.revenue), tone: "accent" },
+      { label: "Net", value: eur(m.net), tone: "accent" },
     ];
   }
   return [];
