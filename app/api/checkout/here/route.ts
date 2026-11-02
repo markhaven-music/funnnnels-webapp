@@ -59,11 +59,13 @@ export async function POST(req: Request) {
     // Meta's ad reviewers and other bots never show up as visitors.
     if (botReason(req, { webdriver: body.w === 1 })) return done();
 
-    // Vercel's geo headers. The page's own country (proxy.ts left it in a
-    // cookie) wins if they disagree, and the city then isn't trusted either.
+    // Vercel's geo headers: where the visitor really is (they come through
+    // m.thegrind.studio's rewrite intact). The page's country cookie
+    // (proxy.ts) only stands in when they're missing: ?country= can force it,
+    // and a preview forced to US must still show up where it really is.
     const cookie = req.headers.get("cookie")?.match(new RegExp(`(?:^|; )${COUNTRY_COOKIE}=([A-Z]{2})(?:;|$)`))?.[1] ?? "";
     const geo = header(req, "x-vercel-ip-country").toUpperCase();
-    const same = /^[A-Z]{2}$/.test(geo) && (!cookie || cookie === geo);
+    const real = /^[A-Z]{2}$/.test(geo);
     const path = String(body.u ?? "").slice(0, 200);
 
     await livePing({
@@ -74,11 +76,11 @@ export async function POST(req: Request) {
       page,
       lang,
       path: path.startsWith("/") ? path : "",
-      country: same ? geo : cookie,
-      region: same ? header(req, "x-vercel-ip-country-region") : "",
-      city: same ? header(req, "x-vercel-ip-city") : "",
-      lat: same ? coord(header(req, "x-vercel-ip-latitude"), 90) : null,
-      lon: same ? coord(header(req, "x-vercel-ip-longitude"), 180) : null,
+      country: real ? geo : cookie,
+      region: real ? header(req, "x-vercel-ip-country-region") : "",
+      city: real ? header(req, "x-vercel-ip-city") : "",
+      lat: real ? coord(header(req, "x-vercel-ip-latitude"), 90) : null,
+      lon: real ? coord(header(req, "x-vercel-ip-longitude"), 180) : null,
       device: deviceOf(req.headers.get("user-agent") ?? ""),
       ...sourceOf(body),
     });
