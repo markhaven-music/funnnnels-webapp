@@ -67,8 +67,9 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
             className={s.productImg}
             src={`${IMG}/product.webp`}
             alt="TOP HITS MIDI Bundle: 1000 chord progressions"
-            width={1856}
-            height={2304}
+            width={944}
+            height={1172}
+            fetchPriority="high"
           />
           <p className={s.dl}>Download link will be sent to your email.</p>
           <ul className={s.list}>

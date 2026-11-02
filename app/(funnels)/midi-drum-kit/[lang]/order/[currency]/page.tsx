@@ -83,7 +83,7 @@ export default async function OrderPage({ params }: { params: Params }) {
         <section className={s.summaryCol}>
           <h2 className={s.colTitle}>{t.order.summaryTitle}</h2>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={s.productImg} src={`${IMG}/product.webp`} alt={t.order.productAlt} width={896} height={1200} />
+          <img className={s.productImg} src={`${IMG}/product.webp`} alt={t.order.productAlt} width={896} height={1200} fetchPriority="high" />
           <p className={s.dl}>{t.order.dl}</p>
           <ul className={s.list}>
             {t.order.bullets.map((b) => (
