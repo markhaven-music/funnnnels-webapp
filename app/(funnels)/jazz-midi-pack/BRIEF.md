@@ -86,9 +86,12 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
 - GRIND STUDIO's MIDI Drum Kit is in the sessions of 2,847 producers (same claim as the Grind landings,
   `site.ts` → `producers`).
 - 4,700+ producers on the GRIND STUDIO email list (4,732 contacts in funnnnels on 2026-11-01).
-- No Jazz-pack testimonials exist yet: none on the page until real ones arrive. The 8 reviews on the Drum Kit and
-  Top Hits order pages are the same quotes and names with "patterns" swapped for "chords", so they are not used
-  here. Social proof = the `Proof` strip (the two numbers above + the guarantee), under the hero and the checkout.
+- Reviews (`s_reviews`, after the product intro on the landing and under the checkout on the order page, since
+  2026-11-02): "add a reviews sections on order page and landing page" → asked which, the user said "usa le 8 e poi
+  aggiungine altre, poi le cambio io dopo". The 8 live ones are the Drum Kit / Top Hits order-page reviews
+  ("patterns" → "chords", as Top Hits has them). Four more sit only in the editor's draft as placeholders
+  ("Write the review here.", "First name L.") for the user to replace with real ones before publishing: no
+  review written by us goes live. No Jazz-specific testimonials exist yet. Social proof = the `Proof` strip (the two numbers above + the guarantee), under the hero and the checkout.
 - Counts on the page: 3,536 = the pack; the bonuses add 4,197 MIDI; 7,733 only as "in total".
 
 ## Before / after (measured by `tools/extract_rolls.py` data, 2026-10-12)

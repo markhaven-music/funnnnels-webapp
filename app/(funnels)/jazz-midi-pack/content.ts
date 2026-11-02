@@ -23,6 +23,9 @@ type Fields = {
   s_letter: { eyebrow: string; title: string; paras: Para[] };
   s_compare_rolls: { beforeLabel: string; beforeText: string; afterLabel: string; afterText: string; note: string };
   s_product: { eyebrow: string; title: string; titleEm: string; lead: string; ticks: string[] };
+  // Reviews: the eight on the Drum Kit and Top Hits order pages ("usa le 8 e
+  // poi aggiungine altre, poi le cambio io dopo", 2026-11-02), editable.
+  s_reviews: { title: string; items: { quote: string; name: string; role: string }[] };
   s_previews: { eyebrow: string; title: string; sub: string; items?: { roll: RollId; title: string; meta: string }[] };
   s_steps: { eyebrow: string; title: string; steps: ({ title: string; text: string } & Hide)[] };
   s_inside: { eyebrow: string; title: string };
@@ -48,6 +51,7 @@ export const SECTION_LABELS: Record<SectionType, string> = {
   s_letter: "Problem letter",
   s_compare_rolls: "Before / after",
   s_product: "Product intro",
+  s_reviews: "Reviews",
   s_previews: "Previews",
   s_steps: "How it works",
   s_inside: "What's inside",
@@ -125,6 +129,23 @@ export const DEFAULT_SECTIONS: Section[] = [
         "No theory needed: every file shows its chord names",
         "Your sounds: Rhodes, piano, pads, synths",
         "One payment, yours to keep",
+      ],
+    },
+  },
+  {
+    id: "reviews",
+    type: "s_reviews",
+    props: {
+      title: "What producers say about the *chords*.",
+      items: [
+        { quote: "Exactly what I needed. Perfect for modern songs and beats.", name: "Marcus Thompson", role: "Producer" },
+        { quote: "These MIDI files saved me hundreds of hours. The chords are industry standard quality.", name: "Ardan Solis", role: "Verified Customer" },
+        { quote: "Perfect. The chords add that extra sauce to make beats stand out.", name: "Niko Varela", role: "Verified Customer" },
+        { quote: "This is what real production tools look like. Every progression is a hit waiting to happen.", name: "Soraya Kenji", role: "Verified Customer" },
+        { quote: "The MIDI progressions are crazy. I've been using these on every session since I got the pack.", name: "Marek Tulan", role: "Hip-hop and Trap Beatmaker" },
+        { quote: "Finally found chords that match the energy of modern music. This pack is legendary.", name: "Aisha Moretti", role: "Beatmaker" },
+        { quote: "The creativity these MIDIs sparked is insane. Perfect foundation for any beat.", name: "Dara Kwon", role: "Trap Producer, 100M+ streams" },
+        { quote: "These chords hit harder than anything I've found. Essential tools for modern producers.", name: "Ravi Lomax", role: "Trap Producer, 100M+ streams" },
       ],
     },
   },

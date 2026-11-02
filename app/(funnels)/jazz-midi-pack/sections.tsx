@@ -8,6 +8,7 @@ import { DEFAULT_SECTIONS, type ChartCell, type Section, type SectionProps, type
 import { Cta } from "./Cta";
 import { PlayableRoll } from "./PlayableRoll";
 import { SoundPicker } from "./SoundPicker";
+import rv from "./reviews.module.css";
 import { LoopList } from "./LoopList";
 import { BonusPlayer } from "./BonusPlayer";
 import { money } from "@/lib/launch";
@@ -454,6 +455,43 @@ function CompareRolls({ p, patch, ctx }: { p: SectionProps["s_compare_rolls"]; p
         <Part k="note" h={h}>
           <T v={p.note} set={set("note")} ctx={ctx} as="p" className={s.baNote} />
         </Part>
+      </div>
+    </section>
+  );
+}
+
+// Reviews: the eight from the Drum Kit and Top Hits order pages ("usa le 8 e
+// poi aggiungine altre, poi le cambio io dopo", 2026-11-02), each editable in
+// the editor, where more wait as placeholders for real ones. On the landing
+// after the product intro and on the order page under the checkout.
+export function Reviews({ p, patch, ctx }: { p: SectionProps["s_reviews"]; patch?: Patch; ctx: Ctx }) {
+  const h = parts(p, patch);
+  const ops = listOps(p.items, "items", patch);
+  return (
+    <section className={s.sec}>
+      <div className={s.wrap}>
+        <Part k="title" h={h}>
+          <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
+        </Part>
+        <ul className={rv.grid}>
+          {p.items.map((r, i) => {
+            const setR = (k: keyof typeof r) => ops.set && ((v: string) => ops.set!(i, { ...r, [k]: v }));
+            return (
+              <li key={i} className={rv.item}>
+                <span className={rv.stars} role="img" aria-label="5 stars">
+                  ★★★★★
+                </span>
+                <T v={r.quote} set={setR("quote")} ctx={ctx} as="p" className={rv.quote} />
+                <p className={rv.who}>
+                  <T v={r.name} set={setR("name")} ctx={ctx} as="b" />
+                  <T v={r.role} set={setR("role")} ctx={ctx} className={rv.role} />
+                </p>
+                <Remove onClick={ops.remove && (() => ops.remove!(i))} />
+              </li>
+            );
+          })}
+        </ul>
+        <Add onClick={ops.add && (() => ops.add!({ quote: "Write the review here.", name: "First name L.", role: "Producer" }))} label="review" />
       </div>
     </section>
   );
@@ -1140,6 +1178,7 @@ const VIEWS: { [K in SectionType]: (a: { p: SectionProps[K]; patch?: Patch; ctx:
   s_letter: Letter,
   s_compare_rolls: CompareRolls,
   s_product: Product,
+  s_reviews: Reviews,
   s_previews: Previews,
   s_steps: Steps,
   s_inside: Inside,

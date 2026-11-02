@@ -1,0 +1,46 @@
+/* Reviews (sections.tsx Reviews): quotes set apart by space, no cards; five
+   yellow stars, the quote, the name and role. Phone: one under the other.
+   Desktop: two columns. */
+.grid {
+  display: grid;
+  gap: 40px 56px;
+  margin: 34px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.item {
+  position: relative;
+}
+.stars {
+  display: block;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--brass);
+}
+.quote {
+  margin-top: 10px;
+  font-size: clamp(18px, 2.6vw, 21px);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--cream);
+}
+.who {
+  margin-top: 12px;
+  color: var(--cream);
+}
+.role {
+  display: block;
+  font-size: 14px;
+  color: var(--mute);
+}
+
+@media (min-width: 720px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1000px) {
+  .grid {
+    gap: 48px 72px;
+  }
+}

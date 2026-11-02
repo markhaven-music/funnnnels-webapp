@@ -6,7 +6,7 @@ import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
 import { funnel } from "../../funnel";
 import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content";
-import { Checkout, OrderSummary, Proof, Seal, fill, isSectionType, type Ctx } from "../../sections";
+import { Checkout, OrderSummary, Proof, Reviews, Seal, fill, isSectionType, type Ctx } from "../../sections";
 import { Tracking } from "../../Tracking";
 import { splitName } from "../../../_kit/KitBox";
 import { Beacon } from "../../../Beacon";
@@ -17,7 +17,7 @@ import s from "../../jazz.module.css";
 // here. Cached on the CDN per currency like the landing (proxy.ts rewrites
 // /jazz-midi-pack/order); publishing from the editor refreshes it too. The
 // stack, guarantee and bonuses are the landing's own sections, so an edit there
-// shows here. No reviews (none exist yet) and no timer (the brief rules out
+// shows here. The reviews are the landing's too. No timer (the brief rules out
 // fake urgency).
 
 export const revalidate = 3600;
@@ -58,6 +58,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   };
   const offer = pick(sections, "s_offer");
   const guarantee = pick(sections, "s_guarantee");
+  const reviews = pick(sections, "s_reviews");
 
   return (
     <main className={`${s.page} ${s.jazz} ${s.orderMain} ${display.variable}`}>
@@ -87,6 +88,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
           </div>
         </div>
       </section>
+
+      {reviews && <Reviews p={reviews} ctx={ctx} />}
 
       <section className={`${s.sec} ${s.band}`}>
         <div className={s.wrap}>
