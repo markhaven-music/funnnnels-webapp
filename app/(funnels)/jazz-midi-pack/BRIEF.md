@@ -167,3 +167,14 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   no longer drawn. The text stays in the blocks' `eyebrow` props and in the editor's data, unused.
 - "come synth usa semplicemente delle sinusoidi": piano.ts plays one plain sine per note (no detuned pair, no
   harmonics under C3); tools/jazz_vsl.py mirrors it for the next VSL render.
+- "thumbnail video usa setting wistia video preview of actual video, no custom image": the VSL's still is a frame of
+  the video itself, 84.5 s ("Watch the top note.", the before/after rolls side by side), uploaded as Wistia image
+  5uwmgd0ifh and set with new_still_media_id (the API has no pick-a-frame call; the result is the same). The share
+  image vsl-en-1600/960.webp is the same frame. The yellow text poster (wtda8c86j3) and the brass one (nzofclfzt2)
+  stay in Wistia, unused.
+- "usa questi bottoni play ovunque nella pagina": every roll's play (before/after, pack browser, bonus players) is
+  the loop list's 40px yellow disc with a triangle, a square while playing (roll.module.css .play); the words
+  "Play"/"Stop"/"Loading" stay for screen readers only.
+- "immagine disallineata": the guarantee seal started at the centre line below 1000px because its wrapper
+  (.twoBody, a size container for the bonuses' container query) shrank to zero width in the flex column; .sealWrap
+  is now full width at every size.
