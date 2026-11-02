@@ -155,9 +155,10 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   `.page` keeps the old brass and cream for the shop and the launch kits, which share the file; the shared button,
   checkout, box and roll styles read `--y*` tokens with the old values as fallbacks. The VSL thumbnail (Wistia still
   wtda8c86j3) and the share image use the same yellow; the video's captions still have the old brass boxes.
-- "you should use 2 columns layout on desktop", then "Tutto sotto l'hero": from 1000px every section made of a
-  heading and one block (letter, pack browser, bonuses, guarantee, after you pay, FAQ) is heading left (sticky) and
-  content right (`.two`, `.twoHead`, `.twoBody`; `.twoWide` for the browser and the bonuses). The hero stays
+- "you should use 2 columns layout on desktop", then "Tutto sotto l'hero": from 1000px the pack browser, the
+  bonuses and the guarantee are heading left (sticky) and content right (`.two`, `.twoHead`, `.twoBody`;
+  `.twoWide` for the browser and the bonuses). The letter, after you pay and FAQ were two columns for an hour and
+  went back to one ("ma che hai fatto"): with no visual, the heading sat alone over a void. The hero stays
   centred; before/after, intro, how it works, chart and offer already had their desktop grids; the final section
   was already text left, image right.
 - "come synth usa semplicemente delle sinusoidi": piano.ts plays one plain sine per note (no detuned pair, no

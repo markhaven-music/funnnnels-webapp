@@ -1459,10 +1459,12 @@
   }
 }
 
-/* Below the hero, every section made of a heading and one block of content is
-   two columns on desktop ("you should use 2 columns layout on desktop",
-   2026-11-02): the heading on the left, sticky, the content on the right.
-   .twoWide gives the pack browser and the bonuses a wider right column. */
+/* The sections with a visual beside their heading are two columns on desktop
+   ("you should use 2 columns layout on desktop", 2026-11-02): the heading on
+   the left, sticky, the pack browser, the bonuses or the seal on the right.
+   .twoWide gives the pack browser and the bonuses a wider right column. The
+   text-only sections (letter, after you pay, FAQ) stay one column: tried as
+   two, the heading sat alone over a void ("ma che hai fatto"). */
 .twoBody {
   min-width: 0;
   container-type: inline-size;
@@ -1497,8 +1499,5 @@
   .sealWrap {
     display: flex;
     justify-content: center;
-  }
-  .two .after {
-    grid-template-columns: repeat(2, 1fr);
   }
 }

@@ -234,12 +234,10 @@ function Letter({ p, patch, ctx }: { p: SectionProps["s_letter"]; patch?: Patch;
   const ops = listOps(p.paras, "paras", patch);
   return (
     <section className={s.sec}>
-      <div className={`${s.wrap} ${s.col} ${s.two}`}>
-        <div className={s.twoHead}>
-          <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
-          <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
-        </div>
-        <div className={`${s.letter} ${s.twoBody}`}>
+      <div className={`${s.wrap} ${s.col}`}>
+        <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
+        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
+        <div className={s.letter}>
           {p.paras.map((para, i) => (
             <div key={i} className={e.row}>
               <T
@@ -768,20 +766,18 @@ function After({ p, patch, ctx }: { p: SectionProps["s_after"]; patch?: Patch; c
   const ops = listOps(p.items, "items", patch);
   return (
     <section className={s.sec}>
-      <div className={`${s.wrap} ${s.two}`}>
-        <Head eyebrow={p.eyebrow} title={p.title} two patch={patch} ctx={ctx} />
-        <div className={s.twoBody}>
-          <ol className={s.after}>
-            {p.items.map((it, i) => (
-              <li key={i}>
-                <T v={it.lead} set={ops.set && ((v) => ops.set!(i, { ...it, lead: v }))} ctx={ctx} as="b" />{" "}
-                <T v={it.text} set={ops.set && ((v) => ops.set!(i, { ...it, text: v }))} ctx={ctx} />
-                <Remove onClick={ops.remove && (() => ops.remove!(i))} />
-              </li>
-            ))}
-          </ol>
-          <Add onClick={ops.add && (() => ops.add!({ lead: "Next.", text: "What happens." }))} label="step" />
-        </div>
+      <div className={s.wrap}>
+        <Head eyebrow={p.eyebrow} title={p.title} patch={patch} ctx={ctx} />
+        <ol className={s.after}>
+          {p.items.map((it, i) => (
+            <li key={i}>
+              <T v={it.lead} set={ops.set && ((v) => ops.set!(i, { ...it, lead: v }))} ctx={ctx} as="b" />{" "}
+              <T v={it.text} set={ops.set && ((v) => ops.set!(i, { ...it, text: v }))} ctx={ctx} />
+              <Remove onClick={ops.remove && (() => ops.remove!(i))} />
+            </li>
+          ))}
+        </ol>
+        <Add onClick={ops.add && (() => ops.add!({ lead: "Next.", text: "What happens." }))} label="step" />
       </div>
     </section>
   );
@@ -791,12 +787,10 @@ function Faq({ p, patch, ctx }: { p: SectionProps["s_faq"]; patch?: Patch; ctx: 
   const ops = listOps(p.items, "items", patch);
   return (
     <section className={`${s.sec} ${s.band}`}>
-      <div className={`${s.wrap} ${s.col} ${s.two}`}>
-        <div className={s.twoHead}>
-          <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
-          <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
-        </div>
-        <div className={`${s.faq} ${s.twoBody}`}>
+      <div className={`${s.wrap} ${s.col}`}>
+        <T v={p.eyebrow} set={patch && ((v) => patch({ eyebrow: v }))} ctx={ctx} as="p" className={s.eyebrow} />
+        <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} />
+        <div className={s.faq}>
           {p.items.map((it, i) =>
             patch ? (
               <div key={i} className={e.faqItem}>
