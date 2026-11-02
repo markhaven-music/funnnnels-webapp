@@ -159,6 +159,10 @@ const UNSUB_WORDS: Record<string, [string, string]> = {
   de: ["Keine E-Mails mehr?", "Abmelden"],
 };
 
+// The sender's postal address, as on the ClickFunnels emails: US law
+// (CAN-SPAM) wants one in every marketing email.
+const POSTAL = "FFUNK Media LLC · 30 N Gould St Suite R, Sheridan, WY 82801, United States";
+
 /** A newsletter-type email, ready for sendEmail: the letter, the unsubscribe link and headers. */
 export function letter(o: { to: Recipient; subject: string; preheader?: string; body: string; vars?: Record<string, string>; lang?: string | null; track?: Track }): Email {
   const r = o.to;
@@ -175,10 +179,10 @@ ${pre ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff"><tr><td align="center" style="padding:28px 18px 40px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px"><tr><td style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#111">
 ${html}
-<p style="margin:32px 0 0;padding-top:18px;border-top:1px solid #e6e6e6;font-size:12px;line-height:1.6;color:#8a8a8a">GRIND STUDIO · <a href="mailto:${SUPPORT}" style="color:#8a8a8a">${SUPPORT}</a><br>${esc(ask)} <a href="${esc(unsub)}" style="color:#8a8a8a">${esc(word)}</a></p>
+<p style="margin:32px 0 0;padding-top:18px;border-top:1px solid #e6e6e6;font-size:12px;line-height:1.6;color:#8a8a8a">GRIND STUDIO · <a href="mailto:${SUPPORT}" style="color:#8a8a8a">${SUPPORT}</a><br>${POSTAL}<br>${esc(ask)} <a href="${esc(unsub)}" style="color:#8a8a8a">${esc(word)}</a></p>
 </td></tr></table>
 </td></tr></table></body></html>`,
-    text: `${text}\n\n--\nGRIND STUDIO · ${SUPPORT}\n${ask} ${word}: ${unsub}`,
+    text: `${text}\n\n--\nGRIND STUDIO · ${SUPPORT}\n${POSTAL}\n${ask} ${word}: ${unsub}`,
     headers: {
       "List-Unsubscribe": `<${UNSUBSCRIBE_ORIGIN}/api/email/unsubscribe?t=${unsubscribeToken(r.email)}>, <mailto:${SUPPORT}?subject=unsubscribe>`,
       "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",

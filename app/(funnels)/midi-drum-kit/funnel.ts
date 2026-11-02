@@ -83,7 +83,10 @@ export const funnel = {
   fileNames: { "drum-loops": "Drum Loops for Songwriting", "emotional-keys": "Emotional Keys MIDI Bundle" } as Record<string, string>,
   checkout: {
     leadTags: ["checkout-started"],
-    buyerTags: ["buyer", "buyer-midi-drum-kit"],
+    // buyer-midi-drum-kit starts the after-purchase emails; owns-midi-drum-kit
+    // (also on ClickFunnels' Drum Kit buyers, 2026-11-02) starts nothing: it's
+    // what the Drum Kit broadcasts leave out.
+    buyerTags: ["buyer", "buyer-midi-drum-kit", "owns-midi-drum-kit"],
     // English addresses; the other languages put /<lang> in front (./i18n.ts).
     thankYou: "/midi-drum-kit/thank-you",
     orderPage: "/midi-drum-kit/order",
