@@ -1,0 +1,307 @@
+/* What a funnel charges, on its map (components/FunnelPrices.tsx): the list on
+   a step's card and the drawer. Uses the map's light colours (funnelMap.module.css). */
+
+/* the list on a step's card */
+.list {
+  border-top: 1px solid var(--edge);
+  padding: 10px 16px 12px;
+}
+.listHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+.listEdit {
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent-l);
+  cursor: pointer;
+}
+.listEdit:hover {
+  text-decoration: underline;
+}
+.line {
+  width: calc(100% + 16px);
+  margin: 0 -8px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.line:hover {
+  background: var(--soft);
+}
+.lineName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.linePrice {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: var(--radius-xs);
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+.tag_main {
+  color: var(--ink-2);
+  background: var(--soft);
+}
+.tag_bump {
+  color: #8a5a00;
+  background: #fff3d6;
+}
+.tag_upsell {
+  color: #0f7a54;
+  background: #e6f7f0;
+}
+
+/* the drawer */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  background: rgb(0 0 0 / 0.3);
+}
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 20;
+  width: min(480px, 100vw);
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid transparent;
+  box-shadow: -12px 0 40px rgb(0 0 0 / 0.18);
+}
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--edge);
+}
+.title {
+  font-size: 18px;
+  font-weight: 700;
+}
+.sub {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.x {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--soft);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.x:hover {
+  background: #e8e5df;
+  color: var(--ink);
+}
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 20px 20px;
+}
+.group {
+  margin-top: 16px;
+}
+.groupHead {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.groupHead span {
+  font-weight: 400;
+  color: var(--ink-3);
+  margin-left: 6px;
+}
+.none {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+.row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 0 -10px;
+  padding: 10px;
+  border-top: 1px solid var(--edge);
+  border-radius: var(--radius-sm);
+}
+.rowChanged {
+  background: #f4f1ff;
+  border-top-color: transparent;
+}
+.thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--soft);
+  display: block;
+}
+.info {
+  min-width: 0;
+}
+.name {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.meta {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.inputs {
+  display: flex;
+  gap: 6px;
+}
+.money {
+  display: flex;
+  align-items: center;
+  width: 84px;
+  height: 36px;
+  border: 1px solid #d6d2ca;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  cursor: text;
+}
+.money:focus-within {
+  border-color: var(--accent-l);
+  box-shadow: 0 0 0 2px #e4dcff;
+}
+.moneyBad {
+  border-color: #d64545;
+}
+.money span {
+  padding-left: 9px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.money input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: none;
+  padding: 0 9px 0 4px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--ink);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.error {
+  grid-column: 2 / -1;
+  font-size: 12px;
+  color: #c03535;
+}
+.note {
+  margin: 20px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+.link {
+  color: var(--accent-l);
+  font-weight: 600;
+}
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--edge);
+  background: #faf9f7;
+}
+.status,
+.ok {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.ok {
+  color: var(--mint-l);
+  font-weight: 600;
+}
+.undo {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid #d6d2ca;
+  border-radius: var(--radius);
+  background: #f3f1ed;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.undo:hover:not(:disabled) {
+  background: #e8e5df;
+}
+.undo:disabled,
+.save:disabled {
+  opacity: 0.45;
+  cursor: default;
+  filter: none;
+}
+
+@media (max-width: 520px) {
+  .row {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+  .inputs {
+    grid-column: 2 / -1;
+  }
+  .money {
+    flex: 1;
+  }
+}

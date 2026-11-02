@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Lanes, previewUrl } from "@/components/FunnelLanes";
+import { PriceList, PricesDrawer, type PriceItem } from "@/components/FunnelPrices";
 import { I } from "@/components/icons";
 import { COLORS, type Variant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import type { Analytics, Metrics, Range, TestStats } from "@/lib/analytics";
@@ -13,6 +14,8 @@ import s from "./funnelMap.module.css";
 // page in order with its picture, live link and numbers for the chosen range,
 // the A/B test's colours on the steps it runs on, and a + to add a language.
 // While a test runs, Lanes shows it as one flow per variant side by side.
+// Prices (components/FunnelPrices.tsx): what the order page and each upsell
+// charge, changed in a drawer.
 
 const RANGES: { id: Range; label: string; note: string }[] = [
   { id: "7d", label: "7D", note: "the last 7 days" },
@@ -235,11 +238,14 @@ function AddLanguage({ map }: { map: FunnelMap }) {
   );
 }
 
-export function FunnelMapView({ map }: { map: FunnelMap }) {
+export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: PriceItem[] }) {
   const [range, setRange] = useState<Range>("28d");
   const [lang, setLang] = useState(map.langs[0]?.lang ?? "en");
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(Boolean(map.statsSlug));
+  const [items, setItems] = useState(prices);
+  // The Prices drawer: closed (null), or open on a price's id ("" for the first).
+  const [editing, setEditing] = useState<string | null>(null);
   // The lanes need room: they open by themselves on a wide screen, the choice is remembered.
   const [view, setView] = useState<View | null>(null);
   useEffect(() => {
@@ -315,6 +321,11 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
               ))}
             </div>
           )}
+          {items.length > 0 && (
+            <button type="button" className="btn ghost" onClick={() => setEditing("")}>
+              <I.receipt size={14} /> Prices
+            </button>
+          )}
           {entry && (
             <a href={previewUrl(entry.url)} target="_blank" rel="noreferrer" className="btn primary" title="Not counted as a visit">
               <I.eye size={14} /> Open funnel
@@ -360,6 +371,13 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
 
         {current.steps.map((step) => {
           const rows = metrics ? stepStats(step, metrics, hasOrderStep) : [];
+          // What this page sells: the checkout's product and order bumps, or the upsell's offer.
+          const sells =
+            step.kind === "order" || (step.kind === "landing" && !hasOrderStep)
+              ? items.filter((i) => i.role !== "upsell")
+              : step.offer
+                ? items.filter((i) => i.role === "upsell" && i.key === step.offer?.id)
+                : [];
           return (
             <div key={step.kind + step.path} className={s.stepWrap}>
               <div className={s.connector} aria-hidden />
@@ -413,6 +431,7 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
                     )}
                   </div>
                 )}
+                {sells.length > 0 && <PriceList items={sells} onEdit={setEditing} />}
                 {test && (step.kind === "landing" || step.kind === "order") && <Variants test={test} scope={testScope} step={step} />}
               </section>
             </div>
@@ -430,6 +449,10 @@ export function FunnelMapView({ map }: { map: FunnelMap }) {
           </p>
         )}
       </main>}
+
+      {editing !== null && (
+        <PricesDrawer funnel={map.id} name={map.name} items={items} focus={editing} onSaved={setItems} onClose={() => setEditing(null)} />
+      )}
     </div>
   );
 }

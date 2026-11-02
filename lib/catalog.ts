@@ -222,6 +222,15 @@ export async function productUses(shop: { slug: string; status: string; price: M
   return uses;
 }
 
+/** What a funnel charges (its map's Prices): the main product, add-ons and upsells, in order, with their paid orders. */
+export async function funnelPrices(funnel: string): Promise<(FunnelItem & { sold: number })[]> {
+  const [items, sold] = await Promise.all([funnelItems(funnel), soldCounts()]);
+  const order: ItemRole[] = ["main", "bump", "upsell"];
+  return items
+    .sort((a, b) => order.indexOf(a.role) - order.indexOf(b.role) || a.position - b.position)
+    .map((i) => ({ ...i, sold: sold.get(`${funnel}/${i.key}`) ?? 0 }));
+}
+
 /** The funnels a product can be added to as an add-on (the ones whose order form shows add-ons). */
 export const ADD_ON_FUNNELS = CODE_FUNNELS.map((f) => ({ slug: f.slug, name: f.name }));
 
