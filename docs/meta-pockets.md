@@ -195,7 +195,7 @@ C25. Looperman. *Grabbing drum loops from Looperman?*
 - **Primary text**: the same line, then one paragraph that names the kit and what is in it (single parts and complete beats, any DAW; the licence for beat sellers; "one payment, no subscription" for Splice), then "$27, one payment. Works in any DAW." (plus "Not affiliated with…" where a brand or artist is named).
 - **One flexible ad per pocket** with 6 images (1:1, 4:5, 9:16 × orange and green). Meta picks the format and colour per placement.
 
-## Wave 1 (2026-11-01, built paused)
+## Wave 1 (2026-11-01, turned on 2026-11-02)
 
 Campaign `GrindStudio_Pockets_W1_2026-11-01` (120254488878320422): 30 ad sets at €1/day (€30/day), US, broad, Advantage+ audience, optimised for purchases. Each ad set holds one flexible ad. Link: m.thegrind.studio/en/midi-drum-kit with `utm_campaign=pockets_w1&utm_content=<pocket>`.
 
@@ -234,6 +234,6 @@ Read after 7–10 days on clicks, landing page views and checkouts per pocket (�
 | C1 | W1_cymatics_US | Are you a big Cymatics fan and you make beats with their kits? The kits give you the sounds, but a kit doesn’t tell you where to put them. We made 1050 drum patterns and complete beats for the kits you already own, so they finally sound the way you want. |
 | C13 | W1_ezdrummer_US | Do you use EZdrummer for rock and want to try a trap beat? You already make drums by dragging in MIDI grooves. We made 1050 trap grooves and complete beats that work exactly the same way, so you can make a trap beat tonight the same way you already work. |
 
-The lines above are the 2026-11-02 rewrite; the 2026-11-01 lines gave advice with nothing behind the click. The 30 ads were rebuilt on 2026-11-02 as `W1_<pocket>_flex_v2` (a Meta creative is immutable, so each got a new creative and a new ad; the 2026-11-01 ads are archived). Everything is still paused.
+The lines above are the 2026-11-02 rewrite; the 2026-11-01 lines gave advice with nothing behind the click. The 30 ads were rebuilt on 2026-11-02 as `W1_<pocket>_flex_v2` (a Meta creative is immutable, so each got a new creative and a new ad; the 2026-11-01 ads are archived). Turned on 2026-11-02: campaign, 30 ad sets and 30 ads ACTIVE, €30/day.
 
 The first build (`GrindStudio_Pockets_2026-11-01`, 6 ad sets at €8 with the old Impact template) never ran and is replaced by wave 1.
