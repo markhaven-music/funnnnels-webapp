@@ -36,11 +36,12 @@ export type FunnelMap = {
 
 const LANG_LABEL: Record<string, string> = { en: "English", fr: "French", es: "Spanish", de: "German", it: "Italian" };
 
-// Where each language's pages are live. The brand domain forwards the funnels'
-// paths here, except the MIDI Drum Kit in English: m.thegrind.studio/midi-drum-kit
-// is still the old Astro page, so its funnnnels pages are on the origin.
-const home = (slug: string, lang: string) =>
-  slug === "midi-drum-kit" && lang === "en" ? "https://funnnnels.vercel.app" : KIT_HOME;
+// Every page is live on the brand domain, which forwards the funnels' paths
+// here; never on the funnnnels.vercel.app origin, which a buyer must not see.
+// One exception in the path: m.thegrind.studio/midi-drum-kit is still the old
+// Astro page, so the MIDI Drum Kit's English sales page is /en/midi-drum-kit
+// (its order, upsell and thank-you pages are /midi-drum-kit/…).
+const landingPrefix = (slug: string, lang: string, prefix: string) => (slug === "midi-drum-kit" && lang === "en" ? "/en" : prefix);
 
 // Screenshots in public/funnels/<slug>/ (tools/funnel-previews.sh), per language.
 const SHOTS: Record<string, Record<string, { landing: string; order?: string; thanks?: string }>> = {
@@ -60,20 +61,15 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
     canTranslate: f.kind === "code",
     langs: langs.map((lang) => {
       const prefix = lang === "en" ? "" : `/${lang}`;
-      const base = home(f.slug, lang);
       const shots = SHOTS[f.slug]?.[lang] ?? SHOTS[f.slug]?.en;
       const img = (name?: string) => (name ? `/funnels/${f.slug}/${name}.webp` : null);
       const edit = editable.has(f.slug) ? `/funnels/${f.slug}/edit` : null;
       // The MIDI Drum Kit's pages are code: their words are edited page by page (app/funnels/[id]/texts).
       const texts = (page: string) => (f.slug === "midi-drum-kit" ? `/funnels/${f.slug}/texts?page=${page}&lang=${lang}` : null);
-      const step = (kind: MapStepKind, name: string, path: string, image: string | null, editUrl: string | null): MapStep => ({
-        kind,
-        name,
-        path: `${prefix}${path}`,
-        url: `${base}${prefix}${path}`,
-        image,
-        editUrl,
-      });
+      const step = (kind: MapStepKind, name: string, path: string, image: string | null, editUrl: string | null): MapStep => {
+        const at = `${kind === "landing" ? landingPrefix(f.slug, lang, prefix) : prefix}${path}`;
+        return { kind, name, path: at, url: `${KIT_HOME}${at}`, image, editUrl };
+      };
       const steps = [
         // Launch-kit products sell on the landing itself (#buy): no order step.
         step("landing", f.checkout.orderPage ? "Sales page" : "Sales page + checkout", `/${f.slug}`, img(shots?.landing), edit ?? texts("landing")),

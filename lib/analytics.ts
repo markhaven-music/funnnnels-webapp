@@ -342,7 +342,8 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
     ...[
       ...codeFunnels().map((f) => ({ slug: f.slug, name: f.product, langs: f.langs ?? null })),
       ...kits.map((k) => ({ slug: k.slug, name: k.name, langs: null })),
-    ].map((f) => ({ ...f, url: `${KIT_HOME}/${f.slug}` })),
+      // m.thegrind.studio/midi-drum-kit is still the old Astro page: funnnnels' English one is /en/midi-drum-kit.
+    ].map((f) => ({ ...f, url: `${KIT_HOME}${f.slug === "midi-drum-kit" ? "/en" : ""}/${f.slug}` })),
     // The shop's orders, all its products together (lib/shop.ts).
     { slug: SHOP_SLUG, name: "Shop", langs: null, url: SHOP_URL },
   ];

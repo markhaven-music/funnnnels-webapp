@@ -1,5 +1,6 @@
 import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS } from "@/lib/beacon";
+import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { restate } from "@/lib/restate";
 import { AB, AB_LANDING_CSS, AB_SCRIPT } from "./abtest";
 import { TEMPLATE } from "./cf/template";
@@ -88,7 +89,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = funn
     .replace("{{DESCRIPTION}}", escapeAttr(meta.description))
     .replace(
       "{{HEAD}}",
-      `<script>${AB_SCRIPT}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: AB.cookie })}</script>\n${headScripts(currency, price)}`,
+      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${AB_SCRIPT}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: AB.cookie })}</script>\n${headScripts(currency, price)}`,
     )
     .replace("{{BODY}}", BODY_SCRIPT);
   const video = VIDEOS[lang];

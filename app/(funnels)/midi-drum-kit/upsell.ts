@@ -1,6 +1,7 @@
 import { getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS, type Step } from "@/lib/beacon";
+import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { restate } from "@/lib/restate";
 import { AB } from "./abtest";
 import { TEMPLATE as FAMOUS } from "./cf/upsell-famous";
@@ -109,7 +110,7 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     .replace("{{LANG}}", lang)
     .replace("{{TITLE}}", escapeAttr(page.title))
     .replace("{{DESCRIPTION}}", escapeAttr(page.title))
-    .replace("{{HEAD}}", `<style>${FIXES}</style>\n<script>${beaconScript({ funnel: slug, page: page.beacon, lang, abCookie: AB.cookie })}</script>\n${headScripts()}`)
+    .replace("{{HEAD}}", `<script>${ORIGIN_BOUNCE_JS}</script>\n<style>${FIXES}</style>\n<script>${beaconScript({ funnel: slug, page: page.beacon, lang, abCookie: AB.cookie })}</script>\n${headScripts()}`)
     .replace("{{BODY}}", script(slug, offerId, lang, nextStep(product, lang, offerId)));
 
   // Words outside the tagged texts: the "reserved for" timer, the progress

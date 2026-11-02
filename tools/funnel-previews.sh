@@ -5,7 +5,8 @@
 # after a page changes:   bash tools/funnel-previews.sh
 #
 # It shoots funnnnels.vercel.app, where the Pixel doesn't load and the visitor
-# count ignores the visit, so the screenshots never touch the stats.
+# count ignores the visit, so the screenshots never touch the stats. ?origin=1
+# keeps the pages there (anyone else is sent to m.thegrind.studio, lib/originBounce.ts).
 # Needs Google Chrome and cwebp (brew install webp).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -24,14 +25,14 @@ shot() { # slug file url
 }
 
 # preview = the card and the landing step; order = the order-page step (the funnel map).
-shot midi-drum-kit preview "https://funnnnels.vercel.app/fr/midi-drum-kit?country=FR"
-shot midi-drum-kit order "https://funnnnels.vercel.app/fr/midi-drum-kit/order?country=FR"
-shot midi-drum-kit preview-en "https://funnnnels.vercel.app/midi-drum-kit?country=US"
-shot midi-drum-kit order-en "https://funnnnels.vercel.app/midi-drum-kit/order?country=US"
+shot midi-drum-kit preview "https://funnnnels.vercel.app/fr/midi-drum-kit?country=FR&origin=1"
+shot midi-drum-kit order "https://funnnnels.vercel.app/fr/midi-drum-kit/order?country=FR&origin=1"
+shot midi-drum-kit preview-en "https://funnnnels.vercel.app/midi-drum-kit?country=US&origin=1"
+shot midi-drum-kit order-en "https://funnnnels.vercel.app/midi-drum-kit/order?country=US&origin=1"
 # thanks = the thank-you step: ?preview=1 shows it as a buyer of everything sees it (no order needed).
-shot midi-drum-kit thanks "https://funnnnels.vercel.app/fr/midi-drum-kit/thank-you?country=FR&preview=1"
-shot midi-drum-kit thanks-en "https://funnnnels.vercel.app/midi-drum-kit/thank-you?country=US&preview=1"
-shot top-hits-midi-bundle preview "https://funnnnels.vercel.app/top-hits-midi-bundle?country=US"
-shot top-hits-midi-bundle order "https://funnnnels.vercel.app/top-hits-midi-bundle/order?country=US"
-shot jazz-midi-pack preview "https://funnnnels.vercel.app/jazz-midi-pack?country=US"
-shot jazz-midi-pack order "https://funnnnels.vercel.app/jazz-midi-pack/order?country=US"
+shot midi-drum-kit thanks "https://funnnnels.vercel.app/fr/midi-drum-kit/thank-you?country=FR&preview=1&origin=1"
+shot midi-drum-kit thanks-en "https://funnnnels.vercel.app/midi-drum-kit/thank-you?country=US&preview=1&origin=1"
+shot top-hits-midi-bundle preview "https://funnnnels.vercel.app/top-hits-midi-bundle?country=US&origin=1"
+shot top-hits-midi-bundle order "https://funnnnels.vercel.app/top-hits-midi-bundle/order?country=US&origin=1"
+shot jazz-midi-pack preview "https://funnnnels.vercel.app/jazz-midi-pack?country=US&origin=1"
+shot jazz-midi-pack order "https://funnnnels.vercel.app/jazz-midi-pack/order?country=US&origin=1"

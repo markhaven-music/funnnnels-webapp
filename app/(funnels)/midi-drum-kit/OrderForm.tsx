@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
+// "pure": Stripe.js loads when loadStripe is called, not as soon as this file does.
+import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
 import { track } from "@/lib/beacon";
@@ -54,11 +55,14 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
   const [method, setMethod] = useState<Method>("card");
   const price = offer.price;
   const total = price + offer.bumps.filter((b) => picked.includes(b.id)).reduce((n, b) => n + b.price, 0);
-  const stripePromise = useMemo(() => (publishableKey ? stripeFor(publishableKey) : null), [publishableKey]);
+  // Stripe.js (≈150 KB of script) loads once the buyer starts on the form, not
+  // with the page, which kept the order page under 90 on PageSpeed mobile (docs/page-speed.md).
+  const [wanted, setWanted] = useState(false);
+  const stripePromise = useMemo(() => (publishableKey && wanted ? stripeFor(publishableKey) : null), [publishableKey, wanted]);
   const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard };
 
   return (
-    <div className={s.form}>
+    <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
       {step === 1 ? (
         <>
           <ol className={s.steps}>
@@ -83,6 +87,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
             info={info}
             onDone={(next) => {
               setInfo(next);
+              setWanted(true);
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
               pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant() });
