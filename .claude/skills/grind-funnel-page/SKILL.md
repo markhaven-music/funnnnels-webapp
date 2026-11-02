@@ -70,16 +70,18 @@ a request conflict, the request wins; say which rule you are breaking.
 - Desktop uses the vertical space. People love to scroll. No dense 3- or
   4-column grids of text: folders, lists, steps, "after you pay" go one under
   the other with room around them.
-- Two columns only as copy beside a visual (an image, the piano rolls, the pack
-  browser, the seal), as the Drum Kit landing does. The visual sits in the left
-  column and stays (sticky) while the copy on the right scrolls. Never a
+- Two columns only as copy beside a visual (an image, the piano rolls, the
+  seal), as the Drum Kit landing does. Each such block is a panel like the Drum
+  Kit's folder and bonus cards: background #0d0c10, 12px corners, no border,
+  the picture about 45 % of the width on the left, the copy on the right; on a
+  phone the picture on top, full width inside the panel, then the copy. Never a
   heading or text that sticks on the side with the body on the other side: that
   was "ma che hai fatto".
-- Bonuses: heading on top, then each bonus with its cover big on the left and
-  name, text, list and playable files on the right, large type.
+- Bonuses: heading on top, then each bonus as one such panel: cover left (sticky
+  on desktop) and name, text, list and playable files right, large type.
+- No sticky bottom bar.
 - Sections with a heading and nothing visual (letter, FAQ, reviews) stay one
   column, centred, max 760px wide.
-- The sticky bottom bar on phones (name, price, CTA) stays.
 
 ## 5. Components
 

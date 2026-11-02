@@ -1153,7 +1153,7 @@
 
 /* footer */
 .footer {
-  padding: 32px 20px 120px;
+  padding: 32px 20px 48px; /* no sticky bar to clear any more */
   text-align: center;
   font-size: 13px;
   color: var(--mute);
@@ -1635,5 +1635,50 @@
   .numList {
     columns: 2;
     column-gap: 32px;
+  }
+}
+
+/* The two-column blocks as the Drum Kit page sets them ("prendi ispirazione
+   da midi drum kit page solo per quanto riguarda layout delle doppie colonne
+   e sfondo delle doppie colonne", 2026-11-02): a dark panel on the black page
+   (its #0d0c10, 12px corners, no border), the picture on top on a phone and
+   on the left on desktop, the copy beside it. Intro, how it works, after you
+   pay, the guarantee; each bonus is one too (bonus.module.css). */
+.panel {
+  padding: 24px 22px 28px;
+  border-radius: 12px;
+  background: #0d0c10;
+}
+.panel .sideImg {
+  order: 0;
+}
+.side.panel {
+  gap: 24px;
+}
+.guarantee.panel {
+  padding: 32px 22px 36px;
+}
+@media (min-width: 1000px) {
+  .panel {
+    padding: 44px 48px;
+  }
+  .side.panel {
+    grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
+    gap: 56px;
+    align-items: center;
+  }
+  .side.panel .sideImg {
+    position: static;
+  }
+  .introGrid.panel {
+    grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
+    gap: 56px;
+    align-items: center;
+  }
+  .two.guarantee.panel {
+    gap: 24px 56px;
+  }
+  .footer {
+    padding-bottom: 48px;
   }
 }

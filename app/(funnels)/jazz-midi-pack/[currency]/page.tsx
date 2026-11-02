@@ -7,7 +7,6 @@ import { getPublishedBlocks } from "@/lib/pages";
 import { funnel } from "../funnel";
 import { DEFAULT_SECTIONS, type Section } from "../content";
 import { SectionView, isSectionType, type Ctx } from "../sections";
-import { StickyCta } from "../StickyCta";
 import { Tracking } from "../Tracking";
 import { Beacon } from "../../Beacon";
 import { display } from "../fonts";
@@ -101,7 +100,6 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
           results vary.
         </p>
       </footer>
-      <StickyCta price={price} />
     </main>
   );
 }

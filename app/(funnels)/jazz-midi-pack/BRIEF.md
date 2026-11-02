@@ -204,3 +204,11 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   name, text, list and files on the right in larger type. The pack browser's heading went back on top of the
   browser. No heading sticks on the side any more; `.two` stays only for the guarantee (text | seal). The rules of
   the whole page are in `.claude/skills/grind-funnel-page/SKILL.md`.
+- "prendi ispirazione da midi drum kit page solo per quanto riguarda layout delle doppie colonne e sfondo delle
+  doppie colonne" (2026-11-02): every two-column block is a panel like the Drum Kit's folder and bonus cards
+  (measured there: background #0d0c10, 12px corners, no border, the picture about 45 % of the width on the left,
+  the copy on the right): the intro (box | text), how it works (DAW | steps), after you pay (box | steps), the
+  guarantee (seal | text) and each bonus (cover | name, text, list, files). On a phone the picture sits on top,
+  full width in the panel, then the copy, as the Drum Kit does. The letter | rolls pair and the hero stay on the
+  black page. "togli anche lo sticky bottom part": the sticky bottom bar is gone from the landing. "che è sto
+  spazio enorme": the bonus cover now spans both grid rows, so the files follow the text with no gap.

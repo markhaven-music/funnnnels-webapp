@@ -13,12 +13,14 @@
 .bonus {
   position: relative;
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
-  gap: 6px 16px;
-  align-items: start;
+  gap: 18px;
+  padding: 24px 22px 28px;
+  border-radius: 12px;
+  background: #0d0c10; /* the Drum Kit page's panel */
 }
 .cover {
-  grid-row: span 2;
+  max-width: 300px;
+  margin: 0 auto;
 }
 .cover img {
   display: block;
@@ -26,9 +28,9 @@
   height: auto;
   filter: drop-shadow(0 12px 18px rgb(0 0 0 / 0.55));
 }
-/* phone: label and name beside the cover, the rest under both */
+/* phone: the cover on top, then everything else (the Drum Kit's folder cards) */
 .info {
-  display: contents;
+  display: block;
 }
 .label {
   display: flex;
@@ -197,20 +199,6 @@
 }
 
 @media (min-width: 720px) {
-  .bonus {
-    grid-template-columns: 140px minmax(0, 1fr);
-    gap: 6px 26px;
-  }
-  .cover {
-    grid-row: span 4;
-  }
-  .text,
-  .inside {
-    grid-column: 2;
-  }
-  .preview {
-    margin-top: 22px;
-  }
   .rolls,
   .loops {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -225,17 +213,16 @@
     gap: 96px;
   }
   .bonus {
-    grid-template-columns: minmax(0, 0.4fr) minmax(0, 0.6fr);
+    grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr);
     align-items: start;
     gap: 0 56px;
+    padding: 44px 48px;
   }
   .cover {
-    grid-row: auto;
+    grid-row: 1 / span 2; /* the text and the files stack beside it, no gap under short text */
+    max-width: none;
     position: sticky;
     top: 28px;
-  }
-  .info {
-    display: block;
   }
   .label {
     font-size: 14px;

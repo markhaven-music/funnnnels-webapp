@@ -503,8 +503,9 @@ function Product({ p, patch, ctx }: { p: SectionProps["s_product"]; patch?: Patc
   const set = (k: string) => patch && ((v: string) => patch({ [k]: v }));
   const h = parts(p, patch);
   return (
-    <section className={`${s.sec} ${s.band}`}>
-      <div className={h.on("box") ? `${s.wrap} ${s.introGrid}` : s.wrap}>
+    <section className={s.sec}>
+      <div className={s.wrap}>
+        <div className={h.on("box") ? `${s.panel} ${s.introGrid}` : s.panel}>
         <Part k="box" h={h}>
           <ProductBox />
         </Part>
@@ -523,6 +524,7 @@ function Product({ p, patch, ctx }: { p: SectionProps["s_product"]; patch?: Patc
               <Drop onClick={h.x("cta")} />
             </Cta>
           )}
+        </div>
         </div>
       </div>
     </section>
@@ -550,8 +552,9 @@ function Steps({ p, patch, ctx }: { p: SectionProps["s_steps"]; patch?: Patch; c
   const ops = listOps(p.steps, "steps", patch);
   const h = parts(p, patch);
   return (
-    <section className={`${s.sec} ${s.band}`}>
-      <div className={`${s.wrap} ${s.side}`}>
+    <section className={s.sec}>
+      <div className={s.wrap}>
+        <div className={`${s.side} ${s.panel}`}>
         <Part k="shot" h={h}>
           <figure className={`${s.dawShot} ${s.sideImg}`}>
             <Scene name="daw" alt="A laptop with the DAW piano roll showing gold jazz voicings under Dm9, G13 and Cmaj9, next to the Jazz MIDI Pack box"
@@ -585,6 +588,7 @@ function Steps({ p, patch, ctx }: { p: SectionProps["s_steps"]; patch?: Patch; c
           })}
         </ol>
         <Add onClick={ops.add && (() => ops.add!({ title: "New step", text: "What happens." }))} label="step" />
+        </div>
         </div>
       </div>
     </section>
@@ -1064,8 +1068,9 @@ export function Seal() {
 function Guarantee({ p, patch, ctx }: { p: SectionProps["s_guarantee"]; patch?: Patch; ctx: Ctx }) {
   const h = parts(p, patch);
   return (
-    <section className={`${s.sec} ${s.band}`}>
-      <div className={`${s.wrap} ${s.guarantee} ${twoIf(h.on("seal") && h.any("title", "text"))}`}>
+    <section className={s.sec}>
+      <div className={s.wrap}>
+        <div className={`${s.guarantee} ${s.panel} ${twoIf(h.on("seal") && h.any("title", "text"))}`}>
         {h.on("seal") && (
           <div className={`${s.sealWrap} ${s.twoBody}`}>
             <Part k="seal" h={h}>
@@ -1081,6 +1086,7 @@ function Guarantee({ p, patch, ctx }: { p: SectionProps["s_guarantee"]; patch?: 
             <T v={p.text} set={patch && ((v) => patch({ text: v }))} ctx={ctx} as="p" className={s.sub} />
           </Part>
         </div>
+        </div>
       </div>
     </section>
   );
@@ -1091,7 +1097,8 @@ function After({ p, patch, ctx }: { p: SectionProps["s_after"]; patch?: Patch; c
   const h = parts(p, patch);
   return (
     <section className={s.sec}>
-      <div className={`${s.wrap} ${s.side}`}>
+      <div className={s.wrap}>
+        <div className={`${s.side} ${s.panel}`}>
         <Part k="box" h={h}>
           <figure className={s.sideImg}>
             <img src={`${DIR}/box-900.webp`} width={900} height={1282} alt="The Jazz MIDI Pack box" loading="lazy" decoding="async" />
@@ -1109,6 +1116,7 @@ function After({ p, patch, ctx }: { p: SectionProps["s_after"]; patch?: Patch; c
           ))}
         </ol>
         <Add onClick={ops.add && (() => ops.add!({ lead: "Next.", text: "What happens." }))} label="step" />
+        </div>
         </div>
       </div>
     </section>
