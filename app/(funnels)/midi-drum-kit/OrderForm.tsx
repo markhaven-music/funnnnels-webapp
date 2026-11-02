@@ -412,7 +412,7 @@ function PayBody({
         </div>
       </details>
 
-      <button type="button" className={d.cta} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
+      <button type="button" className={`${d.cta} ${d.ctaPay}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
         {busy && !cardOff ? (
           paypal ? t.openingPaypal : t.processing
         ) : (

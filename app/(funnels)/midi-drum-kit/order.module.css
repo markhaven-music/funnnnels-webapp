@@ -142,7 +142,7 @@
   justify-content: center;
   gap: 10px;
   width: 100%;
-  padding: 34px 20px;
+  padding: 24px 20px;
   /* no visible edge: the landing's dark 1px edge vanishes on black, but on the
      order form's white card it reads as an outline */
   border: 1px solid transparent;
@@ -150,11 +150,16 @@
   background: linear-gradient(180deg, #ffa13d 0%, #ec6a0c 100%);
   box-shadow: 0 8px 28px rgba(236, 106, 12, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   color: #fff;
-  font: 700 33px/1 var(--font-poppins), Poppins, var(--inter);
+  font: 700 28px/1 var(--font-poppins), Poppins, var(--inter);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   flex-wrap: wrap;
+}
+/* The pay button (step 2) is bigger than step 1's ("solo il bottone dello step 2 deve essere + grande"). */
+.ctaPay {
+  padding: 30px 20px;
+  font-size: 30px;
 }
 /* The line under the pay button ("Get Instant Access"), as on ClickFunnels' order page. */
 .ctaSub {
