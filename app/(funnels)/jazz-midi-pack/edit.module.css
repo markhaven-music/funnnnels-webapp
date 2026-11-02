@@ -115,3 +115,71 @@
   border: 1px dashed currentColor;
   cursor: pointer;
 }
+
+/* Removable parts (sections.tsx Part / Drop): the × sits in the part's corner
+   and shows on hover; hovering the × outlines what it removes. A Part wrapper
+   lays its content out as the parent would (column, same alignment). */
+.part {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  align-items: inherit;
+}
+.host {
+  position: relative;
+}
+.drop {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  z-index: 5;
+  margin: 0;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+.dropLeft {
+  right: auto;
+  left: -10px;
+}
+.dropIn {
+  top: 12px;
+  right: 12px;
+}
+.host:has(> .dropIn:hover) {
+  outline: none;
+}
+.part:hover > .drop,
+.host:hover > .drop,
+.drop:focus-visible {
+  opacity: 1;
+}
+.part:has(> .drop:hover),
+.host:has(> .drop:hover) {
+  outline: 1px dashed #ef8c74;
+  outline-offset: 4px;
+}
+/* under a section (or a bonus, a step): what was removed, one click brings it back */
+.removed {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 12px;
+  color: #9a907f;
+}
+.removed button {
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: rgb(226 169 59 / 0.12);
+  color: #f6d58a;
+  font: inherit;
+  cursor: pointer;
+}
+.removed button:hover {
+  background: rgb(226 169 59 / 0.22);
+}

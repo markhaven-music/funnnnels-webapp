@@ -459,7 +459,7 @@ export function EditorShell({ initialFunnel }: { initialFunnel: StoredFunnel }) 
 
         <div className="editor-stage-footer">
           <div className="hint">
-            Click any text to edit it · drag a section by its grip to move it · × deletes it
+            Click any text to edit it · hover anything for its × to remove it · drag a section by its grip to move it
           </div>
         </div>
       </div>

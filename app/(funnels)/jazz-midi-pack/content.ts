@@ -11,7 +11,12 @@ export type Para = { style: "p" | "bold" | "pull" | "hit"; text: string };
 export type ChartCell = { ok: boolean | null; text: string };
 export type ChartRow = { label: string; cells: ChartCell[] };
 
-export type SectionProps = {
+// `hide`: the parts removed in the editor, by key (sections.tsx Part): they
+// don't render, in the editor or on the live page. Sections have it, and list
+// items with parts of their own (steps, bonuses).
+type Hide = { hide?: string[] };
+
+type Fields = {
   // Centered, like the Grind Studio Drum Kit hero. In `headline`, *words* are highlighted
   // and _words_ underlined.
   s_hero: { tag: string; pre: string; headline: string; sub: string; bullets: string[]; ticks: string[]; hud: string[]; daws: string };
@@ -19,19 +24,21 @@ export type SectionProps = {
   s_compare_rolls: { beforeLabel: string; beforeText: string; afterLabel: string; afterText: string; note: string };
   s_product: { eyebrow: string; title: string; titleEm: string; lead: string; ticks: string[] };
   s_previews: { eyebrow: string; title: string; sub: string; items?: { roll: RollId; title: string; meta: string }[] };
-  s_steps: { eyebrow: string; title: string; steps: { title: string; text: string }[] };
+  s_steps: { eyebrow: string; title: string; steps: ({ title: string; text: string } & Hide)[] };
   s_inside: { eyebrow: string; title: string };
   // A comparison chart: one column per way to get voicings, the last one is the pack.
   // ok: true = ✓, false = ✗, null = neutral.
   s_math: { eyebrow: string; title: string; cols: string[]; rows: ChartRow[]; note: string };
   // The free bonuses: item n shows the cover bonus-n in public/funnels/jazz-midi-pack (1–5).
-  s_bonuses: { eyebrow: string; title: string; sub: string; items: { name: string; text: string }[] };
+  s_bonuses: { eyebrow: string; title: string; sub: string; items: ({ name: string; text: string } & Hide)[] };
   s_offer: { eyebrow: string; title: string; stack: string[]; guarantee: string };
   s_guarantee: { title: string; text: string };
   s_after: { eyebrow: string; title: string; items: { lead: string; text: string }[] };
   s_faq: { eyebrow: string; title: string; items: { q: string; a: string }[] };
   s_final: { title: string; note: string };
 };
+
+export type SectionProps = { [K in keyof Fields]: Fields[K] & Hide };
 
 export type SectionType = keyof SectionProps;
 export type Section<T extends SectionType = SectionType> = { id: string; type: T; props: SectionProps[T] };
