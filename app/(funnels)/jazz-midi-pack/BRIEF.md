@@ -188,8 +188,9 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   before/after rolls and in the pack browser's head; one pick for the whole page, kept in localStorage
   `jazz:sound`, and a file playing restarts on the new sound. The footer credits Salamander (CC BY 3.0). The VSL
   keeps its rendered sine demos.
-- "cambia sfondo hero, mettilo più scuro e cool senza sembrare troppo AI" (2026-11-02): the hero is #050505 with a
-  10 % yellow haze at the very top and, as its texture, the pack's own "after" roll (sections.tsx heroRollTile, an
-  SVG data URI the CSS tiles down the hero, notes in yellow at 10 %, bar lines at 3-5 % white), fading out from
-  45 % to 85 % of the height so the bullets and the button sit on plain black. The glow orbs and the 44px grid are
-  gone from the Jazz hero.
+- "cambia sfondo hero, mettilo più scuro e cool senza sembrare troppo AI", then "nn mi piace lo sfondo, fa una
+  cosa più sleek e professionale tipo Apple" (2026-11-02): the hero is plain black (#000) with one soft neutral
+  light (white at 5 %) behind the video for depth and nothing else: no glow orbs, no grid, no rule. A version with
+  the pack's "after" roll tiled as a faint yellow texture lasted twenty minutes (bcdaa79) and was rejected.
+- "metti social proof reviews verso la fine": the reviews block sits after the guarantee (offer → guarantee →
+  reviews → after you pay → FAQ → final), in the database and in the defaults.

@@ -8,8 +8,6 @@ import { DEFAULT_SECTIONS, type ChartCell, type Section, type SectionProps, type
 import { Cta } from "./Cta";
 import { PlayableRoll } from "./PlayableRoll";
 import { SoundPicker } from "./SoundPicker";
-import rolls from "./rolls.json";
-import type { Roll } from "./piano";
 import rv from "./reviews.module.css";
 import { LoopList } from "./LoopList";
 import { BonusPlayer } from "./BonusPlayer";
@@ -296,25 +294,6 @@ function Marked({ text }: { text: string }) {
   );
 }
 
-// The hero's texture: the "after" roll of the pack (rolls.json), drawn once as
-// an SVG tile the CSS repeats down the hero in yellow at 10 % ("cambia sfondo
-// hero, mettilo più scuro e cool senza sembrare troppo AI", 2026-11-02): the
-// product itself instead of glows and grids. Built on the server, no fetch.
-function heroRollTile() {
-  const r = rolls.after as Roll;
-  const W = 1000;
-  const H = 420;
-  const pitches = r.notes.map((n) => n[2]);
-  const lo = Math.min(...pitches) - 1;
-  const hi = Math.max(...pitches) + 1;
-  const row = H / (hi - lo + 1);
-  const x = (b: number) => (b / r.beats) * W;
-  const bars = Array.from({ length: r.beats }, (_, i) => `<line x1="${x(i).toFixed(1)}" x2="${x(i).toFixed(1)}" y1="0" y2="${H}" stroke="rgba(255,255,255,${i % 4 ? 0.03 : 0.055})"/>`);
-  const notes = r.notes.map(([s, l, p]) => `<rect x="${(x(s) + 1.5).toFixed(1)}" y="${((hi - p) * row + 1.5).toFixed(1)}" width="${Math.max(3, x(l) - 3).toFixed(1)}" height="${(row - 3).toFixed(1)}" rx="2" fill="rgba(245,184,0,0.10)"/>`);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}">${bars.join("")}${notes.join("")}</svg>`;
-}
-const HERO_ROLL = `url("data:image/svg+xml,${encodeURIComponent(heroRollTile())}")`;
-
 function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch; ctx: Ctx }) {
   // Pages published before the centered hero have no `pre`: they get its default copy.
   const p = raw.pre === undefined ? { ...HERO_DEFAULT, tag: raw.tag, hud: raw.hud, daws: raw.daws, ticks: raw.ticks, hide: raw.hide } : raw;
@@ -323,9 +302,7 @@ function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch
   const h = parts(p, patch && ((x) => patch({ ...p, ...x })));
   return (
     <section id="hero" className={s.hero}>
-      <div className={s.heroBg} aria-hidden>
-        <div className={s.heroRoll} style={{ backgroundImage: HERO_ROLL }} />
-      </div>
+      <div className={s.heroBg} aria-hidden />
       <div className={s.topband}>
         <header className={`${s.wrap} ${s.topbar}`}>
           <Part k="logo" h={h}>
