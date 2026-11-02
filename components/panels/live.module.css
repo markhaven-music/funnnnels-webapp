@@ -84,6 +84,34 @@
   }
 }
 
+/* Activity first: as tall as the map and pages beside it (contain: size keeps
+   its 80 rows from stretching the row), scrolling inside. */
+.activity {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  contain: size;
+  min-height: 560px;
+}
+.activity .stream {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+.activity .event {
+  font-size: 13px;
+  padding: 9px 18px;
+}
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.block {
+  margin-bottom: 12px;
+}
+
 .card {
   background: var(--bg-1);
   border: 1px solid transparent;

@@ -180,63 +180,14 @@ export function LivePanel() {
         />
       </div>
 
+      {/* What just happened comes first, beside where they are and which page. */}
       <div className={s.grid}>
-        <section className={s.card}>
-          <div className={s.cardHead}>
-            <div className={s.cardTitle}>Where they are</div>
-            <div className={s.legend}>
-              <span>
-                <i className={s.keyNow} /> on a page now
-              </span>
-              <span>
-                <i className={s.keyRecent} /> last 30 min
-              </span>
-            </div>
-          </div>
-          <WorldMap visitors={visitors} />
-          <Countries visitors={visitors} />
-        </section>
-
-        <section className={s.card}>
-          <div className={s.cardHead}>
-            <div className={s.cardTitle}>Which page</div>
-            <div className={s.legend}>
-              <span>
-                <i className={s.keyNow} /> now
-              </span>
-              <span>
-                <i className={s.keyRecent} /> 30 min
-              </span>
-            </div>
-          </div>
-          <Pages visitors={visitors} />
-        </section>
-      </div>
-
-      <div className={s.grid}>
-        <section className={s.card}>
+        <section className={`${s.card} ${s.activity}`}>
           <div className={s.cardHead}>
             <div className={s.cardTitle}>
-              Visitors <span className={s.count}>{active.length} now</span>
+              Activity
+              {fresh.size > 0 && <span className={s.count}>+{fresh.size} new</span>}
             </div>
-            <div className={s.cardSub}>last 30 minutes</div>
-          </div>
-          {!data ? (
-            <div className={s.empty}>Loading…</div>
-          ) : sorted.length === 0 ? (
-            <div className={s.empty}>No one in the last 30 minutes.</div>
-          ) : (
-            <div className={s.visitors}>
-              {sorted.slice(0, 60).map((v) => (
-                <VisitorRow key={v.id} v={v} now={now} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className={s.card}>
-          <div className={s.cardHead}>
-            <div className={s.cardTitle}>Activity</div>
             <div className={s.cardSub}>last 24 hours</div>
           </div>
           {!data ? (
@@ -261,7 +212,60 @@ export function LivePanel() {
             </ol>
           )}
         </section>
+
+        <div className={s.side}>
+          <section className={s.card}>
+            <div className={s.cardHead}>
+              <div className={s.cardTitle}>Where they are</div>
+              <div className={s.legend}>
+                <span>
+                  <i className={s.keyNow} /> on a page now
+                </span>
+                <span>
+                  <i className={s.keyRecent} /> last 30 min
+                </span>
+              </div>
+            </div>
+            <WorldMap visitors={visitors} />
+            <Countries visitors={visitors} />
+          </section>
+
+          <section className={s.card}>
+            <div className={s.cardHead}>
+              <div className={s.cardTitle}>Which page</div>
+              <div className={s.legend}>
+                <span>
+                  <i className={s.keyNow} /> now
+                </span>
+                <span>
+                  <i className={s.keyRecent} /> 30 min
+                </span>
+              </div>
+            </div>
+            <Pages visitors={visitors} />
+          </section>
+        </div>
       </div>
+
+      <section className={`${s.card} ${s.block}`}>
+        <div className={s.cardHead}>
+          <div className={s.cardTitle}>
+            Visitors <span className={s.count}>{active.length} now</span>
+          </div>
+          <div className={s.cardSub}>last 30 minutes</div>
+        </div>
+        {!data ? (
+          <div className={s.empty}>Loading…</div>
+        ) : sorted.length === 0 ? (
+          <div className={s.empty}>No one in the last 30 minutes.</div>
+        ) : (
+          <div className={s.visitors}>
+            {sorted.slice(0, 60).map((v) => (
+              <VisitorRow key={v.id} v={v} now={now} />
+            ))}
+          </div>
+        )}
+      </section>
 
       <OwnVisits />
     </main>
