@@ -236,4 +236,4 @@ Read after 7–10 days on clicks, landing page views and checkouts per pocket (�
 
 The lines above are the 2026-11-02 rewrite; the 2026-11-01 lines gave advice with nothing behind the click. The 30 ads were rebuilt on 2026-11-02 as `W1_<pocket>_flex_v2` (a Meta creative is immutable, so each got a new creative and a new ad; the 2026-11-01 ads are archived). Turned on 2026-11-02: campaign, 30 ad sets and 30 ads ACTIVE, €30/day.
 
-The first build (`GrindStudio_Pockets_2026-11-01`, 6 ad sets at €8 with the old Impact template) never ran and is replaced by wave 1.
+The first build (`GrindStudio_Pockets_2026-11-01`, 6 ad sets at €8 with the old Impact template) never ran, was replaced by wave 1 and archived on 2026-11-02.
