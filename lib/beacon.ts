@@ -17,6 +17,11 @@
 // and the funnels' trackers (Pixel, Clarity, neo) check PREVIEW_JS too. The tab
 // remembers it (sessionStorage), so the order page, upsells and thank-you page
 // it leads to aren't counted either; ?preview=0 ends it.
+//
+// Nor are the owner's own devices, for good: ?me=1 (or once opening
+// /api/checkout/me, linked from dashboard → Live) leaves fv:me in
+// localStorage, and from then on PREVIEW_JS is true in that browser; ?me=0
+// counts it again.
 
 export const BEACON_URL = "/api/checkout/view";
 export const STEPS = ["landing", "order", "checkout", "upsell-1", "upsell-2", "thank-you"] as const;
@@ -31,13 +36,22 @@ export type BeaconOptions = {
 };
 
 const PREVIEW_KEY = "fv:preview";
+export const ME_KEY = "fv:me";
+export const ME_PATH = "/api/checkout/me";
 
 /** An expression for inline scripts: true on a preview (see above). */
-export const PREVIEW_JS = `(function(){try{var s=location.search;if(/[?&]preview=0(?:&|$)/.test(s)){sessionStorage.removeItem('${PREVIEW_KEY}');sessionStorage.removeItem('ab_preview');return false;}if(/[?&]preview=1(?:&|$)/.test(s)){sessionStorage.setItem('${PREVIEW_KEY}','1');return true;}return sessionStorage.getItem('${PREVIEW_KEY}')==='1';}catch(e){return /[?&]preview=1(?:&|$)/.test(location.search);}})()`;
+export const PREVIEW_JS = `(function(){try{var s=location.search;if(/[?&]me=1(?:&|$)/.test(s))localStorage.setItem('${ME_KEY}','1');else if(/[?&]me=0(?:&|$)/.test(s))localStorage.removeItem('${ME_KEY}');if(localStorage.getItem('${ME_KEY}')==='1')return true;}catch(e){}try{var s=location.search;if(/[?&]preview=0(?:&|$)/.test(s)){sessionStorage.removeItem('${PREVIEW_KEY}');sessionStorage.removeItem('ab_preview');return false;}if(/[?&]preview=1(?:&|$)/.test(s)){sessionStorage.setItem('${PREVIEW_KEY}','1');return true;}return sessionStorage.getItem('${PREVIEW_KEY}')==='1';}catch(e){return /[?&]preview=1(?:&|$)/.test(location.search);}})()`;
 
 /** The same, from React code. */
 export function isPreview(): boolean {
   const s = location.search;
+  try {
+    if (/[?&]me=1(?:&|$)/.test(s)) localStorage.setItem(ME_KEY, "1");
+    else if (/[?&]me=0(?:&|$)/.test(s)) localStorage.removeItem(ME_KEY);
+    if (localStorage.getItem(ME_KEY) === "1") return true;
+  } catch {
+    // no storage: only ?preview=1 below
+  }
   try {
     if (/[?&]preview=0(?:&|$)/.test(s)) {
       sessionStorage.removeItem(PREVIEW_KEY);
@@ -54,8 +68,8 @@ export function isPreview(): boolean {
   }
 }
 
-// A small tag on previewed pages, so it's clear the visit isn't counted.
-const BADGE_JS = `(function(){var go=function(){if(document.getElementById('fv-preview'))return;var d=document.createElement('div');d.id='fv-preview';d.textContent='Preview · not counted';d.style.cssText='position:fixed;left:10px;bottom:10px;z-index:2147483647;font:600 12px/1 system-ui,sans-serif;color:#fff;background:rgba(17,17,17,.82);padding:7px 10px;border-radius:3px;pointer-events:none';document.body.appendChild(d);};if(document.body)go();else document.addEventListener('DOMContentLoaded',go);})();`;
+// A small tag on previewed pages (and the owner's devices), so it's clear the visit isn't counted.
+const BADGE_JS = `(function(){var go=function(){if(document.getElementById('fv-preview'))return;var d=document.createElement('div'),me=false;try{me=localStorage.getItem('${ME_KEY}')==='1';}catch(e){}d.id='fv-preview';d.textContent=me?'Your device · not counted':'Preview · not counted';d.style.cssText='position:fixed;left:10px;bottom:10px;z-index:2147483647;font:600 12px/1 system-ui,sans-serif;color:#fff;background:rgba(17,17,17,.82);padding:7px 10px;border-radius:3px;pointer-events:none';document.body.appendChild(d);};if(document.body)go();else document.addEventListener('DOMContentLoaded',go);})();`;
 
 // Dashboard → Live: who is on a page right now. Unlike the daily count, every
 // page opened says so ("view", with where the visitor came from on the first

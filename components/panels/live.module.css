@@ -486,6 +486,30 @@
   vertical-align: 1px;
 }
 
+/* your own visits */
+.own {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.ownText {
+  flex: 1 1 360px;
+}
+.ownText p {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--fg-2);
+  max-width: 680px;
+}
+.ownActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .liveDot,
   .dotNow,

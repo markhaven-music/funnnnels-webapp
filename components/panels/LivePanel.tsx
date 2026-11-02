@@ -2,8 +2,9 @@
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { I } from "@/components/icons";
-import { STEPS } from "@/lib/beacon";
+import { ME_PATH, STEPS } from "@/lib/beacon";
 import type { Live, LiveEvent, LiveVisitor } from "@/lib/live";
+import { KIT_HOME } from "@/lib/liveUrl";
 import { landPath, MAP_COLS, MAP_ROWS, project } from "@/lib/worldDots";
 import s from "./live.module.css";
 
@@ -12,6 +13,8 @@ import s from "./live.module.css";
 // where they are, which page, and what just happened.
 
 const POLL_MS = 5_000;
+// Where the funnel pages are, so the "don't count me" setting lands in their storage (app/api/checkout/me).
+const ME_URL = `${KIT_HOME}${ME_PATH}`;
 
 const STEP_LABEL: Record<string, string> = {
   landing: "Sales page",
@@ -258,7 +261,41 @@ export function LivePanel() {
           )}
         </section>
       </div>
+
+      <OwnVisits />
     </main>
+  );
+}
+
+// The owner's own visits: one link per browser turns them off (app/api/checkout/me).
+function OwnVisits() {
+  const [copied, setCopied] = useState(false);
+  const copy = () =>
+    navigator.clipboard
+      ?.writeText(ME_URL)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1600);
+      })
+      .catch(() => {});
+  return (
+    <section className={`${s.card} ${s.own}`}>
+      <div className={s.ownText}>
+        <div className={s.cardTitle}>Your own visits</div>
+        <p>
+          Open this link once on every phone and computer you use: from then on, that browser&apos;s visits to the funnel pages don&apos;t count here, in
+          Analytics, or in Meta Pixel, Clarity and neo. Bots are never counted.
+        </p>
+      </div>
+      <div className={s.ownActions}>
+        <a className="btn" href={ME_URL} target="_blank" rel="noreferrer">
+          Don&apos;t count this browser
+        </a>
+        <button type="button" className="btn" onClick={copy}>
+          <I.copy size={13} /> {copied ? "Copied" : "Copy link"}
+        </button>
+      </div>
+    </section>
   );
 }
 
