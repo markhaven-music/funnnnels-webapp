@@ -16,7 +16,9 @@ import { supabase } from "@/lib/supabase";
 // with that email, with its download buttons. No password, no account table:
 //   - the link and the session are signed tokens (email, language, expiry);
 //   - the purchases are asked to Stripe (metadata.email) and read from
-//     paypal_sales, then each one is checked like on the thank-you pages.
+//     paypal_sales, then each one is checked like on the thank-you pages;
+//   - purchases made before funnnnels (ClickFunnels) are rows of
+//     legacy_purchases (db/legacy-purchases.sql), downloaded from /shop/download.
 
 export type Lang = "en" | "fr" | "es" | "de" | "it";
 export const LANGS: readonly Lang[] = ["en", "fr", "es", "de", "it"];
@@ -147,10 +149,10 @@ const owned = (funnel: string) => Boolean(SHELVES[funnel]) || funnel === SHOP_SL
 const SHOP_COVER = "/funnels/dashboard/orders.webp"; // for products without a picture
 
 export type Purchase = {
-  order: Order;
+  id: string; // the order's, or legacy:<product>
   funnel: string;
   name: string; // the product, or the upsell bought after it
-  date: Date;
+  date: Date | null; // unknown for some legacy purchases
   lang: string; // the language of the funnel it was bought in
   cover: string;
   files: { key: string; label: string; href: string }[];
@@ -207,10 +209,10 @@ export async function purchasesOf(email: string): Promise<Purchase[]> {
       }),
     ),
   );
-  return ordered.map(({ order, funnel, date, lang }) => {
+  const current = ordered.map(({ order, funnel, date, lang }) => {
       if (funnel === SHOP_SLUG) {
         return {
-          order,
+          id: order.id,
           funnel,
           date,
           lang,
@@ -222,7 +224,7 @@ export async function purchasesOf(email: string): Promise<Purchase[]> {
       const shelf = SHELVES[funnel];
       const label = (k: string) => names[funnel]?.[k] ?? shelf.labels[k] ?? k;
       return {
-        order,
+        id: order.id,
         funnel,
         date,
         lang,
@@ -231,6 +233,39 @@ export async function purchasesOf(email: string): Promise<Purchase[]> {
         files: shelf.unlocked(order.items).map((k) => ({ key: k, label: label(k), href: shelf.download(order, k) })),
       };
     });
+  return [...current, ...(await legacyPurchases(email))];
+}
+
+// ── Bought before funnnnels ────────────────────────────────────────────────
+// A catalog product each, after the funnnnels orders (they're older). The
+// download link has no order: /shop/download checks the signed-in session
+// against legacy_purchases (ownsLegacy).
+async function legacyPurchases(email: string): Promise<Purchase[]> {
+  if (!isEmail(email)) return [];
+  const { data, error } = await supabase().from("legacy_purchases").select("product, bought_at").eq("email", email).order("bought_at", { ascending: false, nullsFirst: false });
+  if (error) {
+    console.error("account: legacy purchases", error.message);
+    return [];
+  }
+  const rows = data ?? [];
+  const labels = await shopLabels(rows.map((r) => r.product)).catch((): Record<string, ShopLabel> => ({}));
+  return rows.map((r) => ({
+    id: `legacy:${r.product}`,
+    funnel: "legacy",
+    name: labels[r.product]?.name ?? r.product,
+    date: r.bought_at ? new Date(r.bought_at) : null,
+    lang: "", // not known: the account keeps the sign-in's language
+    cover: labels[r.product]?.image?.sm ?? SHOP_COVER,
+    files: [{ key: r.product, label: labels[r.product]?.name ?? r.product, href: `/shop/download?file=${r.product}` }],
+  }));
+}
+
+/** Whether this email bought this catalog product before funnnnels. */
+export async function ownsLegacy(email: string, product: string): Promise<boolean> {
+  if (!isEmail(email)) return false;
+  const { data, error } = await supabase().from("legacy_purchases").select("product").eq("email", email).eq("product", product).maybeSingle();
+  if (error) throw error;
+  return Boolean(data);
 }
 
 /** The language a buyer bought in most recently: their account's language. */

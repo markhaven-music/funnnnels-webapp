@@ -21,6 +21,7 @@ const FUNNEL_HOME: Record<string, string> = {
   account: "https://m.thegrind.studio", // the customer login (app/account)
   shop: "https://m.thegrind.studio", // the shop (app/shop)
 };
+const CF_LOGIN = /^\/(customer-center|contacts\/sign_in)(\/.*)?$/;
 const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
 
 // Funnel pages cached on the CDN once per currency (app/(funnels)/<slug>/[currency]).
@@ -106,6 +107,16 @@ export function proxy(request: NextRequest) {
     after(() => import("@/lib/stripeSales").then((m) => m.recordStripePayment(paid)));
   }
   const host = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
+
+  // ClickFunnels' customer login (www.thegrind.studio/customer-center, which
+  // sent buyers on to /contacts/sign_in): its old links and bookmarks now open
+  // ours, shown in place, since a redirect from here would leave the brand
+  // domain that forwards to us.
+  if (CF_LOGIN.test(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/account";
+    return NextResponse.rewrite(url);
+  }
 
   const slug = kitSlug(pathname);
   const loc = localized(pathname);

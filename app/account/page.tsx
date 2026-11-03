@@ -91,12 +91,12 @@ export default async function Account({ searchParams }: { searchParams: Promise<
           {purchases.length === 0 && <p className={a.none}>{c.none}</p>}
           <ul className={a.items}>
             {purchases.map((p) => (
-              <li key={p.order.id} className={a.item}>
+              <li key={p.id} className={a.item}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img className={a.cover} src={p.cover} alt="" width={120} height={120} loading="lazy" decoding="async" />
                 <div className={a.itemBody}>
                   <h2 className={a.name}>{p.name}</h2>
-                  <p className={a.date}>{c.bought(date.format(p.date))}</p>
+                  {p.date && <p className={a.date}>{c.bought(date.format(p.date))}</p>}
                   <div className={a.files}>
                     {p.files.map((f, i) => (
                       <a key={f.key} className={i === 0 ? a.file : a.fileAlt} href={f.href}>
