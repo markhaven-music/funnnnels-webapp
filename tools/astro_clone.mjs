@@ -1,36 +1,39 @@
 // Turns a page of the Astro site (grind-studio-landing-pages, live on
 // m.thegrind.studio) into a funnnnels template, 1:1: its built HTML, CSS and
 // scripts, with
-//   - its assets (/_astro/*, /icons/*) downloaded into public/funnels/<slug>/
-//     (a/ and icons/) and pointed there,
+//   - its assets (/_astro/*, and /icons, /media, /audio, /brand from the site's
+//     public folder) downloaded into public/funnels/<slug>/ (a/, icons/, …) and pointed there,
 //   - every link to the ClickFunnels order page pointing at {{ORDER}},
 //   - the Astro beacon (dashboard → Live as funnel "astro") replaced by
 //     {{HEAD}}, funnnnels' own beacon,
 //   - the pixels' value and currency as {{VALUE}} and {{CUR}}.
 //
-//   node tools/astro_clone.mjs <page url> <slug> <clickfunnels order url>
+//   node tools/astro_clone.mjs <page url> <slug> <clickfunnels order url> [name]
 //
-// Writes app/(funnels)/<slug>/astro/landing.ts. Fetch the page with ?me=1 off
-// (plain URL): the HTML is the same for every visitor.
-// Used for the Famous Beats Bundle (2026-11-02):
+// Writes app/(funnels)/<slug>/astro/<name>.ts (name: "landing" unless given,
+// for a funnel's second landing; its assets then go in public/funnels/<slug>/<name>/).
+// The page is fetched plainly (no ?me=1): the HTML is the same for every visitor.
+// Used for the Famous Beats Bundle (2026-11-02) and the Drum Kit's /bounce (2026-11-03):
 //   node tools/astro_clone.mjs https://m.thegrind.studio/famous-beats-bundle famous-beats-bundle https://www.thegrind.studio/order-famous-beats-bundle
+//   node tools/astro_clone.mjs https://m.thegrind.studio/bounce midi-drum-kit https://www.thegrind.studio/spot-available-midi-drum-kit-ad-15m30 bounce
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const [url, slug, orderUrl] = process.argv.slice(2);
-if (!url || !slug || !orderUrl) throw new Error("usage: node tools/astro_clone.mjs <page url> <slug> <clickfunnels order url>");
+const [url, slug, orderUrl, name = "landing"] = process.argv.slice(2);
+if (!url || !slug || !orderUrl) throw new Error("usage: node tools/astro_clone.mjs <page url> <slug> <clickfunnels order url> [name]");
 const ORIGIN = new URL(url).origin;
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
-const PUB = `/funnels/${slug}`;
+const PUB = name === "landing" ? `/funnels/${slug}` : `/funnels/${slug}/${name}`;
 
 const res = await fetch(url);
 if (!res.ok) throw new Error(`${url}: ${res.status}`);
 let html = await res.text();
 
-// Assets: everything under /_astro and /icons, plus what the modules import.
-const assets = new Set(html.match(/\/(?:_astro|icons)\/[^"'\s,)]+/g) ?? []);
+// Assets: everything under /_astro and the public folders, plus what the modules import.
+const FOLDERS = ["icons", "media", "audio", "brand"];
+const assets = new Set(html.match(new RegExp(`\\/(?:_astro|${FOLDERS.join("|")})\\/[^"'\\s,)]+`, "g")) ?? []);
 const queue = [...assets].filter((a) => a.endsWith(".js"));
 while (queue.length) {
   const js = queue.shift();
@@ -47,7 +50,8 @@ for (const a of assets) {
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, Buffer.from(await r.arrayBuffer()));
 }
-html = html.replaceAll("/_astro/", `${PUB}/a/`).replaceAll('"/icons/', `"${PUB}/icons/`);
+html = html.replaceAll("/_astro/", `${PUB}/a/`);
+for (const f of FOLDERS) html = html.replace(new RegExp(`(["'(\\s,])/${f}/`, "g"), `$1${PUB}/${f}/`);
 
 // The CTAs: our order page instead of ClickFunnels'.
 const ctas = html.split(orderUrl).length - 1;
@@ -63,7 +67,7 @@ html = html.replace(beacon[0], "<script>{{HEAD}}</script>");
 html = html.replace(/const value = \d+(?:\.\d+)?;\nconst currency = "EUR";/g, 'const value = {{VALUE}};\nconst currency = "{{CUR}}";');
 if (!html.includes("{{CUR}}")) throw new Error("no pixel currency found");
 
-const out = `${ROOT}app/(funnels)/${slug}/astro/landing.ts`;
+const out = `${ROOT}app/(funnels)/${slug}/astro/${name}.ts`;
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(
   out,
