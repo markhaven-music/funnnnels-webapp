@@ -2,7 +2,9 @@ import { checkoutPages, nextStep, offerOf, resolveFunnel } from "@/lib/funnels";
 import { after } from "next/server";
 import { recordPayPalSale } from "@/lib/analytics";
 import { getOrder } from "@/lib/orders";
+import { sendSaleToNeo } from "@/lib/neo";
 import { noteSale } from "@/lib/sales";
+import { saleName } from "@/lib/stripeSales";
 import { isPayPalOrderId, paypal, paypalCheckoutUrl, paypalConfigured, PayPalError, type PayPalOrder } from "@/lib/paypal";
 
 export const runtime = "nodejs";
@@ -46,9 +48,15 @@ export async function GET(req: Request) {
     } catch (err) {
       console.error("paypal sale not recorded", err);
     }
-    // The order too (the receipt email goes from there), once the buyer is on their way.
+    // The order too (the receipt email goes from there), once the buyer is on their way,
+    // and neo hears of it now: a buyer who leaves on an upsell never reaches the
+    // thank-you page that used to tell it (neo dedupes by order id).
     const lang = pages.lang ?? "en";
-    after(async () => noteSale(await getOrder(orderId, f.slug), f.slug, lang));
+    after(async () => {
+      const order = await getOrder(orderId, f.slug);
+      await noteSale(order, f.slug, lang);
+      if (order) await sendSaleToNeo(order, saleName(f, order));
+    });
   }
   // Next: the upsells (with the order and what was bought so far), then the thank-you page.
   if (offer && isPayPalOrderId(parent)) {
