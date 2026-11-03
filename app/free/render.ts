@@ -167,6 +167,12 @@ function pictures(html: string, first: number): string {
   let hero = "";
   html = html.replace(/<img\b[^>]*>/g, (tag) => {
     tag = tag.replace(/\sloading="[^"]*"/, "").replace(/\sdecoding="[^"]*"/, "");
+    // ClickFunnels' .elImage sets aspect-ratio:auto, which drops the width/height
+    // ratio: the picture took no room until it loaded and the form jumped down
+    // (CLS 0.24 on PageSpeed). Inline, the ratio wins.
+    const w = tag.match(/\swidth="(\d+)"/)?.[1];
+    const h = tag.match(/\sheight="(\d+)"/)?.[1];
+    if (w && h && !/\sstyle="/.test(tag)) tag = tag.replace("<img ", `<img style="aspect-ratio:${w}/${h}" `);
     n++;
     if (n < first) return tag;
     if (n === first) {
