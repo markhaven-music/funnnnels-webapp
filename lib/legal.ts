@@ -101,7 +101,7 @@ export const LEGAL_PAGES: LegalPage[] = [
   {
     slug: "privacy-policy",
     title: "Privacy Policy",
-    updated: "January 9, 2026",
+    updated: "November 3, 2026",
     blocks: [
       {
         h: "1. INTRODUCTION AND DATA CONTROLLER",
@@ -131,7 +131,7 @@ export const LEGAL_PAGES: LegalPage[] = [
         h: "5. DATA SHARING WITH THIRD PARTIES",
       },
       {
-        p: "We do not sell or rent your personal data to third parties for their marketing purposes. We only share your information with reliable service providers who are necessary for the operation of our business, such as ClickFunnels for website hosting, secure payment processors for transactions, and email marketing platforms for communication delivery. All such providers are bound by confidentiality agreements and are obligated to use the data exclusively for the purposes we have instructed.",
+        p: "We do not sell or rent your personal data to third parties for their marketing purposes. We only share your information with reliable service providers who are necessary for the operation of our business, such as Vercel for website hosting, Supabase for data storage, Cloudflare for file downloads, secure payment processors (Stripe and PayPal) for transactions, and Amazon Web Services for email delivery. All such providers are bound by confidentiality agreements and are obligated to use the data exclusively for the purposes we have instructed.",
       },
       {
         h: "6. INTERNATIONAL DATA TRANSFERS",
