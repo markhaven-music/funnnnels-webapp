@@ -1,0 +1,93 @@
+/* The legal pages (app/legal): the homepage's look (app/home), black with
+   white text and the one yellow, set for long reading. */
+.page {
+  --y: #f5b800;
+  --text: rgb(255 255 255 / 0.88);
+  --mute: rgb(255 255 255 / 0.62);
+  min-height: 100vh;
+  background: #070707;
+  color: var(--text);
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+}
+.page a {
+  color: inherit;
+}
+.top {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 22px 16px;
+}
+.logo {
+  display: inline-block;
+  line-height: 0;
+}
+.logo img {
+  width: auto;
+  height: 20px;
+}
+.doc {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 72px;
+}
+.doc p,
+.doc ul,
+.doc ol {
+  margin: 0 0 16px;
+}
+.doc ul,
+.doc ol {
+  padding-left: 1.3em;
+}
+.doc ul {
+  list-style: disc;
+}
+.doc ol {
+  list-style: decimal;
+}
+.doc li {
+  margin-bottom: 8px;
+}
+.doc li::marker {
+  color: var(--y);
+}
+.h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(34px, 7vw, 52px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+.updated {
+  margin-top: 10px !important;
+  margin-bottom: 36px !important;
+  color: var(--mute);
+  font-size: 15px;
+}
+.h2 {
+  margin: 40px 0 12px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.address {
+  display: grid;
+  margin-top: 32px;
+  color: var(--mute);
+  font-style: normal;
+}
+.footer {
+  padding: 32px 16px 56px;
+  background: #111;
+  color: var(--mute);
+  font-size: 14px;
+  text-align: center;
+}
+.footer a[aria-current] {
+  color: var(--y);
+  text-decoration: none;
+}

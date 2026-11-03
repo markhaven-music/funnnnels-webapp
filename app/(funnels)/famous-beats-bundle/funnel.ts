@@ -20,9 +20,9 @@ export const funnel = {
   support: "support@thegrind.studio",
   guaranteeDays: 14,
   legal: {
-    terms: "https://www.thegrind.studio/terms-and-conditions",
-    privacy: "https://www.thegrind.studio/privacy-policy",
-    refund: "https://www.thegrind.studio/refund-policy",
+    terms: "/terms-and-conditions",
+    privacy: "/privacy-policy",
+    refund: "/refund-policy",
   },
   tagline: "Bundle of 32 volumes of Famous Beats MIDI Pack.",
   // ClickFunnels sells in euros only; dollars follow the €27 / $27 rule (lib/geo.ts).

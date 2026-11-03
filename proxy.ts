@@ -21,7 +21,12 @@ const FUNNEL_HOME: Record<string, string> = {
   account: "https://m.thegrind.studio", // the customer login (app/account)
   shop: "https://m.thegrind.studio", // the shop (app/shop)
   home: "https://m.thegrind.studio", // the homepage (app/home), the brand domain's /
+  "terms-and-conditions": "https://m.thegrind.studio", // the legal pages (app/legal)
+  "privacy-policy": "https://m.thegrind.studio",
+  "refund-policy": "https://m.thegrind.studio",
 };
+// Terms, Privacy, Refund policy: served by app/legal at ClickFunnels' paths.
+const LEGAL = new Set(["/terms-and-conditions", "/privacy-policy", "/refund-policy"]);
 const CF_LOGIN = /^\/(customer-center|contacts\/sign_in)(\/.*)?$/;
 const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
 
@@ -43,7 +48,7 @@ const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/to
 const LOCALIZED: Record<string, readonly string[]> = { "midi-drum-kit": DRUM_KIT_LANGS };
 const LANG_PREFIXES = new Set(["fr", "it", "de", "nl", "es"]);
 
-const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", "famous-beats-bundle", "shop", "home", ...LANG_PREFIXES]);
+const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", "famous-beats-bundle", "shop", "home", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", ...LANG_PREFIXES]);
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
@@ -84,6 +89,7 @@ const PUBLIC = [
   /^\/famous-beats-bundle(\/|$)/,
   /^\/shop(\/|$)/, // the shop's pages, its thank-you page and downloads
   /^\/home(\/|$)/, // the homepage
+  /^\/legal\/[a-z-]+$/, // the legal pages
   /^\/api\/checkout\/shop\/(intent|paypal)$/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
@@ -114,6 +120,12 @@ export function proxy(request: NextRequest) {
   // sent buyers on to /contacts/sign_in): its old links and bookmarks now open
   // ours, shown in place, since a redirect from here would leave the brand
   // domain that forwards to us.
+  if (LEGAL.has(pathname.replace(/\/$/, ""))) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/legal${pathname.replace(/\/$/, "")}`;
+    return NextResponse.rewrite(url);
+  }
+
   if (CF_LOGIN.test(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/account";
