@@ -1,0 +1,347 @@
+/* Grind Studio's homepage (app/home). The funnel pages' rules: one yellow
+   (#f5b800) on black, white text, no bordered boxes, a juicy key for every
+   call to action (jazz-midi-pack/btn.module.css), one column on a phone and
+   the picture beside the copy on a wide screen. */
+.page {
+  --y: #f5b800;
+  --y-gloss: #ffe14d;
+  --y-deep: #d39a00;
+  --y-lip: #7a5600;
+  --y-glow: rgb(245 184 0 / 0.5);
+  --bg: #070707;
+  --band: #111;
+  --text: rgb(255 255 255 / 0.88);
+  --mute: rgb(255 255 255 / 0.62);
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  overflow-x: clip;
+}
+.page :where(h1, h2, h3, p, ul, ol, blockquote) {
+  margin: 0;
+}
+.page :where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+.page a {
+  color: inherit;
+}
+.y {
+  color: var(--y);
+}
+
+/* ─── bar ────────────────────────────────── */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1120px;
+  height: 64px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.logo {
+  display: block;
+  line-height: 0;
+}
+.logo img {
+  width: auto;
+  height: 20px;
+}
+.account {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 4px;
+  background: var(--band);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.account:hover {
+  color: var(--y);
+}
+
+/* ─── type ───────────────────────────────── */
+.h1,
+.h2 {
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-wrap: balance;
+}
+.h1 {
+  max-width: 14em;
+  margin: 0 auto;
+  font-size: clamp(38px, 9vw, 68px);
+  line-height: 1.04;
+}
+.h2 {
+  max-width: 18em;
+  margin: 0 auto 40px;
+  font-size: clamp(30px, 6.4vw, 46px);
+  line-height: 1.1;
+}
+.h3 {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.h3 a {
+  text-decoration: none;
+}
+
+/* ─── hero ───────────────────────────────── */
+.hero {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 36px 16px 64px;
+  text-align: center;
+}
+.lead {
+  max-width: 32em;
+  margin: 18px auto 0;
+  font-size: clamp(17px, 2.4vw, 20px);
+  color: var(--mute);
+}
+.heroPic {
+  display: block;
+  width: min(300px, 50vw); /* small enough on a phone for the button to be on the first screen */
+  height: auto;
+  margin: 24px auto 28px;
+  filter: drop-shadow(0 30px 50px rgb(245 184 0 / 0.18));
+}
+.note {
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--mute);
+}
+
+/* ─── sections ───────────────────────────── */
+.section,
+.band,
+.yband {
+  padding: 72px 16px;
+}
+.band {
+  background: var(--band);
+}
+/* Drawn when scrolled near (docs/page-speed.md rule 5); nothing in them is fixed or overflows. */
+.lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* ─── packs ──────────────────────────────── */
+.packs {
+  display: grid;
+  gap: 72px;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.pack {
+  display: grid;
+  gap: 24px;
+  align-items: center;
+}
+.packPic {
+  display: block;
+  line-height: 0;
+}
+.packPic img {
+  display: block;
+  width: min(300px, 72vw);
+  height: auto;
+  margin: 0 auto;
+}
+/* A box on its own black square: the square's edges fade into the band. */
+.fade {
+  mask-image: radial-gradient(closest-side, #000 72%, transparent);
+}
+.packText .h3 {
+  font-size: clamp(26px, 3.2vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+.line {
+  margin-top: 8px;
+  font-size: 18px;
+  color: var(--text);
+}
+.points {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 30px;
+  color: var(--mute);
+}
+.points li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.tick {
+  flex: none;
+  margin-top: 4px;
+  color: var(--y);
+}
+
+/* ─── quotes ─────────────────────────────── */
+.quotes,
+.reviews {
+  display: grid;
+  gap: 36px;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.quote {
+  color: #fff;
+  font-size: clamp(20px, 3vw, 24px);
+  font-weight: 600;
+  line-height: 1.35;
+}
+.who {
+  margin-top: 10px;
+  color: var(--y);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.role {
+  color: var(--mute);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.after {
+  max-width: 30em;
+  margin: 48px auto 0;
+  color: var(--mute);
+  font-size: 18px;
+  text-align: center;
+}
+
+/* ─── how it works ───────────────────────── */
+.steps {
+  display: grid;
+  gap: 36px;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.steps li {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+.steps p {
+  color: var(--mute);
+}
+.num {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: var(--y);
+  color: #000;
+  font-size: 20px;
+  font-weight: 800;
+}
+.daws {
+  display: block;
+  width: min(600px, 100%);
+  height: auto;
+  margin: 48px auto 0;
+  opacity: 0.8;
+}
+
+/* ─── reviews ────────────────────────────── */
+.stars {
+  color: var(--y);
+  font-size: 18px;
+  letter-spacing: 0.12em;
+}
+.review {
+  margin-top: 6px;
+  color: #fff;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ─── past buyers ────────────────────────── */
+.yband {
+  background: var(--y);
+  color: #000;
+  text-align: center;
+}
+.yband .h2 {
+  margin-bottom: 14px;
+  color: #000;
+}
+.yband p {
+  max-width: 30em;
+  margin: 0 auto 28px;
+  font-size: 18px;
+}
+.dark {
+  display: inline-flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 28px;
+  border-radius: 4px;
+  background: #000;
+  color: #fff !important;
+  font-weight: 700;
+  text-decoration: none;
+}
+.dark:hover {
+  background: #1c1c1c;
+}
+
+/* ─── footer ─────────────────────────────── */
+.footer {
+  padding: 40px 16px 56px;
+  color: var(--mute);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ─── wide screens: picture beside the copy, sides alternating ─── */
+@media (min-width: 860px) {
+  .section,
+  .band,
+  .yband {
+    padding: 104px 24px;
+  }
+  .pack {
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+  }
+  .flip .packPic {
+    order: 2;
+  }
+  .packPic img {
+    width: min(360px, 100%);
+  }
+  .packText a[data-cta] {
+    margin-inline: 0;
+  }
+  .quotes,
+  .reviews {
+    grid-template-columns: 1fr 1fr;
+    gap: 48px 64px;
+  }
+  .steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+  }
+}
