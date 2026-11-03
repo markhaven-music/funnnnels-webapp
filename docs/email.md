@@ -11,6 +11,8 @@ Vercel), from one job:
 | Receipt with the downloads | 5 min after a paid order, upsells bought right after it in the same email | `lib/mailCopy.ts` (EN/FR/ES/DE/IT) |
 | 💾 Backup Link | 10 min after the receipt: the same download links again and the account page, for buyers whose receipt got buried (ClickFunnels did it) | `lib/backupCopy.ts` |
 | Abandoned checkout | MIDI Drum Kit: 3 emails, 15 min after step 1, then 6 h, then 18 h later (ClickFunnels' words, EN/FR/ES/DE/IT); other funnels: 1 email after 1 h. Stops when they buy | `lib/abandonCopy.ts`, `lib/mailCopy.ts` |
+| Free pack download | Right after an opt-in on a free pack's page (Rolls, Bounce): the link to the zip, every time they ask | `app/free/firstEmail.ts` |
+| Free pack follow-ups | Backup link 1 h after the opt-in, "checkin' in" 24 h later, the Mystery Hooks gift 24 h later, hooks tips 48 h later: "Free Rolls pack" (tag `lead-rolls`) and "Free Bounce pack" (`bounce-pack-ig`), `db/free-leads.sql` | Dashboard → Automations |
 | After a Drum Kit purchase | "How to use" 1 h after, "Fragments" tip 24 h after, "Bonus" folder 48 h later: one sequence per language (`db/email-series-seed.sql`) | Dashboard → Automations |
 | Grind Minute (switched off) | 42 production tips, every 3 days: one sequence per language, ready but off since 2026-10-30, so no one gets it; words in `db/grind-minute/*.txt` | Dashboard → Automations |
 | Sequences | a contact gets the trigger tag → step 1, step 2 N hours later…; a sequence can be for one language | Dashboard → Automations |
@@ -58,8 +60,19 @@ On 2026-10-29 the automations of the ClickFunnels workspace (24 workflows, 98
 emails) were read; four came over (the backup link and Grind Minute on 2026-10-30): the Meta Ads funnel's abandoned checkout and
 the Drum Kit's after-purchase emails (`db/email-series.sql`,
 `db/email-series-seed.sql`). Left in ClickFunnels: the abandoned-checkout copies
-of old price tests (same three emails) and the free-pack lead sequences (Rolls, Mystery Hooks, ESSENTIAL), whose opt-in
-pages aren't in funnnnels.
+of old price tests (same three emails) and the free-pack lead sequences, which
+came over on 2026-11-03 with their pages (below).
+
+On 2026-11-03 the free lead magnets came over (`app/free`): ClickFunnels' opt-in
+and download pages at their old paths (Rolls, Bounce, the Mystery Hooks page,
+the Free Store and its two product pages), the zips in R2 (`free/`), the
+download email sent by `/api/optin`, and the Rolls and Bounce follow-ups word
+for word as sequences (`db/free-leads.sql`). ClickFunnels' "[#1] (FREE) Rolls
+Sequence" ran the Mystery Hooks workflow after two days; here its two emails
+are the sequences' last steps, and they end there (ClickFunnels went on to
+Grind Minute, switched off here). Not copied: the SMS step, the 50/50 test's
+"yo" email, and the "ESSENTIAL" and "MIDI Drum Kit to Leads" workflows, which
+had no trigger in ClickFunnels (nobody entered them).
 
 On 2026-10-30 its 4,718 contacts were imported (dashboard → Contacts: source
 `clickfunnels`, its tags kept, `clickfunnels` on all, `buyer` on the 649 who

@@ -2,6 +2,7 @@ import { after, NextResponse, type NextRequest } from "next/server";
 import { COUNTRY_COOKIE, currencyFor, visitorCountry } from "@/lib/geo";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
+import { CF_PATHS as FREE_PAGES, CF_REDIRECTS as FREE_REDIRECTS } from "@/app/free/packs";
 
 // funnnnels.com is the dashboard, behind ADMIN_PASSWORD. Funnels are public
 // but live on their brand's domain: m.thegrind.studio forwards /jazz-midi-pack
@@ -24,6 +25,7 @@ const FUNNEL_HOME: Record<string, string> = {
   "terms-and-conditions": "https://m.thegrind.studio", // the legal pages (app/legal)
   "privacy-policy": "https://m.thegrind.studio",
   "refund-policy": "https://m.thegrind.studio",
+  free: "https://m.thegrind.studio", // the free packs' pages and downloads (app/free)
 };
 // Terms, Privacy, Refund policy: served by app/legal at ClickFunnels' paths.
 const LEGAL = new Set(["/terms-and-conditions", "/privacy-policy", "/refund-policy"]);
@@ -48,7 +50,7 @@ const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/to
 const LOCALIZED: Record<string, readonly string[]> = { "midi-drum-kit": DRUM_KIT_LANGS };
 const LANG_PREFIXES = new Set(["fr", "it", "de", "nl", "es"]);
 
-const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", "famous-beats-bundle", "shop", "home", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", ...LANG_PREFIXES]);
+const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", "famous-beats-bundle", "shop", "home", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", "free", ...LANG_PREFIXES]);
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
@@ -90,6 +92,7 @@ const PUBLIC = [
   /^\/shop(\/|$)/, // the shop's pages, its thank-you page and downloads
   /^\/home(\/|$)/, // the homepage
   /^\/legal\/[a-z-]+$/, // the legal pages
+  /^\/free\/[a-z-]+(\/[a-z-]+)?$/, // the free packs' pages and downloads (app/free)
   /^\/api\/checkout\/shop\/(intent|paypal)$/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
@@ -115,6 +118,19 @@ export function proxy(request: NextRequest) {
     after(() => import("@/lib/stripeSales").then((m) => m.recordStripePayment(paid)));
   }
   const host = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
+
+  // The free packs' ClickFunnels pages (app/free/packs.ts), at their old paths,
+  // served by app/free/<page>. The funnels' own addresses (which ClickFunnels
+  // redirected to their first page) show that page in place: a redirect from
+  // here would name this origin, not the brand domain that forwards to it.
+  const plain = pathname.replace(/\/$/, "");
+  const free = FREE_PAGES[FREE_REDIRECTS[plain] ?? plain];
+  if (free) {
+    if (DASHBOARD_HOSTS.has(host)) return NextResponse.redirect(`${KIT_HOME}${pathname}${request.nextUrl.search}`, 308);
+    const url = request.nextUrl.clone();
+    url.pathname = `/free/${free}`;
+    return NextResponse.rewrite(url);
+  }
 
   // ClickFunnels' customer login (www.thegrind.studio/customer-center, which
   // sent buyers on to /contacts/sign_in): its old links and bookmarks now open
