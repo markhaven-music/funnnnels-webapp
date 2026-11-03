@@ -79,8 +79,9 @@ out buyers by product; here the TOP HITS emails leave out
 on ClickFunnels' Drum Kit buyers, the `grindstudio-buyer` / `mididrumkit-buyer`
 tags, and given to new Drum Kit buyers; no sequence starts on it, unlike
 `buyer-midi-drum-kit`). "A Sunday with the classics" (Nov 22) sells the Famous
-Beats Bundle alone, which funnnnels has no page for: it's a draft here and
-still scheduled in ClickFunnels. The broadcasts of Nov 3–15 stay in
+Beats Bundle alone: a draft here until its funnnnels page went live, scheduled
+here since 2026-11-03 with the link on m.thegrind.studio/famous-beats-bundle
+(ClickFunnels, closed by then, can't send its copy). The broadcasts of Nov 3–15 stay in
 ClickFunnels.
 
 ## Testing
