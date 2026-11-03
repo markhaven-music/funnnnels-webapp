@@ -56,6 +56,7 @@ ${Object.entries(ICONS).map(([n, i]) => `.fa-${n}::before{${mask(i)}}`).join("\n
 .fa-spin{animation:fa-spin 2s linear infinite}@keyframes fa-spin{to{transform:rotate(360deg)}}
 .fv-error{margin:10px 0 0;color:#ff4d4d;font-size:14px;text-align:center}
 img[width][height]{height:auto}
+@media (max-width:770px){[data-page-element="Image/V2"].elImageWrapper{width:100%}}
 @font-face{font-family:"Archivo Fallback";src:local("Arial"),local("ArialMT"),local("Liberation Sans"),local("LiberationSans"),local("Arimo");size-adjust:98.7%;ascent-override:88.96%;descent-override:21.28%;line-gap-override:0%}`;
 
 // The web fonts arrive after the first paint, and text in the stand-in font
@@ -168,8 +169,9 @@ function pictures(html: string, first: number): string {
   html = html.replace(/<img\b[^>]*>/g, (tag) => {
     tag = tag.replace(/\sloading="[^"]*"/, "").replace(/\sdecoding="[^"]*"/, "");
     // ClickFunnels' .elImage sets aspect-ratio:auto, which drops the width/height
-    // ratio: the picture took no room until it loaded and the form jumped down
-    // (CLS 0.24 on PageSpeed). Inline, the ratio wins.
+    // ratio. Inline, the ratio wins; with the wrappers' full width on phones
+    // (ICON_CSS), a picture keeps its room before it loads (the form jumped
+    // 236 px on the first paint: CLS 0.24 on PageSpeed).
     const w = tag.match(/\swidth="(\d+)"/)?.[1];
     const h = tag.match(/\sheight="(\d+)"/)?.[1];
     if (w && h && !/\sstyle="/.test(tag)) tag = tag.replace("<img ", `<img style="aspect-ratio:${w}/${h}" `);
