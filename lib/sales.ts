@@ -117,7 +117,7 @@ export async function ordersByEmail(email: string): Promise<OrderRow[]> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function toOrderRow(r: any): OrderRow {
+export function toOrderRow(r: any): OrderRow {
   return {
     id: r.id,
     provider: r.provider,

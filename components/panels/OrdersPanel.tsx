@@ -1,19 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { OrderRow } from "@/lib/sales";
 import e from "./email.module.css";
+import { OrderDrawer, money } from "./OrderDetail";
 
 // Dashboard → Orders: every paid order (lib/sales.ts), newest first, with
-// whether its receipt email went out.
+// whether its receipt email went out. A row opens everything about that
+// order (OrderDetail.tsx).
 
 const DAY = 86_400_000;
-
-function money(cents: number, currency: string): string {
-  const n = cents / 100;
-  const s = Number.isInteger(n) ? n.toLocaleString("en-US") : n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return currency === "eur" ? `€${s}` : `$${s}`;
-}
 
 function totals(orders: OrderRow[], since = 0) {
   const o = orders.filter((x) => Date.parse(x.createdAt) >= since);
@@ -45,6 +41,7 @@ export function OrdersPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [q, setQ] = useState("");
+  const [open, setOpen] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/orders", { cache: "no-store" })
@@ -62,6 +59,16 @@ export function OrdersPanel() {
     const needle = q.trim().toLowerCase();
     return needle ? orders.filter((o) => [o.email, o.name, o.id, o.funnel].some((v) => v?.toLowerCase().includes(needle))) : orders;
   }, [orders, q]);
+
+  const close = useCallback(() => setOpen(null), []);
+  const step = useCallback(
+    (dir: 1 | -1) =>
+      setOpen((cur) => {
+        const i = shown.findIndex((o) => o.id === cur);
+        return shown[i + dir]?.id ?? cur;
+      }),
+    [shown],
+  );
 
   const stats = [
     { label: "ORDERS", value: String(all.orders), sub: `${week.orders} in the last 7 days` },
@@ -116,7 +123,7 @@ export function OrdersPanel() {
           {shown.slice(0, 500).map((o) => {
             const r = receipt(o);
             return (
-              <div key={o.id} className={e.row} style={COLS}>
+              <button key={o.id} type="button" className={e.rowButton} style={{ ...COLS, ...(open === o.id ? { background: "var(--bg-2)" } : null) }} onClick={() => setOpen(o.id)}>
                 <span className={e.mono}>{when(o.createdAt)}</span>
                 <span className={e.cell} title={o.id}>
                   <span className={e.strong}>{o.email ?? "—"}</span>
@@ -132,11 +139,13 @@ export function OrdersPanel() {
                 <span className={`${e.chip} ${r.cls}`} title={r.title}>
                   {r.label}
                 </span>
-              </div>
+              </button>
             );
           })}
         </div>
       )}
+
+      {open ? <OrderDrawer id={open} onClose={close} onOpen={setOpen} onStep={step} /> : null}
     </main>
   );
 }
