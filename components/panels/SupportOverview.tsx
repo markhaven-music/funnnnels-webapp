@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Conversation } from "@/lib/support";
+import { I } from "@/components/icons";
 import type { Overview, OverviewItem, Priority } from "@/lib/supportOverview";
 import s from "./support.module.css";
 
@@ -10,8 +11,9 @@ import s from "./support.module.css";
 
 const CHIP: Record<Priority, string> = { urgent: s.p_urgent, high: s.p_high, normal: s.p_normal, low: s.p_low, ignore: s.p_low };
 
-function Item({ item, name, onOpen }: { item: OverviewItem; name: string; onOpen: (c: string) => void }) {
+function Item({ item, name, onOpen, onDone }: { item: OverviewItem; name: string; onOpen: (c: string) => void; onDone: (cs: string[]) => void }) {
   return (
+    <div className={s.ovRow}>
     <button type="button" className={s.ovItem} onClick={() => onOpen(item.customer)}>
       <span className={`${s.prio} ${CHIP[item.priority]}`}>{item.priority}</span>
       <span className={s.ovText}>
@@ -22,22 +24,15 @@ function Item({ item, name, onOpen }: { item: OverviewItem; name: string; onOpen
         <span className={s.ovAction}>→ {item.action}</span>
       </span>
     </button>
+    <button type="button" className={s.discard} title="Mark done" aria-label={`Mark ${name} done`} onClick={() => onDone([item.customer])}>
+      <I.check size={14} />
+    </button>
+    </div>
   );
 }
 
-export function SupportOverview({ list, onOpen }: { list: Conversation[]; onOpen: (customer: string) => void }) {
-  const [overview, setOverview] = useState<Overview | null>(null);
+export function SupportOverview({ overview, list, onOpen, onDone }: { overview: Overview | null; list: Conversation[]; onOpen: (customer: string) => void; onDone: (customers: string[]) => void }) {
   const [showIgnored, setShowIgnored] = useState(false);
-  // New email, read or done: the list's shape changes, the overview follows.
-  const key = list.map((c) => `${c.customer}:${c.messages}:${c.lastAt}:${c.done ? 1 : 0}`).join("|");
-
-  useEffect(() => {
-    fetch("/api/support/overview", { cache: "no-store" })
-      .then((r) => (r.ok ? (r.json() as Promise<Overview>) : null))
-      .then((o) => o && setOverview(o))
-      .catch(() => {});
-  }, [key]);
-
   if (!overview) return null;
   const byCustomer = new Map(list.map((c) => [c.customer, c]));
   const items = overview.items.filter((i) => !byCustomer.get(i.customer)?.done);
@@ -54,19 +49,27 @@ export function SupportOverview({ list, onOpen }: { list: Conversation[]; onOpen
       {main.length > 0 && (
         <div className={s.ovList}>
           {main.map((i) => (
-            <Item key={i.customer} item={i} name={name(i.customer)} onOpen={onOpen} />
+            <Item key={i.customer} item={i} name={name(i.customer)} onOpen={onOpen} onDone={onDone} />
           ))}
         </div>
       )}
       {ignored.length > 0 && (
         <div>
-          <button type="button" className={s.linkButton} onClick={() => setShowIgnored((v) => !v)}>
-            {showIgnored ? "hide" : "show"} {ignored.length} to ignore (spam, phishing, bounces, auto-replies)
-          </button>
+          <div className={s.ignoreBar}>
+            <span>
+              {ignored.length} to ignore (spam, phishing, bounces, auto-replies)
+            </span>
+            <button type="button" className={s.linkButton} style={{ marginTop: 0 }} onClick={() => setShowIgnored((v) => !v)}>
+              {showIgnored ? "hide" : "show"}
+            </button>
+            <button type="button" className="btn" onClick={() => onDone(ignored.map((i) => i.customer))}>
+              <I.check size={13} /> Mark all {ignored.length} done
+            </button>
+          </div>
           {showIgnored && (
             <div className={s.ovList} style={{ marginTop: 8 }}>
               {ignored.map((i) => (
-                <Item key={i.customer} item={i} name={name(i.customer)} onOpen={onOpen} />
+                <Item key={i.customer} item={i} name={name(i.customer)} onOpen={onOpen} onDone={onDone} />
               ))}
             </div>
           )}

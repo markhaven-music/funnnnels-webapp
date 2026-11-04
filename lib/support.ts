@@ -189,12 +189,6 @@ export async function listConversations(): Promise<Conversation[]> {
   });
 }
 
-export async function unreadConversations(): Promise<number> {
-  const { data, error } = await supabase().from("support_messages").select("customer").eq("direction", "in").is("read_at", null).limit(1000);
-  if (error) throw error;
-  return new Set((data ?? []).map((r) => r.customer)).size;
-}
-
 export type SupportMessage = {
   id: number;
   direction: "in" | "out";
@@ -257,8 +251,10 @@ function cleanHtml(html: string): string {
   });
 }
 
-export async function setDone(customer: string, done: boolean): Promise<void> {
-  const { error } = await supabase().from("support_threads").upsert({ customer: customer.toLowerCase(), done_at: done ? new Date().toISOString() : null });
+export async function setDone(customers: string | string[], done: boolean): Promise<void> {
+  const at = done ? new Date().toISOString() : null;
+  const rows = [customers].flat().map((c) => ({ customer: c.toLowerCase(), done_at: at }));
+  const { error } = await supabase().from("support_threads").upsert(rows);
   if (error) throw error;
 }
 

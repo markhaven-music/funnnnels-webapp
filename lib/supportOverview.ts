@@ -64,10 +64,11 @@ function classify(c: Conversation, msgs: Msg[], bought: Bought[], now: number): 
   const buyer = bought.length > 0;
   const last = msgs.at(-1);
   const lastOurs = last?.direction === "out";
-  // Waiting since their first email after our last reply.
-  const lastOut = msgs.findLastIndex((m) => m.direction === "out");
-  const firstWaiting = msgs.slice(lastOut + 1).find((m) => m.direction === "in");
-  const waitingDays = firstWaiting && !lastOurs ? Math.floor((now - Date.parse(firstWaiting.sent_at)) / DAY) : 0;
+  // Days since their last email. Not "since their first unanswered one":
+  // replies sent from another address (ffunk, Gmail) never show up here.
+  const lastIn = incoming.at(-1);
+  const waitingDays = lastIn && !lastOurs ? Math.floor((now - Date.parse(lastIn.sent_at)) / DAY) : 0;
+  const firstDay = incoming[0] ? new Date(incoming[0].sent_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
 
   const item = (priority: Priority, category: Category, title: string, why: string, action: string): OverviewItem => ({ customer: c.customer, priority, category, title, why, action });
 
@@ -93,7 +94,10 @@ function classify(c: Conversation, msgs: Msg[], bought: Bought[], now: number): 
   // ── a person ──
   const products = bought.map((b) => `${b.product}${b.ref ? ` (#${b.ref})` : ""}`);
   const who = buyer ? `Bought ${products.slice(0, 3).join(", ")}${products.length > 3 ? ` and ${products.length - 3} more` : ""}.` : "No purchase found with this email.";
-  const wait = lastOurs ? "We answered last; waiting on them." : waitingDays >= 1 ? `Waiting ${waitingDays} day${waitingDays === 1 ? "" : "s"}${incoming.length > 1 ? `, ${incoming.length} emails` : ""}.` : "Wrote today.";
+  const when = waitingDays === 0 ? "today" : waitingDays === 1 ? "yesterday" : `${waitingDays} days ago`;
+  const wait = lastOurs
+    ? "We answered last; waiting on them."
+    : `Last email ${when}${incoming.length > 1 ? ` (${incoming.length} emails since ${firstDay})` : ""}, no reply from support@ yet.`;
   const why = `${who} ${wait}`;
   const isReplyToUs = /^(re|aw|r|rif|sv):/i.test(subject);
 
@@ -185,11 +189,12 @@ function summarize(items: OverviewItem[], open: Conversation[], boughtBy: Map<st
   if (!waiting.length) parts.push("Nobody is waiting for an answer.");
   else {
     parts.push(`${waiting.length} ${waiting.length === 1 ? "person is" : "people are"} waiting for an answer${buyers.length === waiting.length ? (waiting.length > 1 ? ", all customers" : ", a customer") : buyers.length ? `, ${buyers.length} of them customers` : ""}.`);
+    // The longest silence: whose last email is the oldest.
     const oldest = waiting
-      .map((i) => ({ i, since: Math.min(...(msgs.get(i.customer) ?? []).filter((m) => m.direction === "in").map((m) => Date.parse(m.sent_at))) }))
-      .sort((a, b) => a.since - b.since)[0];
-    const days = Math.floor((now - oldest.since) / DAY);
-    if (days >= 2) parts.push(`The oldest has waited ${days} days (${open.find((c) => c.customer === oldest.i.customer)?.name || oldest.i.customer}).`);
+      .map((i) => ({ i, last: Date.parse((msgs.get(i.customer) ?? []).filter((m) => m.direction === "in").at(-1)?.sent_at ?? "") }))
+      .sort((a, b) => a.last - b.last)[0];
+    const days = Math.floor((now - oldest.last) / DAY);
+    if (days >= 2) parts.push(`The oldest last wrote ${days} days ago (${open.find((c) => c.customer === oldest.i.customer)?.name || oldest.i.customer}).`);
   }
   const issues = [
     [count("dispute"), "possible dispute", "possible disputes"],

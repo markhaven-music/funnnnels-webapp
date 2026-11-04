@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Conversation, SupportMessage, Thread } from "@/lib/support";
+import type { Overview } from "@/lib/supportOverview";
+import { I } from "@/components/icons";
 import { SupportOverview } from "./SupportOverview";
 import e from "./email.module.css";
 import s from "./support.module.css";
@@ -9,8 +11,10 @@ import s from "./support.module.css";
 // Dashboard → Support: support@thegrind.studio (lib/support.ts). The email
 // job copies the mailbox every minute; replies go out from the mailbox itself.
 
-type Tab = "open" | "done" | "all";
-const TABS: Tab[] = ["open", "done", "all"];
+// "spam": what the overview's rules call spam, phishing or automatic mail,
+// kept out of "open" (lib/supportOverview.ts).
+type Tab = "open" | "spam" | "done" | "all";
+const TABS: Tab[] = ["open", "spam", "done", "all"];
 
 function ago(iso: string): string {
   const d = Date.now() - Date.parse(iso);
@@ -94,6 +98,9 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
   const [syncing, setSyncing] = useState(false);
+  const [overview, setOverview] = useState<Overview | null>(null);
+  // The last discard, so it can be taken back.
+  const [undo, setUndo] = useState<{ customers: string[]; done: boolean } | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -110,10 +117,21 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
     }
   }, []);
 
-  // The sidebar's count follows the list.
+  // New email, read or done: the list's shape changes, the overview follows.
+  const listKey = list.map((c) => `${c.customer}:${c.messages}:${c.lastAt}:${c.done ? 1 : 0}`).join("|");
   useEffect(() => {
-    if (!loading) onUnread?.(list.filter((c) => c.unread > 0).length);
-  }, [list, loading, onUnread]);
+    if (!listKey) return;
+    fetch("/api/support/overview", { cache: "no-store" })
+      .then((r) => (r.ok ? (r.json() as Promise<Overview>) : null))
+      .then((o) => o && setOverview(o))
+      .catch(() => {});
+  }, [listKey]);
+  const spam = useMemo(() => new Set((overview?.items ?? []).filter((i) => i.priority === "ignore").map((i) => i.customer)), [overview]);
+
+  // The sidebar's count follows the list, people only.
+  useEffect(() => {
+    if (!loading && overview) onUnread?.(list.filter((c) => c.unread > 0 && !c.done && !spam.has(c.customer)).length);
+  }, [list, loading, overview, spam, onUnread]);
 
   useEffect(() => {
     load();
@@ -152,12 +170,27 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
     }
   };
 
-  const markDone = async (done: boolean) => {
-    if (!active) return;
-    await fetch("/api/support/thread", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ c: active, done }) });
-    setThread((t) => (t ? { ...t, done } : t));
-    setList((l) => l.map((c) => (c.customer === active ? { ...c, done } : c)));
-  };
+  // Done (discarded) or open again, one conversation or many; done ones
+  // move to the "done" tab, and a new email from them opens them again.
+  const setDone = useCallback(async (customers: string[], done: boolean, offerUndo = true) => {
+    if (!customers.length) return;
+    const set = new Set(customers);
+    setList((l) => l.map((c) => (set.has(c.customer) ? { ...c, done } : c)));
+    setThread((t) => (t && set.has(t.customer) ? { ...t, done } : t));
+    setUndo(offerUndo ? { customers, done } : null);
+    const r = await fetch("/api/support/thread", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cs: customers, done }) });
+    if (!r.ok) {
+      setError("Couldn't save that; reloading.");
+      load();
+    }
+  }, [load]);
+  const markDone = (done: boolean) => active && setDone([active], done);
+
+  useEffect(() => {
+    if (!undo) return;
+    const t = setTimeout(() => setUndo(null), 10_000);
+    return () => clearTimeout(t);
+  }, [undo]);
 
   const syncNow = async () => {
     setSyncing(true);
@@ -173,10 +206,12 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
 
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return list.filter((c) => (tab === "all" ? true : tab === "done" ? c.done : !c.done)).filter((c) => !needle || [c.customer, c.name, c.subject, c.snippet].some((v) => v?.toLowerCase().includes(needle)));
-  }, [list, tab, q]);
-  const openCount = list.filter((c) => !c.done).length;
-  const unread = list.filter((c) => c.unread > 0).length;
+    const inTab = (c: Conversation) => (tab === "all" ? true : tab === "done" ? c.done : tab === "spam" ? !c.done && spam.has(c.customer) : !c.done && !spam.has(c.customer));
+    return list.filter(inTab).filter((c) => !needle || [c.customer, c.name, c.subject, c.snippet].some((v) => v?.toLowerCase().includes(needle)));
+  }, [list, tab, q, spam]);
+  const openCount = list.filter((c) => !c.done && !spam.has(c.customer)).length;
+  const spamCount = list.filter((c) => !c.done && spam.has(c.customer)).length;
+  const unread = list.filter((c) => c.unread > 0 && !c.done && !spam.has(c.customer)).length;
   const subject = thread?.messages.findLast((m) => m.direction === "in")?.subject ?? thread?.messages.at(-1)?.subject;
 
   return (
@@ -219,13 +254,25 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
         </div>
       )}
 
-      {list.length > 0 && <SupportOverview list={list} onOpen={open} />}
+      {undo && (
+        <div className={s.undo}>
+          <span>
+            {undo.customers.length === 1 ? "1 conversation" : `${undo.customers.length} conversations`} {undo.done ? "marked done" : "opened again"}.
+          </span>
+          <button type="button" className="btn" onClick={() => setDone(undo.customers, !undo.done, false)}>
+            Undo
+          </button>
+        </div>
+      )}
+
+      {list.length > 0 && <SupportOverview overview={overview} list={list} onOpen={open} onDone={(cs) => setDone(cs, true)} />}
 
       <div className={e.toolbar}>
         <div className="tabs">
           {TABS.map((t) => (
             <button key={t} type="button" className={`tab ${tab === t ? "active" : ""}`} onClick={() => setTab(t)}>
               {t}
+              {t === "spam" && spamCount > 0 ? ` ${spamCount}` : ""}
             </button>
           ))}
         </div>
@@ -240,19 +287,24 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
             </div>
           ) : (
             shown.map((c) => (
-              <button key={c.customer} type="button" className={`${s.item} ${c.unread ? s.unread : ""} ${active === c.customer ? s.itemActive : ""}`} onClick={() => open(c.customer)}>
-                <span className={s.itemTop}>
-                  {c.unread ? <span className={s.dot} /> : null}
-                  <span className={s.who}>{c.name || c.customer}</span>
-                  {c.messages > 1 ? <span className={s.time}>{c.messages}</span> : null}
-                  <span className={s.time}>{ago(c.lastAt)}</span>
-                </span>
-                <span className={s.subject}>{c.subject || "(no subject)"}</span>
-                <span className={s.snippet}>
-                  {c.lastDirection === "out" ? "You: " : ""}
-                  {c.snippet}
-                </span>
-              </button>
+              <div key={c.customer} className={s.itemRow}>
+                <button type="button" className={`${s.item} ${c.unread ? s.unread : ""} ${active === c.customer ? s.itemActive : ""}`} onClick={() => open(c.customer)}>
+                  <span className={s.itemTop}>
+                    {c.unread ? <span className={s.dot} /> : null}
+                    <span className={s.who}>{c.name || c.customer}</span>
+                    {c.messages > 1 ? <span className={s.time}>{c.messages} emails</span> : null}
+                    <span className={s.time}>{ago(c.lastAt)}</span>
+                  </span>
+                  <span className={s.subject}>{c.subject || "(no subject)"}</span>
+                  <span className={s.snippet}>
+                    {c.lastDirection === "out" ? "You: " : ""}
+                    {c.snippet}
+                  </span>
+                </button>
+                <button type="button" className={s.discard} title={c.done ? "Open again" : "Mark done"} aria-label={c.done ? `Open ${c.customer} again` : `Mark ${c.customer} done`} onClick={() => setDone([c.customer], !c.done)}>
+                  {c.done ? "Reopen" : <I.check size={14} />}
+                </button>
+              </div>
             ))
           )}
         </div>

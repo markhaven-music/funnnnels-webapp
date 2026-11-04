@@ -328,3 +328,79 @@
   color: var(--fg-1);
   background: var(--bg-3);
 }
+
+/* Discarding: a check beside each conversation, in the list and the overview. */
+.itemRow,
+.ovRow {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line-soft);
+}
+.itemRow:last-child {
+  border-bottom: 0;
+}
+.itemRow .item,
+.ovRow .ovItem {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 0;
+}
+.discard {
+  flex: none;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 30px;
+  height: 30px;
+  margin: 0 8px;
+  padding: 0 6px;
+  background: var(--bg-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--fg-0);
+  font: 11px var(--font-mono);
+  cursor: pointer;
+  opacity: 0;
+}
+.itemRow:hover .discard,
+.ovRow:hover .discard,
+.discard:focus-visible {
+  opacity: 1;
+}
+.discard:hover {
+  background: var(--accent-base);
+  color: #fff;
+}
+@media (hover: none) {
+  .discard {
+    opacity: 1;
+  }
+}
+.ignoreBar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--fg-1);
+}
+.ignoreBar span {
+  flex: 1;
+  min-width: 200px;
+}
+.undo {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 8px 8px 8px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--fg-0);
+}
