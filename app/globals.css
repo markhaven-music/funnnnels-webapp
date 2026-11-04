@@ -300,6 +300,14 @@ button {
   border-radius: var(--radius-xs);
   color: var(--fg-2);
 }
+/* Unread email in dashboard → Support: a count you have to see. */
+.nav-item .badge.unread {
+  color: #fff;
+  background: var(--accent-base);
+  border-color: transparent;
+  font-size: 11px;
+  font-weight: 600;
+}
 .nav-item .badge.live {
   color: var(--mint);
   border-color: oklch(0.5 0.13 165 / 0.5);

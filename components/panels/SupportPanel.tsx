@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Conversation, SupportMessage, Thread } from "@/lib/support";
+import { SupportOverview } from "./SupportOverview";
 import e from "./email.module.css";
 import s from "./support.module.css";
 
@@ -58,7 +59,7 @@ function Message({ m }: { m: SupportMessage }) {
           <div className={s.body}>{fresh || <span className={e.dim}>(no text)</span>}</div>
           {quoted ? (
             showQuoted ? (
-              <div className={s.body} style={{ color: "var(--fg-3)", marginTop: 8 }}>
+              <div className={s.body} style={{ color: "var(--fg-2)", marginTop: 8 }}>
                 {quoted}
               </div>
             ) : (
@@ -217,6 +218,8 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
           The mailbox isn&apos;t connected yet: set SUPPORT_EMAIL_USER and SUPPORT_EMAIL_PASSWORD (the Private Email password of support@thegrind.studio) in Vercel, then redeploy.
         </div>
       )}
+
+      {list.length > 0 && <SupportOverview list={list} onOpen={open} />}
 
       <div className={e.toolbar}>
         <div className="tabs">

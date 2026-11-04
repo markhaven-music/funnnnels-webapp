@@ -74,7 +74,7 @@
 .time {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--fg-3);
+  color: var(--fg-1);
   flex: none;
 }
 .subject,
@@ -86,10 +86,10 @@
   white-space: nowrap;
 }
 .subject {
-  color: var(--fg-1);
+  color: var(--fg-0);
 }
 .snippet {
-  color: var(--fg-3);
+  color: var(--fg-1);
 }
 
 .thread {
@@ -147,7 +147,7 @@
   border: 0;
   padding: 0;
   margin-top: 8px;
-  color: var(--fg-3);
+  color: var(--fg-2);
   font-family: var(--font-mono);
   font-size: 11px;
   cursor: pointer;
@@ -205,7 +205,7 @@
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.04em;
-  color: var(--fg-3);
+  color: var(--fg-2);
 }
 .order {
   display: flex;
@@ -226,6 +226,116 @@
   border-radius: var(--radius);
   padding: 40px 20px;
   text-align: center;
-  color: var(--fg-3);
+  color: var(--fg-2);
   font-size: 13px;
+}
+
+/* AI Overview (SupportOverview.tsx) */
+.overview {
+  background: var(--bg-1);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: grid;
+  gap: 10px;
+}
+.ovHead {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.ovLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--accent-2);
+}
+.ovMeta {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-1);
+}
+.ovSummary {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--fg-0);
+}
+.ovError {
+  margin: 0;
+  font-size: 13px;
+  color: var(--rose);
+}
+.ovList {
+  display: grid;
+  border-top: 1px solid var(--line-soft);
+}
+.ovItem {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  width: 100%;
+  padding: 10px 4px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ovItem:hover {
+  background: var(--bg-2);
+}
+.ovText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.ovTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--fg-0);
+}
+.ovWho {
+  font-weight: 400;
+  color: var(--fg-1);
+}
+.ovWhy,
+.ovAction {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--fg-1);
+}
+.ovAction {
+  color: var(--fg-0);
+}
+.prio {
+  justify-self: start;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  margin-top: 1px;
+}
+.p_urgent {
+  color: #fff;
+  background: oklch(0.6 0.2 18);
+}
+.p_high {
+  color: oklch(0.2 0.02 75);
+  background: var(--amber);
+}
+.p_normal {
+  color: var(--fg-0);
+  background: oklch(0.78 0.13 230 / 0.28);
+}
+.p_low {
+  color: var(--fg-1);
+  background: var(--bg-3);
 }

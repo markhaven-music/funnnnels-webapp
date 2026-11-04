@@ -50,3 +50,14 @@ create table public.support_threads (
   done_at timestamptz
 );
 alter table public.support_threads enable row level security;
+
+-- The AI Overview of the open conversations (lib/supportOverview.ts), one row,
+-- kept until the conversations it read change (migration "support_overview").
+create table public.support_overview (
+  id smallint primary key default 1 check (id = 1),
+  input_hash text not null,
+  model text not null,
+  result jsonb not null,
+  generated_at timestamptz not null default now()
+);
+alter table public.support_overview enable row level security;

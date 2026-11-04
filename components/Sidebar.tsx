@@ -34,7 +34,7 @@ export function Sidebar({ funnelCount, supportUnread = 0, active, onNav }: Props
               >
                 <Ico size={16} />
                 <span>{it.label}</span>
-                {badge && <span className="badge">{badge}</span>}
+                {badge && <span className={`badge ${it.badgeKey === "support" ? "unread" : ""}`}>{badge}</span>}
               </button>
             );
           })}
