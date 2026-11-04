@@ -5,7 +5,7 @@ import { checkoutPages, resolveFunnel, type Product } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { money } from "@/lib/launch";
-import { card, clickUrl, letter, type CardButton } from "@/lib/mail";
+import { card, letter, type CardButton } from "@/lib/mail";
 import { mailCopy } from "@/lib/mailCopy";
 import { getLaunch } from "@/lib/products";
 import { orderTitle, shopLabels, type ShopLabel } from "@/lib/shop";
@@ -212,7 +212,8 @@ function receiptEmail(group: OrderRow[], f: Product, shop: Record<string, ShopLa
   return {
     to: main.email!,
     subject: c.subject(orderProduct(main, f, shop)),
-    html: card({ lang: main.lang, title: c.title, lead: c.lead, buttons, notes: [...orders, c.account], help: c.help }),
+    // Tracked for dashboard → Orders (opened, downloads clicked); not an email Insights credits sales to.
+    html: card({ lang: main.lang, title: c.title, lead: c.lead, buttons, notes: [...orders, c.account], help: c.help, track: { t: { kind: "receipt", ref: main.id }, email: main.email! } }),
     text: text.join("\n"),
   };
 }
@@ -253,7 +254,7 @@ async function backups(run: Run) {
       const c = backupCopy(main.lang);
       const first = (main.name ?? "").trim().split(/\s+/)[0]?.slice(0, 40) ?? "";
       const body = [c.intro(first), ...downloads(group, f, shop).map((d) => `[button: ${c.button(d.label)}](${d.href})`), c.outro].join("\n\n");
-      const id = await run.send(letter({ to: { email: main.email!, name: main.name }, subject: c.subject(orderProduct(main, f, shop)), body, lang: main.lang }));
+      const id = await run.send(letter({ to: { email: main.email!, name: main.name }, subject: c.subject(orderProduct(main, f, shop)), body, lang: main.lang, track: { kind: "backup", ref: main.id } }));
       if (id === null && !run.dryRun) await db.from("orders").update({ backup_sent_at: null }).in("id", ids);
       else run.report.backups++;
     } catch (err) {
@@ -347,7 +348,7 @@ async function reminders(run: Run) {
       email = {
         to: row.email,
         subject: c.subject(f.product),
-        html: card({ lang: row.lang, title: c.title(first, f.product), lead: c.lead, buttons: [{ label: c.button, url: clickUrl({ kind: "reminder", ref }, row.email, url) }], notes: c.notes, help: c.help }),
+        html: card({ lang: row.lang, title: c.title(first, f.product), lead: c.lead, buttons: [{ label: c.button, url }], notes: c.notes, help: c.help, track: { t: { kind: "reminder", ref }, email: row.email } }),
         text: [c.title(first, f.product), "", c.lead, "", `${c.button}: ${url}`, "", ...c.notes, "", "support@thegrind.studio"].join("\n"),
       };
     }

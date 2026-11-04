@@ -51,11 +51,14 @@ export const unsubscribeUrl = (email: string) => `${UNSUBSCRIBE_ORIGIN}/unsubscr
 // the sender and the pages the links open.
 export const CLICK_ORIGIN = "https://m.thegrind.studio";
 
+/** The emails that sell: what Email → Insights counts and credits orders to. */
 export type EmailKind = "broadcast" | "launch" | "sequence" | "reminder";
-export type Track = { kind: EmailKind; ref: string };
+/** … plus the order's own emails (ref = the main order's id), tracked for dashboard → Orders only. */
+export type MailKind = EmailKind | "receipt" | "backup";
+export type Track = { kind: MailKind; ref: string };
 
-const KIND_CODE: Record<EmailKind, string> = { broadcast: "b", launch: "l", sequence: "s", reminder: "r" };
-const CODE_KIND = Object.fromEntries(Object.entries(KIND_CODE).map(([k, c]) => [c, k])) as Record<string, EmailKind>;
+const KIND_CODE: Record<MailKind, string> = { broadcast: "b", launch: "l", sequence: "s", reminder: "r", receipt: "c", backup: "k" };
+const CODE_KIND = Object.fromEntries(Object.entries(KIND_CODE).map(([k, c]) => [c, k])) as Record<string, MailKind>;
 
 const clickKey = () => createHmac("sha256", key()).update("grind-click-v1").digest();
 
@@ -65,7 +68,7 @@ export function clickUrl(t: Track, email: string, url: string): string {
 }
 
 /** What a click link carries, with ok=false when the signature doesn't match. */
-export function readClickToken(token: unknown): { ok: boolean; kind: EmailKind; ref: string; email: string; url: string } | null {
+export function readClickToken(token: unknown): { ok: boolean; kind: MailKind; ref: string; email: string; url: string } | null {
   if (typeof token !== "string" || token.length > 6000) return null;
   const [p, sig] = token.split(".");
   if (!p || !sig) return null;
@@ -83,6 +86,42 @@ export function readClickToken(token: unknown): { ok: boolean; kind: EmailKind; 
   const got = Buffer.from(sig);
   return { ok: got.length === want.length && timingSafeEqual(got, want), kind, ref, email, url };
 }
+
+// ─── opens ─────────────────────────────────────────────────────────
+// Every tracked email ends with an invisible 1×1 image from
+// /api/checkout/open, signed like the click links: the mail app loading it
+// notes the open (email_opens, db/email-opens.sql) for dashboard → Orders.
+// The way every mail tool counts opens, with the same limits: Apple Mail
+// loads it on delivery whether the email is read or not (marked there),
+// and a reader who blocks images never shows as opened.
+
+const openKey = () => createHmac("sha256", key()).update("grind-open-v1").digest();
+
+export function openUrl(t: Track, email: string): string {
+  const p = Buffer.from(JSON.stringify([KIND_CODE[t.kind], t.ref, email.toLowerCase()])).toString("base64url");
+  return `${CLICK_ORIGIN}/api/checkout/open?t=${p}.${createHmac("sha256", openKey()).update(p).digest("base64url").slice(0, 32)}`;
+}
+
+/** What an open pixel carries, or null when it isn't ours. */
+export function readOpenToken(token: unknown): { kind: MailKind; ref: string; email: string } | null {
+  if (typeof token !== "string" || token.length > 2000) return null;
+  const [p, sig] = token.split(".");
+  if (!p || !sig) return null;
+  const want = Buffer.from(createHmac("sha256", openKey()).update(p).digest("base64url").slice(0, 32));
+  const got = Buffer.from(sig);
+  if (got.length !== want.length || !timingSafeEqual(got, want)) return null;
+  try {
+    const v = JSON.parse(Buffer.from(p, "base64url").toString());
+    if (!Array.isArray(v) || v.length !== 3 || !v.every((x) => typeof x === "string")) return null;
+    const kind = CODE_KIND[v[0]];
+    return kind ? { kind, ref: v[1], email: v[2] } : null;
+  } catch {
+    return null;
+  }
+}
+
+const pixel = (t: Track, email: string) =>
+  `<img src="${esc(openUrl(t, email))}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0;margin:0;padding:0;opacity:0">`;
 
 // ─── the newsletter text format ────────────────────────────────────
 // What the Broadcasts, Automations and Launches editors take:
@@ -180,6 +219,7 @@ ${pre ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px"><tr><td style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#111">
 ${html}
 <p style="margin:32px 0 0;padding-top:18px;border-top:1px solid #e6e6e6;font-size:12px;line-height:1.6;color:#8a8a8a">GRIND STUDIO · <a href="mailto:${SUPPORT}" style="color:#8a8a8a">${SUPPORT}</a><br>${POSTAL}<br>${esc(ask)} <a href="${esc(unsub)}" style="color:#8a8a8a">${esc(word)}</a></p>
+${t ? pixel(t, r.email) : ""}
 </td></tr></table>
 </td></tr></table></body></html>`,
     text: `${text}\n\n--\nGRIND STUDIO · ${SUPPORT}\n${POSTAL}\n${ask} ${word}: ${unsub}`,
@@ -194,9 +234,14 @@ ${html}
 
 export type CardButton = { label: string; url: string; primary?: boolean };
 
-/** A tall card on black, like the sign-in email: title, lead, buttons, small print, support. */
-export function card(o: { lang: string; title: string; lead: string; buttons: CardButton[]; notes: string[]; help: string }): string {
+/**
+ * A tall card on black, like the sign-in email: title, lead, buttons, small print, support.
+ * With `track`, its buttons go through the click link and it carries the open pixel.
+ */
+export function card(o: { lang: string; title: string; lead: string; buttons: CardButton[]; notes: string[]; help: string; track?: { t: Track; email: string } }): string {
+  const tr = o.track;
   const buttons = o.buttons
+    .map((b) => (tr ? { ...b, url: clickUrl(tr.t, tr.email, b.url) } : b))
     .map((b, i) => {
       const style = b.primary ?? i === 0 ? "background:#22c55e;color:#04140a" : "background:#262626;color:#ffffff;border:1px solid #3a3a3a";
       return `<tr><td style="padding:${i === 0 ? 36 : 12}px 36px 0;text-align:center"><a href="${esc(b.url)}" style="display:inline-block;${style};font-weight:700;font-size:16px;text-decoration:none;padding:16px 28px;border-radius:12px">${esc(b.label)}</a></td></tr>`;
@@ -215,5 +260,6 @@ ${notes}
 <tr><td style="padding:36px 36px 44px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:1px solid #2a2a2a;padding-top:28px;text-align:center;color:#7a7a7a;font-size:13px;line-height:1.6">${esc(o.help)}<br><a href="mailto:${SUPPORT}" style="color:#d6d6d6;text-decoration:none;font-weight:700">${SUPPORT}</a></td></tr></table></td></tr>
 </table>
 <p style="margin:28px 0 0;color:#555;font-size:12px">© ${new Date().getFullYear()} GRIND STUDIO</p>
+${tr ? pixel(tr.t, tr.email) : ""}
 </td></tr></table></body></html>`;
 }

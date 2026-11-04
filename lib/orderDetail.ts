@@ -12,7 +12,8 @@ import { supabase } from "@/lib/supabase";
 //     refunds, disputes, risk);
 //   · neo's tables (same Supabase project since 11-03): which click sold it,
 //     the ad's names, the visitor's device and their visits before buying;
-//   · the email side: receipt, the emails sent to and clicked by the buyer,
+//   · the email side: receipt, backup and every email sent to the buyer, each
+//     with when it was opened (email_opens) and clicked (email_clicks), and
 //     the one Email → Insights credits (5 days, a click before a receipt);
 //   · the contact, the checkout start, the support conversation, the
 //     customer-library logins and any ClickFunnels purchase before.
@@ -70,7 +71,18 @@ export type Attribution = {
   visits: Click[]; // every click from this visitor up to the order, oldest first
 };
 
-export type EmailEvent = { at: string; kind: string; what: string; status: string; detail?: string };
+/** One email to the buyer, with what they did with it. */
+export type EmailEvent = {
+  at: string;
+  kind: string;
+  ref: string;
+  what: string;
+  status: "sent" | "failed" | "not sent"; // "not sent": an open or click of an email older than the list
+  detail?: string;
+  // Opens of it: the first one, and the first by a person (not Apple's proxy or a scanner).
+  opened?: { at: string; count: number; byPerson: string | null; machine: "apple" | "scanner" | null };
+  clicked?: { at: string; count: number; links: string[] };
+};
 
 export type OrderDetail = {
   order: OrderRow & { status: string; waiver: boolean; updatedAt: string | null; backupSentAt: string | null; emailAttempts: number };
@@ -119,7 +131,7 @@ export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
     part(row.provider === "paypal" ? "PayPal" : "Stripe", () => (row.provider === "paypal" ? paypalPayment(id) : stripePayment(id)), null),
     part("source (neo)", () => neoAttribution(id, row.createdAt), null),
     part("related orders", () => relatedOrders(row), { parent: null, upsells: [], others: [] as OrderRow[] }),
-    part("emails", () => (email ? emailHistory(email) : Promise.resolve([] as EmailEvent[])), []),
+    part("emails", () => (email ? emailHistory(email) : Promise.resolve(NO_HISTORY)), NO_HISTORY),
     part("buyer", () => buyerExtras(email, row.funnel), { contact: null, checkoutStart: null, support: null, libraryLogin: null, legacy: [] }),
   ]);
 
@@ -133,16 +145,23 @@ export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
   // Email → Insights' rule: the last email clicked in the 5 days before the
   // order (or before the order it followed), else the last one received.
   const at = Date.parse(related.parent?.createdAt ?? row.createdAt);
-  const inWindow = (e: EmailEvent) => Date.parse(e.at) <= at && Date.parse(e.at) > at - CREDIT_DAYS * DAY;
-  const click = emails.find((e) => e.status === "clicked" && inWindow(e));
-  const received = emails.find((e) => e.status === "sent" && e.kind !== "receipt" && inWindow(e));
-  const credited = click ? { what: click.what, how: "click" as const, at: click.at } : received ? { what: received.what, how: "received" as const, at: received.at } : null;
+  const inWindow = (iso: string) => Date.parse(iso) <= at && Date.parse(iso) > at - CREDIT_DAYS * DAY;
+  const click = emails.clicks.find((k) => SELLING.has(k.kind) && inWindow(k.created_at));
+  const received = emails.sends.find((e) => e.status === "sent" && SELLING.has(e.kind) && inWindow(e.at));
+  const credited = click
+    ? { what: emails.what(click.kind, click.ref), how: "click" as const, at: click.created_at }
+    : received
+      ? { what: received.what, how: "received" as const, at: received.at }
+      : null;
 
-  // The receipt, from the order row itself (it isn't in email_sends).
-  const receipt: EmailEvent[] = [];
-  if (row.emailSentAt) receipt.push({ at: row.emailSentAt, kind: "receipt", what: "Order receipt", status: "sent" });
-  else if (row.emailError) receipt.push({ at: r.updated_at ?? row.createdAt, kind: "receipt", what: "Order receipt", status: "failed", detail: `${row.emailError} (${r.email_attempts ?? 0} attempts)` });
-  if (r.backup_sent_at) receipt.push({ at: r.backup_sent_at, kind: "receipt", what: "Backup download email", status: "sent" });
+  // The receipt and the backup, from the order row itself (they aren't in
+  // email_sends). Their ref is the id of the order they were sent for: this
+  // one, or for an upsell sent along with its order, that order.
+  const own: EmailEvent[] = [];
+  const mailRef = row.parent && related.parent?.emailSentAt === row.emailSentAt ? row.parent : row.id;
+  if (row.emailSentAt) own.push({ at: row.emailSentAt, kind: "receipt", ref: mailRef, what: "Order receipt", status: "sent" });
+  else if (row.emailError) own.push({ at: r.updated_at ?? row.createdAt, kind: "receipt", ref: mailRef, what: "Order receipt", status: "failed", detail: `${row.emailError} (${r.email_attempts ?? 0} attempts)` });
+  if (r.backup_sent_at) own.push({ at: r.backup_sent_at, kind: "backup", ref: mailRef, what: "Backup download email", status: "sent" });
 
   return {
     order: { ...row, status: r.status, waiver: Boolean(r.withdrawal_waiver), updatedAt: r.updated_at ?? null, backupSentAt: r.backup_sent_at ?? null, emailAttempts: r.email_attempts ?? 0 },
@@ -156,7 +175,7 @@ export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
     attribution,
     contact: extra.contact,
     checkoutStart: extra.checkoutStart,
-    emails: [...receipt, ...emails].sort((a, b) => Date.parse(b.at) - Date.parse(a.at)),
+    emails: withActivity([...own, ...emails.sends], emails),
     credited,
     support: extra.support,
     libraryLogin: extra.libraryLogin,
@@ -346,21 +365,62 @@ async function relatedOrders(row: OrderRow): Promise<{ parent: OrderRow | null; 
 
 // ─── emails ────────────────────────────────────────────────────────
 
-async function emailHistory(email: string): Promise<EmailEvent[]> {
+const SELLING = new Set(["broadcast", "launch", "sequence", "reminder"]);
+
+type History = { sends: EmailEvent[]; clicks: Row[]; opens: Row[]; what: (kind: string, ref: string) => string };
+const NO_HISTORY: History = { sends: [], clicks: [], opens: [], what: (k) => k };
+
+async function emailHistory(email: string): Promise<History> {
   const db = supabase();
-  const [sends, clicks] = await Promise.all([
+  const [sends, clicks, opens] = await Promise.all([
     db.from("email_sends").select("kind, ref, status, error, created_at").eq("email", email).order("created_at", { ascending: false }).limit(60),
-    db.from("email_clicks").select("kind, ref, url, created_at").eq("email", email).order("created_at", { ascending: false }).limit(60),
+    db.from("email_clicks").select("kind, ref, url, created_at").eq("email", email).order("created_at", { ascending: false }).limit(200),
+    db.from("email_opens").select("kind, ref, machine, created_at").eq("email", email).order("created_at", { ascending: false }).limit(300),
   ]);
   if (sends.error) throw sends.error;
   if (clicks.error) throw clicks.error;
-  const all: Row[] = [...(sends.data ?? []), ...(clicks.data ?? [])];
-  const names = await emailNames(all);
-  const what = (kind: string, ref: string) => names.get(`${kind}:${ref}`) ?? reminderName(kind, ref) ?? `${kind} ${ref.slice(0, 8)}`;
-  return [
-    ...(sends.data ?? []).map((s: Row) => ({ at: s.created_at, kind: s.kind, what: what(s.kind, s.ref), status: s.status, detail: s.error ?? undefined })),
-    ...(clicks.data ?? []).map((k: Row) => ({ at: k.created_at, kind: k.kind, what: what(k.kind, k.ref), status: "clicked", detail: stripQuery(k.url) })),
-  ].sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+  if (opens.error) throw opens.error;
+  const names = await emailNames([...(sends.data ?? []), ...(clicks.data ?? []), ...(opens.data ?? [])]);
+  const what = (kind: string, ref: string) =>
+    names.get(`${kind}:${ref}`) ?? reminderName(kind, ref) ?? (kind === "receipt" ? "Order receipt" : kind === "backup" ? "Backup download email" : `${kind} ${ref.slice(0, 8)}`);
+  return {
+    sends: (sends.data ?? []).map((x: Row) => ({ at: x.created_at, kind: x.kind, ref: x.ref, what: what(x.kind, x.ref), status: x.status === "failed" ? "failed" : "sent", detail: x.error ?? undefined })),
+    clicks: clicks.data ?? [],
+    opens: opens.data ?? [],
+    what,
+  };
+}
+
+/** Each email with its opens and clicks; one opened or clicked but older than the list gets a row of its own. Newest first. */
+function withActivity(mails: EmailEvent[], h: History): EmailEvent[] {
+  const key = (kind: string, ref: string) => `${kind}:${ref}`;
+  const rows = new Map(mails.map((m) => [key(m.kind, m.ref), { ...m }]));
+  const row = (kind: string, ref: string, at: string) => {
+    const k = key(kind, ref);
+    if (!rows.has(k)) rows.set(k, { at, kind, ref, what: h.what(kind, ref), status: "not sent" });
+    return rows.get(k)!;
+  };
+  // Oldest first, so "at" is the first open or click. Loads of the image
+  // under a minute apart (a mail app fetching it twice) are one open.
+  const lastOpen = new Map<string, number>();
+  for (const o of [...h.opens].reverse()) {
+    const m = row(o.kind, o.ref, o.created_at);
+    if (!m.opened) m.opened = { at: o.created_at, count: 0, byPerson: null, machine: o.machine ?? null };
+    const k = key(o.kind, o.ref);
+    const t = Date.parse(o.created_at);
+    if (t - (lastOpen.get(k) ?? -Infinity) >= 60_000) m.opened.count++;
+    lastOpen.set(k, t);
+    if (!o.machine && !m.opened.byPerson) m.opened.byPerson = o.created_at;
+    if (!o.machine) m.opened.machine = null;
+  }
+  for (const c of [...h.clicks].reverse()) {
+    const m = row(c.kind, c.ref, c.created_at);
+    if (!m.clicked) m.clicked = { at: c.created_at, count: 0, links: [] };
+    m.clicked.count++;
+    const link = stripQuery(c.url);
+    if (!m.clicked.links.includes(link)) m.clicked.links.push(link);
+  }
+  return [...rows.values()].sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
 }
 
 function reminderName(kind: string, ref: string): string | null {

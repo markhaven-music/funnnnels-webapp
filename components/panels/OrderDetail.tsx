@@ -449,6 +449,9 @@ function OrderList({ rows, onOpen, base }: { rows: OrderRow[]; onOpen: (id: stri
   );
 }
 
+// Opens are tracked from this deploy on (the pixel, lib/mail.ts): an older email has no "not opened".
+const OPENS_SINCE = Date.parse("2026-11-04T20:00:00Z");
+
 function Timeline({ events }: { events: EmailEvent[] }) {
   return (
     <div className={s.timeline}>
@@ -456,14 +459,48 @@ function Timeline({ events }: { events: EmailEvent[] }) {
         <div key={i} className={s.event}>
           <span className={s.eventWhen}>{short(ev.at)}</span>
           <span className={s.eventWhat}>
-            <span className={`${e.chip} ${STATUS_CHIP[ev.status] ?? ""}`} style={{ marginRight: 8, fontSize: 10, padding: "0 6px" }}>
-              {ev.status}
+            <span>
+              {ev.what}
+              <span className={s.sub}> · {ev.kind}</span>
             </span>
-            {ev.what}
-            <span className={s.sub}> · {ev.kind}{ev.detail ? ` · ${ev.detail}` : ""}</span>
+            <span className={s.marks}>
+              {ev.status === "not sent" ? null : <span className={`${e.chip} ${ev.status === "failed" ? e.chip_failed : ""} ${s.mark}`}>{ev.status}</span>}
+              <Opened ev={ev} />
+              {ev.clicked ? (
+                <span className={`${e.chip} ${e.chip_on} ${s.mark}`} title={ev.clicked.links.join("\n")}>
+                  clicked {short(ev.clicked.at)}
+                  {ev.clicked.count > 1 ? ` · ${ev.clicked.count}×` : ""}
+                </span>
+              ) : null}
+            </span>
+            {ev.clicked ? <span className={s.sub}>→ {ev.clicked.links.join(", ")}</span> : null}
+            {ev.detail ? <span className={s.sub}>{ev.detail}</span> : null}
           </span>
         </div>
       ))}
     </div>
+  );
+}
+
+function Opened({ ev }: { ev: EmailEvent }) {
+  const o = ev.opened;
+  if (!o) {
+    if (ev.status !== "sent" || Date.parse(ev.at) < OPENS_SINCE) return null;
+    return <span className={`${e.chip} ${s.mark} ${s.markDim}`}>not opened</span>;
+  }
+  if (o.byPerson) {
+    return (
+      <span className={`${e.chip} ${e.chip_sent} ${s.mark}`}>
+        opened {short(o.byPerson)}
+        {o.count > 1 ? ` · ${o.count}×` : ""}
+      </span>
+    );
+  }
+  // Only machine opens: Apple Mail's proxy loads every email on delivery; a scanner checks links.
+  const why = o.machine === "apple" ? "Apple Mail loads every email's images on delivery, read or not" : "a mail scanner, not a person";
+  return (
+    <span className={`${e.chip} ${e.chip_scheduled} ${s.mark}`} title={why}>
+      {o.machine === "apple" ? "opened? (Apple Mail)" : "scanned"} {short(o.at)}
+    </span>
   );
 }

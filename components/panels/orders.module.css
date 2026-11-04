@@ -191,6 +191,23 @@
   color: var(--fg-1);
 }
 
+.eventWhat > span {
+  display: block;
+}
+.marks {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 4px 0 2px;
+}
+.mark {
+  font-size: 10px;
+  padding: 0 6px;
+}
+.markDim {
+  color: var(--fg-3);
+}
+
 .credit {
   background: var(--bg-2);
   border-radius: var(--radius-sm);
