@@ -7,14 +7,13 @@ import { ReservedTimer } from "../../../top-hits-midi-bundle/ReservedTimer";
 import { Check } from "../../../top-hits-midi-bundle/sections";
 import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
 import base from "../../../top-hits-midi-bundle/order.module.css";
-import { inter } from "../../../top-hits-midi-bundle/fonts";
 import dk from "../../../midi-drum-kit/order.module.css";
 import { poppins } from "../../../midi-drum-kit/fonts";
 import { Beacon } from "../../../Beacon";
 import { withSkin } from "../../../skin";
 import { orderBullets, reviews } from "../../copy";
 import { funnel } from "../../funnel";
-import { fontVars } from "../../fonts";
+import { fontVars, inter } from "../../fonts";
 import { orderOffer } from "../../offer";
 import skin from "../../order.module.css";
 
