@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { OrderForm } from "../../../top-hits-midi-bundle/OrderForm";
-import { ReservedTimer } from "../../../top-hits-midi-bundle/ReservedTimer";
+import { ReservedTimer } from "../../../midi-drum-kit/ReservedTimer";
+import { copyFor } from "../../../midi-drum-kit/copy";
 import { Check } from "../../../top-hits-midi-bundle/sections";
 import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
 import base from "../../../top-hits-midi-bundle/order.module.css";
@@ -48,10 +49,10 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   const offer = await orderOffer(currency, product);
 
   return (
-    <main className={`${s.page} ${fontVars}`}>
+    <main className={`${s.page} ${fontVars} ${inter.variable} ${poppins.variable}`}>
       <Tracking value={offer.price} currency={currency} event={null} product={funnel.product} />
       <Beacon funnel={funnel.slug} page="order" />
-      <div className={s.redbar}>
+      <div className={`${base.redbar} ${skin.dk}`}>
         <b>BLACK FRIDAY:</b> 90% Sale Is Ending Soon
       </div>
       <header className={s.header}>
@@ -96,8 +97,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
 
         <section id="complete-order">
           <h2 className={s.colTitle}>Complete Order:</h2>
-          {/* The MIDI Drum Kit order page's form, exactly: no skin, its buttons, its font (../../order.module.css .dkForm). */}
-          <div className={`${skin.dkForm} ${inter.variable} ${poppins.variable}`}>
+          {/* The MIDI Drum Kit order page's form, exactly: no skin, its buttons, its font (../../order.module.css .dk). */}
+          <div className={skin.dk}>
             <OrderForm
               currency={currency}
               country={FALLBACK_COUNTRY[currency]}
@@ -167,7 +168,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
         <a href={funnel.legal.privacy}>Privacy Policy</a> - <a href={funnel.legal.refund}>Refund Policy</a> -{" "}
         <b>Contact:</b> <a href={`mailto:${funnel.support}`}>{funnel.support}</a>
       </footer>
-      <ReservedTimer skin={skin} />
+      <ReservedTimer t={copyFor("en").order.timer} />
     </main>
   );
 }

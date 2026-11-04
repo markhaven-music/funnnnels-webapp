@@ -25,16 +25,7 @@
   color: var(--paper);
 }
 
-/* ── top: the ribbon, logo, "Secure Checkout" ── */
-.page.page .redbar {
-  padding: 8px 16px;
-  background: #0b0f18;
-  color: var(--gold-2);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
+/* ── top: the logo, "Secure Checkout" (the ribbon is the Drum Kit's red one, see "the MIDI Drum Kit's pieces" below) ── */
 .page.page .header {
   background: transparent;
   border-bottom: 0;
@@ -80,13 +71,16 @@
   color: var(--gold);
 }
 
-/* ── the checkout card: the MIDI Drum Kit order page's, exactly ("make the
-   checkout widget exactly as the midi drum kit one"): no skin on the form, so
-   it is TOP HITS' ClickFunnels card (../top-hits-midi-bundle/order.module.css)
-   with the Drum Kit's buttons (../midi-drum-kit/order.module.css .cta, its
+/* ── the MIDI Drum Kit's pieces, exactly as on its order page: the red ribbon
+   ("make the top banner and counter like the midi drum kit one (red)"), the
+   checkout card ("make the checkout widget exactly as the midi drum kit one")
+   and the "YOUR COPY IS RESERVED FOR:" box (../midi-drum-kit/ReservedTimer.tsx,
+   its own stylesheet). The ribbon and the card carry no skin, so they are TOP
+   HITS' ClickFunnels template (../top-hits-midi-bundle/order.module.css), the
+   card with the Drum Kit's buttons (../midi-drum-kit/order.module.css .cta, its
    orange). Here only the Drum Kit page's font (Inter, not the landing's Inter
-   Tight) and text colour, under the card. ── */
-.page.page .dkForm {
+   Tight) and text colour, under them. ── */
+.page.page .dk {
   --inter: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #fff;
   font-family: var(--inter);
@@ -141,42 +135,4 @@
 }
 .page.page .footer a {
   color: var(--soft);
-}
-
-/* ── "YOUR COPY IS RESERVED FOR": a dark panel, gold mono digits ── */
-.page.page .timer {
-  border: 1px solid rgb(255 180 59 / 0.28);
-  border-radius: 18px;
-  background: rgb(10 14 22 / 0.94);
-  box-shadow: 0 0 40px -12px rgb(255 160 40 / 0.55), 0 20px 50px -20px rgb(0 0 0 / 0.9);
-  color: var(--mute);
-  backdrop-filter: blur(8px);
-}
-.page.page .timerTitle {
-  color: var(--mute);
-  font-weight: 700;
-  letter-spacing: 0.14em;
-}
-.page.page .timerTitle::before {
-  background: var(--gold);
-  opacity: 1;
-  box-shadow: 0 0 10px 2px rgb(255 180 59 / 0.6);
-}
-.page.page .timerNum {
-  color: var(--gold);
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 18px rgb(255 180 59 / 0.35);
-}
-.page.page .timerLabel {
-  color: var(--dim);
-}
-.page.page .timerSep {
-  color: rgb(255 255 255 / 0.25);
-}
-@media (max-width: 769px) {
-  .page.page .timerNum {
-    font-size: 24px;
-  }
 }
