@@ -106,7 +106,19 @@ export type OrderRow = {
 export async function listOrders(limit = 1000): Promise<OrderRow[]> {
   const { data, error } = await supabase().from("orders").select("*").order("created_at", { ascending: false }).limit(limit);
   if (error) throw error;
-  return (data ?? []).map((r) => ({
+  return (data ?? []).map(toOrderRow);
+}
+
+/** One buyer's orders, newest first (dashboard → Support). */
+export async function ordersByEmail(email: string): Promise<OrderRow[]> {
+  const { data, error } = await supabase().from("orders").select("*").ilike("email", email.replace(/[%_\\]/g, "\\$&")).order("created_at", { ascending: false }).limit(100);
+  if (error) throw error;
+  return (data ?? []).map(toOrderRow);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toOrderRow(r: any): OrderRow {
+  return {
     id: r.id,
     provider: r.provider,
     funnel: r.funnel,
@@ -122,5 +134,5 @@ export async function listOrders(limit = 1000): Promise<OrderRow[]> {
     emailSentAt: r.email_sent_at,
     emailError: r.email_error,
     createdAt: r.created_at,
-  }));
+  };
 }

@@ -237,6 +237,12 @@ export const I = {
       <path d="M9 8V6a3 3 0 0 1 6 0v2" />
     </Base>
   ),
+  inbox: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M3 13h5l1.5 3h5L16 13h5" />
+      <path d="M5.5 5h13L21 13v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6l2.5-8z" />
+    </Base>
+  ),
   mail: (p: IconProps) => (
     <Base {...p}>
       <rect x="3" y="5" width="18" height="14" rx="2" />

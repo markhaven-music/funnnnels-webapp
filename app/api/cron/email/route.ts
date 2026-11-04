@@ -1,5 +1,6 @@
 import { runOutbox } from "@/lib/outbox";
 import { sweepStripe } from "@/lib/stripeSales";
+import { syncSupport } from "@/lib/support";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -20,8 +21,17 @@ export async function GET(req: Request) {
         return 0;
       });
   if (recovered) console.log(`stripe sweep: ${recovered} order(s) recorded`);
+  // The support mailbox (dashboard → Support), copied alongside the emails.
+  const support = dryRun
+    ? null
+    : syncSupport().catch((err) => {
+        console.error("support sync failed", err);
+        return { error: String(err) };
+      });
   const report = await runOutbox({ budgetMs: 40_000, dryRun });
+  const supportReport = await support;
+  if (supportReport && ("error" in supportReport || ("inbox" in supportReport && supportReport.inbox + supportReport.sent > 0))) console.log("support sync", JSON.stringify(supportReport));
   const total = report.receipts + report.backups + report.reminders + report.sequence + report.broadcast + report.launch;
   if (total || report.failed || report.stopped) console.log(`email job${dryRun ? " (dry run)" : ""}`, JSON.stringify(report));
-  return Response.json({ dryRun, recovered, ...report });
+  return Response.json({ dryRun, recovered, support: supportReport, ...report });
 }

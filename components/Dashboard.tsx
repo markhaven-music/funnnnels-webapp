@@ -22,6 +22,7 @@ import { OrdersPanel } from "@/components/panels/OrdersPanel";
 import { ProductsPanel } from "@/components/panels/ProductsPanel";
 import { SettingsPanel } from "@/components/panels/SettingsPanel";
 import { ShopPanel } from "@/components/panels/ShopPanel";
+import { SupportPanel } from "@/components/panels/SupportPanel";
 import { NAV } from "@/lib/data";
 import type { Analytics, Metrics } from "@/lib/analytics";
 import type { StoredFunnel } from "@/lib/blocks";
@@ -40,6 +41,18 @@ const CARD_RANGE = "28d";
 export function Dashboard({ funnels: rows }: Props) {
   const [activeNav, setActiveNav] = useState<string>("home");
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  // Conversations with unread email in dashboard → Support, for the sidebar.
+  const [supportUnread, setSupportUnread] = useState(0);
+  useEffect(() => {
+    const check = () =>
+      fetch("/api/support?count=1", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => j && setSupportUnread(j.unread ?? 0))
+        .catch(() => {});
+    check();
+    const t = setInterval(check, 120_000);
+    return () => clearInterval(t);
+  }, []);
   // ?nav=analytics (from a funnel map) opens that panel.
   useEffect(() => {
     const nav = new URLSearchParams(window.location.search).get("nav");
@@ -61,7 +74,7 @@ export function Dashboard({ funnels: rows }: Props) {
   return (
     <div className="app">
       <Brand />
-      <Sidebar funnelCount={funnels.length} active={activeNav} onNav={setActiveNav} />
+      <Sidebar funnelCount={funnels.length} supportUnread={supportUnread} active={activeNav} onNav={setActiveNav} />
       <TopBar trail={trail} />
       {activeNav === "home"         && <DashboardHome funnels={funnels} analytics={analytics} />}
       {activeNav === "funnels"      && <MainPanel funnels={funnels} />}
@@ -72,6 +85,7 @@ export function Dashboard({ funnels: rows }: Props) {
       {activeNav === "live"         && <LivePanel />}
       {activeNav === "shop"         && <ShopPanel />}
       {activeNav === "orders"       && <OrdersPanel />}
+      {activeNav === "support"      && <SupportPanel onUnread={setSupportUnread} />}
       {activeNav === "contacts"     && <ContactsPanel />}
       {activeNav === "email-insights" && <EmailInsightsPanel analytics={analytics} />}
       {activeNav === "broadcasts"   && <BroadcastsPanel />}

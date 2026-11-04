@@ -5,11 +5,12 @@ import { NAV } from "@/lib/data";
 
 type Props = {
   funnelCount: number;
+  supportUnread?: number;
   active: string;
   onNav: (id: string) => void;
 };
 
-export function Sidebar({ funnelCount, active, onNav }: Props) {
+export function Sidebar({ funnelCount, supportUnread = 0, active, onNav }: Props) {
   return (
     <aside className="nav">
       {NAV.map((s) => (
@@ -21,7 +22,9 @@ export function Sidebar({ funnelCount, active, onNav }: Props) {
             const badge =
               it.badgeKey === "funnels" && funnelCount > 0
                 ? String(funnelCount)
-                : null;
+                : it.badgeKey === "support" && supportUnread > 0
+                  ? String(supportUnread)
+                  : null;
             return (
               <button
                 key={it.id}
