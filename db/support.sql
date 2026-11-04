@@ -51,8 +51,9 @@ create table public.support_threads (
 );
 alter table public.support_threads enable row level security;
 
--- The AI Overview of the open conversations (lib/supportOverview.ts), one row,
--- kept until the conversations it read change (migration "support_overview").
+-- Unused: it held a Claude-written overview, replaced the same day by rules
+-- (lib/supportOverview.ts) that need no storage. Empty; left in place
+-- (migration "support_overview").
 create table public.support_overview (
   id smallint primary key default 1 check (id = 1),
   input_hash text not null,

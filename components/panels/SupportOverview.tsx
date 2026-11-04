@@ -1,30 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Conversation } from "@/lib/support";
 import type { Overview, OverviewItem, Priority } from "@/lib/supportOverview";
 import s from "./support.module.css";
 
-// Dashboard → Support → AI Overview (lib/supportOverview.ts): what to answer
-// first. Written again on opening the page when the inbox changed since.
+// Dashboard → Support → Overview (lib/supportOverview.ts): what to answer
+// first, by rules. Worked out again whenever the conversations change.
 
-type State = { configured: boolean; overview: Overview | null; generatedAt?: string; model?: string; stale: boolean };
-
-const LABEL: Record<Priority, string> = { urgent: "urgent", high: "high", normal: "normal", low: "low", ignore: "ignore" };
 const CHIP: Record<Priority, string> = { urgent: s.p_urgent, high: s.p_high, normal: s.p_normal, low: s.p_low, ignore: s.p_low };
-
-function ago(iso: string): string {
-  const m = Math.round((Date.now() - Date.parse(iso)) / 60_000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m} min ago`;
-  if (m < 1440) return `${Math.round(m / 60)} h ago`;
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-}
 
 function Item({ item, name, onOpen }: { item: OverviewItem; name: string; onOpen: (c: string) => void }) {
   return (
     <button type="button" className={s.ovItem} onClick={() => onOpen(item.customer)}>
-      <span className={`${s.prio} ${CHIP[item.priority]}`}>{LABEL[item.priority]}</span>
+      <span className={`${s.prio} ${CHIP[item.priority]}`}>{item.priority}</span>
       <span className={s.ovText}>
         <span className={s.ovTitle}>
           {item.title} <span className={s.ovWho}>· {name}</span>
@@ -37,57 +26,21 @@ function Item({ item, name, onOpen }: { item: OverviewItem; name: string; onOpen
 }
 
 export function SupportOverview({ list, onOpen }: { list: Conversation[]; onOpen: (customer: string) => void }) {
-  const [state, setState] = useState<State | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [overview, setOverview] = useState<Overview | null>(null);
   const [showIgnored, setShowIgnored] = useState(false);
-  const auto = useRef(false);
-
-  const generate = useCallback(async (force: boolean) => {
-    setBusy(true);
-    setError("");
-    try {
-      const r = await fetch("/api/support/overview", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ force }) });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error ?? `HTTP ${r.status}`);
-      setState((st) => ({ configured: true, ...st, ...j }));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setBusy(false);
-    }
-  }, []);
+  // New email, read or done: the list's shape changes, the overview follows.
+  const key = list.map((c) => `${c.customer}:${c.messages}:${c.lastAt}:${c.done ? 1 : 0}`).join("|");
 
   useEffect(() => {
     fetch("/api/support/overview", { cache: "no-store" })
-      .then((r) => (r.ok ? (r.json() as Promise<State>) : null))
-      .then((j) => {
-        if (!j) return;
-        setState(j);
-        // Opening the page writes a new one if the inbox changed since.
-        if (j.configured && j.stale && !auto.current) {
-          auto.current = true;
-          generate(false);
-        }
-      })
+      .then((r) => (r.ok ? (r.json() as Promise<Overview>) : null))
+      .then((o) => o && setOverview(o))
       .catch(() => {});
-  }, [generate]);
+  }, [key]);
 
-  if (!state) return null;
-  if (!state.configured) {
-    return (
-      <div className={s.overview}>
-        <div className={s.ovHead}>
-          <span className={s.ovLabel}>AI OVERVIEW</span>
-        </div>
-        <p className={s.ovSummary}>Set ANTHROPIC_API_KEY in Vercel to get a summary of the inbox, ordered by what to answer first.</p>
-      </div>
-    );
-  }
-
+  if (!overview) return null;
   const byCustomer = new Map(list.map((c) => [c.customer, c]));
-  // Conversations marked done since drop out.
-  const items = (state.overview?.items ?? []).filter((i) => !byCustomer.get(i.customer)?.done);
+  const items = overview.items.filter((i) => !byCustomer.get(i.customer)?.done);
   const main = items.filter((i) => i.priority !== "ignore");
   const ignored = items.filter((i) => i.priority === "ignore");
   const name = (c: string) => byCustomer.get(c)?.name || c;
@@ -95,42 +48,29 @@ export function SupportOverview({ list, onOpen }: { list: Conversation[]; onOpen
   return (
     <div className={s.overview}>
       <div className={s.ovHead}>
-        <span className={s.ovLabel}>AI OVERVIEW</span>
-        <span className={s.ovMeta}>
-          {busy ? "Reading the inbox…" : state.generatedAt ? `${ago(state.generatedAt)}${state.stale ? " · new email since" : ""}` : ""}
-        </span>
-        <button type="button" className="btn" onClick={() => generate(true)} disabled={busy}>
-          {busy ? "Working…" : "Refresh"}
-        </button>
+        <span className={s.ovLabel}>OVERVIEW</span>
       </div>
-      {error ? <p className={s.ovError}>Couldn&apos;t write the overview: {error}</p> : null}
-      {state.overview ? (
-        <>
-          <p className={s.ovSummary}>{state.overview.summary}</p>
-          {main.length > 0 && (
-            <div className={s.ovList}>
-              {main.map((i) => (
+      <p className={s.ovSummary}>{overview.summary}</p>
+      {main.length > 0 && (
+        <div className={s.ovList}>
+          {main.map((i) => (
+            <Item key={i.customer} item={i} name={name(i.customer)} onOpen={onOpen} />
+          ))}
+        </div>
+      )}
+      {ignored.length > 0 && (
+        <div>
+          <button type="button" className={s.linkButton} onClick={() => setShowIgnored((v) => !v)}>
+            {showIgnored ? "hide" : "show"} {ignored.length} to ignore (spam, phishing, bounces, auto-replies)
+          </button>
+          {showIgnored && (
+            <div className={s.ovList} style={{ marginTop: 8 }}>
+              {ignored.map((i) => (
                 <Item key={i.customer} item={i} name={name(i.customer)} onOpen={onOpen} />
               ))}
             </div>
           )}
-          {ignored.length > 0 && (
-            <div>
-              <button type="button" className={s.linkButton} onClick={() => setShowIgnored((v) => !v)}>
-                {showIgnored ? "hide" : "show"} {ignored.length} to ignore (spam, notifications, auto-replies)
-              </button>
-              {showIgnored && (
-                <div className={s.ovList} style={{ marginTop: 8 }}>
-                  {ignored.map((i) => (
-                    <Item key={i.customer} item={i} name={name(i.customer)} onOpen={onOpen} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </>
-      ) : busy ? null : (
-        <p className={s.ovSummary}>No overview yet.</p>
+        </div>
       )}
     </div>
   );

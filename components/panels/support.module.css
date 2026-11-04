@@ -230,7 +230,7 @@
   font-size: 13px;
 }
 
-/* AI Overview (SupportOverview.tsx) */
+/* Overview (SupportOverview.tsx) */
 .overview {
   background: var(--bg-1);
   border: 1px solid transparent;
@@ -251,22 +251,11 @@
   letter-spacing: 0.06em;
   color: var(--accent-2);
 }
-.ovMeta {
-  flex: 1;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--fg-1);
-}
 .ovSummary {
   margin: 0;
   font-size: 14px;
   line-height: 1.55;
   color: var(--fg-0);
-}
-.ovError {
-  margin: 0;
-  font-size: 13px;
-  color: var(--rose);
 }
 .ovList {
   display: grid;
