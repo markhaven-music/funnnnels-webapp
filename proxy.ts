@@ -151,7 +151,10 @@ export function proxy(request: NextRequest) {
   const slug = kitSlug(pathname);
   const loc = localized(pathname);
   const home = FUNNEL_HOME[loc?.slug ?? pathname.split("/")[1]] ?? (slug ? KIT_HOME : undefined);
-  if (home && DASHBOARD_HOSTS.has(host)) {
+  // The dashboard's editor (funnel map → Edit) shows a page here, in place,
+  // with ?edit=1, to whoever is signed in to the dashboard.
+  const editing = request.nextUrl.searchParams.get("edit") === "1" && isAdmin(request);
+  if (home && DASHBOARD_HOSTS.has(host) && !editing) {
     return NextResponse.redirect(`${home}${pathname}${request.nextUrl.search}`, 308);
   }
 
@@ -190,27 +193,28 @@ export function proxy(request: NextRequest) {
 
   if (slug || PUBLIC.some((re) => re.test(pathname))) return NextResponse.next();
 
-  const password = process.env.ADMIN_PASSWORD;
-  if (!password) {
-    return process.env.NODE_ENV === "production"
-      ? new NextResponse("ADMIN_PASSWORD is not set", { status: 503 })
-      : NextResponse.next();
+  if (!process.env.ADMIN_PASSWORD && process.env.NODE_ENV === "production") {
+    return new NextResponse("ADMIN_PASSWORD is not set", { status: 503 });
   }
-
-  const header = request.headers.get("authorization") ?? "";
-  if (header.startsWith("Basic ")) {
-    try {
-      const decoded = atob(header.slice(6));
-      const pass = decoded.slice(decoded.indexOf(":") + 1);
-      if (pass === password) return NextResponse.next();
-    } catch {
-      // malformed header: fall through to the 401
-    }
-  }
+  if (isAdmin(request)) return NextResponse.next();
   return new NextResponse("Authentication required", {
     status: 401,
     headers: { "WWW-Authenticate": 'Basic realm="funnnnels", charset="UTF-8"' },
   });
+}
+
+/** Signed in to the dashboard (its Basic password); anyone in `next dev` without ADMIN_PASSWORD. */
+function isAdmin(request: NextRequest): boolean {
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) return process.env.NODE_ENV !== "production";
+  const header = request.headers.get("authorization") ?? "";
+  if (!header.startsWith("Basic ")) return false;
+  try {
+    const decoded = atob(header.slice(6));
+    return decoded.slice(decoded.indexOf(":") + 1) === password;
+  } catch {
+    return false; // malformed header
+  }
 }
 
 export const config = {

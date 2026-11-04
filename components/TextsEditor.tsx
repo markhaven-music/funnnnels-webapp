@@ -5,10 +5,12 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { previewUrl } from "@/components/FunnelLanes";
 import { I } from "@/components/icons";
+import { PageFrame, type FrameText } from "@/components/PageFrame";
 import s from "./textsEditor.module.css";
 
-// Funnel map → Edit on a page built in code (the MIDI Drum Kit): every text of
-// the page in one language, in the page's order. ClickFunnels' texts (tNNN)
+// Funnel map → Edit on a page built in code (the MIDI Drum Kit), one page in
+// one language. "On the page": the page itself, a click on a text edits it
+// there (./PageFrame.tsx). "List": every text of the page in the page's order. ClickFunnels' texts (tNNN)
 // are edited as they look, bold and colours kept; the copy's texts are plain
 // with their marks (**bold**, {c} = € or $). Saving sends only what changed;
 // a text put back as the code has it goes back to the code's.
@@ -22,12 +24,14 @@ type Props = {
   code: Record<string, string>;
   edited: Record<string, string>;
   liveUrl: string | null;
+  /** The page as the editor shows it (same site), or null: list only. */
+  frameSrc: string | null;
 };
 
 const isMarkup = (key: string) => /^t\d{3}$/.test(key);
 const plain = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
 
-export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, liveUrl }: Props) {
+export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, liveUrl, frameSrc }: Props) {
   const router = useRouter();
   // key → the text as typed, for the texts touched since the last save.
   const [draft, setDraft] = useState<Record<string, string>>({});
@@ -37,6 +41,15 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
   const [error, setError] = useState("");
   // Bumped when a text is put back, so its field shows the code's text again.
   const [resets, setResets] = useState<Record<string, number>>({});
+  const [view, setView] = useState<"page" | "list">(frameSrc ? "page" : "list");
+  const [phone, setPhone] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [found, setFound] = useState<string[] | null>(null);
+  const [sync, setSync] = useState(0);
+  // The order form's two steps: its step 2 (add-ons, payment) has its own words.
+  const [step2, setStep2] = useState(false);
+  // What the frame's page showed when it loaded: the texts saved by then.
+  const [loaded] = useState(edited);
 
   const keys = Object.keys(code);
   const current = (key: string) => draft[key] ?? saved[key] ?? code[key];
@@ -63,7 +76,18 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
   function putBack(key: string) {
     setDraft((d) => ({ ...d, [key]: code[key] }));
     setResets((r) => ({ ...r, [key]: (r[key] ?? 0) + 1 }));
+    setSync((n) => n + 1);
     setState("idle");
+  }
+
+  const frameTexts: FrameText[] = keys.map((key) => ({ key, markup: isMarkup(key), value: current(key), shown: loaded[key] ?? code[key], code: code[key] }));
+  const missing = found ? keys.filter((k) => !found.includes(k)).length : 0;
+
+  function show(next: "page" | "list") {
+    setView(next);
+    // The list edits the same texts: the page shows them as typed there.
+    if (next === "page") setSync((n) => n + 1);
+    else setResets((r) => Object.fromEntries(keys.map((k) => [k, (r[k] ?? 0) + 1])));
   }
 
   async function save() {
@@ -136,7 +160,78 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
         </div>
       </nav>
 
-      <main className={s.main}>
+      {frameSrc && (
+        <div className={s.viewBar}>
+          <div className="tabs" role="tablist" aria-label="View">
+            <button type="button" className={`tab ${view === "page" ? "active" : ""}`} onClick={() => view !== "page" && show("page")}>
+              On the page
+            </button>
+            <button type="button" className={`tab ${view === "list" ? "active" : ""}`} onClick={() => view !== "list" && show("list")}>
+              List
+            </button>
+          </div>
+          {view === "page" && (
+            <>
+              <div className="tabs" role="tablist" aria-label="Screen">
+                <button type="button" className={`tab ${!phone ? "active" : ""}`} onClick={() => setPhone(false)}>
+                  Desktop
+                </button>
+                <button type="button" className={`tab ${phone ? "active" : ""}`} onClick={() => setPhone(true)}>
+                  Phone
+                </button>
+              </div>
+              {page === "order" && (
+                <div className="tabs" role="tablist" aria-label="Order form step">
+                  <button type="button" className={`tab ${!step2 ? "active" : ""}`} onClick={() => step2 && (setFound(null), setSelected(null), setStep2(false))}>
+                    Form step 1
+                  </button>
+                  <button type="button" className={`tab ${step2 ? "active" : ""}`} onClick={() => !step2 && (setFound(null), setSelected(null), setStep2(true))}>
+                    Form step 2
+                  </button>
+                </div>
+              )}
+              <div className={s.hint}>
+                {selected ? (
+                  <>
+                    <span className={s.key}>{isMarkup(selected) ? `Text ${Number(selected.slice(1))}` : selected}</span>
+                    {current(selected) !== code[selected] && (
+                      <button type="button" className={s.undo} onClick={() => putBack(selected)} title={`Put back: ${plain(code[selected])}`}>
+                        <I.refresh size={12} /> Put back the original
+                      </button>
+                    )}
+                    <span>Esc when done</span>
+                  </>
+                ) : (
+                  <span>Click a text on the page to change it.</span>
+                )}
+                {missing > 0 && (
+                  <button type="button" className={s.undo} onClick={() => show("list")} title="Texts the page doesn't show as text: the title for Google, form placeholders, words the page builds">
+                    {missing} more in the list
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+          {state === "saved" && <span className={s.okInline}>Saved. Live within a few seconds.</span>}
+          {state === "error" && <span className={s.errInline}>{error}</span>}
+        </div>
+      )}
+
+      {frameSrc && (
+        <div className={s.stage} hidden={view !== "page"}>
+          <PageFrame
+            src={step2 ? `${frameSrc}&step=2` : frameSrc}
+            width={phone ? 390 : null}
+            texts={frameTexts}
+            onEdit={edit}
+            onSelect={setSelected}
+            onFound={setFound}
+            sync={sync}
+          />
+        </div>
+      )}
+
+      <main className={s.main} hidden={view !== "list"}>
         <div className={s.tools}>
           <label className={s.search}>
             <I.search size={14} />

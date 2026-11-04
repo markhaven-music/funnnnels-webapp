@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 // "pure": Stripe.js loads when loadStripe is called, not as soon as this file does.
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
@@ -51,6 +51,10 @@ function stripeFor(key: string) {
 export function OrderForm({ lang, currency, country, publishableKey, afterOrder, keepCard, offer, form }: Props) {
   const t = form ?? copyFor(lang, currency).form;
   const [step, setStep] = useState<1 | 2>(1);
+  // The dashboard's editor (funnel map → Edit, "Step 2") opens the form on step 2, to edit its words.
+  useEffect(() => {
+    if (/[?&]edit=1(&|$)/.test(location.search) && /[?&]step=2(&|$)/.test(location.search)) setStep(2);
+  }, []);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);
   const [method, setMethod] = useState<Method>("card");

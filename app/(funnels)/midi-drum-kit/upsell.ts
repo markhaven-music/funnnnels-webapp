@@ -86,7 +86,9 @@ export const offerIds = () => funnel.offers.map((o) => o.id);
 
 // slug: the funnel the page sells for. The TOP HITS MIDI Bundle shows the
 // Famous Beats page too, after its own order (same pixel, Clarity and neo).
-export async function upsellHtml(offerId: string, lang: Lang, currency: Currency, slug: string = funnel.slug): Promise<string | null> {
+// marks: each editable text (tNNN) between <!--fx:tNNN--> and <!--/fx-->, for
+// the dashboard's editor on the page (app/api/funnels/[id]/texts/frame).
+export async function upsellHtml(offerId: string, lang: Lang, currency: Currency, slug: string = funnel.slug, marks = false): Promise<string | null> {
   const page = PAGES[offerId];
   const product = (await resolveFunnel(slug)) ?? getFunnel(slug);
   const offer = product?.offers?.find((o) => o.id === offerId);
@@ -111,7 +113,7 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
   };
 
   let html = page.template
-    .replace(/\{\{([ts]\d{3})\}\}/g, (_, key: string) => text(key))
+    .replace(/\{\{([ts]\d{3})\}\}/g, (_, key: string) => (marks && key.startsWith("t") ? `<!--fx:${key}-->${text(key)}<!--/fx-->` : text(key)))
     .replaceAll("{{YES}}", "#yes")
     .replaceAll("{{NO}}", "#no")
     .replace("{{LANG}}", lang)

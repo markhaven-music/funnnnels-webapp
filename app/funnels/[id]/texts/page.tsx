@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TextsEditor } from "@/components/TextsEditor";
-import { isLang, LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
+import { isLang, LANGS, paths, type Lang } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { codeTexts, isTextPage, TEXT_PAGES, type TextPage } from "@/app/(funnels)/midi-drum-kit/texts";
 import { getFunnelMap, type MapStep } from "@/lib/funnelMap";
 import { pageEdits } from "@/lib/pageTexts";
@@ -40,6 +40,18 @@ export default async function TextsPage({ params, searchParams }: { params: Para
       code={codeTexts(page, lang)}
       edited={edits[page] ?? {}}
       liveUrl={steps.find(isStep)?.url ?? null}
+      frameSrc={frameSrc(id, page, lang)}
     />
   );
+}
+
+// The page as the editor shows it, on this site. ClickFunnels' pages come with
+// their texts marked and without their scripts (api/funnels/[id]/texts/frame);
+// the order and thank-you pages are the pages themselves, kept here with
+// ?edit=1 (proxy.ts), in euros, not counted (?preview=1; the thank-you page
+// then shows as for a buyer of everything).
+function frameSrc(id: string, page: TextPage, lang: Lang): string {
+  if (page === "order") return `${paths(lang).order}?edit=1&preview=1&origin=1&country=FR`;
+  if (page === "thank-you") return `${paths(lang).thankYou}?edit=1&preview=1&origin=1&country=FR`;
+  return `/api/funnels/${id}/texts/frame?page=${page}&lang=${lang}`;
 }
