@@ -434,6 +434,7 @@ export async function attachImage(slug: string, paths: { sm: string; lg: string 
 /** After a change: the shop page, the cart (it carries the prices) and the product's page, in both currencies. */
 export function revalidateShop(slug?: string) {
   for (const c of CURRENCIES) {
+    revalidatePath(`/home/${c}`); // the homepage's grid shows the shop's products too
     revalidatePath(`/shop/${c}`);
     revalidatePath(`/shop/${c}/cart`);
     if (slug) revalidatePath(`/shop/${c}/${slug}`);

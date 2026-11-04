@@ -1,69 +1,18 @@
-/* Grind Studio's homepage (app/home). The funnel pages' rules: one yellow
-   (#f5b800) on black, white text, no bordered boxes, a juicy key for every
-   call to action (jazz-midi-pack/btn.module.css), one column on a phone and
-   the picture beside the copy on a wide screen. */
-.page {
-  --y: #f5b800;
-  --y-gloss: #ffe14d;
-  --y-deep: #d39a00;
-  --y-lip: #7a5600;
-  --y-glow: rgb(245 184 0 / 0.5);
-  --bg: #070707;
+/* Grind Studio's homepage (app/home), in the store's frame (app/shop/ShopFrame,
+   shop.module.css: bar, product grid, footer). The funnel pages' rules: one
+   yellow (#f5b800) on black, white text, no bordered boxes, the juicy key for
+   the banner's call to action (jazz-midi-pack/btn.module.css), one column on
+   a phone and the box beside the copy on a wide screen. */
+.home {
   --band: #111;
   --text: rgb(255 255 255 / 0.88);
-  --mute: rgb(255 255 255 / 0.62);
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-poppins), sans-serif;
-  font-size: 17px;
-  line-height: 1.6;
-  overflow-x: clip;
 }
-.page :where(h1, h2, h3, p, ul, ol, blockquote) {
+.home :where(ul, ol, blockquote) {
   margin: 0;
-}
-.page :where(ul, ol) {
   padding: 0;
   list-style: none;
 }
-.page a {
-  color: inherit;
-}
 .y {
-  color: var(--y);
-}
-
-/* ─── bar ────────────────────────────────── */
-.top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1120px;
-  height: 64px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-.logo {
-  display: block;
-  line-height: 0;
-}
-.logo img {
-  width: auto;
-  height: 20px;
-}
-.account {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 16px;
-  border-radius: 4px;
-  background: var(--band);
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: none;
-}
-.account:hover {
   color: var(--y);
 }
 
@@ -73,20 +22,18 @@
   color: #fff;
   font-weight: 800;
   letter-spacing: -0.02em;
-  text-align: center;
   text-wrap: balance;
 }
 .h1 {
-  max-width: 14em;
-  margin: 0 auto;
-  font-size: clamp(38px, 9vw, 68px);
+  font-size: clamp(36px, 8.6vw, 64px);
   line-height: 1.04;
 }
 .h2 {
   max-width: 18em;
   margin: 0 auto 40px;
-  font-size: clamp(30px, 6.4vw, 46px);
+  font-size: clamp(28px, 6vw, 42px);
   line-height: 1.1;
+  text-align: center;
 }
 .h3 {
   color: #fff;
@@ -94,29 +41,39 @@
   font-weight: 700;
   line-height: 1.25;
 }
-.h3 a {
-  text-decoration: none;
-}
 
-/* ─── hero ───────────────────────────────── */
+/* ─── banner: the MIDI Drum Kit ──────────── */
 .hero {
-  max-width: 760px;
+  background:
+    radial-gradient(60% 70% at 50% 60%, rgb(245 184 0 / 0.14), transparent 70%),
+    linear-gradient(180deg, #0d0d0d, var(--ink));
+}
+.heroIn {
+  max-width: 1160px;
   margin: 0 auto;
-  padding: 36px 16px 64px;
+  padding: 32px 16px 48px;
+}
+.heroText {
+  display: grid;
+  justify-items: center;
   text-align: center;
 }
 .lead {
-  max-width: 32em;
-  margin: 18px auto 0;
-  font-size: clamp(17px, 2.4vw, 20px);
+  max-width: 30em;
+  margin-top: 14px;
+  font-size: clamp(17px, 2.2vw, 20px);
   color: var(--mute);
 }
 .heroPic {
   display: block;
-  width: min(300px, 50vw); /* small enough on a phone for the button to be on the first screen */
+  line-height: 0;
+  margin: 22px 0 26px;
+}
+.heroPic img {
+  display: block;
+  width: min(250px, 48vw); /* small enough on a phone for the button to be on the first screen */
   height: auto;
-  margin: 24px auto 28px;
-  filter: drop-shadow(0 30px 50px rgb(245 184 0 / 0.18));
+  filter: drop-shadow(0 30px 50px rgb(245 184 0 / 0.2));
 }
 .note {
   margin-top: 14px;
@@ -128,7 +85,14 @@
 .section,
 .band,
 .yband {
+  margin-top: 64px;
   padding: 72px 16px;
+}
+.band + .section,
+.section + .band,
+.band + .yband,
+.section + .yband {
+  margin-top: 0;
 }
 .band {
   background: var(--band);
@@ -139,60 +103,7 @@
   contain-intrinsic-size: auto 900px;
 }
 
-/* ─── packs ──────────────────────────────── */
-.packs {
-  display: grid;
-  gap: 72px;
-  max-width: 1040px;
-  margin: 0 auto;
-}
-.pack {
-  display: grid;
-  gap: 24px;
-  align-items: center;
-}
-.packPic {
-  display: block;
-  line-height: 0;
-}
-.packPic img {
-  display: block;
-  width: min(300px, 72vw);
-  height: auto;
-  margin: 0 auto;
-}
-/* A box on its own black square: the square's edges fade into the band. */
-.fade {
-  mask-image: radial-gradient(closest-side, #000 72%, transparent);
-}
-.packText .h3 {
-  font-size: clamp(26px, 3.2vw, 34px);
-  font-weight: 800;
-  letter-spacing: -0.015em;
-}
-.line {
-  margin-top: 8px;
-  font-size: 18px;
-  color: var(--text);
-}
-.points {
-  display: grid;
-  gap: 8px;
-  margin: 18px 0 30px;
-  color: var(--mute);
-}
-.points li {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-.tick {
-  flex: none;
-  margin-top: 4px;
-  color: var(--y);
-}
-
-/* ─── quotes ─────────────────────────────── */
+/* ─── quotes and reviews ─────────────────── */
 .quotes,
 .reviews {
   display: grid;
@@ -226,6 +137,18 @@
   color: var(--mute);
   font-size: 18px;
   text-align: center;
+}
+.stars {
+  color: var(--y);
+  font-size: 18px;
+  letter-spacing: 0.12em;
+}
+.review {
+  margin-top: 6px;
+  color: #fff;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 /* ─── how it works ───────────────────────── */
@@ -263,20 +186,6 @@
   opacity: 0.8;
 }
 
-/* ─── reviews ────────────────────────────── */
-.stars {
-  color: var(--y);
-  font-size: 18px;
-  letter-spacing: 0.12em;
-}
-.review {
-  margin-top: 6px;
-  color: #fff;
-  font-size: 19px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
 /* ─── past buyers ────────────────────────── */
 .yband {
   background: var(--y);
@@ -307,33 +216,47 @@
   background: #1c1c1c;
 }
 
-/* ─── footer ─────────────────────────────── */
-.footer {
-  padding: 40px 16px 56px;
-  color: var(--mute);
-  font-size: 14px;
-  text-align: center;
-}
-
-/* ─── wide screens: picture beside the copy, sides alternating ─── */
+/* ─── wide screens: the box beside the copy ─── */
 @media (min-width: 860px) {
+  .heroIn {
+    padding: 56px 24px 64px;
+  }
+  .heroText {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    grid-template-areas: "h1 pic" "lead pic" "btn pic" "note pic";
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: 56px;
+    justify-items: start;
+    align-items: start;
+    text-align: left;
+  }
+  .heroText > .h1 {
+    grid-area: h1;
+  }
+  .heroText > .lead {
+    grid-area: lead;
+    margin-bottom: 32px;
+  }
+  .heroText > a[data-cta] {
+    grid-area: btn;
+    margin-inline: 0;
+  }
+  .heroText > .note {
+    grid-area: note;
+  }
+  .heroPic {
+    grid-area: pic;
+    justify-self: center;
+    align-self: center;
+    margin: 0;
+  }
+  .heroPic img {
+    width: min(340px, 100%);
+  }
   .section,
   .band,
   .yband {
     padding: 104px 24px;
-  }
-  .pack {
-    grid-template-columns: 1fr 1fr;
-    gap: 64px;
-  }
-  .flip .packPic {
-    order: 2;
-  }
-  .packPic img {
-    width: min(360px, 100%);
-  }
-  .packText a[data-cta] {
-    margin-inline: 0;
   }
   .quotes,
   .reviews {

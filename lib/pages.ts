@@ -47,6 +47,9 @@ export function revalidateFunnelPages(funnelId: string) {
 export function revalidateSalesPages(funnelId: string) {
   revalidateFunnelPages(funnelId);
   for (const currency of CURRENCIES) {
+    // The store shows every funnel's pack at its price (lib/storefront.ts).
+    revalidatePath(`/home/${currency}`);
+    revalidatePath(`/shop/${currency}`);
     revalidatePath(`/${funnelId}/offer/${currency}`); // TOP HITS' upsell
     if (funnelId !== "midi-drum-kit") continue;
     for (const lang of DRUM_KIT_LANGS) {
