@@ -324,7 +324,7 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
 
             <div className={s.side}>
               <span className={s.sideLabel}>{thread.customer.toUpperCase()}</span>
-              {thread.orders.length === 0 ? (
+              {thread.orders.length === 0 && thread.legacy.length === 0 ? (
                 <span>No orders with this email.</span>
               ) : (
                 thread.orders.map((o) => (
@@ -340,6 +340,21 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
                   </div>
                 ))
               )}
+              {thread.legacy.map((o, i) => (
+                <div key={`legacy-${o.ref ?? i}`} className={s.order} title={o.ref ? `ClickFunnels order #${o.ref}` : `Bought before funnnnels (${o.source})`}>
+                  <span>
+                    {o.products[0]}
+                    {o.products.length > 1 ? ` + ${o.products.length - 1} add-on${o.products.length > 2 ? "s" : ""}` : ""}
+                  </span>
+                  <span className="mono">
+                    {o.amountCents != null && o.currency ? `${money(o.amountCents, o.currency)} · ` : ""}
+                    {o.source === "clickfunnels" ? "ClickFunnels" : o.source}
+                    {o.ref ? ` #${o.ref}` : ""}
+                    {o.at ? ` · ${new Date(o.at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "2-digit" })}` : ""}
+                    {o.status && o.status !== "paid" ? ` · ${o.status}` : ""}
+                  </span>
+                </div>
+              ))}
             </div>
 
             {thread.messages.map((m) => (

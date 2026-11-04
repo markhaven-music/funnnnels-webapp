@@ -201,16 +201,68 @@ export type SupportMessage = {
   sentAt: string;
 };
 
-export type Thread = { customer: string; done: boolean; messages: SupportMessage[]; orders: OrderRow[] };
+// Bought before funnnnels: legacy_purchases (one row per product, ClickFunnels'
+// order number as ref) joined to the ClickFunnels export (cf_orders) for the
+// amount, the billing status and the date. One entry per order.
+export type LegacyOrder = {
+  ref: string | null; // ClickFunnels' order number
+  source: string; // "clickfunnels"
+  products: string[]; // catalog names, the main product first
+  amountCents: number | null;
+  currency: string | null;
+  status: string | null; // ClickFunnels' billing status: paid, refunded, disputed…
+  at: string | null;
+};
 
-/** One conversation, oldest first, with the customer's orders. Marks it read. */
+export type Thread = { customer: string; done: boolean; messages: SupportMessage[]; orders: OrderRow[]; legacy: LegacyOrder[] };
+
+async function legacyOrders(email: string): Promise<LegacyOrder[]> {
+  const db = supabase();
+  const [{ data: rows, error }, { data: cf }] = await Promise.all([
+    db.from("legacy_purchases").select("product, source, ref, bought_at").eq("email", email),
+    db.from("cf_orders").select("order_number, total_collected, currency, billing_status, created_at").ilike("email", email.replace(/[%_\\]/g, "\\$&")),
+  ]);
+  if (error) throw error;
+  if (!rows?.length) return [];
+  const { data: catalog } = await db.from("catalog").select("slug, name, position").in("slug", [...new Set(rows.map((r) => r.product as string))]);
+  const name = new Map((catalog ?? []).map((p) => [p.slug as string, p.name as string]));
+  const position = new Map((catalog ?? []).map((p) => [p.slug as string, Number(p.position ?? 0)]));
+  const order = new Map((cf ?? []).map((o) => [String(o.order_number), o]));
+  // Rows of the same order (same ref) make one entry; a row without a ref stands alone.
+  const groups = new Map<string, typeof rows>();
+  for (const r of rows) {
+    const k = r.ref ? `${r.source}:${r.ref}` : `${r.source}:${r.product}:${r.bought_at ?? ""}`;
+    groups.set(k, [...(groups.get(k) ?? []), r]);
+  }
+  return [...groups.values()]
+    .map((g) => {
+      const o = g[0].ref ? order.get(String(g[0].ref)) : undefined;
+      const slugs = g.map((r) => r.product as string).sort((a, b) => (position.get(a) ?? 1e9) - (position.get(b) ?? 1e9));
+      return {
+        ref: g[0].ref ?? null,
+        source: g[0].source,
+        products: slugs.map((s) => name.get(s) ?? s),
+        amountCents: o?.total_collected != null ? Math.round(Number(o.total_collected) * 100) : null,
+        currency: o?.currency ?? null,
+        status: o?.billing_status ?? null,
+        at: o?.created_at ?? g[0].bought_at ?? null,
+      };
+    })
+    .sort((a, b) => Date.parse(b.at ?? "") - Date.parse(a.at ?? ""));
+}
+
+/** One conversation, oldest first, with the customer's orders (funnnnels' and ClickFunnels'). Marks it read. */
 export async function getThread(customer: string): Promise<Thread> {
   const db = supabase();
   const c = customer.toLowerCase();
-  const [{ data, error }, { data: thread }, orders] = await Promise.all([
+  const [{ data, error }, { data: thread }, orders, legacy] = await Promise.all([
     db.from("support_messages").select("*").eq("customer", c).order("sent_at", { ascending: true }).limit(200),
     db.from("support_threads").select("done_at").eq("customer", c).maybeSingle(),
     ordersByEmail(c).catch(() => []),
+    legacyOrders(c).catch((err) => {
+      console.error("support: purchases before funnnnels", err);
+      return [];
+    }),
   ]);
   if (error) throw error;
   const rows = data ?? [];
@@ -223,6 +275,7 @@ export async function getThread(customer: string): Promise<Thread> {
     customer: c,
     done,
     orders,
+    legacy,
     messages: rows.map((m) => ({
       id: m.id,
       direction: m.direction,
