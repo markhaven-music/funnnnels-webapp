@@ -41,10 +41,14 @@ BACK = {
     "fr": {"Graïnde": "GRIND", "huit-zéro-huit,": "808,", "A-Sap": "A$AP"},
     "it": {"Grind": "GRIND", "Twentyone": "21", "quattrocentonovantasette": "497", "milleduecentocinquanta": "1.250", "A-Sap": "A$AP"},
 }[LANG]
-# Where the product pictures come in: (paragraph, its first words) per language.
+# Where the product pictures come in: (paragraph, its first words, picture) per language.
+# Italian has no picture of the kit itself (2026-11-04, "non la far vedere proprio questa
+# immagine del midi drum kit"): the bonuses and the closing boxes only.
 ANCHORS = {
-    "fr": [(11, ["la", "sortie"]), (12, ["Bonus", "numéro", "un"]), (13, ["Bonus", "numéro", "deux"]), (14, ["bonus", "numéro", "trois"]), (16, ["Mais"])],
-    "it": [(11, ["l'uscita"]), (12, ["Bonus", "numero", "uno"]), (13, ["Bonus", "numero", "due"]), (14, ["bonus", "numero", "tre"]), (16, ["Ma"])],
+    "fr": [(11, ["la", "sortie"], "product"), (12, ["Bonus", "numéro", "un"], "bonus-famous"), (13, ["Bonus", "numéro", "deux"], "bonus-starters"),
+           (14, ["bonus", "numéro", "trois"], "bonus-drums"), (16, ["Mais"], "boxes-all")],
+    "it": [(12, ["Bonus", "numero", "uno"], "bonus-famous"), (13, ["Bonus", "numero", "due"], "bonus-starters"),
+           (14, ["bonus", "numero", "tre"], "bonus-drums"), (16, ["Ma"], "boxes-all")],
 }[LANG]
 OUT = {"fr": "VSL-FR-Anatole.mp4", "it": "VSL-IT-MarcoTrox.mp4"}[LANG]
 
@@ -102,7 +106,7 @@ def first(seg_i, starts_with):
             return w["s"]
     raise SystemExit(f"not found: {starts_with} in {seg_i}")
 
-PICS = sorted((first(s, ws), name) for (s, ws), name in zip(ANCHORS, ["product", "bonus-famous", "bonus-starters", "bonus-drums", "boxes-all"]))
+PICS = sorted((first(s, ws), name) for s, ws, name in ANCHORS)
 pic_cache = {}
 
 def picture(t):

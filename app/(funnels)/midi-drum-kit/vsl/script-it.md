@@ -16,25 +16,32 @@ per paragraph, every paragraph checked with scribe_v1. Spelled for the voice:
 GRIND STUDIO → "Grind Studio", 21 Savage → "Twentyone Savage", 497 →
 "quattrocentonovantasette", 1.250 → "milleduecentocinquanta", A$AP → "A-Sap".
 Captions: `python tools/vsl_captions.py <work dir> Roboto.ttf
-public/funnels/midi-drum-kit --lang it`. Whole track 7:20, Wistia vneszof55o
-("GRIND STUDIO VSL 3 Black And Red - IT"), thumbnail = the frame "di fare una
-smorfia" (Wistia image nvaqkm4pxs, public/funnels/midi-drum-kit/vsl-it.webp).
+public/funnels/midi-drum-kit --lang it` (no picture of the kit itself, only the
+bonuses and the closing boxes). Whole track 7:13, Wistia xmzaw2vmu8 ("GRIND
+STUDIO VSL 3 Black And Red - IT v2"), thumbnail = the frame "suonino male?"
+(Wistia image f9t9wziomr, public/funnels/midi-drum-kit/vsl-it.webp).
+
+Changed by the user the same evening (v1 was vneszof55o): the opening question
+("cringe non è smorfia") is now "riascoltare i tuoi beat e pensare che suonino
+male?", "irresistibili" without "davvero", "Il bounce è ciò che fa impazzire le
+persone a un concerto", and the second "la dopamina ... sensazione di dipendenza
+nella musica" is gone (it was said twice).
 
 ---
 
-Ti è mai capitato di fare una smorfia riascoltando i tuoi beat? Le tue produzioni suonano ancora come quelle di anni fa? Hai la sensazione che manchi sempre qualcosa? Noi siamo GRIND STUDIO, e abbiamo deciso di svelare il metodo segreto che rende i beat hip-hop e trap davvero irresistibili.
+Ti è mai capitato di riascoltare i tuoi beat e pensare che suonino male? Le tue produzioni suonano ancora come quelle di anni fa? Hai la sensazione che manchi sempre qualcosa? Noi siamo GRIND STUDIO, e abbiamo deciso di svelare il metodo segreto che rende i beat hip-hop e trap irresistibili.
 
 Stai per scoprire l'unica cosa che tutti i migliori beatmaker hanno in comune: il meccanismo che rende i beat hip-hop e trap una vera e propria dipendenza. Quindi lascia che ti faccia una domanda.
 
 Ti sei mai accorto di ballare su una musica senza nemmeno rendertene conto? Hai mai sentito il bisogno irresistibile di muovere la testa su un beat hip-hop? Nella musica, questo fenomeno si chiama bounce. Il bounce è l'equilibrio ideale dei ritmi che fa venire voglia alle persone di muovere il corpo a tempo di musica.
 
-È quello che fa muovere la testa. È quello che provoca una reazione emotiva. Il bounce è quello che fa impazzire il pubblico a un concerto. In parole semplici, il bounce è l'ingrediente magico che fa rilasciare dopamina al cervello quando ascolta la musica.
+È quello che fa muovere la testa. È quello che provoca una reazione emotiva. Il bounce è ciò che fa impazzire le persone a un concerto. In parole semplici, il bounce è l'ingrediente magico che fa rilasciare dopamina al cervello quando ascolta la musica.
 
 E siccome la dopamina è la molecola della ricompensa e della dipendenza, è il bounce a creare quella sensazione di dipendenza nella musica. Quindi ti starai chiedendo: è possibile creare il bounce a comando nei miei beat? Per rispondere, abbiamo scavato a fondo nella letteratura scientifica, e quello che abbiamo trovato ci ha scioccati. Perché le ricerche dell'Università di Birmingham e del dottor Jan Stupacher hanno dimostrato che il bounce nasce da un battito forte, come il kick, mescolato a elementi fuori tempo: sincopi, terzine e un micro-timing che spinge e tira.
 
 Questi scienziati studiano il bounce da anni, e hanno scoperto che il bounce fa rilasciare al cervello enormi quantità di dopamina, esattamente come una droga. I pattern di batteria giusti sono l'ingrediente magico che fa rilasciare dopamina al cervello quando ascolta la musica.
 
-E siccome la dopamina è la molecola della ricompensa e della dipendenza, il bounce crea quella sensazione di dipendenza nella musica. È come premere un pulsante nel cervello delle persone, che gli fa piacere la tua musica contro la loro volontà. Hai capito? Non si tratta di sequenze di hi-hat complicate.
+È come premere un pulsante nel cervello delle persone, che gli fa piacere la tua musica contro la loro volontà. Hai capito? Non si tratta di sequenze di hi-hat complicate.
 
 Non si tratta di chi ha la batteria che picchia più forte. Si tratta di far muovere le persone. E se i tuoi pattern di batteria non funzionano, il cervello non rilascerà dopamina. Ma se i tuoi pattern hanno bounce, il cervello inonderà all'improvviso di piacere chi ti ascolta.
 
