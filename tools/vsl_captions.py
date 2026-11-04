@@ -1,12 +1,12 @@
-"""French VSL caption video, in the style of the English one: black screen,
+"""French / Italian VSL caption video, in the style of the English one: black screen,
 2-4 words centred, the word being said in a red box, the coming ones dim.
 Frames are drawn once per word (Pillow), then timed with ffmpeg's concat
 demuxer; the Travis Scott clip is the original video; audio = full.wav.
 
-usage: python tools/vsl_captions.py <work dir> <Roboto.ttf> public/funnels/midi-drum-kit [--redraw]
+usage: python tools/vsl_captions.py <work dir> <Roboto.ttf> public/funnels/midi-drum-kit [--lang fr|it] [--redraw]
 
 The work dir holds what the voiceover step made (see
-app/(funnels)/midi-drum-kit/vsl/script-fr.md): segments.json (written and
+app/(funnels)/midi-drum-kit/vsl/script-fr.md / script-it.md): segments.json (written and
 spoken text per paragraph, clip_after), wav/NN.wav (each paragraph,
 loudness-normalised), align/NN.json (ElevenLabs forced alignment of each),
 full.wav (the whole track, clip included) and original-1080p.mp4 (the
@@ -24,7 +24,8 @@ RED = (208, 2, 27)
 SIZE = 76
 GAP, CLIP_GAP = 0.45, 0.3
 CLIP_FROM, CLIP_TO = 149.95, 165.82
-FRAMES = f"{D}/frames-fr"
+LANG = sys.argv[sys.argv.index("--lang") + 1] if "--lang" in sys.argv else "fr"
+FRAMES = f"{D}/frames-{LANG}"
 os.makedirs(FRAMES, exist_ok=True)
 
 font = ImageFont.truetype(FONT, SIZE)
@@ -36,7 +37,16 @@ clip_after = seg["clip_after"]
 dur = lambda f: float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f]))
 
 # Spoken spellings back to the written words on screen.
-BACK = {"Graïnde": "GRIND", "huit-zéro-huit,": "808,", "A-Sap": "A$AP"}
+BACK = {
+    "fr": {"Graïnde": "GRIND", "huit-zéro-huit,": "808,", "A-Sap": "A$AP"},
+    "it": {"Grind": "GRIND", "Twentyone": "21", "quattrocentonovantasette": "497", "milleduecentocinquanta": "1.250", "A-Sap": "A$AP"},
+}[LANG]
+# Where the product pictures come in: (paragraph, its first words) per language.
+ANCHORS = {
+    "fr": [(11, ["la", "sortie"]), (12, ["Bonus", "numéro", "un"]), (13, ["Bonus", "numéro", "deux"]), (14, ["bonus", "numéro", "trois"]), (16, ["Mais"])],
+    "it": [(11, ["l'uscita"]), (12, ["Bonus", "numero", "uno"]), (13, ["Bonus", "numero", "due"]), (14, ["bonus", "numero", "tre"]), (16, ["Ma"])],
+}[LANG]
+OUT = {"fr": "VSL-FR-Anatole.mp4", "it": "VSL-IT-MarcoTrox.mp4"}[LANG]
 
 # ── words with absolute times ─────────────────────────────────
 words = []  # {t, s, e, seg}
@@ -57,8 +67,8 @@ for i in range(len(seg["spoken"])):
         toks.append({"t": txt, "s": t0 + w["start"], "e": t0 + w["end"], "seg": i})
     for k, w in enumerate(toks):
         w["t"] = BACK.get(w["t"], w["t"])
-        if w["t"] == "Studio" and k and toks[k - 1]["t"] == "GRIND":
-            w["t"] = "STUDIO"
+        if w["t"].rstrip(",.") == "Studio" and k and toks[k - 1]["t"] == "GRIND":
+            w["t"] = "STUDIO" + w["t"][6:]
     words += toks
     t0 += dur(f"{D}/wav/{i:02d}.wav")
     if i == clip_after:
@@ -92,13 +102,7 @@ def first(seg_i, starts_with):
             return w["s"]
     raise SystemExit(f"not found: {starts_with} in {seg_i}")
 
-PICS = sorted([
-    (first(11, ["la", "sortie"]), "product"),
-    (first(12, ["Bonus", "numéro", "un"]), "bonus-famous"),
-    (first(13, ["Bonus", "numéro", "deux"]), "bonus-starters"),
-    (first(14, ["bonus", "numéro", "trois"]), "bonus-drums"),
-    (first(16, ["Mais"]), "boxes-all"),
-])
+PICS = sorted((first(s, ws), name) for (s, ws), name in zip(ANCHORS, ["product", "bonus-famous", "bonus-starters", "bonus-drums", "boxes-all"]))
 pic_cache = {}
 
 def picture(t):
@@ -184,6 +188,6 @@ run("-ss", f"{CUT}", "-i", f"{D}/original-1080p.mp4", "-an", "-frames:v", str(fb
 run("-framerate", str(FPS), "-i", f"{sequence('seqB', fb, fz)}/%06d.png", *enc, f"{D}/partB.mp4")
 with open(f"{D}/parts.txt", "w") as fh:
     fh.write(f"file '{D}/partA.mp4'\nfile '{D}/clip.mp4'\nfile '{D}/partB.mp4'\n")
-out = f"{D}/VSL-FR-Anatole.mp4"
+out = f"{D}/{OUT}"
 run("-f", "concat", "-safe", "0", "-i", f"{D}/parts.txt", "-i", f"{D}/full.wav", "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", out)
 print("chunks", len(chunks), "frames", n, "clip at", round(clip_start, 2), "total", round(total, 2), "->", out)

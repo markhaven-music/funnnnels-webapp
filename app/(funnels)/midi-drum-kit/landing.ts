@@ -33,16 +33,16 @@ const IMAGES: Partial<Record<Lang, Record<string, string>>> = {
 };
 
 // The hero video (Wistia) per language: English is ClickFunnels' (funnel.wistiaId);
-// French is the same VSL re-voiced in French with French captions
-// (vsl/script-fr.md, made with tools/vsl_captions.py). poster = its Wistia
+// French and Italian are the same VSL re-voiced with captions in their language
+// (vsl/script-fr.md, vsl/script-it.md, made with tools/vsl_captions.py). poster = its Wistia
 // thumbnail saved in public/funnels/midi-drum-kit, shown until the player loads.
-// Spanish, German and Italian have no VSL of their own yet: they play the English one.
+// Spanish and German have no VSL of their own yet: they play the English one.
 const VIDEOS: Record<Lang, { id: string; poster: string }> = {
   en: { id: funnel.wistiaId, poster: "vsl-en" },
   fr: { id: "3774byed1i", poster: "vsl-fr" },
   es: { id: funnel.wistiaId, poster: "vsl-en" },
   de: { id: funnel.wistiaId, poster: "vsl-en" },
-  it: { id: funnel.wistiaId, poster: "vsl-en" },
+  it: { id: "vneszof55o", poster: "vsl-it" },
 };
 
 // French: the space before : ; ! ? » % and after « stays on the line with the
