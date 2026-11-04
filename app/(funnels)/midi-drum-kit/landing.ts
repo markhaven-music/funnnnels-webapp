@@ -157,8 +157,9 @@ const LATER_CSS = `.pageRoot>.container:nth-child(n+4){content-visibility:auto;c
 
 // Every section is black but the page under them was white: where two sections
 // meet on a fraction of a pixel (desktop, 2x screens) it showed through as a
-// thin white line across the page.
-const SEAM_CSS = `html{background:#000}`;
+// thin white line across the page. html:root, because the page's own "html, :host"
+// reset comes later and would win over a plain html rule.
+const SEAM_CSS = `html:root{background:#000}`;
 
 // Font Awesome's icons that ClickFunnels pages use, as masks of the same shapes
 // (Font Awesome Free 5.15 solid, svgs/solid/*.svg): [width of the 512-high glyph, path].
