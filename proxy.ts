@@ -153,7 +153,10 @@ export function proxy(request: NextRequest) {
   const home = FUNNEL_HOME[loc?.slug ?? pathname.split("/")[1]] ?? (slug ? KIT_HOME : undefined);
   // The dashboard's editor (funnel map → Edit) shows a page here, in place,
   // with ?edit=1, to whoever is signed in to the dashboard.
-  const editing = request.nextUrl.searchParams.get("edit") === "1" && isAdmin(request);
+  // Asked without the password, it asks for it (the browser sends the dashboard's again) instead of leaving.
+  const wantsEdit = request.nextUrl.searchParams.get("edit") === "1" && DASHBOARD_HOSTS.has(host);
+  if (home && wantsEdit && !isAdmin(request)) return challenge();
+  const editing = wantsEdit && isAdmin(request);
   if (home && DASHBOARD_HOSTS.has(host) && !editing) {
     return NextResponse.redirect(`${home}${pathname}${request.nextUrl.search}`, 308);
   }
@@ -197,11 +200,14 @@ export function proxy(request: NextRequest) {
     return new NextResponse("ADMIN_PASSWORD is not set", { status: 503 });
   }
   if (isAdmin(request)) return NextResponse.next();
-  return new NextResponse("Authentication required", {
+  return challenge();
+}
+
+const challenge = () =>
+  new NextResponse("Authentication required", {
     status: 401,
     headers: { "WWW-Authenticate": 'Basic realm="funnnnels", charset="UTF-8"' },
   });
-}
 
 /** Signed in to the dashboard (its Basic password); anyone in `next dev` without ADMIN_PASSWORD. */
 function isAdmin(request: NextRequest): boolean {
