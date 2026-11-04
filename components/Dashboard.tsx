@@ -14,6 +14,7 @@ import { BrandKitPanel } from "@/components/panels/BrandKitPanel";
 import { ContactsPanel } from "@/components/panels/ContactsPanel";
 import { DomainsPanel } from "@/components/panels/DomainsPanel";
 import { EmailInsightsPanel } from "@/components/panels/EmailInsightsPanel";
+import { FreePacksPanel } from "@/components/panels/FreePacksPanel";
 import { IntegrationsPanel } from "@/components/panels/IntegrationsPanel";
 import { LandingPagesPanel } from "@/components/panels/LandingPagesPanel";
 import { LaunchesPanel } from "@/components/panels/LaunchesPanel";
@@ -85,6 +86,7 @@ export function Dashboard({ funnels: rows }: Props) {
       {activeNav === "live"         && <LivePanel />}
       {activeNav === "shop"         && <ShopPanel />}
       {activeNav === "orders"       && <OrdersPanel />}
+      {activeNav === "free-packs"   && <FreePacksPanel />}
       {activeNav === "support"      && <SupportPanel onUnread={setSupportUnread} />}
       {activeNav === "contacts"     && <ContactsPanel />}
       {activeNav === "email-insights" && <EmailInsightsPanel analytics={analytics} />}

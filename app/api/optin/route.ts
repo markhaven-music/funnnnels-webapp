@@ -3,7 +3,9 @@ import { firstEmail } from "@/app/free/firstEmail";
 import { OPTINS } from "@/app/free/packs";
 import { isEmail, upsertContact } from "@/lib/contacts";
 import { resolveFunnel } from "@/lib/funnels";
+import { cleanVisitorId } from "@/lib/neoIds";
 import { sendEmail } from "@/lib/ses";
+import { supabase } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 
@@ -43,6 +45,10 @@ export async function POST(req: Request) {
       { status: 503 },
     );
   }
+  // Which ad and visit it came from (db/optins.sql), for dashboard → Free packs.
+  // Never blocks the opt-in.
+  after(() => recordOptin(contact.email, String(body.funnel), body, req.headers.get("cookie")));
+
   // The download link, every time they ask (they asked: also when unsubscribed
   // from the newsletter), unless their address bounces or complained.
   const which = free?.firstEmail;
@@ -53,4 +59,23 @@ export async function POST(req: Request) {
     );
   }
   return NextResponse.json(ok);
+}
+
+// The page sends its URL's utm_* / ad_id (set by the ad's URL parameters) and
+// neo's visitor id; the ft_vid cookie (.thegrind.studio) is the fallback.
+const UTM = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "ad_id"] as const;
+const short = (v: unknown, n = 200) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : null);
+
+async function recordOptin(email: string, optin: string, body: Record<string, unknown>, cookie: string | null) {
+  const src = body.src && typeof body.src === "object" ? (body.src as Record<string, unknown>) : {};
+  const fromCookie = cookie?.match(/(?:^|; )ft_vid=([^;]+)/)?.[1];
+  const row: Record<string, string | null> = {
+    email,
+    optin: optin.slice(0, 80),
+    visitor_id: cleanVisitorId(body.vid) || cleanVisitorId(fromCookie) || null,
+    page: short(body.page, 300),
+  };
+  for (const k of UTM) row[k] = short(src[k]);
+  const { error } = await supabase().from("optins").insert(row);
+  if (error) console.error("optin: the opt-in row wasn't saved", error);
 }

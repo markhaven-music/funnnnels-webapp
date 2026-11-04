@@ -146,11 +146,16 @@ const BODY = (optin: string | undefined) => `<script>
     }
     btn.setAttribute('aria-busy', 'true');
     label.textContent = 'Submitting...';
-    fetch('/api/optin', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ funnel: OPTIN, email: value, name: name ? name.value : '' }) })
+    var vid = (document.cookie.match(/(?:^|; )ft_vid=([^;]*)/) || [])[1] || '';
+    var q = new URLSearchParams(location.search), src = {};
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ad_id'].forEach(function (k) { if (q.get(k)) src[k] = q.get(k); });
+    fetch('/api/optin', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ funnel: OPTIN, email: value, name: name ? name.value : '', vid: vid, page: location.pathname, src: src }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
         if (!res.ok) throw new Error(res.j && res.j.error);
-        if (window.fbq) fbq('track', 'Lead');
+        // neo sends Meta the same Lead from its server (event_id lead_<ft_vid>_<UTC day>):
+        // the same id here, so Meta counts the opt-in once.
+        if (window.fbq) { if (vid) fbq('track', 'Lead', {}, { eventID: 'lead_' + vid + '_' + new Date().toISOString().slice(0, 10) }); else fbq('track', 'Lead'); }
         location.href = res.j.next || '/';
       })
       .catch(function (e) {

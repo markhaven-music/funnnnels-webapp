@@ -80,6 +80,11 @@ spent money; unsubscribed and undeliverable (`bounced`) stay so). The import
 starts no sequence. ClickFunnels keeps sending its own emails until it ends on
 2026-11-16.
 
+On 2026-11-04 every ClickFunnels order (1,130, Nov 2025 to Nov 2026, all
+statuses, every export field) was archived in `cf_orders`, with the CSV as
+downloaded in `cf_exports` (db/cf-orders-archive.sql): payment ids, amounts,
+refunds and disputes after ClickFunnels is gone.
+
 On 2026-11-02 the 15 broadcasts ClickFunnels had scheduled for Nov 16–30 (the
 TOP HITS launch and the Drum Kit emails between them) were moved into
 Dashboard → Broadcasts, word for word, at the same times (ClickFunnels'
