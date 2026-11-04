@@ -51,16 +51,18 @@ export type FreeOptin = {
   next: string;
 };
 
+// free-pack (2026-11-04) on the three free packs starts the Drum Kit
+// follow-up (db/free-packs-kit.sql) after the pack's own emails.
 // The page's form says which opt-in it is (data-optin on the page, `funnel` in
 // the POST). Tags: ClickFunnels' (lead-rolls, bounce-pack-ig), which start the
 // follow-ups; "lead" as on every funnnnels opt-in.
 // next: ClickFunnels sent Rolls and Bounce opt-ins to a Drum Kit sales page
 // ("WAIT!! Your Free Pack Is Secured…", its step 2); here the Drum Kit's own page.
 export const OPTINS: Record<string, FreeOptin> = {
-  "free-rolls": { source: "free-rolls", tags: ["lead", "lead-rolls"], firstEmail: "rolls", next: "/en/midi-drum-kit" },
-  "free-bounce": { source: "free-bounce", tags: ["lead", "bounce-pack-ig"], firstEmail: "bounce", next: "/en/midi-drum-kit" },
+  "free-rolls": { source: "free-rolls", tags: ["lead", "lead-rolls", "free-pack"], firstEmail: "rolls", next: "/en/midi-drum-kit" },
+  "free-bounce": { source: "free-bounce", tags: ["lead", "bounce-pack-ig", "free-pack"], firstEmail: "bounce", next: "/en/midi-drum-kit" },
   // The Mystery Hooks opt-in (./hooks.ts, 2026-11-04): its own tag and follow-ups.
-  "free-hooks": { source: "free-hooks", tags: ["lead", "lead-hooks"], firstEmail: "hooks", next: "/en/midi-drum-kit" },
+  "free-hooks": { source: "free-hooks", tags: ["lead", "lead-hooks", "free-pack"], firstEmail: "hooks", next: "/en/midi-drum-kit" },
   "free-store": { source: "free-store", tags: ["lead", "free-store"], firstEmail: null, next: "/free-store-access" },
 };
 
