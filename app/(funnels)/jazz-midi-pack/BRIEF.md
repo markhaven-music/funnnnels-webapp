@@ -36,7 +36,14 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   crossed out, "Today" 27, "You save" 255. It reads as the bundle's worth, never as an earlier price of the pack.
 - Bundle total: 7,733 MIDI files = 3,536 (pack) + 2,304 + 150 + 1,548 + 195 (bonuses). The bonuses add 4,197 MIDI
   files, 305 WAV loops (258 Bible piano/e-piano loops + 47 drum loops) and a PDF. Counted 2026-11-01.
-- Angle (2026-11-01): the jazz progressions everyone wants and nobody can write. Never say how many progressions.
+- Angle (2026-11-04, replaces "everyone wants and nobody can write"): the producer who wants a jazz vibe in their beat and
+  doesn't know how. The hero and the letter open on that feeling; lofi, neo soul and trap soul are the specifics (the pack's
+  genre loops); the voicing is explained in its own block ("Why these chords sound played", beside the before/after rolls,
+  after the product intro), never as the opener. Claim used in the letter: lofi, neo soul and trap soul are built on the same
+  jazz progressions (ii-V-I, turnarounds and the rest of the pack's list). Product intro: "a different progression for every
+  beat you upload, for years" (3,536 files ÷ 365 ≈ 9.7 years). Copy goes through the avoid-ai-writing skill
+  (~/.claude/skills/avoid-ai-writing): no "it's not X, it's Y" frames, no "nobody can write", no fragment runs.
+  Never say how many progressions.
 - Five free bonuses with every pack (since 2026-10-16), on the same download page:
   1. MIDI Chord Pack (Jazz Edition): the Jazz MIDI Chord Pack, 2,304 MIDI files, 12 major/minor key pairs,
      six folders (best voicing, best voicing + smooth bass, sevenths, extended, altered & borrowed, progressions).

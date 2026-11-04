@@ -71,15 +71,15 @@ export const DEFAULT_SECTIONS: Section[] = [
     type: "s_hero",
     props: {
       tag: "{files} MIDI files",
-      pre: "For producers who don’t play jazz piano",
-      headline: "*The Jazz Progressions* Everyone Wants And _Nobody Can Write_, As Drag-And-Drop MIDI",
-      sub: "Voiced like a real pianist, note by note: chords that sound played, not programmed",
+      pre: "For producers who want a jazz vibe in their beats",
+      headline: "You Want A *Jazz Vibe* In Your Beat. These Are The Chords, _Already Played_ The Way A Pianist Plays Them.",
+      sub: "{files} drag-and-drop MIDI files: the chords under lofi, neo soul and trap soul, in every key, with bass lines and full loops. Drag one onto your Rhodes.",
       bullets: [
         "{files} Drag-And-Drop Jazz MIDI Files",
-        "The Most Used Jazz Progressions × 13 Voicings × 8 Rhythms",
-        "Voice-Led Like A Pianist: No Jumping Chords",
+        "Lofi, Neo Soul, Trap Soul And Deep House Loops, Drums Included",
+        "Voiced Like A Pianist: Chords That Sound Played",
         "Chord Names In Every File, No Theory Needed",
-        "All 12 Keys, Bass Lines And Genre Loops",
+        "All 12 Keys, Bass Lines And Combo Loops",
         "5 Free Bonuses Included",
       ],
       ticks: ["Any DAW", "Chord names in every file", "{days}-day guarantee"],
@@ -87,35 +87,27 @@ export const DEFAULT_SECTIONS: Section[] = [
       daws: "Ableton Live · Logic · FL Studio · Cubase · Studio One · Reaper · Bitwig · GarageBand",
     },
   },
+  // The door is the feeling ("I want a jazz vibe and don't know how", the
+  // user's angle of 2026-11-04); lofi, neo soul and trap soul are the
+  // specifics. The voicing is explained in its own block further down.
   {
     id: "letter",
     type: "s_letter",
     props: {
-      eyebrow: "Why your chords sound stiff",
-      title: "Your chords aren’t wrong. They just jump.",
+      eyebrow: "",
+      title: "Where the *jazz vibe* comes from.",
       paras: [
         { style: "bold", text: "Dear producer," },
-        { style: "p", text: "You found the chords. Dm7, G7, Cmaj7. The right notes." },
-        { style: "p", text: "You put them in the piano roll and it sounds like a ringtone." },
-        { style: "p", text: "Every chord is a block. Every block lands somewhere new on the keyboard. Nothing connects." },
-        { style: "pull", text: "Pianists don’t play chords. They play lines." },
-        { style: "p", text: "When a jazz player moves from Dm7 to G7, two fingers stay put. The seventh drops a half step. The hand barely moves." },
-        { style: "p", text: "That’s voice leading. It’s why a player sounds smooth and a chord plugin sounds like a grid. Learning it takes months of theory and a piano you might not play." },
-        { style: "p", text: "We’re GRIND STUDIO. Our MIDI Drum Kit is in the sessions of 2,847 producers. This one is for what sits on top of the drums." },
-        { style: "hit", text: "So we took the most used jazz progressions, the ones everyone wants and nobody can write, and voiced every one the way a pianist would. Note by note." },
-        { style: "p", text: "Same chords. Hear the difference." },
+        { style: "p", text: "You know the sound. A Rhodes, a few chords, and a loop turns into a record. Lofi runs on it, neo soul runs on it, and half the trap soul beats on your feed run on it." },
+        { style: "p", text: "So you open the piano roll to put some jazz in your beat, and you stop. Which chords? You try a seventh, a ninth, a few shapes from a chord chart. It sounds like a ringtone." },
+        { style: "p", text: "You watch a tutorial. It starts with theory, and the guy plays piano. You go back to the four chords you always use, and the beat stays a loop." },
+        { style: "pull", text: "The jazz vibe is two things: which chords, and how a pianist plays them." },
+        { style: "p", text: "The chords are the easy half. Lofi, neo soul and trap soul are built on the same jazz progressions, and you can look them up in a minute." },
+        { style: "p", text: "The hard half is how they’re played. A pianist keeps the notes close together and moves each one a little into the next chord, so the chords connect instead of jumping. That’s called voicing, and it’s why a pianist sounds smooth and a chord chart in a piano roll sounds like a grid. We show it below, with the same eight chords played both ways." },
+        { style: "p", text: "We’re GRIND STUDIO. Our MIDI Drum Kit is in the sessions of 2,847 producers. This pack is for what sits on top of the drums." },
+        { style: "hit", text: "We took the jazz progressions that lofi, neo soul and trap soul are built on, and voiced every one the way a pianist plays them, note by note, into {files} MIDI files." },
+        { style: "p", text: "Drag one onto your Rhodes, your piano or your pad. The chord names show on the timeline. Start at 01, and the beat has the vibe before the drums are even in." },
       ],
-    },
-  },
-  {
-    id: "compare",
-    type: "s_compare_rolls",
-    props: {
-      beforeLabel: "Before",
-      beforeText: "Root position. The way most chord tools hand it to you.",
-      afterLabel: "After",
-      afterText: "Best Voicing. The first folder of every progression.",
-      note: "Same eight chords, same rhythm. Watch the top note. Before, it jumps up to seven semitones from chord to chord. After, it only moves between B and C, while the roots hold the bottom.",
     },
   },
   {
@@ -125,12 +117,39 @@ export const DEFAULT_SECTIONS: Section[] = [
       eyebrow: "Introducing",
       title: "The Jazz",
       titleEm: "MIDI Pack",
-      lead: "{files} MIDI files. The most used jazz progressions, the ones everyone wants and nobody can write, each voiced 13 ways, in 8 rhythms and all 12 keys. Plus bass lines, combo loops and full lofi, neo soul, trap soul and deep house loops.",
+      lead: "{files} MIDI files. The most used jazz progressions, each voiced 13 ways, in 8 rhythms and all 12 keys, plus bass lines, combo loops and full lofi, neo soul, trap soul and deep house loops with drums. A different progression for every beat you upload, for years.",
       ticks: [
         "No theory needed: every file shows its chord names",
         "Your sounds: Rhodes, piano, pads, synths",
         "One payment, yours to keep",
       ],
+    },
+  },
+  // The voicing, explained beside the before/after rolls (a letter block
+  // followed by the rolls block is drawn as a pair, [currency]/page.tsx).
+  {
+    id: "voicing",
+    type: "s_letter",
+    props: {
+      eyebrow: "",
+      title: "Why these chords *sound played*.",
+      paras: [
+        { style: "p", text: "Same eight chords, same rhythm, played two ways. The first is root position, the way a chord chart or a chord plugin hands it to you. The second is the first folder of every progression in the pack." },
+        { style: "p", text: "Watch the top note. In root position it jumps up to seven semitones from chord to chord. Voiced, it only moves between B and C, while the bass holds the roots." },
+        { style: "p", text: "When a pianist moves from Dm7 to G7, two fingers stay put, the seventh drops a half step, and the hand barely moves. That is voice leading. Learning it takes months of theory and a piano you might not play, so we played it into every file: 13 voicings per progression, best-sounding first." },
+        { style: "p", text: "Press play on both." },
+      ],
+    },
+  },
+  {
+    id: "compare",
+    type: "s_compare_rolls",
+    props: {
+      beforeLabel: "Before",
+      beforeText: "Root position. The way a chord chart or a chord plugin hands it to you.",
+      afterLabel: "After",
+      afterText: "Best Voicing. The first folder of every progression.",
+      note: "Same eight chords, same rhythm. Watch the top note.",
     },
   },
   {
@@ -320,7 +339,7 @@ export const DEFAULT_SECTIONS: Section[] = [
   {
     id: "final",
     type: "s_final",
-    props: { title: "The progressions everyone wants. 13 voicings. Your sounds. {price}.", note: "{days}-day satisfaction guarantee · instant download" },
+    props: { title: "Jazz chords, already played the way a pianist plays them. Your sounds. {price}.", note: "{days}-day satisfaction guarantee · instant download" },
   },
 ];
 
