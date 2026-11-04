@@ -26,3 +26,15 @@ join public.sequences r on r.id = st.sequence_id and r.name = 'Free Rolls pack �
 where st.position in (0, 1, 3);
 
 commit;
+
+-- Same day, in production: the Bounce follow-ups talk about Bounce (its
+-- first email now hands out the Bounce pack, app/free/firstEmail.ts), so each
+-- pack in the ad test stands alone. Run once.
+update public.sequence_steps st set
+  subject = case st.position when 0 then '💾 Backup Link: Bounce Pack' else st.subject end,
+  body = case st.position when 1 then replace(replace(st.body,
+      'have you tried the Rolls pack?', 'have you tried the Bounce pack?'),
+      'Did those rolls give your drums the bounce you were looking for?', 'Did those patterns give your drums the bounce you were looking for?')
+    else st.body end
+from public.sequences s
+where s.id = st.sequence_id and s.name = 'Free Bounce pack · after opt-in' and st.position in (0, 1);

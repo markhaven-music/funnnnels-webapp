@@ -10,8 +10,10 @@ import { KIT_HOME } from "@/lib/liveUrl";
 // (db/free-leads.sql). ClickFunnels' footer (address, unsubscribe) is the one
 // letter() adds.
 //
-// The Bounce one is ClickFunnels' too: it hands out the Rolls pack, as
-// ClickFunnels did (the Bounce zip comes with the backup link an hour later).
+// The Bounce one: ClickFunnels' handed out the Rolls pack (the Bounce zip
+// only came with the backup link an hour later). Since 2026-11-04 (the
+// free-packs ad test, where each pack must stand alone) it's the Rolls email
+// line by line with the Bounce pack ("Yes, fix it").
 
 const ROLLS_ZIP = `${KIT_HOME}/free/download/rolls`;
 
@@ -37,6 +39,14 @@ Enjoy bro.
 P.S.: If you found this email in your "Promotions" tab, please drag it in the "Primary" folder so you will get our future packs in the Primary tabs.`,
 };
 
+const BOUNCE = {
+  subject: "Hey {first_name}, here's the 'Bounce' pack",
+  preheader: "Here's a direct link to the Bounce pack you requested.",
+  body: ROLLS.body
+    .replace(`**[here is the Snare and Hi-Hat MIDI Rolls Pack](${ROLLS_ZIP}).**`, `**[here is the Bounce MIDI Drum Pack](${KIT_HOME}/free/download/bounce).**`)
+    .replace("These rolls are very useful. You can sprinkle them on top of your beats easily.", "These patterns are very useful. You can drop them into your beats easily."),
+};
+
 // The Mystery Hooks opt-in (2026-11-04): the Rolls email line by line with
 // the Hooks pack; the FL Studio tip is MIDI-only, so it's left out.
 const HOOKS = {
@@ -59,7 +69,7 @@ Enjoy bro.
 P.S.: If you found this email in your "Promotions" tab, please drag it in the "Primary" folder so you will get our future packs in the Primary tabs.`,
 };
 
-const COPY = { rolls: ROLLS, bounce: ROLLS, hooks: HOOKS } as const;
+const COPY = { rolls: ROLLS, bounce: BOUNCE, hooks: HOOKS } as const;
 
 export function firstEmail(which: keyof typeof COPY, to: Recipient): Email {
   const c = COPY[which];
