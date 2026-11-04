@@ -19,7 +19,7 @@ export type Pack = keyof typeof PACKS;
 export const isPack = (p: unknown): p is Pack => typeof p === "string" && Object.hasOwn(PACKS, p);
 
 /** The pages (./cf/<name>.ts). */
-export const PAGES = ["rolls", "bounce", "mystery-hooks", "free-store", "free-store-access", "bounce-midi-pack", "mystery-dopaspace-hooks"] as const;
+export const PAGES = ["rolls", "bounce", "hooks", "mystery-hooks", "free-store", "free-store-access", "bounce-midi-pack", "mystery-dopaspace-hooks"] as const;
 export type PageName = (typeof PAGES)[number];
 export const isPage = (p: unknown): p is PageName => typeof p === "string" && (PAGES as readonly string[]).includes(p);
 
@@ -46,7 +46,7 @@ export type FreeOptin = {
   source: string;
   tags: readonly string[];
   // The email sent right after the opt-in (./firstEmail.ts), if any.
-  firstEmail: "rolls" | "bounce" | null;
+  firstEmail: "rolls" | "bounce" | "hooks" | null;
   // Where the visitor goes next.
   next: string;
 };
@@ -59,8 +59,10 @@ export type FreeOptin = {
 export const OPTINS: Record<string, FreeOptin> = {
   "free-rolls": { source: "free-rolls", tags: ["lead", "lead-rolls"], firstEmail: "rolls", next: "/en/midi-drum-kit" },
   "free-bounce": { source: "free-bounce", tags: ["lead", "bounce-pack-ig"], firstEmail: "bounce", next: "/en/midi-drum-kit" },
+  // The Mystery Hooks opt-in (./hooks.ts, 2026-11-04): its own tag and follow-ups.
+  "free-hooks": { source: "free-hooks", tags: ["lead", "lead-hooks"], firstEmail: "hooks", next: "/en/midi-drum-kit" },
   "free-store": { source: "free-store", tags: ["lead", "free-store"], firstEmail: null, next: "/free-store-access" },
 };
 
 /** Which opt-in a page's form is. */
-export const PAGE_OPTIN: Partial<Record<PageName, string>> = { rolls: "free-rolls", bounce: "free-bounce", "free-store": "free-store" };
+export const PAGE_OPTIN: Partial<Record<PageName, string>> = { rolls: "free-rolls", bounce: "free-bounce", hooks: "free-hooks", "free-store": "free-store" };

@@ -37,7 +37,29 @@ Enjoy bro.
 P.S.: If you found this email in your "Promotions" tab, please drag it in the "Primary" folder so you will get our future packs in the Primary tabs.`,
 };
 
-const COPY = { rolls: ROLLS, bounce: ROLLS } as const;
+// The Mystery Hooks opt-in (2026-11-04): the Rolls email line by line with
+// the Hooks pack; the FL Studio tip is MIDI-only, so it's left out.
+const HOOKS = {
+  subject: "Hey {first_name}, here's the 'Mystery Hooks' pack",
+  preheader: "Here's a direct link to the Mystery Hooks pack you requested.",
+  body: `Hey {first_name},
+
+As promised, **[here are the 17 MYSTERY VocaSpace™ Hooks](${KIT_HOME}/free/download/mystery-hooks).**
+
+These hooks leave space for the artist's voice. You can drag them into your DAW and build your beat around them.
+
+They're WAV files, ready to go in any DAW.
+
+I love them.
+
+Reply "THX" and I'll send you another pack in the following days.
+
+Enjoy bro.
+
+P.S.: If you found this email in your "Promotions" tab, please drag it in the "Primary" folder so you will get our future packs in the Primary tabs.`,
+};
+
+const COPY = { rolls: ROLLS, bounce: ROLLS, hooks: HOOKS } as const;
 
 export function firstEmail(which: keyof typeof COPY, to: Recipient): Email {
   const c = COPY[which];

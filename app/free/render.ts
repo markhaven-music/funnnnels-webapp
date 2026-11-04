@@ -9,6 +9,7 @@ import { TEMPLATE as freeStore } from "./cf/free-store";
 import { TEMPLATE as mysteryDopaspaceHooks } from "./cf/mystery-dopaspace-hooks";
 import { TEMPLATE as mysteryHooks } from "./cf/mystery-hooks";
 import { TEMPLATE as rolls } from "./cf/rolls";
+import { TEMPLATE as hooks } from "./hooks";
 import { PAGE_OPTIN, type PageName } from "./packs";
 
 // A free lead magnet's page as visitors get it: ClickFunnels' page (./cf, made
@@ -21,6 +22,7 @@ import { PAGE_OPTIN, type PageName } from "./packs";
 const TEMPLATES: Record<PageName, string> = {
   rolls,
   bounce,
+  hooks,
   "mystery-hooks": mysteryHooks,
   "free-store": freeStore,
   "free-store-access": freeStoreAccess,
