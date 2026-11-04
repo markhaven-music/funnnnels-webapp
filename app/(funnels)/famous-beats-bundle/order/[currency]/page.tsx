@@ -7,6 +7,9 @@ import { ReservedTimer } from "../../../top-hits-midi-bundle/ReservedTimer";
 import { Check } from "../../../top-hits-midi-bundle/sections";
 import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
 import base from "../../../top-hits-midi-bundle/order.module.css";
+import { inter } from "../../../top-hits-midi-bundle/fonts";
+import dk from "../../../midi-drum-kit/order.module.css";
+import { poppins } from "../../../midi-drum-kit/fonts";
 import { Beacon } from "../../../Beacon";
 import { withSkin } from "../../../skin";
 import { orderBullets, reviews } from "../../copy";
@@ -50,7 +53,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       <Tracking value={offer.price} currency={currency} event={null} product={funnel.product} />
       <Beacon funnel={funnel.slug} page="order" />
       <div className={s.redbar}>
-        <b>MORE BLACK FRIDAY:</b> 90% Sale Is Ending Soon
+        <b>BLACK FRIDAY:</b> 90% Sale Is Ending Soon
       </div>
       <header className={s.header}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -94,16 +97,19 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
 
         <section id="complete-order">
           <h2 className={s.colTitle}>Complete Order:</h2>
-          <OrderForm
-            currency={currency}
-            country={FALLBACK_COUNTRY[currency]}
-            publishableKey={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null}
-            afterOrder={nextStep(product, "en", null)}
-            upsell={product.offers?.[0]?.id ?? null}
-            offer={offer}
-            sells={{ slug: funnel.slug, tagline: funnel.tagline, thankYou: funnel.checkout.thankYou }}
-            skin={skin}
-          />
+          {/* The MIDI Drum Kit order page's form, exactly: no skin, its buttons, its font (../../order.module.css .dkForm). */}
+          <div className={`${skin.dkForm} ${inter.variable} ${poppins.variable}`}>
+            <OrderForm
+              currency={currency}
+              country={FALLBACK_COUNTRY[currency]}
+              publishableKey={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null}
+              afterOrder={nextStep(product, "en", null)}
+              upsell={product.offers?.[0]?.id ?? null}
+              offer={offer}
+              sells={{ slug: funnel.slug, tagline: "", thankYou: funnel.checkout.thankYou }}
+              buttons={dk}
+            />
+          </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.paylogos} src={`${IMG}/payment-logos.webp`} alt="PayPal, Visa, Mastercard, American Express, Discover" width={190} height={22} />
         </section>

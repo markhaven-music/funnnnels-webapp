@@ -1,9 +1,8 @@
 /* The Famous Beats Bundle's order page in its landing's look (theme "aurora",
    grind-studio-landing-pages/src/styles/aurora.css, values read on the live
    page): navy-black page, dark panels with a hairline edge and 24px corners,
-   Inter Tight, gold as light (text, icons, glows). The checkout card is white
-   so it stands out ("il checkout widget non contrasta... rimetti sfondo
-   bianco"), its buttons the landing's 3D key in orange.
+   Inter Tight, gold as light (text, icons, glows). The checkout card is the
+   MIDI Drum Kit order page's (see "the checkout card" below).
    A skin over TOP HITS' order template (../top-hits-midi-bundle/order.module.css):
    every class here joins the template's class of the same name (../skin.ts),
    and every rule starts with .page.page so it wins over the template's. */
@@ -81,176 +80,16 @@
   color: var(--gold);
 }
 
-/* ── the checkout card: off-white (the template's #f4f4f4), so it stands out
-   on the dark page and the white fields, card fields included, stand out on it ── */
-.page.page .form {
-  border-radius: 24px;
-  background: #f4f4f4;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.9), 0 30px 80px -30px rgb(255 140 30 / 0.45), 0 24px 60px -20px rgb(0 0 0 / 0.9);
-  color: #1d2533;
-}
-.page.page .steps {
-  border-bottom: 1px solid #dcdfe5;
-}
-.page.page .steps li {
-  background: #e4e6eb;
-  color: #7d8697;
-}
-.page.page .steps li.stepOn {
-  background: #f4f4f4;
-  color: #0a0d14;
-}
-.page.page .stepOn::after {
-  display: none;
-}
-.page.page .stepNum {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #dfe3ea;
-  color: #6b7486;
-  font-size: 15px;
-}
-.page.page .stepOn .stepNum {
-  background: #0a0d14;
-  color: var(--gold);
-}
-.page.page .stepTitle {
-  font-weight: 700;
-}
-.page.page .stepSub {
-  color: #6b7486;
-}
-.page.page .fields {
-  border: 1.5px solid #c9ced8;
-  border-radius: 12px;
-}
-.page.page .input {
-  border-color: #c9ced8;
-  color: #0a0d14;
-}
-.page.page .input::placeholder {
-  color: #5c6577;
-}
-.page.page .input:focus {
-  outline-color: #e8890c;
-}
-.page.page .respect {
-  color: #5c6577;
-}
-
-/* The buttons: the landing's key (3D lip, glow, breathing light) in ClickFunnels' orange, white label. */
-.page.page .cta {
-  margin-bottom: 7px;
-  border-radius: 20px;
-  background: linear-gradient(180deg, #ffb64a 0%, #ff8a1f 48%, #e56a05 100%);
-  box-shadow:
-    inset 0 2px 0 rgb(255 255 255 / 0.5),
-    inset 0 -4px 0 rgb(0 0 0 / 0.14),
-    0 7px 0 #a84a00,
-    0 22px 48px -12px rgb(255 130 20 / 0.6),
-    0 0 42px -8px rgb(255 130 20 / 0.55);
-  color: #ffffff;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  text-shadow: 0 1px 2px rgb(120 50 0 / 0.45);
-}
-.page.page .cta:active {
-  transform: translateY(5px);
-  box-shadow:
-    inset 0 2px 0 rgb(255 255 255 / 0.5),
-    inset 0 -4px 0 rgb(0 0 0 / 0.14),
-    0 2px 0 #a84a00,
-    0 12px 30px -12px rgb(255 130 20 / 0.6);
-}
-.page.page .ctaPay {
-  font-weight: 800;
-}
-.page.page .ctaSub {
-  color: rgb(255 255 255 / 0.92);
-  font-weight: 700;
-  text-shadow: none;
-}
-
-/* step 2 */
-.page.page .back {
-  color: #1d2533;
-}
-.page.page .product,
-.page.page .summary,
-.page.page .method {
-  border: 1.5px solid #d3d8e1;
-  border-radius: 14px;
-  background: #ffffff;
-}
-.page.page .radio {
-  accent-color: #e8890c;
-}
-.page.page .productName {
-  color: #0a0d14;
-  font-weight: 700;
-}
-.page.page .productDesc {
-  color: #5c6577;
-}
-.page.page .productPrice {
-  color: #0a0d14;
-  font-weight: 700;
-}
-.page.page .label {
-  color: #1d2533;
-  font-weight: 700;
-}
-.page.page .label::after {
-  background: #d3d8e1;
-}
-.page.page .method {
-  color: #3a4354;
-}
-.page.page .methodOn {
-  border-color: #0a0d14;
-  color: #0a0d14;
-}
-.page.page .notConnected,
-.page.page .paypalNote {
-  border-radius: 12px;
-}
-
-/* The add-ons: a warm cream panel in an orange dashed frame. */
-.page.page .bump {
-  border: 2px dashed #ff8a1f;
-  border-radius: 16px;
-  background: #fff6e6;
-  box-shadow: none;
-  color: #1d2533;
-}
-.page.page .bumpTitle {
-  color: #0a0d14;
-}
-.page.page .bumpPrice {
-  color: #0a0d14;
-  font-weight: 700;
-}
-.page.page .bumpArrow {
-  color: #e8590c;
-}
-.page.page .bumpCheck {
-  border: 1.5px solid #0a0d14;
-}
-.page.page .oto {
-  color: #d63a0a;
-}
-
-.page.page .summary > summary {
-  color: #0a0d14;
-}
-.page.page .sumRow {
-  color: #3a4354;
-}
-.page.page .sumTotal {
-  color: #0a0d14;
+/* ── the checkout card: the MIDI Drum Kit order page's, exactly ("make the
+   checkout widget exactly as the midi drum kit one"): no skin on the form, so
+   it is TOP HITS' ClickFunnels card (../top-hits-midi-bundle/order.module.css)
+   with the Drum Kit's buttons (../midi-drum-kit/order.module.css .cta, its
+   orange). Here only the Drum Kit page's font (Inter, not the landing's Inter
+   Tight) and text colour, under the card. ── */
+.page.page .dkForm {
+  --inter: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #fff;
+  font-family: var(--inter);
 }
 
 /* ── reviews, guarantees, footer ── */

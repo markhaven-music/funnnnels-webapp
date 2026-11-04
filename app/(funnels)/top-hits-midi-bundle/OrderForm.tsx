@@ -38,6 +38,9 @@ export type Sells = { slug: string; tagline: string; thankYou: string };
 // skin: a stylesheet (CSS module) whose classes join the ones of
 // ./order.module.css with the same name, for a page drawn in its own style
 // (the Famous Beats Bundle's, like its landing).
+// buttons: a stylesheet whose cta, ctaPay, ctaSub and ctaArrow classes draw the
+// two buttons instead of the template's, as the MIDI Drum Kit's form does
+// (../midi-drum-kit/order.module.css; the Famous Beats Bundle wears its form).
 type Props = {
   currency: Currency;
   country: string;
@@ -47,6 +50,7 @@ type Props = {
   offer: OrderOffer;
   sells?: Sells;
   skin?: Styles;
+  buttons?: Styles;
 };
 
 const Skin = createContext<Styles>(base);
@@ -61,8 +65,11 @@ function stripeFor(key: string) {
 
 const money = (n: number, c: Currency) => `${c === "eur" ? "€" : "$"}${n.toFixed(2)}`;
 
-export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer, sells = TOP_HITS, skin }: Props) {
-  const s = useMemo(() => withSkin(base, skin), [skin]);
+export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer, sells = TOP_HITS, skin, buttons }: Props) {
+  const s = useMemo(() => {
+    const k = withSkin(base, skin);
+    return buttons ? { ...k, cta: buttons.cta, ctaPay: buttons.ctaPay, ctaSub: buttons.ctaSub, ctaArrow: buttons.ctaArrow } : k;
+  }, [skin, buttons]);
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);
@@ -127,7 +134,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
               <input type="radio" checked readOnly className={s.radio} />
               <span className={s.productText}>
                 <span className={s.productName}>{offer.name}</span>
-                <span className={s.productDesc}>{sells.tagline}</span>
+                {sells.tagline && <span className={s.productDesc}>{sells.tagline}</span>}
               </span>
               <span className={s.productPrice}>{money(price, currency)}</span>
             </label>
