@@ -68,7 +68,10 @@ const JAZZ: Product = {
   brand: jazz.brand,
   tagline: jazz.tagline,
   price: jazz.price,
-  bump: jazz.bump,
+  // The old single add-on (the Chord Pack, a bonus now) is gone from the
+  // checkout; no order ever bought it (orders table, 2026-11-05).
+  bump: null,
+  bumps: jazz.bumps,
   checkout: jazz.checkout,
   optin: jazz.optin,
   launch: null,

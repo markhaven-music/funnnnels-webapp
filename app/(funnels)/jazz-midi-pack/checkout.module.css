@@ -324,6 +324,13 @@
 .bump > .bumpCover {
   grid-area: img;
 }
+/* An add-on with its own picture (the Jazz order page's three). */
+.bump > .bumpPic {
+  grid-area: img;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
 .bumpHead {
   grid-area: head;
   display: flex;

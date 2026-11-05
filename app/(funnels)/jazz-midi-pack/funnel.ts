@@ -36,6 +36,34 @@ export const funnel = {
     pitch:
       "All 12 major/minor key pairs in six folders: best voicing, best voicing with a smooth bass, sevenths, extended, altered & borrowed chords, and progressions. Same voice-leading as the main pack.",
   },
+  // The order page's tick-box offers since 2026-11-05 ("aggiungi order bumps"):
+  // products sold on their own elsewhere, none of them a bonus here, at the
+  // price their own funnels ask (never below €27, the user's rule). Prices and
+  // names as dashboard → Products has them (funnel_items) win; `id` is the
+  // file key, and funnel_items.product the zip it hands out.
+  bumps: [
+    {
+      id: "top-hits",
+      name: "TOP HITS MIDI Bundle",
+      price: { eur: 27, usd: 27 },
+      image: "/funnels/home/top-hits-box.webp",
+      pitch: "1000 chord progressions from top hits: chords for pop, R&B, trap and more, beside your jazz ones.",
+    },
+    {
+      id: "drum-kit",
+      name: "MIDI Drum Kit",
+      price: { eur: 27, usd: 27 },
+      image: "/funnels/famous-beats-bundle/bump-drum-kit.webp",
+      pitch: "1050 MIDI drum patterns modeled after Billboard producers: complete beats, patterns and fragments to put under your chords.",
+    },
+    {
+      id: "hustle",
+      name: "HUSTLE Bundle (31 MIDI Packs)",
+      price: { eur: 27, usd: 27 },
+      image: "/funnels/midi-drum-kit/bump-hustle.webp",
+      pitch: "31 professional MIDI packs: jazz, trap, hip-hop, lofi, pop and more.",
+    },
+  ],
   // Free with every pack. `id` is the download key in `files` or `remoteFiles`.
   // `midi`, `count` and `inside` are counted from the files (2026-11-01); the bonus
   // cards show `inside` and play the roll `bonus<n>` (rolls.json) or, for the

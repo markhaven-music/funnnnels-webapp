@@ -39,6 +39,10 @@ type Props = {
   price: number;
   // The add-on; `cover` is the two lines on its little box (default: the Jazz Chord Pack's).
   bump: { name: string; price: number; pitch: string; cover?: [string, string] } | null;
+  // Several tick-box offers (the Jazz order page since 2026-11-05): each with
+  // its id, sent as `bumps: [ids]`; `image` is the product's picture in place
+  // of the drawn cover. Given, it replaces `bump`.
+  bumps?: Bump[];
   thankYou: string;
   publishableKey: string | null;
   // The shop: several products in one order. They fill the summary and go to
@@ -60,6 +64,14 @@ type Props = {
 
 type Info = { firstName: string; lastName: string; email: string };
 
+type Bump = { id: string; name: string; price: number; pitch: string; cover?: [string, string]; image?: string };
+
+/** The tick-box offers this checkout shows: the list, or the single bump. */
+const offersOf = (p: Pick<Props, "bump" | "bumps">): Bump[] => p.bumps ?? (p.bump ? [{ id: "bump", ...p.bump }] : []);
+
+/** What the checkout APIs get: `bumps: [ids]` for a list, `bump: true/false` for the single one. */
+const bumpBody = (p: Pick<Props, "bumps">, picked: string[]) => (p.bumps ? { bumps: picked } : { bump: picked.length > 0 });
+
 const stripeCache = new Map<string, ReturnType<typeof loadStripe>>();
 function stripeFor(key: string) {
   if (!stripeCache.has(key)) stripeCache.set(key, loadStripe(key));
@@ -78,15 +90,17 @@ const GEIST: CardLook = {
 export function CheckoutWidget(props: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
-  const [bump, setBump] = useState(false);
+  const [picked, setPicked] = useState<string[]>([]);
   const [method, setMethod] = useState<Method>("card");
-  const total = props.price + (bump && props.bump ? props.bump.price : 0);
+  const offers = offersOf(props);
+  const total = props.price + offers.filter((o) => picked.includes(o.id)).reduce((sum, o) => sum + o.price, 0);
+  const toggle = (id: string, on: boolean) => setPicked((now) => (on ? [...now.filter((x) => x !== id), id] : now.filter((x) => x !== id)));
   const [wanted, setWanted] = useState(!props.deferStripe);
   const stripePromise = useMemo(
     () => (props.publishableKey && wanted ? stripeFor(props.publishableKey) : null),
     [props.publishableKey, wanted],
   );
-  const body = { ...props, info, method, ticked: bump, setTicked: setBump, total };
+  const body = { ...props, info, method, offers, picked, toggle, total };
 
   return (
     <div className={s.widget}>
@@ -172,7 +186,7 @@ export function CheckoutWidget(props: Props) {
                 {method === "card" && (
                   <div className={s.notConnected}>Card payments switch on once the Stripe keys are added.</div>
                 )}
-                <PayStepBody {...body} offer={props.bump} cardOff />
+                <PayStepBody {...body} cardOff />
               </>
             )}
           </>
@@ -276,8 +290,9 @@ function InfoStep({
 type BodyState = {
   info: Info;
   method: Method;
-  ticked: boolean;
-  setTicked: (v: boolean) => void;
+  offers: Bump[];
+  picked: string[];
+  toggle: (id: string, on: boolean) => void;
   total: number;
 };
 
@@ -299,7 +314,7 @@ function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromis
         funnel: props.funnel,
         ...(props.cart ? { items: props.cart.map((l) => l.slug) } : {}),
         ...props.info,
-        bump: props.ticked,
+        ...bumpBody(props, props.picked),
         country: cookieCountry(props.currency, props.country),
         // The total on screen: the server refuses if its price differs (an early-bird just ended).
         expected: props.total,
@@ -343,7 +358,6 @@ function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromis
       </div>
       <PayStepBody
         {...props}
-        offer={props.bump}
         onCard={payByCard}
         cardPaying={paying || !stripe}
         cardError={error}
@@ -361,18 +375,18 @@ function PayStepBody({
   price,
   product,
   cart,
-  offer,
-  ticked,
-  setTicked,
+  bumps,
+  offers,
+  picked,
+  toggle,
   total,
   onCard,
   cardPaying,
   cardOff,
   cardError,
   abCookie,
-}: Pick<Props, "funnel" | "country" | "currency" | "price" | "product" | "cart" | "abCookie"> &
+}: Pick<Props, "funnel" | "country" | "currency" | "price" | "product" | "cart" | "abCookie" | "bumps"> &
   BodyState & {
-    offer: Props["bump"];
     onCard?: () => void;
     cardPaying?: boolean;
     cardOff?: boolean;
@@ -396,7 +410,7 @@ function PayStepBody({
           funnel,
           ...(cart ? { items: cart.map((l) => l.slug) } : {}),
           ...info,
-          bump: ticked,
+          ...bumpBody({ bumps }, picked),
           country: cookieCountry(currency, country),
           origin: window.location.origin,
           expected: total,
@@ -413,8 +427,6 @@ function PayStepBody({
     }
   }
 
-  const [lead, rest] = splitPitch(offer?.pitch ?? "");
-
   return (
     <>
       {paypal && (
@@ -427,34 +439,9 @@ function PayStepBody({
         </div>
       )}
 
-      {offer && (
-        <label className={s.bump}>
-          <BumpCover lines={offer.cover} />
-          <span className={s.bumpHead}>
-            {/* Gone once ticked, as on ClickFunnels. */}
-            {!ticked && (
-              <svg viewBox="0 0 448 512" className={s.bumpArrow} aria-hidden>
-                <path
-                  fill="currentColor"
-                  d="M313.941 216H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h301.941v46.059c0 21.382 25.851 32.09 40.971 16.971l86.059-86.059c9.373-9.373 9.373-24.569 0-33.941l-86.059-86.059c-15.119-15.119-40.971-4.411-40.971 16.971V216z"
-                />
-              </svg>
-            )}
-            <input
-              type="checkbox"
-              checked={ticked}
-              onChange={(e) => setTicked(e.target.checked)}
-              className={s.bumpCheck}
-            />
-            <span className={s.bumpTitle}>YES! Add the {offer.name}!</span>
-            <span className={s.bumpPrice}>{money(offer.price, currency)}</span>
-          </span>
-          <span className={s.bumpPitch}>
-            <span className={s.bumpOffer}>ADD-ON OFFER:</span> <strong>{lead}</strong>
-            {rest} Only <strong>{money(offer.price, currency)}</strong>, added to this order.
-          </span>
-        </label>
-      )}
+      {offers.map((offer) => (
+        <BumpBox key={offer.id} offer={offer} currency={currency} ticked={picked.includes(offer.id)} onTick={(on) => toggle(offer.id, on)} />
+      ))}
 
       <div className={s.summary}>
         {(cart ?? [{ slug: "", name: product, price }]).map((l) => (
@@ -463,12 +450,14 @@ function PayStepBody({
             <span>{money(l.price, currency)}</span>
           </div>
         ))}
-        {ticked && offer && (
-          <div className={s.sumRow}>
-            <span>{offer.name}</span>
-            <span>{money(offer.price, currency)}</span>
-          </div>
-        )}
+        {offers
+          .filter((o) => picked.includes(o.id))
+          .map((o) => (
+            <div key={o.id} className={s.sumRow}>
+              <span>{o.name}</span>
+              <span>{money(o.price, currency)}</span>
+            </div>
+          ))}
         <div className={`${s.sumRow} ${s.sumTotal}`}>
           <span>Total</span>
           <span>{money(total, currency)}</span>
@@ -494,6 +483,39 @@ function PayStepBody({
         </p>
       )}
     </>
+  );
+}
+
+// One tick-box offer, as ClickFunnels draws it: its picture (or a drawn cover),
+// the red arrow until ticked, headline and price, then the pitch.
+function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: "eur" | "usd"; ticked: boolean; onTick: (on: boolean) => void }) {
+  const [lead, rest] = splitPitch(offer.pitch);
+  return (
+    <label className={s.bump}>
+      {offer.image ? (
+        <img className={s.bumpPic} src={offer.image} alt="" width={84} height={84} loading="lazy" decoding="async" />
+      ) : (
+        <BumpCover lines={offer.cover} />
+      )}
+      <span className={s.bumpHead}>
+        {/* Gone once ticked, as on ClickFunnels. */}
+        {!ticked && (
+          <svg viewBox="0 0 448 512" className={s.bumpArrow} aria-hidden>
+            <path
+              fill="currentColor"
+              d="M313.941 216H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h301.941v46.059c0 21.382 25.851 32.09 40.971 16.971l86.059-86.059c9.373-9.373 9.373-24.569 0-33.941l-86.059-86.059c-15.119-15.119-40.971-4.411-40.971 16.971V216z"
+            />
+          </svg>
+        )}
+        <input type="checkbox" checked={ticked} onChange={(e) => onTick(e.target.checked)} className={s.bumpCheck} />
+        <span className={s.bumpTitle}>YES! Add the {offer.name}!</span>
+        <span className={s.bumpPrice}>{money(offer.price, currency)}</span>
+      </span>
+      <span className={s.bumpPitch}>
+        <span className={s.bumpOffer}>ADD-ON OFFER:</span> <strong>{lead}</strong>
+        {rest} Only <strong>{money(offer.price, currency)}</strong>, added to this order.
+      </span>
+    </label>
   );
 }
 

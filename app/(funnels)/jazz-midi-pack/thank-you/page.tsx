@@ -26,6 +26,7 @@ export const metadata: Metadata = {
 const LABELS: Record<string, string> = {
   pack: funnel.product,
   [funnel.bump.id]: funnel.bump.name,
+  ...Object.fromEntries(funnel.bumps.map((x) => [x.id, x.name])),
   ...Object.fromEntries(funnel.bonuses.map((x) => [x.id, x.name])),
 };
 const BONUS = new Set<string>(funnel.bonuses.map((x) => x.id));
