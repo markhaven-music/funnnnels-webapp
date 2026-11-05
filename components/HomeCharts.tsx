@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode, type RefObject } from "react";
 import type { Day } from "@/lib/analytics";
-import type { MetaDaily } from "@/lib/metaSpend";
+import { SPEND_SINCE, type MetaDaily } from "@/lib/metaSpend";
 import s from "./home.module.css";
 
 // The home's charts (docs/design.md: real numbers only, nearly square corners,
@@ -359,13 +359,19 @@ export function NetVsSpend({ days, rate, periodName }: NetProps) {
   const accCur = spend?.connected ? spend.currency : "EUR";
   // Meta bills in the account's currency; shown in the picked one at the ECB rate.
   const spendIn = (v: number) => (accCur === cur ? v : accCur === "USD" ? v * rate : v / rate);
-  const spendByDay = new Map<string, number>(spend?.connected ? spend.days.map((d) => [d.day, d.spend]) : []);
+  const spendByDay = new Map<string, number>(spend?.connected ? spend.days.filter((d) => d.day >= SPEND_SINCE).map((d) => [d.day, d.spend]) : []);
+  // Before SPEND_SINCE the ads sent buyers to ClickFunnels, whose sales aren't
+  // here: those days keep their net revenue on the chart, dimmed, and count
+  // for nothing in the figures.
+  const counted = days.map((d) => d.day >= SPEND_SINCE);
+  const first = counted.indexOf(true);
+  const sinceLabel = dayLabel(SPEND_SINCE, { day: "numeric", month: "short" });
   const netV = days.map((d) => inCurrency(d.netEur, d.netUsd, cur, rate));
-  const spendV = days.map((d) => (connected ? spendIn(spendByDay.get(d.day) ?? 0) : 0));
-  const netTotal = netV.reduce((a, b) => a + b, 0);
+  const spendV = days.map((d, i) => (connected && counted[i] ? spendIn(spendByDay.get(d.day) ?? 0) : 0));
+  const netTotal = netV.reduce((a, v, i) => a + (counted[i] ? v : 0), 0);
   const spendTotal = spendV.reduce((a, b) => a + b, 0);
-  const orders = days.reduce((a, d) => a + d.orders, 0);
-  const clicks = spend?.connected ? spend.days.reduce((a, d) => a + d.clicks, 0) : 0;
+  const orders = days.reduce((a, d, i) => a + (counted[i] ? d.orders : 0), 0);
+  const clicks = spend?.connected ? spend.days.reduce((a, d) => a + (d.day >= SPEND_SINCE ? d.clicks : 0), 0) : 0;
   const profit = netTotal - spendTotal;
   const roas = spendTotal > 0 ? netTotal / spendTotal : null;
 
@@ -380,7 +386,8 @@ export function NetVsSpend({ days, rate, periodName }: NetProps) {
   const slotAt = (x: number) => Math.floor(x / slot);
   const { hover, setHover, onMove, onKey } = useHover(n);
   const peak = netV.reduce((best, v, i) => (v > (netV[best] ?? 0) ? i : best), -1);
-  const spendLine = showSpend ? smoothPath(spendV.map((v, i) => ({ x: xOf(i), y: yOf(v) }))) : "";
+  const spendPts = showSpend && first >= 0 ? spendV.slice(first).map((v, i) => ({ x: xOf(first + i), y: yOf(v) })) : [];
+  const spendLine = smoothPath(spendPts);
   const hd = hover === null ? null : days[hover];
   const none = netV.every((v) => !v) && (!connected || spendV.every((v) => !v));
   const fx = cur === "USD" ? `$1 = €${rate.toFixed(2)} (ECB)` : `€1 = $${(1 / rate).toFixed(2)} (ECB)`;
@@ -391,7 +398,7 @@ export function NetVsSpend({ days, rate, periodName }: NetProps) {
         <div>
           <div className={s.title}>Net revenue vs ad spend</div>
           <div className={s.sub}>
-            all funnels, less the processors&apos; fees · every Meta ad in the account · {fx}
+            since {sinceLabel}, when the ads moved here from ClickFunnels · all funnels, less the processors&apos; fees · every Meta ad in the account · {fx}
           </div>
         </div>
         <div className={s.controls}>
@@ -413,7 +420,7 @@ export function NetVsSpend({ days, rate, periodName }: NetProps) {
       </div>
 
       <div className={s.figs}>
-        <Fig label="Net revenue" color="var(--accent)" value={money(netTotal, cur)} sub={`${count(orders)} order${orders === 1 ? "" : "s"}`} />
+        <Fig label="Net revenue" color="var(--accent)" value={money(netTotal, cur)} sub={`${count(orders)} order${orders === 1 ? "" : "s"} since ${sinceLabel}`} />
         <Fig
           label="Ad spend"
           color={SPEND_COLOR}
@@ -425,7 +432,15 @@ export function NetVsSpend({ days, rate, periodName }: NetProps) {
       </div>
 
       {view === "table" ? (
-        <SpendTable days={days} netV={netV} spendV={connected ? spendV : null} cur={cur} totals={{ net: netTotal, spend: connected ? spendTotal : null, orders }} />
+        <SpendTable
+          days={days}
+          netV={netV}
+          spendV={connected ? spendV : null}
+          counted={counted}
+          sinceLabel={sinceLabel}
+          cur={cur}
+          totals={{ net: netTotal, spend: connected ? spendTotal : null, orders }}
+        />
       ) : (
         <>
           <div className={s.legend}>
@@ -451,7 +466,7 @@ export function NetVsSpend({ days, rate, periodName }: NetProps) {
               className={s.plot}
               tabIndex={0}
               role="group"
-              aria-label={`Net revenue ${money(netTotal, cur)}${connected ? ` against ${money(spendTotal, cur)} of ad spend` : ""} over the ${periodName}`}
+              aria-label={`Net revenue ${money(netTotal, cur)}${connected ? ` against ${money(spendTotal, cur)} of ad spend` : ""} since ${sinceLabel}`}
               onPointerMove={(e) => onMove(e, slotAt)}
               onPointerLeave={() => setHover(null)}
               onKeyDown={onKey}
@@ -463,11 +478,13 @@ export function NetVsSpend({ days, rate, periodName }: NetProps) {
                   {show.net &&
                     netV.map((v, i) =>
                       v > 0 ? (
-                        <path key={days[i].day} d={column(xOf(i) - barW / 2, Math.min(yOf(v), yOf(0) - 2), barW, yOf(0))} className={`${s.bar} ${hover === i ? s.barOn : ""}`} />
+                        <path key={days[i].day} d={column(xOf(i) - barW / 2, Math.min(yOf(v), yOf(0) - 2), barW, yOf(0))} className={`${s.bar} ${hover === i ? s.barOn : ""} ${counted[i] ? "" : s.barOut}`} />
                       ) : null,
                     )}
                   {spendLine && <path d={spendLine} className={s.spendLine} />}
-                  {showSpend && n === 1 && <circle cx={xOf(0)} cy={yOf(spendV[0])} r={4} fill={SPEND_COLOR} />}
+                  {spendPts.length > 0 &&
+                    spendPts.length <= 31 &&
+                    spendPts.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={3} fill={SPEND_COLOR} className={s.dot} />)}
                   {show.net && peak >= 0 && hover !== peak && (
                     <text x={xOf(peak)} y={yOf(netV[peak]) - 7} className={s.peakLabel} textAnchor="middle">
                       {money(netV[peak], cur)}
@@ -494,7 +511,9 @@ export function NetVsSpend({ days, rate, periodName }: NetProps) {
                         {hd.upsells > 0 && ` + ${hd.upsells} upsell${hd.upsells === 1 ? "" : "s"}`}
                       </span>
                     </div>
-                    {connected && (
+                    {!counted[hover] ? (
+                      <div className={s.tipNote}>before {sinceLabel} the ads sold on ClickFunnels: not counted</div>
+                    ) : connected ? (
                       <>
                         <div className={`${s.tipRow} ${s.tipRowOn}`}>
                           <i className={s.tipKey} style={{ background: SPEND_COLOR }} />
@@ -512,7 +531,7 @@ export function NetVsSpend({ days, rate, periodName }: NetProps) {
                           <span>ROAS</span>
                         </div>
                       </>
-                    )}
+                    ) : null}
                   </div>
                 </Tip>
               )}
@@ -546,13 +565,16 @@ type TableProps = {
   netV: number[];
   /** null while Meta isn't connected. */
   spendV: number[] | null;
+  /** Per day: on or after SPEND_SINCE. */
+  counted: boolean[];
+  sinceLabel: string;
   cur: Currency;
   totals: { net: number; spend: number | null; orders: number };
 };
 
 /** The same days as rows, latest first: the chart's table view. */
-function SpendTable({ days, netV, spendV, cur, totals }: TableProps) {
-  const rows = days.map((d, i) => ({ d, net: netV[i], spend: spendV ? spendV[i] : null })).reverse();
+function SpendTable({ days, netV, spendV, counted, sinceLabel, cur, totals }: TableProps) {
+  const rows = days.map((d, i) => ({ d, net: netV[i], spend: spendV && counted[i] ? spendV[i] : null, out: !counted[i] })).reverse();
   const roas = (net: number, spend: number | null) => (spend && spend > 0 ? `${(net / spend).toFixed(2)}×` : "—");
   const profit = (net: number, spend: number | null) => (spend === null ? "—" : moneyExact(net - spend, cur));
   return (
@@ -569,20 +591,20 @@ function SpendTable({ days, netV, spendV, cur, totals }: TableProps) {
           </tr>
         </thead>
         <tbody>
-          {rows.map(({ d, net, spend }) => (
-            <tr key={d.day}>
+          {rows.map(({ d, net, spend, out }) => (
+            <tr key={d.day} className={out ? s.rowOut : undefined} title={out ? `Before ${sinceLabel} the ads sold on ClickFunnels: not counted` : undefined}>
               <td>{longDay(d.day)}</td>
               <td>{d.orders || "—"}</td>
               <td>{net ? moneyExact(net, cur) : "—"}</td>
               <td>{spend === null ? "—" : moneyExact(spend, cur)}</td>
-              <td className={spend !== null && net - spend < 0 ? s.neg : undefined}>{profit(net, spend)}</td>
-              <td>{roas(net, spend)}</td>
+              <td className={spend !== null && net - spend < 0 ? s.neg : undefined}>{out ? "—" : profit(net, spend)}</td>
+              <td>{out ? "—" : roas(net, spend)}</td>
             </tr>
           ))}
         </tbody>
         <tfoot>
           <tr>
-            <td>Total</td>
+            <td>Since {sinceLabel}</td>
             <td>{count(totals.orders)}</td>
             <td>{moneyExact(totals.net, cur)}</td>
             <td>{totals.spend === null ? "—" : moneyExact(totals.spend, cur)}</td>

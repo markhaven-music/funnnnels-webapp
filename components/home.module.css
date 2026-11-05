@@ -194,6 +194,13 @@
 .barOn {
   fill: var(--accent-2);
 }
+/* A day before the ads moved here from ClickFunnels: shown, not counted. */
+.barOut {
+  opacity: 0.3;
+}
+.rowOut td {
+  color: var(--fg-3);
+}
 .spendLine {
   fill: none;
   stroke: oklch(0.74 0.17 55);
@@ -341,6 +348,15 @@
 }
 .neg {
   color: var(--rose);
+}
+.tipNote {
+  max-width: 200px;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--fg-3);
+  white-space: normal;
 }
 
 /* ─── net revenue vs ad spend ─── */

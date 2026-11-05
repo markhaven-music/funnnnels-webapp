@@ -48,6 +48,14 @@ async function insightRows(params: URLSearchParams): Promise<Row[] | { reason: s
   return rows;
 }
 
+/**
+ * The first day the ads count on the home: before it they sent buyers to
+ * ClickFunnels, whose sales aren't in funnnnels, so their cost has no revenue
+ * against it here ("we migrated from clickfunnels so only count the days
+ * from Nov 2").
+ */
+export const SPEND_SINCE = "2026-11-02";
+
 export type DaySpend = { day: string; spend: number; impressions: number; clicks: number };
 export type MetaDaily = { connected: false; reason: string } | { connected: true; currency: string; days: DaySpend[] };
 
@@ -55,6 +63,8 @@ export type MetaDaily = { connected: false; reason: string } | { connected: true
 export async function spendByDay(since: string, until: string): Promise<MetaDaily> {
   const token = process.env.META_ADS_TOKEN;
   if (!token) return { connected: false, reason: "Meta isn't connected (no META_ADS_TOKEN)." };
+  if (since < SPEND_SINCE) since = SPEND_SINCE;
+  if (since > until) return { connected: true, currency: "EUR", days: [] };
   const rows = await insightRows(
     new URLSearchParams({
       level: "account",
