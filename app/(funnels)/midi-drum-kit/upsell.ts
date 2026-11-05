@@ -43,9 +43,12 @@ type Copy = { [key: string]: string | Record<string, string> | undefined; extra?
 // poster: the Wistia thumbnail shown until the player loads (landing.ts faster),
 // with that player's play-button colour; the TOP HITS page's player is Wistia's
 // own web component, which needs none.
-const PAGES: Record<string, { template: string; copy: Record<Lang, Copy>; poster: string | null; play?: string; beacon: Step; title: string }> = {
-  "famous-beats": { template: FAMOUS, copy: { en: famousEn, fr: famousFr, es: famousEs, de: famousDe, it: famousIt }, poster: "vsl-famous", play: "#60615e", beacon: "upsell-1", title: "Famous Beats Bundle" },
-  "top-hits": { template: TOP_HITS, copy: { en: topHitsEn, fr: topHitsFr, es: topHitsEs, de: topHitsDe, it: topHitsIt }, poster: null, beacon: "upsell-2", title: "TOP HITS MIDI Bundle" },
+// videos: the page's video in other languages (Wistia id, and its poster when the page has
+// one), re-voiced with captions in that language (vsl/script-upsell-*-<lang>.md, made with
+// tools/upsell_vsl.py); the other languages play the English one.
+const PAGES: Record<string, { template: string; copy: Record<Lang, Copy>; poster: string | null; play?: string; beacon: Step; title: string; wistia: string; videos: Partial<Record<Lang, { id: string; poster?: string }>> }> = {
+  "famous-beats": { template: FAMOUS, copy: { en: famousEn, fr: famousFr, es: famousEs, de: famousDe, it: famousIt }, poster: "vsl-famous", play: "#60615e", beacon: "upsell-1", title: "Famous Beats Bundle", wistia: "t1dx0gv5tg", videos: { it: { id: "hjo7o7c8nm", poster: "vsl-famous-it" } } },
+  "top-hits": { template: TOP_HITS, copy: { en: topHitsEn, fr: topHitsFr, es: topHitsEs, de: topHitsDe, it: topHitsIt }, poster: null, beacon: "upsell-2", title: "TOP HITS MIDI Bundle", wistia: "8s55snt7vw", videos: { it: { id: "fgwkqm6rvn" } } },
 };
 
 // The page's step in dashboard → Analytics: its place among the funnel's
@@ -135,8 +138,10 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     html = mapText(html, (t) => (extra[t.trim()] ? t.replace(t.trim(), extra[t.trim()]) : t));
     for (const [from, to] of Object.entries(extra)) html = html.replaceAll(`placeholder="${from}"`, `placeholder="${to}"`).replaceAll(`aria-label="${from}"`, `aria-label="${to}"`);
   }
+  const video = page.videos[lang];
+  if (video) html = html.replaceAll(page.wistia, video.id);
   const images = layout.images ?? {};
-  html = faster(swapImages(html, images, marks), page.poster, [], page.play);
+  html = faster(swapImages(html, images, marks), page.poster && (video?.poster ?? page.poster), [], page.play);
   const origins = imageOrigins(images);
   return origins ? html.replace("<head>", `<head>\n${origins}`) : html;
 }
