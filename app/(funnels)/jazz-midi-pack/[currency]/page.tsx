@@ -6,7 +6,7 @@ import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
 import { funnel } from "../funnel";
 import { DEFAULT_SECTIONS, type Section } from "../content";
-import { AB, AB_CSS, AB_SCRIPT } from "../abtest";
+import { AB, AB_CARRY_SCRIPT, AB_CSS, AB_SCRIPT } from "../abtest";
 import { SectionView, isSectionType, type Ctx } from "../sections";
 import { Tracking } from "../Tracking";
 import { Beacon } from "../../Beacon";
@@ -73,6 +73,8 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
       {/* The headline test: the visitor's variant is picked before the hero paints (../abtest.ts). */}
       <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
       <style dangerouslySetInnerHTML={{ __html: AB_CSS }} />
+      {/* The Buy buttons take the headline and the ad tags to the order page (../abtest.ts AB_CARRY_SCRIPT). */}
+      <script dangerouslySetInnerHTML={{ __html: AB_CARRY_SCRIPT }} />
       <Tracking value={amount} currency={currency} />
       <Beacon funnel={funnel.slug} page="landing" abCookie={AB.cookie} />
       {/* Red, on top, like TOP HITS' and the Drum Kit's ("aggiungi anche banner rossi sopra black friday come gli altri funnels"). */}

@@ -78,3 +78,34 @@ export const AB_CLASS = "ab-head";
 export const AB_CSS =
   `.${AB_CLASS}{display:none}html:not([${ATTR}]) .${AB_CLASS}[data-v="a"]{display:inline}` +
   AB.variants.map((v) => `html[${ATTR}="${v}"] .${AB_CLASS}[data-v="${v}"]{display:inline}`).join("");
+
+// The Buy buttons carry the headline and the ad's tags to the order page
+// (2026-11-05). A Meta ad opens the landing in Instagram's or Facebook's own
+// browser, and buyers often finish in Safari or Chrome (to pay with a PayPal
+// they're signed in to there): a browser with no ab_head cookie and no UTMs,
+// so the order came in with no headline and no source. The first Jazz sale did
+// just that (two B landings from JAZZ_Ringtone, then the order from a fresh
+// browser). Now every [data-cta] link gets ?ab=<the visitor's headline> plus
+// the landing's utm_* / fbclid / gclid as it's clicked, and the order page
+// puts ?ab= back in the cookie (AB_KEEP_SCRIPT) before anything reads it.
+// Not on a preview (the tab's own headline isn't a visitor's).
+const CARRY = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid", "gclid"];
+export const AB_CARRY_SCRIPT = `(function(){try{
+document.addEventListener('click',function(e){try{
+var a=e.target&&e.target.closest&&e.target.closest('a[data-cta]');if(!a)return;
+var u=new URL(a.getAttribute('href'),location.href);if(u.origin!==location.origin)return;
+var q=new URLSearchParams(location.search),k=${JSON.stringify(CARRY)};
+for(var i=0;i<k.length;i++){var x=q.get(k[i]);if(x&&!u.searchParams.has(k[i]))u.searchParams.set(k[i],x);}
+var pre=false;try{pre=sessionStorage.getItem('fv:preview')==='1'||!!sessionStorage.getItem('${PREVIEW_KEY}');}catch(e){pre=/[?&]preview=1(?:&|$)/.test(location.search);}
+var v=window.__abHead;if(!pre&&v&&/^(${LIST})$/.test(v))u.searchParams.set('ab',v);
+a.setAttribute('href',u.pathname+u.search+u.hash);
+}catch(e){}},true);
+}catch(e){}})();`;
+
+/** The order page: ?ab= from the landing's button becomes the visitor's cookie. Never picks one itself. */
+export const AB_KEEP_SCRIPT = `(function(){try{
+var q=(location.search.match(/[?&]ab=(${LIST})(?:&|$)/)||[])[1];if(!q)return;
+try{if(sessionStorage.getItem('fv:preview')==='1'||sessionStorage.getItem('${PREVIEW_KEY}'))return;}catch(e){}
+if(/[?&]preview=1(?:&|$)/.test(location.search))return;
+document.cookie='${AB.cookie}='+q+'; path=/; max-age=15552000; samesite=lax';
+}catch(e){}})();`;

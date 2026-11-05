@@ -6,7 +6,7 @@ import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
 import { funnel } from "../../funnel";
 import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content";
-import { AB } from "../../abtest";
+import { AB, AB_KEEP_SCRIPT } from "../../abtest";
 import { Checkout, OrderSummary, Proof, Reviews, Seal, fill, isSectionType, type Ctx } from "../../sections";
 import { Tracking } from "../../Tracking";
 import { splitName } from "../../../_kit/KitBox";
@@ -63,6 +63,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
 
   return (
     <main className={`${s.page} ${s.jazz} ${s.orderMain} ${display.variable}`}>
+      {/* ?ab= from the landing's button back into the cookie, before the counts and the checkout read it (../../abtest.ts). */}
+      <script dangerouslySetInnerHTML={{ __html: AB_KEEP_SCRIPT }} />
       <Tracking value={amount} currency={currency} page="order" />
       <Beacon funnel={funnel.slug} page="order" abCookie={AB.cookie} />
       <div className={s.bfbar}>
