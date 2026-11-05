@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { FreePackPerson, FreePackRow, FreePackStats } from "@/lib/freePacks";
+import type { PackSpend } from "@/lib/metaSpend";
 import e from "./email.module.css";
 import f from "./freePacks.module.css";
 
@@ -16,6 +17,7 @@ const COLS = { gridTemplateColumns: "92px minmax(0,1.4fr) 110px minmax(0,0.6fr) 
 const pct = (n: number, of: number) => (of ? `${Math.round((n / of) * 100)}%` : "");
 const money = (r: { eur: number; usd: number }) =>
   [r.usd ? `$${(r.usd / 100).toFixed(0)}` : "", r.eur ? `€${(r.eur / 100).toFixed(0)}` : ""].filter(Boolean).join(" + ") || "$0";
+const eur = (n: number) => `€${n.toFixed(2)}`;
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
@@ -36,7 +38,7 @@ function Step({ label, n, of, bought }: { label: string; n: number; of: number; 
   );
 }
 
-function PackCard({ p, people }: { p: FreePackRow; people: FreePackPerson[] }) {
+function PackCard({ p, people, spend }: { p: FreePackRow; people: FreePackPerson[]; spend: PackSpend | null }) {
   const fresh = p.leads - p.alreadyBuyers;
   const mine = people.filter((x) => x.pack === p.label && !x.alreadyBuyer);
   const inKit = mine.filter((x) => x.kit && (x.kit.state === "waiting" || x.kit.state === "sending")).length;
@@ -50,6 +52,17 @@ function PackCard({ p, people }: { p: FreePackRow; people: FreePackPerson[] }) {
       <div>
         <div className={f.big}>{fresh}</div>
         <div className={f.bigLabel}>new sign-ups</div>
+        {spend ? (
+          <div className={f.cost}>
+            <b>{eur(spend.spend)}</b> spent · <b>{fresh ? eur(spend.spend / fresh) : "—"}</b> per sign-up
+            {p.boughtSoFar ? (
+              <>
+                {" "}
+                · <b>{eur(spend.spend / p.boughtSoFar)}</b> per sale
+              </>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       <div className={f.steps}>
         <Step label="Opened the Drum Kit checkout" n={p.checkout.hit} of={fresh} />
@@ -107,6 +120,7 @@ export function FreePacksPanel() {
       ),
     [people, filter],
   );
+  const adSpend = stats?.spend.connected ? Object.values(stats.spend.byPack).reduce((n, x) => n + x.spend, 0) : 0;
   const total = {
     signups: fresh.length,
     checkout: fresh.filter((x) => x.checkoutAt).length,
@@ -119,7 +133,12 @@ export function FreePacksPanel() {
       <div className="page-head">
         <div>
           <h1 className="page-title">Free packs</h1>
-          <p className="page-sub">{error || (stats ? "Who downloaded a free pack, and who went on to buy. Cost per sign-up is in Meta Ads Manager." : "Loading…")}</p>
+          <p className="page-sub">
+            {error ||
+              (stats
+                ? `Who downloaded a free pack, and who went on to buy.${stats.spend.connected ? " Ad spend from Meta, updated every 10 minutes." : ""}`
+                : "Loading…")}
+          </p>
         </div>
       </div>
 
@@ -156,6 +175,15 @@ export function FreePacksPanel() {
               <div className={e.statSub}>{pct(total.bought, total.signups) || "—"} of sign-ups</div>
             </div>
             <div className={e.stat}>
+              <div className={e.statLabel}>AD SPEND</div>
+              <div className={e.statValue}>{stats.spend.connected ? eur(adSpend) : "—"}</div>
+              <div className={e.statSub}>
+                {stats.spend.connected
+                  ? `${total.signups ? eur(adSpend / total.signups) : "—"} per sign-up${total.bought ? ` · ${eur(adSpend / total.bought)} per sale` : ""}`
+                  : stats.spend.reason}
+              </div>
+            </div>
+            <div className={e.stat}>
               <div className={e.statLabel}>REVENUE</div>
               <div className={e.statValue}>{money(total.revenue)}</div>
               <div className={e.statSub}>everything they bought after signing up</div>
@@ -164,7 +192,7 @@ export function FreePacksPanel() {
 
           <div className={f.packs}>
             {stats.packs.map((p) => (
-              <PackCard key={p.key} p={p} people={people} />
+              <PackCard key={p.key} p={p} people={people} spend={stats.spend.connected ? (stats.spend.byPack[p.label] ?? null) : null} />
             ))}
           </div>
 

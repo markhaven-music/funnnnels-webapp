@@ -1,3 +1,4 @@
+import { type MetaSpend, spendByPack } from "@/lib/metaSpend";
 import { supabase } from "@/lib/supabase";
 
 // Dashboard → Free packs: what the free lead magnets bring in. Each opt-in
@@ -8,8 +9,7 @@ import { supabase } from "@/lib/supabase";
 // buyers. A window only counts leads old enough to have lived it ("7 days"
 // over leads at least 7 days old), so a fresh test shows "—", not 0%.
 //
-// Cost per lead isn't here: funnnnels has no Meta token. It's read from Meta
-// (Ads Manager or the Meta MCP) next to these numbers.
+// What the ads cost comes from Meta (lib/metaSpend.ts) when META_ADS_TOKEN is set.
 
 const DAY = 86_400_000;
 export const WINDOWS = [1, 7, 30] as const;
@@ -38,7 +38,8 @@ export type FreePackPerson = {
   // The Drum Kit follow-up (db/free-packs-kit.sql): emails sent of all, and whether it's still going.
   kit: { sent: number; of: number; state: "waiting" | "sending" | "done" | "stopped"; nextAt: string | null } | null;
 };
-export type FreePackStats = { since: string; packs: FreePackRow[]; ads: FreePackRow[]; leads: number; people: FreePackPerson[] };
+// spend: what the Meta ads cost per pack in the same period (lib/metaSpend.ts), when Meta is connected.
+export type FreePackStats = { since: string; packs: FreePackRow[]; ads: FreePackRow[]; leads: number; people: FreePackPerson[]; spend: MetaSpend };
 
 const KIT_SEQUENCE = "Free packs · Drum Kit follow-up";
 
@@ -195,5 +196,6 @@ export async function freePackStats(days = 90): Promise<FreePackStats> {
     packs: group((l) => l.optin, pack),
     ads: group((l) => `${l.optin}|${l.ad_id ?? l.utm_content ?? ""}`, ad),
     people,
+    spend: await spendByPack(Object.values(PACK_NAMES), since.slice(0, 10), new Date().toISOString().slice(0, 10)),
   };
 }
