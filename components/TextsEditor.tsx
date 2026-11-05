@@ -88,6 +88,8 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
   const [query, setQuery] = useState("");
   const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState("");
+  // The last save put the layout in every language (Apply to all languages).
+  const [savedAll, setSavedAll] = useState(false);
   // Bumped when a text is put back, so its field shows the code's text again.
   const [resets, setResets] = useState<Record<string, number>>({});
   const [view, setView] = useState<"page" | "list">(frameSrc ? "page" : "list");
@@ -192,9 +194,11 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
     else setResets((r) => Object.fromEntries(keys.map((k) => [k, (r[k] ?? 0) + 1])));
   }
 
-  async function save() {
+  // all: the layout goes to every language of the page too (the texts stay this language's).
+  async function save(all = false) {
     setState("saving");
     setError("");
+    setSavedAll(false);
     try {
       if (Object.keys(changes.set).length || changes.reset.length) {
         const res = await fetch(`/api/funnels/${funnel.id}/texts`, {
@@ -209,16 +213,17 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
         setSaved(next);
         setDraft({});
       }
-      if (changes.layout) {
+      if (changes.layout || all) {
         const wanted = toSave(draftLayout, codeOrder);
         const res = await fetch(`/api/funnels/${funnel.id}/layout`, {
           method: "PUT",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ page, lang, layout: wanted }),
+          body: JSON.stringify({ page, lang, layout: wanted, ...(all ? { langs: "all" } : {}) }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error ?? "Couldn't save the layout.");
         setSavedLayout((data.layout as Layout | undefined) ?? wanted);
+        setSavedAll(all);
       }
       setState("saved");
     } catch (err) {
@@ -252,7 +257,21 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
               <I.eye size={14} /> Open page
             </a>
           )}
-          <button type="button" className="btn primary" disabled={!changes.count || state === "saving"} onClick={save}>
+          {sections.length > 0 && langs.length > 1 && (
+            <button
+              type="button"
+              className="btn"
+              disabled={state === "saving"}
+              title="Save this page's layout for every language: the same sections hidden and moved, the same pictures, the same button colour. The texts stay each language's own."
+              onClick={() => {
+                const others = langs.filter((l) => l.lang !== lang).map((l) => l.label).join(", ");
+                if (confirm(`Give ${others} this page's layout too? Their sections, pictures and button colour become these.`)) save(true);
+              }}
+            >
+              <I.globe size={14} /> Apply to all languages
+            </button>
+          )}
+          <button type="button" className="btn primary" disabled={!changes.count || state === "saving"} onClick={() => save()}>
             {state === "saving" ? "Saving…" : changes.count ? `Save ${changes.count} change${changes.count > 1 ? "s" : ""}` : state === "saved" ? "Saved" : "Save"}
           </button>
         </div>
@@ -375,7 +394,7 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
               </div>
             </>
           )}
-          {state === "saved" && <span className={s.okInline}>Saved. Live within a few seconds.</span>}
+          {state === "saved" && <span className={s.okInline}>{savedAll ? "Saved, the layout in every language. Live within a few seconds." : "Saved. Live within a few seconds."}</span>}
           {state === "error" && <span className={s.errInline}>{error}</span>}
         </div>
       )}
@@ -408,7 +427,7 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
             {keys.length} texts{editedCount ? ` · ${editedCount} changed from the original` : ""}
           </span>
         </div>
-        {state === "saved" && <p className={s.ok}>Saved. The page shows the new texts within a few seconds.</p>}
+        {state === "saved" && <p className={s.ok}>{savedAll ? "Saved, the layout in every language. Live within a few seconds." : "Saved. The page shows the new texts within a few seconds."}</p>}
         {state === "error" && <p className={s.err}>{error}</p>}
         {!keys.length && <p className={s.empty}>This page has no texts to edit in this language.</p>}
 

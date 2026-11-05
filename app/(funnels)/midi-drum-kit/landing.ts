@@ -26,8 +26,11 @@ import { paths, type Lang } from "./i18n";
 
 const STRINGS: Record<Lang, Record<string, string>> = { en, fr, es, de, it };
 
-// Images with words baked in, swapped per language.
-const IMAGES: Partial<Record<Lang, Record<string, string>>> = {
+// Images with words baked in, swapped per language (the code's name → that
+// language's). The editor's layout keys pictures by the src the page shows,
+// so a layout copied to another language maps them through this
+// (app/api/funnels/[id]/layout).
+export const LANG_IMAGES: Partial<Record<Lang, Record<string, string>>> = {
   fr: { "value-stack": "value-stack-fr" },
   es: { "value-stack": "value-stack-es" },
   de: { "value-stack": "value-stack-de" },
@@ -124,7 +127,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = funn
   if (lang === "en") html = html.replace(FREE_BAR_AT, (at) => FREE_BAR + at);
   const video = VIDEOS[lang];
   html = html.replaceAll(funnel.wistiaId, video.id);
-  for (const [from, to] of Object.entries(IMAGES[lang] ?? {})) {
+  for (const [from, to] of Object.entries(LANG_IMAGES[lang] ?? {})) {
     html = html.replaceAll(`/funnels/midi-drum-kit/${from}.webp`, `/funnels/midi-drum-kit/${to}.webp`);
   }
   // The pictures replaced in the dashboard, keyed by the src the page shows in this language.
