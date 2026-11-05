@@ -8,8 +8,10 @@
 //
 // Spend is per ad set and counted for a pack when the ad set's or campaign's
 // name has the pack's name as one of its " | " parts ("Rolls | US+CA | …",
-// "Leads | Rolls | USA, Canada"). Cached 10 minutes. Amounts in the account's
-// currency (EUR), never converted.
+// "Leads | Rolls | USA, Canada"). A range that reaches today (in the account's
+// time zone, Los Angeles) is asked fresh every time: a cached answer was served
+// stale and showed €25 for a day Meta already had at €35. Past days are cached
+// 10 minutes. Amounts in the account's currency (EUR), never converted.
 
 const GRAPH = "https://graph.facebook.com/v23.0";
 const DEFAULT_ACCOUNT = "462189981361126";
@@ -29,14 +31,20 @@ type Row = {
   inline_link_clicks?: string;
 };
 
+/** Today in the ad account's time zone (GRIND STUDIO bills by Los Angeles days), YYYY-MM-DD. */
+function accountToday(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
+}
+
 /** The account's insight rows, page after page; the reason when Meta says no. */
-async function insightRows(params: URLSearchParams): Promise<Row[] | { reason: string }> {
+async function insightRows(params: URLSearchParams, until: string): Promise<Row[] | { reason: string }> {
+  const live = until >= accountToday();
   const account = process.env.META_AD_ACCOUNT_ID || DEFAULT_ACCOUNT;
   let url: string | null = `${GRAPH}/act_${account}/insights?${params}`;
   const rows: Row[] = [];
   try {
     for (let page = 0; url && page < 10; page++) {
-      const res: Response = await fetch(url, { next: { revalidate: 600 } });
+      const res: Response = await fetch(url, live ? { cache: "no-store" } : { next: { revalidate: 600 } });
       const body = (await res.json()) as { data?: Row[]; paging?: { next?: string }; error?: { message?: string } };
       if (!res.ok || body.error) return { reason: `Meta said: ${body.error?.message ?? `HTTP ${res.status}`}` };
       rows.push(...(body.data ?? []));
@@ -74,6 +82,7 @@ export async function spendByDay(since: string, until: string): Promise<MetaDail
       limit: "500",
       access_token: token,
     }),
+    until,
   );
   if (!Array.isArray(rows)) return { connected: false, reason: rows.reason };
   const days = rows
@@ -99,6 +108,7 @@ export async function spendByPack(labels: string[], since: string, until: string
       limit: "500",
       access_token: token,
     }),
+    until,
   );
   if (!Array.isArray(rows)) return { connected: false, reason: rows.reason };
 

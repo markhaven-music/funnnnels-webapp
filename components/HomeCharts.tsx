@@ -62,22 +62,26 @@ const SINCE_LABEL = shortDay(SPEND_SINCE);
 
 // ─── what the Meta ads cost, day by day (/api/analytics/spend) ────────────────
 
-// Meta's answer per "since..until", so switching back and forth doesn't ask again.
-const spendCache = new Map<string, MetaDaily>();
+// Meta's answer per "since..until", so switching back and forth doesn't ask
+// again; kept 2 minutes, so a page left open doesn't show this morning's spend.
+const spendCache = new Map<string, { at: number; data: MetaDaily }>();
+const SPEND_TTL = 2 * 60_000;
 const FAILED: MetaDaily = { connected: false, reason: "Couldn't load the ad spend." };
 
 function useAdSpend(since: string | undefined, until: string | undefined): MetaDaily | null {
   const key = `${since}..${until}`;
   const [got, setGot] = useState<{ key: string; data: MetaDaily } | null>(null);
   useEffect(() => {
-    if (!since || !until || spendCache.has(key)) return;
+    if (!since || !until) return;
+    const hit = spendCache.get(key);
+    if (hit && Date.now() - hit.at < SPEND_TTL) return;
     let gone = false;
     fetch(`/api/analytics/spend?since=${since}&until=${until}`, { cache: "no-store" })
       .then((res) => (res.ok ? (res.json() as Promise<MetaDaily>) : null))
       .then((m) => {
         if (gone) return;
         const data = m ?? FAILED;
-        spendCache.set(key, data);
+        spendCache.set(key, { at: Date.now(), data });
         setGot({ key, data });
       })
       .catch(() => !gone && setGot({ key, data: FAILED }));
@@ -85,7 +89,7 @@ function useAdSpend(since: string | undefined, until: string | undefined): MetaD
       gone = true;
     };
   }, [key, since, until]);
-  return got?.key === key ? got.data : (spendCache.get(key) ?? null);
+  return got?.key === key ? got.data : (spendCache.get(key)?.data ?? null);
 }
 
 // ─── rows: a day, a week, or the running total up to a day ───────────────────
