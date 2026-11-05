@@ -2,7 +2,7 @@
 """Every file of the Jazz MIDI Pack, for the landing page's pack player.
 
 Pure Python, no deps. Walks ~/Desktop/Jazz MIDI Pack and writes
-public/funnels/jazz-midi-pack/browse-v3/ (a new folder name for each new pack:
+public/funnels/jazz-midi-pack/browse-v4/ (a new folder name for each new pack:
 m.thegrind.studio caches these files for a week; see PackBrowser.tsx DIR):
   pack.json    the five folders as the player shows them: per folder its
                choices ("dims", e.g. Progression · Voicing · Rhythm) and
@@ -27,7 +27,7 @@ import struct
 from extract_rolls import vlq
 
 PACK = os.path.expanduser("~/Desktop/Jazz MIDI Pack")
-OUT = os.path.join(os.path.dirname(__file__), "..", "public", "funnels", "jazz-midi-pack", "browse-v3")
+OUT = os.path.join(os.path.dirname(__file__), "..", "public", "funnels", "jazz-midi-pack", "browse-v4")
 
 
 def parse(path):
@@ -97,9 +97,16 @@ def walk(path, chunks, leaves):
     mids = [n for n in names if n.endswith(".mid")]
     if mids:
         leaves[os.path.relpath(path, PACK)] = len(chunks)
-        chunks.append([{"file": n, **parse(os.path.join(path, n))} for n in mids])
+        chunks.append([{"file": n, **parse(os.path.join(path, n)), **bpm_of(n)} for n in mids])
     for d in dirs(path):
         walk(os.path.join(path, d), chunks, leaves)
+
+
+def bpm_of(name):
+    """The bpm from the file name ("... - 90bpm.mid"): since 2026-11-05 the files carry no tempo event
+    (Ableton turned it into Song Tempo automation), so parse() would read the MIDI default, 120."""
+    m = re.search(r"(\d+)\s*bpm", name)
+    return {"bpm": int(m.group(1))} if m else {}
 
 
 def bare(name):
@@ -131,8 +138,8 @@ def folders(chunks, leaves):
             k = leaves[os.path.join(chords, p, v)]
             for fi, f in enumerate(chunks[k]):
                 files[f"{pi}.{vi}.{rhythms.index(bare(parts(f['file'])[0]))}"] = [k, fi]
-    out.append({"label": "Chords", "folder": chords,
-                "what": "Every progression in its original key, in 13 voicings and 8 rhythms.",
+    out.append({"label": "Progressions", "folder": chords,
+                "what": "Every progression in its usual key (in its name), in 13 voicings and 8 rhythms.",
                 "dims": [prog_dim, {"label": "Voicing", "opts": [bare(v) for v in voicings]},
                          {"label": "Rhythm", "opts": rhythms}], "files": files})
 
@@ -146,7 +153,7 @@ def folders(chunks, leaves):
             if key not in key_names:
                 key_names.append(key)
             files[f"{pid[p[:2]]}.{key_names.index(key)}"] = [k, fi]
-    out.append({"label": "All 12 keys", "folder": keys,
+    out.append({"label": "Every key", "folder": keys,
                 "what": "Every progression in all 12 keys, as voice-led pads.",
                 "dims": [prog_dim, {"label": "Key", "opts": key_names}], "files": files})
 

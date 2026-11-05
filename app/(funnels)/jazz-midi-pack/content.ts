@@ -330,7 +330,7 @@ export const DEFAULT_SECTIONS: Section[] = [
         { q: "I don't know jazz theory. Will I get lost?", a: "No. Files are numbered best-sounding first and every file shows its chord names on the timeline. Start at 01." },
         { q: "I don't play piano.", a: "You don't need to. The voicings are already played into the MIDI. You choose the sound." },
         { q: "Can I use them in my releases?", a: "Yes. Use them in your own music, commercial releases included, with no royalties. You can't resell or share the files themselves." },
-        { q: "Is it only in C?", a: "The main folder is in each progression's original key, and the All 12 Keys folder has every progression in every key. Or transpose in your DAW: the voice leading stays." },
+        { q: "Is it only in C?", a: "The Progressions folder has each progression in its usual key, written in its name, and the Progressions in Every Key folder has every progression in all 12 keys. Or transpose in your DAW: the voice leading stays." },
         { q: "Do the genre loops have drums?", a: "Yes. Every lofi, neo soul, trap soul and deep house loop comes as separate chords, bass and drum MIDI, plus a full multitrack file. Drums use the GM map (kick C1, snare D1, hat F#1)." },
         { q: "What if a file doesn't load?", a: "Email support@thegrind.studio. We fix it, replace it, or refund you if we can't." },
       ],

@@ -576,7 +576,7 @@ function Previews({ p, patch, ctx }: { p: SectionProps["s_previews"]; patch?: Pa
 // roll beside "how it works"; the download list a buyer gets beside "after
 // you pay".
 function HowShot() {
-  const path = ["Jazz MIDI Pack", "1 Chords in Original Key", "01 ii-V-I Major", "01 Best Voicing"];
+  const path = ["Jazz MIDI Pack", "1 Progressions", "01 ii-V-I Major (C)", "01 Best Voicing"];
   const roll = rolls.ballad as Roll;
   return (
     <div className={s.illus} aria-hidden>

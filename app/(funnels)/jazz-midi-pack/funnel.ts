@@ -152,8 +152,8 @@ export const funnel = {
     genres: 4,
   },
   folders: [
-    { name: "Chords in Original Key", files: 8528, what: "Every progression × 13 voicings × 8 rhythms, best-sounding first." },
-    { name: "All 12 Keys", files: 984, what: "Every progression transposed to every key, voice-led pads." },
+    { name: "Progressions", files: 8528, what: "Every progression in its usual key × 13 voicings × 8 rhythms, best-sounding first." },
+    { name: "Progressions in Every Key", files: 984, what: "Every progression transposed to every key, voice-led pads." },
     { name: "Bass Lines", files: 246, what: "Walking, two-feel and bossa nova bass for each progression." },
     { name: "Combo Loops", files: 82, what: "Drop-2 comping + walking bass + ride, two choruses." },
     { name: "Genre Loops", files: 1312, what: "Lofi, neo soul, trap soul and deep house — chords, bass, drums split." },

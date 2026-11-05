@@ -10,6 +10,7 @@ The page draws piano rolls from it and plays the notes on a real piano sample
     python3 tools/extract_rolls.py
 """
 import json
+import re
 import os
 import struct
 import zipfile
@@ -17,18 +18,18 @@ import zipfile
 PACK = os.path.expanduser("~/Desktop/Jazz MIDI Pack")
 OUT = os.path.join(os.path.dirname(__file__), "..", "app", "(funnels)", "jazz-midi-pack", "rolls.json")
 
-C = "1 Chords in Original Key"
+C = "1 Progressions"
 G = "5 Genre Loops (chords bass drums)"
 FILES = {
     # before / after: the same progression, same rhythm, two voicings
-    "before": f"{C}/05 I-vi-ii-V Turnaround/10 Root Position/02 Pads - 05 I-vi-ii-V Turnaround - Root Position - 90bpm.mid",
-    "after": f"{C}/05 I-vi-ii-V Turnaround/01 Best Voicing/02 Pads - 05 I-vi-ii-V Turnaround - Best Voicing - 90bpm.mid",
+    "before": f"{C}/05 I-vi-ii-V Turnaround (C)/10 Root Position/02 Pads - 05 I-vi-ii-V Turnaround - Root Position - 90bpm.mid",
+    "after": f"{C}/05 I-vi-ii-V Turnaround (C)/01 Best Voicing/02 Pads - 05 I-vi-ii-V Turnaround - Best Voicing - 90bpm.mid",
     # previews, best-sounding first
-    "ballad": f"{C}/01 ii-V-I Major/01 Best Voicing/01 Ballad Arpeggios - 01 ii-V-I Major - Best Voicing - 70bpm.mid",
+    "ballad": f"{C}/01 ii-V-I Major (C)/01 Best Voicing/01 Ballad Arpeggios - 01 ii-V-I Major - Best Voicing - 70bpm.mid",
     "neosoul": f"{G}/2 Neo Soul/05 I-vi-ii-V Turnaround - Neo Soul - C - 88bpm/05 I-vi-ii-V Turnaround - Neo Soul - C - 88bpm - Full.mid",
     "lofi": f"{G}/1 Lofi Hip Hop/15 Autumn Leaves Type (relative major-minor) - Lofi Hip Hop - Gm - 82bpm/15 Autumn Leaves Type (relative major-minor) - Lofi Hip Hop - Gm - 82bpm - Full.mid",
-    "bossa": f"{C}/09 Tritone Turnaround/01 Best Voicing/04 Bossa Nova - 09 Tritone Turnaround - Best Voicing - 135bpm.mid",
-    "blues": f"{C}/16 Jazz Blues in F/01 Best Voicing/03 Swing Comping - 16 Jazz Blues in F - Best Voicing - 150bpm.mid",
+    "bossa": f"{C}/09 Tritone Turnaround (C)/01 Best Voicing/04 Bossa Nova - 09 Tritone Turnaround - Best Voicing - 135bpm.mid",
+    "blues": f"{C}/16 Jazz Blues in F (F)/01 Best Voicing/03 Swing Comping - 16 Jazz Blues in F - Best Voicing - 150bpm.mid",
 }
 
 # The free bonuses: a few real files each, to pick and play on the landing's
@@ -151,8 +152,10 @@ def parse(path, data=None, max_beats=None, trim=False):
         markers = [(t, m) for t, m in markers if t < cut]
     last = max(e for _, e, _ in notes)
     beats = -(-last // bar) * 4
+    # the bpm from the file name when it has one: the pack's files carry no tempo event since 2026-11-05
+    m = re.search(r"(\d+)\s*bpm", os.path.basename(path))
     return {
-        "bpm": round(60_000_000 / tempo),
+        "bpm": int(m.group(1)) if m else round(60_000_000 / tempo),
         "beats": beats,
         "notes": [[round(s / tpb, 3), round((e - s) / tpb, 3), p] for s, e, p in sorted(notes)],
         "chords": [[round(t / tpb, 3), m] for t, m in sorted(markers) if m],

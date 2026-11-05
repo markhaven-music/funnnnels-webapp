@@ -9,14 +9,16 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
 - 11,152 MIDI files (.mid) in 5 folders, numbered best-sounding first (3,536 and 26 progressions until 2026-11-05,
   when 27-46 (minor, melancholic, long forms) and 47-82 (the changes of jazz standards found by a web search and
   checked bar by bar, neo soul / lofi staples, reharmonisations) were added).
-  1. Chords in Original Key: 8,528 files. 82 progressions × 13 voicings × 8 rhythms.
-  2. All 12 Keys: 984 files. Every progression in every key, voice-led close voicings as sustained pads.
+  1. Progressions ("Chords in Original Key" until 2026-11-05; each progression's folder names its key, e.g. "82 Dindi Type (Eb)"): 8,528 files. 82 progressions × 13 voicings × 8 rhythms.
+  2. Progressions in Every Key ("All 12 Keys" until 2026-11-05): 984 files. Every progression in every key, voice-led close voicings as sustained pads.
   3. Bass Lines: 246 files. Walking (swing), two-feel (half notes) and bossa nova bass for each progression.
   4. Combo Loops: 82 files. Drop-2 swing comping + walking bass + ride cymbal, two choruses, 150 bpm.
   5. Genre Loops: 1,312 files. Every progression as Lofi Hip Hop (82 bpm), Neo Soul (88 bpm), Trap Soul and
      Deep House. Separate Chords / Bass / Drums MIDI + a Full multitrack file. Key and BPM in every file
      name. GM drum map (kick C1, snare D1, hat F#1).
-- Chord symbols written into every file as MIDI markers (most DAWs show them on the timeline).
+- Chord symbols written into every file as MIDI markers (most DAWs show them on the timeline). No tempo or time-signature
+  events since 2026-11-05 (Ableton made Song Tempo automation from them); the bpm is in every file name. The notes of
+  one chord hit end together.
 - 13 voicings: Best Voicing, Best Voicing + Smooth Bass, Rootless (Bill Evans A-B), Spread (Two-Hand),
   Drop 2, Voice-Led Close, Quartal (So What), Shell (Bud Powell), Drop 3, Root Position, 1st / 2nd / 3rd
   Inversion.
