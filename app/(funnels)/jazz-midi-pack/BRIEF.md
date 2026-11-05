@@ -6,10 +6,10 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
 
 ## The product (counted from `~/Desktop/Jazz MIDI Pack` on 2026-11-05)
 - Brand: GRIND STUDIO. Sold at m.thegrind.studio/jazz-midi-pack.
-- 11,152 MIDI files (.mid) in 5 folders, numbered best-sounding first (3,536 and 26 progressions until 2026-11-05,
+- 10,496 MIDI files (.mid) in 5 folders (11,152 with Smooth Bass, earlier on 2026-11-05), numbered best-sounding first (3,536 and 26 progressions until 2026-11-05,
   when 27-46 (minor, melancholic, long forms) and 47-82 (the changes of jazz standards found by a web search and
   checked bar by bar, neo soul / lofi staples, reharmonisations) were added).
-  1. Progressions ("Chords in Original Key" until 2026-11-05; each progression's folder names its key, e.g. "82 Dindi Type (Eb)"): 8,528 files. 82 progressions × 13 voicings × 8 rhythms.
+  1. Progressions ("Chords in Original Key" until 2026-11-05; each progression's folder names its key, e.g. "82 Dindi Type (Eb)"): 7,872 files. 82 progressions × 12 voicings × 8 rhythms.
   2. Progressions in Every Key ("All 12 Keys" until 2026-11-05): 984 files. Every progression in every key, voice-led close voicings as sustained pads.
   3. Bass Lines: 246 files. Walking (swing), two-feel (half notes) and bossa nova bass for each progression.
   4. Combo Loops: 82 files. Drop-2 swing comping + walking bass + ride cymbal, two choruses, 150 bpm.
@@ -20,11 +20,12 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   Moon, Autumn Leaves, Misty, Black Orpheus, Blue Bossa, Summertime types, Just the Two of Us, Royal Road…), 21-39
   ballads and standards, 40-64 loops and building blocks, 65-82 colour and advanced (make_pack.py GROUPS).
 - "Jazz MIDI Pack - Guide.pdf" in the zip's root (make_guide.py): the idea (voice leading), a one-minute start, the
-  folders, the 13 voicings, the 8 rhythms, the 4 genres and every progression with its key, length and chart.
+  folders, the 12 voicings, the 8 rhythms, the 4 genres and every progression with its key, length and chart.
 - Chord symbols written into every file as MIDI markers (most DAWs show them on the timeline). No tempo or time-signature
   events since 2026-11-05 (Ableton made Song Tempo automation from them); the bpm is in every file name. The notes of
   one chord hit end together.
-- 13 voicings: Best Voicing, Best Voicing + Smooth Bass, Rootless (Bill Evans A-B), Spread (Two-Hand),
+- 12 voicings (13 until 2026-11-05: "Best Voicing + Smooth Bass" left the pack, "molti smooth bass suonano malissimo"):
+  Best Voicing, Rootless (Bill Evans A-B), Spread (Two-Hand),
   Drop 2, Voice-Led Close, Quartal (So What), Shell (Bud Powell), Drop 3, Root Position, 1st / 2nd / 3rd
   Inversion.
 - Best Voicing: always 4 voices + root bass, each moving like a melodic line. Since 2026-11-05 a fourth lower (top voice
@@ -51,14 +52,14 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   Kit"): each item shows what it's worth, the same number in € and $ (`funnel.ts` value / bonuses[].value):
   Jazz MIDI Pack 97, Chord Pack 47, Bible 37, Anime pack 47, Emotional Keys 27, Drum Loops 27. Total value 282,
   crossed out, "Today" 27, "You save" 255. It reads as the bundle's worth, never as an earlier price of the pack.
-- Bundle total: 15,349 MIDI files = 11,152 (pack) + 2,304 + 150 + 1,548 + 195 (bonuses). The bonuses add 4,197 MIDI
+- Bundle total: 14,693 MIDI files = 10,496 (pack) + 2,304 + 150 + 1,548 + 195 (bonuses). The bonuses add 4,197 MIDI
   files, 305 WAV loops (258 Bible piano/e-piano loops + 47 drum loops) and a PDF. Counted 2026-11-01.
 - Angle (2026-11-04, replaces "everyone wants and nobody can write"): the producer who wants a jazz vibe in their beat and
   doesn't know how. The hero and the letter open on that feeling; lofi, neo soul and trap soul are the specifics (the pack's
   genre loops); the voicing is explained in its own block ("Why these chords sound played", beside the before/after rolls,
   after the product intro), never as the opener. Claim used in the letter: lofi, neo soul and trap soul are built on the same
   jazz progressions (ii-V-I, turnarounds and the rest of the pack's list). Product intro: "a different progression for every
-  beat you upload, for years" (11,152 files ÷ 365 ≈ 30 years). Copy goes through the avoid-ai-writing skill
+  beat you upload, for years" (10,496 files ÷ 365 ≈ 29 years). Copy goes through the avoid-ai-writing skill
   (~/.claude/skills/avoid-ai-writing): no "it's not X, it's Y" frames, no "nobody can write", no fragment runs.
   Never say how many progressions.
 - Five free bonuses with every pack (since 2026-10-16), on the same download page:
@@ -116,7 +117,7 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   ("patterns" → "chords", as Top Hits has them). Four more sit only in the editor's draft as placeholders
   ("Write the review here.", "First name L.") for the user to replace with real ones before publishing: no
   review written by us goes live. No Jazz-specific testimonials exist yet. Social proof = the `Proof` strip (the two numbers above + the guarantee), under the hero and the checkout.
-- Counts on the page: 11,152 = the pack; the bonuses add 4,197 MIDI; 15,349 only as "in total". The English VSL
+- Counts on the page: 10,496 = the pack; the bonuses add 4,197 MIDI; 14,693 only as "in total". The English VSL
   (Wistia lh4kzjb92h) still says 3,536: recorded before the 2026-11-05 additions.
 
 ## Before / after (measured by `tools/extract_rolls.py` data, 2026-10-12)
@@ -138,7 +139,7 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
 - The player merges unisons (bass + chord root on the same pitch at the same time) into one note.
 
 ## Sections added on 2026-11-01, taken out on 2026-11-02
-"The secret", "Played by the greats" and "Why 13 voicings and 8 rhythms? Easy." (modelled on the Drum Kit page)
+"The secret", "Played by the greats" and "Why 12 voicings and 8 rhythms? Easy." (modelled on the Drum Kit page)
 were on the page for a day. The user: "you replaced a lot of sections while i didnt ask u to do that"; asked
 what to undo, they picked "Togli sezioni nuove" and "rimetti le sezioni di prima". The page is back to the 14
 sections it had that morning, in the same order. The code is in git at 08e0c7a. The checks below stay for reuse.

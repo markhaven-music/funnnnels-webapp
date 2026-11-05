@@ -24,7 +24,7 @@ G = "5 Genre Loops (chords bass drums)"
 # Progression numbers left out ("??"): the pack's order changes (2026-11-05: best first); found by name.
 FILES = {
     # before / after: the same progression, same rhythm, two voicings
-    "before": f"{C}/?? I-vi-ii-V Turnaround (C)/10 Root Position/02 Pads - ?? I-vi-ii-V Turnaround - Root Position - 90bpm.mid",
+    "before": f"{C}/?? I-vi-ii-V Turnaround (C)/?? Root Position/02 Pads - ?? I-vi-ii-V Turnaround - Root Position - 90bpm.mid",
     "after": f"{C}/?? I-vi-ii-V Turnaround (C)/01 Best Voicing/02 Pads - ?? I-vi-ii-V Turnaround - Best Voicing - 90bpm.mid",
     # previews, best-sounding first
     "ballad": f"{C}/?? ii-V-I Major (C)/01 Best Voicing/01 Ballad Arpeggios - ?? ii-V-I Major - Best Voicing - 70bpm.mid",

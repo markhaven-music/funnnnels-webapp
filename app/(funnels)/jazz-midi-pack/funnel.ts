@@ -18,7 +18,7 @@ export const funnel = {
     privacy: "/privacy-policy",
     refund: "/refund-policy",
   },
-  tagline: "The most used jazz progressions, 13 voicings × 8 rhythms, all 12 keys",
+  tagline: "The most used jazz progressions, 12 voicings × 8 rhythms, all 12 keys",
   price: { eur: 27, usd: 27 },
   // The hero video: Wistia media, in Wistia's player (Vsl.tsx). Its thumbnail
   // is a frame of the video itself (84.5 s, "Watch the top note.", Wistia still
@@ -143,16 +143,16 @@ export const funnel = {
   // (minor and melancholic, long forms) and 47-82 (standards' changes from a web search, neo soul / lofi
   // staples, reharmonisations) added that day, Best Voicing a fourth lower and repeated chords held.
   counts: {
-    files: 11152,
-    // the pack + the bonuses' MIDI (11,152 + 2,304 + 150 + 1,548 + 195)
-    total: 15349,
+    files: 10496,
+    // the pack + the bonuses' MIDI (10,496 + 2,304 + 150 + 1,548 + 195)
+    total: 14693,
     progressions: 82,
-    voicings: 13,
+    voicings: 12,
     rhythms: 8,
     genres: 4,
   },
   folders: [
-    { name: "Progressions", files: 8528, what: "Every progression in its usual key × 13 voicings × 8 rhythms, best-sounding first." },
+    { name: "Progressions", files: 7872, what: "Every progression in its usual key × 12 voicings × 8 rhythms, best-sounding first." },
     { name: "Progressions in Every Key", files: 984, what: "Every progression transposed to every key, voice-led pads." },
     { name: "Bass Lines", files: 246, what: "Walking, two-feel and bossa nova bass for each progression." },
     { name: "Combo Loops", files: 82, what: "Drop-2 comping + walking bass + ride, two choruses." },

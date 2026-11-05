@@ -665,7 +665,7 @@ function Steps({ p, patch, ctx }: { p: SectionProps["s_steps"]; patch?: Patch; c
   );
 }
 
-const VOICINGS = ["Best Voicing", "Best Voicing + Smooth Bass", "Rootless (Bill Evans)", "Spread (two-hand)", "Drop 2", "Voice-Led Close", "Quartal (So What)", "Shell (Bud Powell)", "Drop 3", "Root Position", "1st Inversion", "2nd Inversion", "3rd Inversion"];
+const VOICINGS = ["Best Voicing", "Rootless (Bill Evans)", "Spread (two-hand)", "Drop 2", "Voice-Led Close", "Quartal (So What)", "Shell (Bud Powell)", "Drop 3", "Root Position", "1st Inversion", "2nd Inversion", "3rd Inversion"];
 const RHYTHMS = [["Ballad Arpeggios", "70"], ["Pads", "90"], ["Bossa Nova", "135"], ["Swing Comping", "150"], ["Charleston", "130"], ["Anticipations", "130"], ["Reverse Charleston", "130"], ["Freddie Green 4 to the Bar", "140"]];
 
 function Inside({ p, patch, ctx }: { p: SectionProps["s_inside"]; patch?: Patch; ctx: Ctx }) {
@@ -706,7 +706,7 @@ function Inside({ p, patch, ctx }: { p: SectionProps["s_inside"]; patch?: Patch;
           <div className={s.lists}>
             {h.on("voicings") && (
               <div className={h.host(s.listBox)}>
-                <h3>13 voicings</h3>
+                <h3>12 voicings</h3>
                 <ol className={s.numList}>{VOICINGS.map((v) => <li key={v}>{v}</li>)}</ol>
                 <Drop onClick={h.x("voicings")} />
               </div>

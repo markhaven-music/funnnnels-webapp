@@ -11,8 +11,8 @@ import b from "./browse.module.css";
 // The whole pack as a player: pick one of the five folders, then what the
 // folder varies (Progression · Voicing · Rhythm, Progression · Key, …), and
 // that file plays, drawn as a piano roll, with its place in the pack under it.
-// The notes of all 11,152 files come from tools/extract_browse.py
-// (public/funnels/jazz-midi-pack/browse-v5): pack.json (the choices, ≈22 KB
+// The notes of all 10,496 files come from tools/extract_browse.py
+// (public/funnels/jazz-midi-pack/browse-v6): pack.json (the choices, ≈22 KB
 // gzipped) loads when the player nears the screen and a folder's files when
 // one of them is picked, so the page carries none of it. Drums are drawn, not
 // played (the player has only the sine synth).
@@ -26,10 +26,10 @@ type Folder = { label: string; folder: string; what: string; dims: Dim[]; files:
 type Pack = { total: number; folders: Folder[]; paths: string[] };
 type Shown = { roll: Roll; labels: string[]; path: string };
 
-// browse-v5 since the progressions were put best-first and the guide added (2026-11-05; v4: renamed folders, v3: 82 progressions, v2: 46): m.thegrind.studio keeps these files a week
+// browse-v6 since Best Voicing + Smooth Bass left the pack (2026-11-05; v5: best first, v4: renamed folders, v3: 82 progressions, v2: 46): m.thegrind.studio keeps these files a week
 // (max-age 604800), so a new folder keeps an old cached pack.json from pointing at new chunks. The old
 // folder stays for pages cached before the change. A new pack: a new folder name.
-const DIR = "/funnels/jazz-midi-pack/browse-v5";
+const DIR = "/funnels/jazz-midi-pack/browse-v6";
 const FIRST: Shown = {
   roll: rolls.first as Roll,
   labels: ["Fly Me to the Moon Type (Am)", "Best Voicing", "Ballad Arpeggios"],

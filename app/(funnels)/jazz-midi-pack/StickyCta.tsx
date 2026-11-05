@@ -32,7 +32,7 @@ export function StickyCta({ price }: { price: string }) {
     <div className={`${s.sticky} ${show ? s.stickyOn : ""}`} aria-hidden={!show}>
       <div className={s.stickyIn}>
         <div className={s.stickyText}>
-          <p className={s.stickyTitle}>Jazz MIDI Pack · 11,152 .mid files</p>
+          <p className={s.stickyTitle}>Jazz MIDI Pack · 10,496 .mid files</p>
           <p className={s.stickySub}>{price} · one payment</p>
         </div>
         <a href={funnel.checkout.orderPage} className={`${b.btn} ${b.sm}`} data-cta tabIndex={show ? 0 : -1}>

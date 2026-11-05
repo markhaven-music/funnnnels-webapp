@@ -4,7 +4,7 @@
 // funnnnels.com → Jazz MIDI Pack, not here.
 //
 // Text can use tokens that stay correct per visitor: {price} (€27 or $27),
-// {files} (11,152), {total} (15,349: the pack + the bonuses' MIDI), {days} (14).
+// {files} (10,496), {total} (14,693: the pack + the bonuses' MIDI), {days} (14).
 import type { RollId } from "./piano";
 
 export type Para = { style: "p" | "bold" | "pull" | "hit"; text: string };
@@ -83,7 +83,7 @@ export const DEFAULT_SECTIONS: Section[] = [
         "5 Free Bonuses Included",
       ],
       ticks: ["Any DAW", "Chord names in every file", "{days}-day guarantee"],
-      hud: [".mid · drag & drop", "13 voicings", "chords on the timeline"],
+      hud: [".mid · drag & drop", "12 voicings", "chords on the timeline"],
       daws: "Ableton Live · Logic · FL Studio · Cubase · Studio One · Reaper · Bitwig · GarageBand",
     },
   },
@@ -117,7 +117,7 @@ export const DEFAULT_SECTIONS: Section[] = [
       eyebrow: "Introducing",
       title: "The Jazz",
       titleEm: "MIDI Pack",
-      lead: "{files} MIDI files. The most used jazz progressions, each voiced 13 ways, in 8 rhythms and all 12 keys, plus bass lines, combo loops and full lofi, neo soul, trap soul and deep house loops with drums. A different progression for every beat you upload, for years.",
+      lead: "{files} MIDI files. The most used jazz progressions, each voiced 12 ways, in 8 rhythms and all 12 keys, plus bass lines, combo loops and full lofi, neo soul, trap soul and deep house loops with drums. A different progression for every beat you upload, for years.",
       ticks: [
         "No theory needed: every file shows its chord names",
         "Your sounds: Rhodes, piano, pads, synths",
@@ -136,7 +136,7 @@ export const DEFAULT_SECTIONS: Section[] = [
       paras: [
         { style: "p", text: "Same eight chords, same rhythm, played two ways. The first is root position, the way a chord chart or a chord plugin hands it to you. The second is the first folder of every progression in the pack." },
         { style: "p", text: "Watch the top note. In root position it jumps up to seven semitones from chord to chord. Voiced, it only moves between B and C, while the bass holds the roots." },
-        { style: "p", text: "When a pianist moves from Dm7 to G7, two fingers stay put, the seventh drops a half step, and the hand barely moves. That is voice leading. Learning it takes months of theory and a piano you might not play, so we played it into every file: 13 voicings per progression, best-sounding first." },
+        { style: "p", text: "When a pianist moves from Dm7 to G7, two fingers stay put, the seventh drops a half step, and the hand barely moves. That is voice leading. Learning it takes months of theory and a piano you might not play, so we played it into every file: 12 voicings per progression, best-sounding first." },
         { style: "p", text: "Press play on both." },
       ],
     },
@@ -189,7 +189,7 @@ export const DEFAULT_SECTIONS: Section[] = [
             { ok: true, text: "Once you can play it" },
             { ok: true, text: "Yes" },
             { ok: false, text: "One voicing, block chords that jump" },
-            { ok: true, text: "13 voicings, note by note" },
+            { ok: true, text: "12 voicings, note by note" },
           ],
         },
         {
@@ -271,7 +271,7 @@ export const DEFAULT_SECTIONS: Section[] = [
       title: "{files} jazz MIDI files + 4,197 in the bonuses. Today {price}.",
       stack: [
         "{files} MIDI files in 5 folders",
-        "The most used jazz progressions × 13 voicings × 8 rhythms",
+        "The most used jazz progressions × 12 voicings × 8 rhythms",
         "All 12 keys, as voice-led pads",
         "Walking, two-feel and bossa bass lines",
         "Lofi, neo soul, trap soul and deep house loops, drums included",
