@@ -2,7 +2,7 @@
 """Every file of the Jazz MIDI Pack, for the landing page's pack player.
 
 Pure Python, no deps. Walks ~/Desktop/Jazz MIDI Pack and writes
-public/funnels/jazz-midi-pack/browse-v4/ (a new folder name for each new pack:
+public/funnels/jazz-midi-pack/browse-v5/ (a new folder name for each new pack:
 m.thegrind.studio caches these files for a week; see PackBrowser.tsx DIR):
   pack.json    the five folders as the player shows them: per folder its
                choices ("dims", e.g. Progression · Voicing · Rhythm) and
@@ -27,7 +27,7 @@ import struct
 from extract_rolls import vlq
 
 PACK = os.path.expanduser("~/Desktop/Jazz MIDI Pack")
-OUT = os.path.join(os.path.dirname(__file__), "..", "public", "funnels", "jazz-midi-pack", "browse-v4")
+OUT = os.path.join(os.path.dirname(__file__), "..", "public", "funnels", "jazz-midi-pack", "browse-v5")
 
 
 def parse(path):

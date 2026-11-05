@@ -16,6 +16,11 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   5. Genre Loops: 1,312 files. Every progression as Lofi Hip Hop (82 bpm), Neo Soul (88 bpm), Trap Soul and
      Deep House. Separate Chords / Bass / Drums MIDI + a Full multitrack file. Key and BPM in every file
      name. GM drum map (kick C1, snare D1, hat F#1).
+- Order (2026-11-05, "le progressioni migliori per prime"): four groups, best first: 01-20 the classics (Fly Me to the
+  Moon, Autumn Leaves, Misty, Black Orpheus, Blue Bossa, Summertime types, Just the Two of Us, Royal Road…), 21-39
+  ballads and standards, 40-64 loops and building blocks, 65-82 colour and advanced (make_pack.py GROUPS).
+- "Jazz MIDI Pack - Guide.pdf" in the zip's root (make_guide.py): the idea (voice leading), a one-minute start, the
+  folders, the 13 voicings, the 8 rhythms, the 4 genres and every progression with its key, length and chart.
 - Chord symbols written into every file as MIDI markers (most DAWs show them on the timeline). No tempo or time-signature
   events since 2026-11-05 (Ableton made Song Tempo automation from them); the bpm is in every file name. The notes of
   one chord hit end together.

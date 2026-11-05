@@ -9,6 +9,7 @@ The page draws piano rolls from it and plays the notes on a real piano sample
 
     python3 tools/extract_rolls.py
 """
+import glob
 import json
 import re
 import os
@@ -20,16 +21,19 @@ OUT = os.path.join(os.path.dirname(__file__), "..", "app", "(funnels)", "jazz-mi
 
 C = "1 Progressions"
 G = "5 Genre Loops (chords bass drums)"
+# Progression numbers left out ("??"): the pack's order changes (2026-11-05: best first); found by name.
 FILES = {
     # before / after: the same progression, same rhythm, two voicings
-    "before": f"{C}/05 I-vi-ii-V Turnaround (C)/10 Root Position/02 Pads - 05 I-vi-ii-V Turnaround - Root Position - 90bpm.mid",
-    "after": f"{C}/05 I-vi-ii-V Turnaround (C)/01 Best Voicing/02 Pads - 05 I-vi-ii-V Turnaround - Best Voicing - 90bpm.mid",
+    "before": f"{C}/?? I-vi-ii-V Turnaround (C)/10 Root Position/02 Pads - ?? I-vi-ii-V Turnaround - Root Position - 90bpm.mid",
+    "after": f"{C}/?? I-vi-ii-V Turnaround (C)/01 Best Voicing/02 Pads - ?? I-vi-ii-V Turnaround - Best Voicing - 90bpm.mid",
     # previews, best-sounding first
-    "ballad": f"{C}/01 ii-V-I Major (C)/01 Best Voicing/01 Ballad Arpeggios - 01 ii-V-I Major - Best Voicing - 70bpm.mid",
-    "neosoul": f"{G}/2 Neo Soul/05 I-vi-ii-V Turnaround - Neo Soul - C - 88bpm/05 I-vi-ii-V Turnaround - Neo Soul - C - 88bpm - Full.mid",
-    "lofi": f"{G}/1 Lofi Hip Hop/15 Autumn Leaves Type (relative major-minor) - Lofi Hip Hop - Gm - 82bpm/15 Autumn Leaves Type (relative major-minor) - Lofi Hip Hop - Gm - 82bpm - Full.mid",
-    "bossa": f"{C}/09 Tritone Turnaround (C)/01 Best Voicing/04 Bossa Nova - 09 Tritone Turnaround - Best Voicing - 135bpm.mid",
-    "blues": f"{C}/16 Jazz Blues in F (F)/01 Best Voicing/03 Swing Comping - 16 Jazz Blues in F - Best Voicing - 150bpm.mid",
+    "ballad": f"{C}/?? ii-V-I Major (C)/01 Best Voicing/01 Ballad Arpeggios - ?? ii-V-I Major - Best Voicing - 70bpm.mid",
+    "neosoul": f"{G}/2 Neo Soul/?? I-vi-ii-V Turnaround - Neo Soul - C - 88bpm/?? I-vi-ii-V Turnaround - Neo Soul - C - 88bpm - Full.mid",
+    "lofi": f"{G}/1 Lofi Hip Hop/?? Autumn Leaves Type (relative major-minor) - Lofi Hip Hop - Gm - 82bpm/?? Autumn Leaves Type (relative major-minor) - Lofi Hip Hop - Gm - 82bpm - Full.mid",
+    "bossa": f"{C}/?? Tritone Turnaround (C)/01 Best Voicing/04 Bossa Nova - ?? Tritone Turnaround - Best Voicing - 135bpm.mid",
+    "blues": f"{C}/?? Jazz Blues in F (F)/01 Best Voicing/03 Swing Comping - ?? Jazz Blues in F - Best Voicing - 150bpm.mid",
+    # the pack player's first file (PackBrowser FIRST): the pack's progression 01, first voicing and rhythm
+    "first": f"{C}/01 */01 Best Voicing/01 Ballad Arpeggios - 01 * - Best Voicing - 70bpm.mid",
 }
 
 # The free bonuses: a few real files each, to pick and play on the landing's
@@ -165,8 +169,10 @@ def parse(path, data=None, max_beats=None, trim=False):
 def main():
     out = {}
     for key, rel in FILES.items():
-        roll = parse(os.path.join(PACK, rel))
-        roll["file"] = os.path.basename(rel)
+        hits = glob.glob(os.path.join(PACK, rel))
+        assert len(hits) == 1, (key, rel, hits)
+        roll = parse(hits[0])
+        roll["file"] = os.path.basename(hits[0])
         out[key] = roll
         print(f"{key:8} {roll['bpm']:>3} bpm {roll['beats']:>3} beats {len(roll['notes']):>4} notes "
               f"{len(roll['chords']):>3} chords  {roll['chords'][:4]}")
