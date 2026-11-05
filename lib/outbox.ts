@@ -316,9 +316,13 @@ async function reminders(run: Run) {
 
     const f = await resolveFunnel(row.funnel);
     // Bought (our orders, or Stripe/PayPal for a sale we never saw), or left the list: nothing more.
-    const { data: contact } = await db.from("contacts").select("status").eq("email", row.email).maybeSingle();
+    const { data: contact } = await db.from("contacts").select("status, tags").eq("email", row.email).maybeSingle();
     const bought = (await hasPaidOrder(row.funnel, row.email)) || (await purchasesOf(row.email)).some((p) => p.funnel === row.funnel);
-    if (!f || bought || (contact && contact.status !== "subscribed")) {
+    // A free-pack sign-up (app/free/packs.ts tag "free-pack"): most took the Drum Kit
+    // page's button for their download and never meant to order (11-05: "Yes, stop
+    // them"); the Drum Kit follow-up of db/free-packs-kit.sql writes to them instead.
+    const freePack = Array.isArray(contact?.tags) && contact.tags.includes("free-pack");
+    if (!f || bought || freePack || (contact && contact.status !== "subscribed")) {
       await done();
       continue;
     }
