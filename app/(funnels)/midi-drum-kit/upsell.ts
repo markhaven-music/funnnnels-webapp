@@ -148,7 +148,10 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
 
 // ClickFunnels fades its "fade-in" blocks in with its own script (stripped):
 // without it they'd stay invisible, so they're simply shown.
-const FIXES = `[data-animation-type]{opacity:1!important;visibility:visible!important}`;
+// Its buttons are white with dark words and turn black on hover, words still dark
+// (unreadable): on hover the words turn white.
+const FIXES = `[data-animation-type]{opacity:1!important;visibility:visible!important}
+.elButton:hover .elButtonText,.elButton.elButtonHovered .elButtonText{color:#fff!important}`;
 
 // Meta Pixel PageView, Clarity and neo, as on the landing; never on test hosts.
 // The Purchase of an upsell fires on the thank-you page, with the others.
