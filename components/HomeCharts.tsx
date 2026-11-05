@@ -422,11 +422,18 @@ export function Performance({ a, cur, periodName }: Props) {
   const spendMap: DaySpend | null = spend?.connected
     ? new Map(spend.days.map((d) => [d.day, { spend: spend.currency === "USD" ? d.spend * rate : d.spend, clicks: d.clicks }]))
     : null;
-  const rangeRows = toRows(days, spendMap, k, a.trackingSince);
-  const prevRows = toRows(before, spendMap, k, a.trackingSince);
-  const total = merge(rangeRows);
-  const prevTotal = a.previous ? merge(prevRows) : null;
+  // The whole card counts from SPEND_SINCE ("only count the days from Nov 2"):
+  // before it the ads sold on ClickFunnels, and tiles over different days
+  // didn't add up (net revenue − ad spend ≠ profit). The period before is as
+  // many days right before that.
+  const allDays = [...toRows(before, spendMap, k, a.trackingSince), ...toRows(days, spendMap, k, a.trackingSince)];
   const rangeStartsEarly = (days[0]?.day ?? SPEND_SINCE) < SPEND_SINCE;
+  const firstIn = allDays.findIndex((r) => r.from >= SPEND_SINCE);
+  const rangeStart = Math.max(before.length, firstIn < 0 ? before.length : firstIn);
+  const rangeRows = allDays.slice(rangeStart);
+  const prevRows = a.previous && rangeStart - rangeRows.length >= 0 ? allDays.slice(rangeStart - rangeRows.length, rangeStart) : [];
+  const total = merge(rangeRows);
+  const prevTotal = prevRows.length ? merge(prevRows) : null;
   const spendState = spend === null ? "loading" : spend.connected ? "ok" : "off";
 
   const m = METRICS.find((x) => x.id === picked)!;
@@ -434,11 +441,8 @@ export function Performance({ a, cur, periodName }: Props) {
 
   // What the chart draws: the range, or for the ads' metrics the part of it
   // from SPEND_SINCE; and as many days right before it.
-  const all = [...prevRows, ...rangeRows];
-  const cut = m.ads ? all.findIndex((r) => r.from >= SPEND_SINCE) : prevRows.length;
-  const startIdx = cut < 0 ? all.length : Math.max(prevRows.length, cut);
-  const domain = all.slice(startIdx);
-  const prevDomain = startIdx - domain.length >= 0 && domain.length ? all.slice(startIdx - domain.length, startIdx) : null;
+  const domain = rangeRows;
+  const prevDomain = prevRows.length ? prevRows : null;
   const iv: Interval = interval === "week" && domain.length < WEEK_MIN ? "day" : interval;
   const rows = bucket(domain, iv);
   const prevBuckets = prevDomain ? bucket(prevDomain, iv) : null;
@@ -519,6 +523,11 @@ export function Performance({ a, cur, periodName }: Props) {
   return (
     <div className={`${s.card} ${s.perf}`}>
       {/* The tiles: the range at a glance; click one to chart it. */}
+      {rangeStartsEarly && rangeRows.length > 0 && (
+        <div className={s.since}>
+          {span(rangeRows[0].from, rangeRows[rangeRows.length - 1].to)} · counted from {SINCE_LABEL}, when the ads moved here from ClickFunnels
+        </div>
+      )}
       <div className={s.tiles} role="group" aria-label="Pick what the chart shows">
         {METRICS.map((x) => {
           const now = x.of(total);
@@ -540,7 +549,6 @@ export function Performance({ a, cur, periodName }: Props) {
               <div className={s.tileLabel}>
                 <span className={s.tileKey} style={{ background: x.color }} />
                 {x.label}
-                {x.ads && rangeStartsEarly && <span className={s.tileSince}>since {SINCE_LABEL}</span>}
               </div>
               <div className={s.tileValue}>
                 {waiting ? "—" : fmt(now, x.kind, cur)}
@@ -569,7 +577,7 @@ export function Performance({ a, cur, periodName }: Props) {
           <div className={s.chartTitle}>{title}</div>
           <div className={s.chartSub}>
             {what}
-            {m.ads && rangeStartsEarly && ` From ${SINCE_LABEL}, when the ads moved here from ClickFunnels: the Net revenue tile counts the whole range, ${money(total.net, cur)}; since ${SINCE_LABEL} it's ${money(total.adNet, cur)}.`}
+
           </div>
         </div>
         <div className={s.controls}>

@@ -621,3 +621,11 @@
 .info .mark {
   color: var(--accent-2);
 }
+
+/* The card's period when the range starts before the ads moved here. */
+.since {
+  margin: 2px 0 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-1);
+}
