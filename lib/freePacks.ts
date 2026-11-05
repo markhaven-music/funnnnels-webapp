@@ -25,9 +25,25 @@ export type FreePackRow = {
   boughtSoFar: number;
   revenue: { eur: number; usd: number }; // cents, every order since opting in
 };
-export type FreePackStats = { since: string; packs: FreePackRow[]; ads: FreePackRow[]; leads: number };
+/** One person who opted in, and where they are now (the panel's list). */
+export type FreePackPerson = {
+  email: string;
+  pack: string;
+  ad: string | null; // utm_content / the Meta ad's name; null = no ad
+  at: string; // opted in
+  alreadyBuyer: boolean; // had bought before opting in
+  checkoutAt: string | null; // first checkout started since
+  boughtAt: string | null; // first order since
+  revenue: { eur: number; usd: number };
+  // The Drum Kit follow-up (db/free-packs-kit.sql): emails sent of all, and whether it's still going.
+  kit: { sent: number; of: number; state: "waiting" | "sending" | "done" | "stopped"; nextAt: string | null } | null;
+};
+export type FreePackStats = { since: string; packs: FreePackRow[]; ads: FreePackRow[]; leads: number; people: FreePackPerson[] };
+
+const KIT_SEQUENCE = "Free packs · Drum Kit follow-up";
 
 type Optin = { email: string; optin: string; utm_content: string | null; utm_campaign: string | null; ad_id: string | null; created_at: string };
+type Run = { email: string; next_position: number; next_at: string | null; status: string | null };
 type Lead = Optin & { at: number; before: boolean; checkoutAt: number | null; buyAt: number | null; eur: number; usd: number };
 
 const PACK_NAMES: Record<string, string> = {
@@ -68,7 +84,7 @@ export async function freePackStats(days = 90): Promise<FreePackStats> {
   });
   const emails = [...new Set(optins.map((o) => o.email))];
 
-  const [orders, starts, legacy, names] = await Promise.all([
+  const [orders, starts, legacy, names, kit] = await Promise.all([
     inChunks<{ email: string; amount_cents: number; currency: string; created_at: string }>(emails, (c) =>
       db.from("orders").select("email, amount_cents, currency, created_at").eq("status", "succeeded").in("email", c),
     ),
@@ -80,7 +96,14 @@ export async function freePackStats(days = 90): Promise<FreePackStats> {
       const { data: n } = await db.from("meta_ad_names").select("ad_id, ad_name, campaign_name").in("ad_id", ids);
       return (n ?? []) as { ad_id: string; ad_name: string | null; campaign_name: string | null }[];
     })(),
+    (async () => {
+      const { data: seq } = await db.from("sequences").select("id, sequence_steps(id)").eq("name", KIT_SEQUENCE).maybeSingle();
+      if (!seq) return { of: 0, runs: [] as Run[] };
+      const runs = await inChunks<Run>(emails, (c) => db.from("sequence_runs").select("email, next_position, next_at, status").eq("sequence_id", seq.id).in("email", c));
+      return { of: (seq.sequence_steps as unknown[]).length, runs };
+    })(),
   ]);
+  const kitBy = new Map(kit.runs.map((r) => [r.email.toLowerCase(), r]));
 
   const by = <T extends { email: string }>(rows: T[]) => {
     const m = new Map<string, T[]>();
@@ -145,10 +168,32 @@ export async function freePackStats(days = 90): Promise<FreePackStats> {
     return name ? `${pack(l)} · ${name}` : `${pack(l)} · no ad (organic, email, direct)`;
   };
 
+  const iso = (t: number | null) => (t === null ? null : new Date(t).toISOString());
+  const people: FreePackPerson[] = [...leads]
+    .sort((a, b) => b.at - a.at)
+    .slice(0, 500)
+    .map((l) => {
+      const n = l.ad_id ? nameOf.get(l.ad_id) : null;
+      const r = kitBy.get(l.email);
+      const state = !r ? null : r.status === "done" ? "done" : r.status === "exited" ? "stopped" : r.next_position > 0 ? "sending" : "waiting";
+      return {
+        email: l.email,
+        pack: pack(l),
+        ad: n?.ad_name ?? l.utm_content ?? null,
+        at: l.created_at,
+        alreadyBuyer: l.before,
+        checkoutAt: iso(l.checkoutAt),
+        boughtAt: iso(l.buyAt),
+        revenue: { eur: l.eur, usd: l.usd },
+        kit: r && state ? { sent: r.next_position, of: kit.of, state, nextAt: state === "waiting" || state === "sending" ? r.next_at : null } : null,
+      };
+    });
+
   return {
     since,
     leads: leads.length,
     packs: group((l) => l.optin, pack),
     ads: group((l) => `${l.optin}|${l.ad_id ?? l.utm_content ?? ""}`, ad),
+    people,
   };
 }
