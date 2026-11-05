@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FunnelCard } from "@/components/FunnelCard";
+import { isLeadMagnet, LeadMagnets } from "@/components/LeadMagnets";
 import { NewFunnelTile } from "@/components/NewFunnelTile";
 import { I } from "@/components/icons";
 import type { Analytics, Day, Range } from "@/lib/analytics";
@@ -348,8 +349,11 @@ type Props = {
   analytics: Analytics | null;
 };
 
-export function DashboardHome({ funnels, analytics }: Props) {
+export function DashboardHome({ funnels: all, analytics }: Props) {
   const [tab, setTab] = useState<TabKey>("all");
+  // The lead magnets (free packs) have their own section under the funnels that sell.
+  const funnels = useMemo(() => all.filter((f) => !isLeadMagnet(f)), [all]);
+  const magnets = useMemo(() => all.filter(isLeadMagnet), [all]);
   const [range, setRange] = useState<Range>("28d");
   const [loaded, setLoaded] = useState<Partial<Record<Range, Analytics>>>({});
   const current = range === "28d" ? analytics : (loaded[range] ?? null);
@@ -374,6 +378,7 @@ export function DashboardHome({ funnels, analytics }: Props) {
     if (tab === "all") return funnels;
     return funnels.filter((f) => f.status === tab);
   }, [tab, funnels]);
+  const shownMagnets = tab === "all" ? magnets : magnets.filter((f) => f.status === tab);
 
   const counts = useMemo(() => {
     const c = { live: 0, draft: 0, test: 0 };
@@ -500,6 +505,7 @@ export function DashboardHome({ funnels, analytics }: Props) {
           <FunnelCard key={f.id} f={f} />
         ))}
       </div>
+      <LeadMagnets funnels={shownMagnets} />
     </main>
   );
 }

@@ -136,6 +136,8 @@ export type StoredFunnel = {
   image?: string;
   /** What the numbers on the card cover, e.g. "28d". */
   statsRange?: string;
+  /** "lead-magnet": listed apart, under Lead magnets (the free packs), not among the funnels that sell. */
+  category?: "lead-magnet";
 };
 
 export function defaultProps<T extends BlockType>(

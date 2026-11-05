@@ -8,7 +8,7 @@ import type { StoredFunnel } from "@/lib/blocks";
 // come from dashboard → Analytics (see withStats).
 
 // tag: the word on the card's picture ("Sales" when not given).
-type CodeCard = { id: string; name: string; image: string; steps: number; tag?: string };
+type CodeCard = { id: string; name: string; image: string; steps: number; tag?: string; category?: StoredFunnel["category"] };
 
 const CARDS: CodeCard[] = [
   {
@@ -29,16 +29,15 @@ const CARDS: CodeCard[] = [
     image: "/funnels/famous-beats-bundle/preview.webp",
     steps: 3,
   },
-  // The free lead magnets (app/free), one map with a tab per pack (lib/funnelMap.ts
-  // freePacksMap): the sign-up page, then the MIDI Drum Kit's pages. Analytics
-  // doesn't count them, so the card shows no visits; the map has their numbers.
-  {
-    id: "free-packs",
-    name: "Free packs",
-    image: "/funnels/free/optin-rolls.webp",
-    steps: 4,
-    tag: "Lead magnet",
-  },
+  // The free lead magnets (app/free), listed apart under Lead magnets, one card per
+  // pack. Each opens its map (lib/funnelMap.ts freePacksMap): the sign-up page, then
+  // the MIDI Drum Kit's pages. Analytics doesn't count them, so the cards show no
+  // visits; the map has their numbers. Their ids are the opt-ins' (app/free/packs.ts).
+  ...[
+    { id: "free-rolls", name: "Free Rolls Pack", shot: "optin-rolls" },
+    { id: "free-bounce", name: "Free Bounce Pack", shot: "optin-bounce" },
+    { id: "free-hooks", name: "Free Mystery Hooks Pack", shot: "optin-hooks" },
+  ].map((p): CodeCard => ({ id: p.id, name: p.name, image: `/funnels/free/${p.shot}.webp`, steps: 4, tag: "Lead magnet", category: "lead-magnet" })),
 ];
 
 // The cards show a screenshot of the first page: public/funnels/<slug>/preview.webp,
@@ -54,6 +53,7 @@ export function withCodeFunnels(funnels: StoredFunnel[]): StoredFunnel[] {
     status: "live",
     type: "Code",
     tag: c.tag ?? "Sales",
+    ...(c.category ? { category: c.category } : {}),
     palette: ["oklch(0.82 0.16 75)", "oklch(0.55 0.18 280)"],
     views: "—",
     cvr: "—",

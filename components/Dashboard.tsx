@@ -15,6 +15,7 @@ import { ContactsPanel } from "@/components/panels/ContactsPanel";
 import { DomainsPanel } from "@/components/panels/DomainsPanel";
 import { EmailInsightsPanel } from "@/components/panels/EmailInsightsPanel";
 import { FreePacksPanel } from "@/components/panels/FreePacksPanel";
+import { isLeadMagnet } from "@/components/LeadMagnets";
 import { IntegrationsPanel } from "@/components/panels/IntegrationsPanel";
 import { LandingPagesPanel } from "@/components/panels/LandingPagesPanel";
 import { LaunchesPanel } from "@/components/panels/LaunchesPanel";
@@ -75,7 +76,7 @@ export function Dashboard({ funnels: rows }: Props) {
   return (
     <div className="app">
       <Brand />
-      <Sidebar funnelCount={funnels.length} supportUnread={supportUnread} active={activeNav} onNav={setActiveNav} />
+      <Sidebar funnelCount={funnels.filter((f) => !isLeadMagnet(f)).length} supportUnread={supportUnread} active={activeNav} onNav={setActiveNav} />
       <TopBar trail={trail} />
       {activeNav === "home"         && <DashboardHome funnels={funnels} analytics={analytics} />}
       {activeNav === "funnels"      && <MainPanel funnels={funnels} />}

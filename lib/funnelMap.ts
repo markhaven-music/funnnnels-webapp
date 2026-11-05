@@ -97,7 +97,9 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
 }
 
 // ─── Free packs ────────────────────────────────────────────────────
-// The free lead magnets (app/free) as one funnel, a tab per pack: its sign-up
+// The free lead magnets (app/free): each pack's map (/funnels/free-rolls, the
+// cards under Lead magnets), or all three as tabs (/funnels/free-packs). A pack's
+// funnel is its sign-up
 // page, then the MIDI Drum Kit's pages, where the sign-up sends people
 // (app/free/packs.ts next, with ?free=<pack> for the "Your Free Pack Is
 // Secured" bar). Its numbers are dashboard → Free packs' (lib/freePacks.ts):
@@ -118,7 +120,9 @@ const money = (cents: number, currency: string) =>
 /** Sales in dollars and euros, each only when there is some; "$0" when none. */
 const revenueText = (r: FreePackRow["revenue"]) => [r.usd ? money(r.usd, "usd") : "", r.eur ? money(r.eur, "eur") : ""].filter(Boolean).join(" + ") || "$0";
 
-async function freePacksMap(): Promise<FunnelMap> {
+type FreePackTab = (typeof FREE_PACK_TABS)[number];
+
+async function freePacksMap(only?: FreePackTab): Promise<FunnelMap> {
   const kit = await resolveFunnel("midi-drum-kit");
   const kitSteps = kit ? (codeMap(kit, new Set()).langs.find((l) => l.lang === "en")?.steps ?? []) : [];
   const stats = await freePackStats(FREE_PACK_DAYS).catch((err) => {
@@ -126,8 +130,8 @@ async function freePacksMap(): Promise<FunnelMap> {
     return null;
   });
   return {
-    id: FREE_PACKS_ID,
-    name: "Free packs",
+    id: only?.optin ?? FREE_PACKS_ID,
+    name: only ? `Free ${only.label} Pack` : "Free packs",
     status: "live",
     statsSlug: null,
     canTranslate: false,
@@ -136,7 +140,7 @@ async function freePacksMap(): Promise<FunnelMap> {
       href: "/?nav=free-packs",
       link: "Every person and ad in Free packs",
     },
-    langs: FREE_PACK_TABS.map((t) => {
+    langs: (only ? [only] : FREE_PACK_TABS).map((t) => {
       const row = stats?.packs.find((p) => p.key === t.optin);
       const spend = stats?.spend.connected ? stats.spend.byPack[t.label] : undefined;
       const currency = stats?.spend.connected ? stats.spend.currency : "usd";
@@ -195,6 +199,8 @@ async function freePacksMap(): Promise<FunnelMap> {
 
 export async function getFunnelMap(id: string): Promise<FunnelMap | null> {
   if (id === FREE_PACKS_ID) return freePacksMap();
+  const pack = FREE_PACK_TABS.find((t) => t.optin === id);
+  if (pack) return freePacksMap(pack);
   const row = await getFunnel(id).catch(() => null);
   const product = await resolveFunnel(id).catch(() => undefined);
   if (product) {

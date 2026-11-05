@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { I } from "@/components/icons";
 import { FunnelCard } from "@/components/FunnelCard";
+import { isLeadMagnet, LeadMagnets } from "@/components/LeadMagnets";
 import { NewFunnelTile } from "@/components/NewFunnelTile";
 import type { FunnelStatus, StoredFunnel } from "@/lib/blocks";
 
@@ -12,12 +13,16 @@ const TABS: TabKey[] = ["all", "live", "test", "draft"];
 
 type Props = { funnels: StoredFunnel[] };
 
-export function MainPanel({ funnels }: Props) {
+export function MainPanel({ funnels: all }: Props) {
   const [tab, setTab] = useState<TabKey>("all");
+  // The lead magnets (free packs) have their own section under the funnels that sell.
+  const funnels = useMemo(() => all.filter((f) => !isLeadMagnet(f)), [all]);
+  const magnets = useMemo(() => all.filter(isLeadMagnet), [all]);
   const filtered = useMemo(() => {
     if (tab === "all") return funnels;
     return funnels.filter((f) => f.status === tab);
   }, [tab, funnels]);
+  const shownMagnets = tab === "all" ? magnets : magnets.filter((f) => f.status === tab);
 
   const counts = useMemo(() => {
     const c = { live: 0, draft: 0, test: 0 };
@@ -104,6 +109,7 @@ export function MainPanel({ funnels }: Props) {
           <FunnelCard key={f.id} f={f} />
         ))}
       </div>
+      <LeadMagnets funnels={shownMagnets} />
     </main>
   );
 }
