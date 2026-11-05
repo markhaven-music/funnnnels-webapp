@@ -139,23 +139,24 @@ export const funnel = {
     tags: ["lead", "free-sample"],
     download: "/funnels/jazz-midi-pack/free-sample.zip",
   },
-  // Counted from ~/Desktop/Jazz MIDI Pack on 2026-11-05, after progressions 27-46
-  // (minor and melancholic ones, and long forms up to 32 bars) were added: was 3,536 files, 26 progressions.
+  // Counted from ~/Desktop/Jazz MIDI Pack on 2026-11-05: 3,536 files and 26 progressions until then; 27-46
+  // (minor and melancholic, long forms) and 47-82 (standards' changes from a web search, neo soul / lofi
+  // staples, reharmonisations) added that day, Best Voicing a fourth lower and repeated chords held.
   counts: {
-    files: 6256,
-    // the pack + the bonuses' MIDI (6,256 + 2,304 + 150 + 1,548 + 195)
-    total: 10453,
-    progressions: 46,
+    files: 11152,
+    // the pack + the bonuses' MIDI (11,152 + 2,304 + 150 + 1,548 + 195)
+    total: 15349,
+    progressions: 82,
     voicings: 13,
     rhythms: 8,
     genres: 4,
   },
   folders: [
-    { name: "Chords in Original Key", files: 4784, what: "Every progression × 13 voicings × 8 rhythms, best-sounding first." },
-    { name: "All 12 Keys", files: 552, what: "Every progression transposed to every key, voice-led pads." },
-    { name: "Bass Lines", files: 138, what: "Walking, two-feel and bossa nova bass for each progression." },
-    { name: "Combo Loops", files: 46, what: "Drop-2 comping + walking bass + ride, two choruses." },
-    { name: "Genre Loops", files: 736, what: "Lofi, neo soul, trap soul and deep house — chords, bass, drums split." },
+    { name: "Chords in Original Key", files: 8528, what: "Every progression × 13 voicings × 8 rhythms, best-sounding first." },
+    { name: "All 12 Keys", files: 984, what: "Every progression transposed to every key, voice-led pads." },
+    { name: "Bass Lines", files: 246, what: "Walking, two-feel and bossa nova bass for each progression." },
+    { name: "Combo Loops", files: 82, what: "Drop-2 comping + walking bass + ride, two choruses." },
+    { name: "Genre Loops", files: 1312, what: "Lofi, neo soul, trap soul and deep house — chords, bass, drums split." },
   ],
   progressions: [
     "ii-V-I Major", "ii-V-i Minor", "ii-V-I Short", "ii-V-I Down Whole Steps",
@@ -171,6 +172,7 @@ export const funnel = {
     "Minor Plagal", "Neo Soul Minor Loop", "Minor Deceptive Cadence", "Minor Lofi Ballad (8 bars)",
     "Minor Ending Tag", "Neo Soul 8-Bar", "Minor 12-Bar (Solar type)", "Minor Bossa 16-Bar (Blue Bossa type)",
     "Minor Ballad 16-Bar (Summertime type)", "32-Bar Minor Ballad", "32-Bar Ballad", "Rhythm Changes (32 bars)",
+    "Misty Type (32-bar ballad)", "In a Sentimental Mood Type", "My Funny Valentine Type", "Blue in Green Type", "You Don't Know What Love Is Type", "How Insensitive Type", "Black Orpheus Type", "Beautiful Love Type", "Here's That Rainy Day Type", "Body and Soul Type (A section)", "Round Midnight Type (A section)", "Nardis Type", "Alone Together Type", "All the Things You Are Type", "Stella by Starlight Type", "Days of Wine and Roses Type", "Fly Me to the Moon Type", "Footprints Type", "Girl from Ipanema Type", "Lullaby of Birdland Type", "Someday My Prince Will Come Type", "Satin Doll Type", "Cherokee Bridge Type", "Royal Road (IV-V-iii-vi)", "Neo Soul 4-3-2-1", "I-III7-IV-iv", "Sad Lofi vi-IV-I-V", "ii-iv-V-I", "Chromatic Mediants I-bIII-bVI-V", "Night and Day Type", "Meditation Type", "Major Thirds Cycle (Miss Jones Bridge Type)", "Time Remembered Type", "Chromatic ii-V Side-Steps (Moment's Notice Type)", "Very Early Type", "Dindi Type",
   ],
 } as const;
 

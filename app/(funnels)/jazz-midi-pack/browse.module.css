@@ -114,6 +114,64 @@
   cursor: pointer;
 }
 
+/* Previous / Next beside the long menus: the obvious thing to press (2026-11-05) */
+.stepper {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 6px;
+}
+.step {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--brass);
+  color: #1a1206;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.step:hover {
+  filter: brightness(1.08);
+}
+.step:focus-visible,
+.beat:focus-visible {
+  outline: 2px solid #fff6e0;
+  outline-offset: 2px;
+}
+/* Sine / Piano and Beat side by side, the third column of the roll's head */
+.sounds {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+}
+.beat {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: #a69c8b;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.beat[aria-pressed="true"] {
+  background: #2f281f;
+  color: #f1e8d8;
+}
+@media (max-width: 520px) {
+  .step {
+    padding: 0 10px;
+  }
+}
+
 .viewer {
   border: 0;
   border-radius: 0;

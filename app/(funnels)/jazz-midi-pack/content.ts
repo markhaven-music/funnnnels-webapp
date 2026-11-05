@@ -4,7 +4,7 @@
 // funnnnels.com → Jazz MIDI Pack, not here.
 //
 // Text can use tokens that stay correct per visitor: {price} (€27 or $27),
-// {files} (6,256), {total} (10,453: the pack + the bonuses' MIDI), {days} (14).
+// {files} (11,152), {total} (15,349: the pack + the bonuses' MIDI), {days} (14).
 import type { RollId } from "./piano";
 
 export type Para = { style: "p" | "bold" | "pull" | "hit"; text: string };

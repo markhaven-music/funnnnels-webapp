@@ -37,6 +37,7 @@ export function PlayableRoll({
         <button
           type="button"
           className={s.play}
+          data-play
           aria-pressed="false"
           onClick={() => scope.current && toggle(given ?? id!, scope.current)}
         >
