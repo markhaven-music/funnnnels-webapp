@@ -1,4 +1,5 @@
-// What the Meta ads cost, for dashboard → Free packs (lib/freePacks.ts).
+// What the Meta ads cost, for dashboard → Free packs (lib/freePacks.ts) and
+// the home's net revenue vs ad spend chart (components/HomeCharts.tsx).
 // Read from the Marketing API with a read-only token (ads_read) of a system
 // user in FFUNK Media LLC's Business Manager:
 //
@@ -18,7 +19,59 @@ export type MetaSpend =
   | { connected: false; reason: string }
   | { connected: true; currency: string; byPack: Record<string, PackSpend> };
 
-type Row = { adset_name?: string; campaign_name?: string; spend?: string; impressions?: string; inline_link_clicks?: string };
+type Row = {
+  adset_name?: string;
+  campaign_name?: string;
+  date_start?: string;
+  account_currency?: string;
+  spend?: string;
+  impressions?: string;
+  inline_link_clicks?: string;
+};
+
+/** The account's insight rows, page after page; the reason when Meta says no. */
+async function insightRows(params: URLSearchParams): Promise<Row[] | { reason: string }> {
+  const account = process.env.META_AD_ACCOUNT_ID || DEFAULT_ACCOUNT;
+  let url: string | null = `${GRAPH}/act_${account}/insights?${params}`;
+  const rows: Row[] = [];
+  try {
+    for (let page = 0; url && page < 10; page++) {
+      const res: Response = await fetch(url, { next: { revalidate: 600 } });
+      const body = (await res.json()) as { data?: Row[]; paging?: { next?: string }; error?: { message?: string } };
+      if (!res.ok || body.error) return { reason: `Meta said: ${body.error?.message ?? `HTTP ${res.status}`}` };
+      rows.push(...(body.data ?? []));
+      url = body.paging?.next ?? null;
+    }
+  } catch (err) {
+    return { reason: `Couldn't reach Meta (${String(err)}).` };
+  }
+  return rows;
+}
+
+export type DaySpend = { day: string; spend: number; impressions: number; clicks: number };
+export type MetaDaily = { connected: false; reason: string } | { connected: true; currency: string; days: DaySpend[] };
+
+/** The whole account's spend day by day between two days (YYYY-MM-DD, inclusive), oldest first, in the account's currency. */
+export async function spendByDay(since: string, until: string): Promise<MetaDaily> {
+  const token = process.env.META_ADS_TOKEN;
+  if (!token) return { connected: false, reason: "Meta isn't connected (no META_ADS_TOKEN)." };
+  const rows = await insightRows(
+    new URLSearchParams({
+      level: "account",
+      fields: "spend,impressions,inline_link_clicks,account_currency",
+      time_increment: "1",
+      time_range: JSON.stringify({ since, until }),
+      limit: "500",
+      access_token: token,
+    }),
+  );
+  if (!Array.isArray(rows)) return { connected: false, reason: rows.reason };
+  const days = rows
+    .filter((r) => r.date_start)
+    .map((r) => ({ day: r.date_start!, spend: Number(r.spend ?? 0), impressions: Number(r.impressions ?? 0), clicks: Number(r.inline_link_clicks ?? 0) }))
+    .sort((a, b) => (a.day < b.day ? -1 : 1));
+  return { connected: true, currency: rows[0]?.account_currency ?? "EUR", days };
+}
 
 export function metaConfigured(): boolean {
   return Boolean(process.env.META_ADS_TOKEN);
@@ -28,28 +81,16 @@ export function metaConfigured(): boolean {
 export async function spendByPack(labels: string[], since: string, until: string): Promise<MetaSpend> {
   const token = process.env.META_ADS_TOKEN;
   if (!token) return { connected: false, reason: "Meta isn't connected (no META_ADS_TOKEN)." };
-  const account = process.env.META_AD_ACCOUNT_ID || DEFAULT_ACCOUNT;
-
-  const params = new URLSearchParams({
-    level: "adset",
-    fields: "adset_name,campaign_name,spend,impressions,inline_link_clicks",
-    time_range: JSON.stringify({ since, until }),
-    limit: "500",
-    access_token: token,
-  });
-  let url: string | null = `${GRAPH}/act_${account}/insights?${params}`;
-  const rows: Row[] = [];
-  try {
-    for (let page = 0; url && page < 10; page++) {
-      const res: Response = await fetch(url, { next: { revalidate: 600 } });
-      const body = (await res.json()) as { data?: Row[]; paging?: { next?: string }; error?: { message?: string } };
-      if (!res.ok || body.error) return { connected: false, reason: `Meta said: ${body.error?.message ?? `HTTP ${res.status}`}` };
-      rows.push(...(body.data ?? []));
-      url = body.paging?.next ?? null;
-    }
-  } catch (err) {
-    return { connected: false, reason: `Couldn't reach Meta (${String(err)}).` };
-  }
+  const rows = await insightRows(
+    new URLSearchParams({
+      level: "adset",
+      fields: "adset_name,campaign_name,spend,impressions,inline_link_clicks",
+      time_range: JSON.stringify({ since, until }),
+      limit: "500",
+      access_token: token,
+    }),
+  );
+  if (!Array.isArray(rows)) return { connected: false, reason: rows.reason };
 
   const byPack: Record<string, PackSpend> = {};
   for (const r of rows) {

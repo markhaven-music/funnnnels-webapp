@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { FunnelCard } from "@/components/FunnelCard";
+import { dayLabel, METRICS, money, NetVsSpend, TrendChart, type Metric } from "@/components/HomeCharts";
 import { isLeadMagnet, LeadMagnets } from "@/components/LeadMagnets";
 import { NewFunnelTile } from "@/components/NewFunnelTile";
 import { I } from "@/components/icons";
@@ -11,17 +12,17 @@ import type { FunnelStatus, StoredFunnel } from "@/lib/blocks";
 import { insights, type Insight } from "@/lib/insights";
 import s from "./home.module.css";
 
-// The dashboard's first screen: the range's sales, visitors and conversion,
-// sales per day, where they come from, what stands out, then the funnels.
-// Everything comes from lib/analytics.ts (docs/design.md: real numbers only).
+// The dashboard's first screen: the range's revenue, net revenue, sales,
+// visitors and conversion as tiles (click one and the chart under them shows
+// it day by day against the period before), net revenue against what the
+// Meta ads cost, where the revenue comes from, what stands out, then the
+// funnels. Everything comes from lib/analytics.ts (docs/design.md: real
+// numbers only); the ad spend from lib/metaSpend.ts.
 
 const RANGE_LABEL: Record<Range, string> = { "7d": "7D", "28d": "28D", all: "All" };
 const RANGE_NAME: Record<Range, string> = { "7d": "7 days", "28d": "28 days", all: "period" };
 
 const sum = (days: Day[], k: keyof Omit<Day, "day">) => days.reduce((n, d) => n + d[k], 0);
-const eur = (n: number) => (n >= 10_000 ? `€${(n / 1000).toFixed(1).replace(/\.0$/, "")}K` : `€${Math.round(n).toLocaleString("en-US")}`);
-const dayLabel = (day: string, opts: Intl.DateTimeFormatOptions) =>
-  new Date(`${day}T00:00:00Z`).toLocaleDateString("en-GB", { ...opts, timeZone: "UTC" });
 
 // ─── Sparkline ───────────────────────────────────────────────────────────────
 
@@ -50,19 +51,19 @@ function Sparkline({ points, color }: { points: number[]; color: string }) {
       })
       .join(" ");
 
-  const fillD =
-    pathD + ` L ${w},${h} L 0,${h} Z`;
+  const fillD = pathD + ` L ${w},${h} L 0,${h} Z`;
+  const id = `g-${color.replace(/[^a-z0-9]/g, "")}`;
 
   return (
-    <svg className="spark" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
+    <svg className="spark" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden>
       <defs>
-        <linearGradient id={`g-${color.replace(/[^a-z]/g, "")}`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.18" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={fillD} fill={`url(#g-${color.replace(/[^a-z]/g, "")})`} />
-      <path d={pathD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <path d={fillD} fill={`url(#${id})`} />
+      <path d={pathD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }
@@ -70,13 +71,11 @@ function Sparkline({ points, color }: { points: number[]; color: string }) {
 // ─── KPI tiles ────────────────────────────────────────────────────────────────
 
 type Kpi = {
-  id: string;
-  label: string;
+  metric: Metric;
   value: string;
   unit?: string;
   // Against the period before: a signed change, or null when there's nothing to compare with.
   change: { text: string; up: boolean } | null;
-  color: string;
   spark: number[];
 };
 
@@ -86,6 +85,8 @@ function changeOf(now: number, before: number | null): Kpi["change"] {
   const c = now / before - 1;
   return { text: `${Math.abs(c * 100).toFixed(0)}%`, up: c >= 0 };
 }
+
+const metric = (id: string) => METRICS.find((m) => m.id === id)!;
 
 function buildKpis(a: Analytics): Kpi[] {
   const { days, previous, trackingSince } = a;
@@ -101,60 +102,57 @@ function buildKpis(a: Analytics): Kpi[] {
   const upsells = sum(days, "upsells");
   return [
     {
-      id: "revenue",
-      label: "Revenue",
-      value: eur(sum(days, "revenue")),
+      metric: metric("revenue"),
+      value: money(sum(days, "revenue")),
       change: changeOf(sum(days, "revenue"), previous && sum(previous, "revenue")),
-      color: "oklch(0.74 0.19 295)",
       spark: days.map((d) => d.revenue),
     },
     {
-      id: "net",
-      label: "Net revenue",
-      value: eur(sum(days, "net")),
-      unit: sum(days, "revenue") > 0 ? `${eur(sum(days, "revenue") - sum(days, "net"))} fees` : undefined,
+      metric: metric("net"),
+      value: money(sum(days, "net")),
+      unit: sum(days, "revenue") > 0 ? `${money(sum(days, "revenue") - sum(days, "net"))} fees` : undefined,
       change: changeOf(sum(days, "net"), previous && sum(previous, "net")),
-      color: "oklch(0.66 0.16 295)",
       spark: days.map((d) => d.net),
     },
     {
-      id: "sales",
-      label: "Sales",
+      metric: metric("sales"),
       value: orders.toLocaleString("en-US"),
       unit: upsells ? `+ ${upsells} upsell${upsells === 1 ? "" : "s"}` : undefined,
       change: changeOf(orders, previous && sum(previous, "orders")),
-      color: "oklch(0.82 0.18 295)",
       spark: days.map((d) => d.orders),
     },
     {
-      id: "visitors",
-      label: "Visitors",
+      metric: metric("visitors"),
       value: sum(days, "visitors").toLocaleString("en-US"),
       change: changeOf(sum(days, "visitors"), previous && sum(previous, "visitors")),
-      color: "oklch(0.78 0.13 230)",
       spark: days.map((d) => d.visitors),
     },
     {
-      id: "cvr",
-      label: "Conversion",
+      metric: metric("cvr"),
       value: now === null ? "—" : (now * 100).toFixed(1),
       unit: now === null ? undefined : "%",
       change:
         now !== null && before !== null && before > 0
           ? { text: `${Math.abs((now - before) * 100).toFixed(1)} pts`, up: now >= before }
           : null,
-      color: "oklch(0.86 0.16 165)",
       spark: days.map((d) => (d.visitors ? d.orders / d.visitors : 0)),
     },
   ];
 }
 
-function StatCard({ k, range }: { k: Kpi; range: Range }) {
+function StatCard({ k, range, on, onPick }: { k: Kpi; range: Range; on: boolean; onPick: () => void }) {
   return (
-    <div className="stat">
+    <button
+      type="button"
+      className={`stat ${s.kpi} ${on ? s.kpiOn : ""}`}
+      style={{ "--k": k.metric.color } as CSSProperties}
+      aria-pressed={on}
+      onClick={onPick}
+      title={`Show ${k.metric.label.toLowerCase()} per day`}
+    >
       <div className="stat-label">
-        <span className="lk" style={{ background: k.color }} />
-        {k.label}
+        <span className="lk" style={{ background: k.metric.color }} />
+        {k.metric.label}
       </div>
       <div className="v">
         {k.value}
@@ -167,83 +165,8 @@ function StatCard({ k, range }: { k: Kpi; range: Range }) {
       ) : (
         <span className={`delta ${s.flat}`}>{range === "all" ? "all time" : "nothing to compare yet"}</span>
       )}
-      <Sparkline points={k.spark} color={k.color} />
-    </div>
-  );
-}
-
-// ─── Sales per day ───────────────────────────────────────────────────────────
-
-/** A clean axis top above v: 1, 2 or 5 × a power of ten. */
-function niceMax(v: number) {
-  if (v <= 0) return 100;
-  const p = 10 ** Math.floor(Math.log10(v));
-  const n = v / p;
-  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
-}
-
-function SalesChart({ days }: { days: Day[] }) {
-  const [hover, setHover] = useState<number | null>(null);
-  const top = niceMax(Math.max(...days.map((d) => d.revenue), 0));
-  const peak = days.reduce((best, d, i) => (d.revenue > (days[best]?.revenue ?? 0) ? i : best), -1);
-  const n = days.length;
-  // About five dates under the axis, always the last day.
-  const every = n <= 7 ? 1 : Math.ceil(n / 5);
-  const short = n <= 7;
-  const hd = hover === null ? null : days[hover];
-
-  return (
-    <div className={s.chart}>
-      <div className={s.yAxis} aria-hidden>
-        {[1, 0.5, 0].map((t) => (
-          <span key={t} style={{ top: `${(1 - t) * 100}%` }}>
-            {eur(top * t)}
-          </span>
-        ))}
-      </div>
-      <div className={s.plot} onMouseLeave={() => setHover(null)}>
-        {[1, 0.5, 0].map((t) => (
-          <span key={t} className={s.gridline} style={{ top: `${(1 - t) * 100}%` }} />
-        ))}
-        <div className={s.cols}>
-          {days.map((d, i) => (
-            <button
-              key={d.day}
-              type="button"
-              className={`${s.col} ${hover === i ? s.colOn : ""}`}
-              onMouseEnter={() => setHover(i)}
-              onFocus={() => setHover(i)}
-              onBlur={() => setHover(null)}
-              aria-label={`${dayLabel(d.day, { weekday: "short", day: "numeric", month: "short" })}: ${eur(d.revenue)}, ${d.orders} order${d.orders === 1 ? "" : "s"}`}
-            >
-              {i === peak && d.revenue > 0 && <span className={s.peak}>{eur(d.revenue)}</span>}
-              <span className={s.bar} style={{ height: `${(d.revenue / top) * 100}%` }} />
-            </button>
-          ))}
-        </div>
-        {peak < 0 && <div className={s.none}>No sales in this range yet.</div>}
-        {hd && (
-          <div
-            className={s.tip}
-            style={hover! < n / 2 ? { left: `${((hover! + 0.5) / n) * 100}%` } : { right: `${((n - hover! - 0.5) / n) * 100}%` }}
-          >
-            <div className={s.tipDay}>{dayLabel(hd.day, { weekday: "short", day: "numeric", month: "short" })}</div>
-            <div className={s.tipValue}>{eur(hd.revenue)}</div>
-            <div className={s.tipRow}><b>{hd.orders}</b> order{hd.orders === 1 ? "" : "s"}{hd.upsells ? <> · <b>{hd.upsells}</b> upsell{hd.upsells === 1 ? "" : "s"}</> : null}</div>
-            <div className={s.tipRow}><b>{hd.visitors}</b> visitor{hd.visitors === 1 ? "" : "s"}</div>
-          </div>
-        )}
-      </div>
-      <div className={s.xAxis} aria-hidden>
-        {days.map((d, i) =>
-          (n - 1 - i) % every === 0 ? (
-            <span key={d.day} style={{ left: `${((i + 0.5) / n) * 100}%` }}>
-              {dayLabel(d.day, short ? { weekday: "short" } : { day: "numeric", month: "short" })}
-            </span>
-          ) : null,
-        )}
-      </div>
-    </div>
+      <Sparkline points={k.spark} color={k.metric.color} />
+    </button>
   );
 }
 
@@ -261,12 +184,12 @@ function FunnelRevenue({ a }: { a: Analytics }) {
             <span>{f.name}</span>
             <span className={s.hmeta}>
               {f.total.orders} order{f.total.orders === 1 ? "" : "s"} · {f.total.visitors.toLocaleString("en-US")} visitors
-              {f.total.revenue > 0 && ` · ${eur(f.total.net)} net`}
+              {f.total.revenue > 0 && ` · ${money(f.total.net)} net`}
             </span>
           </div>
           <div className={s.htrack}>
             <span className={s.hbar} style={{ width: `${max ? (f.total.revenue / max) * 100 : 0}%` }} />
-            <span className={s.hval}>{eur(f.total.revenue)}</span>
+            <span className={s.hval}>{money(f.total.revenue)}</span>
           </div>
         </div>
       ))}
@@ -371,6 +294,8 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
   }, [range, loaded]);
   const data = current ?? shown;
 
+  // The tile picked for the chart under them.
+  const [picked, setPicked] = useState("revenue");
   const kpis = useMemo(() => (data ? buildKpis(data) : null), [data]);
   const notes = useMemo(() => (data ? insights(data) : []), [data]);
 
@@ -431,13 +356,13 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
       </div>
 
       <div className={!current && shown ? s.stale : undefined}>
-        {/* KPI tiles */}
+        {/* KPI tiles: click one to chart it */}
         <div className={`stats ${s.kpis}`}>
           {kpis
-            ? kpis.map((k) => <StatCard key={k.id} k={k} range={data!.range} />)
-            : ["Revenue", "Net revenue", "Sales", "Visitors", "Conversion"].map((l) => (
-                <div key={l} className="stat">
-                  <div className="stat-label">{l}</div>
+            ? kpis.map((k) => <StatCard key={k.metric.id} k={k} range={data!.range} on={picked === k.metric.id} onPick={() => setPicked(k.metric.id)} />)
+            : METRICS.map((m) => (
+                <div key={m.id} className="stat">
+                  <div className="stat-label">{m.label}</div>
                   <div className="v">—</div>
                   <span className={`delta ${s.flat}`}>loading…</span>
                 </div>
@@ -449,13 +374,15 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
             <div className={notes.length ? s.row : `${s.row} ${s.rowFull}`}>
               <div className={s.card}>
                 <div className={s.cardHead}>
-                  <div className={s.title}>Sales per day</div>
-                  <div className={s.sub}>revenue in €, upsells included</div>
+                  <div className={s.title}>{metric(picked).label} per day</div>
+                  <div className={s.sub}>{metric(picked).sub}</div>
                 </div>
-                <SalesChart days={data.days} />
+                <TrendChart days={data.days} previous={data.previous} metric={metric(picked)} periodName={RANGE_NAME[data.range]} />
               </div>
               {notes.length > 0 && <Insights list={notes} />}
             </div>
+
+            <NetVsSpend days={data.days} rate={data.usdToEur} periodName={RANGE_NAME[data.range]} />
 
             <div className={`${s.row} ${s.rowHalf}`}>
               <div className={s.card}>

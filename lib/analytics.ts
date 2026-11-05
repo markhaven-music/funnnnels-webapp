@@ -160,6 +160,12 @@ export type Day = {
   upsells: number;
   revenue: number; // in euros, upsells included
   net: number; // the same less Stripe's and PayPal's fees
+  // The same two in each sale's own currency (eur + usd × usdToEur = revenue),
+  // so the home can show a day in dollars without converting twice.
+  eur: number;
+  usd: number;
+  netEur: number;
+  netUsd: number;
   visitors: number; // of the landings
   orderViews: number;
   checkouts: number;
@@ -278,7 +284,7 @@ function daily(range: Range, since: string | null, now: number, rows: DayRow[], 
   const days = dayList(first, today);
   const before = since ? dayList(dayOf(Date.parse(`${first}T00:00:00Z`) - days.length * DAY), dayOf(Date.parse(`${first}T00:00:00Z`) - DAY)) : [];
   const by = new Map<string, Day>(
-    [...before, ...days].map((day) => [day, { day, orders: 0, upsells: 0, revenue: 0, net: 0, visitors: 0, orderViews: 0, checkouts: 0 }]),
+    [...before, ...days].map((day) => [day, { day, orders: 0, upsells: 0, revenue: 0, net: 0, eur: 0, usd: 0, netEur: 0, netUsd: 0, visitors: 0, orderViews: 0, checkouts: 0 }]),
   );
   for (const r of rows) {
     const d = by.get(r.day);
@@ -293,8 +299,11 @@ function daily(range: Range, since: string | null, now: number, rows: DayRow[], 
     if (s.offer) d.upsells += 1;
     else d.orders += 1;
     const r = s.currency === "usd" ? rate : 1;
+    const net = s.amount - (s.fee ?? 0);
     d.revenue += s.amount * r;
-    d.net += (s.amount - (s.fee ?? 0)) * r;
+    d.net += net * r;
+    if (s.currency === "usd") (d.usd += s.amount), (d.netUsd += net);
+    else (d.eur += s.amount), (d.netEur += net);
   }
   return { days: days.map((d) => by.get(d)!), previous: range === "all" ? null : before.map((d) => by.get(d)!) };
 }

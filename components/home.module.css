@@ -1,4 +1,4 @@
-/* Dashboard home: range filter, charts and insights (docs/design.md). */
+/* Dashboard home: range filter, tiles, charts and insights (docs/design.md). */
 
 .filters {
   display: flex;
@@ -22,7 +22,7 @@
   transition: opacity 0.2s;
 }
 
-/* Revenue, net revenue, sales, visitors, conversion. */
+/* ─── tiles: revenue, net revenue, sales, visitors, conversion ─── */
 .kpis {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   margin-bottom: 12px;
@@ -36,6 +36,30 @@
   .kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+/* A tile is a button: click it and the chart under the tiles shows it. The
+   picked one is told by a tint of its own colour, never by a border. */
+.kpi {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.kpi:hover {
+  background: oklch(0.21 0.012 270 / 0.72);
+}
+.kpi:focus-visible {
+  outline: 1px solid var(--accent-dim);
+  outline-offset: 1px;
+}
+:global(.main.home) .stat.kpiOn {
+  background: color-mix(in oklch, var(--k) 13%, oklch(0.18 0.01 270 / 0.72));
+}
+.kpiOn .v {
+  color: var(--fg-0);
 }
 
 .vs {
@@ -100,11 +124,11 @@
   color: var(--fg-3);
 }
 
-/* ─── sales per day: columns ─── */
+/* ─── charts: the frame ─── */
 .chart {
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr);
-  grid-template-rows: 190px 22px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-rows: auto 22px;
 }
 .yAxis {
   position: relative;
@@ -121,56 +145,66 @@
 }
 .plot {
   position: relative;
+  height: 200px;
+  outline: none;
+  cursor: crosshair;
 }
-.gridline {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--line-soft);
-}
-.cols {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  gap: 2px;
-}
-.col {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 4px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: default;
+.plot:focus-visible {
+  box-shadow: 0 0 0 1px var(--accent-dim);
   border-radius: var(--radius-xs);
 }
-.colOn {
-  background: oklch(1 0 0 / 0.03);
+.svg {
+  display: block;
+  overflow: visible;
 }
-.col:focus-visible {
-  outline: 1px solid var(--accent-dim);
+.grid {
+  stroke: var(--line-soft);
+  stroke-width: 1;
+}
+.base {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.cross {
+  stroke: var(--fg-2);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+.dot {
+  stroke: var(--bg-1);
+  stroke-width: 2;
+}
+.prevLine {
+  fill: none;
+  stroke: var(--fg-3);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+.prevDot {
+  fill: var(--fg-3);
+  stroke: var(--bg-1);
+  stroke-width: 2;
 }
 .bar {
-  display: block;
-  width: min(100%, 24px);
-  background: var(--accent);
-  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
-  transition: background 0.12s;
+  fill: var(--accent);
+  transition: fill 0.12s;
 }
-.colOn .bar {
-  background: var(--accent-2);
+.barOn {
+  fill: var(--accent-2);
 }
-.peak {
+.spendLine {
+  fill: none;
+  stroke: oklch(0.74 0.17 55);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.peakLabel {
   font-family: var(--font-mono);
   font-size: 10.5px;
-  color: var(--fg-1);
-  white-space: nowrap;
+  fill: var(--fg-1);
 }
 .none {
   position: absolute;
@@ -179,13 +213,79 @@
   place-items: center;
   font-size: 13px;
   color: var(--fg-3);
+  pointer-events: none;
 }
+.xAxis {
+  grid-column: 2;
+  position: relative;
+}
+.xAxis span {
+  position: absolute;
+  top: 7px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--fg-3);
+  white-space: nowrap;
+}
+
+/* The legend: one key per series, a line key for a line, a square for bars.
+   A key that is a button hides its series. */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  margin: 0 0 14px 48px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+}
+.key {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+.keyBtn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.keyBtn:disabled {
+  cursor: default;
+  color: var(--fg-3);
+}
+.keyOff {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.keyLine {
+  display: inline-block;
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+}
+.keyRect {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-xs);
+}
+.hint {
+  margin-left: auto;
+  color: var(--fg-3);
+}
+
+/* The tooltip: the value first, then the day's other numbers. */
 .tip {
   position: absolute;
   top: 8px;
   z-index: 2;
-  min-width: 140px;
-  padding: 10px 12px;
+  min-width: 170px;
+  padding: 10px 12px 11px;
   background: var(--bg-3);
   border: 1px solid transparent;
   border-radius: var(--radius);
@@ -198,30 +298,173 @@
   color: var(--fg-2);
 }
 .tipValue {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  margin: 2px 0 6px;
-}
-.tipRow {
-  font-size: 12px;
-  color: var(--fg-2);
-}
-.tipRow b {
+  letter-spacing: -0.02em;
+  margin: 3px 0 2px;
   color: var(--fg-0);
-  font-weight: 600;
 }
-.xAxis {
-  grid-column: 2;
-  position: relative;
-}
-.xAxis span {
-  position: absolute;
-  top: 7px;
-  transform: translateX(-50%);
+.tipVs {
   font-family: var(--font-mono);
   font-size: 10.5px;
   color: var(--fg-3);
+}
+.tipRows {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line-soft);
+}
+.tipRow {
+  display: grid;
+  grid-template-columns: 10px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--fg-2);
   white-space: nowrap;
+}
+.tipRow b {
+  color: var(--fg-1);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tipRowOn b {
+  color: var(--fg-0);
+}
+.tipKey {
+  display: inline-block;
+  width: 10px;
+  height: 2px;
+  border-radius: 1px;
+}
+.neg {
+  color: var(--rose);
+}
+
+/* ─── net revenue vs ad spend ─── */
+.big {
+  margin-bottom: 12px;
+}
+.big .cardHead {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.big .plot {
+  height: 260px;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.controls :global(.tab) {
+  text-transform: capitalize;
+}
+.figs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+@media (max-width: 800px) {
+  .figs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.fig {
+  padding: 10px 12px 11px;
+  background: color-mix(in oklch, var(--fg-0) 4%, transparent);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.figLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+  letter-spacing: 0.04em;
+}
+.figKey {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.figValue {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 6px 0 2px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg-0);
+  white-space: nowrap;
+}
+.figMark {
+  font-size: 10px;
+}
+.figUp {
+  color: var(--mint);
+}
+.figDown {
+  color: var(--rose);
+}
+.figSub {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--fg-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The table view: the same days as rows. */
+.tableWrap {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.table th {
+  padding: 6px 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--fg-3);
+  text-align: right;
+  border-bottom: 1px solid var(--line-soft);
+  white-space: nowrap;
+}
+.table td {
+  padding: 7px 8px;
+  text-align: right;
+  color: var(--fg-1);
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid var(--line-soft);
+  white-space: nowrap;
+}
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+  padding-left: 0;
+}
+.table th:last-child,
+.table td:last-child {
+  padding-right: 0;
+}
+.table tfoot td {
+  font-weight: 600;
+  color: var(--fg-0);
+  border-bottom: 0;
+  border-top: 1px solid var(--line);
 }
 
 /* ─── horizontal bars: revenue by funnel, visit → sale ─── */
