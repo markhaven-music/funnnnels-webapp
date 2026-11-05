@@ -11,7 +11,7 @@ import b from "./browse.module.css";
 // The whole pack as a player: pick one of the five folders, then what the
 // folder varies (Progression · Voicing · Rhythm, Progression · Key, …), and
 // that file plays, drawn as a piano roll, with its place in the pack under it.
-// The notes of all 3,536 files come from tools/extract_browse.py
+// The notes of all 6,256 files come from tools/extract_browse.py
 // (public/funnels/jazz-midi-pack/browse): pack.json (the choices, ≈22 KB
 // gzipped) loads when the player nears the screen and a folder's files when
 // one of them is picked, so the page carries none of it. Drums are drawn, not

@@ -119,7 +119,9 @@ export function Svg({ roll, chordsRow, lazy = false }: { roll: Roll; chordsRow: 
       </svg>
       {chordsRow && (
         <div className={s.chords} aria-hidden>
-          {roll.chords.map(([beat, name]) => (
+          {/* Past 12 bars, about 12 names across: the 32-bar forms (2026-11-05) would print 60+ on top of each other.
+              Up to 12 bars (48 beats) every chord still shows. */}
+          {spaced(roll.chords, roll.beats > 48 ? roll.beats / 12 : 0).map(([beat, name]) => (
             <span key={`${beat}${name}`} style={{ left: `${((beat as number) / roll.beats) * 100}%` }}>
               {name}
             </span>
@@ -129,4 +131,18 @@ export function Svg({ roll, chordsRow, lazy = false }: { roll: Roll; chordsRow: 
       <span className={s.playhead} aria-hidden />
     </div>
   );
+}
+
+/** The chord names far enough apart to print: each at least `gap` beats after the last one shown. */
+function spaced(chords: Roll["chords"], gap: number): Roll["chords"] {
+  const out: Roll["chords"] = [];
+  let last = -Infinity;
+  for (const c of chords) {
+    const beat = c[0] as number;
+    if (beat - last >= gap - 1e-6) {
+      out.push(c);
+      last = beat;
+    }
+  }
+  return out;
 }

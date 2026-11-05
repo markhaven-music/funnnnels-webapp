@@ -111,22 +111,23 @@ export const funnel = {
     tags: ["lead", "free-sample"],
     download: "/funnels/jazz-midi-pack/free-sample.zip",
   },
-  // Counted from ~/Desktop/Jazz MIDI Pack on 2026-10-10.
+  // Counted from ~/Desktop/Jazz MIDI Pack on 2026-11-05, after progressions 27-46
+  // (minor and melancholic ones, and long forms up to 32 bars) were added: was 3,536 files, 26 progressions.
   counts: {
-    files: 3536,
-    // the pack + the bonuses' MIDI (3,536 + 2,304 + 150 + 1,548 + 195)
-    total: 7733,
-    progressions: 26,
+    files: 6256,
+    // the pack + the bonuses' MIDI (6,256 + 2,304 + 150 + 1,548 + 195)
+    total: 10453,
+    progressions: 46,
     voicings: 13,
     rhythms: 8,
     genres: 4,
   },
   folders: [
-    { name: "Chords in Original Key", files: 2704, what: "Every progression × 13 voicings × 8 rhythms, best-sounding first." },
-    { name: "All 12 Keys", files: 312, what: "Every progression transposed to every key, voice-led pads." },
-    { name: "Bass Lines", files: 78, what: "Walking, two-feel and bossa nova bass for each progression." },
-    { name: "Combo Loops", files: 26, what: "Drop-2 comping + walking bass + ride, two choruses." },
-    { name: "Genre Loops", files: 416, what: "Lofi, neo soul, trap soul and deep house — chords, bass, drums split." },
+    { name: "Chords in Original Key", files: 4784, what: "Every progression × 13 voicings × 8 rhythms, best-sounding first." },
+    { name: "All 12 Keys", files: 552, what: "Every progression transposed to every key, voice-led pads." },
+    { name: "Bass Lines", files: 138, what: "Walking, two-feel and bossa nova bass for each progression." },
+    { name: "Combo Loops", files: 46, what: "Drop-2 comping + walking bass + ride, two choruses." },
+    { name: "Genre Loops", files: 736, what: "Lofi, neo soul, trap soul and deep house — chords, bass, drums split." },
   ],
   progressions: [
     "ii-V-I Major", "ii-V-i Minor", "ii-V-I Short", "ii-V-I Down Whole Steps",
@@ -137,6 +138,11 @@ export const funnel = {
     "Minor Blues in C", "Bird Blues in F", "Rhythm Changes A", "Rhythm Changes Bridge",
     "Coltrane Changes", "Countdown ii-V Substitution", "Modal So What",
     "Minor Line Cliché", "II7#11 (A Train)", "Sus Dominant ii-V",
+    "Minor Turnaround", "Minor ii-V Chain", "Jazz Andalusian Cadence", "Dorian Vamp",
+    "Phrygian Vamp", "Neapolitan Minor", "Minor Circle of Fifths", "Lament Bass",
+    "Minor Plagal", "Neo Soul Minor Loop", "Minor Deceptive Cadence", "Minor Lofi Ballad (8 bars)",
+    "Minor Ending Tag", "Neo Soul 8-Bar", "Minor 12-Bar (Solar type)", "Minor Bossa 16-Bar (Blue Bossa type)",
+    "Minor Ballad 16-Bar (Summertime type)", "32-Bar Minor Ballad", "32-Bar Ballad", "Rhythm Changes (32 bars)",
   ],
 } as const;
 

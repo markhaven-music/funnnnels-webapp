@@ -4,14 +4,15 @@ Every claim on the landing page must be in this file. Rules: the Grind Studio
 landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.md`,
 `docs/copy-style.md`, "Diretto" voice).
 
-## The product (counted from `~/Desktop/Jazz MIDI Pack` on 2026-10-10)
+## The product (counted from `~/Desktop/Jazz MIDI Pack` on 2026-11-05)
 - Brand: GRIND STUDIO. Sold at m.thegrind.studio/jazz-midi-pack.
-- 3,536 MIDI files (.mid) in 5 folders, numbered best-sounding first.
-  1. Chords in Original Key: 2,704 files. 26 progressions × 13 voicings × 8 rhythms.
-  2. All 12 Keys: 312 files. Every progression in every key, voice-led close voicings as sustained pads.
-  3. Bass Lines: 78 files. Walking (swing), two-feel (half notes) and bossa nova bass for each progression.
-  4. Combo Loops: 26 files. Drop-2 swing comping + walking bass + ride cymbal, two choruses, 150 bpm.
-  5. Genre Loops: 416 files. Every progression as Lofi Hip Hop (82 bpm), Neo Soul (88 bpm), Trap Soul and
+- 6,256 MIDI files (.mid) in 5 folders, numbered best-sounding first (3,536 and 26 progressions until 2026-11-05,
+  when progressions 27-46 were added: the user found too few minor, melancholic ones and none that sound like a whole piece).
+  1. Chords in Original Key: 4,784 files. 46 progressions × 13 voicings × 8 rhythms.
+  2. All 12 Keys: 552 files. Every progression in every key, voice-led close voicings as sustained pads.
+  3. Bass Lines: 138 files. Walking (swing), two-feel (half notes) and bossa nova bass for each progression.
+  4. Combo Loops: 46 files. Drop-2 swing comping + walking bass + ride cymbal, two choruses, 150 bpm.
+  5. Genre Loops: 736 files. Every progression as Lofi Hip Hop (82 bpm), Neo Soul (88 bpm), Trap Soul and
      Deep House. Separate Chords / Bass / Drums MIDI + a Full multitrack file. Key and BPM in every file
      name. GM drum map (kick C1, snare D1, hat F#1).
 - Chord symbols written into every file as MIDI markers (most DAWs show them on the timeline).
@@ -24,7 +25,11 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   Anticipations 130, Reverse Charleston 130, Freddie Green 4 to the Bar 140.
 - 26 progressions: ii-V-I major and minor, turnarounds, tritone subs, backdoor, Lady Bird, Tadd Dameron,
   passing diminished, Autumn Leaves type, jazz/minor/Bird blues, rhythm changes A + bridge, Coltrane
-  changes, Countdown, So What, minor line cliché, A Train, sus ii-V. Full list in `funnel.ts`.
+  changes, Countdown, So What, minor line cliché, A Train, sus ii-V; and since 2026-11-05 minor and melancholic
+  ones (minor turnaround, minor ii-V chain, Andalusian, Dorian and Phrygian vamps, Neapolitan, minor circle of fifths,
+  lament bass, minor plagal, neo soul minor loop, deceptive cadence) and long forms that sound like a whole piece
+  (8-bar minor ballad, ending tag, neo soul 8-bar, Solar-type 12 bars, 16-bar Blue Bossa and Summertime types,
+  32-bar AABA minor and major ballads, full 32-bar rhythm changes). Full list in `funnel.ts`.
 - Works in any DAW that opens .mid (Ableton Live, Logic, FL Studio, Cubase, Studio One, Reaper, Bitwig,
   GarageBand).
 
@@ -34,14 +39,14 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   Kit"): each item shows what it's worth, the same number in € and $ (`funnel.ts` value / bonuses[].value):
   Jazz MIDI Pack 97, Chord Pack 47, Bible 37, Anime pack 47, Emotional Keys 27, Drum Loops 27. Total value 282,
   crossed out, "Today" 27, "You save" 255. It reads as the bundle's worth, never as an earlier price of the pack.
-- Bundle total: 7,733 MIDI files = 3,536 (pack) + 2,304 + 150 + 1,548 + 195 (bonuses). The bonuses add 4,197 MIDI
+- Bundle total: 10,453 MIDI files = 6,256 (pack) + 2,304 + 150 + 1,548 + 195 (bonuses). The bonuses add 4,197 MIDI
   files, 305 WAV loops (258 Bible piano/e-piano loops + 47 drum loops) and a PDF. Counted 2026-11-01.
 - Angle (2026-11-04, replaces "everyone wants and nobody can write"): the producer who wants a jazz vibe in their beat and
   doesn't know how. The hero and the letter open on that feeling; lofi, neo soul and trap soul are the specifics (the pack's
   genre loops); the voicing is explained in its own block ("Why these chords sound played", beside the before/after rolls,
   after the product intro), never as the opener. Claim used in the letter: lofi, neo soul and trap soul are built on the same
   jazz progressions (ii-V-I, turnarounds and the rest of the pack's list). Product intro: "a different progression for every
-  beat you upload, for years" (3,536 files ÷ 365 ≈ 9.7 years). Copy goes through the avoid-ai-writing skill
+  beat you upload, for years" (6,256 files ÷ 365 ≈ 17 years). Copy goes through the avoid-ai-writing skill
   (~/.claude/skills/avoid-ai-writing): no "it's not X, it's Y" frames, no "nobody can write", no fragment runs.
   Never say how many progressions.
 - Five free bonuses with every pack (since 2026-10-16), on the same download page:
@@ -99,7 +104,8 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   ("patterns" → "chords", as Top Hits has them). Four more sit only in the editor's draft as placeholders
   ("Write the review here.", "First name L.") for the user to replace with real ones before publishing: no
   review written by us goes live. No Jazz-specific testimonials exist yet. Social proof = the `Proof` strip (the two numbers above + the guarantee), under the hero and the checkout.
-- Counts on the page: 3,536 = the pack; the bonuses add 4,197 MIDI; 7,733 only as "in total".
+- Counts on the page: 6,256 = the pack; the bonuses add 4,197 MIDI; 10,453 only as "in total". The English VSL
+  (Wistia lh4kzjb92h) still says 3,536: recorded before the 2026-11-05 additions.
 
 ## Before / after (measured by `tools/extract_rolls.py` data, 2026-10-12)
 - File pair: "02 Pads - 05 I-vi-ii-V Turnaround", Root Position vs Best Voicing (same 8 chords, same rhythm).
