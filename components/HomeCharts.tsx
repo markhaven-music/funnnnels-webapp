@@ -192,7 +192,7 @@ const roasOf = (r: Row) => (r.spend ? r.adNet / r.spend : null);
 const cvrOf = (r: Row) => (r.visitors ? r.ratedOrders / r.visitors : null);
 
 const METRICS: Metric[] = [
-  { id: "profit", label: "Profit", color: PROFIT, kind: "money", ads: true, upGood: true, of: profitOf, note: () => "net revenue − ad spend" },
+  { id: "profit", label: "Profit", color: PROFIT, kind: "money", ads: true, upGood: true, of: profitOf, note: (r, cur) => `${money(r.adNet, cur)} net − ${money(r.spend ?? 0, cur)} ad spend` },
   {
     id: "net",
     label: "Net revenue",
@@ -203,7 +203,7 @@ const METRICS: Metric[] = [
     note: (r, cur) => (r.revenue > r.net ? `${money(r.revenue - r.net, cur)} Stripe + PayPal fees` : "less the processors' fees"),
   },
   { id: "spend", label: "Ad spend", color: SPEND, kind: "money", ads: true, upGood: null, of: (r) => r.spend, note: (r) => `${count(r.clicks)} link clicks` },
-  { id: "roas", label: "ROAS", color: "oklch(0.86 0.15 95)", kind: "ratio", ads: true, upGood: true, of: roasOf, note: () => "net revenue ÷ ad spend" },
+  { id: "roas", label: "ROAS", color: "oklch(0.86 0.15 95)", kind: "ratio", ads: true, upGood: true, of: roasOf, note: (r, cur) => `${money(r.adNet, cur)} net ÷ ${money(r.spend ?? 0, cur)} ad spend` },
   { id: "revenue", label: "Revenue", color: "oklch(0.86 0.1 305)", kind: "money", upGood: true, of: (r) => r.revenue, note: () => "upsells included" },
   {
     id: "sales",
@@ -569,7 +569,7 @@ export function Performance({ a, cur, periodName }: Props) {
           <div className={s.chartTitle}>{title}</div>
           <div className={s.chartSub}>
             {what}
-            {m.ads && rangeStartsEarly && ` From ${SINCE_LABEL}, when the ads moved here from ClickFunnels.`}
+            {m.ads && rangeStartsEarly && ` From ${SINCE_LABEL}, when the ads moved here from ClickFunnels: the Net revenue tile counts the whole range, ${money(total.net, cur)}; since ${SINCE_LABEL} it's ${money(total.adNet, cur)}.`}
           </div>
         </div>
         <div className={s.controls}>
