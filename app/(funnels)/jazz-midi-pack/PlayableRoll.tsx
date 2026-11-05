@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import rolls from "./rolls.json";
 import { toggle, type Roll, type RollId } from "./piano";
 import s from "./roll.module.css";
@@ -16,6 +16,7 @@ export function PlayableRoll({
   variant = "full",
   tone = "brass",
   playLabel = "Play it",
+  lazy = false,
 }: {
   id?: RollId;
   roll?: Roll;
@@ -24,6 +25,8 @@ export function PlayableRoll({
   variant?: "full" | "mini" | "short";
   tone?: "brass" | "muted";
   playLabel?: string;
+  /** Draw the notes only once the roll nears the screen (see Svg). */
+  lazy?: boolean;
 }) {
   const scope = useRef<HTMLDivElement>(null);
   const roll = given ?? (rolls[id!] as Roll);
@@ -48,13 +51,43 @@ export function PlayableRoll({
         </span>
         {meta && <span className={s.meta}>{meta}</span>}
       </div>
-      <Svg roll={roll} chordsRow={variant === "full" || (variant === "short" && roll.chords.length > 1)} />
+      <Svg roll={roll} chordsRow={variant === "full" || (variant === "short" && roll.chords.length > 1)} lazy={lazy} />
     </div>
   );
 }
 
 // Drum-only files (the genre loops' Drums.mid) draw their hits, one row per drum.
-export function Svg({ roll, chordsRow }: { roll: Roll; chordsRow: boolean }) {
+// lazy: the box (its height is fixed in roll.module.css, so nothing moves) and
+// the playhead are there at once; the notes and chord names are drawn once the
+// box is within ~1.5 screens. The bonuses alone drew ~1,200 notes into the page's
+// HTML, which every phone parsed and hydrated before anyone scrolled there
+// (docs/page-speed.md; 2026-11-05).
+export function Svg({ roll, chordsRow, lazy = false }: { roll: Roll; chordsRow: boolean; lazy?: boolean }) {
+  const wrap = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(!lazy);
+  useEffect(() => {
+    const el = wrap.current;
+    if (shown || !el) return;
+    if (typeof IntersectionObserver === "undefined") return setShown(true);
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "1200px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [shown]);
+  if (!shown) {
+    return (
+      <div ref={wrap} className={s.svgWrap}>
+        <span className={s.playhead} aria-hidden />
+      </div>
+    );
+  }
   const W = 1000;
   const top = chordsRow ? 26 : 0;
   const H = (chordsRow ? 230 : 120) + top;
@@ -67,7 +100,7 @@ export function Svg({ roll, chordsRow }: { roll: Roll; chordsRow: boolean }) {
   const x = (beat: number) => (beat / roll.beats) * W;
   const bassMax = Math.min(...pitches) + 11;
   return (
-    <div className={s.svgWrap}>
+    <div ref={wrap} className={s.svgWrap}>
       <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={roll.file}>
         {Array.from({ length: roll.beats / 4 + 1 }, (_, i) => (
           <line key={i} x1={x(i * 4)} x2={x(i * 4)} y1={0} y2={H} className={s.bar} />

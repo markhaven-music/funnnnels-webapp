@@ -17,7 +17,7 @@ export function BonusPlayer({ bonus }: { bonus: number }) {
     <ol className={bn.rolls}>
       {files.map((f) => (
         <li key={f.file}>
-          <PlayableRoll roll={f} title={f.title} variant="short" playLabel="Play" />
+          <PlayableRoll roll={f} title={f.title} variant="short" playLabel="Play" lazy />
         </li>
       ))}
     </ol>

@@ -592,7 +592,7 @@ function HowShot() {
       </ol>
       <p className={s.illusArrow}>↓</p>
       <div className={`${r.scope} ${r.short} ${r.brass}`}>
-        <Svg roll={roll} chordsRow />
+        <Svg roll={roll} chordsRow lazy />
       </div>
     </div>
   );
@@ -683,7 +683,7 @@ function Inside({ p, patch, ctx }: { p: SectionProps["s_inside"]; patch?: Patch;
               return (
                 <div key={f.name} className={h.host(`${s.folder} ${s.panel}`)}>
                   <div className={`${r.scope} ${r.short} ${r.brass} ${s.folderRoll}`}>
-                    <Svg roll={roll} chordsRow={roll.chords.length > 0} />
+                    <Svg roll={roll} chordsRow={roll.chords.length > 0} lazy />
                     <p className={s.folderFile}>{roll.file}</p>
                   </div>
                   <div className={s.folderText}>
