@@ -38,3 +38,7 @@ shot famous-beats-bundle preview "https://funnnnels.vercel.app/famous-beats-bund
 shot famous-beats-bundle order "https://funnnnels.vercel.app/famous-beats-bundle/order?country=US&origin=1"
 shot jazz-midi-pack preview "https://funnnnels.vercel.app/jazz-midi-pack?country=US&origin=1"
 shot jazz-midi-pack order "https://funnnnels.vercel.app/jazz-midi-pack/order?country=US&origin=1"
+# The Free packs map (lib/funnelMap.ts): each pack's sign-up page; optin-rolls is also its card.
+shot free optin-rolls "https://funnnnels.vercel.app/download-rolls-midi-drums?origin=1"
+shot free optin-bounce "https://funnnnels.vercel.app/download-bounce-midi-drums?origin=1"
+shot free optin-hooks "https://funnnnels.vercel.app/free/hooks?origin=1"

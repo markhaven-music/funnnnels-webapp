@@ -1,3 +1,4 @@
+import { freePackStats, type FreePackRow } from "@/lib/freePacks";
 import { resolveFunnel, upsellsOn, type Product } from "@/lib/funnels";
 import { KIT_HOME, PRODUCT_TYPE } from "@/lib/liveUrl";
 import { getFunnel } from "@/lib/store";
@@ -19,9 +20,15 @@ export type MapStep = {
   // One-click upsells: which one, the page's visitor-count name, and whether
   // buyers are sent there yet (UPSELLS=on, lib/funnels.ts upsellsOn).
   offer?: { id: string; page: string; live: boolean };
+  // Numbers worked out with the map, for a funnel Analytics doesn't count (Free packs).
+  numbers?: MapNumber[];
 };
 
-export type MapLang = { lang: string; label: string; steps: MapStep[] };
+export type MapNumber = { label: string; value: string; tone: "sky" | "amber" | "mint" | "accent" };
+
+// lang: a language, or another way to split the funnel (Free packs: one tab per pack).
+// summary: the tab's line under its name, when Analytics doesn't count the funnel.
+export type MapLang = { lang: string; label: string; steps: MapStep[]; summary?: string };
 
 export type FunnelMap = {
   id: string;
@@ -32,6 +39,8 @@ export type FunnelMap = {
   /** Hand-built funnels can get more languages (the + on the map). */
   canTranslate: boolean;
   langs: MapLang[];
+  /** Where the numbers come from, when not from Analytics: a line under the map and a link. */
+  numbersFrom?: { note: string; href: string; link: string };
 };
 
 const LANG_LABEL: Record<string, string> = { en: "English", fr: "French", es: "Spanish", de: "German", it: "Italian" };
@@ -87,7 +96,105 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
   };
 }
 
+// ─── Free packs ────────────────────────────────────────────────────
+// The free lead magnets (app/free) as one funnel, a tab per pack: its sign-up
+// page, then the MIDI Drum Kit's pages, where the sign-up sends people
+// (app/free/packs.ts next, with ?free=<pack> for the "Your Free Pack Is
+// Secured" bar). Its numbers are dashboard → Free packs' (lib/freePacks.ts):
+// sign-ups, what the Meta ads cost, and which of those people opened a
+// checkout and bought, over the last 30 days. Upsells aren't counted per pack.
+export const FREE_PACKS_ID = "free-packs";
+const FREE_PACK_DAYS = 30;
+const FREE_PACK_TABS = [
+  { tab: "rolls", optin: "free-rolls", label: "Rolls", page: "/download-rolls-midi-drums", shot: "optin-rolls" },
+  { tab: "bounce", optin: "free-bounce", label: "Bounce", page: "/download-bounce-midi-drums", shot: "optin-bounce" },
+  { tab: "hooks", optin: "free-hooks", label: "Mystery Hooks", page: "/free/hooks", shot: "optin-hooks" },
+] as const;
+
+const intText = (n: number) => n.toLocaleString("en-US");
+const share = (hit: number, of: number) => (of > 0 ? ` (${((hit / of) * 100).toFixed(hit / of < 0.1 ? 1 : 0)}%)` : "");
+const money = (cents: number, currency: string) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase(), maximumFractionDigits: 0 }).format(cents / 100);
+/** Sales in dollars and euros, each only when there is some; "$0" when none. */
+const revenueText = (r: FreePackRow["revenue"]) => [r.usd ? money(r.usd, "usd") : "", r.eur ? money(r.eur, "eur") : ""].filter(Boolean).join(" + ") || "$0";
+
+async function freePacksMap(): Promise<FunnelMap> {
+  const kit = await resolveFunnel("midi-drum-kit");
+  const kitSteps = kit ? (codeMap(kit, new Set()).langs.find((l) => l.lang === "en")?.steps ?? []) : [];
+  const stats = await freePackStats(FREE_PACK_DAYS).catch((err) => {
+    console.error("funnel map free-packs: the numbers couldn't be read", err);
+    return null;
+  });
+  return {
+    id: FREE_PACKS_ID,
+    name: "Free packs",
+    status: "live",
+    statsSlug: null,
+    canTranslate: false,
+    numbersFrom: {
+      note: `Numbers for the last ${FREE_PACK_DAYS} days: sign-ups, then what those people did after signing up (checkouts and orders of any product); ad spend from Meta.`,
+      href: "/?nav=free-packs",
+      link: "Every person and ad in Free packs",
+    },
+    langs: FREE_PACK_TABS.map((t) => {
+      const row = stats?.packs.find((p) => p.key === t.optin);
+      const spend = stats?.spend.connected ? stats.spend.byPack[t.label] : undefined;
+      const currency = stats?.spend.connected ? stats.spend.currency : "usd";
+      const leads = row?.leads ?? 0;
+      const fresh = row?.checkout.of ?? 0; // sign-ups who hadn't bought before
+      const optinNumbers: MapNumber[] = stats
+        ? [
+            ...(spend ? [{ label: "Ad clicks", value: intText(spend.clicks), tone: "sky" as const }] : []),
+            { label: "Sign-ups", value: intText(leads) + (spend ? share(leads, spend.clicks) : ""), tone: "amber" },
+            ...(spend
+              ? [
+                  { label: "Ad spend", value: money(Math.round(spend.spend * 100), currency), tone: "accent" as const },
+                  // Over new sign-ups, as dashboard → Free packs counts it.
+                  { label: "Cost / sign-up", value: fresh ? money(Math.round((spend.spend / fresh) * 100), currency) : "—", tone: "accent" as const },
+                ]
+              : []),
+          ]
+        : [];
+      const steps: MapStep[] = [
+        {
+          kind: "page",
+          name: `Sign-up page: free ${t.label} pack`,
+          path: t.page,
+          url: `${KIT_HOME}${t.page}`,
+          image: `/funnels/free/${t.shot}.webp`,
+          editUrl: null,
+          numbers: optinNumbers,
+        },
+        ...kitSteps.map((st): MapStep => {
+          if (st.kind === "landing") {
+            const path = `${st.path}?free=${t.tab}`;
+            return { ...st, name: "MIDI Drum Kit sales page", path, url: `${KIT_HOME}${path}`, numbers: undefined };
+          }
+          if (st.kind === "order" && row) {
+            return { ...st, name: "MIDI Drum Kit order page", numbers: [{ label: "Opened checkout", value: intText(row.checkout.hit) + share(row.checkout.hit, fresh), tone: "amber" }] };
+          }
+          if (st.kind === "thank-you" && row) {
+            return {
+              ...st,
+              numbers: [
+                { label: "Bought", value: intText(row.boughtSoFar) + share(row.boughtSoFar, fresh), tone: "mint" },
+                { label: "Revenue", value: revenueText(row.revenue), tone: "accent" },
+              ],
+            };
+          }
+          return st;
+        }),
+      ];
+      const summary = stats
+        ? [`${intText(leads)} sign-ups`, `${intText(row?.boughtSoFar ?? 0)} bought`, ...(spend ? [`${money(Math.round(spend.spend * 100), currency)} ads`] : [])].join(" · ")
+        : "numbers unavailable";
+      return { lang: t.tab, label: t.label, steps, summary };
+    }),
+  };
+}
+
 export async function getFunnelMap(id: string): Promise<FunnelMap | null> {
+  if (id === FREE_PACKS_ID) return freePacksMap();
   const row = await getFunnel(id).catch(() => null);
   const product = await resolveFunnel(id).catch(() => undefined);
   if (product) {

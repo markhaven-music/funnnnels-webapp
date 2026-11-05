@@ -337,20 +337,20 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
         </div>
       </header>
 
-      {map.canTranslate && (
-        <nav className={s.langs} aria-label="Languages">
+      {(map.canTranslate || map.langs.length > 1) && (
+        <nav className={s.langs} aria-label={map.canTranslate ? "Languages" : "Tabs"}>
           {map.langs.map((l) => {
             const m = langMetrics(l.lang);
             return (
               <button key={l.lang} type="button" className={`${s.lang} ${l.lang === lang ? s.langOn : ""}`} onClick={() => setLang(l.lang)}>
                 <span className={s.langName}>{l.label}</span>
                 <span className={s.langStats}>
-                  {m ? `${int(m.visitors)} visitors · ${int(m.orders)} orders · ${eur(m.revenue)}` : loading ? "…" : "no numbers yet"}
+                  {l.summary ?? (m ? `${int(m.visitors)} visitors · ${int(m.orders)} orders · ${eur(m.revenue)}` : loading ? "…" : "no numbers yet")}
                 </span>
               </button>
             );
           })}
-          <AddLanguage map={map} />
+          {map.canTranslate && <AddLanguage map={map} />}
         </nav>
       )}
 
@@ -373,7 +373,7 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
         )}
 
         {current.steps.map((step) => {
-          const rows = metrics ? stepStats(step, metrics, hasOrderStep) : [];
+          const rows = step.numbers ?? (metrics ? stepStats(step, metrics, hasOrderStep) : []);
           // What this page sells: the checkout's product and order bumps, or the upsell's offer.
           const sells =
             step.kind === "order" || (step.kind === "landing" && !hasOrderStep)
@@ -418,7 +418,7 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
                     </div>
                   </div>
                 </div>
-                {map.statsSlug && (
+                {(map.statsSlug || (step.numbers && step.numbers.length > 0)) && (
                   <div className={s.stats} style={{ opacity: loading ? 0.5 : 1 }}>
                     {rows.length ? (
                       rows.map((r) => (
@@ -441,6 +441,14 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
           );
         })}
 
+        {map.numbersFrom && (
+          <p className={s.note}>
+            {map.numbersFrom.note}{" "}
+            <Link href={map.numbersFrom.href} className={s.link}>
+              {map.numbersFrom.link}
+            </Link>
+          </p>
+        )}
         {map.statsSlug && (
           <p className={s.note}>
             Numbers for {RANGES.find((r) => r.id === range)?.note}

@@ -7,7 +7,8 @@ import type { StoredFunnel } from "@/lib/blocks";
 // funnel's map (app/funnels/[id]). Their visits, CVR and revenue
 // come from dashboard → Analytics (see withStats).
 
-type CodeCard = { id: string; name: string; image: string; steps: number };
+// tag: the word on the card's picture ("Sales" when not given).
+type CodeCard = { id: string; name: string; image: string; steps: number; tag?: string };
 
 const CARDS: CodeCard[] = [
   {
@@ -28,6 +29,16 @@ const CARDS: CodeCard[] = [
     image: "/funnels/famous-beats-bundle/preview.webp",
     steps: 3,
   },
+  // The free lead magnets (app/free), one map with a tab per pack (lib/funnelMap.ts
+  // freePacksMap): the sign-up page, then the MIDI Drum Kit's pages. Analytics
+  // doesn't count them, so the card shows no visits; the map has their numbers.
+  {
+    id: "free-packs",
+    name: "Free packs",
+    image: "/funnels/free/optin-rolls.webp",
+    steps: 4,
+    tag: "Lead magnet",
+  },
 ];
 
 // The cards show a screenshot of the first page: public/funnels/<slug>/preview.webp,
@@ -42,7 +53,7 @@ export function withCodeFunnels(funnels: StoredFunnel[]): StoredFunnel[] {
     name: c.name,
     status: "live",
     type: "Code",
-    tag: "Sales",
+    tag: c.tag ?? "Sales",
     palette: ["oklch(0.82 0.16 75)", "oklch(0.55 0.18 280)"],
     views: "—",
     cvr: "—",
