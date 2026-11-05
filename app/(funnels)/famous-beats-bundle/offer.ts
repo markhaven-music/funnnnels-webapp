@@ -10,7 +10,8 @@ import { funnel } from "./funnel";
 // in their order, their words from ./copy with the price restated when it
 // changed. An add-on added from Products says its name and tagline.
 
-export async function orderOffer(currency: Currency, product?: Product): Promise<OrderOffer> {
+// words: the add-ons' words as the page has them (with the dashboard's edits), else ./copy.ts'.
+export async function orderOffer(currency: Currency, product?: Product, words: Record<string, string[]> = bumpCopy): Promise<OrderOffer> {
   const code = getFunnel(funnel.slug)!;
   const f = product ?? (await resolveFunnel(funnel.slug)) ?? code;
   return {
@@ -26,7 +27,7 @@ export async function orderOffer(currency: Currency, product?: Product): Promise
         price: b.price[currency],
         image: known?.image ?? b.image ?? "",
         headline: known?.headline ?? `YES! Add ${b.name}!`,
-        body: (bumpCopy[b.id] ?? (b.pitch ? [b.pitch] : [])).map((p) => restate(p, was, b.price[currency])),
+        body: (words[b.id] ?? bumpCopy[b.id] ?? (b.pitch ? [b.pitch] : [])).map((p) => restate(p, was, b.price[currency])),
       };
     }),
   };

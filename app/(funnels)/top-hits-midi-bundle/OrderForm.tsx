@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 // "pure": Stripe.js loads when loadStripe is called, not as soon as this file does.
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
@@ -12,6 +12,8 @@ import { OwnerSkip } from "../OwnerSkip";
 import { withSkin, type Styles } from "../skin";
 import type { OrderOffer } from "../midi-drum-kit/offer";
 import { funnel } from "./funnel";
+import { FORM, type FormWords } from "./formWords";
+import { B } from "./Lines";
 import { Rich } from "./Rich";
 import base from "./order.module.css";
 
@@ -51,9 +53,12 @@ type Props = {
   sells?: Sells;
   skin?: Styles;
   buttons?: Styles;
+  /** Its words (./formWords.ts), with the dashboard's edits. */
+  words?: FormWords;
 };
 
 const Skin = createContext<Styles>(base);
+const Words = createContext<FormWords>(FORM);
 
 const TOP_HITS: Sells = { slug: funnel.slug, tagline: funnel.tagline, thankYou: funnel.checkout.thankYou };
 
@@ -65,12 +70,17 @@ function stripeFor(key: string) {
 
 const money = (n: number, c: Currency) => `${c === "eur" ? "€" : "$"}${n.toFixed(2)}`;
 
-export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer, sells = TOP_HITS, skin, buttons }: Props) {
+export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer, sells = TOP_HITS, skin, buttons, words = FORM }: Props) {
+  const w = words;
   const s = useMemo(() => {
     const k = withSkin(base, skin);
     return buttons ? { ...k, cta: buttons.cta, ctaPay: buttons.ctaPay, ctaSub: buttons.ctaSub, ctaArrow: buttons.ctaArrow } : k;
   }, [skin, buttons]);
   const [step, setStep] = useState<1 | 2>(1);
+  // The dashboard's editor (funnel map → Edit, "Form step 2") opens the form on step 2, to edit its words.
+  useEffect(() => {
+    if (/[?&]edit=1(&|$)/.test(location.search) && /[?&]step=2(&|$)/.test(location.search)) setStep(2);
+  }, []);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);
   const [method, setMethod] = useState<Method>("card");
@@ -85,6 +95,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
   const state: PayState = { currency, country, info, method, picked, setPicked, total, next, offer, slug: sells.slug };
 
   return (
+    <Words.Provider value={w}>
     <Skin.Provider value={s}>
       <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
         {step === 1 ? (
@@ -93,15 +104,15 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
               <li className={s.stepOn}>
                 <span className={s.stepNum}>1</span>
                 <span>
-                  <span className={s.stepTitle}>Your Info</span>
-                  <span className={s.stepSub}>Name &amp; Email</span>
+                  <span className={s.stepTitle}>{w.step1}</span>
+                  <span className={s.stepSub}>{w.step1Sub}</span>
                 </span>
               </li>
               <li>
                 <span className={s.stepNum}>2</span>
                 <span>
-                  <span className={s.stepTitle}>Payment</span>
-                  <span className={s.stepSub}>Payment Info</span>
+                  <span className={s.stepTitle}>{w.step2}</span>
+                  <span className={s.stepSub}>{w.step2Sub}</span>
                 </span>
               </li>
             </ol>
@@ -127,7 +138,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
                   d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"
                 />
               </svg>
-              Go Back
+              {w.back}
             </button>
 
             <label className={s.product}>
@@ -140,7 +151,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
             </label>
 
             <p className={s.label}>
-              <span>PAYMENT INFORMATION</span>
+              <span>{w.payInfo}</span>
             </p>
             <div className={s.methods} role="radiogroup" aria-label="Payment method">
               <button
@@ -150,7 +161,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
                 className={`${s.method} ${method === "card" ? s.methodOn : ""}`}
                 onClick={() => setMethod("card")}
               >
-                <CardGlyph /> Card
+                <CardGlyph /> {w.card}
               </button>
               {PAYPAL_ON && (
                 <button
@@ -160,7 +171,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
                   className={`${s.method} ${method === "paypal" ? s.methodOn : ""}`}
                   onClick={() => setMethod("paypal")}
                 >
-                  <PayPalGlyph /> Paypal
+                  <PayPalGlyph /> {w.paypal}
                 </button>
               )}
             </div>
@@ -179,11 +190,13 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
         )}
       </div>
     </Skin.Provider>
+    </Words.Provider>
   );
 }
 
 function InfoStep({ info, slug, onDone }: { info: Info; slug: string; onDone: (info: Info) => void }) {
   const s = useContext(Skin);
+  const w = useContext(Words);
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.currentTarget)) as Info;
@@ -199,12 +212,12 @@ function InfoStep({ info, slug, onDone }: { info: Info; slug: string; onDone: (i
   return (
     <form onSubmit={submit} className={s.body}>
       <div className={s.fields}>
-        <input name="firstName" placeholder="First Name" autoComplete="given-name" defaultValue={info.firstName} required className={s.input} />
-        <input name="lastName" placeholder="Last Name" autoComplete="family-name" defaultValue={info.lastName} className={s.input} />
+        <input name="firstName" placeholder={w.firstName} autoComplete="given-name" defaultValue={info.firstName} required className={s.input} />
+        <input name="lastName" placeholder={w.lastName} autoComplete="family-name" defaultValue={info.lastName} className={s.input} />
         <input
           name="email"
           type="email"
-          placeholder="Email"
+          placeholder={w.email}
           autoComplete="email"
           inputMode="email"
           defaultValue={info.email}
@@ -219,9 +232,9 @@ function InfoStep({ info, slug, onDone }: { info: Info; slug: string; onDone: (i
             d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
           />
         </svg>
-        GO TO STEP 2
+        {w.toStep2}
       </button>
-      <p className={s.respect}>We respect your privacy &amp; information.</p>
+      <p className={s.respect}>{w.respect}</p>
       <OwnerSkip onSkip={() => onDone(info)} />
     </form>
   );
@@ -242,6 +255,7 @@ type PayState = {
 
 function CardPay({ stripePromise, ...props }: PayState & { stripePromise: ReturnType<typeof loadStripe> }) {
   const s = useContext(Skin);
+  const w = useContext(Words);
   const stripe = useStripe();
   const elements = useElements();
   const [paying, setPaying] = useState(false);
@@ -291,10 +305,10 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
         </Elements>
         {hasWallet && (
           <div className={s.orCard}>
-            <span>or pay by card</span>
+            <span>{w.orCard}</span>
           </div>
         )}
-        <CardFields words={{ number: "Card number", expiry: "MM / YY", cvc: "CVV" }} look={INTER} />
+        <CardFields words={{ number: w.cardNumber, expiry: w.cardExpiry, cvc: w.cardCvc }} look={INTER} />
       </div>
       <PayBody {...props} onCard={payByCard} cardPaying={paying || !stripe} cardError={error} />
     </>
@@ -317,6 +331,7 @@ function PayBody({
   cardError,
 }: PayState & { onCard?: () => void; cardPaying?: boolean; cardOff?: boolean; cardError?: string | null }) {
   const s = useContext(Skin);
+  const w = useContext(Words);
   const [paypalBusy, setPaypalBusy] = useState(false);
   const [paypalError, setPaypalError] = useState<string | null>(null);
   const paypal = method === "paypal";
@@ -359,8 +374,7 @@ function PayBody({
           <PayPalGlyph />
           {/* One flex item: the note box is a flex row, so a bare <b> would become a column of its own. */}
           <span>
-            After you click{" "}<b>GET THE PACK!</b>{" "}below, you finish paying on PayPal&rsquo;s secure page, then come straight back to your
-            download.
+            <B text={w.paypalNote} />
           </span>
         </div>
       )}
@@ -381,7 +395,7 @@ function PayBody({
             <span className={s.bumpText}>
               {b.body.map((p, i) => (
                 <span key={i} className={s.bumpPara}>
-                  {i === 0 && <span className={s.oto}>ONE-TIME OFFER:</span>} <Rich text={p} currency={currency} />
+                  {i === 0 && <span className={s.oto}>{w.oto}</span>} <Rich text={p} currency={currency} />
                 </span>
               ))}
             </span>
@@ -392,7 +406,7 @@ function PayBody({
       <details className={s.summary}>
         <summary>
           <span className={s.sumLeft}>
-            <BasketGlyph /> Summary
+            <BasketGlyph /> {w.summary}
           </span>
           <span className={s.sumRight}>
             {money(total, currency)}
@@ -416,7 +430,7 @@ function PayBody({
             </div>
           ))}
           <div className={`${s.sumRow} ${s.sumTotal}`}>
-            <span>Total</span>
+            <span>{w.total}</span>
             <span>{money(total, currency)}</span>
           </div>
         </div>
@@ -424,7 +438,7 @@ function PayBody({
 
       <button type="button" className={`${s.cta} ${s.ctaPay}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
         {busy && !cardOff ? (
-          paypal ? "Opening PayPal…" : "Processing…"
+          paypal ? w.openingPaypal : w.processing
         ) : (
           <>
             <svg viewBox="0 0 448 512" className={s.ctaArrow} aria-hidden>
@@ -433,8 +447,8 @@ function PayBody({
                 d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
               />
             </svg>
-            GET THE PACK!
-            <span className={s.ctaSub}>Get Instant Access</span>
+            {w.pay}
+            <span className={s.ctaSub}>{w.paySub}</span>
           </>
         )}
       </button>
@@ -443,7 +457,7 @@ function PayBody({
           {error}
         </p>
       )}
-      <p className={s.respect}>We respect your privacy &amp; information.</p>
+      <p className={s.respect}>{w.respect}</p>
     </>
   );
 }

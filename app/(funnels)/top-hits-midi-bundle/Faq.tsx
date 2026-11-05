@@ -3,24 +3,25 @@
 import { useState } from "react";
 import type { Currency } from "@/lib/geo";
 import { restate } from "@/lib/restate";
-import { faq } from "./copy";
 import { funnel } from "./funnel";
 import { Rich } from "./Rich";
+import { LANDING, type FaqWords } from "./words";
 import s from "./landing.module.css";
 
 // price: the bundle's, as dashboard → Products has it (the answers say it).
-export function Faq({ currency, price }: { currency: Currency; price: number }) {
+// w: its words (./words.ts), with the dashboard's edits.
+export function Faq({ currency, price, w = LANDING.faq }: { currency: Currency; price: number; w?: FaqWords }) {
   const [open, setOpen] = useState<number | null>(null);
   return (
     <div className={s.faq}>
-      <p className={s.eyebrow}>FREQUENTLY ASKED</p>
+      <p className={s.eyebrow}>{w.eyebrow}</p>
       <h2 className={s.faqTitle}>
-        GOT <em>QUESTIONS?</em>
+        <Rich text={w.title} currency={currency} />
       </h2>
-      <p className={s.faqSub}>Everything you need to know before grabbing the pack.</p>
+      <p className={s.faqSub}>{w.sub}</p>
       <div className={s.faqList}>
-        {faq.map((item, i) => (
-          <div key={item.q} className={`${s.faqItem} ${open === i ? s.faqOpen : ""}`}>
+        {w.items.map((item, i) => (
+          <div key={i} className={`${s.faqItem} ${open === i ? s.faqOpen : ""}`}>
             <button type="button" className={s.faqTrigger} aria-expanded={open === i} onClick={() => setOpen(open === i ? null : i)}>
               <span>{item.q}</span>
               <span className={s.faqIcon} aria-hidden />

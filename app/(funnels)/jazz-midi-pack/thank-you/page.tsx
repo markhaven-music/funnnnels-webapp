@@ -4,6 +4,9 @@ import { after } from "next/server";
 import { reportSaleToNeo } from "@/lib/neo";
 import { noteSale } from "@/lib/sales";
 import { getOrder } from "@/lib/orders";
+import { fill, wordsFor } from "@/lib/words";
+import { Slots } from "../../top-hits-midi-bundle/Lines";
+import { THANKS } from "../thanksWords";
 import { funnel, unlocked } from "../funnel";
 import { PurchasePixel } from "../PurchasePixel";
 import { Beacon } from "../../Beacon";
@@ -33,15 +36,25 @@ const BONUS = new Set<string>(funnel.bonuses.map((x) => x.id));
 export default async function ThankYou({
   searchParams,
 }: {
-  searchParams: Promise<{ payment_intent?: string; paypal_order?: string }>;
+  searchParams: Promise<{ payment_intent?: string; paypal_order?: string; preview?: string }>;
 }) {
-  const { payment_intent, paypal_order } = await searchParams;
+  const { payment_intent, paypal_order, preview } = await searchParams;
+  // Its words, with the dashboard's edits (funnel map → Edit).
+  const w = await wordsFor(funnel.slug, "thank-you", THANKS);
   const order = await getOrder(payment_intent ?? paypal_order, funnel.slug);
   // The sale also goes to neo, labelled funnnnels (lib/neo.ts).
   if (order) reportSaleToNeo(order, funnel.product);
   if (order) after(() => noteSale(order, funnel.slug, "en"));
-  const paid = order?.status === "succeeded";
+  // The dashboard's preview (?preview=1, not counted: lib/beacon.ts) with no order:
+  // the page as a buyer sees it, its buttons inert.
+  const sample = !order && preview === "1";
+  const paid = sample || order?.status === "succeeded";
   const pending = order?.status === "processing";
+  const keys = sample ? unlocked(["pack"]) : paid && order ? unlocked(order.items) : [];
+  const orderId = order?.id ?? "preview";
+  const state = paid ? w.paid : pending ? w.pending : w.failed;
+  // _words_ in the heading are its italics.
+  const title = state.title.split(/_(.+?)_/).map((part, i) => (i % 2 ? <em key={i}>{part}</em> : part));
 
   return (
     <main className={`${s.page} ${s.jazz} ${display.variable}`}>
@@ -57,63 +70,43 @@ export default async function ThankYou({
         </header>
         <div className={`${s.wrap} ${s.col} ${s.thanks}`} style={{ position: "relative" }}>
           <p className={s.eyebrow}>{funnel.product}</p>
-          <h1 className={s.display}>
-            {paid ? (
-              <>
-                You&rsquo;re in. <em>Go write.</em>
-              </>
-            ) : pending ? (
-              <>
-                Payment <em>processing.</em>
-              </>
-            ) : (
-              <>
-                Payment <em>not completed.</em>
-              </>
-            )}
-          </h1>
-          <p className={s.lead}>
-            {paid
-              ? "Payment received. Your files are below. Bookmark this page: the buttons keep working when you come back."
-              : pending
-                ? "Your bank is still confirming the payment. Refresh this page in a minute and your downloads will appear."
-                : "Nothing was charged. Go back and try again with another card or PayPal."}
-          </p>
-          {paid && order && (
+          <h1 className={s.display}>{title}</h1>
+          <p className={s.lead}>{state.lead}</p>
+          {keys.length > 0 && (
             <div className={s.thanksActions}>
-              {unlocked(order.items).map((key) => (
+              {keys.map((key) => (
                 <a
                   key={key}
-                  href={`/${funnel.slug}/download?order=${order.id}&file=${key}`}
+                  href={`/${funnel.slug}/download?order=${orderId}&file=${key}`}
                   className={key === "pack" ? b.btn : s.ghostBtn}
                 >
                   {key === "pack" && <span className={b.shine} aria-hidden />}
                   <span className={key === "pack" ? b.label : undefined}>
-                    Download {BONUS.has(key) && key !== "pack" ? "bonus: " : ""}
-                    {LABELS[key] ?? key}
+                    {fill(BONUS.has(key) && key !== "pack" ? w.downloadBonus : w.download, { name: LABELS[key] ?? key })}
                   </span>
-                  {key === "pack" && <span className={b.inner}>.zip · {funnel.counts.files.toLocaleString("en-US")} MIDI files</span>}
+                  {key === "pack" && <span className={b.inner}>{fill(w.zip, { files: funnel.counts.files.toLocaleString("en-US") })}</span>}
                 </a>
               ))}
             </div>
           )}
           {paid && (
             <p className={s.sub} data-clarity-mask="True">
-              Start with folder 01, file 01. {order?.provider === "paypal" ? "PayPal" : "Stripe"} has emailed your receipt
-              {order?.email ? ` to ${order.email}` : ""}. A file doesn&rsquo;t open? Email{" "}
-              <a href={`mailto:${funnel.support}`}>{funnel.support}</a> and we fix it.
+              <Slots
+                text={fill(w.receipt, { provider: order?.provider === "paypal" ? "PayPal" : "Stripe", to: order?.email ? fill(w.receiptTo, { email: order.email }) : "" })}
+                slots={{ support: <a href={`mailto:${funnel.support}`}>{funnel.support}</a> }}
+              />
             </p>
           )}
           {paid && (
             <p className={s.account}>
-              Find your downloads anytime at <a href={ACCOUNT_URL}>{ACCOUNT_URL.replace("https://", "")}</a>
+              <Slots text={w.account} slots={{ account: <a href={ACCOUNT_URL}>{ACCOUNT_URL.replace("https://", "")}</a> }} />
             </p>
           )}
           {!paid && !pending && (
             <div className={s.thanksActions}>
               <a href={funnel.checkout.orderPage} className={b.btn}>
                 <span className={b.shine} aria-hidden />
-                <span className={b.label}>Back to checkout</span>
+                <span className={b.label}>{w.back}</span>
               </a>
             </div>
           )}

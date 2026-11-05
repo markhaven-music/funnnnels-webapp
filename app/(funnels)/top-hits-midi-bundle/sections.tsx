@@ -1,58 +1,48 @@
 import type { Currency } from "@/lib/geo";
 import { restate } from "@/lib/restate";
-import { compare, type Cell } from "./copy";
+import { fill } from "@/lib/words";
+import { compare } from "./copy";
 import { funnel } from "./funnel";
 import { Rich, sign } from "./Rich";
+import { LANDING, type CompareWords, type StackWords } from "./words";
 import s from "./landing.module.css";
 
 // The landing's repeated blocks: the value stack, the two green buttons, the comparison table.
 // `price`: the bundle's, as dashboard → Products has it; the words that say
-// the code's price say this one (lib/restate.ts).
+// the code's price say this one (lib/restate.ts). Their words: ./words.ts,
+// with the dashboard's edits when the page hands them in.
 
-export function ValueStack({ currency, price }: { currency: Currency; price: number }) {
+export function ValueStack({ currency, price, w = LANDING.stack }: { currency: Currency; price: number; w?: StackWords }) {
   const c = sign(currency);
+  const t = (text: string) => fill(text, { price }).replaceAll("{c}", c);
   return (
     <div className={s.stack}>
-      <div className={s.stackHead}>Here&apos;s What You Get Today</div>
+      <div className={s.stackHead}>{w.head}</div>
       <div className={s.stackCtx}>
         <p>
-          If you hired a world-class transcription service to rip these chord progressions note-for-note, you&apos;d
-          pay <strong>at least {c}20 per transcription.</strong> That&apos;s <strong>{c}20,000 for all 1,000.</strong>
+          <Rich text={fill(w.hired, { price })} currency={currency} />
         </p>
         <p>
-          Right now, you&apos;re getting all of them for just{" "}
-          <span className={s.green}>
-            {c}
-            {price}.
-          </span>
+          <Rich text={fill(w.now, { price })} currency={currency} hl={s.green} />
         </p>
       </div>
-      <div className={s.stackRow}>
-        <span>1,000 Chord Progressions</span>
-        <span>Included</span>
-      </div>
-      <div className={s.stackRow}>
-        <span>Transcribed 1:1 From Top Hits</span>
-        <span>496 Artists</span>
-      </div>
-      <div className={s.stackRow}>
-        <span>Pro Transcription Cost ({c}20 each)</span>
-        <span>{c}20,000</span>
-      </div>
+      {w.rows.map(([label, value], i) => (
+        <div key={i} className={s.stackRow}>
+          <span>{t(label)}</span>
+          <span>{t(value)}</span>
+        </div>
+      ))}
       <div className={s.stackTotal}>
-        <span>Total Real Value</span>
-        <span>{c}20,000</span>
+        <span>{t(w.total[0])}</span>
+        <span>{t(w.total[1])}</span>
       </div>
-      <div className={s.stackFinal}>
-        YOUR PRICE TODAY: {c}
-        {price}
-      </div>
+      <div className={s.stackFinal}>{t(w.final)}</div>
       <div className={s.stackPer}>
-        That&apos;s just <strong>{c}0.03 per chord progression</strong>
+        <Rich text={fill(w.per, { price })} currency={currency} />
       </div>
       <div className={s.stackScarcity}>
         <span className={s.pulse} />
-        Limited To The First 100 Copies
+        {w.scarcity}
       </div>
     </div>
   );
@@ -60,19 +50,19 @@ export function ValueStack({ currency, price }: { currency: Currency; price: num
 
 const ORDER = funnel.checkout.orderPage;
 
-export function GetThePack() {
+export function GetThePack({ w = LANDING.cta }: { w?: { main: string; sub: string } }) {
   return (
     <a href={ORDER} className={s.cta} data-cta>
-      <span className={s.ctaMain}>GET THE PACK!</span>
-      <span className={s.ctaSub}>90% OFF - Instant Download &amp; Email Link</span>
+      <span className={s.ctaMain}>{w.main}</span>
+      <span className={s.ctaSub}>{w.sub}</span>
     </a>
   );
 }
 
-export function YesButton() {
+export function YesButton({ text = LANDING.yes }: { text?: string }) {
   return (
     <a href={ORDER} className={s.yes} data-cta>
-      <span className={s.yesText}>YES!! I WANT THE BUNDLE</span>
+      <span className={s.yesText}>{text}</span>
       <svg className={s.yesArrow} viewBox="0 0 448 512" aria-hidden>
         <path
           fill="currentColor"
@@ -94,7 +84,7 @@ export function Check({ className }: { className?: string }) {
   );
 }
 
-function Mark({ cell, currency }: { cell: Cell; currency: Currency }) {
+function Mark({ cell, currency }: { cell: string; currency: Currency }) {
   if (cell === "yes")
     return (
       <span className={`${s.icon} ${s.yesIcon}`} aria-label="Yes">
@@ -121,20 +111,26 @@ function Mark({ cell, currency }: { cell: Cell; currency: Currency }) {
   return <Rich text={cell} currency={currency} />;
 }
 
-export function Compare({ currency, price }: { currency: Currency; price: number }) {
+export function Compare({ currency, price, w = LANDING.compare }: { currency: Currency; price: number; w?: CompareWords }) {
+  // The words of the code's table, the ✓ ✗ − cells as the code has them.
+  const columns = compare.columns.map((col, i) => ({ ...col, name: w.columns[i]?.name ?? col.name, sub: w.columns[i]?.sub ?? col.sub }));
+  const rows = compare.rows.map((row, r) => ({
+    label: w.rows[r]?.label ?? row.label,
+    values: row.values.map((v, i) => w.rows[r]?.values[i] ?? v),
+  }));
   return (
     <div className={s.cmp}>
-      <p className={s.eyebrow}>DO THE MATH</p>
+      <p className={s.eyebrow}>{w.eyebrow}</p>
       <h2 className={s.cmpTitle}>
-        WHY THIS BEATS <em>EVERY ALTERNATIVE</em>
+        <Rich text={w.title} currency={currency} />
       </h2>
-      <p className={s.cmpSub}>There are other ways to get hit chord progressions. None of them stack up.</p>
+      <p className={s.cmpSub}>{w.sub}</p>
       <table className={s.table}>
         <thead>
           <tr>
             <th />
-            {compare.columns.map((col) => (
-              <th key={col.name} className={col.bundle ? s.isBundle : undefined}>
+            {columns.map((col, i) => (
+              <th key={i} className={col.bundle ? s.isBundle : undefined}>
                 <span className={s.headName}>{col.name}</span>
                 <span className={s.headSub}>{col.sub}</span>
               </th>
@@ -142,11 +138,11 @@ export function Compare({ currency, price }: { currency: Currency; price: number
           </tr>
         </thead>
         <tbody>
-          {compare.rows.map((row) => (
-            <tr key={row.label}>
+          {rows.map((row, r) => (
+            <tr key={r}>
               <td className={s.isLabel}>{row.label}</td>
               {row.values.map((v, i) => (
-                <td key={i} className={compare.columns[i].bundle ? s.isBundle : undefined}>
+                <td key={i} className={columns[i].bundle ? s.isBundle : undefined}>
                   <Mark cell={typeof v === "string" ? restate(v, funnel.price[currency], price) : v} currency={currency} />
                 </td>
               ))}
@@ -155,15 +151,15 @@ export function Compare({ currency, price }: { currency: Currency; price: number
         </tbody>
       </table>
       <div className={s.cards}>
-        {compare.columns.map((col, i) => (
-          <div key={col.name} className={`${s.card} ${col.bundle ? s.isBundle : ""}`}>
+        {columns.map((col, i) => (
+          <div key={i} className={`${s.card} ${col.bundle ? s.isBundle : ""}`}>
             <div className={s.cardHead}>
               <span className={s.cardName}>{col.name}</span>
               <span className={s.cardSub}>{col.sub}</span>
             </div>
             <ul className={s.cardList}>
-              {compare.rows.map((row) => (
-                <li key={row.label}>
+              {rows.map((row, r) => (
+                <li key={r}>
                   <span>{row.label}</span>
                   <span>
                     <Mark cell={row.values[i]} currency={currency} />

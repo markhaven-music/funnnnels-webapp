@@ -1,3 +1,4 @@
+import { editUrl } from "@/lib/editableIndex";
 import { freePackStats, type FreePackRow } from "@/lib/freePacks";
 import { resolveFunnel, upsellsOn, type Product } from "@/lib/funnels";
 import { KIT_HOME, PRODUCT_TYPE } from "@/lib/liveUrl";
@@ -74,8 +75,9 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
       const shots = SHOTS[f.slug]?.[lang] ?? SHOTS[f.slug]?.en;
       const img = (name?: string) => (name ? `/funnels/${f.slug}/${name}.webp` : null);
       const edit = editable.has(f.slug) ? `/funnels/${f.slug}/edit` : null;
-      // The MIDI Drum Kit's pages are code: their words are edited page by page (app/funnels/[id]/texts).
-      const texts = (page: string) => (f.slug === "midi-drum-kit" ? `/funnels/${f.slug}/texts?page=${page}&lang=${lang}` : null);
+      // Pages built in code: their words are edited page by page (app/funnels/[id]/texts, lib/editableIndex.ts);
+      // an upsell that is a Drum Kit page is edited there.
+      const texts = (page: string) => editUrl(f.slug, page, lang);
       const step = (kind: MapStepKind, name: string, path: string, image: string | null, editUrl: string | null): MapStep => {
         const at = `${kind === "landing" ? landingPrefix(f.slug, lang, prefix) : prefix}${path}`;
         return { kind, name, path: at, url: `${KIT_HOME}${at}`, image, editUrl };
@@ -166,7 +168,7 @@ async function freePacksMap(only?: FreePackTab): Promise<FunnelMap> {
           path: t.page,
           url: `${KIT_HOME}${t.page}`,
           image: `/funnels/free/${t.shot}.webp`,
-          editUrl: null,
+          editUrl: editUrl("free", t.tab),
           numbers: optinNumbers,
         },
         ...kitSteps.map((st): MapStep => {

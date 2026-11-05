@@ -39,6 +39,8 @@ type Props = {
   sync: number;
   /** The page's sections in the code's order (none: a React page). */
   sections: FrameSection[];
+  /** What {name} in a copy text shows as on the page ({c}: €). */
+  vars: Record<string, string>;
   /** The page's layout as it is now (draft or saved). */
   layout: Layout;
   onLayout: (layout: Layout) => void;
@@ -73,34 +75,47 @@ img[data-fi].fx-changed{outline:1px dashed #f5b800;outline-offset:2px}
 img[data-fi].fx-sel{outline:2px solid #22c55e!important;outline-offset:2px}
 `;
 
-const norm = (s: string) => s.replace(/[  ​]/g, " ").replace(/\s+/g, " ").trim();
+// Words compared without their spaces: a heading's lines (<br>, display:block
+// spans) join without one in the page's text, with one in the code's.
+const squash = (s: string) => s.replace(/[\s  ​]+/g, "");
 
-/** How a copy text shows on the page (euros). */
-export function copyDisplay(raw: string): string {
+/** How a copy text shows on the page (euros): its marks as tags, its {tokens} filled in. */
+export function copyDisplay(raw: string, vars: Record<string, string> = { c: "€" }): string {
   const esc = raw.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return esc
+    .replace(/^# /, "")
     .replace(/\*\*([\s\S]+?)\*\*/g, "<b>$1</b>")
-    .replaceAll("{c}", "€")
-    .replace(/\n/g, "<br>");
+    .replace(/__([\s\S]+?)__/g, "<u>$1</u>")
+    .replace(/==([\s\S]+?)==/g, "<mark>$1</mark>")
+    .replace(/(^|[^\w])_([^_]+?)_(?=[^\w]|$)/g, "$1<em>$2</em>")
+    .replace(/\{(\w+)\}/g, (m, k: string) => vars[k] ?? (k === "date" ? "" : m))
+    .replace(/\||\n/g, "<br>");
 }
 
-/** A copy text back from how it shows: <b> → **, line breaks → \n, € → {c} where the code had {c}. */
-function copyFromHtml(html: string, raw: string, doc: Document): string {
+/** A copy text back from how it shows: tags → marks, line breaks → \n (| in a heading), tokens back where the code had them. */
+function copyFromHtml(html: string, raw: string, doc: Document, vars: Record<string, string>): string {
   const marked = html
     .replace(/<(b|strong)\b[^>]*>([\s\S]*?)<\/\1>/gi, "**$2**")
-    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<u\b[^>]*>([\s\S]*?)<\/u>/gi, "__$1__")
+    .replace(/<(em|i)\b[^>]*>([\s\S]*?)<\/\1>/gi, "_$2_")
+    .replace(/<(mark|span)\b[^>]*>([\s\S]*?)<\/\1>/gi, (m, _t, inner: string) => (raw.includes("==") ? `==${inner}==` : inner))
+    .replace(/<br\s*\/?>/gi, raw.includes("|") ? "|" : "\n")
     .replace(/<[^>]+>/g, "");
   const t = doc.createElement("textarea");
   t.innerHTML = marked;
-  let text = t.value.replace(/ /g, " ").replace(/\*\*\*\*/g, "");
-  if (raw.includes("{c}")) text = text.replaceAll("€", "{c}");
+  let text = t.value.replace(/ /g, " ").replace(/\*\*\*\*|____|====/g, "");
+  // The tokens the code's text has, back from what the page shows ({price} before {c}: "€27").
+  for (const k of Object.keys(vars).sort((a, b) => (a === "c" ? 1 : b === "c" ? -1 : 0))) {
+    if (raw.includes(`{${k}}`) && vars[k]) text = text.split(vars[k]).join(`{${k}}`);
+  }
+  if (raw.startsWith("# ") && !text.startsWith("# ")) text = `# ${text}`;
   return text;
 }
 
 /** The page's sections as they stand, top to bottom. */
 const sectionEls = (doc: Document) => [...doc.querySelectorAll<HTMLElement>("[data-fs]")];
 
-export function PageFrame({ src, width, texts, onEdit, onSelect, onFound, sync, sections, layout, onLayout, onImage }: Props) {
+export function PageFrame({ src, width, texts, onEdit, onSelect, onFound, sync, sections, vars, layout, onLayout, onImage }: Props) {
   const frame = useRef<HTMLIFrameElement>(null);
   const els = useRef(new Map<string, HTMLElement>());
   // The text being typed in: never redrawn under the caret.
@@ -108,9 +123,9 @@ export function PageFrame({ src, width, texts, onEdit, onSelect, onFound, sync, 
   // The picture selected (its key), outlined on every copy of it.
   const picked = useRef<string | null>(null);
   // The latest props for the frame's listeners, set up once per load.
-  const live = useRef({ texts, onEdit, onSelect, onFound, sections, layout, onLayout, onImage });
+  const live = useRef({ texts, onEdit, onSelect, onFound, sections, vars, layout, onLayout, onImage });
   useEffect(() => {
-    live.current = { texts, onEdit, onSelect, onFound, sections, layout, onLayout, onImage };
+    live.current = { texts, onEdit, onSelect, onFound, sections, vars, layout, onLayout, onImage };
   });
 
   // Changed texts outlined in yellow.
@@ -148,7 +163,7 @@ export function PageFrame({ src, width, texts, onEdit, onSelect, onFound, sync, 
     // ClickFunnels' texts: between their marks.
     const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_COMMENT);
     const starts: Comment[] = [];
-    for (let n = walker.nextNode(); n; n = walker.nextNode()) if (/^fx:t\d{3}$/.test((n as Comment).data)) starts.push(n as Comment);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) if (/^fx:[\w-]+$/.test((n as Comment).data)) starts.push(n as Comment);
     for (const start of starts) {
       const key = start.data.slice(3);
       const inside: Node[] = [];
@@ -182,15 +197,21 @@ export function PageFrame({ src, width, texts, onEdit, onSelect, onFound, sync, 
       const all = [...doc.body.querySelectorAll<HTMLElement>("*")].filter(
         (e) => !/^(SCRIPT|STYLE|NOSCRIPT|svg|path|TEMPLATE)$/.test(e.tagName) && !e.closest("[data-fx]") && !e.closest(".fs-bar"),
       );
-      const words = new Map(all.map((e) => [e, norm(e.textContent ?? "")]));
+      const words = new Map(all.map((e) => [e, squash(e.textContent ?? "")]));
       const taken = new Set<HTMLElement>();
+      let last: HTMLElement | null = null;
       for (const t of copies) {
-        const want = norm(copyDisplay(t.shown).replace(/<br>/g, " ").replace(/<[^>]+>/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"));
+        const want = squash(copyDisplay(t.shown, live.current.vars).replace(/<[^>]+>/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"));
         if (want.length < 2) continue;
-        const el = all.find(
-          (e) => !taken.has(e) && words.get(e) === want && ![...e.children].some((c) => words.get(c as HTMLElement) === want) && !e.querySelector("[data-fx]"),
-        );
+        const fits = (e: HTMLElement) =>
+          !taken.has(e) && words.get(e) === want && ![...e.children].some((c) => words.get(c as HTMLElement) === want) && !e.querySelector("[data-fx]");
+        // The words come in about the page's order: the first fit after the last
+        // text found, so a short text ("1,000") lands in its own place, not on
+        // the same words higher up; else the first fit anywhere.
+        const after = (e: HTMLElement) => !last || !!(last.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING);
+        const el = all.find((e) => fits(e) && after(e)) ?? all.find(fits);
         if (!el) continue;
+        last = el;
         taken.add(el);
         el.dataset.fx = t.key;
         els.current.set(t.key, el);
@@ -375,7 +396,7 @@ export function PageFrame({ src, width, texts, onEdit, onSelect, onFound, sync, 
       el.dataset.fxDirty = "1";
       const t = live.current.texts.find((x) => x.key === key);
       if (!t) return;
-      live.current.onEdit(key, t.markup ? el.innerHTML : copyFromHtml(el.innerHTML, t.code, doc));
+      live.current.onEdit(key, t.markup ? el.innerHTML : copyFromHtml(el.innerHTML, t.code, doc, live.current.vars));
     });
 
     // A section dragged by its grip drops above or below the section under the pointer.
@@ -433,8 +454,8 @@ export function PageFrame({ src, width, texts, onEdit, onSelect, onFound, sync, 
       if (!el || el === editing.current) continue;
       // Untouched texts stay as the page drew them.
       if (t.value !== t.shown || el.dataset.fxDirty) {
-        const now = t.markup ? el.innerHTML : copyFromHtml(el.innerHTML, t.code, doc);
-        if (now !== t.value) el.innerHTML = t.markup ? t.value : copyDisplay(t.value);
+        const now = t.markup ? el.innerHTML : copyFromHtml(el.innerHTML, t.code, doc, live.current.vars);
+        if (now !== t.value) el.innerHTML = t.markup ? t.value : copyDisplay(t.value, live.current.vars);
         el.dataset.fxDirty = "1";
       }
       el.classList.toggle("fx-changed", t.value !== t.code);

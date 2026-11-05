@@ -1,6 +1,7 @@
 import { AFTER_LOAD, faster } from "@/app/(funnels)/midi-drum-kit/landing";
 import { funnel as drumKit } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { PREVIEW_JS } from "@/lib/beacon";
+import { applyHtmlTexts } from "@/lib/htmlTexts";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { TEMPLATE as bounceMidiPack } from "./cf/bounce-midi-pack";
 import { TEMPLATE as bounce } from "./cf/bounce";
@@ -193,8 +194,13 @@ function pictures(html: string, first: number): string {
   return hero ? html.replace("<head>", `<head>\n<link rel="preload" as="image" href="${hero}" fetchpriority="high">`) : html;
 }
 
-export function freeHtml(page: PageName): string {
-  let html = TEMPLATES[page]
+/** The page's ClickFunnels markup as the code has it, for the dashboard's editor (lib/editablePages.ts). */
+export const freeTemplate = (page: PageName) => TEMPLATES[page];
+
+// edits: its words changed in the dashboard (funnel map → Edit, lib/htmlTexts.ts);
+// marks: each text marked for the editor's frame, never on a live page.
+export function freeHtml(page: PageName, edits: Record<string, string> = {}, marks = false): string {
+  let html = applyHtmlTexts(TEMPLATES[page], edits, marks)
     .replace("{{HEAD}}", `<script>${ORIGIN_BOUNCE_JS}</script>\n<style>${ICON_CSS}</style>\n${TRACKING}`)
     .replace("{{BODY}}", BODY(PAGE_OPTIN[page]));
   // Font Awesome's stylesheets: the icons are drawn above instead.

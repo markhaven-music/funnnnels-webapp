@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
-import { bullets, letter } from "../copy";
+import { wordsFor } from "@/lib/words";
 import { funnel } from "../funnel";
 import { fontVars } from "../fonts";
+import { B, Lines } from "../Lines";
 import { Rich } from "../Rich";
 import { Check, Compare, GetThePack, ValueStack, YesButton } from "../sections";
 import { Faq } from "../Faq";
@@ -13,10 +14,12 @@ import { Tracklist } from "../Tracklist";
 import { Tracking } from "../Tracking";
 import { Beacon } from "../../Beacon";
 import { Wistia } from "../Wistia";
+import { LANDING } from "../words";
 import s from "../landing.module.css";
 
 // The TOP HITS MIDI Bundle sales page, a 1:1 copy of the ClickFunnels one
-// (thegrind.studio/top-hits-midi-bundle--2ff37). Words in ../copy.ts.
+// (thegrind.studio/top-hits-midi-bundle--2ff37). Words in ../words.ts (lists in
+// ../copy.ts), with the dashboard's edits (funnel map → Edit; saving revalidates).
 // Served from Vercel's CDN like the Jazz page: one prebuilt page per currency;
 // proxy.ts rewrites /top-hits-midi-bundle to /top-hits-midi-bundle/eur|usd.
 
@@ -41,47 +44,42 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
   if (!CURRENCIES.includes(currency)) notFound();
   // The bundle's price as dashboard → Products has it; saving there revalidates the page.
   const price = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency];
+  const w = await wordsFor(funnel.slug, "landing", LANDING, { strict: true });
 
   return (
     <main className={`${s.page} ${fontVars}`}>
       <Tracking value={price} currency={currency} />
       <Beacon funnel={funnel.slug} page="landing" />
-      <div className={s.topbar}>BLACK FRIDAY: 90% Sale Ends Soon</div>
+      <div className={s.topbar}>{w.topbar}</div>
 
       <section className={s.hero}>
         <div className={s.wrap}>
-          <p className={s.for}>FOR Ambitious beatmakers, music producers, songwriters, artists...</p>
+          <p className={s.for}>{w.hero.for}</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.logo} src="/funnels/top-hits-midi-bundle/logo.png" alt="GRIND STUDIO" width={900} height={103} />
           <h1 className={s.h1}>
-            WE COPIED THE
-            <br />
-            CHORD PROGRESSIONS
-            <br />
-            OF TOP HITS
-            <br />
-            SO YOU CAN USE THEM.
+            <Lines text={w.hero.title} />
           </h1>
-          <p className={s.swear}>We Swear This MIDI Pack Doesn&apos;t Contain Anything &apos;Illegal&apos; Or &apos;Unethical&apos;</p>
+          <p className={s.swear}>{w.hero.swear}</p>
           <Wistia id={funnel.wistiaId} className={s.video} />
 
           <div className={s.bullets}>
             <ul>
               <li className={s.lead}>
                 <span>
-                  <b>1,000</b> FAMOUS MIDI CHORD PROGRESSIONS
+                  <B text={w.bullets.lead} />
                 </span>
               </li>
-              {bullets.left.map((b) => (
-                <li key={b}>
+              {w.bullets.left.map((b, i) => (
+                <li key={i}>
                   <Check className={s.check} />
                   <span>{b}</span>
                 </li>
               ))}
             </ul>
             <ul>
-              {bullets.right.map((b) => (
-                <li key={b}>
+              {w.bullets.right.map((b, i) => (
+                <li key={i}>
                   <Check className={s.check} />
                   <span>
                     <Rich text={b} currency={currency} />
@@ -91,11 +89,11 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
             </ul>
           </div>
 
-          <ValueStack currency={currency} price={price} />
+          <ValueStack currency={currency} price={price} w={w.stack} />
           <div className={s.ctaBox}>
-            <GetThePack />
+            <GetThePack w={w.cta} />
           </div>
-          <StockDate className={s.hurry} />
+          <StockDate className={s.hurry} text={w.stock} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.stockBar} src="/funnels/top-hits-midi-bundle/stock-bar.gif" alt="" width={850} height={54} />
         </div>
@@ -103,12 +101,12 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
 
       <section className={s.dark}>
         <div className={s.wrap}>
-          <h2 className={s.quote}>&quot;THE CLOSEST THING TO SITTING IN THE STUDIO WITH A BILLBOARD SONGWRITER&quot;</h2>
+          <h2 className={s.quote}>{w.quote}</h2>
         </div>
 
         <div className={s.letter}>
-          <p className={s.today}>Today</p>
-          {letter.map((line, i) =>
+          <p className={s.today}>{w.today}</p>
+          {w.letter.map((line, i) =>
             line.startsWith("# ") ? (
               <p key={i} className={s.letterHead}>
                 {line
@@ -126,33 +124,29 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
               </p>
             ),
           )}
-          <p className={s.sign}>The Grind Studio Team</p>
+          <p className={s.sign}>{w.sign}</p>
         </div>
 
         <div className={s.wrap}>
-          <ValueStack currency={currency} price={price} />
-          <YesButton />
+          <ValueStack currency={currency} price={price} w={w.stack} />
+          <YesButton text={w.yes} />
 
           <div className={s.songsSection}>
             <h2 className={s.songsTitle}>
-              LIST OF ALL SONGS
-              <br />
-              INCLUDED IN
-              <br />
-              &quot;TOP HITS MIDI BUNDLE&quot;
+              <Lines text={w.songsTitle} />
             </h2>
             <Tracklist />
           </div>
 
-          <ValueStack currency={currency} price={price} />
-          <YesButton />
+          <ValueStack currency={currency} price={price} w={w.stack} />
+          <YesButton text={w.yes} />
 
-          <Compare currency={currency} price={price} />
+          <Compare currency={currency} price={price} w={w.compare} />
         </div>
       </section>
 
       <section className={s.light}>
-        <Faq currency={currency} price={price} />
+        <Faq currency={currency} price={price} w={w.faq} />
       </section>
 
       <footer className={s.footer}>

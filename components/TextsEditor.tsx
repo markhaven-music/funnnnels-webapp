@@ -7,6 +7,7 @@ import { previewUrl } from "@/components/FunnelLanes";
 import { I } from "@/components/icons";
 import { PageFrame, type FrameImage, type FrameSection, type FrameText } from "@/components/PageFrame";
 import type { Layout } from "@/lib/pageLayout";
+import { isMarkupKey } from "@/lib/textKeys";
 import s from "./textsEditor.module.css";
 
 // Funnel map → Edit on a page built in code (the MIDI Drum Kit), one page in
@@ -37,9 +38,13 @@ type Props = {
   layout: Layout;
   /** The page runs the button-colour test (the sales page): its colour can be fixed here. */
   buttonColours: boolean;
+  /** What {name} in a text shows as in the frame ({c}: €, {price}: 27). */
+  vars: Record<string, string>;
 };
 
-const isMarkup = (key: string) => /^t\d{3}$/.test(key);
+const isMarkup = isMarkupKey;
+// A key as the list shows it: tNNN and h… are blocks of the page, the rest paths in its words.
+const keyLabel = (key: string, n: number) => (/^t\d{3}$/.test(key) ? `Text ${Number(key.slice(1))}` : /^h[0-9a-f]{8}/.test(key) ? `Text ${n}` : key);
 const plain = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
 
 // The button colours (app/(funnels)/midi-drum-kit/abtest.ts): the test, or one for everyone.
@@ -80,7 +85,7 @@ function toSave(l: Layout, code: string[]): Layout {
   return out;
 }
 
-export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, liveUrl, frameSrc, sections, layout, buttonColours }: Props) {
+export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, liveUrl, frameSrc, sections, layout, buttonColours, vars }: Props) {
   const router = useRouter();
   // key → the text as typed, for the texts touched since the last save.
   const [draft, setDraft] = useState<Record<string, string>>({});
@@ -370,7 +375,7 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
                   </>
                 ) : selected ? (
                   <>
-                    <span className={s.key}>{isMarkup(selected) ? `Text ${Number(selected.slice(1))}` : selected}</span>
+                    <span className={s.key}>{keyLabel(selected, keys.indexOf(selected) + 1)}</span>
                     {current(selected) !== code[selected] && (
                       <button type="button" className={s.undo} onClick={() => putBack(selected)} title={`Put back: ${plain(code[selected])}`}>
                         <I.refresh size={12} /> Put back the original
@@ -410,6 +415,7 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
             onFound={setFound}
             sync={sync}
             sections={sections}
+            vars={vars}
             layout={draftLayout}
             onLayout={setLayout}
             onImage={pickImage}
@@ -438,7 +444,7 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
             return (
               <li key={key} className={s.row}>
                 <div className={s.rowHead}>
-                  <span className={s.key}>{isMarkup(key) ? `Text ${Number(key.slice(1))}` : key}</span>
+                  <span className={s.key}>{keyLabel(key, keys.indexOf(key) + 1)}</span>
                   {changed && <span className={s.tag}>changed</span>}
                   {key in draft && draft[key] !== (saved[key] ?? code[key]) && <span className={s.tagUnsaved}>not saved</span>}
                   {changed && (
@@ -462,7 +468,13 @@ export function TextsEditor({ funnel, page, lang, pages, langs, code, edited, li
           })}
         </ol>
         {keys.some(isMarkup) && (
-          <p className={s.note}>Bold, colours and line breaks stay as on the page; Enter adds a line break. In the plain texts, **word** is bold and {"{c}"} is the currency sign.</p>
+          <p className={s.note}>Bold, colours and line breaks stay as on the page; Enter adds a line break.</p>
+        )}
+        {keys.some((k) => !isMarkup(k)) && (
+          <p className={s.note}>
+            In the plain texts: **word** is bold, __word__ underlined, ==word== highlighted, _word_ italic, {"{c}"} the currency sign; {"{price}"}, {"{email}"} and the
+            like are filled in by the page. A | breaks a heading&apos;s line.
+          </p>
         )}
       </main>
     </div>
