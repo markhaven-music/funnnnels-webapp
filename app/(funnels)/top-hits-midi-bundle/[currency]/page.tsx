@@ -46,7 +46,7 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
     <main className={`${s.page} ${fontVars}`}>
       <Tracking value={price} currency={currency} />
       <Beacon funnel={funnel.slug} page="landing" />
-      <div className={s.topbar}>MORE BLACK FRIDAY: 90% Sale Ends Soon</div>
+      <div className={s.topbar}>BLACK FRIDAY: 90% Sale Ends Soon</div>
 
       <section className={s.hero}>
         <div className={s.wrap}>

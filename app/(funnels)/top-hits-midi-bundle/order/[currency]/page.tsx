@@ -42,7 +42,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       <Tracking value={offer.price} currency={currency} event={null} />
       <Beacon funnel={funnel.slug} page="order" />
       <div className={s.redbar}>
-        <b>MORE BLACK FRIDAY:</b> 90% Sale Is Ending Soon
+        <b>BLACK FRIDAY:</b> 90% Sale Is Ending Soon
       </div>
       <header className={s.header}>
         {/* eslint-disable-next-line @next/next/no-img-element */}

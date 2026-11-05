@@ -12,7 +12,7 @@ export const en = {
     orderTitle: "Order MIDI Drum Kit",
     thanksTitle: "Thank you · MIDI Drum Kit",
   },
-  orderTopbar: "**MORE BLACK FRIDAY:** 90% Sale Is Ending Soon",
+  orderTopbar: "**BLACK FRIDAY:** 90% Sale Is Ending Soon",
 
   footer: { terms: "Terms and Conditions", privacy: "Privacy Policy", refund: "Refund Policy", contact: "Contact:" },
 

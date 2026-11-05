@@ -16,7 +16,7 @@ export const es: Copy = {
     orderTitle: "Pedir el MIDI Drum Kit",
     thanksTitle: "Gracias · MIDI Drum Kit",
   },
-  orderTopbar: "**MÁS BLACK FRIDAY:** -90 %, la oferta termina pronto",
+  orderTopbar: "**BLACK FRIDAY:** -90 %, la oferta termina pronto",
 
   footer: { terms: "Términos y condiciones", privacy: "Política de privacidad", refund: "Política de reembolso", contact: "Contacto:" },
 
