@@ -100,7 +100,8 @@ setInterval(function(){if(document.visibilityState==='visible'&&L.n++<90)send({k
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')send({k:'leave'});else{L.n=0;send({k:'beat'});}});
 }catch(e){}`;
 
-const readCookie = (name: string) =>
+/** A cookie's value in this browser ("" when unset). */
+export const readCookie = (name: string) =>
   (document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`)) ?? [])[1] ?? "";
 
 export function track({ funnel, page, lang = "en", abCookie }: BeaconOptions): void {

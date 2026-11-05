@@ -172,6 +172,23 @@
   box-shadow: 0 0 10px var(--brass);
 }
 /* centered hero, like the Grind Studio Drum Kit page */
+/* The Black Friday bar on top of the landing and the order page: the red and
+   wording of the TOP HITS and Famous Beats order pages (2026-11-05). */
+.bfbar {
+  position: relative;
+  z-index: 2;
+  padding: 10px 16px;
+  background: #9e1b1d;
+  color: #fff;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.bfbar b {
+  font-weight: 900;
+}
+
 .topband {
   position: relative;
   z-index: 1;

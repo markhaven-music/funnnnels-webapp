@@ -105,10 +105,11 @@ export function insights(a: Analytics, now = Date.now()): Insight[] {
   if (revenue > 0 && orders >= 5)
     say(7, "info", `Stripe and PayPal kept ${eur(revenue - net)} in fees, ${pct((revenue - net) / revenue)} of revenue: ${eur(net)} net.`);
 
-  // The A/B test, once it has an answer.
-  if (a.test?.verdict === "winner" && a.test.leader) {
-    const lead = a.test.variants.find((v) => v.variant === a.test!.leader);
-    say(2, "up", `${a.test.leader[0].toUpperCase()}${a.test.leader.slice(1)} buttons win the ${a.test.name.toLowerCase()} test${lead?.chanceBest ? ` (${pct(lead.chanceBest)} sure)` : ""}: make it the only one.`);
+  // Each A/B test, once it has an answer.
+  for (const t of a.tests) {
+    if (t.verdict !== "winner" || !t.leader) continue;
+    const lead = t.variants.find((v) => v.variant === t.leader);
+    say(2, "up", `${lead?.label ?? t.leader} wins the ${t.product} ${t.name.toLowerCase()} test${lead?.chanceBest ? ` (${pct(lead.chanceBest)} sure)` : ""}: make it the only one.`);
   }
 
   return out

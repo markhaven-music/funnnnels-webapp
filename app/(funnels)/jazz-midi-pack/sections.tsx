@@ -18,6 +18,7 @@ import { BonusPlayer } from "./BonusPlayer";
 import { money } from "@/lib/launch";
 import { ProductBox, Scene } from "./ProductBox";
 import { CheckoutWidget } from "./CheckoutWidget";
+import { AB, AB_CLASS, HEADLINES } from "./abtest";
 import { Vsl } from "./Vsl";
 import { PackBrowser } from "./PackBrowser";
 import s from "./jazz.module.css";
@@ -329,10 +330,25 @@ function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch
           <T v={p.pre} set={set("pre")} ctx={ctx} as="p" className={s.heroPre} />
         </Part>
         <Part k="headline" h={h}>
+          {/* The headline A/B test (./abtest.ts): every variant is in the h1 and AB_CSS shows
+              the visitor's. The editor's headline is out of rotation while it runs. */}
           <h1 className={s.heroHead}>
-            {patch ? <T v={p.headline} set={set("headline")} ctx={ctx} /> : <Marked text={fill(p.headline, ctx)} />}
+            {patch ? (
+              <T v={p.headline} set={set("headline")} ctx={ctx} />
+            ) : (
+              AB.variants.map((v) => (
+                <span key={v} className={AB_CLASS} data-v={v}>
+                  <Marked text={fill(HEADLINES[v], ctx)} />
+                </span>
+              ))
+            )}
           </h1>
-          {patch && <p className={e.hint}>*word* = highlighted, _word_ = underlined</p>}
+          {patch && (
+            <p className={e.hint}>
+              *word* = highlighted, _word_ = underlined · Not shown while the headline test runs: visitors see one of
+              A–E (abtest.ts)
+            </p>
+          )}
         </Part>
         <Part k="sub" h={h}>
           <T v={p.sub} set={set("sub")} ctx={ctx} as="p" className={s.heroSub} />
@@ -1048,6 +1064,7 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       bump={ctx.bump ?? null}
       thankYou={funnel.checkout.thankYou}
       publishableKey={ctx.publishableKey}
+      abCookie={AB.cookie}
       deferStripe
       secureRow={false}
     />

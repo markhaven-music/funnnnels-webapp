@@ -1,4 +1,5 @@
-import { AB as BUTTON_TEST } from "@/app/(funnels)/midi-drum-kit/abtest";
+import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi-drum-kit/abtest";
+import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import type { Step } from "@/lib/beacon";
 import { codeFunnels } from "@/lib/funnels";
 import { KIT_HOME, SHOP_URL } from "@/lib/liveUrl";
@@ -9,7 +10,7 @@ import type Stripe from "stripe";
 import { supabase } from "@/lib/supabase";
 
 // Dashboard → Analytics: visitors, checkout starts, orders and revenue per
-// funnel, and the results of the running A/B test.
+// funnel, and the results of the running A/B tests (TESTS, below).
 //   visitors, checkout starts  page_views (lib/beacon.ts → /api/checkout/view)
 //   Stripe orders              Stripe itself: succeeded PaymentIntents with
 //                              metadata.funnel (+ .variant, .lang)
@@ -143,8 +144,12 @@ export type TestStats = {
   since: string | null;
   days: number;
   target: number; // sales per variant for a reliable answer
-  /** m: the orders alone, which the test is judged on; full: the same visitors with their upsells too (the map's lanes). */
-  variants: { variant: string; m: Metrics; full: Metrics; chanceBest: number | null }[];
+  /** The funnel's product name, and where on it the test runs, for the Analytics card. */
+  product: string;
+  where: string;
+  /** m: the orders alone, which the test is judged on; full: the same visitors with their upsells too (the map's lanes).
+   * label, color: how the dashboard names and colours the variant. */
+  variants: { variant: string; label: string; color: { from: string; to: string }; m: Metrics; full: Metrics; chanceBest: number | null }[];
   leader: string | null;
   verdict: "waiting" | "early" | "winner" | "tie";
   salesToGo: number;
@@ -178,7 +183,8 @@ export type Analytics = {
   trackingSince: string | null;
   usdToEur: number;
   funnels: FunnelStats[];
-  test: TestStats | null;
+  /** The running A/B tests (TESTS), each since it started, whatever the range. */
+  tests: TestStats[];
   /** Day by day over the range (dashboard home), oldest first. */
   days: Day[];
   /** The same number of days just before the range, for the comparisons; null for "all". */
@@ -436,13 +442,13 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
   // The day-by-day rows reach back one range more, for the comparison.
   const span = range === "7d" ? 7 : 28;
   const before = since ? dayOf(Date.parse(`${since}T00:00:00Z`) - span * DAY) : null;
-  const [views, allViews, dayRows, rate, trackingSince, testStart, paypal, ...stripeLists] = await Promise.all([
+  const [views, allViews, dayRows, rate, trackingSince, testStarts, paypal, ...stripeLists] = await Promise.all([
     soft("visitors", viewTotals(since), []),
     range === "all" ? Promise.resolve(null) : soft("visitors (all time)", viewTotals(null), []),
     soft("visitors per day", viewDays(before), []),
     usdToEur(),
     soft("tracking start", firstDay(), null),
-    soft("test start", firstDay("midi-drum-kit"), null),
+    Promise.all(TESTS.map((t) => soft(`test start (${t.funnel})`, firstDay(t.funnel), null))),
     soft("PayPal orders", paypalSales(), []),
     ...list.map((f) => (hasStripe ? soft(`Stripe orders (${f.slug})`, stripeSales(f.slug), []) : Promise.resolve([] as Sale[]))),
   ]);
@@ -482,7 +488,7 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
     trackingSince,
     usdToEur: rate,
     funnels,
-    test: buttonTests(allViews ?? views, allSales, rate, testStart, now),
+    tests: TESTS.map((t, i) => testStats(t, allViews ?? views, allSales, rate, testStarts[i], now)),
     ...daily(range, since, now, dayRows, allSales, rate, trackingSince),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
@@ -502,11 +508,46 @@ function withRevenue(m: Metrics, rate: number): Metrics {
   return { ...m, revenue, fees, net: revenue - fees, ratedRevenue: m.ratedEur + m.ratedUsd * rate, offers };
 }
 
-// ─── the A/B test ──────────────────────────────────────────────
+// ─── the A/B tests ─────────────────────────────────────────────
+
+/**
+ * The tests the funnels run, each defined in its funnel's abtest.ts: the
+ * variant names its pages put in the cookie (and so in page_views and the
+ * sales), and how the dashboard names and colours each one. To end a test,
+ * take it out of here and of its pages.
+ */
+type TestDef = {
+  funnel: string;
+  name: string;
+  /** Where on the funnel the test runs, for the Analytics card. */
+  where: string;
+  variants: readonly string[];
+  label: (v: string) => string;
+  color: (v: string) => { from: string; to: string };
+};
+const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
+export const TESTS: TestDef[] = [
+  {
+    funnel: "midi-drum-kit",
+    name: "Button colour",
+    where: "Landing and order page, every language",
+    variants: BUTTON_TEST.variants,
+    label: cap,
+    color: (v) => BUTTON_COLORS[v as keyof typeof BUTTON_COLORS],
+  },
+  {
+    funnel: "jazz-midi-pack",
+    name: "Headline",
+    where: "The landing's hero headline; the order page keeps the visitor's variant",
+    variants: HEADLINE_TEST.variants,
+    label: (v) => HEADLINE_LABELS[v as keyof typeof HEADLINE_LABELS],
+    color: (v) => HEADLINE_COLORS[v as keyof typeof HEADLINE_COLORS],
+  },
+];
 
 /**
  * The first day a visitor was counted: on any funnel, or with an A/B variant
- * on this one (the MIDI Drum Kit button-colour test, app/(funnels)/midi-drum-kit/abtest.ts).
+ * on this one (when its test started).
  */
 async function firstDay(testFunnel?: string): Promise<string | null> {
   let q = supabase().from("page_views").select("day").gte("day", VISITS_FROM);
@@ -516,17 +557,20 @@ async function firstDay(testFunnel?: string): Promise<string | null> {
   return data?.day ?? null;
 }
 
-/** The button-colour test, every language together and each one apart. */
-function buttonTests(views: ViewRow[], sales: Sale[], rate: number, since: string | null, now: number): TestStats {
+/** A test, every language together and, for a funnel sold in several, each one apart (the map's language tabs). */
+function testStats(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, since: string | null, now: number): TestStats {
   const from = since ? Date.parse(`${since}T00:00:00Z`) : Infinity;
   const tested = sales.filter((s) => s.created >= from);
-  const langs = codeFunnels().find((f) => f.slug === TEST_FUNNEL)?.langs ?? ["en"];
+  const langs = codeFunnels().find((f) => f.slug === def.funnel)?.langs ?? ["en"];
+  const whole = testOn(def, views, tested, rate, since, now);
+  if (langs.length < 2) return whole;
   return {
-    ...buttonTest(views, tested, rate, since, now),
+    ...whole,
     byLang: Object.fromEntries(
       langs.map((l) => [
         l,
-        buttonTest(
+        testOn(
+          def,
           views.filter((v) => v.lang === l),
           tested.filter((s) => s.lang === l),
           rate,
@@ -538,14 +582,12 @@ function buttonTests(views: ViewRow[], sales: Sale[], rate: number, since: strin
   };
 }
 
-const TEST_FUNNEL = "midi-drum-kit";
-
-/** The button-colour test since it started: visitors, checkouts and orders per colour, and how sure the leader is. */
-function buttonTest(views: ViewRow[], sales: Sale[], rate: number, since: string | null, now: number): TestStats {
-  const funnel = TEST_FUNNEL;
-  const known = new Set<string>(BUTTON_TEST.variants);
-  const by = new Map<string, Metrics>(BUTTON_TEST.variants.map((v) => [v, empty()]));
-  const full = new Map<string, Metrics>(BUTTON_TEST.variants.map((v) => [v, empty()]));
+/** A test since it started: visitors, checkouts and orders per variant, and how sure the leader is. */
+function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, since: string | null, now: number): TestStats {
+  const { funnel } = def;
+  const known = new Set<string>(def.variants);
+  const by = new Map<string, Metrics>(def.variants.map((v) => [v, empty()]));
+  const full = new Map<string, Metrics>(def.variants.map((v) => [v, empty()]));
   for (const v of views) {
     if (v.funnel !== funnel || !known.has(v.variant)) continue;
     addView(by.get(v.variant)!, v.page, v.views);
@@ -554,12 +596,14 @@ function buttonTest(views: ViewRow[], sales: Sale[], rate: number, since: string
   for (const s of sales) {
     if (s.funnel !== funnel || !known.has(s.variant)) continue;
     addSale(full.get(s.variant)!, s);
-    // The colours are judged on the orders; upsells are another decision.
+    // The variants are judged on the orders; upsells are another decision.
     if (!s.offer) addSale(by.get(s.variant)!, s);
   }
 
   const variants = [...by.entries()].map(([variant, m]) => ({
     variant,
+    label: def.label(variant),
+    color: def.color(variant),
     m: withRevenue(m, rate),
     full: withRevenue(full.get(variant)!, rate),
     chanceBest: null as number | null,
@@ -572,7 +616,7 @@ function buttonTest(views: ViewRow[], sales: Sale[], rate: number, since: string
   const rates = variants.map((v) => rateOf(v.m));
   if (rates.every(Boolean)) {
     for (let i = 0; i < variants.length; i++) {
-      // Chance this colour converts better than each other one (normal approximation), the lowest of them.
+      // Chance this variant converts better than each other one (normal approximation), the lowest of them.
       let chance = 1;
       for (let j = 0; j < variants.length; j++) {
         if (i === j) continue;
@@ -598,7 +642,9 @@ function buttonTest(views: ViewRow[], sales: Sale[], rate: number, since: string
 
   return {
     funnel,
-    name: "Button colour",
+    name: def.name,
+    product: codeFunnels().find((f) => f.slug === funnel)?.product ?? funnel,
+    where: def.where,
     since,
     days,
     target: TARGET_SALES,

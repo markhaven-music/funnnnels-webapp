@@ -10,7 +10,7 @@ import s from "./checkout.module.css";
 import b from "./btn.module.css";
 import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
-import { track } from "@/lib/beacon";
+import { readCookie, track } from "@/lib/beacon";
 import { cookieCountry } from "@/lib/geo";
 
 // The two-step order form, copied from the ClickFunnels checkout:
@@ -51,6 +51,11 @@ type Props = {
   deferStripe?: boolean;
   // false: no "Secure checkout" row on top of the card (the Jazz order page, 2026-11-01).
   secureRow?: boolean;
+  // The cookie holding the visitor's A/B variant, for a funnel running a test
+  // (the Jazz headline test, ./abtest.ts): it goes with the checkout's page view
+  // and with the order (Stripe metadata.variant, PayPal custom_id "v"), so
+  // the sales count per variant in dashboard → Analytics.
+  abCookie?: string;
 };
 
 type Info = { firstName: string; lastName: string; email: string };
@@ -130,7 +135,7 @@ export function CheckoutWidget(props: Props) {
                 value: props.price,
                 currency: props.currency.toUpperCase(),
               });
-              track({ funnel: props.funnel, page: "checkout" });
+              track({ funnel: props.funnel, page: "checkout", abCookie: props.abCookie });
             }}
           />
         ) : (
@@ -298,6 +303,8 @@ function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromis
         country: cookieCountry(props.currency, props.country),
         // The total on screen: the server refuses if its price differs (an early-bird just ended).
         expected: props.total,
+        // The A/B variant the buyer saw, if the funnel runs a test.
+        variant: props.abCookie ? readCookie(props.abCookie) : "",
       }),
     });
     const json = await res.json().catch(() => ({}));
@@ -362,7 +369,8 @@ function PayStepBody({
   cardPaying,
   cardOff,
   cardError,
-}: Pick<Props, "funnel" | "country" | "currency" | "price" | "product" | "cart"> &
+  abCookie,
+}: Pick<Props, "funnel" | "country" | "currency" | "price" | "product" | "cart" | "abCookie"> &
   BodyState & {
     offer: Props["bump"];
     onCard?: () => void;
@@ -392,6 +400,7 @@ function PayStepBody({
           country: cookieCountry(currency, country),
           origin: window.location.origin,
           expected: total,
+          variant: abCookie ? readCookie(abCookie) : "",
         }),
       });
       const json = await res.json().catch(() => ({}));

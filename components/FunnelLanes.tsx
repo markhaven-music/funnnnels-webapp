@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 import { I } from "@/components/icons";
-import { COLORS, type Variant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import type { Metrics, Offer, TestStats } from "@/lib/analytics";
 import type { MapStep } from "@/lib/funnelMap";
 import s from "./funnelLanes.module.css";
 
-// The funnel map's A/B/C test as lanes (components/FunnelMap.tsx → Lanes):
+// The funnel map's A/B test as lanes (components/FunnelMap.tsx → Lanes):
 // the visitors split at the start, then one column per variant through the
 // pages the test changes (landing, order), the same page on the same row so
 // the lanes read across, and each colour's result. The lanes then join: the
@@ -310,8 +309,8 @@ export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope
   const { viewport, stage, view, handlers, zoomCenter, refit } = usePanZoom();
   const hasOrderStep = steps.some((st) => st.kind === "order");
   const lanes = test.variants;
-  const color = (v: string) => COLORS[v as Variant] ?? { from: "#bbb", to: "#999", edge: "#777", glow: "", text: "#fff" };
-  const colors = lanes.map((l) => color(l.variant).to);
+  const label = (v: string) => lanes.find((l) => l.variant === v)?.label ?? name(v);
+  const colors = lanes.map((l) => l.color.to);
   const totalVisitors = lanes.reduce((n, l) => n + (l.full.visitors || l.full.orderViews), 0);
   const split = steps.findLastIndex(tested) + 1;
   const laneSteps = steps.slice(0, split);
@@ -321,7 +320,7 @@ export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope
   const columns = `${LABEL}px repeat(${lanes.length}, ${LANE}px)`;
   const verdict =
     test.verdict === "winner" && test.leader
-      ? `${name(test.leader)} wins`
+      ? `${label(test.leader)} wins`
       : test.verdict === "tie"
         ? "no clear winner"
         : test.verdict === "waiting"
@@ -344,7 +343,7 @@ export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope
                 <span key={i} style={{ background: c }} />
               ))}
             </span>
-            A/B/C test · {test.name}
+            A/B test · {test.name}
           </div>
           <div className={s.splitMeta}>
             {int(totalVisitors)} visitors{test.since ? ` since ${test.since}` : ""} · {scope} ·{" "}
@@ -363,12 +362,12 @@ export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope
         {/* the lanes' heads */}
         <div className={s.labelCell} />
         {lanes.map((l) => {
-          const c = color(l.variant);
+          const c = l.color;
           const n = l.full.visitors || l.full.orderViews;
           return (
             <div key={l.variant} className={s.laneHead}>
               <span className={s.swatch} style={{ background: `linear-gradient(180deg, ${c.from}, ${c.to})` }} />
-              <span className={s.laneName}>{name(l.variant)}</span>
+              <span className={s.laneName}>{l.label}</span>
               {test.leader === l.variant && <span className={s.leading}>leading</span>}
               <span className={s.laneShare}>{totalVisitors > 0 ? `${share(n / totalVisitors)} of visitors` : "no visitors yet"}</span>
             </div>
@@ -385,7 +384,7 @@ export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope
                 <PageLabel step={step} />
               </div>
               {lanes.map((l, i) => {
-                const c = color(l.variant);
+                const c = l.color;
                 const key = keys[i];
                 const k = cmp[i];
                 return (
@@ -417,7 +416,7 @@ export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope
                         ))}
                       </dl>
                       <a href={previewUrl(step.url, l.variant)} target="_blank" rel="noreferrer" className={s.see} title="Not counted as a visit">
-                        <I.eye size={12} /> See the {l.variant} page
+                        <I.eye size={12} /> See this version
                       </a>
                     </section>
                   </div>
@@ -430,12 +429,12 @@ export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope
         {/* each colour's result, upsells included */}
         <div className={s.labelCell}>
           <div className={s.totalLabel}>
-            Result per colour
-            <span>Orders and revenue per visitor (upsells included), and how sure the test is about each colour</span>
+            Result per variant
+            <span>Orders and revenue per visitor (upsells included), and how sure the test is about each variant</span>
           </div>
         </div>
         {lanes.map((l) => {
-          const c = color(l.variant);
+          const c = l.color;
           const m = l.full;
           const n = m.visitors || m.orderViews;
           return (
@@ -493,7 +492,7 @@ export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope
                   <div className={s.nodeBar} style={{ background: `linear-gradient(90deg, ${colors.join(", ")})` }} />
                   {key && (
                     <div className={s.key}>
-                      <span className={s.keyLabel}>{key.label} · every colour</span>
+                      <span className={s.keyLabel}>{key.label} · every variant</span>
                       <span className={s.keyValue}>{ratioText(key, key.whole > 0 ? key.part / key.whole : null)}</span>
                     </div>
                   )}
@@ -512,7 +511,7 @@ export function Lanes({ test, scope, steps, entryUrl }: { test: TestStats; scope
                         return (
                           <span key={l.variant} className={s.colourStat}>
                             <span className={s.swatch} style={{ background: colors[j] }} />
-                            {name(l.variant)} <b>{k ? ratioText(k, k.whole > 0 ? k.part / k.whole : null) : "—"}</b>
+                            {l.label} <b>{k ? ratioText(k, k.whole > 0 ? k.part / k.whole : null) : "—"}</b>
                           </span>
                         );
                       })}

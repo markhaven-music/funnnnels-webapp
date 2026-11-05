@@ -228,3 +228,16 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   the folder's first path in browse/pack.json, regenerate with the snippet in git history of this commit) and the
   number, count, name and what-for on the right. "Pure qua… controlla questi errori" (the chart): the four heads
   share one baseline (the pack's box 48px), every cell is vertically centred.
+
+## Headline test and Black Friday bar (2026-11-05)
+- "crea 20 alternative per la headline di jazz midi pack, segui i principi di dan kennedy", then "3 mi piace, 7, 15, 19,
+  20. possiamo ABCDE testarle tutte?": the hero headline is an A/B/C/D/E test of those five (`abtest.ts`), one per
+  visitor at random, kept in the `ab_head` cookie and carried with the page views and the order. The editor's
+  headline is out of rotation while the test runs. Results: dashboard → Analytics (Headline test card) and the
+  funnel map's A/B lanes. Number 15 said "3,536 Chords" in the list; the page says "{files} MIDI Files" (they're
+  files of progressions, not single chords). At ~1 landing visitor a day the test needs ad traffic to say anything;
+  the first number to read is "went to order page" per headline.
+- "aggiungi anche banner rossi sopra black friday come gli altri funnels": the TOP HITS / Famous Beats order pages'
+  red bar (#9e1b1d) on top of the landing ("BLACK FRIDAY: 90% Sale Ends Soon") and the order page ("BLACK FRIDAY:
+  90% Sale Is Ending Soon"). The user's call over the "no 'sale ends'" rule in Offer; 90 % is the value stack's
+  255 saved on 282.

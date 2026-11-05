@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { I } from "@/components/icons";
-import { COLORS, type Variant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import type { Analytics, Metrics, Range, TestStats } from "@/lib/analytics";
 import s from "./analytics.module.css";
 
 // Dashboard → Analytics. Numbers from /api/analytics (lib/analytics.ts):
 // visitors and checkout starts from our own beacon, orders from Stripe and
-// PayPal, and the button-colour test of the MIDI Drum Kit.
+// PayPal, and the running A/B tests (lib/analytics.ts TESTS).
 
 const RANGES: { id: Range; label: string }[] = [
   { id: "7d", label: "7D" },
@@ -97,7 +96,7 @@ export function AnalyticsPanel() {
         <Stat label="REVENUE" value={total ? eur(total.revenue) : "…"} color="var(--accent)" />
       </div>
 
-      {data?.test && <TestCard t={data.test} />}
+      {data?.tests.map((t) => <TestCard key={t.funnel} t={t} />)}
 
       <div className="section-head">
         <div className="section-title">
@@ -201,24 +200,24 @@ function MetricRow({ name, m, sub }: { name: React.ReactNode; m: Metrics; sub?: 
 }
 
 const VERDICT: Record<TestStats["verdict"], string> = {
-  waiting: "Waiting for the first visitors with a colour.",
+  waiting: "Waiting for the first visitors in the test.",
   early: "Too early to call.",
   winner: "We have a winner.",
-  tie: "No clear winner: the colours sell about the same.",
+  tie: "No clear winner: the variants sell about the same.",
 };
 
 function TestCard({ t }: { t: TestStats }) {
-  const name = (v: string) => v[0].toUpperCase() + v.slice(1);
+  const name = (v: string) => t.variants.find((x) => x.variant === v)?.label ?? v;
   const best = t.leader;
   return (
     <section className={s.test}>
       <div className={s.testHead}>
         <div>
           <div className={s.testTitle}>
-            <I.abtest size={14} /> {t.name} test · MIDI Drum Kit
+            <I.abtest size={14} /> {t.name} test · {t.product}
           </div>
           <div className={s.testSub}>
-            Landing and order page, every language{t.since ? ` · since ${t.since} (${t.days} day${t.days === 1 ? "" : "s"})` : ""} · whole test, whatever the range above
+            {t.where}{t.since ? ` · since ${t.since} (${t.days} day${t.days === 1 ? "" : "s"})` : ""} · whole test, whatever the range above
           </div>
         </div>
         <div className={`${s.verdict} ${t.verdict === "winner" ? s.win : ""}`}>
@@ -229,26 +228,26 @@ function TestCard({ t }: { t: TestStats }) {
       <p className={s.testNote}>
         {t.verdict === "early" || t.verdict === "waiting" ? (
           <>
-            A reliable answer needs about {t.target} sales per colour: {int(t.salesToGo)} to go
+            A reliable answer needs about {t.target} sales per variant: {int(t.salesToGo)} to go
             {t.daysToGo != null ? `, about ${Math.ceil(t.daysToGo)} more day${Math.ceil(t.daysToGo) === 1 ? "" : "s"} at the current pace` : ""}.
             {best ? ` ${name(best)} leads for now, but early leads often flip.` : ""}
           </>
         ) : t.verdict === "winner" && best ? (
           <>
-            {name(best)} converts better than both other colours with at least 95% certainty. Make it the only colour.
+            {name(best)} converts better than every other variant with at least 95% certainty. Keep it and end the test.
           </>
         ) : (
-          <>Every colour has {t.target}+ sales and none is clearly ahead: keep any of them and test something bigger.</>
+          <>Every variant has {t.target}+ sales and none is clearly ahead: keep any of them and test something bigger.</>
         )}
       </p>
 
       <div className={s.variants}>
         {t.variants.map((v) => {
-          const c = COLORS[v.variant as Variant];
+          const c = v.color;
           return (
             <div key={v.variant} className={`${s.variant} ${best === v.variant ? s.leading : ""}`}>
               <div className={s.variantHead}>
-                <span className={s.swatch} style={{ background: c ? `linear-gradient(180deg, ${c.from}, ${c.to})` : "var(--fg-3)" }} />
+                <span className={s.swatch} style={{ background: `linear-gradient(180deg, ${c.from}, ${c.to})` }} />
                 {name(v.variant)}
                 {best === v.variant && <span className={s.badge}>LEADING</span>}
               </div>
@@ -273,7 +272,7 @@ function TestCard({ t }: { t: TestStats }) {
                 <dd>{v.chanceBest == null || v.m.orders === 0 ? "—" : `${Math.round(v.chanceBest * 100)}%`}</dd>
               </dl>
               <div className={s.progress} title={`${v.m.orders} of ${t.target} sales`}>
-                <span style={{ width: `${Math.min(100, (v.m.orders / t.target) * 100)}%`, background: c?.to }} />
+                <span style={{ width: `${Math.min(100, (v.m.orders / t.target) * 100)}%`, background: c.to }} />
               </div>
               <div className={s.progressLabel}>
                 {int(v.m.orders)} / {t.target} sales

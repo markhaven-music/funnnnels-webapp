@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { Lanes, previewUrl } from "@/components/FunnelLanes";
 import { PriceList, PricesDrawer, type PriceItem } from "@/components/FunnelPrices";
 import { I } from "@/components/icons";
-import { COLORS, type Variant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import type { Analytics, Metrics, Range, TestStats } from "@/lib/analytics";
 import type { FunnelMap, MapStep } from "@/lib/funnelMap";
 import s from "./funnelMap.module.css";
@@ -107,7 +106,7 @@ function CopyButton({ text, label = "Copy URL" }: { text: string; label?: string
 
 /** The A/B test's colours on a step: a row per colour with the numbers that step decides. */
 function Variants({ test, scope, step }: { test: TestStats; scope: string; step: MapStep }) {
-  const name = (v: string) => v[0].toUpperCase() + v.slice(1);
+  const label = (v: string) => test.variants.find((x) => x.variant === v)?.label ?? v;
   const cols =
     step.kind === "landing"
       ? ["Visitors", "Went to order page", "Orders", "Orders / visitor"]
@@ -118,28 +117,27 @@ function Variants({ test, scope, step }: { test: TestStats; scope: string; step:
         <span className={s.variantsTitle}>
           <span className={s.dots} aria-hidden>
             {test.variants.map((v) => {
-              const c = COLORS[v.variant as Variant];
-              return <span key={v.variant} style={{ background: c?.to ?? "#999" }} />;
+              return <span key={v.variant} style={{ background: v.color.to }} />;
             })}
           </span>
-          A/B/C test · {test.name}
+          A/B test · {test.name}
         </span>
         <span className={s.variantsMeta}>
           {test.since ? `since ${test.since} · ` : ""}{scope} ·{" "}
           <Link href="/?nav=analytics" className={s.link}>
-            {test.verdict === "winner" && test.leader ? `${name(test.leader)} wins` : test.verdict === "tie" ? "no clear winner" : `${int(test.salesToGo)} sales to a reliable answer`}
+            {test.verdict === "winner" && test.leader ? `${label(test.leader)} wins` : test.verdict === "tie" ? "no clear winner" : `${int(test.salesToGo)} sales to a reliable answer`}
           </Link>
         </span>
       </div>
       <div className={s.variantGrid} role="table">
         <div className={`${s.variantRow} ${s.variantHeadRow}`} role="row">
-          <span>Colour</span>
+          <span>Variant</span>
           {cols.map((c) => (
             <span key={c}>{c}</span>
           ))}
         </div>
         {test.variants.map((v) => {
-          const c = COLORS[v.variant as Variant];
+          const c = v.color;
           const m = v.m;
           const values =
             step.kind === "landing"
@@ -148,9 +146,9 @@ function Variants({ test, scope, step }: { test: TestStats; scope: string; step:
           return (
             <div key={v.variant} className={s.variantRow} role="row">
               <span className={s.variantName}>
-                <span className={s.swatch} style={{ background: c ? `linear-gradient(180deg, ${c.from}, ${c.to})` : "#999" }} />
-                <a href={previewUrl(step.url, v.variant)} target="_blank" rel="noreferrer" className={s.link} title={`See the ${v.variant} page (not counted as a visit)`}>
-                  {name(v.variant)}
+                <span className={s.swatch} style={{ background: `linear-gradient(180deg, ${c.from}, ${c.to})` }} />
+                <a href={previewUrl(step.url, v.variant)} target="_blank" rel="noreferrer" className={s.link} title="See this version (not counted as a visit)">
+                  {v.label}
                 </a>
                 {test.leader === v.variant && <span className={s.leading}>leading</span>}
               </span>
@@ -284,7 +282,7 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
   const langMetrics = (l: string) => (map.langs.length > 1 ? stats?.langs?.find((x) => x.lang === l)?.m : stats?.total);
   const metrics = stats ? langMetrics(lang) : undefined;
   // The test on the chosen language's pages, like the rest of the map.
-  const wholeTest = data?.test && data.test.funnel === map.statsSlug ? data.test : null;
+  const wholeTest = data?.tests.find((t) => t.funnel === map.statsSlug) ?? null;
   const test = wholeTest && map.langs.length > 1 ? (wholeTest.byLang?.[lang] ?? wholeTest) : wholeTest;
   const testScope = test !== wholeTest ? `${current.label} pages` : "every language";
   const hasOrderStep = current.steps.some((st) => st.kind === "order");
@@ -311,7 +309,7 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
                 Flow
               </button>
               <button type="button" className={`tab ${lanes ? "active" : ""}`} onClick={() => pickView("lanes")}>
-                A/B/C lanes
+                A/B lanes
               </button>
             </div>
           )}
@@ -397,7 +395,7 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
                   <div className={s.info}>
                     <div className={s.stepName}>
                       {step.name}
-                      {test && (step.kind === "landing" || step.kind === "order") && <span className={s.abTag}>A/B/C</span>}
+                      {test && (step.kind === "landing" || step.kind === "order") && <span className={s.abTag}>A/B</span>}
                       {step.offer && !step.offer.live && (
                         <span className={s.offTag} title="Buyers go straight to the thank-you page until the upsells are switched on (UPSELLS=on).">
                           Off until tested
@@ -452,7 +450,7 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
         {map.statsSlug && (
           <p className={s.note}>
             Numbers for {RANGES.find((r) => r.id === range)?.note}
-            {map.langs.length > 1 ? `, ${current.label} pages` : ""}; the A/B/C test counts since it started. Visitors are counted by
+            {map.langs.length > 1 ? `, ${current.label} pages` : ""}; the A/B test counts since it started. Visitors are counted by
             our own script{data?.trackingSince ? ` since ${data.trackingSince}` : ""}; orders come from Stripe and PayPal.{" "}
             <Link href="/?nav=analytics" className={s.link}>
               All analytics

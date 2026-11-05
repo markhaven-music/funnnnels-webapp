@@ -6,6 +6,7 @@ import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
 import { funnel } from "../funnel";
 import { DEFAULT_SECTIONS, type Section } from "../content";
+import { AB, AB_CSS, AB_SCRIPT } from "../abtest";
 import { SectionView, isSectionType, type Ctx } from "../sections";
 import { Tracking } from "../Tracking";
 import { Beacon } from "../../Beacon";
@@ -69,8 +70,15 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
 
   return (
     <main className={`${s.page} ${s.jazz} ${display.variable}`}>
+      {/* The headline test: the visitor's variant is picked before the hero paints (../abtest.ts). */}
+      <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
+      <style dangerouslySetInnerHTML={{ __html: AB_CSS }} />
       <Tracking value={amount} currency={currency} />
-      <Beacon funnel={funnel.slug} page="landing" />
+      <Beacon funnel={funnel.slug} page="landing" abCookie={AB.cookie} />
+      {/* Red, on top, like TOP HITS' and the Drum Kit's ("aggiungi anche banner rossi sopra black friday come gli altri funnels"). */}
+      <div className={s.bfbar}>
+        <b>BLACK FRIDAY:</b> 90% Sale Ends Soon
+      </div>
       {sections.map((section, i) => {
         // Desktop, like the Drum Kit page's copy-beside-a-picture blocks: the
         // letter beside the before/after rolls it talks about, text left, rolls
