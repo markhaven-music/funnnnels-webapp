@@ -11,7 +11,7 @@ import f from "./freePacks.module.css";
 // where they stand (bought, opened the checkout, which Drum Kit email is next).
 
 const PERIODS = [7, 30, 90];
-const COLS = { gridTemplateColumns: "96px minmax(0,1.6fr) 120px minmax(0,1fr) minmax(0,1.5fr)" };
+const COLS = { gridTemplateColumns: "92px minmax(0,1.4fr) 110px minmax(0,0.6fr) minmax(0,1.6fr)" };
 
 const pct = (n: number, of: number) => (of ? `${Math.round((n / of) * 100)}%` : "");
 const money = (r: { eur: number; usd: number }) =>
@@ -69,13 +69,13 @@ function status(x: FreePackPerson): { label: string; cls: string } {
   const kit = x.kit;
   const next =
     kit && (kit.state === "waiting" || kit.state === "sending")
-      ? `Drum Kit email ${kit.sent + 1} of ${kit.of}${kit.nextAt ? ` on ${day(kit.nextAt)}` : ""}`
+      ? `Drum Kit email ${kit.sent + 1}/${kit.of}${kit.nextAt ? ` · ${day(kit.nextAt)}` : ""}`
       : kit?.state === "done"
         ? "Got all Drum Kit emails"
         : kit?.state === "stopped"
           ? "Drum Kit emails stopped"
           : "Not in the Drum Kit emails";
-  if (x.checkoutAt) return { label: `Opened checkout ${day(x.checkoutAt)} · ${next}`, cls: f.status_checkout };
+  if (x.checkoutAt) return { label: `Opened checkout ${day(x.checkoutAt)} · then ${next.replace(/^Drum Kit email/, "email")}`, cls: f.status_checkout };
   return { label: next, cls: kit ? "" : f.status_off };
 }
 
@@ -175,7 +175,7 @@ export function FreePacksPanel() {
             <div className={f.filters}>
               {(
                 [
-                  ["all", `All ${people.length}`],
+                  ["all", `Everyone ${people.length}`],
                   ["checkout", `Opened checkout ${total.checkout - fresh.filter((x) => x.checkoutAt && x.boughtAt).length}`],
                   ["bought", `Bought ${total.bought}`],
                 ] as [Filter, string][]

@@ -121,7 +121,7 @@
   font-size: 11px;
   padding: 2px 8px;
   border-radius: var(--radius-xs);
-  white-space: nowrap;
+  line-height: 1.5;
   background: var(--bg-3);
   color: var(--fg-1);
 }
