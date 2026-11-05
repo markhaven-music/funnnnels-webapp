@@ -27,3 +27,14 @@ editor's chrome). Buyer pages follow their brand and
    off funnnnels.com.
 4. **Numbers are real or absent.** A tile, chart or insight shows data from
    `lib/analytics.ts`, or nothing. No placeholder zeros, no made-up trends.
+5. **Readable at a glance.** "I hate that it doesn't read well": contrast
+   comes before mood.
+   - Text is at least 4.5:1 on the card it sits on, the faintest (`--fg-3`)
+     included. Labels and sub-lines use `--fg-2`; `--fg-3` is for the least
+     important text only.
+   - A card stands off the page by a clear step of fill (`--bg-1` on
+     `--bg-0`), and a tile inside a card by another (`--fg-0` at 5%).
+   - Chart lines are 2.5 px, text never under 11 px, and a picked or hovered
+     thing changes its fill strongly enough to see from across the room.
+   - One chart says one thing, big: tiles pick what it draws (WooCommerce
+     style) instead of a second chart.

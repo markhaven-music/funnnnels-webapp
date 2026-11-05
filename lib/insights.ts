@@ -13,7 +13,7 @@ export type Insight = {
 const MAX = 4;
 const DAY = 86_400_000;
 
-const eur = (n: number) => `€${n >= 100 ? Math.round(n).toLocaleString("en-US") : n.toFixed(2).replace(/\.00$/, "")}`;
+const euro = (n: number) => `€${n >= 100 ? Math.round(n).toLocaleString("en-US") : n.toFixed(2).replace(/\.00$/, "")}`;
 const pct = (n: number) => `${n >= 0.1 ? Math.round(n * 100) : (n * 100).toFixed(1)}%`;
 const sum = (days: Day[], k: keyof Omit<Day, "day">) => days.reduce((n, d) => n + d[k], 0);
 const langName = (l: string) => ({ en: "English", fr: "French", es: "Spanish", de: "German", it: "Italian", nl: "Dutch" })[l] ?? l;
@@ -22,7 +22,8 @@ const lastDays = (a: Analytics) => (a.range === "7d" ? "the last 7 days" : a.ran
 /** Orders per landing visitor, counting only the orders made since visitors were counted. */
 const cvr = (m: Metrics) => (m.visitors ? m.ratedOrders / m.visitors : 0);
 
-export function insights(a: Analytics, now = Date.now()): Insight[] {
+/** eur: how a sum in euros is written; the home passes one in the currency picked there. */
+export function insights(a: Analytics, now = Date.now(), eur: (n: number) => string = euro): Insight[] {
   const out: (Insight & { rank: number })[] = [];
   const say = (rank: number, tone: Insight["tone"], text: string) => out.push({ rank, tone, text });
   const hasSales = a.sources.stripe; // without Stripe, card sales are missing and "no sale" would be wrong

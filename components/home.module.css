@@ -1,17 +1,19 @@
-/* Dashboard home: range filter, tiles, charts and insights (docs/design.md). */
+/* Dashboard home: filters, the performance card (tiles + one chart), insights
+   and the breakdowns (docs/design.md: readable first, borders the colour of
+   the card, nearly square corners). */
 
 .filters {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px 14px;
   margin-bottom: 14px;
   flex-wrap: wrap;
 }
 .note,
 .warn {
   font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--fg-3);
+  font-size: 11.5px;
+  color: var(--fg-2);
 }
 .warn {
   color: var(--amber);
@@ -22,80 +24,16 @@
   transition: opacity 0.2s;
 }
 
-/* ─── tiles: revenue, net revenue, sales, visitors, conversion ─── */
-.kpis {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  margin-bottom: 12px;
-}
-@media (max-width: 1100px) {
-  .kpis {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-@media (max-width: 600px) {
-  .kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-/* A tile is a button: click it and the chart under the tiles shows it. The
-   picked one is told by a tint of its own colour, never by a border. */
-.kpi {
-  display: block;
-  width: 100%;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.kpi:hover {
-  background: oklch(0.21 0.012 270 / 0.72);
-}
-.kpi:focus-visible {
-  outline: 1px solid var(--accent-dim);
-  outline-offset: 1px;
-}
-:global(.main.home) .stat.kpiOn {
-  background: color-mix(in oklch, var(--k) 13%, oklch(0.18 0.01 270 / 0.72));
-}
-.kpiOn .v {
-  color: var(--fg-0);
-}
-
-.vs {
-  color: var(--fg-3);
-}
-.flat {
-  color: var(--fg-3);
-}
-
-.row {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.rowFull {
-  grid-template-columns: minmax(0, 1fr);
-}
-.rowHalf {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  margin-bottom: 28px;
-}
-@media (max-width: 1100px) {
-  .row,
-  .rowHalf {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
+/* A card stands off the page by its fill: solid enough to read on the
+   glass rings behind the greeting. */
 .card {
-  background: oklch(0.18 0.01 270 / 0.68);
+  background: color-mix(in oklch, var(--bg-1) 94%, transparent);
   backdrop-filter: blur(14px);
   border: 1px solid transparent;
   border-radius: var(--radius);
-  padding: 16px 18px 18px;
+  padding: 18px 20px 20px;
   min-width: 0;
+  box-shadow: 0 1px 0 oklch(1 0 0 / 0.04) inset, 0 12px 32px oklch(0 0 0 / 0.28);
 }
 .cardHead {
   display: flex;
@@ -108,49 +46,288 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--fg-0);
 }
 .sub {
   font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--fg-3);
+  font-size: 11.5px;
+  color: var(--fg-2);
 }
 .empty {
   padding: 28px 0;
   text-align: center;
   font-size: 13px;
-  color: var(--fg-3);
+  color: var(--fg-2);
 }
 
-/* ─── charts: the frame ─── */
+/* ─── the performance card ─── */
+.perf {
+  margin-bottom: 12px;
+  padding: 16px 20px 20px;
+}
+
+/* Tiles: the range at a glance. The picked one is told by a tint of its own
+   colour, never by a border. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 22px;
+}
+@media (max-width: 900px) {
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.tile {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px 13px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: color-mix(in oklch, var(--fg-0) 5%, transparent);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tile:hover {
+  background: color-mix(in oklch, var(--fg-0) 9%, transparent);
+}
+.tile:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.tileOn,
+.tileOn:hover {
+  background: color-mix(in oklch, var(--k) 20%, transparent);
+}
+.tileLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--fg-1);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.tileKey {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.tileSince {
+  margin-left: auto;
+  color: var(--fg-2);
+  font-size: 10.5px;
+}
+.tileValue {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 7px 0 4px;
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--fg-0);
+  white-space: nowrap;
+}
+.tileDelta {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--fg-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tileNote {
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.good {
+  color: var(--mint);
+}
+.bad {
+  color: var(--rose);
+}
+.flat {
+  color: var(--fg-1);
+}
+.vs {
+  color: var(--fg-2);
+}
+.pos {
+  color: var(--mint);
+}
+.neg {
+  color: var(--rose);
+}
+
+/* Profit / loss: a badge, the value stays in the text colour. */
+.badge {
+  display: inline-block;
+  padding: 2px 7px 3px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+.badgeProfit {
+  color: oklch(0.2 0.05 162);
+  background: oklch(0.85 0.17 162);
+}
+.badgeLoss {
+  color: oklch(0.99 0 0);
+  background: oklch(0.6 0.21 22);
+}
+
+/* The chart's head. */
+.chartHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.chartTitle {
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--fg-0);
+  letter-spacing: -0.01em;
+}
+.chartSub {
+  margin-top: 3px;
+  font-size: 12.5px;
+  color: var(--fg-2);
+}
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.controls :global(.tab:disabled) {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The legend: a key per series with its total; a button key hides its line. */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  margin: 0 0 14px 58px;
+  font-size: 13px;
+  color: var(--fg-1);
+}
+.lgKey {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.lgBtn {
+  background: none;
+  border: 0;
+  padding: 2px 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.lgBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.lgOff {
+  color: var(--fg-2);
+}
+.lgOff .lgName {
+  text-decoration: line-through;
+}
+.lgSwatch {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-xs);
+  border: 2px solid;
+}
+.lgTotal {
+  font-weight: 650;
+  color: var(--fg-0);
+}
+.lgBands {
+  display: inline-flex;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--fg-1);
+}
+.lgBand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.lgBand i {
+  width: 16px;
+  height: 10px;
+  border-radius: var(--radius-xs);
+  opacity: 0.55;
+}
+.hint {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+}
+
+/* The chart: y axis | plot, then the x axis. Tall. */
 .chart {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  grid-template-rows: auto 22px;
+  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-rows: auto 26px;
 }
 .yAxis {
   position: relative;
 }
 .yAxis span {
   position: absolute;
-  right: 10px;
+  right: 12px;
   transform: translateY(-50%);
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--fg-3);
+  font-size: 11.5px;
+  color: var(--fg-2);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 .plot {
   position: relative;
-  height: 200px;
+  height: 380px;
   outline: none;
   cursor: crosshair;
+  touch-action: pan-y;
+}
+@media (max-width: 700px) {
+  .plot {
+    height: 280px;
+  }
 }
 .plot:focus-visible {
-  box-shadow: 0 0 0 1px var(--accent-dim);
+  box-shadow: 0 0 0 2px var(--accent-dim);
   border-radius: var(--radius-xs);
 }
 .svg {
@@ -158,68 +335,44 @@
   overflow: visible;
 }
 .grid {
-  stroke: var(--line-soft);
+  stroke: color-mix(in oklch, var(--fg-0) 9%, transparent);
   stroke-width: 1;
 }
 .base {
-  stroke: var(--line);
+  stroke: color-mix(in oklch, var(--fg-0) 28%, transparent);
   stroke-width: 1;
 }
+.line {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.prevLine {
+  fill: none;
+  stroke: oklch(0.62 0.015 270);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
 .cross {
-  stroke: var(--fg-2);
+  stroke: var(--fg-1);
   stroke-width: 1;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 .dot {
   stroke: var(--bg-1);
   stroke-width: 2;
-}
-.prevLine {
-  fill: none;
-  stroke: var(--fg-3);
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  opacity: 0.85;
-}
-.prevDot {
-  fill: var(--fg-3);
-  stroke: var(--bg-1);
-  stroke-width: 2;
-}
-.bar {
-  fill: var(--accent);
-  transition: fill 0.12s;
-}
-.barOn {
-  fill: var(--accent-2);
-}
-/* A day before the ads moved here from ClickFunnels: shown, not counted. */
-.barOut {
-  opacity: 0.3;
-}
-.rowOut td {
-  color: var(--fg-3);
-}
-.spendLine {
-  fill: none;
-  stroke: oklch(0.74 0.17 55);
-  stroke-width: 2;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-.peakLabel {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  fill: var(--fg-1);
 }
 .none {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 13px;
-  color: var(--fg-3);
+  padding: 0 20px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--fg-1);
   pointer-events: none;
 }
 .xAxis {
@@ -228,243 +381,118 @@
 }
 .xAxis span {
   position: absolute;
-  top: 7px;
+  top: 9px;
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--fg-3);
-  white-space: nowrap;
-}
-
-/* The legend: one key per series, a line key for a line, a square for bars.
-   A key that is a button hides its series. */
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 18px;
-  margin: 0 0 14px 48px;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--fg-2);
-}
-.key {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
   white-space: nowrap;
 }
-.keyBtn {
-  background: none;
-  border: 0;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-.keyBtn:disabled {
-  cursor: default;
-  color: var(--fg-3);
-}
-.keyOff {
-  opacity: 0.5;
-  text-decoration: line-through;
-}
-.keyLine {
-  display: inline-block;
-  width: 14px;
-  height: 2px;
-  border-radius: 1px;
-}
-.keyRect {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-xs);
-}
-.hint {
-  margin-left: auto;
-  color: var(--fg-3);
-}
 
-/* The tooltip: the value first, then the day's other numbers. */
+/* The tooltip: the picked number big, then every number of the day. */
 .tip {
   position: absolute;
-  top: 8px;
+  top: 10px;
   z-index: 2;
-  min-width: 170px;
-  padding: 10px 12px 11px;
+  min-width: 220px;
+  padding: 12px 14px 13px;
   background: var(--bg-3);
   border: 1px solid transparent;
   border-radius: var(--radius);
-  box-shadow: 0 10px 30px oklch(0 0 0 / 0.45);
+  box-shadow: 0 14px 36px oklch(0 0 0 / 0.5);
   pointer-events: none;
 }
-.tipDay {
+.tipHead {
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--fg-2);
+  font-size: 11.5px;
+  color: var(--fg-1);
 }
-.tipValue {
-  font-size: 20px;
-  font-weight: 600;
+.tipBig {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 2px;
+  font-size: 22px;
+  font-weight: 650;
   letter-spacing: -0.02em;
-  margin: 3px 0 2px;
   color: var(--fg-0);
 }
 .tipVs {
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--fg-3);
+  font-size: 11px;
+  color: var(--fg-2);
 }
 .tipRows {
   display: grid;
-  gap: 4px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--line-soft);
+  gap: 5px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in oklch, var(--fg-0) 12%, transparent);
 }
 .tipRow {
   display: grid;
-  grid-template-columns: 10px auto minmax(0, 1fr);
+  grid-template-columns: 12px auto minmax(0, 1fr);
   align-items: center;
-  gap: 7px;
-  font-size: 12px;
-  color: var(--fg-2);
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--fg-1);
   white-space: nowrap;
 }
 .tipRow b {
-  color: var(--fg-1);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.tipRowOn b {
   color: var(--fg-0);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
 }
 .tipKey {
   display: inline-block;
-  width: 10px;
-  height: 2px;
+  width: 12px;
+  height: 3px;
   border-radius: 1px;
 }
-.neg {
-  color: var(--rose);
+.tipMark {
+  font-size: 10px;
+  text-align: center;
+}
+.tipRule {
+  height: 1px;
+  margin: 3px 0;
+  background: color-mix(in oklch, var(--fg-0) 10%, transparent);
 }
 .tipNote {
-  max-width: 200px;
-  margin-top: 6px;
+  max-width: 230px;
+  margin-top: 4px;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1.5;
-  color: var(--fg-3);
+  color: var(--fg-2);
   white-space: normal;
 }
 
-/* ─── net revenue vs ad spend ─── */
-.big {
-  margin-bottom: 12px;
-}
-.big .cardHead {
-  align-items: center;
-  flex-wrap: wrap;
-}
-.big .plot {
-  height: 260px;
-}
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.controls :global(.tab) {
-  text-transform: capitalize;
-}
-.figs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 18px;
-}
-@media (max-width: 800px) {
-  .figs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-.fig {
-  padding: 10px 12px 11px;
-  background: color-mix(in oklch, var(--fg-0) 4%, transparent);
-  border-radius: var(--radius);
-  min-width: 0;
-}
-.figLabel {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--fg-2);
-  letter-spacing: 0.04em;
-}
-.figKey {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-.figValue {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  margin: 6px 0 2px;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--fg-0);
-  white-space: nowrap;
-}
-.figMark {
-  font-size: 10px;
-}
-.figUp {
-  color: var(--mint);
-}
-.figDown {
-  color: var(--rose);
-}
-.figSub {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--fg-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* The table view: the same days as rows. */
+/* The table view: the same numbers as rows. */
 .tableWrap {
   overflow-x: auto;
 }
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .table th {
-  padding: 6px 8px;
+  padding: 8px 10px;
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--fg-3);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--fg-2);
   text-align: right;
-  border-bottom: 1px solid var(--line-soft);
+  border-bottom: 1px solid color-mix(in oklch, var(--fg-0) 16%, transparent);
   white-space: nowrap;
 }
 .table td {
-  padding: 7px 8px;
+  padding: 8px 10px;
   text-align: right;
   color: var(--fg-1);
   font-variant-numeric: tabular-nums;
-  border-bottom: 1px solid var(--line-soft);
+  border-bottom: 1px solid color-mix(in oklch, var(--fg-0) 8%, transparent);
   white-space: nowrap;
 }
 .table th:first-child,
@@ -476,14 +504,46 @@
 .table td:last-child {
   padding-right: 0;
 }
-.table tfoot td {
+.table tbody tr:hover td {
+  background: color-mix(in oklch, var(--fg-0) 4%, transparent);
+}
+.table th.colOn {
+  color: var(--fg-0);
+}
+.table td.colOn {
+  color: var(--fg-0);
   font-weight: 600;
+}
+.table td.pos {
+  color: var(--mint);
+}
+.table td.neg {
+  color: var(--rose);
+}
+.table tfoot td {
+  font-weight: 650;
   color: var(--fg-0);
   border-bottom: 0;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid color-mix(in oklch, var(--fg-0) 22%, transparent);
+}
+.rowOut td {
+  color: var(--fg-2);
+}
+.foot {
+  margin: 12px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
 }
 
-/* ─── horizontal bars: revenue by funnel, visit → sale ─── */
+/* ─── under the chart: insights, revenue by funnel, visit → sale ─── */
+.below {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
 .hbars {
   display: flex;
   flex-direction: column;
@@ -493,15 +553,16 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
-  font-size: 13px;
-  color: var(--fg-1);
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-size: 13.5px;
+  color: var(--fg-0);
   margin-bottom: 6px;
 }
 .hmeta {
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--fg-3);
+  font-size: 11px;
+  color: var(--fg-2);
   white-space: nowrap;
 }
 .htrack {
@@ -521,13 +582,12 @@
   background: var(--sky);
 }
 .hval {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 650;
   color: var(--fg-0);
   text-align: right;
 }
 
-/* ─── insights ─── */
 .insights {
   display: flex;
   flex-direction: column;
@@ -544,9 +604,9 @@
   display: grid;
   grid-template-columns: 14px minmax(0, 1fr);
   gap: 8px;
-  font-size: 13px;
+  font-size: 13.5px;
   line-height: 1.5;
-  color: var(--fg-1);
+  color: var(--fg-0);
 }
 .mark {
   font-size: 9px;
