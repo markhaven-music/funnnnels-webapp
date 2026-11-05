@@ -1802,3 +1802,21 @@
     font-size: 48px;
   }
 }
+
+/* The commercial license card under the guarantee (sections.tsx Guarantee) */
+.license {
+  margin-top: 24px;
+}
+/* the section's content-visibility isolates blending, so the card's own box carries the page colour */
+.licenseArt {
+  background: var(--ink);
+}
+.licenseArt img {
+  /* the card's black background takes the page's near-black instead of showing as a box */
+  mix-blend-mode: lighten;
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin: 0 auto;
+}

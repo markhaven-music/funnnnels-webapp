@@ -40,7 +40,7 @@ Here's what a jazz pianist knows that a chord chart doesn't tell you. Pianists d
 
 [SHOW: compare]
 
-That's called voice leading. Watch the top note. In root position, it jumps up to seven semitones from chord to chord. Voice-led, it only moves between B and C, while the bass plays the roots. That's why a pianist sounds smooth, and a chord plugin sounds like a grid. The catch: learning it takes months of theory, and a piano you might not play.
+That's called voice leading. Watch the top note. In root position, it jumps up to seven semitones from chord to chord. Voice-led, it only moves between E, F and G, while the bass plays the roots. That's why a pianist sounds smooth, and a chord plugin sounds like a grid. The catch: learning it takes months of theory, and a piano you might not play.
 
 [SHOW: image stage-2200]
 
@@ -48,19 +48,19 @@ So we did it for you. We're GRIND STUDIO. Our MIDI Drum Kit is in the sessions o
 
 [SHOW: image box-900]
 
-That's 3,536 MIDI files, in five folders.
+That's 10,496 MIDI files, in five folders.
 
 [SHOW: image daw-1600]
 
-Folder one: the chords, in each progression's original key. Every progression, in 13 voicings and 8 rhythms. Ballad arpeggios, pads, bossa nova, swing comping, Charleston, and Freddie Green four to the bar.
+Folder one: the chords, in each progression's original key. Every progression, in 12 voicings and 8 rhythms. Ballad arpeggios, pads, bossa nova, swing comping, Charleston, and Freddie Green four to the bar.
 
-The 13 voicings go from Best Voicing, the one you just heard, to rootless Bill Evans voicings, drop two, voicings stacked in fourths, shells, two-hand spreads, and every inversion. The progressions are the ones jazz is built on. Two-five-ones in major and minor. Turnarounds. Tritone subs. Backdoor. Lady Bird. Autumn Leaves type changes. Rhythm changes. Jazz blues. Coltrane changes. A Train.
+The 12 voicings go from Best Voicing, the one you just heard, to rootless Bill Evans voicings, drop two, voicings stacked in fourths, shells, two-hand spreads, and every inversion. The progressions are the ones jazz is built on. Two-five-ones in major and minor. Turnarounds. Tritone subs. Backdoor. Lady Bird. Autumn Leaves type changes. Rhythm changes. Jazz blues. Coltrane changes. A Train.
 
 Folder two: every progression in all 12 keys, as voice-led pads. Folder three: bass lines. Walking, two-feel and bossa nova bass, for every progression. Folder four: combo loops. Piano, walking bass and ride cymbal, together. And folder five: genre loops. Every progression as lofi hip hop, neo soul, trap soul and deep house, with separate chords, bass and drum MIDI, plus a full multitrack file.
 
 [SHOW: none]
 
-Here's what that sounds like. Real files from the pack, played on a grand piano. Lofi. Autumn Leaves type.
+Here's what that sounds like. Real files from the pack. Lofi. Autumn Leaves type.
 
 [DEMO: lofi]
 
@@ -74,9 +74,9 @@ And you don't need any theory to use them. The chord names are written into ever
 
 Drag the file onto your keys. Rhodes, piano, pads, a synth, whatever you use. Change the key, swap the rhythm, add your drums. The voice leading stays. It works in any DAW that opens MIDI. Ableton, Logic, FL Studio, Cubase, Studio One, Reaper, Bitwig, GarageBand. And you can use it in your own releases, commercial ones included. No royalties.
 
-[SHOW: card 5 free bonuses]
+[SHOW: card 6 free bonuses]
 
-You also get five bonuses, free, on the same download page.
+You also get six bonuses, free, on the same download page.
 
 [SHOW: bonus 1]
 
@@ -96,11 +96,15 @@ Four: the Emotional Keys MIDI Bundle. Three volumes of songstarters, progression
 
 [SHOW: bonus 5]
 
-And five: 47 drum loops to write over.
+Five: 47 drum loops to write over.
+
+[SHOW: bonus 6]
+
+And six: a PDF guide. What every voicing and rhythm is for, and every progression's chords, bar by bar.
 
 [SHOW: card One payment]
 
-All of it, the pack and the five bonuses, is one payment. Your price is right below this video. No subscription. You download it right after you pay.
+All of it, the pack and the six bonuses, is one payment. Your price is right below this video. No subscription. You download it right after you pay.
 
 [SHOW: none]
 

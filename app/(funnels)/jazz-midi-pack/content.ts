@@ -237,8 +237,8 @@ export const DEFAULT_SECTIONS: Section[] = [
     type: "s_bonuses",
     props: {
       eyebrow: "Free with the pack",
-      title: "Five bonuses. All in the {price}.",
-      sub: "4,197 more MIDI files, 305 WAV loops and a PDF, on the same download page as the pack. Press play on any of them.",
+      title: "Six bonuses. All in the {price}.",
+      sub: "4,197 more MIDI files, 305 WAV loops and two PDFs, on the same download page as the pack. Press play on any of them.",
       items: [
         {
           name: "MIDI Chord Pack (Jazz Edition)",
@@ -260,6 +260,10 @@ export const DEFAULT_SECTIONS: Section[] = [
           name: "Drum Loops for Songwriting",
           text: "Drums to write over while the chords take shape.",
         },
+        {
+          name: "The Jazz MIDI Pack Guide (PDF)",
+          text: "The idea behind the pack, what every voicing and rhythm is for, and every progression's chords, bar by bar.",
+        },
       ],
     },
   },
@@ -276,6 +280,7 @@ export const DEFAULT_SECTIONS: Section[] = [
         "Walking, two-feel and bossa bass lines",
         "Lofi, neo soul, trap soul and deep house loops, drums included",
         "Chord names written into every file",
+        "Commercial license: release and sell your beats, no royalties",
       ],
       guarantee: "{days}-day satisfaction guarantee. A file doesn’t work? We fix it.",
     },

@@ -54,6 +54,11 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   crossed out, "Today" 27, "You save" 255. It reads as the bundle's worth, never as an earlier price of the pack.
 - Bundle total: 14,693 MIDI files = 10,496 (pack) + 2,304 + 150 + 1,548 + 195 (bonuses). The bonuses add 4,197 MIDI
   files, 305 WAV loops (258 Bible piano/e-piano loops + 47 drum loops) and a PDF. Counted 2026-11-01.
+- Since 2026-11-05 ("aggiungi la guida ai bonus", "aggiungi COMMERCIAL LICENSE image"): the PDF guide is bonus 6
+  ("The Jazz MIDI Pack Guide (PDF)", value 17, no file of its own: it's in the pack's zip; cover bonus-6-*.webp, a
+  render made from bonus 2's), so the stack totals 299 and the page says six bonuses and two PDFs. A commercial
+  license card (license-*.webp, generated from Famous Beats' card) sits under the guarantee, with the same terms as
+  the FAQ: own music and commercial releases, no royalties, no reselling or sharing the files. The offer stack says it too.
 - Angle (2026-11-04, replaces "everyone wants and nobody can write"): the producer who wants a jazz vibe in their beat and
   doesn't know how. The hero and the letter open on that feeling; lofi, neo soul and trap soul are the specifics (the pack's
   genre loops); the voicing is explained in its own block ("Why these chords sound played", beside the before/after rolls,
@@ -117,8 +122,8 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   ("patterns" → "chords", as Top Hits has them). Four more sit only in the editor's draft as placeholders
   ("Write the review here.", "First name L.") for the user to replace with real ones before publishing: no
   review written by us goes live. No Jazz-specific testimonials exist yet. Social proof = the `Proof` strip (the two numbers above + the guarantee), under the hero and the checkout.
-- Counts on the page: 10,496 = the pack; the bonuses add 4,197 MIDI; 14,693 only as "in total". The English VSL
-  (Wistia lh4kzjb92h) still says 3,536: recorded before the 2026-11-05 additions.
+- Counts on the page: 10,496 = the pack; the bonuses add 4,197 MIDI; 14,693 only as "in total". The English VSL is
+  Wistia u5f87ncaux since 2026-11-05 (10,496 files, 12 voicings, six bonuses; lh4kzjb92h said 3,536).
 
 ## Before / after (measured by `tools/extract_rolls.py` data, 2026-10-12)
 - File pair: "02 Pads - 05 I-vi-ii-V Turnaround", Root Position vs Best Voicing (same 8 chords, same rhythm).

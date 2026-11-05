@@ -896,7 +896,7 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
               <li key={i} className={ih.on("cover") ? bn.bonus : `${bn.bonus} ${bn.bare}`}>
                 {ih.on("cover") && (
                   <div className={ih.host(bn.cover)}>
-                    {i < 5 && (
+                    {i < 6 && (
                       <img
                         src={`${DIR}/bonus-${i + 1}-360.webp`}
                         srcSet={`${DIR}/bonus-${i + 1}-360.webp 360w, ${DIR}/bonus-${i + 1}-640.webp 640w`}
@@ -1169,6 +1169,29 @@ function Guarantee({ p, patch, ctx }: { p: SectionProps["s_guarantee"]; patch?: 
             <T v={p.text} set={patch && ((v) => patch({ text: v }))} ctx={ctx} as="p" className={s.sub} />
           </Part>
         </div>
+        </div>
+        {/* The license card under the guarantee, like Famous Beats' "Commercial license" tile (2026-11-05,
+            "aggiungi COMMERCIAL LICENSE image come sta su altri funnels"). The card is generated from that one. */}
+        <div className={`${s.guarantee} ${s.two} ${s.license}`}>
+          <div className={`${s.twoBody} ${s.licenseArt}`}>
+            <img
+              src={`${DIR}/license-640.webp`}
+              srcSet={`${DIR}/license-420.webp 420w, ${DIR}/license-640.webp 640w, ${DIR}/license-900.webp 900w`}
+              sizes="(min-width: 1000px) 420px, 90vw"
+              width={1168}
+              height={880}
+              alt="GRIND STUDIO commercial license card for the Jazz MIDI Pack"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div className={s.twoHead}>
+            <h2 className={s.h2}>Commercial license.</h2>
+            <p className={s.sub}>
+              Use every file in your own music, commercial releases included: sell the beats, lease them, put them out. The money is
+              yours, no royalties. You just can&rsquo;t resell or share the MIDI files themselves.
+            </p>
+          </div>
         </div>
       </div>
     </section>

@@ -21,12 +21,15 @@ export const funnel = {
   tagline: "The most used jazz progressions, 12 voicings × 8 rhythms, all 12 keys",
   price: { eur: 27, usd: 27 },
   // The hero video: Wistia media, in Wistia's player (Vsl.tsx). Its thumbnail
-  // is a frame of the video itself (84.5 s, "Watch the top note.", Wistia still
-  // 5uwmgd0ifh; "no custom image", 2026-11-02), also saved as
+  // is a frame of the video itself (85.3 s, "Watch the top note.", Wistia still
+  // kogs5rd7zh since 2026-11-05; "no custom image", 2026-11-02), also saved as
   // public/funnels/jazz-midi-pack/vsl-en-1600.webp for link previews. Script: vsl/script-en.md.
   // lh4kzjb92h since 2026-11-01: voice Aaron on eleven_v4 and the demos on the
   // sine synth (the old cut mnet4ow8rz sounded "robotic and weird").
-  vsl: { wistiaId: "lh4kzjb92h" },
+  // u5f87ncaux since 2026-11-05: the same script with today's pack (10,496 files, 12 voicings, the lower
+  // Best Voicing in the demos, six bonuses with the PDF guide, no "grand piano"), re-voiced with Aaron
+  // ("cambia anche la VSL con il nuovo numero di files"). mvptgv9u24 was the cut with five bonuses.
+  vsl: { wistiaId: "u5f87ncaux" },
   // The old €9 tick-box offer. Since 2026-10-16 the checkout no longer shows it
   // (the Chord Pack is bonus 1); it stays so orders that bought it still verify.
   bump: {
@@ -111,6 +114,16 @@ export const funnel = {
       midi: 0,
       value: 27,
       inside: ["47 WAV drum loops, BPM in every name", "Pop & ballads, hip hop & trap, dance & electronic, vintage & rock"],
+    },
+    // The PDF guide inside the pack's zip (make_guide.py), a bonus since 2026-11-05 ("aggiungi la guida ai bonus").
+    // No file of its own: it comes with the pack, so unlocked() skips it.
+    {
+      id: "guide",
+      name: "The Jazz MIDI Pack Guide (PDF)",
+      count: "PDF guide, every progression charted",
+      midi: 0,
+      value: 17,
+      inside: ["How voice leading works, in one page", "The 12 voicings and 8 rhythms: what each is for", "Every progression with its key, length and chords, bar by bar"],
     },
   ],
   value: { pack: 97 },

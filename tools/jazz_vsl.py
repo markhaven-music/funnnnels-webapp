@@ -57,12 +57,13 @@ DEMOS = {
 # forty-seven"): it gets these words, the captions show the digits again.
 SPOKEN = {
     "2,847": "two thousand, eight hundred and forty-seven",
-    "3,536": "three thousand, five hundred and thirty-six",
+    "10,496": "ten thousand four hundred ninety-six",
     "2,304": "two thousand, three hundred and four",
     "1,548": "one thousand, five hundred and forty-eight",
 }
 BONUSES = ["MIDI Chord Pack (Jazz Edition)", "The Chord Progressions Bible", "Anime & Video Games MIDI Pack",
-           "Emotional Keys MIDI Bundle", "Drum Loops for Songwriting"]
+           "Emotional Keys MIDI Bundle", "Drum Loops for Songwriting",
+           "The Jazz MIDI Pack Guide (PDF)"]
 
 
 def parse():
