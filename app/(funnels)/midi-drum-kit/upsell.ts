@@ -17,6 +17,8 @@ import topHitsEs from "./copy/upsell-tophits/es.json";
 import topHitsFr from "./copy/upsell-tophits/fr.json";
 import topHitsIt from "./copy/upsell-tophits/it.json";
 import { funnel } from "./funnel";
+import { applySections, imageOrigins, swapImages } from "@/lib/cfSections";
+import { pageLayouts } from "@/lib/pageLayout";
 import { pageEdits } from "@/lib/pageTexts";
 import { markupEdits, type TextPage } from "./texts";
 import type { Lang } from "./i18n";
@@ -86,8 +88,9 @@ export const offerIds = () => funnel.offers.map((o) => o.id);
 
 // slug: the funnel the page sells for. The TOP HITS MIDI Bundle shows the
 // Famous Beats page too, after its own order (same pixel, Clarity and neo).
-// marks: each editable text (tNNN) between <!--fx:tNNN--> and <!--/fx-->, for
-// the dashboard's editor on the page (app/api/funnels/[id]/texts/frame).
+// marks: each editable text (tNNN) between <!--fx:tNNN--> and <!--/fx-->, every
+// section and picture tagged, for the dashboard's editor on the page
+// (app/api/funnels/[id]/texts/frame).
 export async function upsellHtml(offerId: string, lang: Lang, currency: Currency, slug: string = funnel.slug, marks = false): Promise<string | null> {
   const page = PAGES[offerId];
   const product = (await resolveFunnel(slug)) ?? getFunnel(slug);
@@ -95,8 +98,11 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
   const was = getFunnel(slug)?.offers?.find((o) => o.id === offerId)?.price[currency];
   if (!page || !offer || !product) return null;
 
-  // With the texts changed in the dashboard (funnel map → Edit, ./texts.ts); the Drum Kit's, also where TOP HITS shows the page.
-  const edits = markupEdits(await pageEdits(funnel.slug, lang, true), offerId as TextPage);
+  // With the texts and the layout (sections hidden or moved, pictures replaced) changed in the
+  // dashboard (funnel map → Edit, ./texts.ts, lib/pageLayout.ts); the Drum Kit's, also where TOP HITS shows the page.
+  const [allEdits, layouts] = await Promise.all([pageEdits(funnel.slug, lang, true), pageLayouts(funnel.slug, lang, true)]);
+  const edits = markupEdits(allEdits, offerId as TextPage);
+  const layout = layouts[offerId] ?? {};
   const strings: Copy = { ...page.copy.en, ...page.copy[lang], ...edits };
   const said = (key: string) =>
     typeof strings[key] === "string" ? restate(strings[key] as string, was ?? offer.price[currency], offer.price[currency], lang) : "";
@@ -112,7 +118,7 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     return html;
   };
 
-  let html = page.template
+  let html = applySections(page.template, layout, marks)
     .replace(/\{\{([ts]\d{3})\}\}/g, (_, key: string) => (marks && key.startsWith("t") ? `<!--fx:${key}-->${text(key)}<!--/fx-->` : text(key)))
     .replaceAll("{{YES}}", "#yes")
     .replaceAll("{{NO}}", "#no")
@@ -129,7 +135,10 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     html = mapText(html, (t) => (extra[t.trim()] ? t.replace(t.trim(), extra[t.trim()]) : t));
     for (const [from, to] of Object.entries(extra)) html = html.replaceAll(`placeholder="${from}"`, `placeholder="${to}"`).replaceAll(`aria-label="${from}"`, `aria-label="${to}"`);
   }
-  return faster(html, page.poster, [], page.play);
+  const images = layout.images ?? {};
+  html = faster(swapImages(html, images, marks), page.poster, [], page.play);
+  const origins = imageOrigins(images);
+  return origins ? html.replace("<head>", `<head>\n${origins}`) : html;
 }
 
 // ClickFunnels fades its "fade-in" blocks in with its own script (stripped):

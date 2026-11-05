@@ -17,8 +17,19 @@ export const AB = {
   variants: ["green", "yellow", "orange"] as const,
 };
 export type Variant = (typeof AB.variants)[number];
+export const isVariant = (v: unknown): v is Variant => (AB.variants as readonly string[]).includes(v as string);
 
 const LIST = AB.variants.join("|");
+
+/**
+ * One colour for every visitor of a page (dashboard → Edit → Button colour,
+ * lib/pageLayout.ts), in AB_SCRIPT's place: it ends the test on that page. The
+ * cookie is set too, so the order page shows the same colour, and the colour
+ * still travels with the order and the Pixel events: the sales keep saying
+ * which colour sold.
+ */
+export const fixedScript = (v: Variant) =>
+  `(function(){try{document.cookie='${AB.cookie}=${v}; path=/; max-age=15552000; samesite=lax';document.documentElement.setAttribute('data-ab-btn','${v}');window.__abBtn='${v}';}catch(e){}})();`;
 
 /** Runs first thing in <head> / at the top of the page. */
 export const AB_SCRIPT = `(function(){try{

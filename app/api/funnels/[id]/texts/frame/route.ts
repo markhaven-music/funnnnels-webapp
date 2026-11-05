@@ -2,6 +2,7 @@ import { funnel } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { isLang } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { landingHtml } from "@/app/(funnels)/midi-drum-kit/landing";
 import { upsellHtml } from "@/app/(funnels)/midi-drum-kit/upsell";
+import { pageLayouts } from "@/lib/pageLayout";
 import { pageEdits } from "@/lib/pageTexts";
 
 export const runtime = "nodejs";
@@ -9,9 +10,11 @@ export const dynamic = "force-dynamic";
 
 // The MIDI Drum Kit's ClickFunnels pages (sales page, both upsells) as the
 // dashboard's editor shows them (components/PageFrame.tsx): the page as it is
-// live in euros, with its saved texts, each editable text between
-// <!--fx:tNNN--> and <!--/fx--> so a click finds it. Without the page's
-// scripts: no tracking, no visit counted, no buttons that go anywhere.
+// live in euros, with its saved texts and layout, each editable text between
+// <!--fx:tNNN--> and <!--/fx--> so a click finds it, every section tagged
+// data-fs (the hidden ones kept, data-fs-hidden) and every picture data-fi.
+// Without the page's scripts: no tracking, no visit counted, no buttons that
+// go anywhere.
 // The sales page shows the code's price, so the words saved say the same
 // price the code does (the live page restates it). Behind ADMIN_PASSWORD (proxy.ts).
 const SCRIPT = /<script\b[^>]*>[\s\S]*?<\/script>/gi;
@@ -24,7 +27,10 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   if (id !== funnel.slug || !isLang(lang)) return new Response("Not found", { status: 404 });
 
   let html: string | null = null;
-  if (page === "landing") html = landingHtml(lang, "eur", funnel.price.eur, await pageEdits(funnel.slug, lang), true);
+  if (page === "landing") {
+    const [edits, layouts] = await Promise.all([pageEdits(funnel.slug, lang), pageLayouts(funnel.slug, lang)]);
+    html = landingHtml(lang, "eur", funnel.price.eur, edits, true, layouts.landing ?? {});
+  }
   else if (page === "famous-beats" || page === "top-hits") html = await upsellHtml(page, lang, "eur", funnel.slug, true);
   if (!html) return new Response("Not found", { status: 404 });
 
