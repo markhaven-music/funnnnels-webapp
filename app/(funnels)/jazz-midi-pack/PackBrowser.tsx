@@ -12,7 +12,7 @@ import b from "./browse.module.css";
 // folder varies (Progression · Voicing · Rhythm, Progression · Key, …), and
 // that file plays, drawn as a piano roll, with its place in the pack under it.
 // The notes of all 6,256 files come from tools/extract_browse.py
-// (public/funnels/jazz-midi-pack/browse): pack.json (the choices, ≈22 KB
+// (public/funnels/jazz-midi-pack/browse-v2): pack.json (the choices, ≈22 KB
 // gzipped) loads when the player nears the screen and a folder's files when
 // one of them is picked, so the page carries none of it. Drums are drawn, not
 // played (the player has only the sine synth).
@@ -21,7 +21,10 @@ type Folder = { label: string; folder: string; what: string; dims: Dim[]; files:
 type Pack = { total: number; folders: Folder[]; paths: string[] };
 type Shown = { roll: Roll; labels: string[]; path: string };
 
-const DIR = "/funnels/jazz-midi-pack/browse";
+// browse-v2 since the pack grew to 46 progressions (2026-11-05): m.thegrind.studio keeps these files a week
+// (max-age 604800), so a new folder keeps an old cached pack.json from pointing at new chunks. The old
+// folder stays for pages cached before the change. A new pack: a new folder name.
+const DIR = "/funnels/jazz-midi-pack/browse-v2";
 const FIRST: Shown = {
   roll: rolls.ballad as Roll,
   labels: ["ii-V-I Major", "Best Voicing", "Ballad Arpeggios"],
