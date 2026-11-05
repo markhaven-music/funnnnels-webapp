@@ -66,6 +66,25 @@ export const mapText = (html: string, fn: (t: string) => string) => html.replace
 
 export const escapeAttr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
+// Who just opted in for a free pack lands here with ?free=<pack>
+// (app/free/packs.ts next): a yellow bar under the red banner's line says the pack is
+// on its way, ClickFunnels' "WAIT!! Your Free Pack Is Secured…" step. Without
+// it they took "GET THE PACK" for their download and left at the card fields.
+// Hidden in the HTML (the page stays one static document for everyone); the
+// script right after it shows it while the page is still being read, before
+// anything below is drawn, so nothing moves. English only: the opt-ins go there.
+const FREE_PACKS = { rolls: "Rolls", bounce: "Bounce", hooks: "Mystery Hooks" };
+// Inside the red banner's section, as its last child: a section of its own would
+// count in LATER_CSS's nth-child and put the hero among the sections drawn late.
+const FREE_BAR_AT = '</div><div data-page-element="UniversalBlock/21784872" class="id-6Z-ALeVQA-41"';
+const FREE_BAR = `<style>.fv-free{background:#f5b800;color:#000;text-align:center;padding:14px 16px 15px}
+.fv-free b{display:block;font:800 22px/1.2 Poppins,"Poppins Fallback",sans-serif}
+.fv-free span{display:block;margin-top:5px;font:500 15px/1.35 Inter,"Inter Fallback",sans-serif}
+@media (min-width:768px){.fv-free b{font-size:28px}.fv-free span{font-size:17px}}</style>
+<div class="fv-free" role="status" hidden><b>WAIT!! Your Free <i style="font-style:normal" id="fv-free-pack"></i> Pack Is Secured…</b><span>It's on its way to your inbox.</span></div>
+<script>(function(){var n=${JSON.stringify(FREE_PACKS)},m=/[?&]free=([a-z]+)/.exec(location.search),k=m&&m[1];if(!k||!Object.prototype.hasOwnProperty.call(n,k))return;document.getElementById('fv-free-pack').textContent=n[k];document.querySelector('.fv-free').hidden=false})()</script>
+`;
+
 // price: the kit's in this currency, as dashboard → Products has it; the
 // words that say the code's price ("Only €297 €27") say this one.
 // edits: the texts changed in the dashboard (funnel map → Edit, ./texts.ts).
@@ -94,6 +113,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = funn
       `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${AB_SCRIPT}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: AB.cookie })}</script>\n${headScripts(currency, price)}`,
     )
     .replace("{{BODY}}", BODY_SCRIPT);
+  if (lang === "en") html = html.replace(FREE_BAR_AT, (at) => FREE_BAR + at);
   const video = VIDEOS[lang];
   html = html.replaceAll(funnel.wistiaId, video.id);
   for (const [from, to] of Object.entries(IMAGES[lang] ?? {})) {
