@@ -5,7 +5,9 @@ import type { Currency } from "@/lib/geo";
 // "Abandoned Checkout (Meta Ads Funnel)" workflow (2026-10-29): 15 minutes
 // after step 1, then 6 hours, then 18 hours later, until they buy
 // (lib/outbox.ts). Every language follows the English line by line; the
-// bodies use the letter format of lib/mail.ts (**bold**, [button: …](url)).
+// bodies use the letter format of lib/mail.ts (**bold**, [text](url)). The link
+// is bold text in brackets, as ClickFunnels had it, not a button: a plain letter
+// lands in Gmail's Promotions less often (11-06: "Sì, come CF").
 // The other funnels keep the one reminder in lib/mailCopy.ts.
 
 export type AbandonEmail = {
@@ -31,7 +33,7 @@ Just checking — did the page crash?
 
 I've saved your cart for you here just in case:
 
-[button: Click To Get Your MIDI Drum Kit](${url})
+**[[Click To Get Your MIDI Drum Kit]](${url})**
 
 Best,
 Grind Studio`,
@@ -51,7 +53,7 @@ Check out what Martin from New York said yesterday:
 
 Here is the link to grab it:
 
-[button: Click To Complete Your MIDI Drum Kit Order](${url})
+**[[Click To Complete Your MIDI Drum Kit Order]](${url})**
 
 Best,
 Grind Studio`,
@@ -79,7 +81,7 @@ You get all 750+ MIDI Drum Patterns plus these 3 Bonuses for the single price of
 
 This is your last chance to grab the full bundle before the link expires.
 
-[button: Click Here To Secure Your MIDI Kit + All 3 Free Bonuses](${url})
+**[[Click Here To Secure Your MIDI Kit + All 3 Free Bonuses]](${url})**
 
 Let me know.
 
@@ -101,7 +103,7 @@ Je vérifie juste : la page a planté ?
 
 J'ai sauvegardé ton panier ici, au cas où :
 
-[button: Clique ici pour avoir ton MIDI Drum Kit](${url})
+**[[Clique ici pour avoir ton MIDI Drum Kit]](${url})**
 
 À bientôt,
 Grind Studio`,
@@ -121,7 +123,7 @@ Regarde ce que Martin, de New York, a dit hier :
 
 Voici le lien pour le prendre :
 
-[button: Clique ici pour finaliser ta commande du MIDI Drum Kit](${url})
+**[[Clique ici pour finaliser ta commande du MIDI Drum Kit]](${url})**
 
 À bientôt,
 Grind Studio`,
@@ -149,7 +151,7 @@ Tu as les 750+ patterns de batterie MIDI plus ces 3 bonus pour un prix unique de
 
 C'est ta dernière chance d'avoir le bundle complet avant que le lien expire.
 
-[button: Clique ici pour assurer ton MIDI Kit + les 3 bonus gratuits](${url})
+**[[Clique ici pour assurer ton MIDI Kit + les 3 bonus gratuits]](${url})**
 
 Dis-moi.
 
@@ -171,7 +173,7 @@ Solo quería comprobar: ¿se colgó la página?
 
 Te guardé el carrito aquí, por si acaso:
 
-[button: Haz clic para conseguir tu MIDI Drum Kit](${url})
+**[[Haz clic para conseguir tu MIDI Drum Kit]](${url})**
 
 Saludos,
 Grind Studio`,
@@ -191,7 +193,7 @@ Mira lo que dijo ayer Martin, de Nueva York:
 
 Aquí tienes el enlace para conseguirlo:
 
-[button: Haz clic para completar tu pedido del MIDI Drum Kit](${url})
+**[[Haz clic para completar tu pedido del MIDI Drum Kit]](${url})**
 
 Saludos,
 Grind Studio`,
@@ -219,7 +221,7 @@ Tienes los más de 750 patrones de batería MIDI más estos 3 bonos por un únic
 
 Es tu última oportunidad de conseguir el bundle completo antes de que caduque el enlace.
 
-[button: Haz clic para asegurar tu MIDI Kit + los 3 bonos gratis](${url})
+**[[Haz clic para asegurar tu MIDI Kit + los 3 bonos gratis]](${url})**
 
 Dime algo.
 
@@ -241,7 +243,7 @@ Ich frag nur kurz nach: Ist die Seite abgestürzt?
 
 Ich habe deinen Warenkorb hier für dich gespeichert, nur für den Fall:
 
-[button: Klick hier und hol dir dein MIDI Drum Kit](${url})
+**[[Klick hier und hol dir dein MIDI Drum Kit]](${url})**
 
 Viele Grüße
 Grind Studio`,
@@ -261,7 +263,7 @@ Schau, was Martin aus New York gestern gesagt hat:
 
 Hier ist der Link, um es dir zu holen:
 
-[button: Klick hier und schließ deine MIDI Drum Kit Bestellung ab](${url})
+**[[Klick hier und schließ deine MIDI Drum Kit Bestellung ab]](${url})**
 
 Viele Grüße
 Grind Studio`,
@@ -289,7 +291,7 @@ Du bekommst alle 750+ MIDI-Drum-Patterns plus diese 3 Boni zum Einzelpreis von $
 
 Das ist deine letzte Chance, dir das komplette Bundle zu holen, bevor der Link abläuft.
 
-[button: Klick hier und sichere dir dein MIDI Kit + alle 3 Gratis-Boni](${url})
+**[[Klick hier und sichere dir dein MIDI Kit + alle 3 Gratis-Boni]](${url})**
 
 Sag mir Bescheid.
 
@@ -311,7 +313,7 @@ Volevo solo controllare: la pagina si è bloccata?
 
 Ti ho salvato il carrello qui, per sicurezza:
 
-[button: Clicca per avere il tuo MIDI Drum Kit](${url})
+**[[Clicca per avere il tuo MIDI Drum Kit]](${url})**
 
 A presto,
 Grind Studio`,
@@ -331,7 +333,7 @@ Guarda cosa ha detto ieri Martin, da New York:
 
 Ecco il link per prenderlo:
 
-[button: Clicca per completare il tuo ordine del MIDI Drum Kit](${url})
+**[[Clicca per completare il tuo ordine del MIDI Drum Kit]](${url})**
 
 A presto,
 Grind Studio`,
@@ -359,7 +361,7 @@ Ottieni tutti gli oltre 750 pattern di batteria MIDI più questi 3 bonus a un pr
 
 È la tua ultima occasione per prendere il bundle completo prima che il link scada.
 
-[button: Clicca per assicurarti il tuo MIDI Kit + tutti e 3 i bonus gratis](${url})
+**[[Clicca per assicurarti il tuo MIDI Kit + tutti e 3 i bonus gratis]](${url})**
 
 Fammi sapere.
 

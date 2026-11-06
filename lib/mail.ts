@@ -190,11 +190,16 @@ const plainHref: Href = (u) => esc(u);
 // reads on white; bold to carry the colour. The footer's links stay grey.
 const LINK = "color:#00b034;font-weight:700;text-decoration:underline";
 
+// [text](url), or [[text]](url): the link reads "[text]", brackets included, as in
+// ClickFunnels' abandoned-checkout emails (lib/abandonCopy.ts). Only that exact
+// shape is new; "[👉 [text](url)]" in older emails renders as it always did.
+const MD_LINK = /\[(\[[^[\]]*\]|[^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+
 function inline(s: string, href: Href): string {
   // Escape first, then add the few marks we allow.
   return esc(s)
     .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, t, u) => `<a href="${href(unesc(u))}" style="${LINK}">${t}</a>`)
+    .replace(MD_LINK, (_, t, u) => `<a href="${href(unesc(u))}" style="${LINK}">${t}</a>`)
     .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, (_, pre, u) => `${pre}<a href="${href(unesc(u))}" style="${LINK}">${u}</a>`);
 }
 
@@ -224,7 +229,7 @@ export function render(text: string, href: Href = plainHref): { html: string; te
       plain.push(lines.join("\n"));
     }
   }
-  return { html: html.join("\n"), text: plain.join("\n\n").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, "$1 ($2)") };
+  return { html: html.join("\n"), text: plain.join("\n\n").replace(/\*\*(.+?)\*\*/g, "$1").replace(MD_LINK, "$1 ($2)") };
 }
 
 const UNSUB_WORDS: Record<string, [string, string]> = {
