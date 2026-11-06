@@ -61,7 +61,9 @@ export const cardElements = (look: CardLook, locale: StripeElementLocale | undef
       spacingUnit: "2px",
     },
     rules: {
-      ".Input": { border: "2px solid #dbdcdd", boxShadow: "none" },
+      // 16px at the sides like the name and email fields: Stripe's own was ~8px with
+      // spacingUnit 2px, so the words sat off to the left ("sembra un po' decentrato", 11-06).
+      ".Input": { border: "2px solid #dbdcdd", boxShadow: "none", paddingLeft: "16px", paddingRight: "16px" },
       ".Input:focus": { borderColor: look.focus, boxShadow: "none" },
       ".Input--invalid": { borderColor: "#dc2626", boxShadow: "none" },
     },

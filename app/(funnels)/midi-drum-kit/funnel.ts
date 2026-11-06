@@ -10,6 +10,8 @@ export const funnel = {
   // The line on the order form's product card, as on the box (was ClickFunnels'
   // "MIDI Drum Kit (27)" until 11-06), and the price it's shown crossed out from.
   orderName: "MIDI Drum Kit Bundle",
+  // What test A of the step-2 test (./payTest.ts) shows instead, as before 11-06.
+  orderNameBefore: "MIDI Drum Kit (27)",
   wasPrice: 297,
   brand: "GRIND STUDIO",
   // Same accounts as the other Grind Studio funnels.

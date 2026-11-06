@@ -1,4 +1,4 @@
-import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi-drum-kit/abtest";
+import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import type { Step } from "@/lib/beacon";
 import { codeFunnels } from "@/lib/funnels";
@@ -520,11 +520,13 @@ const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 export const TESTS: TestDef[] = [
   {
     funnel: "midi-drum-kit",
-    name: "Button colour",
-    where: "Landing and order page, every language",
-    variants: BUTTON_TEST.variants,
-    label: cap,
-    color: (v) => BUTTON_COLORS[v as keyof typeof BUTTON_COLORS],
+    // Back on 11-06 evening in place of the button-colour test (whose colours
+    // still show at random, uncounted): the old step 2 against the new one.
+    name: "Step 2: as it was vs new",
+    where: "Order page, step 2 (payment), every language",
+    variants: PAY_TEST.variants,
+    label: (v) => PAY_LABELS[v as keyof typeof PAY_LABELS],
+    color: (v) => PAY_COLORS[v as keyof typeof PAY_COLORS],
   },
   {
     funnel: "jazz-midi-pack",

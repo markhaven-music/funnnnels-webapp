@@ -289,9 +289,9 @@
 .bumpMore {
   display: none !important;
 }
-/* Phones only: there the bar takes the timer's place; a computer keeps the timer and has no bar (11-06). */
+/* Phones only, test B (./payTest.ts): there the bar takes the timer's place; a computer keeps the timer and has no bar (11-06). */
 @media (max-width: 769px) {
-  :global(html[data-order-step="2"]) .timer {
+  :global(html[data-ab-pay="b"][data-order-step="2"]) .timer {
     display: none;
   }
 }

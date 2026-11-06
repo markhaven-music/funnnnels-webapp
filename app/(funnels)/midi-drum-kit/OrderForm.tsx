@@ -6,7 +6,8 @@ import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
 import { track } from "@/lib/beacon";
-import { AB, readVariant } from "./abtest";
+import { readVariant } from "./abtest";
+import { PAY, readPay, type PayVariant } from "./payTest";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
@@ -58,6 +59,9 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
     if (/[?&]edit=1(&|$)/.test(location.search) && /[?&]step=2(&|$)/.test(location.search)) setStep(2);
   }, []);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
+  // The step-2 test's letter (./payTest.ts); set before this mounts by the page's script.
+  const [pay, setPay] = useState<PayVariant>("b");
+  useEffect(() => setPay(readPay() ?? "b"), []);
   // <html data-order-step>: step 2 hides the "reserved for" timer, the pay bar takes its place (./order.module.css).
   useEffect(() => {
     document.documentElement.setAttribute("data-order-step", String(step));
@@ -86,7 +90,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
         setInfo({ firstName: cart.firstName ?? "", lastName: cart.lastName ?? "", email: cart.email });
         setWanted(true);
         setStep(2);
-        track({ funnel: funnel.slug, page: "checkout", lang, abCookie: AB.cookie });
+        track({ funnel: funnel.slug, page: "checkout", lang, abCookie: PAY.cookie });
         // The token off the address bar: a shared or bookmarked link carries no one's cart.
         const url = new URL(location.href);
         url.searchParams.delete("c");
@@ -96,7 +100,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
       })
       .catch(() => {});
   }, [lang]);
-  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard };
+  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard, pay };
 
   return (
     <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
@@ -136,8 +140,8 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
               setWanted(true);
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
-              pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant() });
-              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: AB.cookie });
+              pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant(), ab_pay: readPay() });
+              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: PAY.cookie });
             }}
           />
         </>
@@ -156,13 +160,17 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
           <label className={s.product}>
             <input type="radio" checked readOnly className={s.radio} />
             <span className={s.productText}>
-              <span className={s.productName}>{offer.name}</span>
+              <span className={s.productName}>{pay === "a" ? funnel.orderNameBefore : offer.name}</span>
             </span>
-            <span className={s.productPrice}>
-              {/* The price it's down from (funnel.ts wasPrice, the sales page's €297), then today's in green. */}
-              {funnel.wasPrice > price && <s className={d.was}>{fmt(funnel.wasPrice, currency, lang)}</s>}
-              <span className={d.now}>{fmt(price, currency, lang)}</span>
-            </span>
+            {pay === "a" ? (
+              <span className={s.productPrice}>{fmt(price, currency, lang)}</span>
+            ) : (
+              <span className={s.productPrice}>
+                {/* The price it's down from (funnel.ts wasPrice, the sales page's €297), then today's in green. */}
+                {funnel.wasPrice > price && <s className={d.was}>{fmt(funnel.wasPrice, currency, lang)}</s>}
+                <span className={d.now}>{fmt(price, currency, lang)}</span>
+              </span>
+            )}
           </label>
 
           <p className={s.label}>
@@ -264,6 +272,7 @@ type PayState = {
   total: number;
   offer: OrderOffer;
   keepCard: boolean;
+  pay: PayVariant;
 };
 
 function CardPay({ stripePromise, ...props }: PayState & { stripePromise: ReturnType<typeof loadStripe> }) {
@@ -289,7 +298,8 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
         funnel: funnel.slug,
         ...props.info,
         bumps: props.picked,
-        variant: readVariant(),
+        // The step-2 test's letter: what the dashboard counts this order under.
+        variant: readPay(),
         lang: props.lang,
         country: cookieCountry(props.currency, props.country),
         expected: props.total,
@@ -360,6 +370,7 @@ function PayBody({
   cardPaying,
   cardOff,
   cardError,
+  pay,
 }: PayState & { onCard?: () => void; cardPaying?: boolean; cardOff?: boolean; cardError?: string | null }) {
   const [paypalBusy, setPaypalBusy] = useState(false);
   // The bar at the bottom shows while the real pay button is off screen (11-06: most
@@ -368,11 +379,11 @@ function PayBody({
   const [payInView, setPayInView] = useState(true);
   useEffect(() => {
     const el = payRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
+    if (pay !== "b" || !el || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(([e]) => setPayInView(e.isIntersecting), { threshold: 0.4 });
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [pay]);
   const [paypalError, setPaypalError] = useState<string | null>(null);
   const paypal = method === "paypal";
   const busy = paypal ? paypalBusy : Boolean(cardPaying);
@@ -390,7 +401,7 @@ function PayBody({
           funnel: funnel.slug,
           ...info,
           bumps: picked,
-          variant: readVariant(),
+          variant: readPay(),
           country: cookieCountry(currency, country),
           origin: window.location.origin,
           lang,
@@ -417,9 +428,35 @@ function PayBody({
         </div>
       )}
 
-      {offer.bumps.map((b) => (
-        <ShortBump key={b.id} b={b} on={picked.includes(b.id)} toggle={toggle} t={t} currency={currency} lang={lang} />
-      ))}
+      {pay === "b" &&
+        offer.bumps.map((b) => (
+          <ShortBump key={b.id} b={b} on={picked.includes(b.id)} toggle={toggle} t={t} currency={currency} lang={lang} />
+        ))}
+      {/* Test A: the ClickFunnels add-on box as it was before 11-06. */}
+      {pay === "a" &&
+        offer.bumps.map((b) => {
+          const on = picked.includes(b.id);
+          return (
+            <label key={b.id} className={s.bump}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
+              <span className={s.bumpHead}>
+                {/* Gone once ticked, as on ClickFunnels. */}
+                {!on && <BumpArrow />}
+                <input type="checkbox" checked={on} onChange={(e) => toggle(b.id, e.target.checked)} className={s.bumpCheck} />
+                <span className={s.bumpTitle}>{b.headline}</span>
+                <span className={s.bumpPrice}>{fmt(b.price, currency, lang)}</span>
+              </span>
+              <span className={s.bumpText}>
+                {b.body.map((p, i) => (
+                  <span key={i} className={s.bumpPara}>
+                    {i === 0 && <span className={s.oto}>{t.oto}</span>} <Rich text={p} currency={currency} />
+                  </span>
+                ))}
+              </span>
+            </label>
+          );
+        })}
 
       <details className={s.summary}>
         <summary>
@@ -477,7 +514,7 @@ function PayBody({
       )}
       <p className={s.respect}>{t.respect}</p>
       {/* Always there, slid out of sight while the real button is on screen (./order.module.css .payBarOn). */}
-      {(
+      {pay === "b" && (
         <div className={`${d.payBar} ${payInView ? "" : d.payBarOn}`} aria-hidden={payInView} inert={payInView}>
           <button
             type="button"
