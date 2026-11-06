@@ -252,8 +252,14 @@
   align-items: start;
   margin-top: 8px;
 }
+/* The shared .bumpImg / .bumpText name grid areas ("img", "text") this grid doesn't
+   have, which put the picture on a row of its own under the text: place them plainly. */
+.bumpDetails > * {
+  grid-area: auto;
+}
 .bumpDetails img {
   width: 64px;
+  height: auto;
 }
 .payBar {
   position: fixed;
