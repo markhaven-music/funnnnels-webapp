@@ -1,4 +1,4 @@
-import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi-drum-kit/abtest";
+import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import type { Step } from "@/lib/beacon";
 import { codeFunnels } from "@/lib/funnels";
@@ -439,7 +439,7 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
     soft("visitors per day", viewDays(before), []),
     usdToEur(),
     soft("tracking start", firstDay(), null),
-    Promise.all(TESTS.map((t) => soft(`test start (${t.funnel})`, firstDay(t.funnel), null))),
+    Promise.all(TESTS.map((t) => soft(`test start (${t.funnel})`, firstDay(t.funnel, t.variants), null))),
     soft("PayPal orders", paypalSales(), []),
     ...list.map((f) => (hasStripe ? soft(`Stripe orders (${f.slug})`, stripeSales(f.slug), []) : Promise.resolve([] as Sale[]))),
   ]);
@@ -516,15 +516,16 @@ type TestDef = {
   label: (v: string) => string;
   color: (v: string) => { from: string; to: string };
 };
-const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 export const TESTS: TestDef[] = [
   {
     funnel: "midi-drum-kit",
-    name: "Button colour",
-    where: "Landing and order page, every language",
-    variants: BUTTON_TEST.variants,
-    label: cap,
-    color: (v) => BUTTON_COLORS[v as keyof typeof BUTTON_COLORS],
+    // Replaced the button-colour test on 11-06 (3 orders each for green, yellow
+    // and orange, no winner); the colours still show at random, uncounted.
+    name: "Step 2: pay bar",
+    where: "Order page, step 2 (payment), every language",
+    variants: PAY_TEST.variants,
+    label: (v) => PAY_LABELS[v as keyof typeof PAY_LABELS],
+    color: (v) => PAY_COLORS[v as keyof typeof PAY_COLORS],
   },
   {
     funnel: "jazz-midi-pack",
@@ -540,9 +541,9 @@ export const TESTS: TestDef[] = [
  * The first day a visitor was counted: on any funnel, or with an A/B variant
  * on this one (when its test started).
  */
-async function firstDay(testFunnel?: string): Promise<string | null> {
+async function firstDay(testFunnel?: string, variants?: readonly string[]): Promise<string | null> {
   let q = supabase().from("page_views").select("day").gte("day", VISITS_FROM);
-  if (testFunnel) q = q.eq("funnel", testFunnel).neq("variant", "");
+  if (testFunnel) q = variants?.length ? q.eq("funnel", testFunnel).in("variant", [...variants]) : q.eq("funnel", testFunnel).neq("variant", "");
   const { data, error } = await q.order("day").limit(1).maybeSingle();
   if (error) throw error;
   return data?.day ?? null;

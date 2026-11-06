@@ -12,7 +12,8 @@ import { copyWith } from "../../../copy";
 import { pageEdits } from "@/lib/pageTexts";
 import { copyEdits } from "../../../texts";
 import { funnel } from "../../../funnel";
-import { AB, AB_SCRIPT } from "../../../abtest";
+import { AB_SCRIPT } from "../../../abtest";
+import { PAY, PAY_SCRIPT } from "../../../payTest";
 import { Beacon } from "../../../../Beacon";
 import { isLang, LANGS } from "../../../i18n";
 import { orderOffer } from "../../../offer";
@@ -59,8 +60,10 @@ export default async function OrderPage({ params }: { params: Params }) {
     <main className={`${s.page} ${fontVars} ${poppins.variable}`} lang={lang}>
       {/* The button-colour test: before the buttons paint (see ../../../abtest.ts). */}
       <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
+      {/* The step-2 test (../../../payTest.ts): its letter is what the visit counts under. */}
+      <script dangerouslySetInnerHTML={{ __html: PAY_SCRIPT }} />
       <Tracking value={offer.price} currency={currency} event={null} />
-      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={AB.cookie} />
+      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={PAY.cookie} />
       <div className={s.redbar}>
         <Rich text={t.orderTopbar} currency={currency} />
       </div>
@@ -136,7 +139,8 @@ export default async function OrderPage({ params }: { params: Params }) {
         <div className={s.gGrid}>
           <div className={`${s.g} ${d.g}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`${IMG}/badge-guarantee.webp`} alt="" width={86} height={86} />
+            {/* The seal says "quality guarantee" in the page's language (tools/quality_badges.js). */}
+            <img src={`${IMG}/badge-quality-sm${lang === "en" ? "" : `-${lang}`}.webp`} alt="" width={86} height={86} />
             <div>
               <h3>{t.order.guaranteeTitle}</h3>
               <p>{t.order.guaranteeText}</p>

@@ -87,6 +87,11 @@ export const en = {
     pay: "GET THE PACK!",
     // Under it, as on ClickFunnels' order page.
     paySub: "Get Instant Access",
+    // Step-2 test B (../payTest.ts): the bar fixed at the bottom of the screen, {price} = the total.
+    payBar: "Pay {price}",
+    // Test B: each add-on on one line, the rest behind this link.
+    bumpMore: "Details",
+    bumpLess: "Hide",
     processing: "Processing…",
     openingPaypal: "Opening PayPal…",
     paymentFailed: "Payment couldn't start.",

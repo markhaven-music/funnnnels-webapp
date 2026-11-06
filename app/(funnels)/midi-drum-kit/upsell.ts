@@ -3,7 +3,7 @@ import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS, type Step } from "@/lib/beacon";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { restate } from "@/lib/restate";
-import { AB } from "./abtest";
+import { PAY } from "./payTest";
 import { TEMPLATE as FAMOUS } from "./cf/upsell-famous";
 import { TEMPLATE as TOP_HITS } from "./cf/upsell-tophits";
 import famousDe from "./copy/upsell-famous/de.json";
@@ -128,7 +128,7 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     .replace("{{LANG}}", lang)
     .replace("{{TITLE}}", escapeAttr(page.title))
     .replace("{{DESCRIPTION}}", escapeAttr(page.title))
-    .replace("{{HEAD}}", `<script>${ORIGIN_BOUNCE_JS}</script>\n<style>${FIXES}</style>\n<script>${beaconScript({ funnel: slug, page: beaconStep(product, offerId, page.beacon), lang, abCookie: AB.cookie })}</script>\n${headScripts()}`)
+    .replace("{{HEAD}}", `<script>${ORIGIN_BOUNCE_JS}</script>\n<style>${FIXES}</style>\n<script>${beaconScript({ funnel: slug, page: beaconStep(product, offerId, page.beacon), lang, abCookie: PAY.cookie })}</script>\n${headScripts()}`)
     .replace("{{BODY}}", script(slug, offerId, lang, nextStep(product, lang, offerId)));
 
   // Words outside the tagged texts: the "reserved for" timer, the progress
@@ -178,7 +178,7 @@ function headScripts(): string {
 
 /** The buttons, the "reserved for" countdown. */
 function script(slug: string, offerId: string, lang: Lang, next: string): string {
-  const cfg = JSON.stringify({ funnel: slug, offer: offerId, lang, next, ui: UI[lang], ab: AB.cookie });
+  const cfg = JSON.stringify({ funnel: slug, offer: offerId, lang, next, ui: UI[lang], ab: PAY.cookie });
   return `<script>
 (function () {
   var C = ${cfg};

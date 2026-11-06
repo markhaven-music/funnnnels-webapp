@@ -213,3 +213,67 @@
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
+
+/* ── step-2 test B (./payTest.ts) ──
+   Each add-on in its yellow box on one line (tick, name, price), the picture
+   and text behind "Details"; a pay bar fixed at the bottom of the screen
+   while the real pay button is off screen; no "reserved for" timer on step 2. */
+.bumpShort {
+  display: block;
+  padding: 8px 10px 6px;
+}
+.bumpRow {
+  cursor: pointer;
+}
+.bumpMore {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 4px 0 0 41px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: #31373f;
+  font: 600 12px/1.4 var(--inter);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.bumpMore svg {
+  transition: transform 0.2s;
+}
+.bumpMoreOpen {
+  transform: rotate(180deg);
+}
+.bumpDetails {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  margin-top: 8px;
+}
+.bumpDetails img {
+  width: 64px;
+}
+.payBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.55) 35%, rgba(0, 0, 0, 0.75) 100%);
+  pointer-events: none;
+}
+.payBarBtn {
+  max-width: 520px;
+  padding: 16px 18px;
+  font: 900 22px/1 var(--inter);
+  letter-spacing: 0.5px;
+  pointer-events: auto;
+}
+:global(html[data-ab-pay="b"][data-order-step="2"]) .timer {
+  display: none;
+}

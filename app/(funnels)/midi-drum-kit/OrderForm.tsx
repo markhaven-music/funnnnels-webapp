@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 // "pure": Stripe.js loads when loadStripe is called, not as soon as this file does.
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
 import { track } from "@/lib/beacon";
-import { AB, readVariant } from "./abtest";
+import { readVariant } from "./abtest";
+import { PAY, readPay, type PayVariant } from "./payTest";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
@@ -56,6 +57,13 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
     if (/[?&]edit=1(&|$)/.test(location.search) && /[?&]step=2(&|$)/.test(location.search)) setStep(2);
   }, []);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
+  // The step-2 test's letter (./payTest.ts); set before this mounts by the page's script.
+  const [pay, setPay] = useState<PayVariant>("a");
+  useEffect(() => setPay(readPay() ?? "a"), []);
+  // <html data-order-step>: test B hides the "reserved for" timer on step 2 (./order.module.css).
+  useEffect(() => {
+    document.documentElement.setAttribute("data-order-step", String(step));
+  }, [step]);
   const [picked, setPicked] = useState<string[]>([]);
   const [method, setMethod] = useState<Method>("card");
   const price = offer.price;
@@ -64,7 +72,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
   // with the page, which kept the order page under 90 on PageSpeed mobile (docs/page-speed.md).
   const [wanted, setWanted] = useState(false);
   const stripePromise = useMemo(() => (publishableKey && wanted ? stripeFor(publishableKey) : null), [publishableKey, wanted]);
-  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard };
+  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard, pay };
 
   return (
     <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
@@ -95,8 +103,8 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
               setWanted(true);
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
-              pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant() });
-              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: AB.cookie });
+              pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant(), ab_pay: readPay() });
+              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: PAY.cookie });
             }}
           />
         </>
@@ -219,6 +227,7 @@ type PayState = {
   total: number;
   offer: OrderOffer;
   keepCard: boolean;
+  pay: PayVariant;
 };
 
 function CardPay({ stripePromise, ...props }: PayState & { stripePromise: ReturnType<typeof loadStripe> }) {
@@ -244,7 +253,8 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
         funnel: funnel.slug,
         ...props.info,
         bumps: props.picked,
-        variant: readVariant(),
+        // The step-2 test's letter: what the dashboard counts this order under.
+        variant: readPay(),
         lang: props.lang,
         country: cookieCountry(props.currency, props.country),
         expected: props.total,
@@ -315,8 +325,19 @@ function PayBody({
   cardPaying,
   cardOff,
   cardError,
+  pay,
 }: PayState & { onCard?: () => void; cardPaying?: boolean; cardOff?: boolean; cardError?: string | null }) {
   const [paypalBusy, setPaypalBusy] = useState(false);
+  // Test B: the bar at the bottom shows while the real pay button is off screen.
+  const payRef = useRef<HTMLButtonElement>(null);
+  const [payInView, setPayInView] = useState(true);
+  useEffect(() => {
+    const el = payRef.current;
+    if (pay !== "b" || !el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setPayInView(e.isIntersecting), { threshold: 0.4 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [pay]);
   const [paypalError, setPaypalError] = useState<string | null>(null);
   const paypal = method === "paypal";
   const busy = paypal ? paypalBusy : Boolean(cardPaying);
@@ -334,7 +355,7 @@ function PayBody({
           funnel: funnel.slug,
           ...info,
           bumps: picked,
-          variant: readVariant(),
+          variant: readPay(),
           country: cookieCountry(currency, country),
           origin: window.location.origin,
           lang,
@@ -361,7 +382,11 @@ function PayBody({
         </div>
       )}
 
-      {offer.bumps.map((b) => {
+      {pay === "b" &&
+        offer.bumps.map((b) => (
+          <ShortBump key={b.id} b={b} on={picked.includes(b.id)} toggle={toggle} t={t} currency={currency} lang={lang} />
+        ))}
+      {pay !== "b" && offer.bumps.map((b) => {
         const on = picked.includes(b.id);
         return (
           <label key={b.id} className={s.bump}>
@@ -418,7 +443,7 @@ function PayBody({
         </div>
       </details>
 
-      <button type="button" className={`${d.cta} ${d.ctaPay}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
+      <button ref={payRef} type="button" className={`${d.cta} ${d.ctaPay}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
         {busy && !cardOff ? (
           paypal ? t.openingPaypal : t.processing
         ) : (
@@ -440,7 +465,86 @@ function PayBody({
         </p>
       )}
       <p className={s.respect}>{t.respect}</p>
+      {pay === "b" && !payInView && (
+        <div className={d.payBar}>
+          <button
+            type="button"
+            className={`${d.cta} ${d.payBarBtn}`}
+            disabled={blocked}
+            onClick={() => {
+              // The real button does the paying (card errors show beside it), so bring it on screen too.
+              payRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+              payRef.current?.click();
+            }}
+          >
+            {busy && !cardOff ? (
+              paypal ? t.openingPaypal : t.processing
+            ) : (
+              <>
+                <svg viewBox="0 0 448 512" className={d.ctaArrow} aria-hidden>
+                  <path
+                    fill="currentColor"
+                    d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
+                  />
+                </svg>
+                {t.payBar.replace("{price}", fmt(total, currency, lang))}
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </>
+  );
+}
+
+// Test B's add-on: tick, name and price on one line; picture and text behind "Details".
+function ShortBump({
+  b,
+  on,
+  toggle,
+  t,
+  currency,
+  lang,
+}: {
+  b: OrderOffer["bumps"][number];
+  on: boolean;
+  toggle: (id: string, on: boolean) => void;
+  t: Copy["form"];
+  currency: Currency;
+  lang: Lang;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`${s.bump} ${d.bumpShort}`}>
+      <label className={`${s.bumpHead} ${d.bumpRow}`}>
+        {!on && <BumpArrow />}
+        <input type="checkbox" checked={on} onChange={(e) => toggle(b.id, e.target.checked)} className={s.bumpCheck} />
+        <span className={s.bumpTitle}>{b.headline}</span>
+        <span className={s.bumpPrice}>{fmt(b.price, currency, lang)}</span>
+      </label>
+      <button type="button" className={d.bumpMore} aria-expanded={open} onClick={() => setOpen(!open)}>
+        {open ? t.bumpLess : t.bumpMore}
+        <svg viewBox="0 0 448 512" width="10" height="10" aria-hidden className={open ? d.bumpMoreOpen : undefined}>
+          <path
+            fill="currentColor"
+            d="M207 381.5L12.7 187.1c-9.4-9.4-9.4-24.6 0-33.9l22.7-22.7c9.4-9.4 24.5-9.4 33.9 0L224 284.5l154.7-154c9.4-9.3 24.5-9.3 33.9 0l22.7 22.7c9.4 9.4 9.4 24.6 0 33.9L241 381.5c-9.4 9.4-24.6 9.4-33.9 0z"
+          />
+        </svg>
+      </button>
+      {open && (
+        <div className={d.bumpDetails}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
+          <span className={s.bumpText}>
+            {b.body.map((p, i) => (
+              <span key={i} className={s.bumpPara}>
+                {i === 0 && <span className={s.oto}>{t.oto}</span>} <Rich text={p} currency={currency} />
+              </span>
+            ))}
+          </span>
+        </div>
+      )}
+    </div>
   );
 }
 
