@@ -72,9 +72,14 @@
    colour, never by a border. */
 .tiles {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 22px;
+}
+@media (max-width: 1200px) {
+  .tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 @media (max-width: 900px) {
   .tiles {

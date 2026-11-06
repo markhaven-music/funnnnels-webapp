@@ -169,7 +169,7 @@ function bucket(rows: Row[], interval: Interval): Row[] {
 // ─── the metrics: one tile each ──────────────────────────────────────────────
 
 type Kind = "money" | "count" | "pct" | "ratio";
-type MetricId = "profit" | "net" | "spend" | "roas" | "revenue" | "sales" | "visitors" | "cvr";
+type MetricId = "profit" | "net" | "spend" | "roas" | "revenue" | "sales" | "aov" | "visitors" | "cvr";
 type Metric = {
   id: MetricId;
   label: string;
@@ -194,6 +194,8 @@ const PREV = "oklch(0.62 0.015 270)";
 const profitOf = (r: Row) => (r.spend === null ? null : r.adNet - r.spend);
 const roasOf = (r: Row) => (r.spend ? r.adNet / r.spend : null);
 const cvrOf = (r: Row) => (r.visitors ? r.ratedOrders / r.visitors : null);
+/** Average order value: the revenue (upsells included) per order. */
+const aovOf = (r: Row) => (r.orders ? r.revenue / r.orders : null);
 
 const METRICS: Metric[] = [
   { id: "profit", label: "Profit", color: PROFIT, kind: "money", ads: true, upGood: true, of: profitOf, note: (r, cur) => `${money(r.adNet, cur)} net − ${money(r.spend ?? 0, cur)} ad spend` },
@@ -218,6 +220,7 @@ const METRICS: Metric[] = [
     of: (r) => r.orders,
     note: (r) => (r.upsells ? `+ ${r.upsells} upsell${r.upsells === 1 ? "" : "s"}` : "orders, upsells apart"),
   },
+  { id: "aov", label: "AOV", color: "oklch(0.82 0.12 140)", kind: "money", upGood: true, of: aovOf, note: () => "revenue ÷ orders, upsells included" },
   { id: "visitors", label: "Visitors", color: "oklch(0.8 0.14 235)", kind: "count", upGood: true, of: (r) => r.visitors, note: () => "unique, on the landings" },
   { id: "cvr", label: "Conversion", color: "oklch(0.84 0.13 195)", kind: "pct", upGood: true, of: cvrOf, note: () => "orders ÷ visitors" },
 ];
@@ -815,6 +818,7 @@ function Details({ r, cur }: { r: Row; cur: Currency }) {
       <TipRow value={moneyExact(r.revenue, cur)} label={r.revenue > r.net ? `revenue · ${moneyExact(r.revenue - r.net, cur)} fees` : "revenue"} />
       <TipRow value={count(r.orders)} label={`order${r.orders === 1 ? "" : "s"}${r.upsells ? ` + ${r.upsells} upsell${r.upsells === 1 ? "" : "s"}` : ""}`} />
       <TipRow value={count(r.visitors)} label="visitors" />
+      {r.orders > 0 && <TipRow value={moneyExact(r.revenue / r.orders, cur)} label="per order (AOV)" />}
       {cvr !== null && <TipRow value={pct(cvr)} label="conversion" />}
       {r.spend !== null && r.adOrders > 0 && <TipRow value={moneyExact(r.spend / r.adOrders, cur)} label="ad cost per order" />}
       {r.spend !== null && <TipRow value={count(r.clicks)} label="link clicks" />}
@@ -838,6 +842,7 @@ function TipRow({ color, mark, value, label }: { color?: string; mark?: "pos" | 
 const COLS: { id: MetricId; label: string }[] = [
   { id: "sales", label: "Orders" },
   { id: "revenue", label: "Revenue" },
+  { id: "aov", label: "AOV" },
   { id: "net", label: "Net revenue" },
   { id: "spend", label: "Ad spend" },
   { id: "profit", label: "Profit" },

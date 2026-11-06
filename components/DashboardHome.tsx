@@ -27,6 +27,7 @@ const CURRENCY_KEY = "fv:home-currency";
 
 function FunnelRevenue({ a, cur }: { a: Analytics; cur: Currency }) {
   const c = (v: number) => money(fromEur(v, cur, a.usdToEur), cur);
+  const cx = (v: number) => moneyExact(fromEur(v, cur, a.usdToEur), cur);
   const rows = a.funnels.filter((f) => f.total.revenue > 0 || f.total.visitors > 0).sort((x, y) => y.total.revenue - x.total.revenue);
   const max = Math.max(...rows.map((f) => f.total.revenue), 0);
   if (!rows.length) return <div className={s.empty}>No visitors or sales in this range yet.</div>;
@@ -39,6 +40,7 @@ function FunnelRevenue({ a, cur }: { a: Analytics; cur: Currency }) {
             <span className={s.hmeta}>
               {f.total.orders} order{f.total.orders === 1 ? "" : "s"} · {f.total.visitors.toLocaleString("en-US")} visitors
               {f.total.revenue > 0 && ` · ${c(f.total.net)} net`}
+              {f.total.orders > 0 && ` · AOV ${cx(f.total.revenue / f.total.orders)}`}
             </span>
           </div>
           <div className={s.htrack}>
