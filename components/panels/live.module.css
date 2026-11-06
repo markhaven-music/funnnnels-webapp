@@ -557,3 +557,183 @@
     display: none;
   }
 }
+
+/* who they are (VisitorStats.tsx) */
+.statsNote {
+  margin: -6px 0 12px;
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.statsH {
+  margin: 18px 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg-1);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.statsH small {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--fg-2);
+}
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (max-width: 800px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.kpi {
+  background: color-mix(in oklch, var(--fg-0) 5%, transparent);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.kpiLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+.kpiValue {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.kpiSub {
+  font-size: 11px;
+  color: var(--fg-2);
+  margin-top: 2px;
+}
+.deviceTable {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  overflow-x: auto;
+}
+.deviceHead,
+.deviceRow {
+  display: grid;
+  grid-template-columns: 130px minmax(150px, 1.6fr) repeat(3, minmax(88px, 1fr));
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  min-width: 560px;
+}
+.deviceHead {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+  padding-top: 0;
+}
+.deviceRow {
+  border-top: 1px solid var(--line);
+}
+.deviceRow small {
+  color: var(--fg-2);
+  font-size: 12px;
+  margin-left: 4px;
+}
+.deviceRow b {
+  font-variant-numeric: tabular-nums;
+}
+.deviceName {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.miniBar {
+  display: block;
+  height: 6px;
+  margin-top: 5px;
+  background: var(--bg-2);
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+}
+.miniBar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-xs);
+}
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 4px 28px;
+}
+.statBox {
+  min-width: 0;
+}
+.statRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(40px, 1fr) 72px;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--fg-1);
+}
+.statName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.statNum {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+  white-space: nowrap;
+}
+.statNum b {
+  color: var(--fg-0);
+  font-weight: 600;
+}
+.statEmpty {
+  font-size: 12px;
+  color: var(--fg-2);
+  padding: 4px 0;
+}
+.cols {
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  height: 130px;
+}
+.col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+.colBar {
+  width: 100%;
+  min-height: 1px;
+  background: var(--accent);
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+}
+.colNum {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+  margin-bottom: 3px;
+}
+.colLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+  height: 16px;
+  margin-top: 4px;
+  white-space: nowrap;
+}

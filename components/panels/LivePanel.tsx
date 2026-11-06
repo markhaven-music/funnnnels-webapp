@@ -8,6 +8,7 @@ import type { Live, LiveEvent, LiveVisitor } from "@/lib/live";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { landPath, MAP_COLS, MAP_ROWS, project } from "@/lib/worldDots";
 import s from "./live.module.css";
+import { VisitorStats } from "./VisitorStats";
 
 // Dashboard → Live. From /api/live (lib/live.ts), asked every 5 s while this
 // panel is open and the tab is in front: who is on a buyer page right now,
@@ -277,6 +278,8 @@ export function LivePanel() {
           </div>
         )}
       </section>
+
+      <VisitorStats />
 
       <OwnVisits />
     </main>
