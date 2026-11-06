@@ -140,17 +140,7 @@ export function CheckoutWidget(props: Props) {
       </ol>
 
       <div className={s.body} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
-        {/* While step 1 is filled in, Stripe's card fields load out of sight, so on
-            step 2 they show at once ("xkè ci mette così tanto a caricare", 11-06),
-            as on the Drum Kit order page. */}
-        {step === 1 && stripePromise && (
-          <div aria-hidden style={{ position: "absolute", left: -10000, top: 0, width: 340, height: 0, overflow: "hidden" }}>
-            <Elements stripe={stripePromise} options={cardElements(GEIST, undefined, { total, currency: props.currency })}>
-              <CardFields look={GEIST} />
-            </Elements>
-          </div>
-        )}
-        {step === 1 ? (
+        {step === 1 && (
           <InfoStep
             funnel={props.funnel}
             info={info}
@@ -166,8 +156,12 @@ export function CheckoutWidget(props: Props) {
               track({ funnel: props.funnel, page: "checkout", abCookie: props.abCookie });
             }}
           />
-        ) : (
-          <>
+        )}
+        {/* Step 2 is built (hidden) as soon as Stripe is wanted, while step 1 is
+            filled in: its card fields are then already loaded when it opens,
+            instead of loading for 2-3 s ("xkè ci mette così tanto a caricare", 11-06). */}
+        {(step === 2 || stripePromise) && (
+          <div hidden={step !== 2} className={s.step2}>
             <button type="button" className={s.back} onClick={() => setStep(1)}>
               ← Go back
             </button>
@@ -203,7 +197,7 @@ export function CheckoutWidget(props: Props) {
                 <PayStepBody {...body} cardOff />
               </>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
