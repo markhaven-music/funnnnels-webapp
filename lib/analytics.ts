@@ -522,6 +522,8 @@ export const TESTS: TestDef[] = [
     funnel: "midi-drum-kit",
     // Back on 11-06 evening in place of the button-colour test (whose colours
     // still show at random, uncounted): the old step 2 against the new one.
+    // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
+    // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
     where: "Order page, step 2 (payment), every language",
     variants: PAY_TEST.variants,

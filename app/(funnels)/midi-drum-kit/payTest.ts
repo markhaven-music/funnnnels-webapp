@@ -26,6 +26,11 @@
 export const PAY = {
   cookie: "ab_pay",
   variants: ["a", "b"] as const,
+  // Since 11-06 ~20:00 everyone gets B ("switch on the new one only… keep the
+  // old in memory… keep the previous stats to compare"): the split ran ~1 hour.
+  // A stays in the code and in Analytics (its visits and orders until then);
+  // ?preview=1&ab=a still shows it. To split again: live: null.
+  live: "b" as "a" | "b" | null,
 };
 export type PayVariant = (typeof PAY.variants)[number];
 
@@ -48,7 +53,7 @@ var re=/(?:^|; )${PAY.cookie}=(${LIST})(?:;|$)/,q=(location.search.match(/[?&]ab
 var pre=/[?&]preview=1(?:&|$)/.test(location.search),v=null;
 try{if(/[?&]preview=0(?:&|$)/.test(location.search))sessionStorage.removeItem('${PREVIEW_KEY}');else if(pre&&q)sessionStorage.setItem('${PREVIEW_KEY}',q);v=sessionStorage.getItem('${PREVIEW_KEY}');}catch(e){if(pre)v=q;}
 if(v&&!/^(${LIST})$/.test(v))v=null;
-if(!v){v=q||(document.cookie.match(re)||[])[1];
+if(!v){v=${PAY.live ? `'${PAY.live}'` : `q||(document.cookie.match(re)||[])[1]`};
 if(!v){var all=${JSON.stringify(PAY.variants)};v=all[Math.floor(Math.random()*all.length)];}
 document.cookie='${PAY.cookie}='+v+'; path=/; max-age=15552000; samesite=lax';}
 document.documentElement.setAttribute('${ATTR}',v);window.__abPay=v;
