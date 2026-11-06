@@ -70,6 +70,28 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
   // with the page, which kept the order page under 90 on PageSpeed mobile (docs/page-speed.md).
   const [wanted, setWanted] = useState(false);
   const stripePromise = useMemo(() => (publishableKey && wanted ? stripeFor(publishableKey) : null), [publishableKey, wanted]);
+  // The abandoned-checkout emails' link ("I've saved your cart", ?c=, lib/mail.ts resumeToken):
+  // their name and email filled, straight to step 2. No InitiateCheckout again: they had theirs.
+  useEffect(() => {
+    const c = new URLSearchParams(location.search).get("c");
+    if (!c) return;
+    fetch("/api/checkout/resume", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t: c, funnel: funnel.slug }) })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((cart: Info | null) => {
+        if (!cart?.email) return;
+        setInfo({ firstName: cart.firstName ?? "", lastName: cart.lastName ?? "", email: cart.email });
+        setWanted(true);
+        setStep(2);
+        track({ funnel: funnel.slug, page: "checkout", lang, abCookie: AB.cookie });
+        // The token off the address bar: a shared or bookmarked link carries no one's cart.
+        const url = new URL(location.href);
+        url.searchParams.delete("c");
+        history.replaceState(history.state, "", url);
+        // On phones the form is under the summary: straight to it (a jump, not an animation, on arrival).
+        window.scrollTo(0, document.getElementById("complete-order")?.offsetTop ?? 0);
+      })
+      .catch(() => {});
+  }, [lang]);
   const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard };
 
   return (

@@ -96,7 +96,7 @@ const PUBLIC = [
   /^\/api\/checkout\/shop\/(intent|paypal)$/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
-  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|here|me|upsell|go|open)$/, // go, open: a click on / an open of an email (lib/mail.ts); here, me: dashboard → Live
+  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|here|me|upsell|go|open|resume)$/, // go, open: a click on / an open of an email (lib/mail.ts); resume: its saved cart; here, me: dashboard → Live
   /^\/account$/, // the customer login and its API
   /^\/api\/checkout\/account\/(login|verify|session)$/,
   // Email: Stripe's webhook, the email job (its own CRON_SECRET), unsubscribing.

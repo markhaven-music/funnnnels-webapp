@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createCipheriv, createDecipheriv, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { SUPPORT, type Email } from "@/lib/ses";
 
 // What every email we write is made of (the sending is lib/ses.ts, the
@@ -85,6 +85,42 @@ export function readClickToken(token: unknown): { ok: boolean; kind: MailKind; r
   const want = Buffer.from(createHmac("sha256", clickKey()).update(p).digest("base64url").slice(0, 32));
   const got = Buffer.from(sig);
   return { ok: got.length === want.length && timingSafeEqual(got, want), kind, ref, email, url };
+}
+
+// ─── the saved cart ────────────────────────────────────────────────
+// The abandoned-checkout emails promise "I've saved your cart": their link
+// carries ?c=<token>, and the order page asks /api/checkout/resume for the
+// name and email inside it, then opens on step 2 (payment) with them filled.
+// Encrypted, not just signed: the address never sits readable in a URL that
+// the page's pixels and analytics see. Good for 30 days.
+
+const RESUME_DAYS = 30;
+const resumeKey = () => createHmac("sha256", key()).update("grind-resume-v1").digest();
+
+export function resumeToken(o: { funnel: string; email: string; name: string | null }): string {
+  const iv = randomBytes(12);
+  const c = createCipheriv("aes-256-gcm", resumeKey(), iv);
+  const body = Buffer.concat([c.update(JSON.stringify([o.funnel, o.email.toLowerCase(), o.name ?? "", Math.floor(Date.now() / 1000)])), c.final()]);
+  return Buffer.concat([iv, body, c.getAuthTag()]).toString("base64url");
+}
+
+/** The cart a token saved, or null when it was tampered with, is for another funnel or is too old. */
+export function readResumeToken(token: unknown, funnel: string): { email: string; firstName: string; lastName: string } | null {
+  if (typeof token !== "string" || token.length < 40 || token.length > 600) return null;
+  try {
+    const raw = Buffer.from(token, "base64url");
+    const d = createDecipheriv("aes-256-gcm", resumeKey(), raw.subarray(0, 12));
+    d.setAuthTag(raw.subarray(raw.length - 16));
+    const v = JSON.parse(Buffer.concat([d.update(raw.subarray(12, raw.length - 16)), d.final()]).toString());
+    if (!Array.isArray(v) || v.length !== 4) return null;
+    const [f, email, name, at] = v as [string, string, string, number];
+    if (f !== funnel || typeof email !== "string" || Date.now() / 1000 - at > RESUME_DAYS * 86_400) return null;
+    // The name as step 1 saved it, "first last" (app/api/checkout/lead): split back at the first space.
+    const [first, ...rest] = String(name).trim().split(/\s+/);
+    return { email, firstName: first ?? "", lastName: rest.join(" ") };
+  } catch {
+    return null;
+  }
 }
 
 // ─── opens ─────────────────────────────────────────────────────────

@@ -10,7 +10,7 @@ Vercel), from one job:
 | --- | --- | --- |
 | Receipt with the downloads | 5 min after a paid order, upsells bought right after it in the same email | `lib/mailCopy.ts` (EN/FR/ES/DE/IT) |
 | 💾 Backup Link | 10 min after the receipt: the same download links again and the account page, for buyers whose receipt got buried (ClickFunnels did it) | `lib/backupCopy.ts` |
-| Abandoned checkout | MIDI Drum Kit: 3 emails, 15 min after step 1, then 6 h, then 18 h later (ClickFunnels' words, EN/FR/ES/DE/IT); other funnels: 1 email after 1 h. Stops when they buy | `lib/abandonCopy.ts`, `lib/mailCopy.ts` |
+| Abandoned checkout | MIDI Drum Kit: 3 emails, 15 min after step 1, then 6 h, then 18 h later (ClickFunnels' words, EN/FR/ES/DE/IT); its link is the saved cart: the order page opens on step 2 with their name and email filled (`?c=`, an encrypted token, `lib/mail.ts` resumeToken → `/api/checkout/resume`). Other funnels: 1 email after 1 h. Stops when they buy | `lib/abandonCopy.ts`, `lib/mailCopy.ts` |
 | Free pack download | Right after an opt-in on a free pack's page (Rolls, Bounce): the link to the zip, every time they ask | `app/free/firstEmail.ts` |
 | Free pack follow-ups | Backup link 1 h after the opt-in, "checkin' in" 24 h later, the Mystery Hooks gift 24 h later, hooks tips 48 h later: "Free Rolls pack" (tag `lead-rolls`) and "Free Bounce pack" (`bounce-pack-ig`), `db/free-leads.sql` | Dashboard → Automations |
 | After a Drum Kit purchase | "How to use" 1 h after, "Fragments" tip 24 h after, "Bonus" folder 48 h later: one sequence per language (`db/email-series-seed.sql`) | Dashboard → Automations |

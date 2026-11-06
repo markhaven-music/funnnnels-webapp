@@ -5,7 +5,7 @@ import { checkoutPages, resolveFunnel, type Product } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { money } from "@/lib/launch";
-import { card, letter, type CardButton } from "@/lib/mail";
+import { card, letter, resumeToken, type CardButton } from "@/lib/mail";
 import { mailCopy } from "@/lib/mailCopy";
 import { getLaunch } from "@/lib/products";
 import { orderTitle, shopLabels, type ShopLabel } from "@/lib/shop";
@@ -337,7 +337,10 @@ async function reminders(run: Run) {
       if (!claimed?.length) continue;
     }
     const first = (row.name ?? "").trim().split(/\s+/)[0]?.slice(0, 40) ?? "";
-    const url = `${f.home ?? BRAND_ORIGIN}${checkoutPages(f, row.lang).orderPage}`;
+    // The series says "I've saved your cart": its link opens the order page on step 2
+    // with their name and email filled (lib/mail.ts resumeToken, read by OrderForm.tsx).
+    const order = `${f.home ?? BRAND_ORIGIN}${checkoutPages(f, row.lang).orderPage}`;
+    const url = series ? `${order}?c=${resumeToken({ funnel: row.funnel, email: row.email, name: row.name })}` : order;
     // The series' emails count apart in Insights (<funnel>/1, /2, /3); the single reminder is <funnel>.
     const ref = series ? `${row.funnel}/${sent + 1}` : row.funnel;
     let email: Email;
