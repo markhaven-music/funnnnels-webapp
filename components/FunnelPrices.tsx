@@ -12,7 +12,9 @@ import p from "./funnelPrices.module.css";
 // top bar's Prices, or a click on a price): the main product, the order bumps
 // and the upsells, in € and $. Saved through dashboard → Products' own API
 // (/api/products/items, lib/catalog.ts), so the checkout charges the new price
-// from the next order and the funnel's pages are refreshed.
+// from the next order and the funnel's pages are refreshed. The order bumps
+// can also be put in order, taken out and added here (11-06, "rendere selezione
+// order bump più semplice dal pannello funnel"): those save at once.
 
 export type PriceItem = FunnelItem & { sold: number };
 
@@ -30,7 +32,7 @@ export function PriceList({ items, onEdit }: { items: PriceItem[]; onEdit: (id: 
       <div className={p.listHead}>
         <span>Prices</span>
         <button type="button" className={p.listEdit} onClick={() => onEdit(priceId(first))}>
-          Edit prices
+          Edit prices &amp; order bumps
         </button>
       </div>
       {items.map((i) => (
@@ -83,8 +85,42 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
   const [saved, setSaved] = useState<string | null>(null);
   const body = useRef<HTMLDivElement>(null);
 
-  const changed = items.filter((i) => !same(drafts[priceId(i)], i.price));
-  const invalid = changed.some((i) => problem(drafts[priceId(i)]));
+  const draft = (i: PriceItem) => drafts[priceId(i)] ?? draftOf(i.price);
+  const changed = items.filter((i) => !same(draft(i), i.price));
+  const invalid = changed.some((i) => problem(draft(i)));
+
+  // ─── the order bumps' list: order, out, in (saved at once) ───
+  const [listBusy, setListBusy] = useState(false);
+  const [listMsg, setListMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [products, setProducts] = useState<{ slug: string; name: string; file: string | null; image: string | null }[]>([]);
+  const [pick, setPick] = useState("");
+  const [pickPrice, setPickPrice] = useState<Draft>({ eur: "", usd: "" });
+  useEffect(() => {
+    fetch("/api/products", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => setProducts((j.products ?? []).map((x: { slug: string; name: string; file: string | null; image: string | null }) => ({ slug: x.slug, name: x.name, file: x.file, image: x.image }))))
+      .catch(() => {});
+  }, []);
+  async function listAct(method: "PUT" | "DELETE" | "POST", body: Record<string, unknown>, done: string) {
+    setListBusy(true);
+    setListMsg(null);
+    try {
+      const res = await fetch("/api/products/items", { method, headers: { "content-type": "application/json" }, body: JSON.stringify({ funnel, ...body }) });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Couldn't save.");
+      const fresh = await fetch(`/api/products/items?funnel=${encodeURIComponent(funnel)}`, { cache: "no-store" }).then((r) => r.json());
+      onSaved(fresh.items ?? items);
+      setListMsg({ ok: true, text: done });
+      return true;
+    } catch (err) {
+      setListMsg({ ok: false, text: (err as Error).message });
+      return false;
+    } finally {
+      setListBusy(false);
+    }
+  }
+  const bumps = items.filter((i) => i.role === "bump");
+  const addable = products.filter((x) => x.file && !items.some((i) => i.product === x.slug && i.role !== "upsell"));
 
   useEffect(() => {
     const el = (focus && body.current?.querySelector<HTMLInputElement>(`input[data-id="${focus}"]`)) || body.current?.querySelector("input");
@@ -124,7 +160,7 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
     const results = await Promise.all(
       changed.map(async (i) => {
         const id = priceId(i);
-        const price = { eur: parse(drafts[id].eur), usd: parse(drafts[id].usd) };
+        const price = { eur: parse(draft(i).eur), usd: parse(draft(i).usd) };
         const res = await fetch("/api/products/items", {
           method: "PATCH",
           headers: { "content-type": "application/json" },
@@ -164,7 +200,7 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
       >
         <header className={p.head}>
           <div>
-            <div className={p.title}>Prices</div>
+            <div className={p.title}>Prices &amp; order bumps</div>
             <p className={p.sub}>
               What {name} charges. € for buyers in Europe, $ for everyone else, in every language. Typing the € price
               fills in the $ one while they match.
@@ -184,18 +220,10 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
                 <div className={p.groupHead}>
                   {g.title} <span>{g.note}</span>
                 </div>
-                {!rows.length && (
-                  <p className={p.none}>
-                    None yet. Any product can be one: open it in{" "}
-                    <Link href="/?nav=products" className={p.link}>
-                      Products
-                    </Link>{" "}
-                    and use &ldquo;Sell it in a funnel&rdquo;.
-                  </p>
-                )}
+                {!rows.length && <p className={p.none}>None yet: add one below.</p>}
                 {rows.map((i) => {
                   const id = priceId(i);
-                  const d = drafts[id];
+                  const d = draft(i);
                   const isChanged = !same(d, i.price);
                   const error = errors[id] ?? (isChanged ? problem(d) : null);
                   return (
@@ -227,17 +255,90 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
                           </label>
                         ))}
                       </div>
+                      {i.role === "bump" && (
+                        <div className={p.order}>
+                          <span className={p.place}>
+                            {bumps.indexOf(i) + 1} of {bumps.length} on the order form
+                          </span>
+                          <button type="button" className={p.mini} disabled={listBusy || bumps.indexOf(i) === 0} onClick={() => listAct("PUT", { role: "bump", key: i.key, move: -1 }, `${i.name} moved up.`)} aria-label={`Move ${i.name} up`}>
+                            ↑ Up
+                          </button>
+                          <button type="button" className={p.mini} disabled={listBusy || bumps.indexOf(i) === bumps.length - 1} onClick={() => listAct("PUT", { role: "bump", key: i.key, move: 1 }, `${i.name} moved down.`)} aria-label={`Move ${i.name} down`}>
+                            ↓ Down
+                          </button>
+                          <button
+                            type="button"
+                            className={`${p.mini} ${p.miniDanger}`}
+                            disabled={listBusy}
+                            onClick={() => window.confirm(`Take ${i.name} off ${name}'s order form?`) && listAct("DELETE", { role: "bump", key: i.key }, `${i.name} taken off the order form.`)}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
                       {error && <div className={p.error}>{error}</div>}
                     </div>
                   );
                 })}
+                {g.role === "bump" && (
+                  <div className={p.add}>
+                    <div className={p.addHead}>Add an order bump</div>
+                    <div className={p.addRow}>
+                      <select
+                        className={p.select}
+                        value={pick}
+                        onChange={(e) => setPick(e.target.value)}
+                        aria-label="Product to add as an order bump"
+                      >
+                        <option value="">Choose a product…</option>
+                        {addable.map((x) => (
+                          <option key={x.slug} value={x.slug}>
+                            {x.name}
+                          </option>
+                        ))}
+                      </select>
+                      {(["eur", "usd"] as const).map((cur) => (
+                        <label key={cur} className={p.money}>
+                          <span aria-hidden>{cur === "eur" ? "€" : "$"}</span>
+                          <input
+                            inputMode="decimal"
+                            autoComplete="off"
+                            aria-label={`New order bump, price in ${cur === "eur" ? "euros" : "dollars"}`}
+                            value={pickPrice[cur]}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              setPickPrice((d) => ({ ...d, [cur]: v, ...(cur === "eur" && d.usd === d.eur ? { usd: v } : {}) }));
+                            }}
+                          />
+                        </label>
+                      ))}
+                      <button
+                        type="button"
+                        className="btn primary"
+                        disabled={listBusy || !pick || !!problem(pickPrice)}
+                        onClick={async () => {
+                          const x = addable.find((a) => a.slug === pick);
+                          const ok = await listAct("POST", { product: pick, role: "bump", price: { eur: parse(pickPrice.eur), usd: parse(pickPrice.usd) } }, `${x?.name ?? "It"} added, last on the order form.`);
+                          if (ok) {
+                            setPick("");
+                            setPickPrice({ eur: "", usd: "" });
+                          }
+                        }}
+                      >
+                        Add
+                      </button>
+                    </div>
+                    <p className={p.addNote}>It goes last; move it with ↑. Products without a zip can&rsquo;t be added: buyers would get nothing.</p>
+                  </div>
+                )}
+                {g.role === "bump" && listMsg && <p className={listMsg.ok ? p.ok : p.error}>{listMsg.text}</p>}
               </section>
             );
           })}
           <p className={p.note}>
             The order form and the upsell pages show the new price. The pages&rsquo; words follow it too:
-            reread any line that does math with it (&ldquo;90% off&rdquo;, &ldquo;usually €147&rdquo;). Names, pictures and
-            new order bumps are in{" "}
+            reread any line that does math with it (&ldquo;90% off&rdquo;, &ldquo;usually €147&rdquo;). Names and pictures
+            are in{" "}
             <Link href="/?nav=products" className={p.link}>
               Products
             </Link>

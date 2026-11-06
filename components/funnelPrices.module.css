@@ -305,3 +305,69 @@
     flex: 1;
   }
 }
+
+/* The order bumps' order, removal and the "Add an order bump" row. */
+.order {
+  grid-column: 2 / -1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.place {
+  flex: 1;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.mini {
+  padding: 4px 10px;
+  border: 1px solid #d6d2ca;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mini:hover:not(:disabled) {
+  border-color: var(--accent-l);
+}
+.mini:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.miniDanger {
+  color: #c03535;
+}
+.add {
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--edge);
+}
+.addHead {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.addRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.select {
+  flex: 1 1 200px;
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid #d6d2ca;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+}
+.addNote {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+}

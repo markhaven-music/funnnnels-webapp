@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { addItem, moveItem, removeItem, updateItem, type ItemRole } from "@/lib/catalog";
+import { addItem, funnelPrices, moveItem, removeItem, updateItem, type ItemRole } from "@/lib/catalog";
 import { revalidateSalesPages } from "@/lib/pages";
 
 export const runtime = "nodejs";
 
 // Dashboard → Products: what each funnel sells (funnel_items, lib/catalog.ts).
+//   GET    ?funnel=…                                           its items in order, with paid orders (the map's Prices)
 //   POST   { funnel, product, role: "bump" | "upsell", price }  a product into a funnel
 //   PATCH  { funnel, role, key, name, price }                   its name and price there
 //   PUT    { funnel, role, key, move: -1 | 1 }                  an add-on one place up or down
@@ -29,6 +30,16 @@ async function run(body: Record<string, unknown>, act: (funnel: string) => Promi
   } catch (err) {
     console.error("products: saving a funnel item failed", err);
     return NextResponse.json({ error: "Couldn't save." }, { status: 500 });
+  }
+}
+
+export async function GET(req: Request) {
+  const funnel = new URL(req.url).searchParams.get("funnel") ?? "";
+  try {
+    return NextResponse.json({ items: await funnelPrices(funnel) });
+  } catch (err) {
+    console.error("products: loading a funnel's items failed", err);
+    return NextResponse.json({ error: "Couldn't load." }, { status: 500 });
   }
 }
 
