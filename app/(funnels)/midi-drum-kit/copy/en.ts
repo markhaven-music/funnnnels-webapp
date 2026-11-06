@@ -33,7 +33,7 @@ export const en = {
       "Never Feel Beat Block Again",
       "Works With Mac & PC and Any DAW",
       "Limited Time Sale",
-      "Money Back Guarantee (No Risk)",
+      "Quality Guarantee (No Risk)",
       "Limited To 1,250 Licenses",
     ],
     completeTitle: "Complete Order:",
@@ -49,7 +49,7 @@ export const en = {
       { quote: "\"These patterns hit harder than anything I've found. Essential tools for modern producers.\"", name: "Ravi Lomax", role: "Trap Producer, 100M+ streams", avatar: "avatar-a" },
     ],
     starsAlt: "5 stars",
-    guaranteeTitle: "14-Day Money-Back Guarantee",
+    guaranteeTitle: "14-Day Quality Guarantee",
     guaranteeText:
       "Every pattern in this kit is tested before release. If anything's wrong with your files, email support@thegrind.studio within 14 days and we'll make it right — a fresh download, a replacement, or a refund if we can't fix it.",
     secureTitle: "Secure Payments",
