@@ -63,6 +63,10 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
     document.documentElement.setAttribute("data-order-step", String(step));
   }, [step]);
   const [picked, setPicked] = useState<string[]>([]);
+  // The add-ons ticked, for the upsell pages: one already bought here is skipped (./upsell.ts).
+  useEffect(() => {
+    document.cookie = `fv_owned=${picked.join(",")}; path=/; max-age=7200; samesite=lax`;
+  }, [picked]);
   const [method, setMethod] = useState<Method>("card");
   const price = offer.price;
   const total = price + offer.bumps.filter((b) => picked.includes(b.id)).reduce((n, b) => n + b.price, 0);

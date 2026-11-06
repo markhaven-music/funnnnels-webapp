@@ -116,6 +116,12 @@ export const en = {
           "Limited to the first 150 orders.",
         ],
       },
+      "top-hits": {
+        headline: "YES! Add the TOP HITS MIDI Bundle!",
+        body: [
+          "1000 chord progressions from the biggest hits (The Weeknd, Dua Lipa, Coldplay, Bad Bunny and more) as **drag-and-drop MIDI files**. Put one under your drums and your beat has a hit's harmony. Add it now for just {c}97.",
+        ],
+      },
       chords: {
         headline: "YES! I want Chord Progressions!",
         body: [

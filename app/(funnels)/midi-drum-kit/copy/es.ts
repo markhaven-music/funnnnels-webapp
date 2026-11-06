@@ -111,6 +111,12 @@ export const es: Copy = {
           "Limitado a los primeros 150 pedidos.",
         ],
       },
+      "top-hits": {
+        headline: "¡SÍ! ¡Añade el TOP HITS MIDI Bundle!",
+        body: [
+          "1000 progresiones de acordes de los mayores hits (The Weeknd, Dua Lipa, Coldplay, Bad Bunny y más) en **archivos MIDI drag-and-drop**. Pon una debajo de tus drums y tu beat tiene la armonía de un hit. Añádelo ahora por solo 97 {c}.",
+        ],
+      },
       chords: {
         headline: "¡SÍ! ¡Quiero las progresiones de acordes!",
         body: [

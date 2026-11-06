@@ -111,6 +111,12 @@ export const de: Copy = {
           "Begrenzt auf die ersten 150 Bestellungen.",
         ],
       },
+      "top-hits": {
+        headline: "JA! Das TOP HITS MIDI Bundle dazu!",
+        body: [
+          "1000 Akkordfolgen der größten Hits (The Weeknd, Dua Lipa, Coldplay, Bad Bunny und mehr) als **Drag-and-Drop-MIDI-Dateien**. Leg eine unter deine Drums und dein Beat hat die Harmonie eines Hits. Hol es dir jetzt für nur 97 {c}.",
+        ],
+      },
       chords: {
         headline: "JA! Ich will die Akkordfolgen!",
         body: [

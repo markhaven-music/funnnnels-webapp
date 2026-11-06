@@ -50,6 +50,15 @@ export const funnel = {
       pitch: "31 professional MIDI packs: jazz, trap, hip-hop, lofi, pop and more.",
     },
     {
+      // 11-06: in place of "chords" on the order form, at $97 ("voglio testare");
+      // whoever ticks it skips the TOP HITS upsell page (./upsell.ts).
+      id: "top-hits",
+      name: "TOP HITS MIDI Bundle (1000 Chord Progressions)",
+      price: { eur: 97, usd: 97 },
+      image: "/funnels/midi-drum-kit/bump-top-hits.webp",
+      pitch: "1000 chord progressions from the biggest hits, as drag-and-drop MIDI files.",
+    },
+    {
       id: "chords",
       name: "Chord Progressions Bundle (750 Songs)",
       price: { eur: 25, usd: 25 },

@@ -193,6 +193,8 @@ function script(slug: string, offerId: string, lang: Lang, next: string): string
     location.href = C.next + (p.toString() ? '?' + p.toString() : '');
   }
   function cookie(n) { var m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : ''; }
+  // Already ticked on the order form (OrderForm.tsx sets fv_owned): this offer is skipped.
+  if (cookie('fv_owned').split(',').indexOf(C.offer) >= 0) { go(); return; }
   var busy = false;
   function say(btn, t) {
     var box = btn.closest('[data-page-element="Button/V1"]') || btn.parentElement;
