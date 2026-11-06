@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width"><meta name=robots content=noindex><title>pe-lab</title><script src="https://js.stripe.com/v3"></script>
+<style>body{font-family:sans-serif;margin:10px;background:#f3f3f3}.box{margin:12px 0;padding:8px;background:#fff;display:inline-block;vertical-align:top;margin-right:12px}</style></head><body><div id=out></div>
+<script>
+// Layout lab for the order form's Payment Element (no payments; delete after use).
+const stripe=Stripe("pk_live_51SoLSpEFgbUefWJ0cI6LTYBJFXijR96g85kJhKooWcx3Titq6QeSKq0LOKXaOHpPdUxgTThNOC6P6c6LpKPCfyW300HLyVxUl2");
+const base={theme:'stripe',variables:{fontFamily:'Inter, sans-serif',fontSizeBase:'16px',colorText:'#384751',colorPrimary:'#000',colorDanger:'#dc2626',borderRadius:'5px',spacingUnit:'3px'},rules:{'.Input':{border:'2px solid #dbdcdd',boxShadow:'none'}}};
+const v=(labels,mod)=>{const a=JSON.parse(JSON.stringify(base));a.labels=labels;if(mod)mod(a);return a};
+const cases=[
+ ['A ours floating',v('floating')],
+ ['B floating small',v('floating',a=>{a.variables.spacingUnit='2px';a.variables.fontSizeBase='15px'})],
+ ['C above',v('above')],
+ ['D auto',v('auto')],
+ ['E default stripe',{theme:'stripe'}],
+ ['F floating 14px',v('floating',a=>{a.variables.spacingUnit='2px';a.variables.fontSizeBase='14px'})],
+];
+for (const w of [335,360,440]) cases.forEach(([n,a],i)=>{const id='p'+w+'_'+i;const d=document.createElement('div');d.className='box';d.style.width=w+'px';d.innerHTML='<b>'+w+' '+n+'</b><div id='+id+'></div>';document.getElementById('out').appendChild(d);
+const el=stripe.elements({mode:'payment',amount:2700,currency:'eur',allowedPaymentMethodTypes:['card'],fonts:[{cssSrc:'https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap'}],appearance:a});
+el.create('payment',{layout:'tabs',fields:{billingDetails:{name:'never',email:'never',address:{country:'never'}}},wallets:{applePay:'never',googlePay:'never',link:'never'},terms:{card:'never'}}).mount('#'+id);});
+</script></body></html>
