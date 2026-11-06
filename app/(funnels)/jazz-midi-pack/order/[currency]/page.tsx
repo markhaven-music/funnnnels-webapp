@@ -4,7 +4,7 @@ import { getFunnel, resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
-import { funnel } from "../../funnel";
+import { bumpCopy, funnel } from "../../funnel";
 import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content";
 import { AB, AB_KEEP_SCRIPT } from "../../abtest";
 import { Checkout, OrderSummary, Proof, Reviews, Seal, fill, isSectionType, type Ctx } from "../../sections";
@@ -56,7 +56,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     country: FALLBACK_COUNTRY[currency],
     publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null,
     bump: f.bump ? { name: f.bump.name, price: f.bump.price[currency], pitch: f.bump.pitch, cover: splitName(f.bump.name) } : null,
-    bumps: (f.bumps ?? []).map((b) => ({ id: b.id, name: b.name, price: b.price[currency], pitch: b.pitch, image: b.image })),
+    bumps: (f.bumps ?? []).map((b) => ({ id: b.id, name: b.name, price: b.price[currency], pitch: b.pitch, image: b.image, ...bumpCopy[b.id] })),
   };
   const offer = pick(sections, "s_offer");
   const guarantee = pick(sections, "s_guarantee");

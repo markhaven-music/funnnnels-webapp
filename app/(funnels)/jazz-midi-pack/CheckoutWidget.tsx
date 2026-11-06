@@ -60,11 +60,15 @@ type Props = {
   // and with the order (Stripe metadata.variant, PayPal custom_id "v"), so
   // the sales count per variant in dashboard → Analytics.
   abCookie?: string;
+  // A white form on the dark page (the Jazz order page since 11-06: the dark
+  // one "si fonde con lo sfondo scuro"): ./checkout.module.css .light.
+  light?: boolean;
 };
 
 type Info = { firstName: string; lastName: string; email: string };
 
-type Bump = { id: string; name: string; price: number; pitch: string; cover?: [string, string]; image?: string };
+// headline / body: the offer's own words (`{c}` = currency sign, `**bold**`); without them, "YES! Add the <name>!" and the pitch.
+type Bump = { id: string; name: string; price: number; pitch: string; cover?: [string, string]; image?: string; headline?: string; body?: string[] };
 
 /** The tick-box offers this checkout shows: the list, or the single bump. */
 const offersOf = (p: Pick<Props, "bump" | "bumps">): Bump[] => p.bumps ?? (p.bump ? [{ id: "bump", ...p.bump }] : []);
@@ -103,7 +107,7 @@ export function CheckoutWidget(props: Props) {
   const body = { ...props, info, method, offers, picked, toggle, total };
 
   return (
-    <div className={s.widget}>
+    <div className={`${s.widget} ${props.light ? s.light : ""}`}>
       {props.secureRow !== false && (
         <div className={s.secure}>
           <LockGlyph /> Secure checkout
@@ -136,6 +140,16 @@ export function CheckoutWidget(props: Props) {
       </ol>
 
       <div className={s.body} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
+        {/* While step 1 is filled in, Stripe's card fields load out of sight, so on
+            step 2 they show at once ("xkè ci mette così tanto a caricare", 11-06),
+            as on the Drum Kit order page. */}
+        {step === 1 && stripePromise && (
+          <div aria-hidden style={{ position: "absolute", left: -10000, top: 0, width: 340, height: 0, overflow: "hidden" }}>
+            <Elements stripe={stripePromise} options={cardElements(GEIST, undefined, { total, currency: props.currency })}>
+              <CardFields look={GEIST} />
+            </Elements>
+          </div>
+        )}
         {step === 1 ? (
           <InfoStep
             funnel={props.funnel}
@@ -509,15 +523,30 @@ function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: "
           </svg>
         )}
         <input type="checkbox" checked={ticked} onChange={(e) => onTick(e.target.checked)} className={s.bumpCheck} />
-        <span className={s.bumpTitle}>YES! Add the {offer.name}!</span>
+        <span className={s.bumpTitle}>{offer.headline ?? `YES! Add the ${offer.name}!`}</span>
         <span className={s.bumpPrice}>{money(offer.price, currency)}</span>
       </span>
-      <span className={s.bumpPitch}>
-        <span className={s.bumpOffer}>ADD-ON OFFER:</span> <strong>{lead}</strong>
-        {rest} Only <strong>{money(offer.price, currency)}</strong>, added to this order.
-      </span>
+      {offer.body ? (
+        <span className={s.bumpPitch}>
+          {offer.body.map((p, i) => (
+            <span key={i} className={s.bumpPara}>
+              {i === 0 && <span className={s.bumpOffer}>ADD-ON OFFER:</span>} <Rich text={p.replaceAll("{c}", currency === "eur" ? "€" : "$")} />
+            </span>
+          ))}
+        </span>
+      ) : (
+        <span className={s.bumpPitch}>
+          <span className={s.bumpOffer}>ADD-ON OFFER:</span> <strong>{lead}</strong>
+          {rest} Only <strong>{money(offer.price, currency)}</strong>, added to this order.
+        </span>
+      )}
     </label>
   );
+}
+
+// "**bold**" → bold.
+function Rich({ text }: { text: string }) {
+  return <>{text.split(/\*\*(.+?)\*\*/g).map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part))}</>;
 }
 
 // "Lead sentence: the rest." → the lead goes bold, like the ClickFunnels bump.

@@ -411,6 +411,12 @@
   font-size: 14px;
   line-height: 1.5;
 }
+.bumpPara {
+  display: block;
+}
+.bumpPara + .bumpPara {
+  margin-top: 6px;
+}
 .bumpOffer {
   font-weight: 800;
   color: #e0301e;
@@ -495,4 +501,39 @@
   flex: 1;
   height: 1px;
   background: var(--rule);
+}
+
+/* ─── light: a white form on the dark page ─────────────
+   The Jazz order page (11-06, the dark form "si fonde con lo sfondo scuro"):
+   the same anatomy, black words on white, light grey panels, and the fields
+   get the card fields' 2px #dbdcdd border so they read on white. */
+.light {
+  --ink: #f2f2f0;
+  --ink-2: #ffffff;
+  --ink-3: #e6e6e3;
+  --rule: #dcdcd8;
+  --cream: #111111;
+  --cream-2: #222222;
+  --cream-3: #555555;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.9), 0 30px 80px -30px rgb(0 0 0 / 0.9);
+}
+.light .input {
+  border: 2px solid #dbdcdd;
+}
+.light .input:focus {
+  border-color: #000;
+  box-shadow: none;
+}
+.light .tabOn .tabNum {
+  color: #111;
+}
+.light .methodOn {
+  background: #111;
+  color: #fff;
+}
+.light .error {
+  color: #c62828;
+}
+.light .orderTag {
+  color: #d1442b;
 }

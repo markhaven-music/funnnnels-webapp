@@ -284,16 +284,15 @@
   max-width: 560px;
   pointer-events: auto;
 }
-/* Add-ons: on a computer the whole offer shows, as before; on a phone, one line + "Details". */
+/* Add-ons: on a computer the whole offer shows, as before; on a phone only the
+   one line (tick, name, price): no "Details" button or pane (user, 11-06:
+   "togli i panes details da mobile checkouts"). */
 .bumpMore {
   display: none !important;
 }
 @media (max-width: 769px) {
-  .bumpMore {
-    display: inline-flex !important;
-  }
-  .bumpDetails:not(.bumpOpen) {
-    display: none;
+  .bumpDetails {
+    display: none !important;
   }
 }
 /* Phones only: there the bar takes the timer's place; a computer keeps the timer and has no bar (11-06). */

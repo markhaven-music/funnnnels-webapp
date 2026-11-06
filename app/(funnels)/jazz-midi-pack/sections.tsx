@@ -36,7 +36,7 @@ export type Ctx = {
   // An add-on given to Jazz in dashboard → Products (none since 2026-10-16).
   bump?: { name: string; price: number; pitch: string; cover: [string, string] } | null;
   // The order page's tick-box offers (dashboard → Products: funnel_items), in this currency.
-  bumps?: { id: string; name: string; price: number; pitch: string; image?: string }[];
+  bumps?: { id: string; name: string; price: number; pitch: string; image?: string; headline?: string; body?: string[] }[];
 };
 
 type Patch = (props: Record<string, unknown>) => void;
@@ -1070,6 +1070,7 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       abCookie={AB.cookie}
       deferStripe
       secureRow={false}
+      light
     />
   );
 }

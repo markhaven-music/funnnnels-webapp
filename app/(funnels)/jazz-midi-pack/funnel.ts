@@ -205,3 +205,31 @@ export function unlocked(items: readonly string[]): string[] {
     : [];
   return [...new Set([...items, ...bonuses])];
 }
+
+// The words of the order page's tick-box offers, by bump id (11-06: "le copy
+// degli order bump falle meglio, le hai già in altri order bumps"): the Drum
+// Kit order page's add-on copy (../midi-drum-kit/copy/en.ts) at this page's
+// price. `{c}` is the currency sign, `**…**` bold. A bump without an entry
+// shows "YES! Add the <name>!" and its `pitch`.
+export const bumpCopy: Record<string, { headline: string; body: string[] }> = {
+  "top-hits": {
+    headline: "YES! Add the TOP HITS MIDI Bundle!",
+    body: [
+      "1000 chord progressions from the biggest hits (Drake, Kendrick Lamar, Travis Scott, Lil Baby, The Weeknd and more) as **drag-and-drop MIDI files**. Put one under your drums and your beat has a hit's harmony. Add it now for just {c}27.",
+      "Once you complete your order this box is gone: tick it now and the bundle lands in the same download.",
+    ],
+  },
+  "drum-kit": {
+    headline: "YES! Add the MIDI Drum Kit Bundle!",
+    body: [
+      "1050 MIDI drum patterns modeled after Billboard producers: **complete beats, patterns and fragments**. Drag them under your jazz chords and the beat is done. Add it now for just {c}27.",
+    ],
+  },
+  hustle: {
+    headline: "YES! I Also Want 31 Musical MIDI Packs!",
+    body: [
+      "The 'HUSTLE' Bundle includes **31 Professional MIDI Packs** with Musical Ideas, Chord Progressions and Melodies. Jazz, Trap, Hiphop, Lofi, Pop and more. Each MIDI Pack is {c}29 (total {c}899) but you can get them all right now for just {c}27!!",
+      "Limited to the first 150 orders.",
+    ],
+  },
+};

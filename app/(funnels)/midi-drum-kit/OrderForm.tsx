@@ -23,8 +23,8 @@ import type { OrderOffer } from "./offer";
 // step, in the page's language (words in ./copy, `form`):
 //   1 · Your Info → first, last, email (saved as a lead), "GO TO STEP 2"
 //   2 · Payment   → product card ($297 crossed out, $27 in green), Card | Paypal,
-//                   three tick-box offers on one line each ("Details" opens
-//                   the rest), Summary, "GET THE PACK!", and a "Pay $27" bar
+//                   three tick-box offers (on a phone one line each: tick,
+//                   name, price; a computer shows the whole offer), Summary, "GET THE PACK!", and a "Pay $27" bar
 //                   at the bottom of the screen while that button is off it
 // Both buttons look like the sales page's ("stesso stile della pagina dalla
 // quale proviene"): ./order.module.css .cta, in the visitor's test colour.
@@ -510,7 +510,7 @@ function PayBody({
   );
 }
 
-// An add-on: tick, name and price on one line; picture and text behind "Details".
+// An add-on: tick, name and price on one line; on a computer also its picture and text (no "Details" on phones since 11-06).
 function ShortBump({
   b,
   on,
@@ -551,7 +551,7 @@ function ShortBump({
           />
         </svg>
       </button>
-      {/* Always there on a computer; on a phone only once "Details" is pressed (./order.module.css). */}
+      {/* On a computer only; phones show the one line (./order.module.css). */}
       {(
         <div className={`${d.bumpDetails} ${open ? d.bumpOpen : ""}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
