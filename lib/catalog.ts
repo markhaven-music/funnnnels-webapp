@@ -290,7 +290,9 @@ export async function addItem(funnel: string, product: string, role: "bump" | "u
     if (ONE_ADD_ON.has(funnel) && rows.some((r) => r.role === "bump")) return `${code.name}'s checkout shows one add-on: remove the one it has first.`;
     // A key the code already uses for another file would hand out that file.
     const taken = code.files[product] && ZIP_PRODUCT[zipOf(code.files[product])] !== product;
-    if (!KEY.test(key) || key.length > 24 || taken || rows.some((r) => r.key === key)) return "This product's URL can't be an add-on id here (24 characters at most).";
+    // The same key as an upsell is fine (and wanted: an add-on "top-hits" makes the
+    // TOP HITS upsell page skip itself, OrderForm.tsx fv_owned); only two add-ons can't share one.
+    if (!KEY.test(key) || key.length > 24 || taken || rows.some((r) => r.key === key && r.role === "bump")) return "This product's URL can't be an add-on id here (24 characters at most).";
   }
   const position = Math.max(-1, ...rows.filter((r) => r.role === role).map((r) => r.position)) + 1;
   const { error } = await db.from("funnel_items").insert({
