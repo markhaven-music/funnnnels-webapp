@@ -41,7 +41,8 @@
   }
 }
 
-/* ── guarantee and secure payments: badges stack big above the text on phones ── */
+/* ── guarantee and secure payments: on phones the badge sits small above its text
+   (it was stretched to the screen's width, from a 172px file: "immagini enormi", 11-06) ── */
 .g h3 {
   font-size: 30px;
   line-height: 1.2;
@@ -53,12 +54,11 @@
 @media (max-width: 769px) {
   .g {
     flex-direction: column;
-    gap: 22px;
+    gap: 14px;
   }
   .g img {
-    width: 100%;
-    max-width: 374px;
-    height: auto;
+    width: 96px;
+    height: 96px;
   }
   .g h3 {
     line-height: 1.4;
@@ -214,7 +214,7 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-/* ── step-2 test B (./payTest.ts) ──
+/* ── step 2 (11-06; tried as an A/B test for an hour, then for everyone) ──
    Each add-on in its yellow box on one line (tick, name, price), the picture
    and text behind "Details"; a pay bar fixed at the bottom of the screen
    while the real pay button is off screen; no "reserved for" timer on step 2. */
@@ -274,6 +274,50 @@
   letter-spacing: 0.5px;
   pointer-events: auto;
 }
-:global(html[data-ab-pay="b"][data-order-step="2"]) .timer {
+:global(html[data-order-step="2"]) .timer {
   display: none;
+}
+
+/* ── who's behind it: the logo, a heading and a few lines, centred on black ── */
+.about {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 36px 20px 8px;
+  text-align: center;
+  color: #fdfdfd;
+}
+.about img {
+  display: block;
+  width: 150px;
+  height: auto;
+  margin: 0 auto 18px;
+}
+.about h3 {
+  margin: 0 0 10px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.about p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(253, 253, 253, 0.82);
+}
+/* Room under the footer for the fixed "reserved for" box / pay bar, so they never cover its links. */
+.footer {
+  padding-bottom: 110px;
+}
+
+/* The product card's price: the one it's down from crossed out, today's in green. */
+.was {
+  margin-right: 8px;
+  color: #8a8f98;
+  font-weight: 500;
+  text-decoration-thickness: 2px;
+  text-decoration-color: #dc2626;
+}
+.now {
+  color: #16a34a;
+  font-weight: 800;
 }

@@ -7,8 +7,10 @@
 export const funnel = {
   slug: "midi-drum-kit",
   product: "MIDI Drum Kit",
-  // The line on the order form's product card (as on ClickFunnels).
-  orderName: "MIDI Drum Kit (27)",
+  // The line on the order form's product card, as on the box (was ClickFunnels'
+  // "MIDI Drum Kit (27)" until 11-06), and the price it's shown crossed out from.
+  orderName: "MIDI Drum Kit Bundle",
+  wasPrice: 297,
   brand: "GRIND STUDIO",
   // Same accounts as the other Grind Studio funnels.
   tracking: {

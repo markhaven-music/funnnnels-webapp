@@ -55,6 +55,11 @@ export const en = {
     secureTitle: "Secure Payments",
     secureText:
       "Payments are processed through all major credit cards and PayPal with full 256-bit SSL encryption. No payment details are ever stored.",
+    // Under the guarantees (11-06, "una piccola sezione chi siamo che aumenta fiducia"). Only facts:
+    // in the game for years (the user), 4 years on the patterns and 2,847 producers (the original page).
+    aboutTitle: "Who's Behind GRIND STUDIO",
+    aboutText:
+      "We're beatmakers, and we've been in this game for years, making beats and building tools for producers like you. It took us 4 years to pull these patterns out of the records that move people, and 2,847 producers use them today. Got a question? Write to support@thegrind.studio: one of us reads and answers every email.",
     timer: { title: "YOUR COPY IS RESERVED FOR:", min: "min", sec: "sec", ms: "ms", label: "Your copy is reserved" },
   },
 
@@ -87,9 +92,9 @@ export const en = {
     pay: "GET THE PACK!",
     // Under it, as on ClickFunnels' order page.
     paySub: "Get Instant Access",
-    // Step-2 test B (../payTest.ts): the bar fixed at the bottom of the screen, {price} = the total.
+    // Step 2: the bar fixed at the bottom of the screen while the button is off screen, {price} = the total.
     payBar: "Pay {price}",
-    // Test B: each add-on on one line, the rest behind this link.
+    // Step 2: each add-on on one line, the rest behind this link.
     bumpMore: "Details",
     bumpLess: "Hide",
     processing: "Processing…",

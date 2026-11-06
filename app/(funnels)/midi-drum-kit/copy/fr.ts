@@ -58,6 +58,9 @@ export const fr: Copy = {
     secureTitle: "Paiements sécurisés",
     secureText:
       "Les paiements passent par toutes les grandes cartes bancaires et PayPal, avec un chiffrement SSL 256 bits. Aucune donnée de paiement n'est conservée.",
+    aboutTitle: "Qui est derrière GRIND STUDIO",
+    aboutText:
+      "On est des beatmakers, et on est dans le game depuis des années, à faire des beats et à créer des outils pour des producteurs comme toi. Il nous a fallu 4 ans pour extraire ces patterns des morceaux qui font bouger les gens, et 2 847 producteurs les utilisent aujourd'hui. Une question ? Écris à support@thegrind.studio : l'un de nous lit chaque e-mail et y répond.",
     timer: { title: "TON EXEMPLAIRE EST RÉSERVÉ PENDANT :", min: "min", sec: "sec", ms: "ms", label: "Ton exemplaire est réservé" },
   },
 

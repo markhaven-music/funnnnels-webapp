@@ -12,8 +12,7 @@ import { copyWith } from "../../../copy";
 import { pageEdits } from "@/lib/pageTexts";
 import { copyEdits } from "../../../texts";
 import { funnel } from "../../../funnel";
-import { AB_SCRIPT } from "../../../abtest";
-import { PAY, PAY_SCRIPT } from "../../../payTest";
+import { AB, AB_SCRIPT } from "../../../abtest";
 import { Beacon } from "../../../../Beacon";
 import { isLang, LANGS } from "../../../i18n";
 import { orderOffer } from "../../../offer";
@@ -60,10 +59,8 @@ export default async function OrderPage({ params }: { params: Params }) {
     <main className={`${s.page} ${fontVars} ${poppins.variable}`} lang={lang}>
       {/* The button-colour test: before the buttons paint (see ../../../abtest.ts). */}
       <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
-      {/* The step-2 test (../../../payTest.ts): its letter is what the visit counts under. */}
-      <script dangerouslySetInnerHTML={{ __html: PAY_SCRIPT }} />
       <Tracking value={offer.price} currency={currency} event={null} />
-      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={PAY.cookie} />
+      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={AB.cookie} />
       <div className={s.redbar}>
         <Rich text={t.orderTopbar} currency={currency} />
       </div>
@@ -157,7 +154,15 @@ export default async function OrderPage({ params }: { params: Params }) {
         </div>
       </section>
 
-      <footer className={s.footer}>
+      {/* Who's behind it (11-06): people, not a faceless store. */}
+      <section className={d.about}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`${IMG}/logo.webp`} alt="GRIND STUDIO" width={900} height={103} loading="lazy" decoding="async" />
+        <h3>{t.order.aboutTitle}</h3>
+        <p>{t.order.aboutText}</p>
+      </section>
+
+      <footer className={`${s.footer} ${d.footer}`}>
         © 2026 {funnel.brand} - <a href={funnel.legal.terms}>{t.footer.terms}</a> - <a href={funnel.legal.privacy}>{t.footer.privacy}</a> -{" "}
         <a href={funnel.legal.refund}>{t.footer.refund}</a> - <b>{t.footer.contact}</b> <a href={`mailto:${funnel.support}`}>{funnel.support}</a>
       </footer>
