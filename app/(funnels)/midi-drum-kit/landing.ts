@@ -30,11 +30,16 @@ const STRINGS: Record<Lang, Record<string, string>> = { en, fr, es, de, it };
 // language's). The editor's layout keys pictures by the src the page shows,
 // so a layout copied to another language maps them through this
 // (app/api/funnels/[id]/layout).
+// The guarantee seal says "quality guarantee" in each language (tools/quality_badges.js;
+// ClickFunnels' badge-dont-overthink said "100% money back", 11-06). The value
+// stacks' "-w" files have a pure white background, as the card around them
+// (tools/value_stack_white.js).
 export const LANG_IMAGES: Partial<Record<Lang, Record<string, string>>> = {
-  fr: { "value-stack": "value-stack-fr" },
-  es: { "value-stack": "value-stack-es" },
-  de: { "value-stack": "value-stack-de" },
-  it: { "value-stack": "value-stack-it" },
+  en: { "value-stack": "value-stack-w", "badge-dont-overthink": "badge-quality" },
+  fr: { "value-stack": "value-stack-fr-w", "badge-dont-overthink": "badge-quality-fr" },
+  es: { "value-stack": "value-stack-es-w", "badge-dont-overthink": "badge-quality-es" },
+  de: { "value-stack": "value-stack-de-w", "badge-dont-overthink": "badge-quality-de" },
+  it: { "value-stack": "value-stack-it-w", "badge-dont-overthink": "badge-quality-it" },
 };
 
 // The hero video (Wistia) per language: English is ClickFunnels' (funnel.wistiaId);
