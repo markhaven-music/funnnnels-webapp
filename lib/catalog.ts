@@ -169,6 +169,7 @@ export type ProductUse = {
   price: Money | null; // null: free with something else
   sold: number | null; // paid orders it was in; null when free
   with?: string;
+  place?: { at: number; of: number }; // an add-on's place among its funnel's tick-boxes (1-based)
 };
 
 export const ROLE_NAME: Record<ItemRole, UseRole> = { main: "Main", bump: "Add-on", upsell: "Upsell" };
@@ -194,7 +195,9 @@ export async function productUses(shop: { slug: string; status: string; price: M
   const push = (slug: string, u: ProductUse) => (uses[slug] ??= []).push(u);
   const order: ItemRole[] = ["main", "bump", "upsell"];
   for (const it of [...items].sort((a, b) => order.indexOf(a.role) - order.indexOf(b.role))) {
+    const siblings = items.filter((x) => x.funnel === it.funnel && x.role === it.role).sort((a, b) => a.position - b.position);
     push(it.product, {
+      place: it.role === "bump" ? { at: siblings.indexOf(it) + 1, of: siblings.length } : undefined,
       funnel: it.funnel,
       funnelName: names[it.funnel] ?? it.funnel,
       role: ROLE_NAME[it.role],
@@ -305,6 +308,27 @@ export async function addItem(funnel: string, product: string, role: "bump" | "u
 }
 
 /** An add-on or upsell out of a funnel (its past orders keep their downloads). The main product stays. */
+/** An add-on (or upsell) one place earlier (-1) or later (+1) at its funnel's checkout. */
+export async function moveItem(funnel: string, role: ItemRole, key: string, move: -1 | 1): Promise<string | null> {
+  if (role === "main") return "The main product has no place to move.";
+  const db = supabase();
+  const { data, error } = await db.from("funnel_items").select("key, position").eq("funnel", funnel).eq("role", role).order("position");
+  if (error) throw error;
+  const rows = (data ?? []) as { key: string; position: number }[];
+  const at = rows.findIndex((r) => r.key === key);
+  if (at < 0) return "Not found.";
+  const to = at + move;
+  if (to < 0 || to >= rows.length) return null;
+  [rows[at], rows[to]] = [rows[to], rows[at]];
+  // Positions renumbered 0, 1, 2… in the new order.
+  for (const [i, r] of rows.entries()) {
+    if (r.position === i) continue;
+    const { error: e } = await db.from("funnel_items").update({ position: i, updated_at: new Date().toISOString() }).eq("funnel", funnel).eq("role", role).eq("key", r.key);
+    if (e) throw e;
+  }
+  return null;
+}
+
 export async function removeItem(funnel: string, role: ItemRole, key: string): Promise<string | null> {
   if (role === "main") return "A funnel's main product stays: rename it or change its price instead.";
   const { data, error } = await supabase().from("funnel_items").delete().eq("funnel", funnel).eq("role", role).eq("key", key).select("key");

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addItem, removeItem, updateItem, type ItemRole } from "@/lib/catalog";
+import { addItem, moveItem, removeItem, updateItem, type ItemRole } from "@/lib/catalog";
 import { revalidateSalesPages } from "@/lib/pages";
 
 export const runtime = "nodejs";
@@ -7,6 +7,7 @@ export const runtime = "nodejs";
 // Dashboard → Products: what each funnel sells (funnel_items, lib/catalog.ts).
 //   POST   { funnel, product, role: "bump" | "upsell", price }  a product into a funnel
 //   PATCH  { funnel, role, key, name, price }                   its name and price there
+//   PUT    { funnel, role, key, move: -1 | 1 }                  an add-on one place up or down
 //   DELETE { funnel, role, key }                                an add-on or upsell out
 // Each saves straight to the live checkout and refreshes the funnel's pages.
 // Behind ADMIN_PASSWORD (proxy.ts).
@@ -41,6 +42,12 @@ export async function PATCH(req: Request) {
   const body = await req.json().catch(() => ({}));
   if (!ROLES.includes(body.role)) return NextResponse.json({ error: "Unknown role." }, { status: 400 });
   return run(body, (funnel) => updateItem(funnel, body.role, String(body.key ?? ""), String(body.name ?? ""), price(body.price)));
+}
+
+export async function PUT(req: Request) {
+  const body = await req.json().catch(() => ({}));
+  if (!ROLES.includes(body.role) || (body.move !== -1 && body.move !== 1)) return NextResponse.json({ error: "Bad move." }, { status: 400 });
+  return run(body, (funnel) => moveItem(funnel, body.role, String(body.key ?? ""), body.move));
 }
 
 export async function DELETE(req: Request) {

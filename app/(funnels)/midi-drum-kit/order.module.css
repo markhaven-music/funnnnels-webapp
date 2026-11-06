@@ -262,6 +262,11 @@
   height: auto;
 }
 .payBar {
+  transform: translateY(110%);
+  opacity: 0;
+  transition:
+    transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.2s ease;
   position: fixed;
   left: 0;
   right: 0;
@@ -336,4 +341,14 @@
 .now {
   color: #16a34a;
   font-weight: 800;
+}
+/* The bar sliding in from the bottom when the form's own button leaves the screen (and back down). */
+.payBarOn {
+  transform: none;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .payBar {
+    transition: opacity 0.15s ease;
+  }
 }

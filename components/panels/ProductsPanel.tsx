@@ -425,12 +425,12 @@ function PricedUse({ u, onSaved }: { u: ProductUse; onSaved: () => void }) {
   const role = API_ROLE[u.role as keyof typeof API_ROLE];
   const changed = f.name !== u.soldAs || f.price?.eur !== u.price?.eur || f.price?.usd !== u.price?.usd;
 
-  async function act(method: "PATCH" | "DELETE") {
+  async function act(method: "PATCH" | "DELETE" | "PUT", move?: -1 | 1) {
     setBusy(true);
     setMsg(null);
     try {
-      await send("/api/products/items", method, { funnel: u.funnel, role, key: u.key, name: f.name, price: f.price });
-      setMsg({ ok: true, text: method === "DELETE" ? "Taken out of the funnel." : "Saved: the checkout charges it now." });
+      await send("/api/products/items", method, { funnel: u.funnel, role, key: u.key, name: f.name, price: f.price, move });
+      setMsg({ ok: true, text: method === "DELETE" ? "Taken out of the funnel." : method === "PUT" ? "Moved: the order form shows the new order." : "Saved: the checkout charges it now." });
       onSaved();
     } catch (err) {
       setMsg({ ok: false, text: (err as Error).message });
@@ -443,7 +443,7 @@ function PricedUse({ u, onSaved }: { u: ProductUse; onSaved: () => void }) {
     <div className={c.useEdit}>
       <div className={c.useHead}>
         <span>
-          <b>{u.funnelName}</b> <span className={c.dim}>· {u.role}</span>
+          <b>{u.funnelName}</b> <span className={c.dim}>· {u.role}{u.place ? ` ${u.place.at} of ${u.place.of}` : ""}</span>
         </span>
         <span className={c.mono}>{u.sold ?? 0} sold</span>
       </div>
@@ -458,6 +458,16 @@ function PricedUse({ u, onSaved }: { u: ProductUse; onSaved: () => void }) {
         <button type="button" className="btn primary" disabled={busy || !changed} onClick={() => act("PATCH")}>
           Save
         </button>
+        {u.place && u.place.of > 1 && (
+          <>
+            <button type="button" className="btn ghost" disabled={busy || u.place.at === 1} onClick={() => act("PUT", -1)} title="Show it one place higher on the order form">
+              ↑ Up
+            </button>
+            <button type="button" className="btn ghost" disabled={busy || u.place.at === u.place.of} onClick={() => act("PUT", 1)} title="Show it one place lower on the order form">
+              ↓ Down
+            </button>
+          </>
+        )}
         {u.role !== "Main" && (
           <button type="button" className={`btn ghost ${c.danger}`} disabled={busy} onClick={() => act("DELETE")}>
             Take out of {u.funnelName}

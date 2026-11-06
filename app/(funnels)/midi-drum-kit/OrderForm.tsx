@@ -467,8 +467,9 @@ function PayBody({
         </p>
       )}
       <p className={s.respect}>{t.respect}</p>
-      {!payInView && (
-        <div className={d.payBar}>
+      {/* Always there, slid out of sight while the real button is on screen (./order.module.css .payBarOn). */}
+      {(
+        <div className={`${d.payBar} ${payInView ? "" : d.payBarOn}`} aria-hidden={payInView} inert={payInView}>
           <button
             type="button"
             className={`${d.cta} ${d.ctaPay} ${d.payBarBtn}`}
