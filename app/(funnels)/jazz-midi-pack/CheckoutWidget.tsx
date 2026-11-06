@@ -161,7 +161,8 @@ export function CheckoutWidget(props: Props) {
             filled in: its card fields are then already loaded when it opens,
             instead of loading for 2-3 s ("xkè ci mette così tanto a caricare", 11-06). */}
         {(step === 2 || stripePromise) && (
-          <div hidden={step !== 2} className={s.step2}>
+          // Off screen, not display:none: Stripe only lays its fields out once they have a size.
+          <div className={`${s.step2} ${step !== 2 ? s.step2Away : ""}`} aria-hidden={step !== 2} inert={step !== 2}>
             <button type="button" className={s.back} onClick={() => setStep(1)}>
               ← Go back
             </button>

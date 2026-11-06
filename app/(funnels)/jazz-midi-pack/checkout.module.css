@@ -88,6 +88,7 @@
 }
 
 .body {
+  position: relative;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -100,8 +101,13 @@
   flex-direction: column;
   gap: 16px;
 }
-.step2[hidden] {
-  display: none;
+/* During step 1: laid out at its real width, out of sight. */
+.step2Away {
+  position: absolute;
+  top: 0;
+  left: -10000px;
+  width: calc(100% - 40px);
+  visibility: hidden;
 }
 
 /* ─── step 1 ────────────────────────────── */
