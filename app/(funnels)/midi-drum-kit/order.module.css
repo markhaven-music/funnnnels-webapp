@@ -220,6 +220,7 @@
    while the real pay button is off screen; no "reserved for" timer on step 2. */
 .bumpShort {
   display: block;
+  cursor: pointer;
   padding: 8px 10px 6px;
 }
 .bumpRow {
@@ -358,5 +359,18 @@
 @media (prefers-reduced-motion: reduce) {
   .payBar {
     transition: opacity 0.15s ease;
+  }
+}
+
+/* Phones: the checkout a little wider (11-06, "checkout widget un po' più largo su mobile"):
+   less page margin around it, less padding inside it. */
+@media (max-width: 769px) {
+  .cols {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .body {
+    padding-left: 12px;
+    padding-right: 12px;
   }
 }

@@ -54,7 +54,7 @@ export const en = {
       "Every pattern in this kit is tested before release. If anything's wrong with your files, email support@thegrind.studio within 14 days and we'll make it right — a fresh download, a replacement, or a refund if we can't fix it.",
     secureTitle: "Secure Payments",
     secureText:
-      "Payments are processed through all major credit cards and PayPal with full 256-bit SSL encryption. No payment details are ever stored.",
+      "Your payment is processed by Stripe, the payment platform trusted by millions of businesses including Amazon, Google and Shopify, or by PayPal. Your card details go straight to Stripe over 256-bit SSL encryption and never touch our servers.",
     // Under the guarantees (11-06, "una piccola sezione chi siamo che aumenta fiducia"). Only facts:
     // in the game for years (the user), 4 years on the patterns and 2,847 producers (the original page).
     aboutTitle: "Who's Behind GRIND STUDIO",
@@ -119,7 +119,8 @@ export const en = {
       "top-hits": {
         headline: "YES! Add the TOP HITS MIDI Bundle!",
         body: [
-          "1000 chord progressions from the biggest hits (The Weeknd, Dua Lipa, Coldplay, Bad Bunny and more) as **drag-and-drop MIDI files**. Put one under your drums and your beat has a hit's harmony. Add it now for just {c}97.",
+          "1000 chord progressions from the biggest hits (Drake, Kendrick Lamar, Travis Scott, Lil Baby, The Weeknd and more) as **drag-and-drop MIDI files**. Put one under your drums and your beat has a hit's harmony. Add it now for just {c}97.",
+          "Once you complete your order this box is gone: tick it now and the bundle lands in the same download.",
         ],
       },
       chords: {

@@ -102,6 +102,15 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
     <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
       {step === 1 ? (
         <>
+          {/* While step 1 is filled in, Stripe's card fields load out of sight, so on
+              step 2 they show at once ("ci mettono un po' a caricare"). */}
+          {stripePromise && (
+            <div aria-hidden style={{ position: "absolute", left: -10000, top: 0, width: 340, height: 0, overflow: "hidden" }}>
+              <Elements stripe={stripePromise} options={cardElements(INTER, lang, { total, currency })}>
+                <CardFields look={INTER} />
+              </Elements>
+            </div>
+          )}
           <ol className={s.steps}>
             <li className={s.stepOn}>
               <span className={s.stepNum}>1</span>
@@ -133,7 +142,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
           />
         </>
       ) : (
-        <div className={s.body}>
+        <div className={`${s.body} ${d.body}`}>
           <button type="button" className={s.back} onClick={() => setStep(1)}>
             <svg viewBox="0 0 448 512" width="14" height="14" aria-hidden>
               <path
@@ -212,7 +221,7 @@ function InfoStep({ t, lang, info, onDone }: { t: Copy["form"]; lang: Lang; info
     onDone(data);
   }
   return (
-    <form onSubmit={submit} className={s.body}>
+    <form onSubmit={submit} className={`${s.body} ${d.body}`}>
       <div className={s.fields}>
         <input name="firstName" placeholder={t.firstName} autoComplete="given-name" defaultValue={info.firstName} required className={s.input} />
         <input name="lastName" placeholder={t.lastName} autoComplete="family-name" defaultValue={info.lastName} className={s.input} />
@@ -519,7 +528,14 @@ function ShortBump({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className={`${s.bump} ${d.bumpShort}`}>
+    // The whole box ticks it, as the ClickFunnels box did; "Details" and the tick's own row don't toggle twice.
+    <div
+      className={`${s.bump} ${d.bumpShort}`}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("button, label, a")) return;
+        toggle(b.id, !on);
+      }}
+    >
       <label className={`${s.bumpHead} ${d.bumpRow}`}>
         {!on && <BumpArrow />}
         <input type="checkbox" checked={on} onChange={(e) => toggle(b.id, e.target.checked)} className={s.bumpCheck} />

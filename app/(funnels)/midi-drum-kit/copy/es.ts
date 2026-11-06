@@ -57,7 +57,7 @@ export const es: Copy = {
       "Cada patrón de este kit se prueba antes de salir. Si algo falla con tus archivos, escribe a support@thegrind.studio dentro de los 14 días y lo solucionamos: una nueva descarga, un reemplazo o un reembolso si no conseguimos arreglarlo.",
     secureTitle: "Pagos seguros",
     secureText:
-      "Los pagos se procesan con todas las tarjetas principales y PayPal, con cifrado SSL de 256 bits. No guardamos ningún dato de pago.",
+      "Tu pago lo procesa Stripe, la plataforma de pagos en la que confían millones de empresas, entre ellas Amazon, Google y Shopify, o PayPal. Los datos de tu tarjeta van directamente a Stripe con cifrado SSL de 256 bits y nunca pasan por nuestros servidores.",
     aboutTitle: "Quién está detrás de GRIND STUDIO",
     aboutText:
       "Somos beatmakers y llevamos años en esto, haciendo beats y creando herramientas para productores como tú. Nos tomó 4 años sacar estos patrones de los temas que mueven a la gente, y hoy 2.847 productores los usan. ¿Tienes una pregunta? Escribe a support@thegrind.studio: uno de nosotros lee y responde cada email.",
@@ -114,7 +114,8 @@ export const es: Copy = {
       "top-hits": {
         headline: "¡SÍ! ¡Añade el TOP HITS MIDI Bundle!",
         body: [
-          "1000 progresiones de acordes de los mayores hits (The Weeknd, Dua Lipa, Coldplay, Bad Bunny y más) en **archivos MIDI drag-and-drop**. Pon una debajo de tus drums y tu beat tiene la armonía de un hit. Añádelo ahora por solo 97 {c}.",
+          "1000 progresiones de acordes de los mayores hits (Drake, Kendrick Lamar, Travis Scott, Lil Baby, The Weeknd y más) en **archivos MIDI drag-and-drop**. Pon una debajo de tus drums y tu beat tiene la armonía de un hit. Añádelo ahora por solo 97 {c}.",
+          "Cuando completes tu pedido, esta casilla desaparece: márcala ahora y el bundle llega en la misma descarga.",
         ],
       },
       chords: {

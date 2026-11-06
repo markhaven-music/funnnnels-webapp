@@ -57,7 +57,7 @@ export const fr: Copy = {
       "Chaque pattern de ce kit est testé avant sa sortie. Si quelque chose ne va pas avec tes fichiers, écris à support@thegrind.studio dans les 14 jours et on règle ça : un nouveau téléchargement, un remplacement, ou un remboursement si on n'arrive pas à corriger le problème.",
     secureTitle: "Paiements sécurisés",
     secureText:
-      "Les paiements passent par toutes les grandes cartes bancaires et PayPal, avec un chiffrement SSL 256 bits. Aucune donnée de paiement n'est conservée.",
+      "Ton paiement est traité par Stripe, la plateforme de paiement utilisée par des millions d'entreprises, dont Amazon, Google et Shopify, ou par PayPal. Les données de ta carte vont directement à Stripe avec un chiffrement SSL 256 bits et ne passent jamais par nos serveurs.",
     aboutTitle: "Qui est derrière GRIND STUDIO",
     aboutText:
       "On est des beatmakers, et on est dans le game depuis des années, à faire des beats et à créer des outils pour des producteurs comme toi. Il nous a fallu 4 ans pour extraire ces patterns des morceaux qui font bouger les gens, et 2 847 producteurs les utilisent aujourd'hui. Une question ? Écris à support@thegrind.studio : l'un de nous lit chaque e-mail et y répond.",
@@ -114,7 +114,8 @@ export const fr: Copy = {
       "top-hits": {
         headline: "OUI ! Ajoute le TOP HITS MIDI Bundle !",
         body: [
-          "1000 progressions d'accords des plus grands hits (The Weeknd, Dua Lipa, Coldplay, Bad Bunny et d'autres) en **fichiers MIDI glisser-déposer**. Mets-en une sous tes drums et ton beat a l'harmonie d'un hit. Ajoute-le maintenant pour seulement 97 {c}.",
+          "1000 progressions d'accords des plus grands hits (Drake, Kendrick Lamar, Travis Scott, Lil Baby, The Weeknd et d'autres) en **fichiers MIDI glisser-déposer**. Mets-en une sous tes drums et ton beat a l'harmonie d'un hit. Ajoute-le maintenant pour seulement 97 {c}.",
+          "Une fois ta commande validée, cette case disparaît : coche-la maintenant et le bundle arrive dans le même téléchargement.",
         ],
       },
       chords: {

@@ -50,13 +50,15 @@ export const cardElements = (look: CardLook, locale: StripeElementLocale | undef
     labels: "floating",
     variables: {
       fontFamily: look.font,
-      fontSizeBase: "16px",
+      // 15px text and 2px spacing: with more, Stripe stacks expiry and CVC on rows
+      // of their own below ~360px wide (tried on a layout lab page, 11-06).
+      fontSizeBase: "15px",
       colorText: look.color,
       colorTextPlaceholder: look.placeholder,
       colorPrimary: look.focus,
       colorDanger: "#dc2626",
       borderRadius: "5px",
-      spacingUnit: "3px",
+      spacingUnit: "2px",
     },
     rules: {
       ".Input": { border: "2px solid #dbdcdd", boxShadow: "none" },

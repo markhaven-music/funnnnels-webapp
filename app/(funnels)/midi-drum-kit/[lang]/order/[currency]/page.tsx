@@ -79,7 +79,7 @@ export default async function OrderPage({ params }: { params: Params }) {
         {t.order.secure}
       </div>
 
-      <div className={s.cols}>
+      <div className={`${s.cols} ${d.cols}`}>
         <section className={s.summaryCol}>
           <h2 className={s.colTitle}>{t.order.summaryTitle}</h2>
           {/* eslint-disable-next-line @next/next/no-img-element */}
