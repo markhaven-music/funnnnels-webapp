@@ -88,27 +88,10 @@
 }
 
 .body {
-  position: relative;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-/* Step 2's own column: built hidden during step 1 (CheckoutWidget.tsx). */
-.step2 {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-/* During step 1: laid out at its real width, out of sight. */
-.step2Away {
-  position: absolute;
-  top: 0;
-  left: -10000px;
-  width: calc(100% - 40px);
-  /* No visibility:hidden: Stripe then waits to draw its fields. Out of sight
-     anyway, and inert (CheckoutWidget.tsx). */
 }
 
 /* ─── step 1 ────────────────────────────── */
