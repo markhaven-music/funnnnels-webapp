@@ -24,7 +24,7 @@ export const LEGAL_PAGES: LegalPage[] = [
   {
     slug: "terms-and-conditions",
     title: "Terms & Conditions",
-    updated: "January 9, 2026",
+    updated: "November 6, 2026",
     blocks: [
       {
         h: "1. BUSINESS INFORMATION",
@@ -48,7 +48,9 @@ export const LEGAL_PAGES: LegalPage[] = [
         h: "4. REFUND POLICY",
       },
       {
-        p: "We offer a 14-Day Money-Back Satisfaction Guarantee. If you feel a product is not the right fit for your music production, you may request a refund by emailing support@thegrind.studio within 14 days of your purchase date. To prevent fraud and system abuse, we strictly enforce a lifetime limit of one refund per customer.",
+        // 2026-11-06: was a "Money-Back Satisfaction Guarantee" (refund if not the right
+        // fit), against the Refund Policy and every product page ("Yes, align it").
+        p: "We offer a 14-Day Quality Guarantee. If your files are defective, not as described, or you are unable to download your purchase, email support@thegrind.studio within 14 days of your purchase date: we will first repair or replace the files, and if we are unable to resolve the issue, we will issue a full refund. Duplicate purchases are also refunded. The full terms are in our Refund Policy. To prevent fraud and system abuse, we strictly enforce a lifetime limit of one refund per customer.",
       },
       {
         h: "5. CHARGEBACKS AND DISPUTES",
