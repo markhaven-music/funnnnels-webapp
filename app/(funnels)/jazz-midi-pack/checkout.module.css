@@ -107,7 +107,8 @@
   top: 0;
   left: -10000px;
   width: calc(100% - 40px);
-  visibility: hidden;
+  /* No visibility:hidden: Stripe then waits to draw its fields. Out of sight
+     anyway, and inert (CheckoutWidget.tsx). */
 }
 
 /* ─── step 1 ────────────────────────────── */
