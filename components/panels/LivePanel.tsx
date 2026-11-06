@@ -536,12 +536,21 @@ function EventRow({ e, fresh }: { e: LiveEvent; fresh: boolean }) {
     case "checkout":
       text = (
         <>
-          <b>{e.who}</b> started checkout
+          {e.country && <span className={s.flag}>{flag(e.country)}</span>}
+          <b>{e.who}</b>
+          {e.country && <span className={s.muted}> from {place(e.city, e.country)}</span>} started checkout
           <span className={s.muted}>
             {" "}
             · {e.funnelName}
             {lang}
+            {e.device && ` · ${e.device}`}
           </span>
+          {e.source && (
+            <span className={s.src} title={e.campaign || undefined}>
+              {e.source}
+              {e.campaign && ` · ${e.campaign}`}
+            </span>
+          )}
         </>
       );
       break;

@@ -111,6 +111,7 @@ export function deviceOf(ua: string): "mobile" | "tablet" | "desktop" {
 const ACTIVE_MS = 50_000;
 const RECENT_MS = 30 * 60_000;
 const STREAM_MS = 24 * 3600_000;
+const MATCH_MS = 2 * 60_000; // a checkout start and its step-2 ping, at most this far apart
 const STREAM_MAX = 80;
 
 export type LiveVisitor = {
@@ -140,7 +141,7 @@ export type LiveVisitor = {
 type Base = { id: string; at: string; funnel: string; funnelName: string; lang: string };
 export type LiveEvent =
   | (Base & { kind: "view"; visitor: string; page: string; path: string; url: string; country: string; city: string; source: string; campaign: string })
-  | (Base & { kind: "checkout"; who: string })
+  | (Base & { kind: "checkout"; who: string; country: string; city: string; device: string; source: string; campaign: string })
   | (Base & { kind: "order" | "upsell"; who: string; amount: number; currency: string; country: string; offer: string })
   | (Base & { kind: "click"; who: string; url: string });
 
@@ -208,7 +209,7 @@ export async function getLive(day: string | null): Promise<Live> {
   type OrderRow = { id: string; funnel: string; name: string | null; email: string | null; country: string | null; amount_cents: number; currency: string; offer: string | null; parent: string | null; lang: string | null; status: string; created_at: string };
   type ClickRow = { id: number; email: string; url: string; created_at: string };
 
-  const [visitorRows, viewRows, checkoutRows, orderRows, clickRows, first, rate] = await Promise.all([
+  const [visitorRows, viewRows, checkoutRows, orderRows, clickRows, first, rate, stepRows] = await Promise.all([
     soft<VisitorRow>("visitors", db.from("live_visitors").select("*").gte("last_seen", iso(now - RECENT_MS)).order("last_seen", { ascending: false }).limit(500)),
     // The checkout's step 1 comes from checkout_starts instead, with the name.
     soft<ViewRow>("page views", db.from("live_events").select("*").gte("at", iso(now - STREAM_MS)).neq("page", "checkout").order("at", { ascending: false }).limit(STREAM_MAX)),
@@ -217,7 +218,35 @@ export async function getLive(day: string | null): Promise<Live> {
     soft<ClickRow>("email clicks", db.from("email_clicks").select("id, email, url, created_at").gte("created_at", iso(now - STREAM_MS)).order("created_at", { ascending: false }).limit(STREAM_MAX)),
     soft<{ at: string }>("first view", db.from("live_events").select("at").order("at", { ascending: true }).limit(1)),
     usdToEur(),
+    // Step 2 opening (the page's "checkout" ping): it carries the visit, so a
+    // checkout start gets its place and source from it.
+    soft<ViewRow>("checkout steps", db.from("live_events").select("*").eq("page", "checkout").gte("at", iso(now - STREAM_MS - MATCH_MS)).order("at", { ascending: false }).limit(500)),
   ]);
+
+  // The visit each step-2 ping belongs to: where it first came from (an ad,
+  // say), which the later pings of the same visit may not repeat.
+  const stepSids = [...new Set(stepRows.map((r) => r.sid))];
+  const stepVisits = stepSids.length
+    ? await soft<Pick<VisitorRow, "sid" | "device" | "source" | "campaign">>(
+        "checkout visits",
+        db.from("live_visitors").select("sid, device, source, campaign").in("sid", stepSids),
+      )
+    : [];
+  const visitOf = new Map(stepVisits.map((v) => [v.sid, v]));
+  // The lead (checkout_starts) and the ping are sent by the same click on the
+  // same funnel: pair each start with the nearest unused ping.
+  const used = new Set<number>();
+  const stepFor = (c: CheckoutRow) => {
+    const at = Date.parse(c.started_at);
+    let best: ViewRow | null = null;
+    for (const r of stepRows) {
+      if (r.funnel !== c.funnel || used.has(r.id) || !shown(r.host)) continue;
+      const gap = Math.abs(Date.parse(r.at) - at);
+      if (gap <= MATCH_MS && (!best || gap < Math.abs(Date.parse(best.at) - at))) best = r;
+    }
+    if (best) used.add(best.id);
+    return best;
+  };
 
   // Dev servers write here too: production never shows their visits.
   const shown = (host: string) => process.env.NODE_ENV !== "production" || !OFF_HOST.test(host);
@@ -274,15 +303,24 @@ export async function getLive(day: string | null): Promise<Live> {
       })),
     ...checkouts
       .filter((c) => inStream(c.started_at))
-      .map((c): LiveEvent => ({
-        kind: "checkout",
-        id: `c${c.funnel}:${c.email}:${c.started_at}`,
-        at: c.started_at,
-        funnel: c.funnel,
-        funnelName: name(c.funnel),
-        lang: c.lang ?? "en",
-        who: c.name || c.email,
-      })),
+      .map((c): LiveEvent => {
+        const step = stepFor(c);
+        const visit = step ? visitOf.get(step.sid) : undefined;
+        return {
+          kind: "checkout",
+          id: `c${c.funnel}:${c.email}:${c.started_at}`,
+          at: c.started_at,
+          funnel: c.funnel,
+          funnelName: name(c.funnel),
+          lang: c.lang ?? "en",
+          who: c.name || c.email,
+          country: step?.country ?? "",
+          city: step?.city ?? "",
+          device: visit?.device ?? "",
+          source: visit?.source || step?.source || "",
+          campaign: visit?.source ? visit.campaign : (step?.campaign ?? ""),
+        };
+      }),
     ...paid
       .filter((o) => inStream(o.created_at))
       .map((o): LiveEvent => ({
