@@ -467,7 +467,7 @@ function PayBody({
         <div className={d.payBar}>
           <button
             type="button"
-            className={`${d.cta} ${d.payBarBtn}`}
+            className={`${d.cta} ${d.ctaPay} ${d.payBarBtn}`}
             disabled={blocked}
             onClick={() => {
               // The real button does the paying (card errors show beside it), so bring it on screen too.
@@ -485,7 +485,8 @@ function PayBody({
                     d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
                   />
                 </svg>
-                {t.payBar.replace("{price}", fmt(total, currency, lang))}
+                {t.pay}
+                <span className={d.ctaSub}>{t.paySub}</span>
               </>
             )}
           </button>
@@ -529,8 +530,9 @@ function ShortBump({
           />
         </svg>
       </button>
-      {open && (
-        <div className={d.bumpDetails}>
+      {/* Always there on a computer; on a phone only once "Details" is pressed (./order.module.css). */}
+      {(
+        <div className={`${d.bumpDetails} ${open ? d.bumpOpen : ""}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
           <span className={s.bumpText}>

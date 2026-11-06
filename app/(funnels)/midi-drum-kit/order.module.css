@@ -273,12 +273,22 @@
   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.55) 35%, rgba(0, 0, 0, 0.75) 100%);
   pointer-events: none;
 }
+/* The same button as the one in the form ("stesso CTA, stessa grandezza"). */
 .payBarBtn {
-  max-width: 520px;
-  padding: 16px 18px;
-  font: 900 22px/1 var(--inter);
-  letter-spacing: 0.5px;
+  max-width: 560px;
   pointer-events: auto;
+}
+/* Add-ons: on a computer the whole offer shows, as before; on a phone, one line + "Details". */
+.bumpMore {
+  display: none !important;
+}
+@media (max-width: 769px) {
+  .bumpMore {
+    display: inline-flex !important;
+  }
+  .bumpDetails:not(.bumpOpen) {
+    display: none;
+  }
 }
 :global(html[data-order-step="2"]) .timer {
   display: none;
