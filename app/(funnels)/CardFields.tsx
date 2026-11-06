@@ -134,9 +134,11 @@ export function Wallet({
   // Out of the layout until a wallet shows: on a device without Apple Pay or
   // Google Pay Stripe still leaves an empty 8px frame, which with the form's
   // gaps made a band of space above the card fields ("crea troppo spazio").
+  // left: 0 too: without it the box starts where the form's text does and,
+  // a page wide, stuck out 20-40px on the right, so phones panned sideways (11-06).
   const [shown, setShown] = useState(false);
   return (
-    <div style={shown ? undefined : { position: "absolute", width: "100%", height: 0, overflow: "hidden" }}>
+    <div style={shown ? undefined : { position: "absolute", left: 0, width: "100%", height: 0, overflow: "hidden" }}>
       <ExpressCheckoutElement
         options={{
           buttonHeight: 48,
