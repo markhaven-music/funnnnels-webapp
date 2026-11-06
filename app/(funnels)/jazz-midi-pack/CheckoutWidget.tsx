@@ -178,7 +178,7 @@ export function CheckoutWidget(props: Props) {
             {PAYPAL_ON && <MethodTabs method={method} setMethod={setMethod} />}
 
             {stripePromise ? (
-              <Elements stripe={stripePromise} options={cardElements(GEIST)}>
+              <Elements stripe={stripePromise} options={cardElements(GEIST, undefined, { total, currency: props.currency })}>
                 <PayStep {...body} stripePromise={stripePromise} />
               </Elements>
             ) : (
@@ -302,7 +302,8 @@ function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromis
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasWallet, setHasWallet] = useState(false);
-  const billing = { name: `${props.info.firstName} ${props.info.lastName}`.trim(), email: props.info.email };
+  // The country too: the card fields don't ask it (../CardFields.tsx).
+  const billing = { name: `${props.info.firstName} ${props.info.lastName}`.trim(), email: props.info.email, address: { country: cookieCountry(props.currency, props.country) } };
 
   // Card fields and wallet buttons both pay through here: the PaymentIntent at
   // the server's price (its client secret). Success goes on to the thank-you page.

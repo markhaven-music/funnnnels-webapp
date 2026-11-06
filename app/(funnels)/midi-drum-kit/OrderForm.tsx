@@ -183,7 +183,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
           </div>
 
           {stripePromise ? (
-            <Elements stripe={stripePromise} options={cardElements(INTER, lang)}>
+            <Elements stripe={stripePromise} options={cardElements(INTER, lang, { total, currency })}>
               <CardPay {...state} stripePromise={stripePromise} />
             </Elements>
           ) : (

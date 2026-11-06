@@ -177,7 +177,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
             </div>
 
             {stripePromise ? (
-              <Elements stripe={stripePromise} options={cardElements(INTER, "en")}>
+              <Elements stripe={stripePromise} options={cardElements(INTER, "en", { total, currency })}>
                 <CardPay {...state} stripePromise={stripePromise} />
               </Elements>
             ) : (
@@ -261,7 +261,8 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasWallet, setHasWallet] = useState(false);
-  const billing = { name: `${props.info.firstName} ${props.info.lastName}`.trim(), email: props.info.email };
+  // The country too: the card fields don't ask it (../CardFields.tsx).
+  const billing = { name: `${props.info.firstName} ${props.info.lastName}`.trim(), email: props.info.email, address: { country: cookieCountry(props.currency, props.country) } };
 
   // The PaymentIntent, at the server's price; its client secret.
   async function intent(): Promise<string> {

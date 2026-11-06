@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
-import { CardElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import type { PaymentMethodCreateParams, Stripe, StripeElementLocale, StripeElements, StripeElementsOptions, StripeElementStyle } from "@stripe/stripe-js";
+import { useState } from "react";
+import { ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import type { PaymentMethodCreateParams, Stripe, StripeElementLocale, StripeElements, StripeElementsOptions } from "@stripe/stripe-js";
 
-// The card field: one 50px box, 2px #dbdcdd border, 5px corners (ClickFunnels'
-// look), no labels, no "you allow Grind Studio to charge your card" notice.
-// Stripe's own field (an iframe), so card numbers never touch our server.
+// The card fields: Stripe's Payment Element, cards only (since 11-06, "se è gold
+// standard usiamo quello"). Number, expiry and CVC are three boxes in ONE
+// iframe, so the browser's autofill fills them together: the ClickFunnels-style
+// three separate fields filled only the number, the single CardElement skipped
+// the expiry. Labels sit inside the boxes and float up when typing; 2px
+// #dbdcdd borders and 5px corners as before; no "you allow Grind Studio to
+// charge your card" notice. Name, email and country come from step 1, so the
+// element doesn't ask them; a ZIP shows where Stripe wants one (US, UK, CA).
+// Stripe's own fields, so card numbers never touch our server.
 //
 // Styled inline, not with a stylesheet: a CSS module shared by the Jazz and the
 // ClickFunnels-style pages gets bundled with the Jazz page's CSS and fonts, and
@@ -29,50 +35,49 @@ export const INTER: CardLook = {
   focus: "#000000",
 };
 
-export const cardElements = (look: CardLook, locale?: StripeElementLocale): StripeElementsOptions => ({
+/** What is being paid: the Elements group needs it for the Payment Element (react-stripe-js updates it as add-ons are ticked). */
+export type CardAmount = { total: number; currency: string };
+
+export const cardElements = (look: CardLook, locale: StripeElementLocale | undefined, pay: CardAmount): StripeElementsOptions => ({
   fonts: [{ cssSrc: look.fontCss }],
   ...(locale ? { locale } : {}),
+  mode: "payment",
+  amount: Math.max(50, Math.round(pay.total * 100)),
+  currency: pay.currency.toLowerCase(),
+  allowedPaymentMethodTypes: ["card"],
+  appearance: {
+    theme: "stripe",
+    labels: "floating",
+    variables: {
+      fontFamily: look.font,
+      fontSizeBase: "16px",
+      colorText: look.color,
+      colorTextPlaceholder: look.placeholder,
+      colorPrimary: look.focus,
+      colorDanger: "#dc2626",
+      borderRadius: "5px",
+      spacingUnit: "3px",
+    },
+    rules: {
+      ".Input": { border: "2px solid #dbdcdd", boxShadow: "none" },
+      ".Input:focus": { borderColor: look.focus, boxShadow: "none" },
+      ".Input--invalid": { borderColor: "#dc2626", boxShadow: "none" },
+    },
+  },
 });
 
-// One field for number, expiry and CVC (Stripe's CardElement), since 11-06: the
-// three separate fields of ClickFunnels were three iframes, and Safari's
-// autofill only filled the one being typed in (the number, never the expiry).
-// In a single field the browser fills number and expiry together. `words` are
-// kept for the callers; Stripe writes its own placeholders in the page's locale.
-export function CardFields({ look }: { words?: CardWords; look: CardLook }) {
-  const [focused, setFocused] = useState(false);
-  const [invalid, setInvalid] = useState(false);
-  const style: StripeElementStyle = {
-    base: {
-      color: look.color,
-      fontFamily: look.font,
-      fontSize: "16px",
-      fontWeight: "400",
-      fontSmoothing: "antialiased",
-      iconColor: look.color,
-      "::placeholder": { color: look.placeholder },
-    },
-    invalid: { color: "#dc2626", iconColor: "#dc2626" },
-  };
-  const box: CSSProperties = {
-    boxSizing: "border-box",
-    minWidth: 0,
-    padding: "15px 12px",
-    border: `2px solid ${invalid ? "#dc2626" : "#dbdcdd"}`,
-    borderRadius: 5,
-    background: "#fff",
-    ...(focused ? { outline: `2px solid ${look.focus}`, outlineOffset: -2 } : {}),
-  };
+export function CardFields(_: { words?: CardWords; look?: CardLook }) {
   return (
-    <div style={box}>
-      {/* No Link "Autofill" button, no postcode: ClickFunnels asked for neither. */}
-      <CardElement
-        options={{ style, hidePostalCode: true, disableLink: true }}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        onChange={(e) => setInvalid(Boolean(e.error))}
-      />
-    </div>
+    <PaymentElement
+      options={{
+        layout: "tabs",
+        // Step 1 has them; the country is the visit's (Stripe gets it at payWithCard).
+        fields: { billingDetails: { name: "never", email: "never", address: { country: "never" } } },
+        // Apple / Google Pay have their own buttons above (<Wallet>); no Link.
+        wallets: { applePay: "never", googlePay: "never", link: "never" },
+        terms: { card: "never" },
+      }}
+    />
   );
 }
 
@@ -86,9 +91,10 @@ type Billing = PaymentMethodCreateParams.BillingDetails;
  * thank-you page find it by ?payment_intent=. Throws the message to show.
  */
 export async function payWithCard(stripe: Stripe, elements: StripeElements, billing: Billing, intent: () => Promise<string>, next: string) {
-  const card = elements.getElement(CardElement);
-  if (!card) return;
-  const { error, paymentMethod } = await stripe.createPaymentMethod({ type: "card", card, billing_details: billing });
+  // Checks the fields (and shows their errors) before anything is created.
+  const { error: invalid } = await elements.submit();
+  if (invalid) throw new Error(invalid.message);
+  const { error, paymentMethod } = await stripe.createPaymentMethod({ elements, params: { billing_details: billing } });
   if (error) throw new Error(error.message);
   const clientSecret = await intent();
   const { error: payError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, { payment_method: paymentMethod.id });
