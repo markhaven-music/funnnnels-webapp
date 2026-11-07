@@ -45,6 +45,10 @@ export const cardElements = (look: CardLook, locale: StripeElementLocale | undef
   amount: Math.max(50, Math.round(pay.total * 100)),
   currency: pay.currency.toLowerCase(),
   allowedPaymentMethodTypes: ["card"],
+  // payWithCard makes the card a PaymentMethod first (stripe.createPaymentMethod),
+  // which the Payment Element only allows with this. Without it every card
+  // payment failed before reaching the server, from 11-06 17:21 to 11-07 17:30.
+  paymentMethodCreation: "manual",
   appearance: {
     theme: "stripe",
     labels: "floating",
