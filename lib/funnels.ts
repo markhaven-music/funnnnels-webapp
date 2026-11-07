@@ -55,7 +55,7 @@ export type Product = {
   // Languages the pages come in. English keeps the plain addresses; the others
   // live under /<lang> (see checkoutPages).
   langs?: readonly string[];
-  // One-click upsells after the order, in order (MIDI Drum Kit, TOP HITS).
+  // One-click upsells after the order, in order (MIDI Drum Kit, TOP HITS, Famous Beats, Jazz).
   offers?: readonly Offer[];
   // The origin its pages are on, when it isn't the brand domain (the shop, see SHOP_HOME).
   home?: string;
@@ -75,6 +75,7 @@ const JAZZ: Product = {
   checkout: jazz.checkout,
   optin: jazz.optin,
   launch: null,
+  offers: jazz.offers,
 };
 
 const TOP_HITS: Product = {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getFunnel, resolveFunnel } from "@/lib/funnels";
+import { getFunnel, nextStep, resolveFunnel, upsellsOn } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
@@ -57,6 +57,9 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null,
     bump: f.bump ? { name: f.bump.name, price: f.bump.price[currency], pitch: f.bump.pitch, cover: splitName(f.bump.name) } : null,
     bumps: (f.bumps ?? []).map((b) => ({ id: b.id, name: b.name, price: b.price[currency], pitch: b.pitch, image: b.image, ...bumpCopy[b.id] })),
+    // After paying: the Famous Beats upsell (./offer), then the thank-you page.
+    afterOrder: nextStep(f, "en", null),
+    keepCard: upsellsOn(f),
   };
   const offer = pick(sections, "s_offer");
   const guarantee = pick(sections, "s_guarantee");

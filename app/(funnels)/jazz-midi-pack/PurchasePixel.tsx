@@ -9,15 +9,16 @@ import { purchaseEventId } from "@/lib/neoIds";
 // id>", the id of neo's server-side Purchase (lib/neo.ts), so Meta dedupes the
 // two; and a localStorage mark so a refresh or a bookmarked return doesn't
 // count the sale twice.
-export function PurchasePixel({ orderId, value, currency }: { orderId: string; value: number; currency: string }) {
+// product: what this payment bought (the upsell is a payment of its own).
+export function PurchasePixel({ orderId, value, currency, product = funnel.product }: { orderId: string; value: number; currency: string; product?: string }) {
   const data = JSON.stringify({
-    content_name: funnel.product,
+    content_name: product,
     content_type: "product",
     value,
     currency: currency.toUpperCase(),
   });
   return (
-    <Script id="purchase-pixel" strategy="afterInteractive">{`
+    <Script id={`purchase-pixel-${orderId}`} strategy="afterInteractive">{`
       (function () {
         var key = 'px-purchase-${orderId}';
         try { if (localStorage.getItem(key)) return; localStorage.setItem(key, '1'); } catch (e) {}

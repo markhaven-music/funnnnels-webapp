@@ -343,4 +343,5 @@ const CODE_UPSELLS: Record<string, string[]> = {
   [topHits.slug]: topHits.offers.map((o) => o.id),
   [drumKit.slug]: drumKit.offers.map((o) => o.id),
   [famousBeats.slug]: famousBeats.offers.map((o) => o.id),
+  [jazz.slug]: jazz.offers.map((o) => o.id),
 };

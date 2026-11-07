@@ -37,6 +37,9 @@ export type Ctx = {
   bump?: { name: string; price: number; pitch: string; cover: [string, string] } | null;
   // The order page's tick-box offers (dashboard → Products: funnel_items), in this currency.
   bumps?: { id: string; name: string; price: number; pitch: string; image?: string; headline?: string; body?: string[] }[];
+  // The page after paying (the upsell, else the thank-you page) and whether the card is kept for it (lib/funnels.ts nextStep, upsellsOn).
+  afterOrder?: string;
+  keepCard?: boolean;
 };
 
 type Patch = (props: Record<string, unknown>) => void;
@@ -1066,6 +1069,8 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       bump={ctx.bump ?? null}
       bumps={ctx.bumps}
       thankYou={funnel.checkout.thankYou}
+      afterOrder={ctx.afterOrder}
+      keepCard={ctx.keepCard}
       publishableKey={ctx.publishableKey}
       abCookie={AB.cookie}
       deferStripe

@@ -44,6 +44,10 @@ type Props = {
   // of the drawn cover. Given, it replaces `bump`.
   bumps?: Bump[];
   thankYou: string;
+  // The page after paying when it isn't the thank-you page (a one-click upsell),
+  // and keepCard: the card is kept for it (setup_future_usage, as the server's intent has it).
+  afterOrder?: string;
+  keepCard?: boolean;
   publishableKey: string | null;
   // The shop: several products in one order. They fill the summary and go to
   // the shop's checkout APIs as `items` (their slugs); `price` is the cart's
@@ -347,7 +351,7 @@ function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromis
     setPaying(true);
     setError(null);
     try {
-      await payWithCard(stripe, elements, billing, intent, props.thankYou);
+      await payWithCard(stripe, elements, billing, intent, props.afterOrder ?? props.thankYou);
     } catch (err) {
       setError((err as Error).message);
       setPaying(false);
@@ -360,9 +364,15 @@ function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromis
       <div hidden={props.method !== "card"} className={s.cardPane}>
         <Elements
           stripe={stripePromise}
-          options={{ mode: "payment", amount: Math.round(props.total * 100), currency: props.currency, allowedPaymentMethodTypes: ["card"] }}
+          options={{
+            mode: "payment",
+            amount: Math.round(props.total * 100),
+            currency: props.currency,
+            allowedPaymentMethodTypes: ["card"],
+            ...(props.keepCard ? { setupFutureUsage: "off_session" as const } : {}),
+          }}
         >
-          <Wallet pay={(st, el) => payWithWallet(st, el, billing, intent, props.thankYou)} onReady={setHasWallet} onError={setError} />
+          <Wallet pay={(st, el) => payWithWallet(st, el, billing, intent, props.afterOrder ?? props.thankYou)} onReady={setHasWallet} onError={setError} />
         </Elements>
         {hasWallet && (
           <div className={s.orCard}>

@@ -139,7 +139,14 @@ export const funnel = {
     bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
     "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
     "drum-loops": "jazz-midi-pack/Drum Loops for Songwriting.zip",
+    // The one-click upsell's zip (offers below), the one the other funnels sell.
+    "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
   } as Record<string, string>,
+  // One-click upsell after the order (2026-11-07, "Solo Famous Beats"): the
+  // MIDI Drum Kit's Famous Beats page (midi-drum-kit/upsell.ts) selling for
+  // this funnel, as after the TOP HITS order. Not a tick-box offer here, so
+  // nobody sees it twice. Price and name: dashboard → Products (funnel_items).
+  offers: [{ id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } }],
   checkout: {
     leadTags: ["checkout-started"],
     buyerTags: ["buyer"],
