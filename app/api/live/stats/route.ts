@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
-import { getVisitorStats, STAT_DAYS } from "@/lib/visitorStats";
+import { isRange } from "@/lib/range";
+import { getVisitorStats, STAT_RANGES } from "@/lib/visitorStats";
 
 export const runtime = "nodejs";
 
-// Dashboard → Live → "Who they are" (lib/visitorStats.ts). ?days= 1, 7 or 30;
-// ?tz= the viewer's getTimezoneOffset(). Behind ADMIN_PASSWORD (proxy.ts).
+// Dashboard → Live → "Who they are" (lib/visitorStats.ts). ?range= one of
+// STAT_RANGES; ?tz= the viewer's getTimezoneOffset(). Behind ADMIN_PASSWORD (proxy.ts).
 export async function GET(req: Request) {
   const q = new URL(req.url).searchParams;
-  const days = Number(q.get("days"));
+  const asked = q.get("range");
   const tz = Number(q.get("tz"));
   try {
     const stats = await getVisitorStats(
-      (STAT_DAYS as readonly number[]).includes(days) ? days : 7,
+      isRange(asked) && STAT_RANGES.includes(asked) ? asked : "7d",
       Number.isFinite(tz) && Math.abs(tz) <= 840 ? tz : 0,
     );
     return NextResponse.json(stats, { headers: { "cache-control": "no-store" } });

@@ -5,7 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { Lanes, previewUrl } from "@/components/FunnelLanes";
 import { PriceList, PricesDrawer, type PriceItem } from "@/components/FunnelPrices";
 import { I } from "@/components/icons";
-import type { Analytics, Metrics, Range, TestStats } from "@/lib/analytics";
+import type { Analytics, Metrics, TestStats } from "@/lib/analytics";
+import { RangePicker, useRange } from "@/components/RangePicker";
+import { rangePhrase } from "@/lib/range";
 import type { FunnelMap, MapStep } from "@/lib/funnelMap";
 import s from "./funnelMap.module.css";
 
@@ -16,11 +18,6 @@ import s from "./funnelMap.module.css";
 // Prices (components/FunnelPrices.tsx): what the order page and each upsell
 // charge, changed in a drawer.
 
-const RANGES: { id: Range; label: string; note: string }[] = [
-  { id: "7d", label: "7D", note: "the last 7 days" },
-  { id: "28d", label: "28D", note: "the last 28 days" },
-  { id: "all", label: "ALL", note: "all time" },
-];
 
 type View = "flow" | "lanes";
 const VIEW_KEY = "funnel-map-view";
@@ -240,7 +237,7 @@ function AddLanguage({ map }: { map: FunnelMap }) {
 }
 
 export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: PriceItem[] }) {
-  const [range, setRange] = useState<Range>("28d");
+  const [range, setRange] = useRange();
   const [lang, setLang] = useState(map.langs[0]?.lang ?? "en");
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(Boolean(map.statsSlug));
@@ -314,13 +311,7 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
             </div>
           )}
           {map.statsSlug && !lanes && (
-            <div className="tabs" role="tablist" aria-label="Range">
-              {RANGES.map((r) => (
-                <button key={r.id} type="button" className={`tab ${r.id === range ? "active" : ""}`} onClick={() => setRange(r.id)}>
-                  {r.label}
-                </button>
-              ))}
-            </div>
+            <RangePicker value={range} onChange={setRange} bare />
           )}
           {items.length > 0 && (
             <button type="button" className="btn ghost" onClick={() => setEditing("")}>
@@ -449,7 +440,7 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
         )}
         {map.statsSlug && (
           <p className={s.note}>
-            Numbers for {RANGES.find((r) => r.id === range)?.note}
+            Numbers {range === "all" ? "for all time" : rangePhrase(range).replace(/^(today|yesterday|this)/, "for $1")}
             {map.langs.length > 1 ? `, ${current.label} pages` : ""}; the A/B test counts since it started. Visitors are counted by
             our own script{data?.trackingSince ? ` since ${data.trackingSince}` : ""}; orders come from Stripe and PayPal.{" "}
             <Link href="/?nav=analytics" className={s.link}>

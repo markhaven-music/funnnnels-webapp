@@ -2,17 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { I } from "@/components/icons";
+import { RangePicker, useRange } from "@/components/RangePicker";
+import { rangeLength, type Range } from "@/lib/range";
 import type { Count, VisitorStats as Stats } from "@/lib/visitorStats";
 import s from "./live.module.css";
 
-// Dashboard → Live → "Who they are": the visitors of the last day, week or
-// month (lib/visitorStats.ts via /api/live/stats). Read again every minute.
+// Dashboard → Live → "Who they are": the visitors of today, yesterday, the
+// last week or month, in the viewer's own days (lib/visitorStats.ts via /api/live/stats). Read again every minute.
 
-const RANGES = [
-  { days: 1, label: "24 hours" },
-  { days: 7, label: "7 days" },
-  { days: 30, label: "30 days" },
-] as const;
+const OFFERED: Range[] = ["today", "yesterday", "7d", "28d", "this-month"];
 
 const DEVICE = {
   mobile: { label: "Phone", Icon: I.device_mobile },
@@ -48,18 +46,19 @@ const pct1 = (n: number, of: number) => (of ? `${((n / of) * 100).toFixed(n / of
 const dur = (sec: number) => (sec < 60 ? `${sec}s` : `${Math.floor(sec / 60)}m ${String(sec % 60).padStart(2, "0")}s`);
 
 export function VisitorStats() {
-  const [days, setDays] = useState<number>(7);
+  const [range, setRange] = useRange("7d", "fv:live-range", OFFERED);
+  const days = rangeLength(range) ?? 30;
   const [data, setData] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
     let timer: ReturnType<typeof setTimeout>;
-    setData((d) => (d?.days === days ? d : null));
+    setData((d) => (d?.range === range ? d : null));
     const load = async () => {
       if (document.visibilityState === "visible") {
         try {
-          const r = await fetch(`/api/live/stats?days=${days}&tz=${new Date().getTimezoneOffset()}`, { cache: "no-store" });
+          const r = await fetch(`/api/live/stats?range=${range}&tz=${new Date().getTimezoneOffset()}`, { cache: "no-store" });
           if (!r.ok) throw new Error(`Visitor stats didn't load (${r.status}).`);
           const d = (await r.json()) as Stats;
           if (alive) {
@@ -77,7 +76,7 @@ export function VisitorStats() {
       alive = false;
       clearTimeout(timer);
     };
-  }, [days]);
+  }, [range]);
 
   const total = data?.visitors ?? 0;
   const short = data?.since && Date.now() - Date.parse(data.since) < days * 24 * 3600_000;
@@ -86,13 +85,7 @@ export function VisitorStats() {
     <section className={`${s.card} ${s.block}`}>
       <div className={s.cardHead}>
         <div className={s.cardTitle}>Who they are</div>
-        <div className="tabs" role="tablist">
-          {RANGES.map((r) => (
-            <button key={r.days} type="button" role="tab" aria-selected={days === r.days} className={`tab ${days === r.days ? "active" : ""}`} onClick={() => setDays(r.days)}>
-              {r.label}
-            </button>
-          ))}
-        </div>
+        <RangePicker value={range} onChange={setRange} ranges={OFFERED} offsetMin={-new Date().getTimezoneOffset()} />
       </div>
 
       {error && <div className={`${s.notice} ${s.bad}`}>{error}</div>}

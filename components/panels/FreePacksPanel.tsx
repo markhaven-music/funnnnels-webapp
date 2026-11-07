@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { RangePicker, useRange } from "@/components/RangePicker";
+import { rangePhrase } from "@/lib/range";
 import type { FreePackPerson, FreePackRow, FreePackStats } from "@/lib/freePacks";
 import type { PackSpend } from "@/lib/metaSpend";
 import e from "./email.module.css";
@@ -11,7 +13,6 @@ import f from "./freePacks.module.css";
 // (sign-ups → opened the Drum Kit checkout → bought), then every person and
 // where they stand (bought, opened the checkout, which Drum Kit email is next).
 
-const PERIODS = [7, 30, 90];
 const COLS = { gridTemplateColumns: "92px minmax(0,1.4fr) 110px minmax(0,0.6fr) minmax(0,1.6fr)" };
 
 const pct = (n: number, of: number) => (of ? `${Math.round((n / of) * 100)}%` : "");
@@ -95,7 +96,7 @@ function status(x: FreePackPerson): { label: string; cls: string } {
 type Filter = "all" | "checkout" | "bought";
 
 export function FreePacksPanel() {
-  const [days, setDays] = useState(30);
+  const [range, setRange] = useRange();
   const [stats, setStats] = useState<FreePackStats | null>(null);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
@@ -103,13 +104,13 @@ export function FreePacksPanel() {
   useEffect(() => {
     setStats(null);
     setError("");
-    fetch(`/api/free-packs?days=${days}`, { cache: "no-store" })
+    fetch(`/api/free-packs?range=${range}`, { cache: "no-store" })
       .then(async (r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         setStats(await r.json());
       })
       .catch((err) => setError(`Couldn't load the free packs (${String(err)}).`));
-  }, [days]);
+  }, [range]);
 
   const people = useMemo(() => stats?.people ?? [], [stats]);
   const fresh = people.filter((x) => !x.alreadyBuyer);
@@ -143,13 +144,7 @@ export function FreePacksPanel() {
       </div>
 
       <div className={e.toolbar}>
-        <select className={e.select} value={days} onChange={(ev) => setDays(Number(ev.target.value))}>
-          {PERIODS.map((d) => (
-            <option key={d} value={d}>
-              Last {d} days
-            </option>
-          ))}
-        </select>
+        <RangePicker value={range} onChange={setRange} />
       </div>
 
       {stats && stats.leads === 0 ? (
@@ -162,7 +157,7 @@ export function FreePacksPanel() {
             <div className={e.stat}>
               <div className={e.statLabel}>SIGN-UPS</div>
               <div className={e.statValue}>{total.signups}</div>
-              <div className={e.statSub}>new people, last {days} days</div>
+              <div className={e.statSub}>new people {rangePhrase(range)}</div>
             </div>
             <div className={e.stat}>
               <div className={e.statLabel}>OPENED THE CHECKOUT</div>

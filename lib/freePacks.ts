@@ -1,4 +1,5 @@
 import { type MetaSpend, spendByPack } from "@/lib/metaSpend";
+import { rangeSpan, type Range } from "@/lib/range";
 import { supabase } from "@/lib/supabase";
 
 // Dashboard → Free packs: what the free lead magnets bring in. Each opt-in
@@ -64,13 +65,17 @@ async function inChunks<T>(emails: string[], run: (chunk: string[]) => PromiseLi
   return out;
 }
 
-export async function freePackStats(days = 90): Promise<FreePackStats> {
+/** range: one of the dashboard's ranges, or the last so many days. */
+export async function freePackStats(range: Range | number = "90d"): Promise<FreePackStats> {
   const db = supabase();
-  const since = new Date(Date.now() - days * DAY).toISOString();
+  const span = typeof range === "number" ? { from: Date.now() - range * DAY, until: Date.now() + DAY } : rangeSpan(range);
+  const since = new Date(span.from).toISOString();
+  const until = new Date(span.until).toISOString();
   const { data, error } = await db
     .from("optins")
     .select("email, optin, utm_content, utm_campaign, ad_id, created_at")
     .gte("created_at", since)
+    .lt("created_at", until)
     .order("created_at", { ascending: true })
     .limit(20_000);
   if (error) throw error;
@@ -196,6 +201,11 @@ export async function freePackStats(days = 90): Promise<FreePackStats> {
     packs: group((l) => l.optin, pack),
     ads: group((l) => `${l.optin}|${l.ad_id ?? l.utm_content ?? ""}`, ad),
     people,
-    spend: await spendByPack(Object.values(PACK_NAMES), since.slice(0, 10), new Date().toISOString().slice(0, 10)),
+    spend: await spendByPack(
+      Object.values(PACK_NAMES),
+      // All time: from the first sign-up, not 1970.
+      span.from ? since.slice(0, 10) : (optins[0]?.created_at ?? new Date().toISOString()).slice(0, 10),
+      new Date(Math.min(Date.now(), span.until - DAY)).toISOString().slice(0, 10),
+    ),
   };
 }

@@ -1,4 +1,5 @@
 import type { Analytics, Day, Metrics } from "@/lib/analytics";
+import { rangePhrase } from "@/lib/range";
 
 // Dashboard home → Insights: what stands out in the numbers of the range,
 // worded like a note from an analyst. Plain rules over lib/analytics.ts, no
@@ -17,7 +18,11 @@ const euro = (n: number) => `€${n >= 100 ? Math.round(n).toLocaleString("en-US
 const pct = (n: number) => `${n >= 0.1 ? Math.round(n * 100) : (n * 100).toFixed(1)}%`;
 const sum = (days: Day[], k: keyof Omit<Day, "day">) => days.reduce((n, d) => n + d[k], 0);
 const langName = (l: string) => ({ en: "English", fr: "French", es: "Spanish", de: "German", it: "Italian", nl: "Dutch" })[l] ?? l;
-const lastDays = (a: Analytics) => (a.range === "7d" ? "the last 7 days" : a.range === "28d" ? "the last 28 days" : "the whole period");
+// "the last 7 days", "this month", "October", "2025", "the whole period": after "in" or on its own.
+const lastDays = (a: Analytics) => {
+  const p = rangePhrase(a.range);
+  return p === "so far" ? "the whole period" : p.replace(/^in /, "");
+};
 
 /** Orders per landing visitor, counting only the orders made since visitors were counted. */
 const cvr = (m: Metrics) => (m.visitors ? m.ratedOrders / m.visitors : 0);
@@ -38,12 +43,13 @@ export function insights(a: Analytics, now = Date.now(), eur: (n: number) => str
     if (before > 0 && orders + prevOrders >= 6) {
       const change = revenue / before - 1;
       if (Math.abs(change) >= 0.2)
-        say(change < 0 ? 1 : 3, change < 0 ? "down" : "up", `Revenue is ${change < 0 ? "down" : "up"} ${pct(Math.abs(change))} on the ${days.length} days before: ${eur(revenue)} against ${eur(before)}.`);
+        say(change < 0 ? 1 : 3, change < 0 ? "down" : "up", `Revenue is ${change < 0 ? "down" : "up"} ${pct(Math.abs(change))} on the ${days.length === 1 ? "day" : `${days.length} days`} before: ${eur(revenue)} against ${eur(before)}.`);
     }
   }
 
   // A quiet spell after a steady pace.
-  if (hasSales && a.lastSale) {
+  // Only when the range runs up to today (not for Yesterday, Last month…).
+  if (hasSales && a.lastSale && a.until === new Date(now).toISOString().slice(0, 10)) {
     const quiet = Math.floor((now - a.lastSale) / DAY);
     const perDay = orders / days.length;
     if (quiet >= 2 && perDay >= 0.7)

@@ -7,7 +7,9 @@ import { CURRENCIES, dayLabel, fromEur, money, moneyExact, Performance, SYMBOL, 
 import { isLeadMagnet, LeadMagnets } from "@/components/LeadMagnets";
 import { NewFunnelTile } from "@/components/NewFunnelTile";
 import { I } from "@/components/icons";
-import type { Analytics, Range } from "@/lib/analytics";
+import type { Analytics } from "@/lib/analytics";
+import { RangePicker, useRange } from "@/components/RangePicker";
+import { previousName, rangePhrase, type Range } from "@/lib/range";
 import type { FunnelStatus, StoredFunnel } from "@/lib/blocks";
 import { insights, type Insight } from "@/lib/insights";
 import s from "./home.module.css";
@@ -19,8 +21,6 @@ import s from "./home.module.css";
 // Everything comes from lib/analytics.ts and Meta (docs/design.md: real
 // numbers only).
 
-const RANGE_LABEL: Record<Range, string> = { "7d": "7D", "28d": "28D", all: "All" };
-const RANGE_NAME: Record<Range, string> = { "7d": "7 days", "28d": "28 days", all: "period" };
 const CURRENCY_KEY = "fv:home-currency";
 
 // ─── Revenue by funnel, visit → sale ─────────────────────────────────────────
@@ -133,7 +133,7 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
   // The lead magnets (free packs) have their own section under the funnels that sell.
   const funnels = useMemo(() => all.filter((f) => !isLeadMagnet(f)), [all]);
   const magnets = useMemo(() => all.filter(isLeadMagnet), [all]);
-  const [range, setRange] = useState<Range>("28d");
+  const [range, setRange] = useRange();
   const [loaded, setLoaded] = useState<Partial<Record<Range, Analytics>>>({});
   const current = range === "28d" ? analytics : (loaded[range] ?? null);
   // While another range loads, the last one stays on screen, dimmed.
@@ -217,13 +217,7 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
 
       {/* The range and the currency: they scope every number below */}
       <div className={s.filters}>
-        <div className="tabs" role="group" aria-label="Range">
-          {(Object.keys(RANGE_LABEL) as Range[]).map((r) => (
-            <button key={r} type="button" className={`tab ${range === r ? "active" : ""}`} aria-pressed={range === r} onClick={() => setRange(r)}>
-              {RANGE_LABEL[r]}
-            </button>
-          ))}
-        </div>
+        <RangePicker value={range} onChange={setRange} />
         <div className="tabs" role="group" aria-label="Currency">
           {CURRENCIES.map((c) => (
             <button key={c} type="button" className={`tab ${cur === c ? "active" : ""}`} aria-pressed={cur === c} onClick={() => pickCurrency(c)}>
@@ -243,7 +237,7 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
       </div>
 
       <div className={!current && shown ? s.stale : undefined}>
-        <Performance a={data} cur={cur} periodName={data ? RANGE_NAME[data.range] : "period"} />
+        <Performance a={data} cur={cur} periodName={data ? previousName(data.range) : "period"} />
 
         {data && (
           <div className={s.below}>
@@ -251,7 +245,7 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
             <div className={s.card}>
               <div className={s.cardHead}>
                 <div className={s.title}>Revenue by funnel</div>
-                <div className={s.sub}>{data.range === "all" ? "all time" : `last ${RANGE_NAME[data.range]}`}</div>
+                <div className={s.sub}>{data.range === "all" ? "all time" : rangePhrase(data.range).replace(/^in /, "")}</div>
               </div>
               <FunnelRevenue a={data} cur={cur} />
             </div>

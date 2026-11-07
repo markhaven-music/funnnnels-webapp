@@ -1,4 +1,4 @@
-import type { Range } from "@/lib/analytics";
+import { rangePhrase, type Range } from "@/lib/range";
 import type { Insight } from "@/lib/insights";
 import type { EmailKind } from "@/lib/mail";
 
@@ -75,7 +75,7 @@ const sales = (t: Tally) => `${count(t.orders, "order")}${t.upsells ? ` + ${coun
 export function emailNotes(d: EmailInsights, allRevenue: number | null, now = Date.now()): Insight[] {
   const out: (Insight & { rank: number })[] = [];
   const say = (rank: number, tone: Insight["tone"], text: string) => out.push({ rank, tone, text });
-  const when = d.range === "7d" ? "in the last 7 days" : d.range === "28d" ? "in the last 28 days" : "so far";
+  const when = rangePhrase(d.range, now);
   const t = d.total;
 
   if (d.blocked) say(0, "down", d.blocked);

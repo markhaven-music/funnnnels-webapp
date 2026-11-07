@@ -1,6 +1,7 @@
 import { ASTRO_FUNNEL } from "@/lib/beacon";
 import { codeFunnels } from "@/lib/funnels";
 import { OFF_HOST } from "@/lib/live";
+import { rangeLength, rangeSpan, type Range } from "@/lib/range";
 import { SHOP_SLUG } from "@/lib/shop";
 import { supabase } from "@/lib/supabase";
 
@@ -11,12 +12,14 @@ import { supabase } from "@/lib/supabase";
 //   live_events    each page opened: when, and how far down a funnel it got
 // Bots and the owner's own browsers are never in them (lib/bots.ts, ?me=1).
 
-export const STAT_DAYS = [1, 7, 30] as const;
+// The ranges offered: the tables keep 30 days.
+export const STAT_RANGES: Range[] = ["today", "yesterday", "7d", "28d", "this-month"];
 
 export type Count = { key: string; n: number };
 export type DeviceRow = { device: string; visitors: number; order: number; checkout: number; bought: number };
 
 export type VisitorStats = {
+  range: Range;
   days: number;
   since: string | null; // the first visit recorded at all
   visitors: number;
@@ -47,12 +50,15 @@ function top(map: Map<string, number>, max = 12): Count[] {
 const add = (map: Map<string, number>, key: string, n = 1) => map.set(key, (map.get(key) ?? 0) + n);
 
 /**
- * @param days 1, 7 or 30
+ * @param range one of STAT_RANGES, in the viewer's own days
  * @param offset the viewer's Date.getTimezoneOffset(), for hours and days
  */
-export async function getVisitorStats(days: number, offset: number): Promise<VisitorStats> {
+export async function getVisitorStats(range: Range, offset: number): Promise<VisitorStats> {
   const db = supabase();
-  const from = new Date(Date.now() - days * 24 * 3600_000).toISOString();
+  const span = rangeSpan(range, Date.now(), -offset);
+  const days = rangeLength(range) ?? 30;
+  const from = new Date(span.from).toISOString();
+  const until = new Date(span.until).toISOString();
   type V = { sid: string; first_seen: string; session_start: string; last_seen: string; host: string; funnel: string; lang: string; country: string; city: string; device: string; source: string; campaign: string; views: number };
   type E = { sid: string; at: string; host: string; funnel: string; page: string };
 
@@ -60,7 +66,7 @@ export async function getVisitorStats(days: number, offset: number): Promise<Vis
   async function all<T>(table: string, cols: string, col: string): Promise<T[]> {
     const out: T[] = [];
     for (let at = 0; at < 50_000; at += 1000) {
-      const { data, error } = await db.from(table).select(cols).gte(col, from).order(col, { ascending: true }).range(at, at + 999);
+      const { data, error } = await db.from(table).select(cols).gte(col, from).lt(col, until).order(col, { ascending: true }).range(at, at + 999);
       if (error) throw error;
       out.push(...((data ?? []) as T[]));
       if (!data || data.length < 1000) break;
@@ -141,6 +147,7 @@ export async function getVisitorStats(days: number, offset: number): Promise<Vis
 
   const STAY_ORDER = ["under 10 s", "10–30 s", "30 s – 1 min", "1–3 min", "3–10 min", "10 min +"];
   return {
+    range,
     days,
     since: first.data?.[0]?.at ?? null,
     visitors: visitors.length,

@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { I } from "@/components/icons";
-import type { Analytics, Range } from "@/lib/analytics";
+import type { Analytics } from "@/lib/analytics";
+import { RangePicker, useRange } from "@/components/RangePicker";
+import type { Range } from "@/lib/range";
 import {
   CLICKS_SINCE,
   KIND_LABEL,
@@ -24,7 +26,6 @@ import x from "./emailInsights.module.css";
 // (lib/emailInsights.ts). Real numbers only (docs/design.md): an order counts
 // for an email when its buyer clicked it in the 5 days before paying.
 
-const RANGE_LABEL: Record<Range, string> = { "7d": "7D", "28d": "28D", all: "All" };
 
 const eur = (n: number) => (n >= 10_000 ? `€${(n / 1000).toFixed(1).replace(/\.0$/, "")}K` : `€${Math.round(n).toLocaleString("en-US")}`);
 const pct = (n: number) => `${(n * 100).toFixed(n >= 0.1 ? 0 : 1)}%`;
@@ -47,7 +48,7 @@ function useAllRevenue(range: Range, home: Analytics | null): number | null {
 }
 
 export function EmailInsightsPanel({ analytics }: { analytics: Analytics | null }) {
-  const [range, setRange] = useState<Range>("28d");
+  const [range, setRange] = useRange();
   const [loaded, setLoaded] = useState<Partial<Record<Range, EmailInsights>>>({});
   const [failed, setFailed] = useState("");
   useEffect(() => {
@@ -83,13 +84,7 @@ export function EmailInsightsPanel({ analytics }: { analytics: Analytics | null 
       </div>
 
       <div className={s.filters}>
-        <div className="tabs">
-          {(Object.keys(RANGE_LABEL) as Range[]).map((r) => (
-            <button key={r} type="button" className={`tab ${range === r ? "active" : ""}`} onClick={() => setRange(r)}>
-              {RANGE_LABEL[r]}
-            </button>
-          ))}
-        </div>
+        <RangePicker value={range} onChange={setRange} />
         <span className={s.note}>Clicks counted since {day(CLICKS_SINCE)}</span>
         {failed && <span className={s.warn}>Couldn&apos;t load: {failed}</span>}
       </div>

@@ -7,6 +7,7 @@ import { SHOP_SLUG } from "@/lib/shop";
 import { paypal, paypalConfigured, type PayPalOrder } from "@/lib/paypal";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import type Stripe from "stripe";
+import { rangeDays, rangeLength, type Range } from "@/lib/range";
 import { supabase } from "@/lib/supabase";
 
 // Dashboard → Analytics: visitors, checkout starts, orders and revenue per
@@ -27,8 +28,7 @@ import { supabase } from "@/lib/supabase";
 export const VISITS_FROM = "2026-10-22";
 const counted = (since: string | null) => (since && since > VISITS_FROM ? since : VISITS_FROM);
 
-export type Range = "7d" | "28d" | "all";
-export const RANGES: Range[] = ["7d", "28d", "all"];
+export type { Range } from "@/lib/range";
 
 // ─── recording ─────────────────────────────────────────────────
 
@@ -173,6 +173,8 @@ export type Day = {
 export type Analytics = {
   range: Range;
   since: string | null;
+  /** The range's last day, included ("2026-11-06" for yesterday). */
+  until: string;
   /** The first day any visitor was counted. */
   trackingSince: string | null;
   usdToEur: number;
@@ -200,9 +202,7 @@ const TARGET_SALES = 100;
 
 /** First UTC day of the range ("2026-10-14"), or null for all time. */
 export function sinceDay(range: Range, now = Date.now()): string | null {
-  if (range === "all") return null;
-  const days = range === "7d" ? 7 : 28;
-  return new Date(now - (days - 1) * DAY).toISOString().slice(0, 10);
+  return rangeDays(range, now).first;
 }
 
 const empty = (): Metrics => ({
@@ -254,10 +254,21 @@ function addSale(m: Metrics, s: Sale) {
   if (s.currency === "usd") m.ratedUsd += s.amount;
 }
 
-async function viewTotals(since: string | null): Promise<ViewRow[]> {
+async function viewTotalsSince(since: string | null): Promise<ViewRow[]> {
   const { data, error } = await supabase().rpc("page_view_totals", { p_since: counted(since) });
   if (error) throw error;
   return ((data ?? []) as ViewRow[]).map((r) => ({ ...r, views: Number(r.views) }));
+}
+
+/** Views from `since` up to `until` (the first day not counted; null = today included). */
+async function viewTotals(since: string | null, until: string | null = null): Promise<ViewRow[]> {
+  if (!until) return viewTotalsSince(since);
+  // page_view_totals only takes a start: the range is what came since its
+  // first day, less what came from the day after its last.
+  const [from, after] = await Promise.all([viewTotalsSince(since), viewTotalsSince(until)]);
+  const key = (r: ViewRow) => `${r.funnel}|${r.page}|${r.lang}|${r.variant}`;
+  const later = new Map(after.map((r) => [key(r), r.views]));
+  return from.map((r) => ({ ...r, views: r.views - (later.get(key(r)) ?? 0) })).filter((r) => r.views > 0);
 }
 
 type DayRow = { day: string; funnel: string; page: Step; views: number };
@@ -278,10 +289,9 @@ function dayList(first: string, last: string): string[] {
 }
 
 /** The range day by day, and as many days before it (none for "all"). */
-function daily(range: Range, since: string | null, now: number, rows: DayRow[], sales: Sale[], rate: number, trackingSince: string | null) {
-  const today = dayOf(now);
-  const first = since ?? [trackingSince, ...sales.map((s) => dayOf(s.created))].filter(Boolean).sort()[0] ?? today;
-  const days = dayList(first, today);
+function daily(range: Range, since: string | null, last: string, rows: DayRow[], sales: Sale[], rate: number, trackingSince: string | null) {
+  const first = since ?? [trackingSince, ...sales.map((s) => dayOf(s.created))].filter(Boolean).sort()[0] ?? last;
+  const days = dayList(first, last);
   const before = since ? dayList(dayOf(Date.parse(`${first}T00:00:00Z`) - days.length * DAY), dayOf(Date.parse(`${first}T00:00:00Z`) - DAY)) : [];
   const by = new Map<string, Day>(
     [...before, ...days].map((day) => [day, { day, orders: 0, upsells: 0, revenue: 0, net: 0, visitors: 0, orderViews: 0, checkouts: 0 }]),
@@ -405,8 +415,11 @@ async function kitFunnels(): Promise<{ slug: string; name: string }[]> {
 
 export async function getAnalytics(range: Range): Promise<Analytics> {
   const now = Date.now();
-  const since = sinceDay(range, now);
+  const { first: since, last } = rangeDays(range, now);
   const sinceMs = since ? Date.parse(`${since}T00:00:00Z`) : 0;
+  // The first day after the range, when it ends before today (Yesterday, Last month…).
+  const after = last < dayOf(now) ? dayOf(Date.parse(`${last}T00:00:00Z`) + DAY) : null;
+  const untilMs = after ? Date.parse(`${after}T00:00:00Z`) : Infinity;
   const errors: string[] = [];
   const soft = async <T,>(what: string, p: Promise<T>, fallback: T): Promise<T> => {
     try {
@@ -431,10 +444,10 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
 
   const hasStripe = stripeConfigured();
   // The day-by-day rows reach back one range more, for the comparison.
-  const span = range === "7d" ? 7 : 28;
+  const span = rangeLength(range, now) ?? 0;
   const before = since ? dayOf(Date.parse(`${since}T00:00:00Z`) - span * DAY) : null;
   const [views, allViews, dayRows, rate, trackingSince, testStarts, paypal, ...stripeLists] = await Promise.all([
-    soft("visitors", viewTotals(since), []),
+    soft("visitors", viewTotals(since, after), []),
     range === "all" ? Promise.resolve(null) : soft("visitors (all time)", viewTotals(null), []),
     soft("visitors per day", viewDays(before), []),
     usdToEur(),
@@ -446,7 +459,7 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
   const allSales = [...paypal, ...stripeLists.flat()];
   const ratedFrom = trackingSince ? Date.parse(`${trackingSince}T00:00:00Z`) : Infinity;
   for (const s of allSales) s.rated = s.created >= ratedFrom;
-  const sales = allSales.filter((s) => s.created >= sinceMs);
+  const sales = allSales.filter((s) => s.created >= sinceMs && s.created < untilMs);
 
   const funnels: FunnelStats[] = list.map((f) => {
     const total = empty();
@@ -476,11 +489,12 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
   return {
     range,
     since,
+    until: last,
     trackingSince,
     usdToEur: rate,
     funnels,
     tests: TESTS.map((t, i) => testStats(t, allViews ?? views, allSales, rate, testStarts[i], now)),
-    ...daily(range, since, now, dayRows, allSales, rate, trackingSince),
+    ...daily(range, since, last, dayRows, allSales, rate, trackingSince),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
     errors,

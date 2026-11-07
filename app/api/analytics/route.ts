@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { getAnalytics, RANGES, type Range } from "@/lib/analytics";
+import { getAnalytics } from "@/lib/analytics";
+import { rangeParam } from "@/lib/range";
 
 export const runtime = "nodejs";
 
-// Dashboard → Analytics, ?range=7d|28d|all. Behind ADMIN_PASSWORD like every non-public route (proxy.ts).
+// Dashboard → Analytics, ?range= one of lib/range.ts RANGES. Behind ADMIN_PASSWORD like every non-public route (proxy.ts).
 export async function GET(req: Request) {
-  const asked = new URL(req.url).searchParams.get("range") as Range;
-  const range = RANGES.includes(asked) ? asked : "28d";
-  return NextResponse.json(await getAnalytics(range), { headers: { "cache-control": "no-store" } });
+  return NextResponse.json(await getAnalytics(rangeParam(req.url)), { headers: { "cache-control": "no-store" } });
 }

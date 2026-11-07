@@ -1,4 +1,5 @@
-import { sinceDay, usdToEur, type Range } from "@/lib/analytics";
+import { usdToEur } from "@/lib/analytics";
+import { rangeDays, type Range } from "@/lib/range";
 import { WINDOW_DAYS, type EmailInsights, type EmailRow, type Tally } from "@/lib/emailInsights";
 import type { EmailKind } from "@/lib/mail";
 import { supabase } from "@/lib/supabase";
@@ -45,19 +46,54 @@ function merge(into: Counts, c: Counts) {
 const SANDBOX = /sandbox/i;
 const RECENT_MS = 7 * 86_400_000;
 
+const DAY = 86_400_000;
+
+/**
+ * email_stats over [since, until): it only takes a start, so a range that
+ * ends before today is what came since its start less what came after it.
+ * Clickers are people, so that part can come out a little low when someone
+ * clicked the same email both in the range and after it.
+ */
+async function statsBetween(since: string | null, until: string | null): Promise<Stat[]> {
+  const db = supabase();
+  const read = async (p_since: string | null) => {
+    const r = await db.rpc("email_stats", { p_since });
+    if (r.error) throw r.error;
+    return (r.data ?? []) as Stat[];
+  };
+  if (!until) return read(since);
+  const [from, after] = await Promise.all([read(since), read(until)]);
+  const later = new Map(after.map((x) => [`${x.kind}:${x.ref}`, x]));
+  const n = (v: number | string | undefined) => Number(v ?? 0);
+  return from.map((x) => {
+    const y = later.get(`${x.kind}:${x.ref}`);
+    return {
+      ...x,
+      sent: n(x.sent) - n(y?.sent),
+      failed: n(x.failed) - n(y?.failed),
+      clickers: Math.max(0, n(x.clickers) - n(y?.clickers)),
+      clicks: n(x.clicks) - n(y?.clicks),
+      unsubscribed: n(x.unsubscribed) - n(y?.unsubscribed),
+    };
+  });
+}
+
 export async function getEmailInsights(range: Range): Promise<EmailInsights> {
   const db = supabase();
-  const day = sinceDay(range);
+  const { first: day, last } = rangeDays(range);
   const since = day ? `${day}T00:00:00Z` : null;
-  const [attr, stats, rate, broadcasts, launchEmails, sequences] = await Promise.all([
+  const today = new Date().toISOString().slice(0, 10);
+  const untilMs = last < today ? Date.parse(`${last}T00:00:00Z`) + DAY : null;
+  const until = untilMs ? new Date(untilMs).toISOString() : null;
+  const [attr, statRows, rate, broadcasts, launchEmails, sequences] = await Promise.all([
     db.rpc("email_attribution", { p_since: since, p_days: WINDOW_DAYS }),
-    db.rpc("email_stats", { p_since: since }),
+    statsBetween(since, until),
     usdToEur(),
     db.from("broadcasts").select("id, subject, audience_tag, exclude_tag, status, sent_at, send_at, error, updated_at").order("created_at", { ascending: false }).limit(500),
     db.from("launch_emails").select("id, step, subject, audience_tag, status, sent_at, send_at"),
     db.from("sequences").select("id, name, trigger_tag, active, created_at, sequence_steps(id)").order("created_at"),
   ]);
-  for (const r of [attr, stats, broadcasts, launchEmails, sequences]) if (r.error) throw r.error;
+  for (const r of [attr, broadcasts, launchEmails, sequences]) if (r.error) throw r.error;
 
   // Everything per email (kind:ref), then rolled up.
   const per = new Map<string, Counts>();
@@ -68,7 +104,7 @@ export async function getEmailInsights(range: Range): Promise<EmailInsights> {
   };
   const total = counts();
   const byKind: Record<EmailKind, Tally> = { broadcast: tally(), launch: tally(), sequence: tally(), reminder: tally() };
-  for (const s of (stats.data ?? []) as Stat[]) {
+  for (const s of statRows) {
     const c = at(s.kind, s.ref);
     c.sent = Number(s.sent);
     c.failed = Number(s.failed);
@@ -76,6 +112,7 @@ export async function getEmailInsights(range: Range): Promise<EmailInsights> {
     c.unsubscribed = Number(s.unsubscribed);
   }
   for (const a of (attr.data ?? []) as Attribution[]) {
+    if (untilMs && Date.parse(a.created_at) >= untilMs) continue;
     if (!a.how || !a.kind || !a.ref) continue;
     addSale(at(a.kind, a.ref)[a.how === "click" ? "clicked" : "received"], a, rate);
     if (a.how === "click") addSale(byKind[a.kind], a, rate);

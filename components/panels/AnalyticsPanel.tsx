@@ -2,18 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { I } from "@/components/icons";
-import type { Analytics, Metrics, Range, TestStats } from "@/lib/analytics";
+import type { Analytics, Metrics, TestStats } from "@/lib/analytics";
+import { RangePicker, useRange } from "@/components/RangePicker";
 import s from "./analytics.module.css";
 
 // Dashboard → Analytics. Numbers from /api/analytics (lib/analytics.ts):
 // visitors and checkout starts from our own beacon, orders from Stripe and
 // PayPal, and the running A/B tests (lib/analytics.ts TESTS).
 
-const RANGES: { id: Range; label: string }[] = [
-  { id: "7d", label: "7D" },
-  { id: "28d", label: "28D" },
-  { id: "all", label: "ALL" },
-];
 
 const LANG_NAMES: Record<string, string> = { en: "English", fr: "French", es: "Spanish", de: "German", it: "Italian", "?": "Language not recorded" };
 
@@ -28,7 +24,7 @@ function langPath(slug: string, lang: string) {
 }
 
 export function AnalyticsPanel() {
-  const [range, setRange] = useState<Range>("28d");
+  const [range, setRange] = useRange();
   const [data, setData] = useState<Analytics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,13 +64,7 @@ export function AnalyticsPanel() {
           <h1 className="page-title">Analytics</h1>
           <p className="page-sub">Visitors, checkouts and sales per funnel.</p>
         </div>
-        <div className="tabs" role="tablist">
-          {RANGES.map((r) => (
-            <button key={r.id} type="button" role="tab" aria-selected={range === r.id} className={`tab ${range === r.id ? "active" : ""}`} onClick={() => setRange(r.id)}>
-              {r.label}
-            </button>
-          ))}
-        </div>
+        <RangePicker value={range} onChange={setRange} />
       </div>
 
       {error && <div className={`${s.notice} ${s.bad}`}>{error}</div>}

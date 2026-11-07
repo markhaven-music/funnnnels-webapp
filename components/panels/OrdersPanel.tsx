@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { RangePicker, useRange } from "@/components/RangePicker";
+import { previousName, rangePhrase, rangeSpan } from "@/lib/range";
 import type { OrderRow } from "@/lib/sales";
 import e from "./email.module.css";
 import { OrderDrawer, money } from "./OrderDetail";
@@ -11,8 +13,11 @@ import { OrderDrawer, money } from "./OrderDetail";
 
 const DAY = 86_400_000;
 
-function totals(orders: OrderRow[], since = 0) {
-  const o = orders.filter((x) => Date.parse(x.createdAt) >= since);
+function totals(orders: OrderRow[], from = 0, until = Infinity) {
+  const o = orders.filter((x) => {
+    const t = Date.parse(x.createdAt);
+    return t >= from && t < until;
+  });
   const sum = (c: string) => o.filter((x) => x.currency === c).reduce((n, x) => n + x.amountCents, 0);
   const mains = o.filter((x) => !x.offer);
   return {
@@ -53,12 +58,20 @@ export function OrdersPanel() {
       .finally(() => setLoading(false));
   }, []);
 
-  const all = useMemo(() => totals(orders), [orders]);
-  const week = useMemo(() => totals(orders, Date.now() - 7 * DAY), [orders]);
+  // Orders keep their own range (all of them by default), not the home's.
+  const [range, setRange] = useRange("all", "fv:orders-range");
+  const span = useMemo(() => rangeSpan(range), [range]);
+  const all = useMemo(() => totals(orders, span.from, span.until), [orders, span]);
+  // The period before: as many days, right before (none for all time).
+  const prev = useMemo(() => (span.from ? totals(orders, span.from - (span.until - span.from), span.from) : null), [orders, span]);
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return needle ? orders.filter((o) => [o.email, o.name, o.id, o.funnel].some((v) => v?.toLowerCase().includes(needle))) : orders;
-  }, [orders, q]);
+    const inRange = orders.filter((o) => {
+      const t = Date.parse(o.createdAt);
+      return t >= span.from && t < span.until;
+    });
+    return needle ? inRange.filter((o) => [o.email, o.name, o.id, o.funnel].some((v) => v?.toLowerCase().includes(needle))) : inRange;
+  }, [orders, q, span]);
 
   const close = useCallback(() => setOpen(null), []);
   const step = useCallback(
@@ -70,11 +83,12 @@ export function OrdersPanel() {
     [shown],
   );
 
+  const before = `previous ${previousName(range)}`;
   const stats = [
-    { label: "ORDERS", value: String(all.orders), sub: `${week.orders} in the last 7 days` },
+    { label: "ORDERS", value: String(all.orders), sub: prev ? `${prev.orders} the ${before}` : rangePhrase(range) },
     { label: "UPSELLS", value: String(all.upsells), sub: all.orders ? `${Math.round((all.upsells / all.orders) * 100)}% per order` : "—" },
-    { label: "REVENUE · EUR", value: money(all.eur, "eur"), sub: `${money(week.eur, "eur")} in 7 days` },
-    { label: "REVENUE · USD", value: money(all.usd, "usd"), sub: `${money(week.usd, "usd")} in 7 days` },
+    { label: "REVENUE · EUR", value: money(all.eur, "eur"), sub: prev ? `${money(prev.eur, "eur")} the ${before}` : rangePhrase(range) },
+    { label: "REVENUE · USD", value: money(all.usd, "usd"), sub: prev ? `${money(prev.usd, "usd")} the ${before}` : rangePhrase(range) },
     { label: "ADD-ON TAKE RATE", value: all.orders ? `${Math.round((all.bumps / all.orders) * 100)}%` : "—", sub: `${all.bumps} of ${all.orders} orders` },
   ];
 
@@ -100,11 +114,16 @@ export function OrdersPanel() {
       </div>
 
       <div className={e.toolbar}>
+        <RangePicker value={range} onChange={setRange} />
         <input className={e.input} style={{ width: 280 }} placeholder="Search email, name, order id…" value={q} onChange={(ev) => setQ(ev.target.value)} />
         <span className={e.mono}>{shown.length} shown</span>
       </div>
 
-      {!loading && orders.length === 0 ? (
+      {!loading && orders.length > 0 && shown.length === 0 && !q.trim() ? (
+        <div className={e.empty}>
+          <div>No orders {rangePhrase(range)}.</div>
+        </div>
+      ) : !loading && orders.length === 0 ? (
         <div className={e.empty}>
           <img className={e.emptyArt} src="/funnels/dashboard/orders.webp" width={112} height={112} alt="" />
           <div>No orders recorded yet.</div>
