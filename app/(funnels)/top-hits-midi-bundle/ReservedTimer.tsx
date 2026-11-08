@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { reservedUntil } from "../reservedUntil";
 import { withSkin, type Styles } from "../skin";
 import base from "./order.module.css";
 
-// ClickFunnels' "YOUR COPY IS RESERVED FOR" box: ten minutes from page load,
+// ClickFunnels' "YOUR COPY IS RESERVED FOR" box: ten minutes from the first visit (a refresh doesn't restart it, ../reservedUntil.ts),
 // counting down to 00:00:00 (it only stops; nothing expires).
 const START = 10 * 60 * 1000;
 
@@ -13,7 +14,7 @@ export function ReservedTimer({ skin }: { skin?: Styles }) {
   const s = withSkin(base, skin);
   const [left, setLeft] = useState(START);
   useEffect(() => {
-    const end = Date.now() + START;
+    const end = reservedUntil(START);
     const id = setInterval(() => {
       const ms = Math.max(0, end - Date.now());
       setLeft(ms);

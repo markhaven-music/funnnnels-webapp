@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { reservedUntil } from "../reservedUntil";
 import type { Copy } from "./copy";
 import s from "./order.module.css";
 
 // The Drum Kit order page's "YOUR COPY IS RESERVED FOR:" box: ten minutes from
-// page load, counting down to 00:00:00 (it only stops; nothing expires).
+// the first visit (a refresh doesn't restart it, ../reservedUntil.ts), counting down to 00:00:00 (it only stops; nothing expires).
 const START = 10 * 60 * 1000;
 
 export function ReservedTimer({ t }: { t: Copy["order"]["timer"] }) {
   const [left, setLeft] = useState(START);
   useEffect(() => {
-    const end = Date.now() + START;
+    const end = reservedUntil(START);
     const id = setInterval(() => {
       const ms = Math.max(0, end - Date.now());
       setLeft(ms);
