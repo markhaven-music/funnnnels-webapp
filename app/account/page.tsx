@@ -1,56 +1,34 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import { cookies, headers } from "next/headers";
-import { LANG_COOKIE, LANGS, SESSION_COOKIE, isLang, purchaseLang, purchasesOf, readSession, type Lang } from "@/lib/account";
-import { COUNTRY_COOKIE } from "@/lib/geo";
+import { cookies } from "next/headers";
+import { SESSION_COOKIE, purchasesOf, readSession, type Lang } from "@/lib/account";
 import { SUPPORT } from "@/lib/ses";
 import { Clarity } from "@/app/(funnels)/Clarity";
-import { LANG_NAMES, copyFor } from "./copy";
+import { copyFor } from "./copy";
 import { LoginForm } from "./LoginForm";
 import a from "./account.module.css";
 
 // The customer login, m.thegrind.studio/account (grind-studio-landing-pages
 // forwards it here): signed out, the email form; signed in, every purchase
 // with its downloads (lib/account.ts).
-// Language: the one picked with the switch, else the language of the funnel
-// the buyer last bought in, else the browser's / the country's.
+// Language: English, always (no language switch).
 export const dynamic = "force-dynamic";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-poppins" });
 
-const FRENCH_COUNTRIES = new Set(["FR", "BE", "LU", "MC", "CH", "CA", "SN", "CI", "MA", "TN", "DZ"]);
-const SPANISH_COUNTRIES = new Set(["ES", "MX", "AR", "CO", "CL", "PE", "VE", "EC", "GT", "CU", "BO", "DO", "HN", "PY", "SV", "NI", "CR", "PA", "UY", "PR"]);
-const GERMAN_COUNTRIES = new Set(["DE", "AT", "CH", "LI"]);
-const ITALIAN_COUNTRIES = new Set(["IT", "SM", "VA"]);
 const DATES: Record<Lang, string> = { en: "en-US", fr: "fr-FR", es: "es-ES", de: "de-DE", it: "it-IT" };
-
-async function guessLang(): Promise<Lang> {
-  const h = await headers();
-  const jar = await cookies();
-  const accept = (h.get("accept-language") ?? "").toLowerCase();
-  if (accept.startsWith("fr")) return "fr";
-  if (accept.startsWith("es")) return "es";
-  if (accept.startsWith("de")) return "de";
-  if (accept.startsWith("it")) return "it";
-  if (accept) return "en";
-  const country = jar.get(COUNTRY_COOKIE)?.value ?? "";
-  return FRENCH_COUNTRIES.has(country) ? "fr" : SPANISH_COUNTRIES.has(country) ? "es" : GERMAN_COUNTRIES.has(country) ? "de" : ITALIAN_COUNTRIES.has(country) ? "it" : "en";
-}
 
 async function pageState() {
   const jar = await cookies();
   const session = readSession(jar.get(SESSION_COOKIE)?.value);
   const purchases = session ? await purchasesOf(session.e) : [];
-  const chosen = jar.get(LANG_COOKIE)?.value;
-  const lang: Lang = isLang(chosen) ? chosen : session ? (purchaseLang(purchases) ?? session.l) : await guessLang();
+  // English always: the store and its "My downloads" are in English, no switch.
+  const lang: Lang = "en";
   return { session, purchases, lang };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const jar = await cookies();
-  const chosen = jar.get(LANG_COOKIE)?.value;
-  const lang = isLang(chosen) ? chosen : await guessLang();
-  return { title: copyFor(lang).meta, robots: { index: false, follow: false } };
+  return { title: copyFor("en").meta, robots: { index: false, follow: false } };
 }
 
 export default async function Account({ searchParams }: { searchParams: Promise<{ expired?: string }> }) {
@@ -65,13 +43,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
       <header className={a.top}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={a.logo} src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
-        <nav className={a.tools} aria-label="Language">
-          {LANGS.map((l) => (
-            <a key={l} href={`/api/checkout/account/session?lang=${l}`} className={l === lang ? a.langOn : a.lang} aria-current={l === lang ? "true" : undefined} hrefLang={l} lang={l}>
-              {l.toUpperCase()}
-              <span className={a.hidden}> {LANG_NAMES[l]}</span>
-            </a>
-          ))}
+        <nav className={a.tools} aria-label="Account">
           {session && (
             <form method="post" action="/api/checkout/account/session">
               <button className={a.signOut} type="submit">
