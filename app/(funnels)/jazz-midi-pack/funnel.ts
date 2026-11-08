@@ -44,7 +44,25 @@ export const funnel = {
   // price their own funnels ask (never below €27, the user's rule). Prices and
   // names as dashboard → Products has them (funnel_items) win; `id` is the
   // file key, and funnel_items.product the zip it hands out.
+  // The two €7 / $7 add-ons first (2026-11-08, "fai 1 e 2"): made for this pack and sold
+  // only here (the €27 floor is for products sold on their own elsewhere). Built by
+  // ~/Desktop/Jazz MIDI Pack Tools/make_record_samples.py and make_swing_grooves.py,
+  // zips in R2 under jazz-midi-pack/.
   bumps: [
+    {
+      id: "record-samples",
+      name: "Jazz Record Samples (122 WAV Loops)",
+      price: { eur: 7, usd: 7 },
+      image: "/funnels/jazz-midi-pack/bump-records.webp",
+      pitch: "This pack's progressions as 122 WAV loops in Rhodes and piano, made to sound like an old record. Chop them like a sample, no clearance needed.",
+    },
+    {
+      id: "swing-grooves",
+      name: "Drunk Swing Grooves (389 MIDI Files)",
+      price: { eur: 7, usd: 7 },
+      image: "/funnels/jazz-midi-pack/bump-grooves.webp",
+      pitch: "The late, loose feel of lofi and neo soul: 31 groove templates, 30 drum grooves and this pack's loops already swung. Snare on the beat, everything else laid back.",
+    },
     {
       id: "top-hits",
       name: "TOP HITS MIDI Bundle",
