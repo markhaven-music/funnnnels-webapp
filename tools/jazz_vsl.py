@@ -71,7 +71,7 @@ def parse():
     body = open(SCRIPT).read().split("\n---\n", 1)[1]
     items, show = [], "none"
     for block in [b.strip() for b in body.split("\n\n") if b.strip()]:
-        if m := re.fullmatch(r"\[DEMO: (\w+)\]", block):
+        if m := re.fullmatch(r"\[DEMO: ([\w-]+)\]", block):
             items.append(("demo", m[1]))
         elif m := re.fullmatch(r"\[SHOW: (.+)\]", block):
             show = m[1]

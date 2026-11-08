@@ -72,6 +72,14 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
           <p className={s.sub}>
             <Rich text={w.hero.sub} />
           </p>
+          <div className={s.vsl}>
+            <iframe
+              src={`https://fast.wistia.net/embed/iframe/${funnel.vsl.wistiaId}?playerColor=f5b800&videoFoam=false`}
+              title="Drunk Swing Grooves: same notes, only the timing moves"
+              allow="autoplay; fullscreen"
+              allowFullScreen
+            />
+          </div>
           <AbPlayer words={w.ab} />
           <ul className={s.bullets}>
             {w.bullets.map((b, i) => (

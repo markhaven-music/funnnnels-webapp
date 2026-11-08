@@ -15,7 +15,9 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
   added Introducing (the box beside the bullets), the ✓/✗ chart (swing knob / moving notes by hand / the pack),
   "Everything you get" (no money values, the price only), After you pay, the reviews after the guarantee. Reviews: the
   MIDI Drum Kit's eight, word for word (the user: "Drum Kit reviews"), on the landing (said to be the Drum Kit's) and
-  on the order page. The VSL comes next, its script approved first.
+  on the order page.
+- 2026-11-08: VSL script approved ("Yes, record it"): vsl/script-en.md, made with tools/grooves_vsl.py (Aaron Sage,
+  eleven_v4, every part checked with speech-to-text), 4:54, Wistia tuqmnch1mn, above the A/B switch in the hero.
 - 2026-11-08: "fai vedere immagini delle box etc etc anche su order page"; the box is the user's own artwork ("usa questa",
   sampler + vinyl, orange lettering, "MIDI PACK"), cut out: public/funnels/drunk-swing-grooves/pack-*.webp.
 - "say J Dilla in the copy": the copy says "J Dilla-style swing"; the product is named "Drunk", not after

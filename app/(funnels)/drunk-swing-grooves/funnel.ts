@@ -24,6 +24,9 @@ export const funnel = {
     privacy: "/privacy-policy",
     refund: "/refund-policy",
   },
+  // The hero video (vsl/script-en.md, made with tools/grooves_vsl.py, 2026-11-08), in Wistia's own player;
+  // its still is a frame of the video (the two grids, "Same drum sounds.").
+  vsl: { wistiaId: "tuqmnch1mn" },
   tagline: "MIDI drum grooves with the drunk, laid-back feel of lofi and neo soul.",
   price: { eur: 7, usd: 7 },
   // Counted from the files (make_swing_grooves.py, 2026-11-08).
