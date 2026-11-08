@@ -1,8 +1,8 @@
 /* Grind Studio's homepage (app/home), in the store's frame (app/shop/ShopFrame,
-   shop.module.css: bar, product grid, footer). The funnel pages' rules: one
-   yellow (#f5b800) on black, white text, no bordered boxes, the juicy key for
-   the banner's call to action (jazz-midi-pack/btn.module.css), one column on
-   a phone and the box beside the copy on a wide screen. */
+   shop.module.css: bar, product grid, footer). White on black, no yellow
+   (since 2026-11-08), no bordered boxes, the brand kit's glass buttons
+   (components/ui/GlassButton.tsx) over the kit's glass-cubes backdrop in the
+   banner, one column on a phone and the box beside the copy on a wide screen. */
 .home {
   --band: #111;
   --text: rgb(255 255 255 / 0.88);
@@ -44,9 +44,12 @@
 
 /* ─── banner: the MIDI Drum Kit ──────────── */
 .hero {
+  /* The brand kit's backdrop (its mockup Glass-CTA-Raised): the glass cubes at
+     70%, darkened top to bottom, so the glass button has something to show
+     through it. 40 KB, a CSS background, not the LCP. */
   background:
-    radial-gradient(60% 70% at 50% 60%, rgb(245 184 0 / 0.14), transparent 70%),
-    linear-gradient(180deg, #0d0d0d, var(--ink));
+    linear-gradient(180deg, rgb(10 11 14 / 0.55), rgb(10 11 14 / 0.78) 92%, var(--ink)),
+    #0a0b0e url(/funnels/home/glass-cubes.webp) center 30% / cover no-repeat;
 }
 .heroIn {
   max-width: 1160px;
@@ -68,8 +71,8 @@
   display: block;
   line-height: 0;
   margin: 22px 0 26px;
-  /* the box's yellow glow, painted as a plain gradient under it (cheap) */
-  background: radial-gradient(closest-side, rgb(245 184 0 / 0.22), transparent) 50% 70% / 120% 90% no-repeat;
+  /* a soft light under the box, painted as a plain gradient (cheap) */
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.08), transparent) 50% 70% / 120% 90% no-repeat;
 }
 .heroPic img {
   display: block;
@@ -192,32 +195,17 @@
 
 /* ─── past buyers ────────────────────────── */
 .yband {
-  background: var(--y);
-  color: #000;
+  background: var(--band);
+  color: var(--text);
   text-align: center;
 }
 .yband .h2 {
   margin-bottom: 14px;
-  color: #000;
 }
 .yband p {
   max-width: 30em;
   margin: 0 auto 28px;
   font-size: 18px;
-}
-.dark {
-  display: inline-flex;
-  align-items: center;
-  min-height: 56px;
-  padding: 0 28px;
-  border-radius: 4px;
-  background: #000;
-  color: #fff !important;
-  font-weight: 700;
-  text-decoration: none;
-}
-.dark:hover {
-  background: #1c1c1c;
 }
 
 /* ─── wide screens: the box beside the copy ─── */

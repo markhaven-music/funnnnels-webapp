@@ -155,9 +155,7 @@ export default async function Home({ params }: { params: Promise<{ currency: str
       <section className={`${h.yband} ${h.lazy}`}>
         <h2 className={h.h2}>Already Bought From Us?</h2>
         <p>Every pack you bought is on your downloads page. Sign in with the email you paid with.</p>
-        <a href="/account" className={h.dark}>
-          Get my downloads
-        </a>
+        <GlassButton href="/account" variant="clear" size="md" label="Get my downloads" />
       </section>
     </ShopFrame>
   );

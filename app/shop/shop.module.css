@@ -1,15 +1,14 @@
 /* The store (app/shop, and the homepage app/home): the funnel pages' rules,
-   as on the homepage. One yellow (#f5b800) on black, white text, no bordered
+   as on the homepage. White on black (no yellow since 2026-11-08), no bordered
    boxes, Poppins, mobile first with a real desktop layout, text ≥ 17px. Like
    a sample-pack store: a bar with the menu and the cart, rows of packs on
    dark tiles. Kept small: it's every shop page's only stylesheet, with the
    checkout's and the button's. */
 .page {
-  --y: #f5b800;
-  --y-gloss: #ffe14d; /* the juicy key's (jazz-midi-pack/btn.module.css) */
-  --y-deep: #d39a00;
-  --y-lip: #7a5600;
-  --y-glow: rgb(245 184 0 / 0.5);
+  /* No yellow in the store since 2026-11-08 ("togli giallo come colore del
+     brand"): the accent is white, the buttons are the brand kit's glass
+     (components/ui/GlassButton.tsx). */
+  --y: #fff;
   --ink: #070707;
   --ink-2: #111;
   --ink-3: #1a1a1a;
