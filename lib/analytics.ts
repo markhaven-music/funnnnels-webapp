@@ -570,7 +570,7 @@ export const TESTS: TestDef[] = [
     // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
     // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
-    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-07 → 11-08, C 11-09 → today",
+    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-07 → 11-08, C 11-09 → today; orders go to the step they were paid on",
     // C: the same step as B with the phone's pay bar docked to the bottom edge
     // (11-08 17:29, "contiamolo come test C"); no letter of its own, only days.
     variants: [...PAY_TEST.variants, "c"],
@@ -714,7 +714,7 @@ function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, sin
 
 /**
  * A test judged on when each variant was the only one shown (TestDef.windows):
- * every visit and order of those days counts for it, whatever letter it carries.
+ * every visit of those days and every order paid while it ran counts for it, whatever letter it carries.
  */
 function windowTest(def: TestDef, days: DayRow[], sales: Sale[], rate: number, now: number): TestStats {
   const today = dayOf(now);
@@ -723,7 +723,10 @@ function windowTest(def: TestDef, days: DayRow[], sales: Sale[], rate: number, n
   const tagged: Sale[] = [];
   for (const [variant, w] of Object.entries(def.windows!)) {
     for (const r of days) if (r.funnel === def.funnel && inDays(r.day, w.days)) views.push({ funnel: r.funnel, page: r.page, lang: "", variant, views: r.views });
-    for (const s of sales) if (s.funnel === def.funnel && inDays(dayOf(s.created), w.days)) tagged.push({ ...s, variant });
+    // Orders by the minute they were paid (2026-11-08: the 20:45 order was paid on C,
+    // whose days only start 11-09); the visits by day, as they are kept.
+    const [from, until] = [Date.parse(w.from), w.until ? Date.parse(w.until) : Infinity];
+    for (const s of sales) if (s.funnel === def.funnel && s.created >= from && s.created < until) tagged.push({ ...s, variant });
   }
   const first = Object.values(def.windows!).map((w) => w.days[0]).sort()[0];
   return testOn(def, views, tagged, rate, first, now);
@@ -738,10 +741,16 @@ function windowTest(def: TestDef, days: DayRow[], sales: Sale[], rate: number, n
 async function checkoutPaid(funnel: string, w: { from: string; until: string | null }): Promise<CheckoutPaid> {
   const db = supabase();
   const until = w.until ?? new Date().toISOString();
+  const [fromAt, untilAt] = [Date.parse(w.from), Date.parse(until)];
+  // A buyer belongs to the step they paid on (2026-11-08, "dobbiamo attribuirlo a C non B
+  // mi sembra ovvio": checkout started at 17:17 on B, paid at 20:45 on C). So the starts
+  // of the two weeks before count too, for whoever paid in this window, and a start of this
+  // window paid in a later one leaves it. A start never paid stays where it started.
+  const lookback = new Date(fromAt - 14 * 86_400_000).toISOString();
   const [starts, cards, pp] = await Promise.all([
-    db.from("checkout_starts").select("email, started_at, device").eq("funnel", funnel).eq("own", false).gte("started_at", w.from).lt("started_at", until).limit(5000),
-    db.from("orders").select("email, created_at").eq("funnel", funnel).eq("status", "succeeded").is("offer", null).gte("created_at", w.from).lt("created_at", until).limit(5000),
-    db.from("paypal_sales").select("email, payer_email, created_at").eq("funnel", funnel).is("offer", null).gte("created_at", w.from).lt("created_at", until).limit(5000),
+    db.from("checkout_starts").select("email, started_at, device").eq("funnel", funnel).eq("own", false).gte("started_at", lookback).lt("started_at", until).limit(5000),
+    db.from("orders").select("email, created_at").eq("funnel", funnel).eq("status", "succeeded").is("offer", null).gte("created_at", lookback).limit(5000),
+    db.from("paypal_sales").select("email, payer_email, created_at").eq("funnel", funnel).is("offer", null).gte("created_at", lookback).limit(5000),
   ]);
   for (const r of [starts, cards, pp]) if (r.error) throw r.error;
   const low = (e: string | null | undefined) => (e ?? "").trim().toLowerCase();
@@ -765,11 +774,28 @@ async function checkoutPaid(funnel: string, w: { from: string; until: string | n
     }
   }
   const free = (e: string, at: number) => (optedAt.get(e) ?? Infinity) <= at;
-  const started = new Set(startRows.filter((r) => !free(low(r.email), Date.parse(r.started_at))).map((r) => low(r.email)));
-  // Only the orders of those who started the checkout in the window: a PayPal
-  // payment straight from elsewhere (11-03) has no checkout to count against.
-  const startedAt = new Map(startRows.map((r) => [low(r.email), Date.parse(r.started_at)]));
-  const paid = new Set(orderRows.filter((r) => started.has(r.e) && r.at >= (startedAt.get(r.e) ?? Infinity)).map((r) => r.e));
+  // Each email's last checkout start before the window ends (free-pack sign-ups left out) and its first payment after it.
+  const startedAt = new Map<string, number>();
+  for (const r of startRows) {
+    const e = low(r.email);
+    const at = Date.parse(r.started_at);
+    if (!e || free(e, at)) continue;
+    startedAt.set(e, Math.max(startedAt.get(e) ?? 0, at));
+  }
+  const paidAt = new Map<string, number>();
+  for (const r of orderRows) {
+    const st = startedAt.get(r.e);
+    if (st === undefined || r.at < st) continue;
+    paidAt.set(r.e, Math.min(paidAt.get(r.e) ?? Infinity, r.at));
+  }
+  const inWindow = (t: number) => t >= fromAt && t < untilAt;
+  const started = new Set(
+    [...startedAt].filter(([e, st]) => {
+      const paid = paidAt.get(e);
+      return paid !== undefined ? inWindow(paid) : inWindow(st);
+    }).map(([e]) => e),
+  );
+  const paid = new Set([...started].filter((e) => paidAt.has(e)));
   const deviceOf = new Map(startRows.map((r) => [low(r.email), r.device]));
   const phones = [...started].filter((e) => deviceOf.get(e) === "mobile");
   return {

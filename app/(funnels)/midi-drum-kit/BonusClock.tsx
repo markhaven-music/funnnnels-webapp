@@ -158,7 +158,13 @@ export function BonusItem({ w, image, price, currency, lang, compact }: { w: Bon
         <span className={d.bonusName}>
           <span className={d.bonusBadge}>{w.badge}</span> {w.name}
         </span>
-        {!compact && <span className={d.bonusLine}>{w.line}</span>}
+        {/* What's inside, also in step 2 (2026-11-08, "si capisca cosa stiamo dando gratis? cosa è incluso nelle espansioni"). */}
+        <span className={d.bonusLine}>{w.line}</span>
+        <ul className={d.bonusList}>
+          {w.list.map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ul>
         <span className={d.bonusAdded}>
           <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
             <path fill="currentColor" d="M6.2 11.6 2.8 8.2l1.1-1.1 2.3 2.3 5.9-5.9 1.1 1.1z" />

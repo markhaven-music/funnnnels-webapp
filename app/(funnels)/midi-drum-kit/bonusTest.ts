@@ -75,6 +75,8 @@ export type BonusWords = {
   badge: string;
   name: string;
   line: string;
+  /** What's in the Expansions, one line per style (the zip's own folders: 172 MIDI files, 2026-11-08). */
+  list: string[];
   free: string;
   added: string;
   /** Beside "Summary" in step 2 while the bonus is in the order. */
@@ -84,60 +86,65 @@ export type BonusWords = {
 
 export const BONUS_WORDS: Record<Lang, BonusWords> = {
   en: {
-    lead: "Order in the next {time} and get the Expansions free.",
+    lead: "Order in the next {time} and get the Expansions free: 172 more MIDI files.",
     sub: "Not a fake timer. Close this page and the offer is gone.",
     over: "Time's up. The free Expansions are gone.",
     badge: "BONUS",
     name: "MIDI Drum Kit Expansions",
-    line: "3 expansions: complete beats for House, Lo-Fi and Afrobeat.",
+    line: "172 more MIDI files in 3 new styles:",
+    list: ["Afrobeat: 61 patterns, 7 fragments, 5 complete multi-track beats", "Lo-Fi: 87 MIDI files", "House: 12 complete beats"],
     free: "FREE",
     added: "Already in your order",
     summaryTag: "(+ FREE BONUS)",
     expired: "The 5 minutes are up: the free Expansions are no longer in your order. Check the total and pay again.",
   },
   fr: {
-    lead: "Commande dans les {time} et les Expansions sont offertes.",
+    lead: "Commande dans les {time} et les Expansions sont offertes : 172 fichiers MIDI de plus.",
     sub: "Ce n'est pas un faux minuteur. Ferme cette page et l'offre disparaît.",
     over: "Temps écoulé. Les Expansions offertes ne sont plus disponibles.",
     badge: "BONUS",
     name: "MIDI Drum Kit Expansions",
-    line: "3 expansions : des beats complets House, Lo-Fi et Afrobeat.",
+    line: "172 fichiers MIDI de plus, dans 3 nouveaux styles :",
+    list: ["Afrobeat : 61 patterns, 7 fragments, 5 beats complets multipistes", "Lo-Fi : 87 fichiers MIDI", "House : 12 beats complets"],
     free: "OFFERT",
     added: "Déjà dans ta commande",
     summaryTag: "(+ BONUS OFFERT)",
     expired: "Les 5 minutes sont passées : les Expansions offertes ne sont plus dans ta commande. Vérifie le total et paie à nouveau.",
   },
   es: {
-    lead: "Pide en los próximos {time} y llévate las Expansions gratis.",
+    lead: "Pide en los próximos {time} y llévate las Expansions gratis: 172 archivos MIDI más.",
     sub: "No es un temporizador falso. Cierra esta página y la oferta desaparece.",
     over: "Se acabó el tiempo. Las Expansions gratis ya no están.",
     badge: "BONUS",
     name: "MIDI Drum Kit Expansions",
-    line: "3 expansiones: beats completos de House, Lo-Fi y Afrobeat.",
+    line: "172 archivos MIDI más, en 3 estilos nuevos:",
+    list: ["Afrobeat: 61 patrones, 7 fragmentos, 5 beats completos multipista", "Lo-Fi: 87 archivos MIDI", "House: 12 beats completos"],
     free: "GRATIS",
     added: "Ya en tu pedido",
     summaryTag: "(+ BONUS GRATIS)",
     expired: "Pasaron los 5 minutos: las Expansions gratis ya no están en tu pedido. Revisa el total y paga de nuevo.",
   },
   de: {
-    lead: "Bestelle in den nächsten {time} und die Expansions sind gratis dabei.",
+    lead: "Bestelle in den nächsten {time} und die Expansions sind gratis dabei: 172 zusätzliche MIDI-Dateien.",
     sub: "Kein Fake-Timer. Schließt du diese Seite, ist das Angebot weg.",
     over: "Die Zeit ist um. Die gratis Expansions sind weg.",
     badge: "BONUS",
     name: "MIDI Drum Kit Expansions",
-    line: "3 Expansions: komplette Beats für House, Lo-Fi und Afrobeat.",
+    line: "172 zusätzliche MIDI-Dateien in 3 neuen Stilen:",
+    list: ["Afrobeat: 61 Patterns, 7 Fragmente, 5 komplette Multitrack-Beats", "Lo-Fi: 87 MIDI-Dateien", "House: 12 komplette Beats"],
     free: "GRATIS",
     added: "Schon in deiner Bestellung",
     summaryTag: "(+ GRATIS-BONUS)",
     expired: "Die 5 Minuten sind um: Die gratis Expansions sind nicht mehr in deiner Bestellung. Prüfe den Gesamtbetrag und bezahle erneut.",
   },
   it: {
-    lead: "Ordina nei prossimi {time} e le Expansions sono gratis.",
+    lead: "Ordina nei prossimi {time} e le Expansions sono gratis: 172 file MIDI in più.",
     sub: "Non è un timer finto. Chiudi questa pagina e l'offerta sparisce.",
     over: "Tempo scaduto. Le Expansions gratis non ci sono più.",
     badge: "BONUS",
     name: "MIDI Drum Kit Expansions",
-    line: "3 espansioni: beat completi House, Lo-Fi e Afrobeat.",
+    line: "172 file MIDI in più, in 3 nuovi stili:",
+    list: ["Afrobeat: 61 pattern, 7 frammenti, 5 beat completi multitraccia", "Lo-Fi: 87 file MIDI", "House: 12 beat completi"],
     free: "GRATIS",
     added: "Già nel tuo ordine",
     summaryTag: "(+ BONUS GRATIS)",
