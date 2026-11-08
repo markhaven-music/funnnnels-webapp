@@ -3,7 +3,11 @@
 // availability...' and then says 'A license is still available' and THEN goes
 // to the order page"). Every funnel's buttons are plain links to its /order
 // page, so one listener catches them: a click on a link to …/order shows the
-// popup, ~1.5 s of a spinner, ~1.2 s of the yellow ✓, then the link opens.
+// popup, ~3 s of a spinner ("fallo durare di piu il checking availability"), ~0.7 s of the yellow ✓, then the link opens.
+// The order page loads behind the popup from the tap on: Chrome/Android
+// prerender it whole and switch at once after the ✓; Safari (no prerender)
+// starts going there as the ✓ appears, so the ✓ stays up while it loads
+// ("ci mette troppo tempo dopo 'a license is still available'").
 // A click another script already handled (defaultPrevented), a new-tab click
 // (⌘/ctrl/shift/middle) or a link to another site goes through untouched.
 // Words in the page's language (<html lang>), English otherwise.
@@ -40,14 +44,15 @@ var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a||a.target===
 var u;try{u=new URL(a.href,location.href)}catch(x){return}
 if(u.origin!==location.origin||!/\\/order(\\/|$)/.test(u.pathname)||/\\/order(\\/|$)/.test(location.pathname))return;
 e.preventDefault();busy=1;
+var pre=0;try{if(HTMLScriptElement.supports&&HTMLScriptElement.supports('speculationrules')){pre=1;var sr=document.createElement('script');sr.type='speculationrules';sr.textContent=JSON.stringify({prerender:[{source:'list',urls:[u.href],eagerness:'immediate'}]});document.head.appendChild(sr)}else{fetch(u.href,{credentials:'same-origin'}).catch(function(){})}}catch(x){}
 var w=W[(document.documentElement.lang||'en').slice(0,2)]||W.en;
 if(!document.getElementById('fv-av-css')){var s=document.createElement('style');s.id='fv-av-css';s.textContent=${JSON.stringify(CSS)};document.head.appendChild(s)}
 var d=document.createElement('div');d.className='fv-av';d.setAttribute('role','status');d.setAttribute('aria-live','polite');
 d.innerHTML='<div class="fv-av-box"><div class="fv-av-ic"><div class="fv-av-spin"></div><div class="fv-av-ok"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#000" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="fv-av-t1"></div><div class="fv-av-t2"></div></div>';
 d.querySelector('.fv-av-t1').textContent=w[0];d.querySelector('.fv-av-t2').textContent=w[1];
 document.body.appendChild(d);requestAnimationFrame(function(){d.classList.add('on')});
-setTimeout(function(){d.classList.add('done')},1500);
-setTimeout(function(){location.href=u.href},2700);
+setTimeout(function(){d.classList.add('done')},3000);
+setTimeout(function(){location.href=u.href},pre?3700:3100);
 });
 window.addEventListener('pageshow',function(e){if(e.persisted){busy=0;var d=document.querySelector('.fv-av');if(d)d.remove()}});
 })();`;
