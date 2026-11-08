@@ -85,6 +85,15 @@ statuses, every export field) was archived in `cf_orders`, with the CSV as
 downloaded in `cf_exports` (db/cf-orders-archive.sql): payment ids, amounts,
 refunds and disputes after ClickFunnels is gone.
 
+On 2026-11-08 the last export (db/cf-orders-archive.sql, end): no
+ClickFunnels order was paid after 2026-10-31, so `cf_orders` is complete; its
+Payments list (declines with their codes, refunds) is in `cf_exports`. The
+contacts were re-read: 8 new ones added, 9 unsubscribed and 4 undeliverable
+in ClickFunnels turned off here, tags merged, no sequence started; every
+contact's ClickFunnels "date added" is `contacts.cf_added_at` (the real
+opt-in day, for opt-in → purchase timing). Every broadcast it sent (128, from
+2025-11-28) is in `cf_broadcasts` with its HTML and report numbers.
+
 On 2026-11-02 the 15 broadcasts ClickFunnels had scheduled for Nov 16–30 (the
 TOP HITS launch and the Drum Kit emails between them) were moved into
 Dashboard → Broadcasts, word for word, at the same times (ClickFunnels'
