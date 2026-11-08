@@ -1,5 +1,6 @@
 import { funnel as jazz } from "@/app/(funnels)/jazz-midi-pack/funnel";
 import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
+import { funnel as drunkGrooves } from "@/app/(funnels)/drunk-swing-grooves/funnel";
 import { funnel as drumKit } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
@@ -124,7 +125,23 @@ const FAMOUS_BEATS: Product = {
   offers: famousBeats.offers,
 };
 
-const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS, [DRUM_KIT.slug]: DRUM_KIT, [FAMOUS_BEATS.slug]: FAMOUS_BEATS };
+// Drunk Swing Grooves (2026-11-08): €7, the Record Samples add-on, the Jazz MIDI Pack then Famous Beats after the order.
+const DRUNK_GROOVES: Product = {
+  kind: "code",
+  slug: drunkGrooves.slug,
+  product: drunkGrooves.product,
+  brand: drunkGrooves.brand,
+  tagline: drunkGrooves.tagline,
+  price: drunkGrooves.price,
+  bump: null,
+  bumps: drunkGrooves.bumps.map(({ id, name, price, pitch, image }) => ({ id, name, price, pitch, image })),
+  checkout: drunkGrooves.checkout,
+  optin: null,
+  launch: null,
+  offers: drunkGrooves.offers,
+};
+
+const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS, [DRUM_KIT.slug]: DRUM_KIT, [FAMOUS_BEATS.slug]: FAMOUS_BEATS, [DRUNK_GROOVES.slug]: DRUNK_GROOVES };
 
 // Named for the abandoned-checkout reminder ("Your GRIND STUDIO order is
 // waiting"); the receipt names the products themselves.

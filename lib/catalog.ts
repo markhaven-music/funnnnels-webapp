@@ -4,6 +4,7 @@ import { funnel as drumKit } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { funnel as jazz } from "@/app/(funnels)/jazz-midi-pack/funnel";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
+import { funnel as drunkGrooves } from "@/app/(funnels)/drunk-swing-grooves/funnel";
 import type { Money } from "@/lib/launch";
 import { signedDownload } from "@/lib/products";
 import { presignedDownload, r2Configured } from "@/lib/r2";
@@ -87,6 +88,8 @@ const ZIP_PRODUCT: Record<string, string> = {
   "Jazz MIDI Chord Pack.zip": "jazz-chord-pack",
   "Anime & Video Game MIDI Chord Pack.zip": "anime-pack",
   "Drum Loops for Songwriting.zip": "drum-loops",
+  "Drunk Swing Grooves.zip": "drunk-swing-grooves",
+  "Jazz Record Samples.zip": "jazz-record-samples",
 };
 
 type CodeFunnel = {
@@ -102,6 +105,7 @@ export const CODE_FUNNELS: CodeFunnel[] = [
   { slug: topHits.slug, name: topHits.product, files: topHits.files },
   { slug: drumKit.slug, name: drumKit.product, files: drumKit.files, includes: drumKit.includes },
   { slug: famousBeats.slug, name: famousBeats.product, files: famousBeats.files },
+  { slug: drunkGrooves.slug, name: drunkGrooves.product, files: drunkGrooves.files },
 ];
 
 const zipOf = (p: string) => p.split("/").pop() ?? p;
@@ -344,4 +348,5 @@ const CODE_UPSELLS: Record<string, string[]> = {
   [drumKit.slug]: drumKit.offers.map((o) => o.id),
   [famousBeats.slug]: famousBeats.offers.map((o) => o.id),
   [jazz.slug]: jazz.offers.map((o) => o.id),
+  [drunkGrooves.slug]: drunkGrooves.offers.map((o) => o.id),
 };

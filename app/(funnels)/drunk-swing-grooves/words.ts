@@ -1,0 +1,162 @@
+import { ORDER as TOP_HITS_ORDER, THANKS as TOP_HITS_THANKS } from "../top-hits-midi-bundle/words";
+import { funnel } from "./funnel";
+
+// Every word of the Drunk Swing Grooves pages (lib/words.ts reads the dashboard's
+// edits by path). Marks: **bold**, ==highlight== (the page's yellow), {price} =
+// the price in the visitor's currency, "|" breaks a heading's line. Every claim
+// is in ./BRIEF.md. Angle (the user's, 2026-11-08): "that drunk feeling, the
+// microtiming everybody wants but nobody knows how to make".
+
+const n = funnel.counts;
+
+export const LANDING = {
+  hero: {
+    title: "That ==drunk feeling.|In MIDI, ready to drag in.",
+    sub: "The microtiming everybody wants and nobody knows how to program: the snare dead on the beat, the hats leaning, the kick a little loose. " +
+      `${n.grooves} MIDI drum grooves with the J Dilla-style swing of lofi and neo soul.`,
+  },
+  ab: {
+    title: "Play the beat, then flip the switch.",
+    straight: "Quantized",
+    drunk: "Drunk",
+    caption: "Same notes, same sounds. Only the timing moves.",
+    play: "Play the beat",
+  },
+  bullets: [
+    `**${n.grooves} MIDI drum grooves**: ${n.patterns} beats, each in ${n.feels} feels`,
+    "Light, Medium and Heavy drunk, plus **Quintuplet Swing**",
+    "The snare on the beat, everything else laid back",
+    "Drum rack **and** multitrack versions of every groove",
+    `**${n.templates} groove templates** to put the feel on any MIDI`,
+    "Any DAW: Ableton, FL Studio, Logic, MPC and more",
+  ],
+  cta: { label: "Get the grooves", note: "{price} · instant download" },
+  proof: [
+    ["2,847", "producers have the GRIND STUDIO MIDI Drum Kit in their sessions"],
+    ["14 days", "satisfaction guarantee on every file"],
+  ],
+  why: {
+    title: "Why your drums sound stiff",
+    body: [
+      "Quantized MIDI puts every hit exactly on the grid. That's why it sounds like a machine.",
+      "The beats you love don't sit on the grid. The snare lands dead on the beat, and everything around it leans: the hats a hair early, the kick a little loose, the ghost notes dragging behind.",
+      "That's microtiming. You can do it by hand, moving every hit a few milliseconds by ear, on every beat, for hours. Or you start from a groove that already has it.",
+    ],
+    straight: "Quantized",
+    drunk: "Drunk",
+  },
+  feels: {
+    title: "Pick how drunk it sounds",
+    caption: "Dusty Boom Bap in all four feels, on a stock drum kit.",
+    items: [
+      ["Light Drunk", "A little loose. For keys and for beats that still need to feel tight."],
+      ["Medium Drunk", "The lofi pocket. The hats lean, the kick floats, the snare stays put."],
+      ["Heavy Drunk", "Late and lazy, like a beat finger-drummed on a pad."],
+      ["Quintuplet Swing", "Every second 16th on a five-note grid. Smooth and rolling: the neo soul swing."],
+    ],
+  },
+  inside: {
+    title: `${n.files} MIDI files. Here's what's inside.`,
+    items: [
+      [
+        `Drum Grooves (${n.grooves} files)`,
+        "10 beats: Dusty Boom Bap, Lazy Sunday, Late Night Lofi, Neo Soul Pocket, Sliding Kick, Half-Time Soul, Rimshot Shuffle, Broken Beat, Jazzy Hop, Tape Stop Groove. Each in 4 feels, 4 bars, 72 to 94 bpm, and in two versions: drum rack and multitrack.",
+      ],
+      [
+        `Groove Templates (${n.templates} files)`,
+        "Swing from 52% to 70%, septuplet and quintuplet swing, 12 drunk feels, laid back and pushed. Put one on any MIDI: chords, bass, your own drums.",
+      ],
+      [
+        `Bonus: Neo Soul Keys in Quintuplet Swing (${n.bonus} files)`,
+        "10 neo soul progressions from the GRIND STUDIO Jazz MIDI Pack, keys and bass, played on the quintuplet grid. Put one over a groove and hear the feel on a whole beat.",
+      ],
+      ["The guide (PDF)", "How to use the templates in Ableton Live and Logic Pro, and which feel to use for what."],
+    ],
+    bonusCaption: "The bonus: Royal Road keys and bass over Neo Soul Pocket, both in Quintuplet Swing.",
+  },
+  versions: {
+    title: "Drum rack or one sound per channel",
+    items: [
+      ["Drum Rack", "One track. Kick C1, snare D1, closed hat F#1. Drop it on a drum rack, an MPC or any General MIDI kit."],
+      [
+        "Multitrack",
+        "One track per sound: kick, snare, clap, rim, closed hat, open hat. Every note on C3, so a sample loaded on its own channel plays at its own pitch. For FL Studio's Channel Rack, a Simpler per sound in Ableton, a sampler per hit.",
+      ],
+    ],
+  },
+  guarantee: {
+    title: "14-day satisfaction guarantee",
+    text: "A file doesn't work, or the pack isn't what this page says? Email {email} within 14 days and we fix it.",
+  },
+  license: {
+    title: "Royalty-free",
+    text: "Use the grooves in your own beats and releases, commercial ones too. No credit needed. Just don't resell or share the files.",
+  },
+  faq: {
+    title: "Questions",
+    items: [
+      ["Do they come with drum sounds?", "No, they're MIDI: you play them with your own kit. You bring the sounds, the files bring the feel."],
+      ["Which DAWs?", "Any DAW that opens .mid files: Ableton Live, FL Studio, Logic Pro, Cubase, Studio One, Reaper, Bitwig, GarageBand, MPC software."],
+      [
+        "What's a groove template?",
+        "Two bars of 16th notes with the timing of a feel. In Ableton you drop it in the Groove Pool, in Logic you make it a groove template, and the MIDI you apply it to takes that feel. The guide shows how.",
+      ],
+      ["Why is the snare on the beat?", "The snare is the anchor. When it stays put and everything around it moves, the beat sounds loose but never sloppy."],
+      ["How do I get the files?", `Right after you pay: a download button on the next page and a link by email. One zip, ${n.files} MIDI files and a PDF guide.`],
+    ],
+  },
+  final: { title: "Make your drums feel drunk." },
+};
+export type LandingWords = typeof LANDING;
+
+// The order page: TOP HITS' template (as Famous Beats'), this pack's list and add-on.
+// No reviews: this pack has none yet, and none are invented (grind-funnel-page §7).
+export const ORDER = {
+  ...TOP_HITS_ORDER,
+  redbar: "**Instant download:** 131 MIDI files, any DAW",
+  bullets: [
+    "80 MIDI drum grooves in 4 feels",
+    "Light, Medium, Heavy drunk + Quintuplet Swing",
+    "Snare on the beat, everything else laid back",
+    "Drum rack and multitrack versions",
+    "31 groove templates for any MIDI",
+    "Bonus: neo soul keys in quintuplet swing",
+    "Any DAW, Mac and PC",
+    "Royalty-free",
+    "14-day satisfaction guarantee",
+  ],
+  reviews: [] as { quote: string; name: string; role: string }[],
+  guarantee: {
+    title: "14-Day Satisfaction Guarantee",
+    text: "A file doesn't work, or the pack isn't what the page says? Email {email} within {days} days and we fix it.",
+  },
+  form: { ...TOP_HITS_ORDER.form, pay: "GET THE GROOVES!", paypalNote: "After you click **GET THE GROOVES!** below, you finish paying on PayPal's secure page, then come straight back to your download." },
+  bumps: {
+    "record-samples": [
+      "**122 WAV loops** of jazz chord progressions in Rhodes and piano, made to sound like an old record. Chop them like a sample over your grooves, no clearance needed. Add them for **{c}7**.",
+    ],
+  } as Record<string, string[]>,
+};
+export type OrderWords = typeof ORDER;
+
+export const THANKS = TOP_HITS_THANKS;
+
+// The Jazz MIDI Pack's one-click page after the order (./offer).
+export const UPSELL = {
+  bar: "Wait. Your order is complete: one more thing for your grooves.",
+  title: "Your grooves swing.|Now give them ==chords that swing with them.",
+  sub: "The Jazz MIDI Pack: the progressions behind lofi, neo soul and jazz, as MIDI, already voiced like a pianist plays them. Drop one over a drunk groove and the beat is there.",
+  bullets: [
+    "**10,496 MIDI files** in 5 folders",
+    "The most used jazz progressions × 12 voicings × 8 rhythms",
+    "Every progression in all 12 keys",
+    "Walking, two-feel and bossa bass lines",
+    "Lofi, neo soul, trap soul and deep house loops, drums included",
+    "Chord names written into every file",
+  ],
+  listen: "The pack's Royal Road, keys and bass, over a Drunk Swing groove:",
+  yes: "Yes, add the Jazz MIDI Pack for {price}",
+  yesSub: "One click: charged to the card or PayPal you just used",
+  no: "No thanks, I'll skip the chords",
+};
+export type UpsellWords = typeof UPSELL;

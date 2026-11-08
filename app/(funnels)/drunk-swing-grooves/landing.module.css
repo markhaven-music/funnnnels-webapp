@@ -1,0 +1,483 @@
+/* Drunk Swing Grooves landing. The GRIND STUDIO funnel palette (grind-funnel-page §3):
+   one yellow #f5b800, white text (88% body, 62% muted), black page and #111 bands,
+   no borders, no outlines, 3-4px corners, 12px on the two-column panel. Mobile first. */
+.page {
+  --y: #f5b800;
+  --y-gloss: #ffe14d;
+  --y-deep: #c99700;
+  --y-lip: #6b5000;
+  --y-glow: rgb(245 184 0 / 0.55);
+  --text: rgb(255 255 255 / 0.88);
+  --muted: rgb(255 255 255 / 0.62);
+  min-height: 100vh;
+  background: #070707;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.page b {
+  color: #fff;
+  font-weight: 700;
+}
+.hl {
+  color: var(--y);
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.narrow {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.section,
+.band {
+  padding: 72px 0;
+}
+.band {
+  background: #111;
+}
+/* Below the fold: drawn only when scrolled near (docs/page-speed.md). */
+.lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* ─── hero ─────────────────────────────────────────── */
+.hero {
+  background: #000;
+  padding: 28px 0 64px;
+  text-align: center;
+  background-image: radial-gradient(ellipse 70% 40% at 50% 46%, rgb(255 255 255 / 0.06), transparent 70%);
+}
+.logo {
+  display: block;
+  width: 150px;
+  height: auto;
+  margin: 0 auto 30px;
+  opacity: 0.9;
+}
+.h1 {
+  margin: 0 auto 18px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(34px, 9vw, 62px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-wrap: balance;
+}
+.sub {
+  max-width: 620px;
+  margin: 0 auto 30px;
+  font-size: 18px;
+  color: var(--text);
+  text-wrap: pretty;
+}
+.h2 {
+  margin: 0 0 22px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(28px, 6.5vw, 40px);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: #fff;
+  text-wrap: balance;
+}
+.h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.2;
+  color: #fff;
+}
+
+/* the A/B player */
+.ab {
+  max-width: 520px;
+  margin: 0 auto 34px;
+  padding: 22px 18px 18px;
+  background: #121212;
+  border-radius: 4px;
+}
+.abRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.abPlay,
+.clip {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.disc {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--y);
+  box-shadow: 0 6px 22px rgb(245 184 0 / 0.35);
+  transition: transform 0.15s;
+}
+.abPlay:active .disc,
+.clip:active .disc {
+  transform: scale(0.94);
+}
+.clip .disc {
+  width: 52px;
+  height: 52px;
+}
+.triangle {
+  width: 0;
+  height: 0;
+  margin-left: 5px;
+  border-style: solid;
+  border-width: 11px 0 11px 18px;
+  border-color: transparent transparent transparent #000;
+}
+.square {
+  width: 18px;
+  height: 18px;
+  background: #000;
+  border-radius: 2px;
+}
+.switch {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: #000;
+  border-radius: 4px;
+}
+.switch button {
+  min-height: 52px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted);
+  font: 700 17px/1 var(--font-display), system-ui, sans-serif;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.switch button.on {
+  background: var(--y);
+  color: #000;
+}
+.abCaption {
+  margin: 14px 0 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.bullets {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+  margin: 0 auto 36px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.bullets li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.tick {
+  flex: none;
+  margin-top: 3px;
+  color: var(--y);
+}
+.cta {
+  margin: 0 auto;
+  max-width: 520px;
+  text-align: center;
+}
+.cta p {
+  color: var(--muted);
+  font-size: 15px;
+}
+.proof {
+  display: grid;
+  gap: 8px;
+  margin-top: 30px;
+  font-size: 15px;
+  color: var(--muted);
+}
+.proof p {
+  margin: 0;
+}
+.proof b {
+  color: var(--y);
+}
+
+/* ─── copy beside a visual (a panel, grind-funnel-page §4) ─── */
+.panel {
+  display: grid;
+  gap: 28px;
+  width: calc(100% - 32px);
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 22px;
+  background: #0d0c10;
+  border-radius: 12px;
+}
+.panelCopy p {
+  margin: 0 0 16px;
+}
+.gridPair {
+  display: grid;
+  gap: 18px;
+}
+.grid p {
+  margin: 0 0 8px;
+  font: 700 15px/1 var(--font-display), system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+.gridStraight {
+  color: var(--muted);
+}
+.gridDrunk {
+  color: var(--y);
+}
+.gridRow {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+}
+.gridName {
+  font-size: 13px;
+  color: var(--muted);
+}
+.gridLane {
+  position: relative;
+  height: 26px;
+  background: #050505;
+  border-radius: 3px;
+}
+.beatLine,
+.stepLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+.beatLine {
+  background: rgb(255 255 255 / 0.22);
+}
+.stepLine {
+  background: rgb(255 255 255 / 0.07);
+}
+.hit,
+.hitDrunk,
+.hitSnare {
+  position: absolute;
+  top: 4px;
+  width: 5%;
+  height: 18px;
+  border-radius: 2px;
+}
+.hit {
+  background: rgb(255 255 255 / 0.55);
+}
+.hitDrunk {
+  background: var(--y);
+}
+.hitSnare {
+  background: #fff;
+}
+
+/* ─── the four feels ─── */
+.feels {
+  display: grid;
+  gap: 26px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+.feels li {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.feels h3,
+.inside h3,
+.versions h3 {
+  margin: 0 0 4px;
+  font: 700 21px/1.25 var(--font-display), system-ui, sans-serif;
+  color: #fff;
+}
+.feels p,
+.inside p,
+.versions p {
+  margin: 0;
+}
+.caption {
+  margin: 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* ─── what's inside: one under the other, numbered ─── */
+.inside {
+  display: grid;
+  gap: 34px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: in;
+}
+.inside li {
+  position: relative;
+  padding-left: 52px;
+  counter-increment: in;
+}
+.inside li::before {
+  content: counter(in);
+  position: absolute;
+  left: 0;
+  top: -2px;
+  font: 800 34px/1 var(--font-display), system-ui, sans-serif;
+  color: var(--y);
+}
+.inlineClip {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-top: 16px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.versions {
+  display: grid;
+  gap: 30px;
+  margin-bottom: 44px;
+}
+
+.promise {
+  display: grid;
+  gap: 34px;
+}
+.promise p {
+  margin: 0;
+}
+
+.faq details {
+  padding: 18px 0;
+}
+.faq details + details {
+  margin-top: 4px;
+}
+.faq summary {
+  cursor: pointer;
+  font: 700 19px/1.35 var(--font-display), system-ui, sans-serif;
+  color: #fff;
+  list-style: none;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq summary::after {
+  content: " +";
+  color: var(--y);
+}
+.faq details[open] summary::after {
+  content: " −";
+}
+.faq p {
+  margin: 10px 0 0;
+}
+
+.final {
+  padding: 80px 0 90px;
+  background: #000;
+  text-align: center;
+}
+
+.footer {
+  padding: 30px 20px 40px;
+  background: #000;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+.footer a {
+  color: var(--muted);
+}
+
+/* ─── wider screens ─── */
+@media (min-width: 900px) {
+  .hero {
+    padding: 40px 0 90px;
+  }
+  .section,
+  .band {
+    padding: 104px 0;
+  }
+  .panel {
+    grid-template-columns: 45fr 55fr;
+    gap: 56px;
+    align-items: center;
+    padding: 48px;
+  }
+  .versions {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+  .promise {
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+}
+
+/* ─── the Jazz MIDI Pack upsell (../offer) ─── */
+.upBar {
+  margin: 0;
+  padding: 12px 20px;
+  background: var(--y);
+  color: #000;
+  font: 700 16px/1.35 var(--font-display), system-ui, sans-serif;
+  text-align: center;
+}
+.upBox {
+  display: block;
+  width: min(320px, 80vw);
+  height: auto;
+  margin: 0 auto 30px;
+}
+.upNote {
+  margin: 12px auto 0;
+  max-width: 440px;
+  font-size: 15px;
+  color: #fff;
+}
+.noThanks {
+  display: block;
+  margin: 22px auto 0;
+  padding: 8px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
+  text-decoration: underline;
+  cursor: pointer;
+}

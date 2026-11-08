@@ -29,6 +29,12 @@ const CARDS: CodeCard[] = [
     image: "/funnels/famous-beats-bundle/preview.webp",
     steps: 3,
   },
+  {
+    id: "drunk-swing-grooves",
+    name: "Drunk Swing Grooves",
+    image: "/funnels/drunk-swing-grooves/preview.webp",
+    steps: 4,
+  },
   // The free lead magnets (app/free), listed apart under Lead magnets, one card per
   // pack. Each opens its map (lib/funnelMap.ts freePacksMap): the sign-up page, then
   // the MIDI Drum Kit's pages. Analytics doesn't count them, so the cards show no

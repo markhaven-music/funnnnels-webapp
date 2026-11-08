@@ -15,7 +15,7 @@ export const BUCKET = "product-files";
 
 // First path segments that are app routes, never product slugs (see proxy.ts).
 // Two-letter language prefixes (/fr/midi-drum-kit…) are taken too.
-export const RESERVED_SLUGS = new Set(["api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", "famous-beats-bundle", "shop", "home", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", "free", "fr", "it", "de", "nl", "es", "favicon", "robots", "sitemap",
+export const RESERVED_SLUGS = new Set(["api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", "famous-beats-bundle", "drunk-swing-grooves", "shop", "home", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", "free", "fr", "it", "de", "nl", "es", "favicon", "robots", "sitemap",
   // The free packs' ClickFunnels paths (app/free/packs.ts).
   ...[...Object.keys(FREE_PAGES), ...Object.keys(FREE_REDIRECTS)].map((p) => p.slice(1))]);
 export const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;

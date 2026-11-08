@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { funnel as drumKit, unlocked as drumKitUnlocked } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { funnel as jazz, unlocked as jazzUnlocked } from "@/app/(funnels)/jazz-midi-pack/funnel";
 import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
+import { funnel as drunkGrooves } from "@/app/(funnels)/drunk-swing-grooves/funnel";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import { resolveFunnel } from "@/lib/funnels";
 import { SHOP_HOME } from "@/lib/liveUrl";
@@ -90,6 +91,7 @@ type Shelf = {
 const OFFER_COVERS: Record<string, string> = {
   "famous-beats": "/funnels/midi-drum-kit/bonus-famous.webp",
   "top-hits": "/funnels/top-hits-midi-bundle/product.webp",
+  "jazz-pack": "/funnels/jazz-midi-pack/box-520.webp",
 };
 
 const SHELVES: Record<string, Shelf> = {
@@ -122,6 +124,17 @@ const SHELVES: Record<string, Shelf> = {
     unlocked: (items) => items,
     cover: (o) => (o.offer ? (OFFER_COVERS[o.offer] ?? "/funnels/famous-beats-bundle/product.webp") : "/funnels/famous-beats-bundle/product.webp"),
     download: (o, file) => `/${famousBeats.slug}/download?order=${o.id}&file=${file}`,
+  },
+  [drunkGrooves.slug]: {
+    product: drunkGrooves.product,
+    labels: {
+      pack: drunkGrooves.product,
+      ...Object.fromEntries(drunkGrooves.bumps.map((b) => [b.id, b.name])),
+      ...Object.fromEntries(drunkGrooves.offers.map((o) => [o.id, o.name])),
+    },
+    unlocked: (items) => items,
+    cover: (o) => (o.offer ? (OFFER_COVERS[o.offer] ?? "/funnels/drunk-swing-grooves/product-600.webp") : "/funnels/drunk-swing-grooves/product-600.webp"),
+    download: (o, file) => `/${drunkGrooves.slug}/download?order=${o.id}&file=${file}`,
   },
   [jazz.slug]: {
     product: jazz.product,

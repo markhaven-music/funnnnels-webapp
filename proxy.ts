@@ -19,6 +19,7 @@ const FUNNEL_HOME: Record<string, string> = {
   "top-hits-midi-bundle": "https://m.thegrind.studio",
   "midi-drum-kit": "https://m.thegrind.studio",
   "famous-beats-bundle": "https://m.thegrind.studio",
+  "drunk-swing-grooves": "https://m.thegrind.studio",
   account: "https://m.thegrind.studio", // the customer login (app/account)
   shop: "https://m.thegrind.studio", // the shop (app/shop)
   home: "https://m.thegrind.studio", // the homepage (app/home), the brand domain's /
@@ -36,7 +37,7 @@ const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
 // The visitor keeps the plain URL; the country comes from ?country= (the
 // brand domain's rewrite sets it, and it lets you preview either price) or
 // from Vercel's geo header, and also goes into a cookie for the checkout.
-const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/jazz-midi-pack/offer", "/top-hits-midi-bundle", "/top-hits-midi-bundle/order", "/top-hits-midi-bundle/offer", "/famous-beats-bundle", "/famous-beats-bundle/order", "/famous-beats-bundle/offer", "/midi-drum-kit/bounce", "/home"]);
+const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/jazz-midi-pack/offer", "/top-hits-midi-bundle", "/top-hits-midi-bundle/order", "/top-hits-midi-bundle/offer", "/famous-beats-bundle", "/famous-beats-bundle/order", "/famous-beats-bundle/offer", "/drunk-swing-grooves", "/drunk-swing-grooves/order", "/drunk-swing-grooves/offer", "/drunk-swing-grooves/offer-2", "/midi-drum-kit/bounce", "/home"]);
 
 // Launch-kit products (dashboard → Launches) live at /<slug> and are served by
 // app/(funnels)/[slug]: the page per currency, /<slug>/thank-you and
@@ -50,7 +51,7 @@ const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/ja
 const LOCALIZED: Record<string, readonly string[]> = { "midi-drum-kit": DRUM_KIT_LANGS };
 const LANG_PREFIXES = new Set(["fr", "it", "de", "nl", "es"]);
 
-const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", "famous-beats-bundle", "shop", "home", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", "free", ...LANG_PREFIXES]);
+const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "midi-drum-kit", "famous-beats-bundle", "drunk-swing-grooves", "shop", "home", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", "free", ...LANG_PREFIXES]);
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
@@ -89,6 +90,7 @@ const PUBLIC = [
   /^\/top-hits-midi-bundle(\/|$)/,
   /^\/midi-drum-kit(\/|$)/,
   /^\/famous-beats-bundle(\/|$)/,
+  /^\/drunk-swing-grooves(\/|$)/,
   /^\/shop(\/|$)/, // the shop's pages, its thank-you page and downloads
   /^\/home(\/|$)/, // the homepage
   /^\/legal\/[a-z-]+$/, // the legal pages

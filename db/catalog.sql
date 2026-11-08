@@ -79,7 +79,10 @@ insert into public.catalog (slug, name, store, file, cover, status, position) va
   ('expansions',       'MIDI Drum Kit Expansions (House, Lo-Fi, Afrobeat)', 'r2',    'midi-drum-kit/EXPLORER Expansions (House, Lofi, Afrobeat).zip', '/funnels/midi-drum-kit/bump-expansions.webp',             'draft', 107),
   ('jazz-chord-pack',  'Jazz MIDI Chord Pack',                              'local', 'private/jazz-midi-pack/Jazz MIDI Chord Pack.zip',               '/funnels/jazz-midi-pack/bonus-1-360.webp',                'draft', 108),
   ('anime-pack',       'Anime & Video Game MIDI Chord Pack',                'local', 'private/jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip', '/funnels/jazz-midi-pack/bonus-3-360.webp',                'draft', 109),
-  ('drum-loops',       'Drum Loops for Songwriting',                        'r2',    'jazz-midi-pack/Drum Loops for Songwriting.zip',                 '/funnels/jazz-midi-pack/bonus-5-360.webp',                'draft', 110);
+  ('drum-loops',       'Drum Loops for Songwriting',                        'r2',    'jazz-midi-pack/Drum Loops for Songwriting.zip',                 '/funnels/jazz-midi-pack/bonus-5-360.webp',                'draft', 110),
+  -- 2026-11-08: the Jazz order's €7 add-ons, then Drunk Swing Grooves' own funnel.
+  ('jazz-record-samples', 'Jazz Record Samples (122 WAV Loops)',              'r2',    'jazz-midi-pack/Jazz Record Samples.zip',                        '/funnels/jazz-midi-pack/bump-records.webp',               'draft', 111),
+  ('drunk-swing-grooves', 'Drunk Swing Grooves (131 MIDI Files)',             'r2',    'jazz-midi-pack/Drunk Swing Grooves.zip',                        '/funnels/drunk-swing-grooves/product-600.webp',           'draft', 112);
 
 insert into public.funnel_items (funnel, role, key, product, name, price_eur_cents, price_usd_cents, position) values
   ('jazz-midi-pack',       'main',   'pack',           'jazz-midi-pack', 'Jazz MIDI Pack',                                 2700, 2700, 0),
@@ -101,4 +104,8 @@ insert into public.funnel_items (funnel, role, key, product, name, price_eur_cen
   ('famous-beats-bundle',  'bump',   'emotional-keys', 'emotional-keys', 'Emotional Keys MIDI Bundle',                      700,  700, 0),
   ('famous-beats-bundle',  'bump',   'drum-kit',       'midi-drum-kit',  'MIDI Drum Kit Bundle',                           2500, 2500, 1),
   ('famous-beats-bundle',  'bump',   'hustle',         'hustle',         'HUSTLE Bundle (31 MIDI Packs)',                  2500, 2500, 2),
-  ('famous-beats-bundle',  'upsell', 'top-hits',       'top-hits',       'TOP HITS MIDI Bundle (1000 Chord Progressions)', 2700, 2700, 0);
+  ('famous-beats-bundle',  'upsell', 'top-hits',       'top-hits',       'TOP HITS MIDI Bundle (1000 Chord Progressions)', 2700, 2700, 0),
+  ('drunk-swing-grooves',  'main',   'pack',           'drunk-swing-grooves', 'Drunk Swing Grooves',                       700,  700, 0),
+  ('drunk-swing-grooves',  'bump',   'record-samples', 'jazz-record-samples', 'Jazz Record Samples (122 WAV Loops)',       700,  700, 0),
+  ('drunk-swing-grooves',  'upsell', 'jazz-pack',      'jazz-midi-pack',      'Jazz MIDI Pack',                           2700, 2700, 0),
+  ('drunk-swing-grooves',  'upsell', 'famous-beats',   'famous-beats',        'Famous Beats Bundle (320 MIDI Beats)',     2700, 2700, 1);
