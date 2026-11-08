@@ -7,10 +7,12 @@ export const runtime = "nodejs";
 // The Drum Kit order page's 5-minute bonus clock (lib/bonusClock.ts): the
 // first call starts it, every later one returns the same end. `now` is the
 // server's clock, so the page counts down right on a phone whose clock is off.
-export async function POST() {
+export async function POST(req: Request) {
   const jar = await cookies();
   const now = Date.now();
-  const saved = readStart(jar.get(BONUS_COOKIE)?.value);
+  // `next dev` only: ?reset=1 starts a fresh 5 minutes (testing the page again).
+  const reset = process.env.NODE_ENV === "development" && new URL(req.url).searchParams.has("reset");
+  const saved = reset ? null : readStart(jar.get(BONUS_COOKIE)?.value);
   const start = saved ?? now;
   const res = NextResponse.json({ end: bonusEnd(start), now }, { headers: { "cache-control": "no-store" } });
   if (saved === null) {

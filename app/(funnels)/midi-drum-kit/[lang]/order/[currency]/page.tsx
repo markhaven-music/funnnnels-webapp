@@ -14,7 +14,7 @@ import { copyEdits } from "../../../texts";
 import { funnel } from "../../../funnel";
 import { AB_SCRIPT } from "../../../abtest";
 import { PAY_SCRIPT } from "../../../payTest";
-import { BONUS, BONUS_SCRIPT, BONUS_WORDS } from "../../../bonusTest";
+import { BONUS, BONUS_SCRIPT, BONUS_TIME_SCRIPT, BONUS_WORDS } from "../../../bonusTest";
 import { BonusBanner, BonusItem } from "../../../BonusClock";
 import { Beacon } from "../../../../Beacon";
 import { isLang, LANGS } from "../../../i18n";
@@ -99,6 +99,8 @@ export default async function OrderPage({ params }: { params: Params }) {
           {xp && (
             <div className={d.bonusSlot}>
               <BonusItem w={bonusWords} image={xp.image} price={xp.price} currency={currency} lang={lang} />
+              {/* The countdown from this browser's known end, before the page's scripts run (no 05:00 on a refresh). */}
+              <script dangerouslySetInnerHTML={{ __html: BONUS_TIME_SCRIPT }} />
             </div>
           )}
           <p className={s.dl}>{t.order.dl}</p>

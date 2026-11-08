@@ -128,3 +128,20 @@ export const BONUS_WORDS: Record<Lang, BonusWords> = {
     expired: "I 5 minuti sono passati: le Expansions gratis non sono più nel tuo ordine. Controlla il totale e paga di nuovo.",
   },
 };
+
+/** Where the browser keeps the end it last heard from the server (this device's clock), for the first paint. */
+export const BONUS_END_KEY = "fv_bonus_end";
+
+/**
+ * Right after the banner and the card in the HTML: writes the countdown from the
+ * end this browser already knows, and keeps it ticking until React takes over,
+ * so a refresh shows 04:12 at once instead of 05:00 until the page's scripts run.
+ * The server's clock is still the one that counts (lib/bonusClock.ts).
+ */
+export const BONUS_TIME_SCRIPT = `(function(){try{
+var e=Number(localStorage.getItem('${BONUS_END_KEY}'));if(!e)return;
+var p=function(n){return(n<10?'0':'')+n;};
+var f=function(){if(window.__bonusLive)return clearInterval(i);var s=Math.max(0,Math.ceil((e-Date.now())/1000)),t=p(Math.floor(s/60))+':'+p(s%60);
+document.querySelectorAll('[data-bonus-time]').forEach(function(x){x.textContent=t;});};
+var i=setInterval(f,250);f();
+}catch(x){}})();`;

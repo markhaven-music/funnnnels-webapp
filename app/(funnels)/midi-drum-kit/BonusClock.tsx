@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Currency } from "@/lib/geo";
-import { BONUS, readBonus, type BonusWords } from "./bonusTest";
+import { BONUS, BONUS_END_KEY, readBonus, type BonusWords } from "./bonusTest";
 import { money as fmt, type Lang } from "./i18n";
 import d from "./order.module.css";
 
@@ -22,14 +22,25 @@ const emit = () => listeners.forEach((l) => l());
 function start() {
   if (started) return;
   started = true;
+  // React has the countdown from here (BONUS_TIME_SCRIPT stops).
+  (window as unknown as { __bonusLive?: boolean }).__bonusLive = true;
   if (readBonus() !== "bonus-on") return;
-  clock = { ...clock, on: true };
+  // The end this browser already knows, until the server confirms it: no 05:00 on a refresh.
+  let known: number | null = null;
+  try {
+    known = Number(localStorage.getItem(BONUS_END_KEY)) || null;
+  } catch {}
+  clock = { ...clock, on: true, end: known };
   emit();
   fetch("/api/checkout/bonus", { method: "POST" })
     .then((r) => (r.ok ? r.json() : null))
     .then((j: { end: number; now: number } | null) => {
       // No answer: no bonus shown (the server wouldn't give it either).
-      clock = j ? { ...clock, end: Date.now() + (j.end - j.now) } : { ...clock, dead: true };
+      const end = j ? Date.now() + (j.end - j.now) : null;
+      clock = end ? { ...clock, end } : { ...clock, dead: true };
+      try {
+        if (end) localStorage.setItem(BONUS_END_KEY, String(end));
+      } catch {}
       emit();
     })
     .catch(() => {
@@ -86,7 +97,7 @@ function Lead({ text, left }: { text: string; left: number | null }) {
   return (
     <>
       {before}
-      <span className={d.bonusTime} role="timer">
+      <span className={d.bonusTime} role="timer" data-bonus-time suppressHydrationWarning>
         {mmss(left)}
       </span>
       {after}
@@ -131,7 +142,9 @@ export function BonusItem({ w, image, price, currency, lang, compact }: { w: Bon
           <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
             <path fill="currentColor" d="M6.2 11.6 2.8 8.2l1.1-1.1 2.3 2.3 5.9-5.9 1.1 1.1z" />
           </svg>
-          {w.added} · <span className={d.bonusTimeSmall}>{mmss(left)}</span>
+          {w.added} · <span className={d.bonusTimeSmall} data-bonus-time suppressHydrationWarning>
+            {mmss(left)}
+          </span>
         </span>
       </div>
       <span className={d.bonusPrice}>
