@@ -497,3 +497,9 @@
 .bonusItemCompact .bonusName {
   font-size: 14px;
 }
+
+/* Beside "Summary" in step 2 while the bonus is in the order ("affianco a Summary metti (+ FREE BONUS)"). */
+.sumBonus {
+  margin-left: 6px;
+  font-weight: 800;
+}

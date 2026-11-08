@@ -68,6 +68,8 @@ export type BonusWords = {
   line: string;
   free: string;
   added: string;
+  /** Beside "Summary" in step 2 while the bonus is in the order. */
+  summaryTag: string;
   expired: string;
 };
 
@@ -81,6 +83,7 @@ export const BONUS_WORDS: Record<Lang, BonusWords> = {
     line: "3 expansions: complete beats for House, Lo-Fi and Afrobeat.",
     free: "FREE",
     added: "Already in your order",
+    summaryTag: "(+ FREE BONUS)",
     expired: "The 5 minutes are up: the free Expansions are no longer in your order. Check the total and pay again.",
   },
   fr: {
@@ -92,6 +95,7 @@ export const BONUS_WORDS: Record<Lang, BonusWords> = {
     line: "3 expansions : des beats complets House, Lo-Fi et Afrobeat.",
     free: "OFFERT",
     added: "Déjà dans ta commande",
+    summaryTag: "(+ BONUS OFFERT)",
     expired: "Les 5 minutes sont passées : les Expansions offertes ne sont plus dans ta commande. Vérifie le total et paie à nouveau.",
   },
   es: {
@@ -103,6 +107,7 @@ export const BONUS_WORDS: Record<Lang, BonusWords> = {
     line: "3 expansiones: beats completos de House, Lo-Fi y Afrobeat.",
     free: "GRATIS",
     added: "Ya en tu pedido",
+    summaryTag: "(+ BONUS GRATIS)",
     expired: "Pasaron los 5 minutos: las Expansions gratis ya no están en tu pedido. Revisa el total y paga de nuevo.",
   },
   de: {
@@ -114,6 +119,7 @@ export const BONUS_WORDS: Record<Lang, BonusWords> = {
     line: "3 Expansions: komplette Beats für House, Lo-Fi und Afrobeat.",
     free: "GRATIS",
     added: "Schon in deiner Bestellung",
+    summaryTag: "(+ GRATIS-BONUS)",
     expired: "Die 5 Minuten sind um: Die gratis Expansions sind nicht mehr in deiner Bestellung. Prüfe den Gesamtbetrag und bezahle erneut.",
   },
   it: {
@@ -125,6 +131,7 @@ export const BONUS_WORDS: Record<Lang, BonusWords> = {
     line: "3 espansioni: beat completi House, Lo-Fi e Afrobeat.",
     free: "GRATIS",
     added: "Già nel tuo ordine",
+    summaryTag: "(+ BONUS GRATIS)",
     expired: "I 5 minuti sono passati: le Expansions gratis non sono più nel tuo ordine. Controlla il totale e paga di nuovo.",
   },
 };

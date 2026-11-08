@@ -482,6 +482,7 @@ function PayBody({
         <summary>
           <span className={s.sumLeft}>
             <BasketGlyph /> {t.summary}
+            {bonusLive && bonusBump && <b className={d.sumBonus}>{w.summaryTag}</b>}
           </span>
           <span className={s.sumRight}>
             {fmt(total, currency, lang)}
