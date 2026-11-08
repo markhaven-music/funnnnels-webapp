@@ -136,6 +136,8 @@ export type StoredFunnel = {
   image?: string;
   /** What the numbers on the card cover, e.g. "28d". */
   statsRange?: string;
+  /** The card's big numbers for that range, from dashboard → Analytics (lib/codeFunnels.ts withStats). */
+  stats?: { revenue: string; orders: string; aov: string; cvr: string; visitors: string };
   /** "lead-magnet": listed apart, under Lead magnets (the free packs), not among the funnels that sell. */
   category?: "lead-magnet";
 };

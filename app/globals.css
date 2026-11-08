@@ -854,6 +854,48 @@ button {
   border-radius: 50%;
 }
 
+/* The card's big numbers: 2x2 tiles, plain sans text, readable from across the room. */
+.funnel-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 4px;
+}
+.funnel-stat {
+  background: oklch(0.98 0.004 270 / 0.05);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px 10px;
+  min-width: 0;
+}
+.funnel-stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-2);
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.funnel-stat-value {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.funnel-stat-value.money {
+  color: var(--mint);
+}
+.funnel-stats-note {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--fg-2);
+}
+
 .funnel-foot {
   display: flex;
   align-items: center;

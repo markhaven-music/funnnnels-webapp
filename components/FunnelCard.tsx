@@ -2,6 +2,12 @@ import Link from "next/link";
 import { FunnelThumb } from "@/components/FunnelThumb";
 import type { StoredFunnel } from "@/lib/blocks";
 
+// "28d" → "last 28 days", for the line under the card's numbers.
+function rangeLabel(r?: string) {
+  const m = r?.match(/^(\d+)d$/);
+  return m ? `last ${m[1]} days` : (r ?? "");
+}
+
 export function FunnelCard({ f }: { f: StoredFunnel }) {
   const stages = Array.from({ length: f.steps }, (_, i) => i < f.on);
   const body = (
@@ -24,17 +30,43 @@ export function FunnelCard({ f }: { f: StoredFunnel }) {
             {f.status}
           </span>
         </div>
-        <div className="funnel-meta">
-          <span>
-            <b>{f.views}</b> visits
-          </span>
-          <span className="pip" />
-          <span>
-            <b>{f.cvr}</b> cvr
-          </span>
-          <span className="pip" />
-          <span>{f.statsRange ?? `upd ${f.updated}`}</span>
-        </div>
+        {f.stats ? (
+          <>
+            <div className="funnel-stats">
+              <div className="funnel-stat">
+                <div className="funnel-stat-label">Revenue</div>
+                <div className="funnel-stat-value money">{f.stats.revenue}</div>
+              </div>
+              <div className="funnel-stat">
+                <div className="funnel-stat-label">Orders</div>
+                <div className="funnel-stat-value">{f.stats.orders}</div>
+              </div>
+              <div className="funnel-stat">
+                <div className="funnel-stat-label">Avg. order (AOV)</div>
+                <div className="funnel-stat-value">{f.stats.aov}</div>
+              </div>
+              <div className="funnel-stat">
+                <div className="funnel-stat-label">Conversion</div>
+                <div className="funnel-stat-value">{f.stats.cvr}</div>
+              </div>
+            </div>
+            <div className="funnel-stats-note">
+              {f.stats.visitors} visitors · {rangeLabel(f.statsRange)}
+            </div>
+          </>
+        ) : (
+          <div className="funnel-meta">
+            <span>
+              <b>{f.views}</b> visits
+            </span>
+            <span className="pip" />
+            <span>
+              <b>{f.cvr}</b> cvr
+            </span>
+            <span className="pip" />
+            <span>{f.statsRange ?? `upd ${f.updated}`}</span>
+          </div>
+        )}
       </div>
       <div className="funnel-foot">
         <div className="stage-bar">
@@ -43,7 +75,7 @@ export function FunnelCard({ f }: { f: StoredFunnel }) {
           ))}
         </div>
         <div className="conv">
-          {f.revenue !== "—" ? (
+          {f.stats ? null : f.revenue !== "—" ? (
             <b>{f.revenue}</b>
           ) : (
             <span style={{ color: "var(--fg-3)" }}>— rev</span>

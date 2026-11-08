@@ -70,17 +70,29 @@ export function withCodeFunnels(funnels: StoredFunnel[]): StoredFunnel[] {
 const eur = (n: number) =>
   new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
+const eur2 = (n: number) =>
+  new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+
 /** The cards' visits, CVR and revenue from the Analytics numbers, keyed by funnel slug. */
 export function withStats(funnels: StoredFunnel[], stats: Record<string, Metrics>, range: string): StoredFunnel[] {
   return funnels.map((f) => {
     const m = stats[f.id];
     if (!m) return f;
+    const cvr = m.visitors > 0 ? `${((m.ratedOrders / m.visitors) * 100).toFixed(1)}%` : "—";
     return {
       ...f,
       views: m.visitors.toLocaleString("en-US"),
-      cvr: m.visitors > 0 ? `${((m.ratedOrders / m.visitors) * 100).toFixed(1)}%` : "—",
+      cvr,
       revenue: eur(m.revenue),
       statsRange: range,
+      stats: {
+        revenue: eur(m.revenue),
+        orders: m.orders.toLocaleString("en-US"),
+        // Average order value: revenue (upsells included) per order.
+        aov: m.orders > 0 ? eur2(m.revenue / m.orders) : "—",
+        cvr,
+        visitors: m.visitors.toLocaleString("en-US"),
+      },
     };
   });
 }
