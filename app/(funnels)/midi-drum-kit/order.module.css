@@ -439,9 +439,9 @@
 }
 .bonusItemCompact {
   grid-template-columns: 48px 1fr auto;
-  /* Step 2 spaces its parts 18px apart; the next add-on sits 8px under this row
-     ("troppo spazio tra bannerino expansion e next Order Bump"). */
-  margin: 0 0 -10px;
+  /* Step 2 spaces its parts 18px apart: the next add-on sits as far under this
+     row as the add-ons sit from each other ("stesso spazio che c'è tra altri order bump"). */
+  margin: 0;
   padding: 10px;
 }
 .bonusImg {
