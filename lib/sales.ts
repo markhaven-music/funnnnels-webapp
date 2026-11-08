@@ -1,3 +1,4 @@
+import { productsOfOrders, ownsTags } from "@/lib/catalog";
 import { upsertContact } from "@/lib/contacts";
 import { resolveFunnel } from "@/lib/funnels";
 import type { Order } from "@/lib/orders";
@@ -52,7 +53,10 @@ export async function recordSale(order: Order, funnel: string, lang?: string | n
   if (inserted?.length && email) {
     try {
       // The shop also tags what was bought (buyer-shop-<slug>), for emails to its buyers.
-      const tags = [...f.checkout.buyerTags, ...(f.kind === "shop" ? order.items.map((s) => `buyer-shop-${s}`) : [])];
+      // owns-<product> for everything the order brings, add-ons and upsells too (lib/catalog.ts
+      // productsOfOrders): sequences selling a product exit on it, and nobody is sold what they have.
+      const owns = ownsTags(await productsOfOrders([{ funnel, items: order.items }]).catch(() => new Set<string>()));
+      const tags = [...f.checkout.buyerTags, ...(f.kind === "shop" ? order.items.map((s) => `buyer-shop-${s}`) : []), ...owns];
       await upsertContact({ email, name: order.name ?? undefined, source: funnel, tags, lang: language });
     } catch (err) {
       console.error(`order ${order.id}: tagging the buyer failed`, err);

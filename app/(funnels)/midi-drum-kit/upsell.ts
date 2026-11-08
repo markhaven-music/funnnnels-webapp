@@ -197,7 +197,7 @@ function quickChoice(html: string, ui: (typeof UI)[Lang], price: string, no: str
   }
   if (cut < 0) return html;
   const sub = ui.yesSub.replace("{price}", price);
-  const block = `<div id="oto-choice"><a href="#yes" data-oto="yes" class="elButton"><span class="elButtonMain"><span class="elButtonMainText">${ui.yes}</span></span><span class="oto-sub">${sub}</span></a><a href="#no" data-oto="no" class="elButton"><span class="elButtonMain"><span class="elButtonMainText elButtonText">${no}</span></span></a></div>`;
+  const block = `<div id="oto-choice"><a href="#yes" data-oto="yes" class="elButton"><span class="elButtonMain"><span class="elButtonMainText">${ui.yes}<i class="oto-arrow" aria-hidden="true"></i></span></span><span class="oto-sub">${sub}</span></a><a href="#no" data-oto="no" class="elButton"><span class="elButtonMain"><span class="elButtonMainText elButtonText">${no}</span></span></a></div>`;
   return html.slice(0, cut) + block + html.slice(cut);
 }
 
@@ -248,18 +248,36 @@ export function stepsBar(product: { offers?: readonly { id: string }[] } & Param
 }
 
 // Every Yes and No on the ClickFunnels pages (2026-11-08, "fallo piu chiaro con bottoni
-// piu chiari soprattutto su mobile"): Yes = the funnel's yellow, black words, big;
-// No = a plain dark button as wide as Yes, white words, no underline: two buttons
-// that read as a choice. Phone first: full width less the page's margins.
-const CHOICE_CSS = `#oto-choice{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:460px;margin:22px auto 6px;padding:0 16px}
-a.elButton[href="#yes"]{display:flex!important;flex-direction:column;align-items:center;justify-content:center;width:100%!important;max-width:460px!important;min-height:68px;box-sizing:border-box;margin:0 auto!important;padding:14px 18px!important;border:0!important;border-radius:6px!important;background:#f5b800!important;box-shadow:0 5px 0 #a87d00,0 10px 26px rgba(245,184,0,.35)!important;text-decoration:none!important}
-a.elButton[href="#yes"] .elButtonMainText,a.elButton[href="#yes"] .elButtonMainText *{color:#000!important;font-family:Inter,system-ui,sans-serif!important;font-size:20px!important;font-weight:800!important;line-height:1.2!important;text-transform:none!important;letter-spacing:0!important}
-a.elButton[href="#yes"]:hover .elButtonText,a.elButton[href="#yes"]:hover .elButtonMainText{color:#000!important}
-a.elButton[href="#yes"]:active{transform:translateY(3px);box-shadow:0 2px 0 #a87d00!important}
-a.elButton[href="#yes"] .elButtonSub,a.elButton[href="#yes"] .oto-sub{display:block;margin-top:4px;color:rgba(0,0,0,.72)!important;font:600 13px/1.3 Inter,system-ui,sans-serif!important;text-transform:none!important}
-a.elButton[href="#no"]{display:flex!important;align-items:center;justify-content:center;width:100%!important;max-width:460px!important;min-height:54px;box-sizing:border-box;margin:0 auto!important;padding:12px 18px!important;border:0!important;border-radius:6px!important;background:rgba(0,0,0,.55)!important;box-shadow:none!important;text-decoration:none!important}
+// piu chiari soprattutto su mobile"; then "these buttons are not super juicy. they need
+// to be high converting"): Yes = the funnel's yellow as a big physical key, the same
+// as the landings' CTA (jazz-midi-pack/btn.module.css): a solid lip underneath, a
+// gloss on the top half, a light sweep, a pulsing glow, gentle breathing, an arrow
+// that nudges; it sinks onto its lip when pressed. No = a plain dark button as wide
+// as Yes, white words: two buttons that read as a choice, Yes by far the louder.
+// The arrow is drawn here (ClickFunnels' Font Awesome arrow came out as a box: the
+// button's font is forced to Inter, which has no such glyph).
+const ARROW = `url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20448%20512%27%3E%3Cpath%20d%3D%27M190.5%2066.9l22.2-22.2c9.4-9.4%2024.6-9.4%2033.9%200L441%20239c9.4%209.4%209.4%2024.6%200%2033.9L246.6%20467.3c-9.4%209.4-24.6%209.4-33.9%200l-22.2-22.2c-9.5-9.5-9.3-25%20.4-34.3L311.4%20296H24c-13.3%200-24-10.7-24-24v-32c0-13.3%2010.7-24%2024-24h287.4L190.9%20101.2c-9.8-9.3-10-24.8-.4-34.3z%27%2F%3E%3C%2Fsvg%3E")`;
+const CHOICE_CSS = `#oto-choice{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:480px;margin:24px auto 8px;padding:0 16px}
+a.elButton[href="#yes"]{position:relative!important;isolation:isolate;overflow:hidden;display:flex!important;flex-direction:column;align-items:center;justify-content:center;width:100%!important;max-width:480px!important;min-height:88px;box-sizing:border-box;margin:0 auto 8px!important;padding:16px 20px!important;border:0!important;border-radius:20px!important;background:linear-gradient(180deg,#ffe066 0%,#f5b800 46%,#d99a00 100%)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.65),inset 0 -4px 0 rgba(0,0,0,.14),0 8px 0 #8a6400,0 22px 48px -10px rgba(245,184,0,.6)!important;text-decoration:none!important;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;transition:translate 90ms ease-out,box-shadow 90ms ease-out,filter 160ms ease;animation:oto-breathe 2.8s ease-in-out infinite,oto-glow 2.6s ease-in-out infinite}
+a.elButton[href="#yes"]::before{content:""!important;position:absolute;left:4%;right:4%;top:3px;height:46%;z-index:-1;border-radius:16px 16px 50% 50%/16px 16px 12px 12px;background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0));opacity:.6;pointer-events:none}
+a.elButton[href="#yes"]::after{content:""!important;position:absolute;top:0;bottom:0;left:0;width:45%;z-index:-1;background:linear-gradient(100deg,transparent,rgba(255,255,255,.65),transparent);transform:translateX(-120%) skewX(-12deg);animation:oto-sweep 3.4s ease-in-out infinite;pointer-events:none}
+a.elButton[href="#yes"] .elButtonMain{display:block}
+a.elButton[href="#yes"] .elButtonMainText,a.elButton[href="#yes"] .elButtonMainText *{color:#140f00!important;font-family:Inter,system-ui,sans-serif!important;font-size:24px!important;font-weight:900!important;line-height:1.1!important;text-transform:uppercase!important;letter-spacing:-.01em!important}
+a.elButton[href="#yes"]:hover{filter:brightness(1.06) saturate(1.08)}
+a.elButton[href="#yes"]:hover .elButtonText,a.elButton[href="#yes"]:hover .elButtonMainText{color:#140f00!important}
+a.elButton[href="#yes"]:active{translate:0 6px;animation-play-state:paused;box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -2px 0 rgba(0,0,0,.12),0 2px 0 #8a6400,0 8px 22px -10px rgba(245,184,0,.6)!important}
+a.elButton[href="#yes"] i.fa-arrow-right,a.elButton[href="#yes"] .oto-arrow{display:inline-block!important;width:.9em!important;height:.9em;margin-left:.4em;vertical-align:-.08em;background:currentColor;-webkit-mask:${ARROW} center/contain no-repeat;mask:${ARROW} center/contain no-repeat;animation:oto-nudge 1.4s ease-in-out infinite}
+a.elButton[href="#yes"] i.fa-arrow-right::before{content:none!important;display:none!important}
+a.elButton[href="#yes"] .elButtonSub,a.elButton[href="#yes"] .oto-sub{display:block;margin-top:6px;color:rgba(20,15,0,.78)!important;font:700 14px/1.3 Inter,system-ui,sans-serif!important;text-transform:none!important}
+a.elButton[href="#no"]{display:flex!important;align-items:center;justify-content:center;width:100%!important;max-width:480px!important;min-height:54px;box-sizing:border-box;margin:0 auto!important;padding:12px 18px!important;border:0!important;border-radius:14px!important;background:rgba(0,0,0,.55)!important;box-shadow:none!important;text-decoration:none!important}
 a.elButton[href="#no"] .elButtonMainText,a.elButton[href="#no"] .elButtonMainText *{color:#fff!important;font-family:Inter,system-ui,sans-serif!important;font-size:15px!important;font-weight:600!important;line-height:1.35!important;text-decoration:none!important;text-transform:none!important;letter-spacing:0!important}
-a.elButton[href="#no"]:hover{background:rgba(0,0,0,.75)!important}`;
+a.elButton[href="#no"]:hover{background:rgba(0,0,0,.75)!important}
+@keyframes oto-breathe{0%,100%{scale:1}50%{scale:1.025}}
+@keyframes oto-glow{0%,100%{filter:drop-shadow(0 0 0 rgba(245,184,0,0))}50%{filter:drop-shadow(0 0 18px rgba(255,200,40,.75))}}
+@keyframes oto-sweep{0%,55%{transform:translateX(-120%) skewX(-12deg)}85%,100%{transform:translateX(260%) skewX(-12deg)}}
+@keyframes oto-nudge{0%,100%{translate:0 0}50%{translate:5px 0}}
+@media (min-width:900px){a.elButton[href="#yes"]{min-height:98px}a.elButton[href="#yes"] .elButtonMainText,a.elButton[href="#yes"] .elButtonMainText *{font-size:28px!important}}
+@media (prefers-reduced-motion:reduce){a.elButton[href="#yes"],a.elButton[href="#yes"]::after,a.elButton[href="#yes"] i.fa-arrow-right,a.elButton[href="#yes"] .oto-arrow{animation:none}}`;
 
 // ClickFunnels fades its "fade-in" blocks in with its own script (stripped):
 // without it they'd stay invisible, so they're simply shown.
@@ -311,6 +329,9 @@ export function script(slug: string, offerId: string, lang: Lang, next: string):
   function cookie(n) { var m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : ''; }
   // Already ticked on the order form (OrderForm.tsx sets fv_owned): this offer is skipped.
   if (cookie('fv_owned').split(',').indexOf(C.offer) >= 0) { go(); return; }
+  // Bought before (any order of this email, or ClickFunnels): skipped too (/api/checkout/owned).
+  if (main) fetch('/api/checkout/owned', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ funnel: C.funnel, offer: C.offer, order: main[1] }) })
+    .then(function (r) { return r.json(); }).then(function (r) { if (r && r.owned) go(); }).catch(function () {});
   var busy = false;
   function say(btn, t) {
     var box = btn.closest('[data-page-element="Button/V1"]') || btn.parentElement;
@@ -343,6 +364,7 @@ export function script(slug: string, offerId: string, lang: Lang, next: string):
       body: JSON.stringify({ funnel: C.funnel, offer: C.offer, order: main[1], lang: C.lang, bought: bought, variant: cookie(C.ab), ft_vid: cookie('ft_vid') })
     }).then(function (res) { return res.json().catch(function () { return {}; }).then(function (r) { r.code = res.status; return r; }); }).then(function (r) {
       if (r.status === 'paid') return go(r.id);
+      if (r.status === 'owned') return go(null);
       if (r.status === 'action') return stripeAction(r, a);
       if (r.status === 'paypal') return (location.href = r.url);
       // The server's words are English (Stripe's reason for a declined card too).

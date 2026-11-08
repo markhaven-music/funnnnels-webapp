@@ -18,6 +18,8 @@ const UI: Ui = {
   noOrder: "We couldn't find your order on this page. Your purchase is safe: continue to get your downloads.",
 };
 
+let ownedCheck: Promise<boolean> | undefined;
+
 const cookie = (n: string) => {
   const m = document.cookie.match(new RegExp("(?:^|; )" + n + "=([^;]*)"));
   return m ? decodeURIComponent(m[1]) : "";
@@ -42,9 +44,22 @@ export function UpsellButtons({ funnel, offer, next, yes, yesSub, no }: { funnel
     location.href = next + (p.toString() ? "?" + p.toString() : "");
   };
 
-  // Already ticked as an add-on on the order form (fv_owned): this offer is skipped.
+  // Already ticked as an add-on on the order form (fv_owned), or bought before (any
+  // order of this email, or ClickFunnels: /api/checkout/owned): this offer is skipped.
+  // Asked once per page, however many sets of buttons it has.
   useEffect(() => {
-    if (cookie("fv_owned").split(",").includes(offer)) go(null);
+    if (cookie("fv_owned").split(",").includes(offer)) return go(null);
+    const { main } = state();
+    if (!main) return;
+    ownedCheck ??= fetch("/api/checkout/owned", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ funnel, offer, order: main[1] }),
+    })
+      .then((r) => r.json())
+      .then((r) => Boolean(r?.owned))
+      .catch(() => false);
+    ownedCheck.then((owned) => owned && go(null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -79,6 +94,7 @@ export function UpsellButtons({ funnel, offer, next, yes, yesSub, no }: { funnel
       });
       const r = await res.json().catch(() => ({}));
       if (r.status === "paid") return go(r.id);
+      if (r.status === "owned") return go(null);
       if (r.status === "action") return stripeAction(r);
       if (r.status === "paypal") return void (location.href = r.url);
       setBusy(false);

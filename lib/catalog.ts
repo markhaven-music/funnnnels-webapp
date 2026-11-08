@@ -350,3 +350,76 @@ const CODE_UPSELLS: Record<string, string[]> = {
   [jazz.slug]: jazz.offers.map((o) => o.id),
   [drunkGrooves.slug]: drunkGrooves.offers.map((o) => o.id),
 };
+
+// ─── what a buyer owns ──────────────────────────────────────────────────
+// 2026-11-08 ("se lo ha preso non deve vederlo come upsell. Questo in generale in
+// tutto funnnnels"): every product a buyer has, from their paid orders (main
+// product, add-ons, upsells, and the files those bring along: the Jazz pack's
+// bonuses, an add-on's `includes`) and ClickFunnels' legacy_purchases. It tags
+// them owns-<product> (lib/sales.ts) and makes an upsell page skip a product the
+// buyer already has (/api/checkout/owned, /api/checkout/upsell).
+
+type OrderLike = { funnel: string; items: readonly string[] | null };
+
+/** The catalog products some orders bring, by catalog slug. */
+export async function productsOfOrders(orders: readonly OrderLike[]): Promise<Set<string>> {
+  const owned = new Set<string>();
+  if (!orders.length) return owned;
+  const rows = await funnelItems().catch((): FunnelItem[] => []);
+  const byKey = new Map(rows.map((r) => [`${r.funnel}/${r.key}`, r.product]));
+  for (const o of orders) {
+    if (o.funnel === SHOP_SLUG) {
+      for (const slug of o.items ?? []) owned.add(slug);
+      continue;
+    }
+    const code = CODE_FUNNELS.find((f) => f.slug === o.funnel);
+    const zipProduct = (key: string) => (code?.files[key] ? ZIP_PRODUCT[zipOf(code.files[key])] : undefined);
+    for (const key of o.items ?? ["pack"]) {
+      const p = byKey.get(`${o.funnel}/${key}`) ?? zipProduct(key);
+      if (p) owned.add(p);
+      for (const extra of code?.includes?.[key] ?? []) {
+        const x = zipProduct(extra);
+        if (x) owned.add(x);
+      }
+      // A pack's own bonuses (the Jazz MIDI Pack's).
+      if (key === "pack") {
+        for (const b of code?.bonuses ?? []) {
+          const x = zipProduct(b.id);
+          if (x) owned.add(x);
+        }
+      }
+    }
+  }
+  return owned;
+}
+
+/**
+ * Every catalog product this email has bought, here or on ClickFunnels.
+ * except: an upsell bought after this order (a reload of its page, a second tap)
+ * doesn't count, so the page answers "paid" again rather than skipping it.
+ */
+export async function ownedProducts(email: string, except?: { parent: string; offer: string }): Promise<Set<string>> {
+  const e = email.trim().toLowerCase();
+  if (!e) return new Set();
+  const db = supabase();
+  const [{ data: orders, error }, { data: legacy, error: lErr }] = await Promise.all([
+    db.from("orders").select("funnel, items, parent, offer").eq("email", e).eq("status", "succeeded").limit(500),
+    db.from("legacy_purchases").select("product").eq("email", e),
+  ]);
+  if (error) throw error;
+  if (lErr) throw lErr;
+  const kept = ((orders ?? []) as (OrderLike & { parent: string | null; offer: string | null })[]).filter(
+    (o) => !(except && o.parent === except.parent && o.offer === except.offer),
+  );
+  const owned = await productsOfOrders(kept);
+  for (const r of legacy ?? []) owned.add(r.product as string);
+  return owned;
+}
+
+/** The catalog product a funnel's upsell (or add-on) sells. */
+export async function offerProduct(funnel: string, key: string): Promise<string | null> {
+  return productOf(funnel, key);
+}
+
+/** The owns-<product> tags for a set of products. */
+export const ownsTags = (products: Iterable<string>) => [...products].map((p) => `owns-${p}`);

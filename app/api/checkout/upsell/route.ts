@@ -1,6 +1,7 @@
 import { after, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
+import { offerProduct, ownedProducts } from "@/lib/catalog";
 import { checkoutPages, offerOf, resolveFunnel, upsellsOn } from "@/lib/funnels";
 import { toCents } from "@/lib/launch";
 import { cleanVisitorId } from "@/lib/neoIds";
@@ -30,6 +31,12 @@ export async function POST(req: Request) {
   const parent = await getOrder(body.order, f.slug);
   if (!parent || parent.status !== "succeeded" || parent.offer) {
     return NextResponse.json({ error: "We couldn't find your order. Your purchase is safe: continue to get your downloads." }, { status: 400 });
+  }
+  // Already theirs (bought before, here or on ClickFunnels, or ticked at checkout): never
+  // charged twice; the page moves on (/api/checkout/owned, normally asked first).
+  if (parent.email) {
+    const [product, owned] = await Promise.all([offerProduct(f.slug, offer.id), ownedProducts(parent.email, { parent: parent.id, offer: offer.id })]).catch(() => [null, new Set<string>()] as const);
+    if (product && owned.has(product)) return NextResponse.json({ status: "owned" });
   }
   const lang = checkoutPages(f, body.lang).lang ?? "en";
   const currency = parent.currency as "eur" | "usd";
