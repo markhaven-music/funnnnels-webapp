@@ -38,6 +38,9 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 - €7 in Europe, $7 elsewhere. One payment, instant download. No fake urgency, no value stack.
 - Add-on: Jazz Record Samples (122 WAV Loops) €7 / $7 (catalog `jazz-record-samples`).
 - Upsell 1: Jazz MIDI Pack €27 / $27 (its own page here, ./offer). Facts from ../jazz-midi-pack/BRIEF.md.
+  Since 2026-11-08 ("Sì, aggiungili") with its five bonus zips, as on the Jazz funnel and the Drum Kit's Jazz upsell:
+  MIDI Chord Pack (Jazz Edition), The Chord Progressions Bible, Anime & Video Games MIDI Pack, Emotional Keys MIDI
+  Bundle, Drum Loops for Songwriting (the PDF guide is inside the pack's zip). funnel.ts `includes`.
 - Upsell 2: Famous Beats Bundle €27 / $27 (the MIDI Drum Kit's page, midi-drum-kit/upsell.ts).
 - Guarantee: 14-day satisfaction guarantee ("A file doesn't work ... we fix it"). Royalty-free license
   (own music and commercial releases, no credit; no resale or sharing of the files).
