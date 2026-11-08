@@ -1,25 +1,39 @@
 # Reel: jazz voicings (plugs the Jazz MIDI Pack)
 
-Infotainment reel for the GRIND STUDIO Instagram. `tools/reels.py`. Claims from app/(funnels)/jazz-midi-pack/funnel.ts.
+Animated in Remotion (see trap-hats.md). Claims from app/(funnels)/jazz-midi-pack/funnel.ts.
 
 ---
 
-[SHOW: title Same chords. Played like a pianist.]
+[SHOW: hook]
 
-Same four chords, played twice. Listen to the difference.
+Your jazz chords sound like a *piano lesson.* Here's why.
+
+[SHOW: roll-before]
 
 [DEMO: before]
 
+[SHOW: jumpy]
+
+Every chord jumps across the keyboard like it's *late* for something.
+
+[SHOW: lazy]
+
+Pianists are lazy. In a good way. Each finger moves as *little* as possible to the next chord.
+
+[SHOW: roll-after]
+
 [DEMO: after]
 
-[SHOW: compare]
+[BED: after]
 
-The first is root position. Every chord jumps up and down the keyboard.
+[SHOW: topnote]
 
-The second is how a pianist plays it. The hands stay in one place, and each note moves as little as it can to the next chord. Watch the top note. It barely moves.
+Watch the top note. It barely moves. That's *voice leading.*
 
-That's voice leading, and it's why it sounds smooth.
+[SHOW: bar]
 
-[SHOW: product jazz-midi-pack/box-900|JAZZ MIDI PACK]
+Same four chords. Now it's a smoky bar at *2 a.m.*
 
-The Jazz MIDI Pack by GRIND STUDIO has the most used jazz progressions, already voiced like this, in all 12 keys. Link in bio.
+[SHOW: product jazz-midi-pack/box-900]
+
+The most used jazz progressions, already voiced like this in all 12 keys, are in our *Jazz MIDI Pack,* link in bio.

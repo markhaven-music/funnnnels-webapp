@@ -1,31 +1,43 @@
 # Reel: drunk drums (plugs Drunk Swing Grooves)
 
-Infotainment reel for the GRIND STUDIO Instagram. `tools/reels.py`. Claims from app/(funnels)/drunk-swing-grooves/BRIEF.md.
+Animated in Remotion (see trap-hats.md). Claims from app/(funnels)/drunk-swing-grooves/BRIEF.md.
 
 ---
 
-[SHOW: title The drunk drums trick]
+[SHOW: hook]
 
-J Dilla made drums that sound drunk. Here's the part most people get wrong.
+J Dilla turned quantize off, and his drums sounded *drunk.*
 
-[SHOW: grid straight]
+[SHOW: knob]
 
-This is a beat, quantized.
+So everyone grabbed the swing knob. *Wrong move.*
+
+[SHOW: grid-straight]
+
+Here's a beat, quantized.
 
 [DEMO: ab-straight]
 
-And this is the same beat, drunk.
+[SHOW: sober]
+
+The secret? The snare *never* moves. It's the sober friend.
+
+[SHOW: stumble]
+
+Everything else stumbles around it. Hats a little early, a little late. Kick dragging behind.
+
+[SHOW: grid-drunk]
+
+Listen.
 
 [DEMO: ab-drunk]
 
-[SHOW: grid both]
+[BED: ab-drunk]
 
-Same notes, same sounds. Look at the snare. It doesn't move. It stays on the beat. That's the anchor.
+[SHOW: walkhome]
 
-Everything else leans. The hats a hair early or late, the kick a little loose.
+Drunk. But it still makes it *home.*
 
-The swing knob can't do this. It moves everything, the snare too, so the beat sounds sloppy instead of drunk.
+[SHOW: product drunk-swing-grooves/pack-900]
 
-[SHOW: product drunk-swing-grooves/pack-900|DRUNK SWING GROOVES]
-
-We made 80 MIDI drum grooves with this feel already in them. Drunk Swing Grooves by GRIND STUDIO. 10 beats, each in 4 feels, from light drunk to quintuplet swing. Link in bio.
+80 grooves that already walk like this are in *Drunk Swing Grooves,* link in bio.
