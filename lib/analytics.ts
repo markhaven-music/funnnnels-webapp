@@ -477,6 +477,9 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
     ...list.map((f) => (hasStripe ? soft(`Stripe orders (${f.slug})`, stripeSales(f.slug), []) : Promise.resolve([] as Sale[]))),
   ]);
   const allSales = [...paypal, ...stripeLists.flat()];
+  // The visits per day since the first test that runs on days rather than letters (TestDef.windows).
+  const firstWindow = TESTS.flatMap((t) => Object.values(t.windows ?? {}).map((w) => w.days[0])).sort()[0];
+  const windowDays = firstWindow ? await soft("visitors per day (tests)", viewDays(firstWindow), []) : [];
   const ratedFrom = trackingSince ? Date.parse(`${trackingSince}T00:00:00Z`) : Infinity;
   for (const s of allSales) s.rated = s.created >= ratedFrom;
   const sales = allSales.filter((s) => s.created >= sinceMs && s.created < untilMs);
@@ -515,7 +518,7 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
     funnels,
     tests: await Promise.all(
       TESTS.map(async (t, i) => {
-        const stats = testStats(t, allViews ?? views, allSales, rate, testStarts[i], now);
+        const stats = t.windows ? windowTest(t, windowDays, allSales, rate, now) : testStats(t, allViews ?? views, allSales, rate, testStarts[i], now);
         if (!t.windows) return stats;
         const paid = await soft(`checkouts paid (${t.name})`, Promise.all(stats.variants.map((v) => (t.windows![v.variant] ? checkoutPaid(t.funnel, t.windows![v.variant]) : null))), null);
         return paid ? { ...stats, variants: stats.variants.map((v, j) => ({ ...v, paid: paid[j] ?? undefined })) } : stats;
@@ -557,7 +560,7 @@ type TestDef = {
   label: (v: string) => string;
   color: (v: string) => { from: string; to: string };
   /** When each variant was the only one shown, to compare the checkouts that paid (ISO times; until null = still now). */
-  windows?: Record<string, { from: string; until: string | null }>;
+  windows?: Record<string, { from: string; until: string | null; days: [string, string | null] }>;
 };
 const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 export const TESTS: TestDef[] = [
@@ -579,16 +582,18 @@ export const TESTS: TestDef[] = [
     // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
     // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
-    where: "Order page, step 2 (payment), every language",
+    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-07 → today",
     variants: PAY_TEST.variants,
     label: (v) => PAY_LABELS[v as keyof typeof PAY_LABELS],
     color: (v) => PAY_COLORS[v as keyof typeof PAY_COLORS],
     // The split ran too short to say anything, so each step is judged on when
     // everyone had it: the old one from 11-02 (funnnnels' order page) until the
     // first test on 11-06 16:00, the new one since 11-06 19:20 (everyone on B).
+    // The card's other rows (visitors, orders, revenue…) count whole UTC days,
+    // as the visits are kept per day: 11-06, when both ran, is left out.
     windows: {
-      a: { from: "2026-11-02T00:00:00+01:00", until: "2026-11-06T16:00:00+01:00" },
-      b: { from: "2026-11-06T19:20:00+01:00", until: null },
+      a: { from: "2026-11-02T00:00:00+01:00", until: "2026-11-06T16:00:00+01:00", days: ["2026-11-02", "2026-11-05"] },
+      b: { from: "2026-11-06T19:20:00+01:00", until: null, days: ["2026-11-07", null] },
     },
   },
   {
@@ -711,6 +716,23 @@ function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, sin
     // At the pace so far.
     daysToGo: totalOrders > 0 && days > 0 ? salesToGo / (totalOrders / days) : null,
   };
+}
+
+/**
+ * A test judged on when each variant was the only one shown (TestDef.windows):
+ * every visit and order of those days counts for it, whatever letter it carries.
+ */
+function windowTest(def: TestDef, days: DayRow[], sales: Sale[], rate: number, now: number): TestStats {
+  const today = dayOf(now);
+  const inDays = (day: string, d: [string, string | null]) => day >= d[0] && day <= (d[1] ?? today);
+  const views: ViewRow[] = [];
+  const tagged: Sale[] = [];
+  for (const [variant, w] of Object.entries(def.windows!)) {
+    for (const r of days) if (r.funnel === def.funnel && inDays(r.day, w.days)) views.push({ funnel: r.funnel, page: r.page, lang: "", variant, views: r.views });
+    for (const s of sales) if (s.funnel === def.funnel && inDays(dayOf(s.created), w.days)) tagged.push({ ...s, variant });
+  }
+  const first = Object.values(def.windows!).map((w) => w.days[0]).sort()[0];
+  return testOn(def, views, tagged, rate, first, now);
 }
 
 /**
