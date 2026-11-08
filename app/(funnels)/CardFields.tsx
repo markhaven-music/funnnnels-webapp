@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import type { PaymentMethodCreateParams, Stripe, StripeElementLocale, StripeElements, StripeElementsOptions } from "@stripe/stripe-js";
 
@@ -67,17 +67,29 @@ export const cardElements = (look: CardLook, locale: StripeElementLocale | undef
     rules: {
       // 16px at the sides like the name and email fields: Stripe's own was ~8px with
       // spacingUnit 2px, so the words sat off to the left ("sembra un po' decentrato", 11-06).
-      // The typed text at 16px: below that an iPhone zooms the page in when a card
-      // field gets focus or is autofilled, and leaves it zoomed, so the page swayed
-      // left and right ("dopo autofill… la pagina traballa", 11-08). The rest stays 15px.
-      ".Input": { border: "2px solid #dbdcdd", boxShadow: "none", paddingLeft: "16px", paddingRight: "16px", fontSize: "16px" },
+      // The text stays 15px: at 16px iPhone Safari puts expiry and CVC on rows of their
+      // own even on a 360px form ("perché siamo tornati a due righe", 11-08). The zoom an
+      // iPhone does on a field under 16px is stopped by noZoomOnIos below instead.
+      ".Input": { border: "2px solid #dbdcdd", boxShadow: "none", paddingLeft: "16px", paddingRight: "16px" },
       ".Input:focus": { borderColor: look.focus, boxShadow: "none" },
       ".Input--invalid": { borderColor: "#dc2626", boxShadow: "none" },
     },
   },
 });
 
+// An iPhone zooms the page in when a field with text under 16px gets focus or is
+// autofilled, and leaves it zoomed, so the page swayed left and right ("dopo
+// autofill… la pagina traballa", 11-08). maximum-scale=1 stops that zoom; on
+// iOS people can still pinch to zoom. iPhones and iPads only: on Android it
+// would block pinching, and Android doesn't zoom on focus anyway.
+function noZoomOnIos() {
+  const ios = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+  if (ios && meta && !/maximum-scale/.test(meta.content)) meta.content += ", maximum-scale=1";
+}
+
 export function CardFields(_: { words?: CardWords; look?: CardLook }) {
+  useEffect(noZoomOnIos, []);
   return (
     <PaymentElement
       options={{
