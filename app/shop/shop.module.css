@@ -244,6 +244,7 @@
 }
 /* The box, whole, on a square dark tile: every product's picture has its own shape. */
 .tile {
+  position: relative;
   display: grid;
   place-items: center;
   aspect-ratio: 1;
@@ -254,15 +255,18 @@
   overflow: hidden;
 }
 .tile img {
+  /* Pinned inside the tile's margin: a tall picture can't stretch the square and get cut. */
+  position: absolute;
+  inset: 8%;
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 84%;
+  height: 84%;
   object-fit: contain;
   transition: transform 0.25s ease;
 }
 .tile img.fade {
   /* These pictures carry their own dark backdrop around a smaller box: zoom so the box is as big as the cut-out ones. */
-  scale: 1.26;
+  scale: 1.08;
   mask-image: radial-gradient(closest-side, #000 74%, transparent);
 }
 .cardLink:hover .tile img {
