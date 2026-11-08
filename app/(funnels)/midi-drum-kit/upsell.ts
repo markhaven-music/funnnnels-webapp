@@ -46,8 +46,8 @@ type Copy = { [key: string]: string | Record<string, string> | undefined; extra?
 // videos: the page's video in other languages (Wistia id, and its poster when the page has
 // one), re-voiced with captions in that language (vsl/script-upsell-*-<lang>.md, made with
 // tools/upsell_vsl.py); the other languages play the English one.
-const PAGES: Record<string, { template: string; copy: Record<Lang, Copy>; poster: string | null; play?: string; beacon: Step; title: string; wistia: string; videos: Partial<Record<Lang, { id: string; poster?: string }>> }> = {
-  "famous-beats": { template: FAMOUS, copy: { en: famousEn, fr: famousFr, es: famousEs, de: famousDe, it: famousIt }, poster: "vsl-famous", play: "#60615e", beacon: "upsell-1", title: "Famous Beats Bundle", wistia: "t1dx0gv5tg", videos: { it: { id: "hjo7o7c8nm", poster: "vsl-famous-it" } } },
+const PAGES: Record<string, { template: string; copy: Record<Lang, Copy>; poster: string | null; play?: string; beacon: Step; title: string; wistia: string; videos: Partial<Record<Lang, { id: string; poster?: string }>>; quickNo?: string }> = {
+  "famous-beats": { template: FAMOUS, copy: { en: famousEn, fr: famousFr, es: famousEs, de: famousDe, it: famousIt }, poster: "vsl-famous", play: "#60615e", beacon: "upsell-1", title: "Famous Beats Bundle", wistia: "t1dx0gv5tg", videos: { it: { id: "hjo7o7c8nm", poster: "vsl-famous-it" } }, quickNo: "t028" },
   "top-hits": { template: TOP_HITS, copy: { en: topHitsEn, fr: topHitsFr, es: topHitsEs, de: topHitsDe, it: topHitsIt }, poster: null, beacon: "upsell-2", title: "TOP HITS MIDI Bundle", wistia: "8s55snt7vw", videos: { it: { id: "fgwkqm6rvn" } } },
 };
 
@@ -59,28 +59,35 @@ export const beaconStep = (product: { offers?: readonly { id: string }[] }, offe
 };
 
 // What the buttons say while they work, per language.
-const UI: Record<Lang, { busy: string; failed: string; noOrder: string }> = {
+// done: the bar on top of the page, so the buyer knows the order is through
+// before the offer (2026-11-08: about 1 in 4 buyers closed this page).
+const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: string }> = {
   en: {
+    done: "Order complete. Your download link is on its way to your email.",
     busy: "Adding it to your order…",
     failed: "The payment didn't go through. Try again, or skip this offer: your order is safe.",
     noOrder: "We couldn't find your order on this page. Your purchase is safe: continue to get your downloads.",
   },
   fr: {
+    done: "Commande terminée. Ton lien de téléchargement arrive par e-mail.",
     busy: "Ajout à ta commande…",
     failed: "Le paiement n'est pas passé. Réessaie, ou passe cette offre : ta commande est en sécurité.",
     noOrder: "On ne retrouve pas ta commande sur cette page. Ton achat est en sécurité : continue pour tes téléchargements.",
   },
   es: {
+    done: "Pedido completado. Tu enlace de descarga va camino de tu email.",
     busy: "Añadiéndolo a tu pedido…",
     failed: "El pago no se completó. Inténtalo de nuevo o salta esta oferta: tu pedido está a salvo.",
     noOrder: "No encontramos tu pedido en esta página. Tu compra está a salvo: continúa para ver tus descargas.",
   },
   de: {
+    done: "Bestellung abgeschlossen. Dein Download-Link ist per E-Mail unterwegs.",
     busy: "Wird zu deiner Bestellung hinzugefügt…",
     failed: "Die Zahlung ist nicht durchgegangen. Versuch es noch einmal oder überspring dieses Angebot: Deine Bestellung ist sicher.",
     noOrder: "Wir finden deine Bestellung auf dieser Seite nicht. Dein Kauf ist sicher: Mach weiter zu deinen Downloads.",
   },
   it: {
+    done: "Ordine completato. Il link per il download sta arrivando nella tua email.",
     busy: "Lo aggiungo al tuo ordine…",
     failed: "Il pagamento non è andato a buon fine. Riprova, oppure salta questa offerta: il tuo ordine è al sicuro.",
     noOrder: "Non troviamo il tuo ordine su questa pagina. Il tuo acquisto è al sicuro: continua per i tuoi download.",
@@ -142,12 +149,29 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     html = mapText(html, (t) => (extra[t.trim()] ? t.replace(t.trim(), extra[t.trim()]) : t));
     for (const [from, to] of Object.entries(extra)) html = html.replaceAll(`placeholder="${from}"`, `placeholder="${to}"`).replaceAll(`aria-label="${from}"`, `aria-label="${to}"`);
   }
+  if (page.quickNo) html = quickNo(html, UI[lang].done, marks ? `<!--fx:${page.quickNo}-->${text(page.quickNo)}<!--/fx-->` : text(page.quickNo));
   const video = page.videos[lang];
   if (video) html = html.replaceAll(page.wistia, video.id);
   const images = layout.images ?? {};
   html = faster(swapImages(html, images, marks), page.poster && (video?.poster ?? page.poster), [], page.play);
   const origins = imageOrigins(images);
   return origins ? html.replace("<head>", `<head>\n${origins}`) : html;
+}
+
+// The way out, where a buyer looks first (2026-11-08, "Sì, fallo": about 1 in 4
+// buyers closed the first upsell, whose first "No thanks" sat 3 phone screens
+// down): "Order complete" on top of the page, and the page's own "No thanks"
+// link (quickNo: its text) right under the video, as on ./[lang]/jazz-offer.
+const DONE_CSS = "margin:0;padding:12px 16px;background:#111;color:rgba(255,255,255,.88);font:500 15px/1.4 Inter,system-ui,sans-serif;text-align:center";
+function quickNo(html: string, done: string, no: string): string {
+  const bar = `<p id="oto-done" style="${DONE_CSS}"><span aria-hidden="true" style="color:#f5b800;font-weight:800;margin-right:6px">✓</span>${done}</p>`;
+  html = html.replace(/<body[^>]*>/, (tag) => `${tag}${bar}`);
+  const at = html.indexOf('data-page-element="Video/V1"');
+  const end = at < 0 ? -1 : html.indexOf("</iframe></div></div>", at);
+  if (end < 0) return html;
+  const cut = end + "</iframe></div></div>".length;
+  const link = `<div data-page-element="Button/V1" class="elBTN id-6Z-WRVNaX-2" id="no-shine" style="margin-top:14px"><a target="_self" href="#no" class="elButton" rel="noopener" data-oto="no"><span class="elButtonMain"><span class="elButtonMainText elButtonText">${no}</span></span></a></div>`;
+  return html.slice(0, cut) + link + html.slice(cut);
 }
 
 // ClickFunnels fades its "fade-in" blocks in with its own script (stripped):
