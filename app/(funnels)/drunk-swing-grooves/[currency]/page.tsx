@@ -9,7 +9,7 @@ import { Cta } from "../../jazz-midi-pack/Cta";
 import { display } from "../../jazz-midi-pack/fonts";
 import { Tracking } from "../../top-hits-midi-bundle/Tracking";
 import { funnel } from "../funnel";
-import { AbPlayer, Clip } from "../Players";
+import { AbPlayer, Clip, GrooveBrowser } from "../Players";
 import { Rich } from "../Rich";
 import { LANDING } from "../words";
 import s from "../landing.module.css";
@@ -151,6 +151,11 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
             ))}
           </ul>
           <p className={s.caption}>{w.feels.caption}</p>
+          <div className={s.browse}>
+            <h2 className={s.h2}>{w.browse.title}</h2>
+            <p>{w.browse.sub}</p>
+            <GrooveBrowser words={w.browse} />
+          </div>
         </div>
       </section>
 

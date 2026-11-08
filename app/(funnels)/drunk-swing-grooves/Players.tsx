@@ -123,3 +123,87 @@ export function Clip({ file, label }: { file: string; label: string }) {
     </button>
   );
 }
+
+// The ten beats of the pack, in its order (2 Drum Grooves, file names: "01 Dusty Boom Bap - … - 88bpm.mid").
+const BEATS: [string, number][] = [
+  ["Dusty Boom Bap", 88],
+  ["Lazy Sunday", 80],
+  ["Late Night Lofi", 76],
+  ["Neo Soul Pocket", 90],
+  ["Sliding Kick", 84],
+  ["Slow Soul", 72],
+  ["Rimshot Shuffle", 92],
+  ["Broken Beat", 86],
+  ["Jazzy Hop", 94],
+  ["Tape Stop Groove", 78],
+];
+const SNARE_KEYS = ["24", "ht"];
+const FEEL_KEYS = ["light", "medium", "heavy", "quintuplet"];
+const ALL = "/funnels/drunk-swing-grooves/audio/all";
+
+/** All 80 grooves: two switches (snare, feel) and the ten beats, each with a play disc. One <audio>;
+ * flipping a switch while a beat plays swaps to the same beat in the new setting, at the same spot. */
+export function GrooveBrowser({ words }: { words: { snare: string[]; feels: string[] } }) {
+  const el = useRef<HTMLAudioElement>(null);
+  const [snare, setSnare] = useState(0);
+  const [feel, setFeel] = useState(2);
+  const [beat, setBeat] = useState<number | null>(null);
+  const src = (b: number, sn: number, f: number) => `${ALL}/${String(b + 1).padStart(2, "0")}-${SNARE_KEYS[sn]}-${FEEL_KEYS[f]}.mp3`;
+  const stop = () => {
+    el.current?.pause();
+    setBeat(null);
+  };
+  useOnlyOne("browse", stop);
+
+  const play = (b: number, sn = snare, f = feel, at = 0) => {
+    const a = el.current;
+    if (!a) return;
+    claim("browse");
+    a.src = src(b, sn, f);
+    a.loop = true;
+    if (at) a.addEventListener("loadedmetadata", () => (a.currentTime = at % (a.duration || 1)), { once: true });
+    void a.play();
+    setBeat(b);
+  };
+  const change = (sn: number, f: number) => {
+    setSnare(sn);
+    setFeel(f);
+    if (beat !== null && el.current) play(beat, sn, f, el.current.currentTime);
+  };
+
+  return (
+    <div className={s.browser}>
+      <audio ref={el} preload="none" />
+      <div className={s.switch} role="radiogroup" aria-label="Snare">
+        {words.snare.map((label, i) => (
+          <button key={label} type="button" role="radio" aria-checked={snare === i} className={snare === i ? s.on : ""} onClick={() => change(i, feel)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className={`${s.switch} ${s.switch4}`} role="radiogroup" aria-label="Feel">
+        {words.feels.map((label, i) => (
+          <button key={label} type="button" role="radio" aria-checked={feel === i} className={feel === i ? s.on : ""} onClick={() => change(snare, i)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      <ol className={s.beats}>
+        {BEATS.map(([name, bpm], i) => (
+          <li key={name}>
+            <button type="button" className={s.beatBtn} onClick={() => (beat === i ? stop() : play(i))}>
+              <span className={s.clip}>
+                <Disc playing={beat === i} />
+              </span>
+              <span className={s.beatName}>
+                <b>{name}</b>
+                <span>{bpm} bpm</span>
+              </span>
+              <span className={s.srOnly}>{beat === i ? "Stop" : "Play"}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}

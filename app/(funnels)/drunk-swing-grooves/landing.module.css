@@ -748,3 +748,65 @@
   height: 100%;
   border: 0;
 }
+
+/* every groove (Players.tsx GrooveBrowser) */
+.browse {
+  margin-top: 80px;
+}
+.browse > p {
+  margin: 0 0 24px;
+}
+.browser {
+  display: grid;
+  gap: 10px;
+}
+.switch4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.switch4 button {
+  font-size: 15px;
+}
+.beats {
+  display: grid;
+  gap: 4px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.beatBtn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.beatBtn .clip .disc {
+  width: 46px;
+  height: 46px;
+}
+.beatBtn .triangle {
+  border-width: 9px 0 9px 15px;
+}
+.beatBtn .square {
+  width: 15px;
+  height: 15px;
+}
+.beatName b {
+  display: block;
+  font: 700 19px/1.25 var(--font-display), system-ui, sans-serif;
+}
+.beatName span {
+  font-size: 14px;
+  color: var(--muted);
+}
+@media (min-width: 720px) {
+  .beats {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 40px;
+  }
+}

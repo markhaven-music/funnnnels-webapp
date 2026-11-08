@@ -67,6 +67,14 @@ export const LANDING = {
       ["Quintuplet Swing", "Every second 16th on a five-note grid. Smooth and rolling: the neo soul swing."],
     ],
   },
+  // Every groove playable (2026-11-08, "fai sentire tutti i grooves"): the pack's own Drum Rack files
+  // rendered on a stock kit (~/Desktop/Jazz MIDI Pack Tools/render_all_grooves.py).
+  browse: {
+    title: `Hear all ${n.grooves} grooves`,
+    sub: "Pick the snare and the feel, then press play on any beat. These are the pack's own files on a stock drum kit.",
+    snare: ["Snare on 2 and 4", "Half-time"],
+    feels: ["Light", "Medium", "Heavy", "Quintuplet"],
+  },
   inside: {
     title: `${n.files} MIDI files. Here's what's inside.`,
     items: [

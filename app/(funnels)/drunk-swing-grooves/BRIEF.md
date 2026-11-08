@@ -59,6 +59,9 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 - Proof: "2,847 producers have the GRIND STUDIO MIDI Drum Kit" (the Jazz order page's line). No reviews.
 
 ## Audio on the page
+- 2026-11-08 "fai sentire tutti i grooves": all 80 grooves playable ("Hear all 80 grooves", under the four feels):
+  the pack's own Drum Rack files with the bpm in their names, fluidsynth + GeneralUser GS, in audio/all
+  (~/Desktop/Jazz MIDI Pack Tools/render_all_grooves.py). Snare + feel switches, ten beats; nothing loads before a tap.
 - public/funnels/drunk-swing-grooves/audio, made by ~/Desktop/Jazz MIDI Pack Tools/make_grooves_demos.py
   (fluidsynth + GeneralUser GS), in audio/v2 since 2026-11-08: the A/B (Neo Soul Pocket quantized vs Heavy Drunk
   with the Jazz pack's Royal Road keys + bass, same 8 bars; Dusty Boom Bap Medium was too subtle), the four feels
