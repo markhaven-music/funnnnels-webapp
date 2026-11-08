@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isPreview } from "@/lib/beacon";
 import type { Currency } from "@/lib/geo";
 import { BONUS, BONUS_END_KEY, readBonus, type BonusWords } from "./bonusTest";
 import { money as fmt, type Lang } from "./i18n";
@@ -42,7 +43,7 @@ function start() {
   clock = { ...clock, on: true, end: known };
   if (known !== null && known <= Date.now()) markGone();
   emit();
-  fetch("/api/checkout/bonus", { method: "POST" })
+  fetch("/api/checkout/bonus", { method: "POST", body: JSON.stringify({ own: isPreview() }) })
     .then((r) => (r.ok ? r.json() : null))
     .then((j: { end: number; now: number } | null) => {
       // No answer: no bonus shown (the server wouldn't give it either).

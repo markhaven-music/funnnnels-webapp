@@ -266,3 +266,53 @@
   line-height: 1.4;
   color: var(--fg-3);
 }
+
+/* 5-minute bonus card (BonusCard) */
+.bonusBig {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+}
+.bonusBig small {
+  font-size: 14px;
+  color: var(--fg-2);
+  font-weight: 400;
+}
+.bonusPct {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--mint);
+  margin: 2px 0 12px;
+}
+.bonusBars {
+  display: grid;
+  gap: 6px;
+}
+.bonusBar {
+  display: grid;
+  grid-template-columns: 92px 1fr 28px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.bonusLabel {
+  color: var(--fg-2);
+}
+.bonusTrack {
+  height: 8px;
+  background: var(--bg-3);
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+}
+.bonusTrack span {
+  display: block;
+  height: 100%;
+}
+.bonusN {
+  font-family: var(--font-mono);
+  text-align: right;
+  color: var(--fg-1);
+  font-variant-numeric: tabular-nums;
+}

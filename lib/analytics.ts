@@ -177,6 +177,29 @@ export type TestStats = {
   byLang?: Record<string, TestStats>;
 };
 
+/** The Drum Kit order page's 5-minute bonus (app/(funnels)/midi-drum-kit/bonusTest.ts). */
+export type BonusStats = {
+  /** Since everyone has the bonus (ISO). */
+  since: string;
+  /** Drum Kit orders paid since then (upsells apart): within the 5 minutes (they got the free Expansions) and after. */
+  orders: number;
+  within: number;
+  after: number;
+  /** PayPal orders: PayPal doesn't record whether the bonus was given, so they're in neither `within` nor `after`. */
+  paypal: number;
+  /** Clocks started (a browser reaching the order page for the first time, owner and test devices left out), counted since `clocksSince`. */
+  clocksSince: string | null;
+  clocks: number;
+  clocksPhone: number;
+  /** The orders paid since clocks are counted, for the rates per clock. */
+  ordersSinceClocks: number;
+  withinSinceClocks: number;
+  /** Card orders whose clock start is known: how long after it they paid. */
+  timing: { label: string; n: number; within: boolean }[];
+  timed: number;
+  medianSec: number | null;
+};
+
 /** One UTC day, all funnels together. */
 export type Day = {
   day: string; // "2026-10-21"
@@ -200,6 +223,8 @@ export type Analytics = {
   funnels: FunnelStats[];
   /** The running A/B tests (TESTS), each since it started, whatever the range. */
   tests: TestStats[];
+  /** The Drum Kit order page's 5-minute bonus, since everyone has it (bonusStats), whatever the range. */
+  bonus: BonusStats | null;
   /** Day by day over the range (dashboard home), oldest first. */
   days: Day[];
   /** The same number of days just before the range, for the comparisons; null for "all". */
@@ -212,7 +237,22 @@ export type Analytics = {
 
 // offer: the upsell's id for a one-click upsell, "" for an order.
 // fee: the processor's, in the sale's currency; null when not known.
-type Sale = { funnel: string; lang: string; variant: string; offer: string; amount: number; fee: number | null; currency: string; created: number; rated?: boolean };
+// bonus: the Drum Kit's 5-minute bonus was given (card orders: metadata.bonus); bonusStart: when the
+// buyer's 5 minutes started (ms, card orders since 2026-11-09: metadata.bonus_start); paypal: a PayPal order.
+type Sale = {
+  funnel: string;
+  lang: string;
+  variant: string;
+  offer: string;
+  amount: number;
+  fee: number | null;
+  currency: string;
+  created: number;
+  rated?: boolean;
+  bonus?: boolean;
+  bonusStart?: number | null;
+  paypal?: boolean;
+};
 type ViewRow = { funnel: string; page: Step; lang: string; variant: string; views: number };
 
 const DAY = 86_400_000;
@@ -355,6 +395,8 @@ async function stripeSales(slug: string): Promise<Sale[]> {
         fee: stripeFee(pi),
         currency: pi.currency,
         created: pi.created * 1000,
+        bonus: !!pi.metadata.bonus,
+        bonusStart: Number(pi.metadata.bonus_start) || null,
       });
     }
     if (!res.has_more || !res.next_page) break;
@@ -392,6 +434,7 @@ async function paypalSales(): Promise<Sale[]> {
     fee: r.fee_cents === null ? null : r.fee_cents / 100,
     currency: r.currency,
     created: Date.parse(r.created_at),
+    paypal: true,
   }));
 }
 
@@ -529,6 +572,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
         return paid ? { ...stats, variants: stats.variants.map((v, j) => ({ ...v, paid: paid[j] ?? undefined })) } : stats;
       }),
     ),
+    bonus: await soft("5-minute bonus", bonusStats(allSales), null),
     ...daily(range, since, last, dayRows, allSales, rate, trackingSince),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
@@ -810,6 +854,62 @@ async function checkoutPaid(funnel: string, w: { from: string; until: string | n
     starts: started.size,
     orders: paid.size,
     phone: { starts: phones.length, orders: phones.filter((e) => paid.has(e)).length, unknown: [...started].filter((e) => !deviceOf.get(e)).length },
+  };
+}
+
+// Everyone on the Drum Kit order page has had the 5-minute bonus since this minute (6bf35cf).
+const BONUS_SINCE = "2026-11-08T19:50:00+01:00";
+const BONUS_BUCKETS: { label: string; upTo: number; within: boolean }[] = [
+  { label: "Under 1 min", upTo: 60, within: true },
+  { label: "1–2 min", upTo: 120, within: true },
+  { label: "2–3 min", upTo: 180, within: true },
+  { label: "3–4 min", upTo: 240, within: true },
+  { label: "4–5 min", upTo: 330, within: true }, // the 30 s grace for a click on time (BONUS.graceMs)
+  { label: "5–30 min", upTo: 1800, within: false },
+  { label: "30 min – 24 h", upTo: 86_400, within: false },
+  { label: "Later", upTo: Infinity, within: false },
+];
+
+/**
+ * How many pay within the 5 minutes of the Drum Kit's bonus: every order since
+ * everyone has it, split by whether it got the free Expansions, against the clocks
+ * started (bonus_clocks, from 2026-11-09) and, for card orders that say when their
+ * clock started, how long they took.
+ */
+async function bonusStats(sales: Sale[]): Promise<BonusStats> {
+  const from = Date.parse(BONUS_SINCE);
+  const orders = sales.filter((s) => s.funnel === "midi-drum-kit" && !s.offer && s.created >= from);
+  const db = supabase();
+  const [first, all, phone] = await Promise.all([
+    db.from("bonus_clocks").select("started_at").eq("own", false).order("started_at").limit(1).maybeSingle(),
+    db.from("bonus_clocks").select("id", { count: "exact", head: true }).eq("own", false),
+    db.from("bonus_clocks").select("id", { count: "exact", head: true }).eq("own", false).eq("device", "mobile"),
+  ]);
+  for (const r of [first, all, phone]) if (r.error) throw r.error;
+  const clocksSince = (first.data as { started_at: string } | null)?.started_at ?? null;
+  const counted = clocksSince ? orders.filter((s) => s.created >= Date.parse(clocksSince)) : [];
+  const timed = orders.filter((s) => s.bonusStart && s.created >= s.bonusStart).map((s) => (s.created - s.bonusStart!) / 1000);
+  const timing = BONUS_BUCKETS.map((b, i) => ({
+    label: b.label,
+    within: b.within,
+    n: timed.filter((sec) => sec < b.upTo && (i === 0 || sec >= BONUS_BUCKETS[i - 1].upTo)).length,
+  }));
+  const sorted = [...timed].sort((a, b) => a - b);
+  const within = orders.filter((s) => s.bonus).length;
+  return {
+    since: BONUS_SINCE,
+    orders: orders.length,
+    within,
+    after: orders.filter((s) => !s.paypal && !s.bonus).length,
+    paypal: orders.filter((s) => s.paypal).length,
+    clocksSince,
+    clocks: all.count ?? 0,
+    clocksPhone: phone.count ?? 0,
+    ordersSinceClocks: counted.length,
+    withinSinceClocks: counted.filter((s) => s.bonus).length,
+    timing,
+    timed: timed.length,
+    medianSec: sorted.length ? sorted[Math.floor((sorted.length - 1) / 2)] : null,
   };
 }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { I } from "@/components/icons";
-import type { Analytics, Metrics, TestStats } from "@/lib/analytics";
+import type { Analytics, BonusStats, Metrics, TestStats } from "@/lib/analytics";
 import { RangePicker, useRange } from "@/components/RangePicker";
 import s from "./analytics.module.css";
 
@@ -85,6 +85,8 @@ export function AnalyticsPanel() {
         <Stat label="ORDERS" value={total ? int(total.orders) : "…"} sub={total ? pct(total.ratedOrders, total.visitors) : ""} color="var(--mint)" />
         <Stat label="REVENUE" value={total ? eur(total.revenue) : "…"} color="var(--accent)" />
       </div>
+
+      {data?.bonus && <BonusCard b={data.bonus} />}
 
       {data?.tests.map((t) => <TestCard key={`${t.funnel}|${t.name}`} t={t} />)}
 
@@ -202,6 +204,101 @@ const when = (iso: string) =>
     .formatToParts(new Date(iso))
     .reduce((o, p) => ({ ...o, [p.type]: p.value }), {} as Record<string, string>);
 const whenText = (p: Record<string, string>) => `${p.month}-${p.day} ${p.hour}:${p.minute}`;
+
+const mins = (sec: number) => (sec < 60 ? `${Math.round(sec)} s` : `${Math.floor(sec / 60)} min ${String(Math.round(sec % 60)).padStart(2, "0")} s`);
+
+/** Dashboard → Analytics: how many Drum Kit buyers pay within the order page's 5-minute bonus (lib/analytics.ts bonusStats). */
+function BonusCard({ b }: { b: BonusStats }) {
+  const card = b.within + b.after;
+  const top = Math.max(1, ...b.timing.map((t) => t.n));
+  return (
+    <section className={s.test}>
+      <div className={s.testHead}>
+        <div>
+          <div className={s.testTitle}>
+            <I.analytics size={14} /> 5-minute bonus · MIDI Drum Kit
+          </div>
+          <div className={s.testSub}>
+            Order page: the Expansions free if paid within 5 minutes of arriving · since {whenText(when(b.since))}, when everyone got it · whatever the range above
+          </div>
+        </div>
+      </div>
+
+      <div className={s.variants}>
+        <div className={s.variant}>
+          <div className={s.variantHead}>Orders paid within the 5 minutes</div>
+          <div className={s.bonusBig}>
+            {int(b.within)} <small>of {int(card)}</small>
+          </div>
+          <div className={s.bonusPct}>{pct(b.within, card)}</div>
+          <dl className={s.kv}>
+            <dt>Within 5 min (free Expansions)</dt>
+            <dd className={s.strong}>{int(b.within)}</dd>
+            <dt>After the 5 minutes</dt>
+            <dd>{int(b.after)}</dd>
+            {b.paypal > 0 && (
+              <>
+                <dt>PayPal (not known)</dt>
+                <dd>{int(b.paypal)}</dd>
+              </>
+            )}
+          </dl>
+          <div className={s.paidNote}>Card orders, upsells apart. PayPal doesn&apos;t record whether the bonus was given, so its orders are left out of the %.</div>
+        </div>
+
+        <div className={s.variant}>
+          <div className={s.variantHead}>Out of everyone who saw the clock</div>
+          <div className={s.bonusBig}>
+            {int(b.withinSinceClocks)} <small>of {int(b.clocks)}</small>
+          </div>
+          <div className={s.bonusPct}>{pct(b.withinSinceClocks, b.clocks)}</div>
+          <dl className={s.kv}>
+            <dt>Clocks started</dt>
+            <dd>{int(b.clocks)}</dd>
+            <dt>On phones</dt>
+            <dd>
+              {int(b.clocksPhone)} <small>{pct(b.clocksPhone, b.clocks)}</small>
+            </dd>
+            <dt>Paid within 5 min</dt>
+            <dd className={s.strong}>
+              {int(b.withinSinceClocks)} <small>{pct(b.withinSinceClocks, b.clocks)}</small>
+            </dd>
+            <dt>Paid at all</dt>
+            <dd>
+              {int(b.ordersSinceClocks)} <small>{pct(b.ordersSinceClocks, b.clocks)}</small>
+            </dd>
+          </dl>
+          <div className={s.paidNote}>
+            A clock starts the first time a browser reaches the order page (owner and test devices left out)
+            {b.clocksSince ? ` · counted since ${whenText(when(b.clocksSince))}` : " · none counted yet"}
+          </div>
+        </div>
+
+        <div className={s.variant}>
+          <div className={s.variantHead}>How long they took to pay</div>
+          <div className={s.bonusBars}>
+            {b.timing.map((t) => (
+              <div key={t.label} className={s.bonusBar}>
+                <span className={s.bonusLabel}>{t.label}</span>
+                <span className={s.bonusTrack}>
+                  <span style={{ width: `${(t.n / top) * 100}%`, background: t.within ? "var(--mint)" : "var(--fg-3)" }} />
+                </span>
+                <span className={s.bonusN}>{int(t.n)}</span>
+              </div>
+            ))}
+          </div>
+          <dl className={s.kv} style={{ marginTop: 10 }}>
+            <dt>Median</dt>
+            <dd className={s.strong}>{b.medianSec == null ? "—" : mins(b.medianSec)}</dd>
+          </dl>
+          <div className={s.paidNote}>
+            From the clock&apos;s start to the payment, card orders that recorded it ({int(b.timed)} so far, from 11-09); green = within the 5 minutes.
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function TestCard({ t }: { t: TestStats }) {
   const name = (v: string) => t.variants.find((x) => x.variant === v)?.label ?? v;

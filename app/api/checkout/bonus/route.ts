@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BONUS_COOKIE, BONUS_COOKIE_AGE, bonusEnd, readStart, signStart } from "@/lib/bonusClock";
+import { botReason } from "@/lib/bots";
+import { visitorCountry } from "@/lib/geo";
+import { deviceOf } from "@/lib/live";
+import { supabase } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 
@@ -17,6 +21,20 @@ export async function POST(req: Request) {
   const res = NextResponse.json({ end: bonusEnd(start), now }, { headers: { "cache-control": "no-store" } });
   if (saved === null) {
     res.cookies.set(BONUS_COOKIE, signStart(start), { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: BONUS_COOKIE_AGE });
+    // A new clock: counted for Analytics → 5-minute bonus (lib/analytics.ts bonusStats).
+    // own: the owner's or a test device (?preview=1, the opt-out), left out there. Never blocks the page.
+    if (!reset && !botReason(req)) {
+      const body = await req.json().catch(() => ({}));
+      const { error } = await supabase()
+        .from("bonus_clocks")
+        .insert({
+          started_at: new Date(start).toISOString(),
+          device: deviceOf(req.headers.get("user-agent") ?? ""),
+          country: visitorCountry(req.headers) || null,
+          own: body?.own === true,
+        });
+      if (error) console.error("bonus clock: save failed", error);
+    }
   }
   return res;
 }
