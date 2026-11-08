@@ -288,23 +288,30 @@
   pointer-events: auto;
   border-radius: 0;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-  padding: 18px 20px calc(16px + env(safe-area-inset-bottom));
+  padding: 16px 20px calc(14px + env(safe-area-inset-bottom));
 }
 .payBarBtn:hover,
 .payBarBtn:active {
   transform: none;
 }
-/* After the colour rules (html[data-ab-btn] .cta), which add the floating glow back. */
+/* After the colour rules (html[data-ab-btn] .cta), which add the gradient and
+   the glow back: one flat block, the colour Safari's bar takes under it
+   ("togli gradiente così è un blocco con la base che crea safari"). */
+:global(html) .payBar,
 :global(html) .payBar > .payBarBtn {
-  border-radius: 0;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  background: #ec6a0c;
 }
-/* The bar behind the button is its bottom colour, the one Safari's bar picks up. */
-:global(html[data-ab-btn="green"]) .payBar {
+:global(html[data-ab-btn="green"]) .payBar,
+:global(html[data-ab-btn="green"]) .payBar > .payBarBtn {
   background: #16a34a;
 }
-:global(html[data-ab-btn="yellow"]) .payBar {
+:global(html[data-ab-btn="yellow"]) .payBar,
+:global(html[data-ab-btn="yellow"]) .payBar > .payBarBtn {
   background: #f5b800;
+}
+:global(html) .payBar > .payBarBtn {
+  border-radius: 0;
+  box-shadow: none;
 }
 /* Add-ons: the whole offer (picture and text) on phones too, as on a computer;
    no "Details" button (user, 11-06: "togli i panes details… deve essere come su desktop"). */
