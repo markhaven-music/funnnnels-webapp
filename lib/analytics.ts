@@ -139,7 +139,14 @@ export type FunnelStats = {
 };
 
 /** Checkouts started and the orders in a window, the free-pack sign-ups left out (they land on the order page without meaning to buy). */
-export type CheckoutPaid = { from: string; until: string | null; starts: number; orders: number };
+export type CheckoutPaid = {
+  from: string;
+  until: string | null;
+  starts: number;
+  orders: number;
+  /** The same on phones alone (checkout_starts.device; before 11-08 matched from the Live session at the same time). */
+  phone: { starts: number; orders: number; unknown: number };
+};
 
 export type TestStats = {
   funnel: string;
@@ -716,13 +723,13 @@ async function checkoutPaid(funnel: string, w: { from: string; until: string | n
   const db = supabase();
   const until = w.until ?? new Date().toISOString();
   const [starts, cards, pp] = await Promise.all([
-    db.from("checkout_starts").select("email, started_at").eq("funnel", funnel).gte("started_at", w.from).lt("started_at", until).limit(5000),
+    db.from("checkout_starts").select("email, started_at, device").eq("funnel", funnel).gte("started_at", w.from).lt("started_at", until).limit(5000),
     db.from("orders").select("email, created_at").eq("funnel", funnel).eq("status", "succeeded").is("offer", null).gte("created_at", w.from).lt("created_at", until).limit(5000),
     db.from("paypal_sales").select("email, payer_email, created_at").eq("funnel", funnel).is("offer", null).gte("created_at", w.from).lt("created_at", until).limit(5000),
   ]);
   for (const r of [starts, cards, pp]) if (r.error) throw r.error;
   const low = (e: string | null | undefined) => (e ?? "").trim().toLowerCase();
-  const startRows = (starts.data ?? []) as { email: string; started_at: string }[];
+  const startRows = (starts.data ?? []) as { email: string; started_at: string; device: string | null }[];
   const orderRows = [
     ...((cards.data ?? []) as { email: string | null; created_at: string }[]).map((r) => ({ e: low(r.email), at: Date.parse(r.created_at) })),
     ...((pp.data ?? []) as { email: string | null; payer_email: string | null; created_at: string }[]).map((r) => ({
@@ -747,7 +754,15 @@ async function checkoutPaid(funnel: string, w: { from: string; until: string | n
   // payment straight from elsewhere (11-03) has no checkout to count against.
   const startedAt = new Map(startRows.map((r) => [low(r.email), Date.parse(r.started_at)]));
   const paid = new Set(orderRows.filter((r) => started.has(r.e) && r.at >= (startedAt.get(r.e) ?? Infinity)).map((r) => r.e));
-  return { from: w.from, until: w.until, starts: started.size, orders: paid.size };
+  const deviceOf = new Map(startRows.map((r) => [low(r.email), r.device]));
+  const phones = [...started].filter((e) => deviceOf.get(e) === "mobile");
+  return {
+    from: w.from,
+    until: w.until,
+    starts: started.size,
+    orders: paid.size,
+    phone: { starts: phones.length, orders: phones.filter((e) => paid.has(e)).length, unknown: [...started].filter((e) => !deviceOf.get(e)).length },
+  };
 }
 
 /** Standard normal CDF (Abramowitz–Stegun 7.1.26). */

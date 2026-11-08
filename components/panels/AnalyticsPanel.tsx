@@ -86,7 +86,7 @@ export function AnalyticsPanel() {
         <Stat label="REVENUE" value={total ? eur(total.revenue) : "…"} color="var(--accent)" />
       </div>
 
-      {data?.tests.map((t) => <TestCard key={t.funnel} t={t} />)}
+      {data?.tests.map((t) => <TestCard key={`${t.funnel}|${t.name}`} t={t} />)}
 
       <div className="section-head">
         <div className="section-title">
@@ -275,9 +275,18 @@ function TestCard({ t }: { t: TestStats }) {
                     <dd className={s.strong}>
                       {int(v.paid.orders)} of {int(v.paid.starts)} <small>{pct(v.paid.orders, v.paid.starts)}</small>
                     </dd>
+                    {v.paid.phone && (
+                      <>
+                        <dt>On phones</dt>
+                        <dd className={s.strong}>
+                          {int(v.paid.phone.orders)} of {int(v.paid.phone.starts)} <small>{pct(v.paid.phone.orders, v.paid.phone.starts)}</small>
+                        </dd>
+                      </>
+                    )}
                   </dl>
                   <div className={s.paidNote}>
                     {whenText(when(v.paid.from))} → {v.paid.until ? whenText(when(v.paid.until)) : "now"}, when everyone had it · MIDI Drum Kit buyers only, free-pack sign-ups left out
+                    {v.paid.phone?.unknown ? ` · device unknown for ${v.paid.phone.unknown}` : ""}
                   </div>
                 </div>
               )}
