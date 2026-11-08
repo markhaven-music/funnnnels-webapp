@@ -252,3 +252,17 @@
   color: var(--fg-3);
   margin-top: 6px;
 }
+/* The step 2 test's "paid after checkout", counted when everyone had the step. */
+.paid {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--bg-3);
+  border-radius: var(--radius-xs);
+}
+.paidNote {
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--fg-3);
+}

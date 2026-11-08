@@ -138,6 +138,9 @@ export type FunnelStats = {
   langs: { lang: string; m: Metrics }[] | null;
 };
 
+/** Checkouts started and the orders in a window, the free-pack sign-ups left out (they land on the order page without meaning to buy). */
+export type CheckoutPaid = { from: string; until: string | null; starts: number; orders: number };
+
 export type TestStats = {
   funnel: string;
   name: string;
@@ -150,7 +153,16 @@ export type TestStats = {
   where: string;
   /** m: the orders alone, which the test is judged on; full: the same visitors with their upsells too (the map's lanes).
    * label, color: how the dashboard names and colours the variant. */
-  variants: { variant: string; label: string; color: { from: string; to: string }; m: Metrics; full: Metrics; chanceBest: number | null }[];
+  variants: {
+    variant: string;
+    label: string;
+    color: { from: string; to: string };
+    m: Metrics;
+    full: Metrics;
+    chanceBest: number | null;
+    /** How many who started the checkout paid, in the window this variant was the only one shown (TestDef.windows). */
+    paid?: CheckoutPaid;
+  }[];
   leader: string | null;
   verdict: "waiting" | "early" | "winner" | "tie";
   salesToGo: number;
@@ -494,7 +506,14 @@ export async function getAnalytics(range: Range): Promise<Analytics> {
     trackingSince,
     usdToEur: rate,
     funnels,
-    tests: TESTS.map((t, i) => testStats(t, allViews ?? views, allSales, rate, testStarts[i], now)),
+    tests: await Promise.all(
+      TESTS.map(async (t, i) => {
+        const stats = testStats(t, allViews ?? views, allSales, rate, testStarts[i], now);
+        if (!t.windows) return stats;
+        const paid = await soft(`checkouts paid (${t.name})`, Promise.all(stats.variants.map((v) => (t.windows![v.variant] ? checkoutPaid(t.funnel, t.windows![v.variant]) : null))), null);
+        return paid ? { ...stats, variants: stats.variants.map((v, j) => ({ ...v, paid: paid[j] ?? undefined })) } : stats;
+      }),
+    ),
     ...daily(range, since, last, dayRows, allSales, rate, trackingSince),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
@@ -530,6 +549,8 @@ type TestDef = {
   variants: readonly string[];
   label: (v: string) => string;
   color: (v: string) => { from: string; to: string };
+  /** When each variant was the only one shown, to compare the checkouts that paid (ISO times; until null = still now). */
+  windows?: Record<string, { from: string; until: string | null }>;
 };
 const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 export const TESTS: TestDef[] = [
@@ -555,6 +576,13 @@ export const TESTS: TestDef[] = [
     variants: PAY_TEST.variants,
     label: (v) => PAY_LABELS[v as keyof typeof PAY_LABELS],
     color: (v) => PAY_COLORS[v as keyof typeof PAY_COLORS],
+    // The split ran too short to say anything, so each step is judged on when
+    // everyone had it: the old one from 11-02 (funnnnels' order page) until the
+    // first test on 11-06 16:00, the new one since 11-06 19:20 (everyone on B).
+    windows: {
+      a: { from: "2026-11-02T00:00:00+01:00", until: "2026-11-06T16:00:00+01:00" },
+      b: { from: "2026-11-06T19:20:00+01:00", until: null },
+    },
   },
   {
     funnel: "jazz-midi-pack",
@@ -676,6 +704,47 @@ function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, sin
     // At the pace so far.
     daysToGo: totalOrders > 0 && days > 0 ? salesToGo / (totalOrders / days) : null,
   };
+}
+
+/**
+ * Who started the checkout in the window (one per email) and how many orders
+ * were paid in it (card and PayPal, upsells apart), leaving out the emails that
+ * took a free pack before: since 11-05 the free packs send their sign-ups to the
+ * order page with their name filled in, so they count as checkouts.
+ */
+async function checkoutPaid(funnel: string, w: { from: string; until: string | null }): Promise<CheckoutPaid> {
+  const db = supabase();
+  const until = w.until ?? new Date().toISOString();
+  const [starts, cards, pp] = await Promise.all([
+    db.from("checkout_starts").select("email, started_at").eq("funnel", funnel).gte("started_at", w.from).lt("started_at", until).limit(5000),
+    db.from("orders").select("email, created_at").eq("funnel", funnel).eq("status", "succeeded").is("offer", null).gte("created_at", w.from).lt("created_at", until).limit(5000),
+    db.from("paypal_sales").select("email, payer_email, created_at").eq("funnel", funnel).is("offer", null).gte("created_at", w.from).lt("created_at", until).limit(5000),
+  ]);
+  for (const r of [starts, cards, pp]) if (r.error) throw r.error;
+  const low = (e: string | null | undefined) => (e ?? "").trim().toLowerCase();
+  const startRows = (starts.data ?? []) as { email: string; started_at: string }[];
+  const orderRows = [
+    ...((cards.data ?? []) as { email: string | null; created_at: string }[]).map((r) => ({ e: low(r.email), at: Date.parse(r.created_at) })),
+    ...((pp.data ?? []) as { email: string | null; payer_email: string | null; created_at: string }[]).map((r) => ({
+      e: low(r.email || r.payer_email),
+      at: Date.parse(r.created_at),
+    })),
+  ];
+  const orderEmails = orderRows.map((r) => r.e);
+  const emails = [...new Set([...startRows.map((r) => low(r.email)), ...orderEmails].filter(Boolean))];
+  const optedAt = new Map<string, number>();
+  for (let i = 0; i < emails.length; i += 300) {
+    const { data, error } = await db.from("optins").select("email, created_at").in("email", emails.slice(i, i + 300)).lt("created_at", until);
+    if (error) throw error;
+    for (const o of (data ?? []) as { email: string; created_at: string }[]) {
+      const t = Date.parse(o.created_at);
+      const k = low(o.email);
+      optedAt.set(k, Math.min(optedAt.get(k) ?? Infinity, t));
+    }
+  }
+  const free = (e: string, at: number) => (optedAt.get(e) ?? Infinity) <= at;
+  const started = new Set(startRows.filter((r) => !free(low(r.email), Date.parse(r.started_at))).map((r) => low(r.email)));
+  return { from: w.from, until: w.until, starts: started.size, orders: orderRows.filter((r) => !free(r.e, r.at)).length };
 }
 
 /** Standard normal CDF (Abramowitz–Stegun 7.1.26). */

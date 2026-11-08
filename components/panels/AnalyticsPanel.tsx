@@ -196,6 +196,13 @@ const VERDICT: Record<TestStats["verdict"], string> = {
   tie: "No clear winner: the variants sell about the same.",
 };
 
+/** "11-06 16:00", Rome time. */
+const when = (iso: string) =>
+  new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Rome", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false })
+    .formatToParts(new Date(iso))
+    .reduce((o, p) => ({ ...o, [p.type]: p.value }), {} as Record<string, string>);
+const whenText = (p: Record<string, string>) => `${p.month}-${p.day} ${p.hour}:${p.minute}`;
+
 function TestCard({ t }: { t: TestStats }) {
   const name = (v: string) => t.variants.find((x) => x.variant === v)?.label ?? v;
   const best = t.leader;
@@ -261,6 +268,19 @@ function TestCard({ t }: { t: TestStats }) {
                 <dt>Chance it&apos;s best</dt>
                 <dd>{v.chanceBest == null || v.m.orders === 0 ? "—" : `${Math.round(v.chanceBest * 100)}%`}</dd>
               </dl>
+              {v.paid && (
+                <div className={s.paid}>
+                  <dl className={s.kv}>
+                    <dt>Paid after checkout</dt>
+                    <dd className={s.strong}>
+                      {int(v.paid.orders)} of {int(v.paid.starts)} <small>{pct(v.paid.orders, v.paid.starts)}</small>
+                    </dd>
+                  </dl>
+                  <div className={s.paidNote}>
+                    {whenText(when(v.paid.from))} → {v.paid.until ? whenText(when(v.paid.until)) : "now"}, when everyone had it · MIDI Drum Kit buyers only, free-pack sign-ups left out
+                  </div>
+                </div>
+              )}
               <div className={s.progress} title={`${v.m.orders} of ${t.target} sales`}>
                 <span style={{ width: `${Math.min(100, (v.m.orders / t.target) * 100)}%`, background: c.to }} />
               </div>
