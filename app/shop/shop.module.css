@@ -317,38 +317,6 @@
   font-weight: 800;
   color: var(--y);
 }
-/* A small yellow key: the funnels' button, at card size. */
-.add {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 0 16px;
-  border: 0;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #ffd23d, var(--y) 55%, #d39a00);
-  box-shadow: 0 3px 0 #7a5600, 0 8px 18px rgb(245 184 0 / 0.18);
-  color: #000;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 800;
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
-}
-.add:hover {
-  filter: brightness(1.06);
-}
-.add:active {
-  transform: translateY(3px);
-  box-shadow: 0 0 0 #7a5600, 0 4px 10px rgb(245 184 0 / 0.14);
-}
-.added {
-  background: var(--ink-3);
-  box-shadow: none;
-  color: var(--cream-2);
-}
-
 /* ─── product ────────────────────────────── */
 .back {
   display: inline-block;
@@ -505,21 +473,6 @@
   align-content: center;
   text-align: center;
 }
-.ghost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 56px;
-  padding: 0 22px;
-  border: 1px solid var(--brass);
-  border-radius: 4px;
-  font-weight: 700;
-  text-decoration: none;
-}
-.ghost:hover {
-  background: rgb(226 169 59 / 0.1);
-}
-
 /* ─── thank you ──────────────────────────── */
 .thanks {
   padding-top: 56px;
