@@ -27,3 +27,16 @@ export function restate(text: string, from: number, to: number, lang = "en"): st
       .replace(new RegExp(`(?<![\\d.,])${f}(\\s|&nbsp;|\\u00a0|\\u202f)${sign}`, "g"), (_, sp: string, s: string) => `${t}${sp}${s}`)
   );
 }
+
+/** A per-unit figure worked out from the price ("€0.08 per hit" = €27 ÷ 320), worked out again at the new price. */
+export function restateEach(text: string, from: number, to: number, units: number, lang = "en"): string {
+  if (from === to || !text) return text;
+  const fix = (n: number) => (n / units).toFixed(2);
+  const [a, b] = [fix(from), fix(to)];
+  if (a === b) return text;
+  const sign = "(€|\\$|\\{c\\})";
+  return text
+    .replace(new RegExp(`${sign}(\\s?)${esc(a)}(?!\\d)`, "g"), (_, s: string, sp: string) => `${s}${sp}${b}`)
+    .replace(new RegExp(`(?<![\\d.,])${esc(a.replace(".", ","))}(\\s|&nbsp;|\\u00a0|\\u202f)${sign}`, "g"), (_, sp: string, s: string) => `${b.replace(".", ",")}${sp}${s}`)
+    .replace(new RegExp(`${sign}(\\s?)${esc(a.replace(".", ","))}(?!\\d)`, "g"), (_, s: string, sp: string) => `${s}${sp}${b.replace(".", ",")}`);
+}

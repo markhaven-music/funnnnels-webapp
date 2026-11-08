@@ -1,5 +1,5 @@
 import type { Currency } from "@/lib/geo";
-import { restate } from "@/lib/restate";
+import { restate, restateEach } from "@/lib/restate";
 import { fill } from "@/lib/words";
 import { compare } from "./copy";
 import { funnel } from "./funnel";
@@ -38,7 +38,7 @@ export function ValueStack({ currency, price, w = LANDING.stack }: { currency: C
       </div>
       <div className={s.stackFinal}>{t(w.final)}</div>
       <div className={s.stackPer}>
-        <Rich text={fill(w.per, { price })} currency={currency} />
+        <Rich text={restateEach(fill(w.per, { price }), funnel.price[currency], price, 1000)} currency={currency} />
       </div>
       <div className={s.stackScarcity}>
         <span className={s.pulse} />
@@ -118,6 +118,9 @@ export function Compare({ currency, price, w = LANDING.compare }: { currency: Cu
     label: w.rows[r]?.label ?? row.label,
     values: row.values.map((v, i) => w.rows[r]?.values[i] ?? v),
   }));
+  // A price cell (and "{c}0.03" per progression) at dashboard → Products' price, in the table and the phone cards alike.
+  const cell = (v: (typeof rows)[number]["values"][number]) =>
+    typeof v === "string" ? restateEach(restate(v, funnel.price[currency], price), funnel.price[currency], price, 1000) : v;
   return (
     <div className={s.cmp}>
       <p className={s.eyebrow}>{w.eyebrow}</p>
@@ -143,7 +146,7 @@ export function Compare({ currency, price, w = LANDING.compare }: { currency: Cu
               <td className={s.isLabel}>{row.label}</td>
               {row.values.map((v, i) => (
                 <td key={i} className={columns[i].bundle ? s.isBundle : undefined}>
-                  <Mark cell={typeof v === "string" ? restate(v, funnel.price[currency], price) : v} currency={currency} />
+                  <Mark cell={cell(v)} currency={currency} />
                 </td>
               ))}
             </tr>
@@ -162,7 +165,7 @@ export function Compare({ currency, price, w = LANDING.compare }: { currency: Cu
                 <li key={r}>
                   <span>{row.label}</span>
                   <span>
-                    <Mark cell={row.values[i]} currency={currency} />
+                    <Mark cell={cell(row.values[i])} currency={currency} />
                   </span>
                 </li>
               ))}

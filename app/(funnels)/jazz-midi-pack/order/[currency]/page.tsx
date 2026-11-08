@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel, upsellsOn } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
+import { restate } from "@/lib/restate";
 import { getPublishedBlocks } from "@/lib/pages";
 import { bumpCopy, funnel } from "../../funnel";
 import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content";
@@ -56,7 +57,13 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     country: FALLBACK_COUNTRY[currency],
     publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null,
     bump: f.bump ? { name: f.bump.name, price: f.bump.price[currency], pitch: f.bump.pitch, cover: splitName(f.bump.name) } : null,
-    bumps: (f.bumps ?? []).map((b) => ({ id: b.id, name: b.name, price: b.price[currency], pitch: b.pitch, image: b.image, ...bumpCopy[b.id] })),
+    // Their words say the code's price ("just {c}27"): said again at Products' (lib/restate.ts).
+    bumps: (f.bumps ?? []).map((b) => {
+      const was = getFunnel(funnel.slug)?.bumps?.find((c) => c.id === b.id)?.price[currency] ?? b.price[currency];
+      const copy = bumpCopy[b.id];
+      const said = copy ? { ...copy, body: copy.body.map((p) => restate(p, was, b.price[currency])) } : {};
+      return { id: b.id, name: b.name, price: b.price[currency], pitch: b.pitch, image: b.image, ...said };
+    }),
     // After paying: the Famous Beats upsell (./offer), then the thank-you page.
     afterOrder: nextStep(f, "en", null),
     keepCard: upsellsOn(f),

@@ -2,7 +2,7 @@ import { getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS, type Step } from "@/lib/beacon";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
-import { restate } from "@/lib/restate";
+import { restate, restateEach } from "@/lib/restate";
 import { PAY } from "./payTest";
 import { TEMPLATE as FAMOUS } from "./cf/upsell-famous";
 import { TEMPLATE as TOP_HITS } from "./cf/upsell-tophits";
@@ -107,12 +107,10 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
   const edits = markupEdits(allEdits, offerId as TextPage);
   const layout = layouts[offerId] ?? {};
   const strings: Copy = { ...page.copy.en, ...page.copy[lang], ...edits };
-  // Famous Beats' "€0.08 per hit transcription" was worked out for €27: the price ÷ 320 transcriptions.
-  const per = (t: string) => {
-    if (offerId !== "famous-beats" || offer.price[currency] === 27) return t;
-    const each = (offer.price[currency] / 320).toFixed(2);
-    return t.replace(/([€$])0\.08\b/g, `$1${each}`).replace(/\b0,08(\s|&nbsp;|\u00a0|\u202f)€/g, (_, sp: string) => `${each.replace(".", ",")}${sp}€`);
-  };
+  // "€0.08 per hit transcription" (Famous Beats, ÷ 320) and "€0.03 per chord progression" (TOP HITS, ÷ 1000) follow the price.
+  const units = ({ "famous-beats": 320, "top-hits": 1000 } as Record<string, number>)[offerId];
+  const base = was ?? offer.price[currency];
+  const per = (t: string) => (units ? restateEach(t, base, offer.price[currency], units, lang) : t);
   const said = (key: string) =>
     typeof strings[key] === "string" ? per(restate(strings[key] as string, was ?? offer.price[currency], offer.price[currency], lang)) : "";
   const dollars = (t: string) => (currency === "usd" ? t.replaceAll("€", "$") : t);
