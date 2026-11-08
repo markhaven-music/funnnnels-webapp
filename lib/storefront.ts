@@ -65,13 +65,6 @@ const FUNNEL_PACKS: { slug: string; funnel: string; href: string; line: string; 
     pic: { src: "/funnels/home/top-hits-box.webp", width: 440, height: 440, fade: true },
   },
   {
-    slug: "famous-beats",
-    funnel: "famous-beats-bundle",
-    href: "/famous-beats-bundle",
-    line: "The drums behind 320 hits, note for note.",
-    pic: { src: "/funnels/home/famous-beats-box.webp", width: 440, height: 440, fade: true },
-  },
-  {
     slug: "jazz-midi-pack",
     funnel: "jazz-midi-pack",
     href: "/jazz-midi-pack",
@@ -80,7 +73,10 @@ const FUNNEL_PACKS: { slug: string; funnel: string; href: string; line: string; 
   },
 ];
 
-const FUNNEL_SLUGS = new Set(FUNNEL_PACKS.map((p) => p.slug));
+// Never in the home or the shop (Famous Beats is sold only as an upsell after an order).
+const HIDDEN = new Set(["famous-beats"]);
+
+const FUNNEL_SLUGS = new Set([...FUNNEL_PACKS.map((p) => p.slug), ...HIDDEN]);
 
 export const shopPic = (image: ShopImage | null): StorePic | null =>
   image ? { src: image.sm, srcSet: image.sm === image.lg ? undefined : `${image.sm} 600w, ${image.lg} 1200w`, width: 600, height: 600 } : null;
