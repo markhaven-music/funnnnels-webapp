@@ -355,15 +355,5 @@
   }
 }
 
-/* Phones: the checkout a little wider (11-06, "checkout widget un po' più largo su mobile"):
-   less page margin around it, less padding inside it. */
-@media (max-width: 769px) {
-  .cols {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-  .body {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-}
+/* Phones: the checkout a little wider lives in ../top-hits-midi-bundle/order.module.css
+   (.cols, .body), for every order page that shares that template (11-08). */

@@ -397,6 +397,13 @@
 .cartWait {
   min-height: 70vh;
 }
+/* Phones: the checkout 8px from the screen's edges, as the funnels' (11-08):
+   the 16px gutter minus 8px (checkout.module.css .widget). */
+@media (max-width: 769px) {
+  .pay {
+    --checkout-bleed: 8px;
+  }
+}
 .cartPage {
   display: grid;
   gap: 32px;

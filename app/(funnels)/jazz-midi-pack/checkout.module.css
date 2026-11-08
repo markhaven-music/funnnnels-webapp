@@ -11,7 +11,10 @@
   --brass: var(--y, #d9a441);
   --brass-2: var(--y-gloss, #f0c46a);
 
-  width: 100%;
+  /* wider than its column on phones by --checkout-bleed each side (set by the
+     page: jazz.module.css .orderForm, shop.module.css .pay) */
+  width: calc(100% + 2 * var(--checkout-bleed, 0px));
+  margin-inline: calc(-1 * var(--checkout-bleed, 0px));
   border-radius: 4px;
   overflow: hidden;
   background: var(--ink-2);
@@ -183,6 +186,14 @@
   color: var(--cream);
 }
 
+
+/* Phones: 12px inside, as the Drum Kit's checkout (11-08). */
+@media (max-width: 769px) {
+  .body {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
 
 @media (max-width: 380px) {
   .row {

@@ -864,3 +864,18 @@
     font-size: 26px;
   }
 }
+
+/* Phones: the checkout a little wider, on every order page that shares this
+   template (Drum Kit since 11-06, the rest since 11-08, "le checkout widgets in
+   generale di default leggermente più larghe su mobile"): 8px page margin
+   around it, 12px padding inside it. */
+@media (max-width: 769px) {
+  .cols {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .body {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}

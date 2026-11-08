@@ -946,6 +946,13 @@
 .orderForm {
   order: -1;
 }
+/* Phones: the checkout 8px from the screen's edges, as the Drum Kit's (11-08):
+   the page's 20px gutter minus 12px (checkout.module.css .widget). */
+@media (max-width: 769px) {
+  .orderForm {
+    --checkout-bleed: 12px;
+  }
+}
 .orderSummary {
   display: flex;
   flex-direction: column;
