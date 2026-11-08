@@ -200,9 +200,20 @@ export const ORDER = {
     text: "A file doesn't work, or the pack isn't what the page says? Email {email} within {days} days and we fix it. If we can't, you get a refund.",
   },
   form: { ...TOP_HITS_ORDER.form, pay: "GET THE GROOVES!", paypalNote: "After you click **GET THE GROOVES!** below, you finish paying on PayPal's secure page, then come straight back to your download." },
+  // The add-ons' words: the Famous Beats order page's (Drum Kit), TOP HITS' (Famous
+  // Beats) and, for the Jazz MIDI Pack, the same shape from its own claims (jazz-midi-pack/BRIEF.md).
   bumps: {
-    "record-samples": [
-      "**122 WAV loops** of jazz chord progressions in Rhodes and piano, made to sound like an old record. Chop them like a sample over your grooves, no clearance needed. Add them for **{c}7**.",
+    "drum-kit": [
+      "The **'MIDI Drum Kit' Bundle** includes **1050 MIDI Drum Patterns** modeled after billboard producers like Southside, Lex Luger, Zaytoven, DJ Mustard, Pharrell. It includes Complete Original Beats + Patterns + Fragments. Usually {c}299 but you can get it right now at 90% off for __just {c}27!!__",
+      "Limited to the first 150 orders.",
+    ],
+    "famous-beats": [
+      "The **'Famous Beats' Bundle** includes **32 Packs** containing 320 MIDI Transcriptions of some of the most influential Drum Beats of all time. If you hired a professional transcription service you'd pay {c}20 per beat ({c}6,400 total). But right now you can get 320 total MIDI transcriptions for __just {c}27!!__",
+      "Limited to the first 150 orders.",
+    ],
+    "jazz-pack": [
+      "The **'Jazz MIDI Pack'** includes **10,496 MIDI files**: the most used jazz progressions × 12 voicings × 8 rhythms, in all 12 keys, with walking bass lines and lofi, neo soul and trap soul loops. Drop it over your drunk grooves and the beat is there. Plus its **6 bonuses**, all for __just {c}27!!__",
+      "Limited to the first 150 orders.",
     ],
   } as Record<string, string[]>,
 };
@@ -222,7 +233,7 @@ export const UPSELL = {
     "Walking, two-feel and bossa bass lines",
     "Lofi, neo soul, trap soul and deep house loops, drums included",
     "Chord names written into every file",
-    "**Plus its 5 bonuses**: MIDI Chord Pack (Jazz Edition), The Chord Progressions Bible, Anime & Video Games MIDI Pack, Emotional Keys MIDI Bundle, Drum Loops for Songwriting",
+    "**Plus its 6 bonuses**: MIDI Chord Pack (Jazz Edition), The Chord Progressions Bible, Anime & Video Games MIDI Pack, Emotional Keys MIDI Bundle, Drum Loops for Songwriting, The Jazz MIDI Pack Guide (PDF)",
   ],
   listen: "The pack's Royal Road, keys and bass, over a Drunk Swing groove:",
   yes: "Yes, add the Jazz MIDI Pack for {price}",

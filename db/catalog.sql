@@ -106,6 +106,8 @@ insert into public.funnel_items (funnel, role, key, product, name, price_eur_cen
   ('famous-beats-bundle',  'bump',   'hustle',         'hustle',         'HUSTLE Bundle (31 MIDI Packs)',                  2500, 2500, 2),
   ('famous-beats-bundle',  'upsell', 'top-hits',       'top-hits',       'TOP HITS MIDI Bundle (1000 Chord Progressions)', 2700, 2700, 0),
   ('drunk-swing-grooves',  'main',   'pack',           'drunk-swing-grooves', 'Drunk Swing Grooves',                       700,  700, 0),
-  ('drunk-swing-grooves',  'bump',   'record-samples', 'jazz-record-samples', 'Jazz Record Samples (122 WAV Loops)',       700,  700, 0),
+  ('drunk-swing-grooves',  'bump',   'drum-kit',       'midi-drum-kit',       'MIDI Drum Kit Bundle',                     2700, 2700, 0),
+  ('drunk-swing-grooves',  'bump',   'famous-beats',   'famous-beats',        'Famous Beats Bundle (320 MIDI Beats)',     2700, 2700, 1),
+  ('drunk-swing-grooves',  'bump',   'jazz-pack',      'jazz-midi-pack',      'Jazz MIDI Pack',                           2700, 2700, 2),
   ('drunk-swing-grooves',  'upsell', 'jazz-pack',      'jazz-midi-pack',      'Jazz MIDI Pack',                           2700, 2700, 0),
   ('drunk-swing-grooves',  'upsell', 'famous-beats',   'famous-beats',        'Famous Beats Bundle (320 MIDI Beats)',     2700, 2700, 1);

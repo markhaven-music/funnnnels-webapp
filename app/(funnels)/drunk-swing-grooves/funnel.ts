@@ -32,16 +32,36 @@ export const funnel = {
   // Counted from the files (make_swing_grooves.py, 2026-11-08).
   // 80 grooves = 10 patterns × 2 snare placements (2 and 4, half-time) × 4 feels; 160 files with the multitrack copies.
   counts: { files: 211, grooves: 80, grooveFiles: 160, patterns: 10, feels: 4, templates: 31, bonus: 20 },
-  // The tick-box add-on on step 2. Ids double as file keys and travel in
-  // PayPal's 127-character custom_id, so keep them short.
+  // The tick-box add-ons on step 2. Ids double as file keys and travel in
+  // PayPal's 127-character custom_id, so keep them short. Since 2026-11-08 ("metti
+  // anche MIDI Drum Kit, Famous Beats e Jazz MIDI Pack come order bumps invece di
+  // jazz record samples"): €27 each, never below what they sell for elsewhere.
+  // "famous-beats" and "jazz-pack" are also the upsells' ids: ticked here, that
+  // upsell page skips itself (OrderForm.tsx fv_owned).
   bumps: [
     {
-      id: "record-samples",
-      name: "Jazz Record Samples (122 WAV Loops)",
-      headline: "YES! Add the Jazz Record Samples!",
-      price: { eur: 7, usd: 7 },
-      image: "/funnels/jazz-midi-pack/bump-records.webp",
-      pitch: "122 WAV loops of jazz chord progressions in Rhodes and piano, made to sound like an old record. Chop them like a sample over your grooves, no clearance needed.",
+      id: "drum-kit",
+      name: "MIDI Drum Kit Bundle",
+      headline: "YES! Add MIDI Drum Kit Bundle!",
+      price: { eur: 27, usd: 27 },
+      image: "/funnels/famous-beats-bundle/bump-drum-kit.webp",
+      pitch: "1050 MIDI drum patterns modeled after Billboard producers: complete beats, patterns and fragments.",
+    },
+    {
+      id: "famous-beats",
+      name: "Famous Beats Bundle (320 MIDI Beats)",
+      headline: "YES! I want 320 Famous Beats!",
+      price: { eur: 27, usd: 27 },
+      image: "/funnels/top-hits-midi-bundle/bump-famous-beats.png",
+      pitch: "32 packs, 320 MIDI transcriptions of famous drum beats.",
+    },
+    {
+      id: "jazz-pack",
+      name: "Jazz MIDI Pack",
+      headline: "YES! Add the Jazz MIDI Pack!",
+      price: { eur: 27, usd: 27 },
+      image: "/funnels/jazz-midi-pack/bump-jazz.webp",
+      pitch: "10,496 MIDI files of jazz chord progressions, voiced like a pianist plays them, with its 6 bonuses.",
     },
   ],
   // Paid zips in Cloudflare R2 (lib/r2.ts), handed out as 10-minute links once
@@ -49,6 +69,7 @@ export const funnel = {
   files: {
     pack: "jazz-midi-pack/Drunk Swing Grooves.zip",
     "record-samples": "jazz-midi-pack/Jazz Record Samples.zip",
+    "drum-kit": "midi-drum-kit/MIDI Drum Kit - Bundle.zip",
     "jazz-pack": "jazz-midi-pack/Jazz MIDI Pack.zip",
     "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
     // The Jazz MIDI Pack upsell's five bonuses, the zips its own funnel gives with it
