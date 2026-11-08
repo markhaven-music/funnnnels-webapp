@@ -470,16 +470,31 @@
   font-size: 15px;
   color: #fff;
 }
+/* No: a real button, as wide as Yes (2026-11-08, "bottoni piu chiari soprattutto su mobile"). */
 .noThanks {
-  display: block;
-  margin: 22px auto 0;
-  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 32rem;
+  min-height: 56px;
+  margin: 14px auto 0;
+  padding: 12px 18px;
   border: 0;
-  background: none;
-  color: var(--muted);
-  font-size: 15px;
-  text-decoration: underline;
+  border-radius: 4px;
+  background: #1c1c1c;
+  color: rgb(255 255 255 / 0.88);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-decoration: none;
   cursor: pointer;
+}
+.noThanks:hover,
+.noThanks:active {
+  background: #262626;
+  color: #fff;
 }
 
 /* ─── 2026-11-08: the D2C sections (Introducing, chart, stack, reviews, after) ─── */

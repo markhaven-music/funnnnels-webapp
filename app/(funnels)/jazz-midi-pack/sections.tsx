@@ -33,6 +33,8 @@ export type Ctx = {
   country: string;
   publishableKey: string | null;
   editing?: boolean;
+  // Shown as another funnel's one-click upsell (midi-drum-kit/[lang]/jazz-offer): no links to the Jazz order page.
+  upsell?: boolean;
   // An add-on given to Jazz in dashboard → Products (none since 2026-10-16).
   bump?: { name: string; price: number; pitch: string; cover: [string, string] } | null;
   // The order page's tick-box offers (dashboard → Products: funnel_items), in this currency.
@@ -1257,9 +1259,11 @@ function Faq({ p, patch, ctx }: { p: SectionProps["s_faq"]; patch?: Patch; ctx: 
                 <summary>{fill(it.q, ctx)}</summary>
                 <p>
                   {fill(it.a, ctx)}{" "}
-                  <a href={funnel.checkout.orderPage} data-cta className={s.micro}>
-                    Get the pack
-                  </a>
+                  {!ctx.upsell && (
+                    <a href={funnel.checkout.orderPage} data-cta className={s.micro}>
+                      Get the pack
+                    </a>
+                  )}
                 </p>
               </details>
             ),

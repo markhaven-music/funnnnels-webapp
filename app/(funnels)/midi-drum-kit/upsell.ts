@@ -48,7 +48,7 @@ type Copy = { [key: string]: string | Record<string, string> | undefined; extra?
 // tools/upsell_vsl.py); the other languages play the English one.
 const PAGES: Record<string, { template: string; copy: Record<Lang, Copy>; poster: string | null; play?: string; beacon: Step; title: string; wistia: string; videos: Partial<Record<Lang, { id: string; poster?: string }>>; quickNo?: string }> = {
   "famous-beats": { template: FAMOUS, copy: { en: famousEn, fr: famousFr, es: famousEs, de: famousDe, it: famousIt }, poster: "vsl-famous", play: "#60615e", beacon: "upsell-1", title: "Famous Beats Bundle", wistia: "t1dx0gv5tg", videos: { it: { id: "hjo7o7c8nm", poster: "vsl-famous-it" } }, quickNo: "t028" },
-  "top-hits": { template: TOP_HITS, copy: { en: topHitsEn, fr: topHitsFr, es: topHitsEs, de: topHitsDe, it: topHitsIt }, poster: null, beacon: "upsell-2", title: "TOP HITS MIDI Bundle", wistia: "8s55snt7vw", videos: { it: { id: "fgwkqm6rvn" } } },
+  "top-hits": { template: TOP_HITS, copy: { en: topHitsEn, fr: topHitsFr, es: topHitsEs, de: topHitsDe, it: topHitsIt }, poster: null, beacon: "upsell-2", title: "TOP HITS MIDI Bundle", wistia: "8s55snt7vw", videos: { it: { id: "fgwkqm6rvn" } }, quickNo: "t028" },
 };
 
 // The page's step in dashboard → Analytics: its place among the funnel's
@@ -63,8 +63,11 @@ export const beaconStep = (product: { offers?: readonly { id: string }[] }, offe
 // are a step further, so closing the page means missing them (2026-11-08: about
 // 1 in 4 buyers closed this page; "dire order complete non chiude il loop
 // mentale?": no mention of the email, which told them they could leave).
-const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: string; doneLater: string }> = {
+// yes / yesSub: the Yes button put under the video with the No (quickChoice).
+const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: string; doneLater: string; yes: string; yesSub: string }> = {
   en: {
+    yes: "Yes, add it to my order",
+    yesSub: "{price} · one tap, paid the way you just paid",
     done: "Payment received. Your downloads are on the next page.",
     doneLater: "Payment received. Your downloads are waiting right after these offers.",
     busy: "Adding it to your order…",
@@ -72,6 +75,8 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: st
     noOrder: "We couldn't find your order on this page. Your purchase is safe: continue to get your downloads.",
   },
   fr: {
+    yes: "Oui, ajoute-le à ma commande",
+    yesSub: "{price} · un clic, payé comme tu viens de payer",
     done: "Paiement reçu. Tes téléchargements sont sur la page suivante.",
     doneLater: "Paiement reçu. Tes téléchargements t'attendent juste après ces offres.",
     busy: "Ajout à ta commande…",
@@ -79,6 +84,8 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: st
     noOrder: "On ne retrouve pas ta commande sur cette page. Ton achat est en sécurité : continue pour tes téléchargements.",
   },
   es: {
+    yes: "Sí, añádelo a mi pedido",
+    yesSub: "{price} · un toque, pagado como acabas de pagar",
     done: "Pago recibido. Tus descargas están en la página siguiente.",
     doneLater: "Pago recibido. Tus descargas te esperan justo después de estas ofertas.",
     busy: "Añadiéndolo a tu pedido…",
@@ -86,6 +93,8 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: st
     noOrder: "No encontramos tu pedido en esta página. Tu compra está a salvo: continúa para ver tus descargas.",
   },
   de: {
+    yes: "Ja, zu meiner Bestellung hinzufügen",
+    yesSub: "{price} · ein Klick, bezahlt wie eben",
     done: "Zahlung erhalten. Deine Downloads sind auf der nächsten Seite.",
     doneLater: "Zahlung erhalten. Deine Downloads warten direkt nach diesen Angeboten.",
     busy: "Wird zu deiner Bestellung hinzugefügt…",
@@ -93,6 +102,8 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: st
     noOrder: "Wir finden deine Bestellung auf dieser Seite nicht. Dein Kauf ist sicher: Mach weiter zu deinen Downloads.",
   },
   it: {
+    yes: "Sì, aggiungilo al mio ordine",
+    yesSub: "{price} · un tocco, pagato come hai appena pagato",
     done: "Pagamento ricevuto. I tuoi download sono nella pagina successiva.",
     doneLater: "Pagamento ricevuto. I tuoi download ti aspettano subito dopo queste offerte.",
     busy: "Lo aggiungo al tuo ordine…",
@@ -157,7 +168,7 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     for (const [from, to] of Object.entries(extra)) html = html.replaceAll(`placeholder="${from}"`, `placeholder="${to}"`).replaceAll(`aria-label="${from}"`, `aria-label="${to}"`);
   }
   html = html.replace(/<body[^>]*>/, (tag) => `${tag}<style>${HIDE_CF_BAR}</style>${stepsBar(product, offerId, lang)}`);
-  if (page.quickNo) html = quickNo(html, marks ? `<!--fx:${page.quickNo}-->${text(page.quickNo)}<!--/fx-->` : text(page.quickNo));
+  if (page.quickNo) html = quickChoice(html, UI[lang], priceTag(offer.price[currency], currency, lang), marks ? `<!--fx:${page.quickNo}-->${text(page.quickNo)}<!--/fx-->` : text(page.quickNo));
   const video = page.videos[lang];
   if (video) html = html.replaceAll(page.wistia, video.id);
   const images = layout.images ?? {};
@@ -166,17 +177,35 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
   return origins ? html.replace("<head>", `<head>\n${origins}`) : html;
 }
 
-// The way out, where a buyer looks first (2026-11-08, "Sì, fallo": about 1 in 4
-// buyers closed the first upsell, whose first "No thanks" sat 3 phone screens
-// down): the page's own "No thanks" link (quickNo: its text) right under the
-// video, as on ./[lang]/jazz-offer.
-function quickNo(html: string, no: string): string {
+// The choice, where a buyer looks first: right under the video, Yes then No.
+// 2026-11-08, "Sì, fallo": about 1 in 4 buyers closed the first upsell, whose first
+// "No thanks" sat 3 phone screens down, so the page's own No (quickNo: its text) went
+// under the video; then "fallo piu chiaro con bottoni piu chiari soprattutto su
+// mobile": a Yes goes with it (the first one sat 3 screens down too), and every Yes /
+// No on the page is a clear button (CHOICE_CSS).
+function quickChoice(html: string, ui: (typeof UI)[Lang], price: string, no: string): string {
+  let cut = -1;
   const at = html.indexOf('data-page-element="Video/V1"');
-  const end = at < 0 ? -1 : html.indexOf("</iframe></div></div>", at);
-  if (end < 0) return html;
-  const cut = end + "</iframe></div></div>".length;
-  const link = `<div data-page-element="Button/V1" class="elBTN id-6Z-WRVNaX-2" id="no-shine" style="margin-top:14px"><a target="_self" href="#no" class="elButton" rel="noopener" data-oto="no"><span class="elButtonMain"><span class="elButtonMainText elButtonText">${no}</span></span></a></div>`;
-  return html.slice(0, cut) + link + html.slice(cut);
+  if (at >= 0) {
+    const end = html.indexOf("</iframe></div></div>", at);
+    if (end >= 0) cut = end + "</iframe></div></div>".length;
+  }
+  if (cut < 0) {
+    // TOP HITS: Wistia's web component in a custom-code block.
+    const end = html.indexOf("</wistia-player></span></div></div>");
+    if (end >= 0) cut = end + "</wistia-player></span></div></div>".length;
+  }
+  if (cut < 0) return html;
+  const sub = ui.yesSub.replace("{price}", price);
+  const block = `<div id="oto-choice"><a href="#yes" data-oto="yes" class="elButton"><span class="elButtonMain"><span class="elButtonMainText">${ui.yes}</span></span><span class="oto-sub">${sub}</span></a><a href="#no" data-oto="no" class="elButton"><span class="elButtonMain"><span class="elButtonMainText elButtonText">${no}</span></span></a></div>`;
+  return html.slice(0, cut) + block + html.slice(cut);
+}
+
+// "$27", "€27", "27 €" as the page writes prices in that language.
+function priceTag(amount: number, currency: Currency, lang: Lang): string {
+  const n = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
+  if (currency === "usd") return `$${n}`;
+  return lang === "en" ? `€${n}` : `${n}\u00a0€`;
 }
 
 // ClickFunnels' own bar on top ("ONE TIME OFFER...", a fixed 73 % / 90 %): its section, replaced by stepsBar.
@@ -218,12 +247,27 @@ export function stepsBar(product: { offers?: readonly { id: string }[] } & Param
   return `<div id="oto-steps" style="background:#111;padding:12px 16px 14px;font-family:Inter,system-ui,sans-serif;text-align:center"><p style="margin:0 auto;max-width:560px;color:rgba(255,255,255,.88);font-size:15px;line-height:1.4;font-weight:500"><span aria-hidden="true" style="color:#f5b800;font-weight:800;margin-right:6px">✓</span>${done}</p><ol aria-label="${step}" style="display:flex;gap:5px;max-width:560px;margin:12px auto 0;padding:0">${cells}</ol></div>`;
 }
 
+// Every Yes and No on the ClickFunnels pages (2026-11-08, "fallo piu chiaro con bottoni
+// piu chiari soprattutto su mobile"): Yes = the funnel's yellow, black words, big;
+// No = a plain dark button as wide as Yes, white words, no underline: two buttons
+// that read as a choice. Phone first: full width less the page's margins.
+const CHOICE_CSS = `#oto-choice{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:460px;margin:22px auto 6px;padding:0 16px}
+a.elButton[href="#yes"]{display:flex!important;flex-direction:column;align-items:center;justify-content:center;width:100%!important;max-width:460px!important;min-height:68px;box-sizing:border-box;margin:0 auto!important;padding:14px 18px!important;border:0!important;border-radius:6px!important;background:#f5b800!important;box-shadow:0 5px 0 #a87d00,0 10px 26px rgba(245,184,0,.35)!important;text-decoration:none!important}
+a.elButton[href="#yes"] .elButtonMainText,a.elButton[href="#yes"] .elButtonMainText *{color:#000!important;font-family:Inter,system-ui,sans-serif!important;font-size:20px!important;font-weight:800!important;line-height:1.2!important;text-transform:none!important;letter-spacing:0!important}
+a.elButton[href="#yes"]:hover .elButtonText,a.elButton[href="#yes"]:hover .elButtonMainText{color:#000!important}
+a.elButton[href="#yes"]:active{transform:translateY(3px);box-shadow:0 2px 0 #a87d00!important}
+a.elButton[href="#yes"] .elButtonSub,a.elButton[href="#yes"] .oto-sub{display:block;margin-top:4px;color:rgba(0,0,0,.72)!important;font:600 13px/1.3 Inter,system-ui,sans-serif!important;text-transform:none!important}
+a.elButton[href="#no"]{display:flex!important;align-items:center;justify-content:center;width:100%!important;max-width:460px!important;min-height:54px;box-sizing:border-box;margin:0 auto!important;padding:12px 18px!important;border:0!important;border-radius:6px!important;background:rgba(0,0,0,.55)!important;box-shadow:none!important;text-decoration:none!important}
+a.elButton[href="#no"] .elButtonMainText,a.elButton[href="#no"] .elButtonMainText *{color:#fff!important;font-family:Inter,system-ui,sans-serif!important;font-size:15px!important;font-weight:600!important;line-height:1.35!important;text-decoration:none!important;text-transform:none!important;letter-spacing:0!important}
+a.elButton[href="#no"]:hover{background:rgba(0,0,0,.75)!important}`;
+
 // ClickFunnels fades its "fade-in" blocks in with its own script (stripped):
 // without it they'd stay invisible, so they're simply shown.
 // Its buttons are white with dark words and turn black on hover, words still dark
 // (unreadable): on hover the words turn white.
 const FIXES = `[data-animation-type]{opacity:1!important;visibility:visible!important}
-.elButton:hover .elButtonText,.elButton.elButtonHovered .elButtonText{color:#fff!important}`;
+.elButton:hover .elButtonText,.elButton.elButtonHovered .elButtonText{color:#fff!important}
+${CHOICE_CSS}`;
 
 // Meta Pixel PageView, Clarity and neo, as on the landing; never on test hosts.
 // The Purchase of an upsell fires on the thank-you page, with the others.

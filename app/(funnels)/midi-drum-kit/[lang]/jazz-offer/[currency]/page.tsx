@@ -41,8 +41,14 @@ export function generateStaticParams() {
 export const metadata: Metadata = { title: "Add the Jazz MIDI Pack · GRIND STUDIO", robots: { index: false, follow: false } };
 
 const OFFER = "jazz";
-// The Jazz landing's blocks shown here, in this order.
-const KEEP = ["product", "voicing", "compare", "bonuses", "guarantee"];
+// The Jazz landing's blocks, in the landing's order (2026-11-08, "dovrebbe avere stesse
+// sezioni no?"), less those that belong to a first purchase: the hero (this page's
+// top replaces it), "After you pay" (card, receipt: the order is paid already) and
+// the final call (this page's own end, with the Yes / No buttons).
+const SKIP = new Set(["s_hero", "s_after", "s_final"]);
+// Parts hidden on top of the editor's: every button to the Jazz order page, and the
+// offer's payment ways (the card is the one just used).
+const HIDE: Record<string, string[]> = { s_offer: ["cta", "payWays", "download"] };
 
 const valid = (x: unknown): x is Section =>
   !!x && typeof x === "object" && isSectionType((x as Section).type) && typeof (x as Section).props === "object";
@@ -57,15 +63,15 @@ export default async function JazzOffer({ params }: { params: Params }) {
   const offer = product.offers?.find((o) => o.id === OFFER);
   if (!offer) notFound();
   const amount = offer.price[currency];
-  const ctx: Ctx = { price: money(amount, currency), amount, currency, country: currency === "usd" ? "US" : "FR", publishableKey: null };
+  const ctx: Ctx = { price: money(amount, currency), amount, currency, country: currency === "usd" ? "US" : "FR", publishableKey: null, upsell: true };
 
   const blocks = await getPublishedBlocks(jazz.slug, DEFAULT_SECTIONS, valid, { strict: true });
-  const shown = KEEP.flatMap((id) => {
-    const found = blocks.find((x) => x.id === id) ?? DEFAULT_SECTIONS.find((x) => x.id === id);
-    if (!found) return [];
-    const hide = [...((found.props as { hide?: string[] }).hide ?? []), "cta"];
-    return [{ ...found, props: { ...found.props, hide } } as Section];
-  });
+  const shown = blocks
+    .filter((x) => !SKIP.has(x.type))
+    .map((found) => {
+      const hide = [...((found.props as { hide?: string[] }).hide ?? []), "cta", ...(HIDE[found.type] ?? [])];
+      return { ...found, props: { ...found.props, hide } } as Section;
+    });
   const voicing = shown.find((x) => x.id === "voicing");
   const compare = shown.find((x) => x.id === "compare");
 
@@ -90,7 +96,9 @@ export default async function JazzOffer({ params }: { params: Params }) {
               ctx,
             )}
           </p>
-          <Vsl />
+          <div className={u.video}>
+            <Vsl />
+          </div>
           <Buttons price={ctx.price} />
         </div>
       </section>
