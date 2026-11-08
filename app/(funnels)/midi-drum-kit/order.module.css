@@ -275,14 +275,36 @@
   z-index: 60;
   display: flex;
   justify-content: center;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.55) 35%, rgba(0, 0, 0, 0.75) 100%);
+  /* Docked to the bottom edge, edge to edge, no margins or corners (11-08: "si
+     azzeccasse alla parte finale della pagina senza bordi"): Safari tints its
+     bottom bar with this colour, and the page gets the room the float took. */
+  padding: 0;
+  background: #ec6a0c;
   pointer-events: none;
 }
-/* The same button as the one in the form ("stesso CTA, stessa grandezza"). */
+/* The same button as the one in the form ("stesso CTA, stessa grandezza"),
+   flat against the edge: square, no glow, the home bar's room inside it. */
 .payBarBtn {
-  max-width: 560px;
   pointer-events: auto;
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  padding: 18px 20px calc(16px + env(safe-area-inset-bottom));
+}
+.payBarBtn:hover,
+.payBarBtn:active {
+  transform: none;
+}
+/* After the colour rules (html[data-ab-btn] .cta), which add the floating glow back. */
+:global(html) .payBar > .payBarBtn {
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+/* The bar behind the button is its bottom colour, the one Safari's bar picks up. */
+:global(html[data-ab-btn="green"]) .payBar {
+  background: #16a34a;
+}
+:global(html[data-ab-btn="yellow"]) .payBar {
+  background: #f5b800;
 }
 /* Add-ons: the whole offer (picture and text) on phones too, as on a computer;
    no "Details" button (user, 11-06: "togli i panes details… deve essere come su desktop"). */

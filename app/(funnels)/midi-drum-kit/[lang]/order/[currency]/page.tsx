@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel, upsellsOn } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
@@ -31,6 +31,10 @@ import { Tracking } from "../../../Tracking";
 // (../../../texts.ts); saving either revalidates it.
 
 export const revalidate = 3600;
+
+// The page runs under the iPhone's home bar, so the docked pay bar reaches the
+// screen's edge (its own padding keeps the words above the bar: order.module.css .payBarBtn).
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 type Params = Promise<{ lang: string; currency: string }>;
 
