@@ -295,6 +295,8 @@ async function reminders(run: Run) {
     .from("checkout_starts")
     .select("funnel, email, name, lang, currency, started_at, reminders, reminder_sent_at")
     .lt("reminders", REMINDERS_DONE)
+    // Not the owner's or a test device's (checkout_starts.own).
+    .eq("own", false)
     .lte("started_at", new Date(now - FIRST_SERIES_MS).toISOString())
     .gte("started_at", new Date(now - REMIND_GIVE_UP_MS).toISOString())
     .order("started_at")

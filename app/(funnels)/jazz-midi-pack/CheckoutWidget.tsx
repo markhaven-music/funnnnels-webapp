@@ -10,7 +10,7 @@ import s from "./checkout.module.css";
 import b from "./btn.module.css";
 import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
-import { readCookie, track } from "@/lib/beacon";
+import { isPreview, readCookie, track } from "@/lib/beacon";
 import { cookieCountry } from "@/lib/geo";
 
 // The two-step order form, copied from the ClickFunnels checkout:
@@ -256,7 +256,8 @@ function InfoStep({
     fetch("/api/checkout/lead", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...data, funnel }),
+      // own: an owner or test device (lib/beacon.ts isPreview): not counted as a real checkout start.
+      body: JSON.stringify({ ...data, funnel, own: isPreview() }),
       keepalive: true,
     }).catch(() => {});
     onDone(data);

@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
-import { track } from "@/lib/beacon";
+import { isPreview, track } from "@/lib/beacon";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
@@ -204,7 +204,8 @@ function InfoStep({ info, slug, onDone }: { info: Info; slug: string; onDone: (i
     fetch("/api/checkout/lead", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...data, funnel: slug }),
+      // own: an owner or test device (lib/beacon.ts isPreview): not counted as a real checkout start.
+      body: JSON.stringify({ ...data, funnel: slug, own: isPreview() }),
       keepalive: true,
     }).catch(() => {});
     onDone(data);

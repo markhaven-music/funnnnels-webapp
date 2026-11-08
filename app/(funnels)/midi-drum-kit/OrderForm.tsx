@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
-import { track } from "@/lib/beacon";
+import { isPreview, track } from "@/lib/beacon";
 import { readVariant } from "./abtest";
 import { readPay, type PayVariant } from "./payTest";
 import { BONUS, BONUS_WORDS, readBonus } from "./bonusTest";
@@ -234,7 +234,8 @@ function InfoStep({ t, lang, info, onDone }: { t: Copy["form"]; lang: Lang; info
     fetch("/api/checkout/lead", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...data, funnel: funnel.slug, lang }),
+      // own: an owner or test device (lib/beacon.ts isPreview): not counted as a real checkout start.
+      body: JSON.stringify({ ...data, funnel: funnel.slug, lang, own: isPreview() }),
       keepalive: true,
     }).catch(() => {});
     onDone(data);

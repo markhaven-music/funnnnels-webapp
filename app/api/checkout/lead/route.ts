@@ -61,6 +61,8 @@ export async function POST(req: Request) {
           // Phone or computer, for the step 2 test (lib/analytics.ts checkoutPaid).
           device: deviceOf(req.headers.get("user-agent") ?? ""),
           device_guessed: false,
+          // The owner's or a test device (?preview=1, the opt-out): kept for Live, left out of Analytics and the reminders.
+          own: body.own === true,
         },
         { onConflict: "funnel,email" },
       );

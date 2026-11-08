@@ -749,7 +749,7 @@ async function checkoutPaid(funnel: string, w: { from: string; until: string | n
   const db = supabase();
   const until = w.until ?? new Date().toISOString();
   const [starts, cards, pp] = await Promise.all([
-    db.from("checkout_starts").select("email, started_at, device").eq("funnel", funnel).gte("started_at", w.from).lt("started_at", until).limit(5000),
+    db.from("checkout_starts").select("email, started_at, device").eq("funnel", funnel).eq("own", false).gte("started_at", w.from).lt("started_at", until).limit(5000),
     db.from("orders").select("email, created_at").eq("funnel", funnel).eq("status", "succeeded").is("offer", null).gte("created_at", w.from).lt("created_at", until).limit(5000),
     db.from("paypal_sales").select("email, payer_email, created_at").eq("funnel", funnel).is("offer", null).gte("created_at", w.from).lt("created_at", until).limit(5000),
   ]);
