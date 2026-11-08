@@ -9,7 +9,7 @@ export const funnel = {
   slug: "drunk-swing-grooves",
   product: "Drunk Swing Grooves",
   // The line under the name on the order form's product card.
-  orderName: "Drunk Swing Grooves (131 MIDI Files)",
+  orderName: "Drunk Swing Grooves (211 MIDI Files)",
   brand: "GRIND STUDIO",
   // Same accounts as the other GRIND STUDIO funnels.
   tracking: {
@@ -27,7 +27,8 @@ export const funnel = {
   tagline: "MIDI drum grooves with the drunk, laid-back feel of lofi and neo soul.",
   price: { eur: 7, usd: 7 },
   // Counted from the files (make_swing_grooves.py, 2026-11-08).
-  counts: { files: 131, grooves: 80, patterns: 10, feels: 4, templates: 31, bonus: 20 },
+  // 80 grooves = 10 patterns × 2 snare placements (2 and 4, half-time) × 4 feels; 160 files with the multitrack copies.
+  counts: { files: 211, grooves: 80, grooveFiles: 160, patterns: 10, feels: 4, templates: 31, bonus: 20 },
   // The tick-box add-on on step 2. Ids double as file keys and travel in
   // PayPal's 127-character custom_id, so keep them short.
   bumps: [

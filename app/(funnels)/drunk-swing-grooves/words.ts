@@ -23,7 +23,7 @@ export const LANDING = {
     play: "Play the beat",
   },
   bullets: [
-    `**${n.grooves} MIDI drum grooves**: ${n.patterns} beats, each in ${n.feels} feels`,
+    `**${n.grooves} MIDI drum grooves**: ${n.patterns} beats × ${n.feels} feels, with the snare on 2 and 4 **and** in half-time`,
     "Light, Medium and Heavy drunk, plus **Quintuplet Swing**",
     "The snare on the beat, everything else laid back",
     "Drum rack **and** multitrack versions of every groove",
@@ -47,7 +47,7 @@ export const LANDING = {
   },
   feels: {
     title: "Pick how drunk it sounds",
-    caption: "Dusty Boom Bap in all four feels, on a stock drum kit.",
+    caption: "Neo Soul Pocket in all four feels, on a stock drum kit.",
     items: [
       ["Light Drunk", "A little loose. For keys and for beats that still need to feel tight."],
       ["Medium Drunk", "The lofi pocket. The hats lean, the kick floats, the snare stays put."],
@@ -59,8 +59,8 @@ export const LANDING = {
     title: `${n.files} MIDI files. Here's what's inside.`,
     items: [
       [
-        `Drum Grooves (${n.grooves} files)`,
-        "10 beats: Dusty Boom Bap, Lazy Sunday, Late Night Lofi, Neo Soul Pocket, Sliding Kick, Half-Time Soul, Rimshot Shuffle, Broken Beat, Jazzy Hop, Tape Stop Groove. Each in 4 feels, 4 bars, 72 to 94 bpm, and in two versions: drum rack and multitrack.",
+        `Drum Grooves (${n.grooveFiles} files)`,
+        "10 beats: Dusty Boom Bap, Lazy Sunday, Late Night Lofi, Neo Soul Pocket, Sliding Kick, Slow Soul, Rimshot Shuffle, Broken Beat, Jazzy Hop, Tape Stop Groove. Each with the snare on 2 and 4 and again in half-time (the snare on 3), in 4 feels: 80 grooves, 4 bars, 72 to 94 bpm. Every groove in two versions: drum rack and multitrack.",
       ],
       [
         `Groove Templates (${n.templates} files)`,
@@ -113,9 +113,10 @@ export type LandingWords = typeof LANDING;
 // No reviews: this pack has none yet, and none are invented (grind-funnel-page §7).
 export const ORDER = {
   ...TOP_HITS_ORDER,
-  redbar: "**Instant download:** 131 MIDI files, any DAW",
+  redbar: "**Instant download:** 211 MIDI files, any DAW",
   bullets: [
     "80 MIDI drum grooves in 4 feels",
+    "Snare on 2 and 4, and half-time",
     "Light, Medium, Heavy drunk + Quintuplet Swing",
     "Snare on the beat, everything else laid back",
     "Drum rack and multitrack versions",

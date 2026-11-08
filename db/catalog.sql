@@ -82,7 +82,7 @@ insert into public.catalog (slug, name, store, file, cover, status, position) va
   ('drum-loops',       'Drum Loops for Songwriting',                        'r2',    'jazz-midi-pack/Drum Loops for Songwriting.zip',                 '/funnels/jazz-midi-pack/bonus-5-360.webp',                'draft', 110),
   -- 2026-11-08: the Jazz order's €7 add-ons, then Drunk Swing Grooves' own funnel.
   ('jazz-record-samples', 'Jazz Record Samples (122 WAV Loops)',              'r2',    'jazz-midi-pack/Jazz Record Samples.zip',                        '/funnels/jazz-midi-pack/bump-records.webp',               'draft', 111),
-  ('drunk-swing-grooves', 'Drunk Swing Grooves (131 MIDI Files)',             'r2',    'jazz-midi-pack/Drunk Swing Grooves.zip',                        '/funnels/drunk-swing-grooves/product-600.webp',           'draft', 112);
+  ('drunk-swing-grooves', 'Drunk Swing Grooves (211 MIDI Files)',             'r2',    'jazz-midi-pack/Drunk Swing Grooves.zip',                        '/funnels/drunk-swing-grooves/product-600.webp',           'draft', 112);
 
 insert into public.funnel_items (funnel, role, key, product, name, price_eur_cents, price_usd_cents, position) values
   ('jazz-midi-pack',       'main',   'pack',           'jazz-midi-pack', 'Jazz MIDI Pack',                                 2700, 2700, 0),
