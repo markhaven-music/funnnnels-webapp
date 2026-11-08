@@ -56,7 +56,7 @@ const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
 // The pages a localized funnel has after its /<lang>/<slug>.
-const LOCAL_PAGES = ["", "order", "offer", "last-offer", "thank-you"] as const;
+const LOCAL_PAGES = ["", "order", "offer", "last-offer", "jazz-offer", "thank-you"] as const;
 
 function localized(pathname: string): { slug: string; lang: string; page: (typeof LOCAL_PAGES)[number] } | null {
   const parts = pathname.replace(/\/$/, "").split("/");

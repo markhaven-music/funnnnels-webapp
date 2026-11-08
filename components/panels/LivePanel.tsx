@@ -24,6 +24,7 @@ const STEP_LABEL: Record<string, string> = {
   checkout: "Checkout",
   "upsell-1": "Upsell 1",
   "upsell-2": "Upsell 2",
+  "upsell-3": "Upsell 3",
   "thank-you": "Thank-you page",
 };
 

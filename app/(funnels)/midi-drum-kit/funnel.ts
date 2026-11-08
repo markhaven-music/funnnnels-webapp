@@ -81,19 +81,35 @@ export const funnel = {
     "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
     "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
     "top-hits": "top-hits-midi-bundle/TOP HITS MIDI Bundle.zip",
+    // The Jazz MIDI Pack upsell (offers below) and the bonuses its own funnel gives
+    // with it, the same zips (jazz-midi-pack/funnel.ts remoteFiles).
+    jazz: "jazz-midi-pack/Jazz MIDI Pack.zip",
+    "jazz-chords": "jazz-midi-pack/Jazz MIDI Chord Pack.zip",
+    "anime-pack": "jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip",
+    bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
   },
   // One-click upsells after the order, in ClickFunnels order (its
   // /famous-beats-bundle and /last-offer-top-hits-midi-bundle): each its own
   // page (./upsell.ts) and its own charge on the card just used. `id` doubles
   // as the file key; `path` is the page after /midi-drum-kit/.
+  // 2026-11-08 ("metti MIDI Jazz Pack come oto upsell in MIDI Drum Kit", first,
+  // €27): the Jazz MIDI Pack with its five bonus zips, on its own page in the Jazz
+  // look ([lang]/jazz-offer), before Famous Beats.
   offers: [
+    { id: "jazz", path: "jazz-offer", name: "Jazz MIDI Pack", price: { eur: 27, usd: 27 } },
     { id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } },
     { id: "top-hits", path: "last-offer", name: "TOP HITS MIDI Bundle (1000 Chord Progressions)", price: { eur: 27, usd: 27 } },
   ],
   // Files an add-on brings beyond its own (its key in `files`).
-  includes: { chords: ["drum-loops", "emotional-keys"] } as Record<string, readonly string[]>,
+  includes: { chords: ["drum-loops", "emotional-keys"], jazz: ["jazz-chords", "bible", "anime-pack", "emotional-keys", "drum-loops"] } as Record<string, readonly string[]>,
   // Download labels for the files that aren't the pack or an add-on.
-  fileNames: { "drum-loops": "Drum Loops for Songwriting", "emotional-keys": "Emotional Keys MIDI Bundle" } as Record<string, string>,
+  fileNames: {
+    "drum-loops": "Drum Loops for Songwriting",
+    "emotional-keys": "Emotional Keys MIDI Bundle",
+    "jazz-chords": "MIDI Chord Pack (Jazz Edition)",
+    bible: "The Chord Progressions Bible",
+    "anime-pack": "Anime & Video Games MIDI Pack",
+  } as Record<string, string>,
   checkout: {
     leadTags: ["checkout-started"],
     // buyer-midi-drum-kit starts the after-purchase emails; owns-midi-drum-kit

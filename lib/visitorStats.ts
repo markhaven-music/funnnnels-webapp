@@ -39,7 +39,7 @@ export type VisitorStats = {
   perDay: { day: string; n: number }[]; // unique visitors per day, the viewer's days
 };
 
-const STEP_ORDER = ["landing", "order", "checkout", "upsell-1", "upsell-2", "thank-you"];
+const STEP_ORDER = ["landing", "order", "checkout", "upsell-1", "upsell-2", "upsell-3", "thank-you"];
 
 function top(map: Map<string, number>, max = 12): Count[] {
   return [...map.entries()]

@@ -265,3 +265,9 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   red bar (#9e1b1d) on top of the landing ("BLACK FRIDAY: 90% Sale Ends Soon") and the order page ("BLACK FRIDAY:
   90% Sale Is Ending Soon"). The user's call over the "no 'sale ends'" rule in Offer; 90 % is the value stack's
   255 saved on 282.
+
+## Drum Kit upsell (2026-11-08)
+- "puoi mettere MIDI Jazz Pack come oto upsell in MIDI Drum Kit?": the Jazz MIDI Pack is the MIDI Drum Kit's first
+  one-click upsell, before Famous Beats and TOP HITS, at €27 / $27, with its five bonus zips (and the guide in the pack's
+  zip). Page: midi-drum-kit/[lang]/jazz-offer, a short page in the Jazz look (headline, the Jazz VSL, Yes / No, then
+  this landing's own product, voicing + before/after rolls, bonuses and guarantee blocks). English in every language.

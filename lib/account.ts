@@ -92,6 +92,7 @@ const OFFER_COVERS: Record<string, string> = {
   "famous-beats": "/funnels/midi-drum-kit/bonus-famous.webp",
   "top-hits": "/funnels/top-hits-midi-bundle/product.webp",
   "jazz-pack": "/funnels/jazz-midi-pack/box-520.webp",
+  jazz: "/funnels/jazz-midi-pack/box-520.webp",
 };
 
 const SHELVES: Record<string, Shelf> = {

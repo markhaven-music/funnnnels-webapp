@@ -53,9 +53,9 @@ const PAGES: Record<string, { template: string; copy: Record<Lang, Copy>; poster
 
 // The page's step in dashboard → Analytics: its place among the funnel's
 // upsells (the Famous Beats Bundle shows TOP HITS first), else the page's own.
-const beaconStep = (product: { offers?: readonly { id: string }[] }, offerId: string, fallback: Step): Step => {
+export const beaconStep = (product: { offers?: readonly { id: string }[] }, offerId: string, fallback: Step): Step => {
   const at = product.offers?.findIndex((o) => o.id === offerId) ?? -1;
-  return at === 0 ? "upsell-1" : at === 1 ? "upsell-2" : fallback;
+  return at === 0 ? "upsell-1" : at === 1 ? "upsell-2" : at === 2 ? "upsell-3" : fallback;
 };
 
 // What the buttons say while they work, per language.
@@ -159,9 +159,9 @@ const FIXES = `[data-animation-type]{opacity:1!important;visibility:visible!impo
 
 // Meta Pixel PageView, Clarity and neo, as on the landing; never on test hosts.
 // The Purchase of an upsell fires on the thank-you page, with the others.
-const OFF = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/);
+export const OFF = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/);
 
-function headScripts(): string {
+export function headScripts(): string {
   const { metaPixelId, clarityId, neoSnippet } = funnel.tracking;
   return `<script>
 (function () {
@@ -180,8 +180,8 @@ function headScripts(): string {
 </script>`;
 }
 
-/** The buttons, the "reserved for" countdown. */
-function script(slug: string, offerId: string, lang: Lang, next: string): string {
+/** The buttons, the "reserved for" countdown (also on ./[lang]/jazz-offer: its links with data-oto). */
+export function script(slug: string, offerId: string, lang: Lang, next: string): string {
   const cfg = JSON.stringify({ funnel: slug, offer: offerId, lang, next, ui: UI[lang], ab: PAY.cookie });
   return `<script>
 (function () {
