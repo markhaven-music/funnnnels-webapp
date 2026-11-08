@@ -89,7 +89,10 @@ export const AB_CSS =
 // the landing's utm_* / fbclid / gclid as it's clicked, and the order page
 // puts ?ab= back in the cookie (AB_KEEP_SCRIPT) before anything reads it.
 // Not on a preview (the tab's own headline isn't a visitor's).
-const CARRY = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid", "gclid"];
+// campaign_id/adset_id/ad_id too (2026-11-08): without them the order page's
+// click had names only, and neo filed 3 of the first 4 Jazz sales under a
+// second, id-less copy of the campaign instead of the ad that sold.
+const CARRY = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "campaign_id", "adset_id", "ad_id", "fbclid", "gclid"];
 export const AB_CARRY_SCRIPT = `(function(){try{
 document.addEventListener('click',function(e){try{
 var a=e.target&&e.target.closest&&e.target.closest('a[data-cta]');if(!a)return;
