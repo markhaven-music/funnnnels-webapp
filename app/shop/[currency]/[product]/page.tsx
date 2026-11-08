@@ -13,7 +13,7 @@ import s from "../../shop.module.css";
 // One product of the shop: /shop/<slug>, rewritten by proxy.ts to
 // /shop/<currency>/<slug> and cached per currency like the shop page.
 
-export const revalidate = 60;
+export const revalidate = 3600; // saves in the dashboard refresh it at once (revalidatePath)
 
 export function generateStaticParams() {
   return [];

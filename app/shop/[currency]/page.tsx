@@ -18,7 +18,7 @@ import s from "../shop.module.css";
 // country. Nothing here reads headers, cookies or searchParams, so it stays
 // cacheable. Saving in the dashboard revalidates (lib/shop.ts revalidateShop).
 
-export const revalidate = 60;
+export const revalidate = 3600; // saves in the dashboard refresh it at once (revalidatePath)
 
 // Rendered on the first visit, then cached (ISR).
 export function generateStaticParams() {

@@ -20,9 +20,9 @@ import h from "../home.module.css";
 // One cached page per currency, like the funnels: proxy.ts rewrites /home to
 // /home/eur|usd by the visitor's country (docs/page-speed.md rule 9). Prices
 // and the shop's products are read from the database, so it's refreshed every
-// minute and when they're saved (lib/shop.ts revalidateShop, lib/pages.ts).
+// hour and at once when they're saved (lib/shop.ts revalidateShop, lib/pages.ts).
 
-export const revalidate = 60;
+export const revalidate = 3600; // saves in the dashboard refresh it at once (revalidatePath)
 
 export function generateStaticParams() {
   return CURRENCIES.map((currency) => ({ currency }));

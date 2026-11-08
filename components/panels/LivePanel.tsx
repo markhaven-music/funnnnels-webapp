@@ -10,11 +10,11 @@ import { landPath, MAP_COLS, MAP_ROWS, project } from "@/lib/worldDots";
 import s from "./live.module.css";
 import { VisitorStats } from "./VisitorStats";
 
-// Dashboard → Live. From /api/live (lib/live.ts), asked every 5 s while this
+// Dashboard → Live. From /api/live (lib/live.ts), asked every 15 s while this
 // panel is open and the tab is in front: who is on a buyer page right now,
 // where they are, which page, and what just happened.
 
-const POLL_MS = 5_000;
+const POLL_MS = 15_000; // every request costs Vercel CPU time (free-plan limit)
 // Where the funnel pages are, so the "don't count me" setting lands in their storage (app/api/checkout/me).
 const ME_URL = `${KIT_HOME}${ME_PATH}`;
 

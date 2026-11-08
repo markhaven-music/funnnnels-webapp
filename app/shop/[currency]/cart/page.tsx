@@ -14,7 +14,7 @@ import s from "../../shop.module.css";
 // and the browser picks the ones in its cart (app/shop/cart.ts). The
 // checkout's server prices the cart again before any payment.
 
-export const revalidate = 60;
+export const revalidate = 3600; // saves in the dashboard refresh it at once (revalidatePath)
 
 export function generateStaticParams() {
   return [];

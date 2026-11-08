@@ -226,5 +226,7 @@ function isAdmin(request: NextRequest): boolean {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image).*)"],
+  // Funnel pictures, audio and zips in /public skip the proxy: they are public
+  // anyway (PUBLIC above) and every run costs Vercel CPU time (free-plan limit).
+  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|funnels/[^/]+/.+\\.(?:webp|png|jpe?g|gif|svg|avif|ico|mp3|mp4|webm|wav|zip|mid|woff2?|pdf|txt)).*)"],
 };

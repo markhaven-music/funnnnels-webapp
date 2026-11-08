@@ -14,7 +14,11 @@ export async function GET(req: Request) {
   const dryRun = new URL(req.url).searchParams.get("dryRun") === "1";
   // First the card orders nobody told us about (a tab closed before any of our
   // pages), so their receipts go out in this same run.
-  const recovered = dryRun
+  // The Stripe sweep and the support mailbox run every 5th minute only: each
+  // run costs Vercel CPU time (free plan: 4 h a month), and both are safety
+  // nets, not the main path (webhooks record orders; support isn't urgent).
+  const slow = new Date().getUTCMinutes() % 5 === 0;
+  const recovered = dryRun || !slow
     ? 0
     : await sweepStripe().catch((err) => {
         console.error("stripe sweep failed", err);
@@ -22,7 +26,7 @@ export async function GET(req: Request) {
       });
   if (recovered) console.log(`stripe sweep: ${recovered} order(s) recorded`);
   // The support mailbox (dashboard → Support), copied alongside the emails.
-  const support = dryRun
+  const support = dryRun || !slow
     ? null
     : syncSupport().catch((err) => {
         console.error("support sync failed", err);
