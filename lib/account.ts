@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { funnel as drumKit, unlocked as drumKitUnlocked } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { funnel as jazz, unlocked as jazzUnlocked } from "@/app/(funnels)/jazz-midi-pack/funnel";
 import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
-import { funnel as drunkGrooves } from "@/app/(funnels)/drunk-swing-grooves/funnel";
+import { funnel as drunkGrooves, unlocked as drunkGroovesUnlocked } from "@/app/(funnels)/drunk-swing-grooves/funnel";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import { resolveFunnel } from "@/lib/funnels";
 import { SHOP_HOME } from "@/lib/liveUrl";
@@ -132,8 +132,9 @@ const SHELVES: Record<string, Shelf> = {
       pack: drunkGrooves.product,
       ...Object.fromEntries(drunkGrooves.bumps.map((b) => [b.id, b.name])),
       ...Object.fromEntries(drunkGrooves.offers.map((o) => [o.id, o.name])),
+      ...drunkGrooves.fileNames,
     },
-    unlocked: (items) => items,
+    unlocked: drunkGroovesUnlocked,
     cover: (o) => (o.offer ? (OFFER_COVERS[o.offer] ?? "/funnels/drunk-swing-grooves/product-600.webp") : "/funnels/drunk-swing-grooves/product-600.webp"),
     download: (o, file) => `/${drunkGrooves.slug}/download?order=${o.id}&file=${file}`,
   },

@@ -47,7 +47,24 @@ export const funnel = {
     "record-samples": "jazz-midi-pack/Jazz Record Samples.zip",
     "jazz-pack": "jazz-midi-pack/Jazz MIDI Pack.zip",
     "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
+    // The Jazz MIDI Pack upsell's five bonuses, the zips its own funnel gives with it
+    // (jazz-midi-pack/funnel.ts remoteFiles), as the MIDI Drum Kit's Jazz upsell does.
+    "jazz-chords": "jazz-midi-pack/Jazz MIDI Chord Pack.zip",
+    bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
+    "anime-pack": "jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip",
+    "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
+    "drum-loops": "jazz-midi-pack/Drum Loops for Songwriting.zip",
   },
+  // What a purchase brings beyond its own zip: the Jazz MIDI Pack upsell comes with
+  // its five bonuses (2026-11-08, "Sì, aggiungili"), as on the Jazz funnel and the Drum Kit's upsell.
+  includes: { "jazz-pack": ["jazz-chords", "bible", "anime-pack", "emotional-keys", "drum-loops"] } as Record<string, readonly string[]>,
+  fileNames: {
+    "jazz-chords": "MIDI Chord Pack (Jazz Edition)",
+    bible: "The Chord Progressions Bible",
+    "anime-pack": "Anime & Video Games MIDI Pack",
+    "emotional-keys": "Emotional Keys MIDI Bundle",
+    "drum-loops": "Drum Loops for Songwriting",
+  } as Record<string, string>,
   // One-click upsells after the order (lib/funnels.ts nextStep), in order:
   // the Jazz MIDI Pack on this funnel's own page (./offer), then the Famous
   // Beats Bundle on the MIDI Drum Kit's page (midi-drum-kit/upsell.ts).
@@ -62,3 +79,6 @@ export const funnel = {
     orderPage: "/drunk-swing-grooves/order",
   },
 } as const;
+
+/** An order's files: what it bought, plus what those bring along (`includes`). */
+export const unlocked = (items: readonly string[]) => [...new Set(items.flatMap((i) => [i, ...(funnel.includes[i] ?? [])]))];

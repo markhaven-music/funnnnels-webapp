@@ -105,7 +105,7 @@ export const CODE_FUNNELS: CodeFunnel[] = [
   { slug: topHits.slug, name: topHits.product, files: topHits.files },
   { slug: drumKit.slug, name: drumKit.product, files: drumKit.files, includes: drumKit.includes },
   { slug: famousBeats.slug, name: famousBeats.product, files: famousBeats.files },
-  { slug: drunkGrooves.slug, name: drunkGrooves.product, files: drunkGrooves.files },
+  { slug: drunkGrooves.slug, name: drunkGrooves.product, files: drunkGrooves.files, includes: drunkGrooves.includes },
 ];
 
 const zipOf = (p: string) => p.split("/").pop() ?? p;

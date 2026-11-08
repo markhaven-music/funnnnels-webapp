@@ -153,6 +153,7 @@ export const UPSELL = {
     "Walking, two-feel and bossa bass lines",
     "Lofi, neo soul, trap soul and deep house loops, drums included",
     "Chord names written into every file",
+    "**Plus its 5 bonuses**: MIDI Chord Pack (Jazz Edition), The Chord Progressions Bible, Anime & Video Games MIDI Pack, Emotional Keys MIDI Bundle, Drum Loops for Songwriting",
   ],
   listen: "The pack's Royal Road, keys and bass, over a Drunk Swing groove:",
   yes: "Yes, add the Jazz MIDI Pack for {price}",
