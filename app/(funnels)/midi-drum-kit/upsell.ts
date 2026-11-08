@@ -1,4 +1,4 @@
-import { getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
+import { checkoutPages, getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS, type Step } from "@/lib/beacon";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
@@ -59,35 +59,42 @@ export const beaconStep = (product: { offers?: readonly { id: string }[] }, offe
 };
 
 // What the buttons say while they work, per language.
-// done: the bar on top of the page, so the buyer knows the order is through
-// before the offer (2026-11-08: about 1 in 4 buyers closed this page).
-const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: string }> = {
+// done: the bar on top of the page: the payment went through, and the downloads
+// are a step further, so closing the page means missing them (2026-11-08: about
+// 1 in 4 buyers closed this page; "dire order complete non chiude il loop
+// mentale?": no mention of the email, which told them they could leave).
+const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: string; doneLater: string }> = {
   en: {
-    done: "Order complete. Your download link is on its way to your email.",
+    done: "Payment received. Your downloads are on the next page.",
+    doneLater: "Payment received. Your downloads are waiting right after these offers.",
     busy: "Adding it to your order…",
     failed: "The payment didn't go through. Try again, or skip this offer: your order is safe.",
     noOrder: "We couldn't find your order on this page. Your purchase is safe: continue to get your downloads.",
   },
   fr: {
-    done: "Commande terminée. Ton lien de téléchargement arrive par e-mail.",
+    done: "Paiement reçu. Tes téléchargements sont sur la page suivante.",
+    doneLater: "Paiement reçu. Tes téléchargements t'attendent juste après ces offres.",
     busy: "Ajout à ta commande…",
     failed: "Le paiement n'est pas passé. Réessaie, ou passe cette offre : ta commande est en sécurité.",
     noOrder: "On ne retrouve pas ta commande sur cette page. Ton achat est en sécurité : continue pour tes téléchargements.",
   },
   es: {
-    done: "Pedido completado. Tu enlace de descarga va camino de tu email.",
+    done: "Pago recibido. Tus descargas están en la página siguiente.",
+    doneLater: "Pago recibido. Tus descargas te esperan justo después de estas ofertas.",
     busy: "Añadiéndolo a tu pedido…",
     failed: "El pago no se completó. Inténtalo de nuevo o salta esta oferta: tu pedido está a salvo.",
     noOrder: "No encontramos tu pedido en esta página. Tu compra está a salvo: continúa para ver tus descargas.",
   },
   de: {
-    done: "Bestellung abgeschlossen. Dein Download-Link ist per E-Mail unterwegs.",
+    done: "Zahlung erhalten. Deine Downloads sind auf der nächsten Seite.",
+    doneLater: "Zahlung erhalten. Deine Downloads warten direkt nach diesen Angeboten.",
     busy: "Wird zu deiner Bestellung hinzugefügt…",
     failed: "Die Zahlung ist nicht durchgegangen. Versuch es noch einmal oder überspring dieses Angebot: Deine Bestellung ist sicher.",
     noOrder: "Wir finden deine Bestellung auf dieser Seite nicht. Dein Kauf ist sicher: Mach weiter zu deinen Downloads.",
   },
   it: {
-    done: "Ordine completato. Il link per il download sta arrivando nella tua email.",
+    done: "Pagamento ricevuto. I tuoi download sono nella pagina successiva.",
+    doneLater: "Pagamento ricevuto. I tuoi download ti aspettano subito dopo queste offerte.",
     busy: "Lo aggiungo al tuo ordine…",
     failed: "Il pagamento non è andato a buon fine. Riprova, oppure salta questa offerta: il tuo ordine è al sicuro.",
     noOrder: "Non troviamo il tuo ordine su questa pagina. Il tuo acquisto è al sicuro: continua per i tuoi download.",
@@ -149,7 +156,9 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     html = mapText(html, (t) => (extra[t.trim()] ? t.replace(t.trim(), extra[t.trim()]) : t));
     for (const [from, to] of Object.entries(extra)) html = html.replaceAll(`placeholder="${from}"`, `placeholder="${to}"`).replaceAll(`aria-label="${from}"`, `aria-label="${to}"`);
   }
-  if (page.quickNo) html = quickNo(html, UI[lang].done, marks ? `<!--fx:${page.quickNo}-->${text(page.quickNo)}<!--/fx-->` : text(page.quickNo));
+  // "on the next page" only where the next page is the downloads (the Drum Kit shows this page second of three).
+  const last = nextStep(product, lang, offerId) === checkoutPages(product, lang).thankYou;
+  if (page.quickNo) html = quickNo(html, last ? UI[lang].done : UI[lang].doneLater, marks ? `<!--fx:${page.quickNo}-->${text(page.quickNo)}<!--/fx-->` : text(page.quickNo));
   const video = page.videos[lang];
   if (video) html = html.replaceAll(page.wistia, video.id);
   const images = layout.images ?? {};
@@ -160,7 +169,7 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
 
 // The way out, where a buyer looks first (2026-11-08, "Sì, fallo": about 1 in 4
 // buyers closed the first upsell, whose first "No thanks" sat 3 phone screens
-// down): "Order complete" on top of the page, and the page's own "No thanks"
+// down): "Payment received" on top of the page, and the page's own "No thanks"
 // link (quickNo: its text) right under the video, as on ./[lang]/jazz-offer.
 const DONE_CSS = "margin:0;padding:12px 16px;background:#111;color:rgba(255,255,255,.88);font:500 15px/1.4 Inter,system-ui,sans-serif;text-align:center";
 function quickNo(html: string, done: string, no: string): string {
