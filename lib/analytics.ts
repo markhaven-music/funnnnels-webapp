@@ -582,10 +582,12 @@ export const TESTS: TestDef[] = [
     // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
     // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
-    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-07 → today",
-    variants: PAY_TEST.variants,
-    label: (v) => PAY_LABELS[v as keyof typeof PAY_LABELS],
-    color: (v) => PAY_COLORS[v as keyof typeof PAY_COLORS],
+    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-07 → 11-08, C 11-09 → today",
+    // C: the same step as B with the phone's pay bar docked to the bottom edge
+    // (11-08 17:29, "contiamolo come test C"); no letter of its own, only days.
+    variants: [...PAY_TEST.variants, "c"],
+    label: (v) => (v === "c" ? "C · B with the pay bar docked at the bottom" : PAY_LABELS[v as keyof typeof PAY_LABELS]),
+    color: (v) => (v === "c" ? { from: "#fbbf24", to: "#f59e0b" } : PAY_COLORS[v as keyof typeof PAY_COLORS]),
     // The split ran too short to say anything, so each step is judged on when
     // everyone had it: the old one from 11-02 (funnnnels' order page) until the
     // first test on 11-06 16:00, the new one since 11-06 19:20 (everyone on B).
@@ -593,7 +595,9 @@ export const TESTS: TestDef[] = [
     // as the visits are kept per day: 11-06, when both ran, is left out.
     windows: {
       a: { from: "2026-11-02T00:00:00+01:00", until: "2026-11-06T16:00:00+01:00", days: ["2026-11-02", "2026-11-05"] },
-      b: { from: "2026-11-06T19:20:00+01:00", until: null, days: ["2026-11-07", null] },
+      // B's days take 11-08 whole (C went live at 17:29 that day); its checkouts stop at the minute.
+      b: { from: "2026-11-06T19:20:00+01:00", until: "2026-11-08T17:29:00+01:00", days: ["2026-11-07", "2026-11-08"] },
+      c: { from: "2026-11-08T17:29:00+01:00", until: null, days: ["2026-11-09", null] },
     },
   },
   {
