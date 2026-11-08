@@ -61,7 +61,7 @@ export const funnel = {
       name: "Drunk Swing Grooves (389 MIDI Files)",
       price: { eur: 7, usd: 7 },
       image: "/funnels/jazz-midi-pack/bump-grooves.webp",
-      pitch: "The late, loose feel of lofi and neo soul: 31 groove templates, 30 drum grooves and this pack's loops already swung. Snare on the beat, everything else laid back.",
+      pitch: "The drunk, J Dilla-style swing of lofi and neo soul: 31 groove templates, 30 drum grooves and this pack's loops already swung. Snare on the beat, everything else laid back.",
     },
     {
       id: "top-hits",
