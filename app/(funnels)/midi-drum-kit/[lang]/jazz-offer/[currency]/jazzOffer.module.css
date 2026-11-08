@@ -1,17 +1,4 @@
 /* The Jazz upsell's own top and bottom (page.tsx); the rest is jazz.module.css. */
-.done {
-  margin: 0;
-  padding: 12px 16px;
-  background: #111;
-  color: rgb(255 255 255 / 0.88);
-  font-size: 15px;
-  text-align: center;
-}
-.check {
-  color: #f5b800;
-  font-weight: 800;
-  margin-right: 6px;
-}
 .top {
   background: #000;
   padding: 40px 0 56px;

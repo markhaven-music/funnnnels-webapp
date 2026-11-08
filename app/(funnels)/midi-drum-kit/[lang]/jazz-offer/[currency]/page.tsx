@@ -16,7 +16,7 @@ import b from "../../../../jazz-midi-pack/btn.module.css";
 import { funnel } from "../../../funnel";
 import { isLang, LANGS } from "../../../i18n";
 import { PAY } from "../../../payTest";
-import { beaconStep, headScripts, script } from "../../../upsell";
+import { beaconStep, headScripts, script, stepsBar } from "../../../upsell";
 import { Beacon } from "../../../../Beacon";
 import u from "./jazzOffer.module.css";
 
@@ -75,12 +75,8 @@ export default async function JazzOffer({ params }: { params: Params }) {
       <script dangerouslySetInnerHTML={{ __html: js(headScripts()) }} />
       <Beacon funnel={funnel.slug} page={beaconStep(product, OFFER, "upsell-1")} lang={lang} abCookie={PAY.cookie} />
 
-      <p className={u.done}>
-        <span className={u.check} aria-hidden>
-          ✓
-        </span>
-        Order complete. Your MIDI Drum Kit is paid and waiting for you.
-      </p>
+      {/* "✓ Payment received", where the downloads are, and the funnel's steps (upsell.ts stepsBar, 2026-11-08). */}
+      <div dangerouslySetInnerHTML={{ __html: stepsBar(product, OFFER, lang) }} />
 
       <section className={u.top}>
         <div className={j.wrap}>

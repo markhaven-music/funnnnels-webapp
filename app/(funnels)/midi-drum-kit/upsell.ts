@@ -156,9 +156,8 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     html = mapText(html, (t) => (extra[t.trim()] ? t.replace(t.trim(), extra[t.trim()]) : t));
     for (const [from, to] of Object.entries(extra)) html = html.replaceAll(`placeholder="${from}"`, `placeholder="${to}"`).replaceAll(`aria-label="${from}"`, `aria-label="${to}"`);
   }
-  // "on the next page" only where the next page is the downloads (the Drum Kit shows this page second of three).
-  const last = nextStep(product, lang, offerId) === checkoutPages(product, lang).thankYou;
-  if (page.quickNo) html = quickNo(html, last ? UI[lang].done : UI[lang].doneLater, marks ? `<!--fx:${page.quickNo}-->${text(page.quickNo)}<!--/fx-->` : text(page.quickNo));
+  html = html.replace(/<body[^>]*>/, (tag) => `${tag}<style>${HIDE_CF_BAR}</style>${stepsBar(product, offerId, lang)}`);
+  if (page.quickNo) html = quickNo(html, marks ? `<!--fx:${page.quickNo}-->${text(page.quickNo)}<!--/fx-->` : text(page.quickNo));
   const video = page.videos[lang];
   if (video) html = html.replaceAll(page.wistia, video.id);
   const images = layout.images ?? {};
@@ -169,18 +168,52 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
 
 // The way out, where a buyer looks first (2026-11-08, "Sì, fallo": about 1 in 4
 // buyers closed the first upsell, whose first "No thanks" sat 3 phone screens
-// down): "Payment received" on top of the page, and the page's own "No thanks"
-// link (quickNo: its text) right under the video, as on ./[lang]/jazz-offer.
-const DONE_CSS = "margin:0;padding:12px 16px;background:#111;color:rgba(255,255,255,.88);font:500 15px/1.4 Inter,system-ui,sans-serif;text-align:center";
-function quickNo(html: string, done: string, no: string): string {
-  const bar = `<p id="oto-done" style="${DONE_CSS}"><span aria-hidden="true" style="color:#f5b800;font-weight:800;margin-right:6px">✓</span>${done}</p>`;
-  html = html.replace(/<body[^>]*>/, (tag) => `${tag}${bar}`);
+// down): the page's own "No thanks" link (quickNo: its text) right under the
+// video, as on ./[lang]/jazz-offer.
+function quickNo(html: string, no: string): string {
   const at = html.indexOf('data-page-element="Video/V1"');
   const end = at < 0 ? -1 : html.indexOf("</iframe></div></div>", at);
   if (end < 0) return html;
   const cut = end + "</iframe></div></div>".length;
   const link = `<div data-page-element="Button/V1" class="elBTN id-6Z-WRVNaX-2" id="no-shine" style="margin-top:14px"><a target="_self" href="#no" class="elButton" rel="noopener" data-oto="no"><span class="elButtonMain"><span class="elButtonMainText elButtonText">${no}</span></span></a></div>`;
   return html.slice(0, cut) + link + html.slice(cut);
+}
+
+// ClickFunnels' own bar on top ("ONE TIME OFFER...", a fixed 73 % / 90 %): its section, replaced by stepsBar.
+const HIDE_CF_BAR = ".id-6Z-8MQNDX-8{display:none!important}";
+
+// Where the buyer is (2026-11-08, "metti una barra progress in linea con lo step in
+// cui siamo. fai capire che ci sono altri steps"): on top of every upsell page,
+// "✓ Payment received" and where the downloads are, then one segment per step of
+// this funnel: paid, each upsell in its order (funnel.offers), the downloads.
+// Steps behind are yellow, this one yellow and bold, the rest grey. Also on
+// ./[lang]/jazz-offer. Inline styles: the ClickFunnels pages have no stylesheet of ours.
+const STEPS_UI: Record<Lang, { paid: string; offer: string; downloads: string; step: string }> = {
+  en: { paid: "Paid", offer: "Offer {n}", downloads: "Downloads", step: "Step {i} of {n}" },
+  fr: { paid: "Payé", offer: "Offre {n}", downloads: "Téléchargements", step: "Étape {i} sur {n}" },
+  es: { paid: "Pagado", offer: "Oferta {n}", downloads: "Descargas", step: "Paso {i} de {n}" },
+  de: { paid: "Bezahlt", offer: "Angebot {n}", downloads: "Downloads", step: "Schritt {i} von {n}" },
+  it: { paid: "Pagato", offer: "Offerta {n}", downloads: "Download", step: "Passo {i} di {n}" },
+};
+
+export function stepsBar(product: { offers?: readonly { id: string }[] } & Parameters<typeof nextStep>[0], offerId: string, lang: Lang): string {
+  const ui = STEPS_UI[lang] ?? STEPS_UI.en;
+  const offers = product.offers ?? [];
+  const at = Math.max(0, offers.findIndex((o) => o.id === offerId));
+  const labels = [`✓ ${ui.paid}`, ...offers.map((_, i) => ui.offer.replace("{n}", String(i + 1))), ui.downloads];
+  const here = at + 1;
+  // "on the next page" only where the next page is the downloads (the Drum Kit shows Famous Beats second of three).
+  const last = nextStep(product, lang, offerId) === checkoutPages(product, lang).thankYou;
+  const done = last ? UI[lang].done : UI[lang].doneLater;
+  const cells = labels
+    .map((label, i) => {
+      const bar = i <= here ? "#f5b800" : "rgba(255,255,255,.18)";
+      const color = i === here ? "#fff" : i < here ? "rgba(255,255,255,.62)" : "rgba(255,255,255,.4)";
+      return `<li style="flex:1;min-width:0;list-style:none;margin:0;padding:0"${i === here ? ' aria-current="step"' : ""}><span style="display:block;height:6px;border-radius:3px;background:${bar}${i === here ? ";box-shadow:0 0 10px rgba(245,184,0,.55)" : ""}"></span><span style="display:block;margin-top:7px;font-size:12px;line-height:1.2;font-weight:${i === here ? 700 : 500};color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${label}</span></li>`;
+    })
+    .join("");
+  const step = ui.step.replace("{i}", String(here + 1)).replace("{n}", String(labels.length));
+  return `<div id="oto-steps" style="background:#111;padding:12px 16px 14px;font-family:Inter,system-ui,sans-serif;text-align:center"><p style="margin:0 auto;max-width:560px;color:rgba(255,255,255,.88);font-size:15px;line-height:1.4;font-weight:500"><span aria-hidden="true" style="color:#f5b800;font-weight:800;margin-right:6px">✓</span>${done}</p><ol aria-label="${step}" style="display:flex;gap:5px;max-width:560px;margin:12px auto 0;padding:0">${cells}</ol></div>`;
 }
 
 // ClickFunnels fades its "fade-in" blocks in with its own script (stripped):
