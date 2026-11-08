@@ -70,13 +70,7 @@ export const funnel = {
       image: "/funnels/home/top-hits-box.webp",
       pitch: "1000 chord progressions from top hits: chords for pop, R&B, trap and more, beside your jazz ones.",
     },
-    {
-      id: "drum-kit",
-      name: "MIDI Drum Kit",
-      price: { eur: 27, usd: 27 },
-      image: "/funnels/famous-beats-bundle/bump-drum-kit.webp",
-      pitch: "1050 MIDI drum patterns modeled after Billboard producers: complete beats, patterns and fragments to put under your chords.",
-    },
+    // The MIDI Drum Kit add-on left on 2026-11-08 ("è difficile che lo prendano"); no Jazz order had taken it.
     {
       id: "hustle",
       name: "HUSTLE Bundle (31 MIDI Packs)",
