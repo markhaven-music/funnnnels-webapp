@@ -125,7 +125,7 @@ export async function spendByPack(labels: string[], since: string, until: string
   return { connected: true, currency: "EUR", byPack };
 }
 
-export type AdSpend = { adId: string; adName: string; spend: number };
+export type AdSpend = { adId: string; adName: string; campaignName: string; spend: number };
 
 /** Spend per ad between two days (YYYY-MM-DD, inclusive), for the funnel cards (lib/funnelSpend.ts). */
 export async function spendByAd(since: string, until: string): Promise<{ connected: false; reason: string } | { connected: true; currency: string; ads: AdSpend[] }> {
@@ -136,7 +136,7 @@ export async function spendByAd(since: string, until: string): Promise<{ connect
   const rows = (await insightRows(
     new URLSearchParams({
       level: "ad",
-      fields: "ad_id,ad_name,spend,account_currency",
+      fields: "ad_id,ad_name,campaign_name,spend,account_currency",
       time_range: JSON.stringify({ since, until }),
       limit: "500",
       access_token: token,
@@ -147,6 +147,6 @@ export async function spendByAd(since: string, until: string): Promise<{ connect
   return {
     connected: true,
     currency: rows[0]?.account_currency ?? "EUR",
-    ads: rows.filter((r) => r.ad_id && Number(r.spend ?? 0) > 0).map((r) => ({ adId: r.ad_id!, adName: r.ad_name ?? "", spend: Number(r.spend ?? 0) })),
+    ads: rows.filter((r) => r.ad_id && Number(r.spend ?? 0) > 0).map((r) => ({ adId: r.ad_id!, adName: r.ad_name ?? "", campaignName: r.campaign_name ?? "", spend: Number(r.spend ?? 0) })),
   };
 }

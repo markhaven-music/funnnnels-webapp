@@ -57,22 +57,33 @@ export function funnelOfUrl(url: string | null, slugs: string[]): string | null 
 
 /**
  * Each ad's funnel, by where most of its recorded clicks landed (last 120
- * days): by the ad's id, else by its name, which every click carries in
- * utm_content even when the ad's URL template has no ids (the Travis ads).
+ * days): by the ad's id; else by its name in utm_content; else by its
+ * campaign's name in utm_campaign (the Travis ads carry neither the id nor
+ * their own name: utm_content=clipfirst_en for TRAVIS_clipfirst_EN_FUN_usd).
  */
-async function funnelOfAds(ads: { adId: string; adName: string }[], slugs: string[]): Promise<Map<string, string>> {
+async function funnelOfAds(ads: { adId: string; adName: string; campaignName: string }[], slugs: string[]): Promise<Map<string, string>> {
   const since = new Date(Date.now() - 120 * 86_400_000).toISOString();
-  const vote = async (column: "ad_id" | "utm_content", keys: string[]) => {
+  const vote = async (column: "ad_id" | "utm_content" | "utm_campaign", keys: string[]) => {
     const votes = new Map<string, Map<string, number>>();
-    for (let i = 0; i < keys.length; i += 200) {
-      const { data, error } = await supabase()
-        .from("clicks")
-        .select(`${column}, page_url`)
-        .in(column, keys.slice(i, i + 200))
-        .gte("created_at", since)
-        .limit(20_000);
-      if (error) throw error;
-      for (const r of (data ?? []) as Record<string, string | null>[]) {
+    // Page by page: the API hands back 1,000 rows at most per request, and
+    // reading only the first page left most ads looking unvisited.
+    const rows: Record<string, string | null>[] = [];
+    for (let i = 0; i < keys.length; i += 100) {
+      for (let from = 0; ; from += 1000) {
+        const { data, error } = await supabase()
+          .from("clicks")
+          .select(`id, ${column}, page_url`)
+          .in(column, keys.slice(i, i + 100))
+          .gte("created_at", since)
+          .order("id")
+          .range(from, from + 999);
+        if (error) throw error;
+        rows.push(...((data ?? []) as Record<string, string | null>[]));
+        if (!data || data.length < 1000) break;
+      }
+    }
+    {
+      for (const r of rows) {
         const key = r[column];
         const f = funnelOfUrl(r.page_url, slugs);
         if (!key || !f) continue;
@@ -86,9 +97,11 @@ async function funnelOfAds(ads: { adId: string; adName: string }[], slugs: strin
   const byId = await vote("ad_id", ads.map((a) => a.adId));
   const rest = ads.filter((a) => !byId.has(a.adId) && a.adName);
   const byName = rest.length ? await vote("utm_content", Array.from(new Set(rest.map((a) => a.adName)))) : new Map<string, string>();
+  const left = rest.filter((a) => !byName.has(a.adName) && a.campaignName);
+  const byCampaign = left.length ? await vote("utm_campaign", Array.from(new Set(left.map((a) => a.campaignName)))) : new Map<string, string>();
   const out = new Map<string, string>();
   for (const a of ads) {
-    const f = byId.get(a.adId) ?? byName.get(a.adName);
+    const f = byId.get(a.adId) ?? byName.get(a.adName) ?? byCampaign.get(a.campaignName);
     if (f) out.set(a.adId, f);
   }
   return out;
