@@ -9,6 +9,18 @@ import { funnel } from "./funnel";
 
 const n = funnel.counts;
 
+// The MIDI Drum Kit's eight reviews, word for word (midi-drum-kit/copy/en.ts).
+const DRUM_KIT_REVIEWS = [
+  { quote: "The drum patterns are exactly what I needed. Perfect for modern trap and drill beats.", name: "Marcus Thompson", role: "Trap Producer" },
+  { quote: "These MIDI files saved me hundreds of hours. The patterns are industry standard quality.", name: "Ardan Solis", role: "Verified Customer" },
+  { quote: "Perfect for trap. The fragments add that extra sauce to make beats stand out.", name: "Niko Varela", role: "Verified Customer" },
+  { quote: "This is what real trap production tools look like. Every pattern is a hit waiting to happen.", name: "Soraya Kenji", role: "Verified Customer" },
+  { quote: "The MIDI patterns are crazy. I've been using these on every session since I got the pack.", name: "Marek Tulan", role: "Hip-hop and Trap Beatmaker" },
+  { quote: "Finally found patterns that match the energy of modern trap. This pack is legendary.", name: "Aisha Moretti", role: "Beatmaker" },
+  { quote: "The creativity these MIDIs sparked is insane. Perfect foundation for any trap beat.", name: "Dara Kwon", role: "Trap Producer, 100M+ streams" },
+  { quote: "These patterns hit harder than anything I've found. Essential tools for modern producers.", name: "Ravi Lomax", role: "Trap Producer, 100M+ streams" },
+];
+
 export const LANDING = {
   hero: {
     title: "That ==drunk feeling.|In MIDI, ready to drag in.",
@@ -33,7 +45,7 @@ export const LANDING = {
   cta: { label: "Get the grooves", note: "{price} · instant download" },
   proof: [
     ["2,847", "producers have the GRIND STUDIO MIDI Drum Kit in their sessions"],
-    ["14 days", "satisfaction guarantee on every file"],
+    ["14 days", "quality guarantee on every file"],
   ],
   why: {
     title: "Why your drums sound stiff",
@@ -85,12 +97,59 @@ export const LANDING = {
     ],
   },
   guarantee: {
-    title: "14-day satisfaction guarantee",
-    text: "A file doesn't work, or the pack isn't what this page says? Email {email} within 14 days and we fix it.",
+    title: "14-day quality guarantee",
+    text: "A file doesn't work, or the pack isn't what this page says? Email {email} within 14 days and we fix it. If we can't, you get a refund.",
   },
   license: {
     title: "Royalty-free",
     text: "Use the grooves in your own beats and releases, commercial ones too. No credit needed. Just don't resell or share the files.",
+  },
+  // "Introducing": the box beside what it is (grind-funnel-page §4 panel).
+  intro: {
+    title: "Drunk Swing Grooves",
+    lead: "Drag a groove onto your drum rack and the beat already leans. No nudging notes for hours, no swing knob that moves everything at once.",
+    ticks: [
+      `${n.grooves} grooves, ${n.feels} feels, snare on 2 and 4 **and** half-time`,
+      "Drum rack and multitrack versions",
+      `${n.templates} groove templates for chords, bass, your own drums`,
+      "Bonus: neo soul keys in quintuplet swing",
+    ],
+  },
+  // The ✓/✗ chart, as on the Jazz page.
+  compare: {
+    title: "Other ways to get the drunk feel",
+    cols: ["The swing knob", "Moving notes by hand", "Drunk Swing Grooves"],
+    rows: [
+      ["The snare stays on the beat", [false, "Swing moves it too"], [true, "If you're careful"], [true, "In every groove"]],
+      ["Hats, kick and ghost notes move on their own", [false, "One amount for all"], [true, "One by one"], [true, "Each sound its own timing"]],
+      ["Time it takes", [true, "Seconds"], [false, "Hours per beat"], [true, "Drag in a file"]],
+      ["Sounds like a person played it", [false, "Even, mechanical swing"], [null, "If your ear is trained"], [true, "Light to heavy drunk"]],
+    ] as [string, [boolean | null, string], [boolean | null, string], [boolean | null, string]][],
+  },
+  // Everything in the zip, then the price. No invented values (BRIEF: no value stack in money).
+  stack: {
+    title: "Everything you get",
+    items: [
+      [`${n.grooves} MIDI drum grooves`, `${n.grooveFiles} files: drum rack and multitrack`],
+      [`${n.templates} groove templates`, "Swing, quintuplet, septuplet, drunk, laid back"],
+      [`Bonus: Neo Soul Keys in Quintuplet Swing`, `${n.bonus} files: keys and bass`],
+      ["The guide (PDF)", "Ableton Live and Logic Pro, which feel for what"],
+    ],
+    today: "Today",
+  },
+  // Social proof after the guarantee (grind-funnel-page §7): the Drum Kit's reviews.
+  reviews: {
+    title: "What producers say about GRIND STUDIO drums",
+    note: "Reviews of the GRIND STUDIO MIDI Drum Kit.",
+    items: DRUM_KIT_REVIEWS,
+  },
+  after: {
+    title: "From the click to your first drunk beat in two minutes.",
+    items: [
+      ["Pay.", "Card or PayPal, one payment."],
+      ["Download.", `A button on the next page and a link by email. One zip, ${n.files} MIDI files and the guide.`],
+      ["Drag a groove in.", "Onto a drum rack, an MPC, FL Studio's Channel Rack. Press play: it already leans."],
+    ],
   },
   faq: {
     title: "Questions",
@@ -124,12 +183,13 @@ export const ORDER = {
     "Bonus: neo soul keys in quintuplet swing",
     "Any DAW, Mac and PC",
     "Royalty-free",
-    "14-day satisfaction guarantee",
+    "14-day quality guarantee",
   ],
-  reviews: [] as { quote: string; name: string; role: string }[],
+  // The MIDI Drum Kit's reviews (2026-11-08, the user chose "Drum Kit reviews" for this pack).
+  reviews: DRUM_KIT_REVIEWS as { quote: string; name: string; role: string }[],
   guarantee: {
-    title: "14-Day Satisfaction Guarantee",
-    text: "A file doesn't work, or the pack isn't what the page says? Email {email} within {days} days and we fix it.",
+    title: "14-Day Quality Guarantee",
+    text: "A file doesn't work, or the pack isn't what the page says? Email {email} within {days} days and we fix it. If we can't, you get a refund.",
   },
   form: { ...TOP_HITS_ORDER.form, pay: "GET THE GROOVES!", paypalNote: "After you click **GET THE GROOVES!** below, you finish paying on PayPal's secure page, then come straight back to your download." },
   bumps: {

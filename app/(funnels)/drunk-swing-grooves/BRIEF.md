@@ -11,6 +11,13 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
   Jazz loops left; "il quintuplet swing suona molto bene... una versione con delle note come bonus" and
   "aggiungi anche quintuplets swings nei ritmi".
 - Multitrack versions, "ogni traccia uno strumento ... per chi non usa drum racks".
+- 2026-11-08: "la pagina drunk grooves dovrebbe sembrare più una pagina funnel d2c come le altre. VSL + social proof etc":
+  added Introducing (the box beside the bullets), the ✓/✗ chart (swing knob / moving notes by hand / the pack),
+  "Everything you get" (no money values, the price only), After you pay, the reviews after the guarantee. Reviews: the
+  MIDI Drum Kit's eight, word for word (the user: "Drum Kit reviews"), on the landing (said to be the Drum Kit's) and
+  on the order page. The VSL comes next, its script approved first.
+- 2026-11-08: "fai vedere immagini delle box etc etc anche su order page"; the box is the user's own artwork ("usa questa",
+  sampler + vinyl, orange lettering, "MIDI PACK"), cut out: public/funnels/drunk-swing-grooves/pack-*.webp.
 - "say J Dilla in the copy": the copy says "J Dilla-style swing"; the product is named "Drunk", not after
   a person.
 
@@ -45,7 +52,7 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
   MIDI Chord Pack (Jazz Edition), The Chord Progressions Bible, Anime & Video Games MIDI Pack, Emotional Keys MIDI
   Bundle, Drum Loops for Songwriting (the PDF guide is inside the pack's zip). funnel.ts `includes`.
 - Upsell 2: Famous Beats Bundle €27 / $27 (the MIDI Drum Kit's page, midi-drum-kit/upsell.ts).
-- Guarantee: 14-day satisfaction guarantee ("A file doesn't work ... we fix it"). Royalty-free license
+- Guarantee: 14-day quality guarantee ("A file doesn't work ... we fix it. If we can't, you get a refund"; never "money back"). Royalty-free license
   (own music and commercial releases, no credit; no resale or sharing of the files).
 - Proof: "2,847 producers have the GRIND STUDIO MIDI Drum Kit" (the Jazz order page's line). No reviews.
 

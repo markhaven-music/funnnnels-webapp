@@ -22,7 +22,7 @@ import skin from "../../../famous-beats-bundle/order.module.css";
 
 // The order page: the Famous Beats Bundle's (TOP HITS' template with the MIDI Drum
 // Kit's form, ../../../famous-beats-bundle/order), with this pack's picture, words,
-// add-on and checkout. No reviews block: this pack has none yet.
+// add-on and checkout. Reviews: the MIDI Drum Kit's (the user's choice, 2026-11-08).
 // Cached per currency like the landing (proxy.ts rewrites /drunk-swing-grooves/order).
 
 export const revalidate = 3600;
@@ -80,10 +80,10 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className={s.productImg}
-            src={`${OWN}/product.webp`}
-            srcSet={`${OWN}/product-600.webp 600w, ${OWN}/product.webp 900w`}
+            src={`${OWN}/pack-square.webp`}
+            srcSet={`${OWN}/pack-square-600.webp 600w, ${OWN}/pack-square.webp 900w`}
             sizes="(max-width: 769px) calc(100vw - 30px), 535px"
-            alt="Drunk Swing Grooves: 80 MIDI drum grooves with the drunk feel"
+            alt="The Drunk Swing Grooves box: 80 MIDI drum grooves with the drunk feel"
             width={900}
             height={900}
             fetchPriority="high"

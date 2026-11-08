@@ -106,7 +106,29 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
         </div>
       </section>
 
+
       <section className={`${s.section} ${s.lazy}`}>
+        <div className={s.panel}>
+          <Box w={520} className={s.panelBox} />
+          <div className={s.panelCopy}>
+            <h2 className={s.h2}>{w.intro.title}</h2>
+            <p className={s.lead}>{w.intro.lead}</p>
+            <ul className={s.bullets}>
+              {w.intro.ticks.map((b, i) => (
+                <li key={i}>
+                  <Tick />
+                  <span>
+                    <Rich text={b} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {cta}
+          </div>
+        </div>
+      </section>
+
+      <section className={`${s.band} ${s.lazy}`}>
         <div className={s.narrow}>
           <h2 className={s.h2}>{w.feels.title}</h2>
           <ul className={s.feels}>
@@ -124,7 +146,7 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
         </div>
       </section>
 
-      <section className={`${s.band} ${s.lazy}`}>
+      <section className={`${s.section} ${s.lazy}`}>
         <div className={s.narrow}>
           <h2 className={s.h2}>{w.inside.title}</h2>
           <ol className={s.inside}>
@@ -144,7 +166,7 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
         </div>
       </section>
 
-      <section className={`${s.section} ${s.lazy}`}>
+      <section className={`${s.band} ${s.lazy}`}>
         <div className={s.narrow}>
           <h2 className={s.h2}>{w.versions.title}</h2>
           <div className={s.versions}>
@@ -155,16 +177,73 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
               </div>
             ))}
           </div>
-          {cta}
+        </div>
+      </section>
+
+      <section className={`${s.section} ${s.lazy}`}>
+        <div className={s.wide}>
+          <h2 className={`${s.h2} ${s.center}`}>{w.compare.title}</h2>
+          <div className={s.chart} role="table" aria-label={w.compare.title}>
+            <div className={s.chRow} role="row">
+              <span role="columnheader" />
+              {w.compare.cols.map((c, i) => (
+                <span key={c} role="columnheader" className={i === 2 ? `${s.chHead} ${s.chWin}` : s.chHead}>
+                  {i === 2 && <Box w={160} className={s.chBox} />}
+                  {c}
+                </span>
+              ))}
+            </div>
+            {w.compare.rows.map(([label, ...cells]) => (
+              <div key={label} className={s.chRow} role="row">
+                <span role="rowheader" className={s.chLabel}>
+                  {label}
+                </span>
+                {cells.map(([ok, text], i) => (
+                  <span key={i} role="cell" className={i === 2 ? `${s.chCell} ${s.chWin}` : s.chCell}>
+                    <Mark ok={ok} />
+                    <span className={i === 2 ? undefined : s.chAlt}>{text}</span>
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className={`${s.band} ${s.lazy}`}>
         <div className={s.narrow}>
+          <h2 className={`${s.h2} ${s.center}`}>{w.stack.title}</h2>
+          <div className={s.stack}>
+            <Box w={520} className={s.stackBox} />
+            <ul className={s.stackList}>
+              {w.stack.items.map(([name, text]) => (
+                <li key={name}>
+                  <Tick />
+                  <span>
+                    <b>{name}</b>
+                    <span className={s.stackSub}>{text}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className={s.today}>
+            <span>{w.stack.today}</span> <b>{money(price, currency)}</b>
+          </p>
+          {cta}
+        </div>
+      </section>
+
+      <section className={`${s.section} ${s.lazy}`}>
+        <div className={s.narrow}>
           <div className={s.promise}>
-            <div>
+            <div className={s.sealRow}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="14-day quality guarantee" width={172} height={172} loading="lazy" decoding="async" />
+              <div>
               <h2 className={s.h3}>{w.guarantee.title}</h2>
               <p>{fill(w.guarantee.text, { email: funnel.support })}</p>
+              </div>
             </div>
             <div>
               <h2 className={s.h3}>{w.license.title}</h2>
@@ -174,7 +253,42 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
         </div>
       </section>
 
+
+      <section className={`${s.band} ${s.lazy}`}>
+        <div className={s.narrow}>
+          <h2 className={s.h2}>{w.reviews.title}</h2>
+          <ul className={s.reviews}>
+            {w.reviews.items.map((r) => (
+              <li key={r.name}>
+                <span className={s.stars} role="img" aria-label="5 stars">
+                  ★★★★★
+                </span>
+                <p className={s.quote}>&ldquo;{r.quote}&rdquo;</p>
+                <p className={s.who}>
+                  <b>{r.name}</b>
+                  <span>{r.role}</span>
+                </p>
+              </li>
+            ))}
+          </ul>
+          <p className={s.caption}>{w.reviews.note}</p>
+        </div>
+      </section>
+
       <section className={`${s.section} ${s.lazy}`}>
+        <div className={s.narrow}>
+          <h2 className={s.h2}>{w.after.title}</h2>
+          <ol className={s.after}>
+            {w.after.items.map(([lead, text]) => (
+              <li key={lead}>
+                <b>{lead}</b> {text}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className={`${s.band} ${s.lazy}`}>
         <div className={s.narrow}>
           <h2 className={s.h2}>{w.faq.title}</h2>
           <div className={s.faq}>
@@ -200,6 +314,40 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
         <a href={funnel.legal.refund}>Refund policy</a> · <a href={`mailto:${funnel.support}`}>{funnel.support}</a>
       </footer>
     </main>
+  );
+}
+
+// The box (pack-160/520/900.webp, 1187×1721 trimmed, the user's artwork, 2026-11-08).
+function Box({ w, className }: { w: 160 | 520; className?: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      className={className}
+      src={`/funnels/drunk-swing-grooves/pack-${w}.webp`}
+      srcSet={w === 520 ? "/funnels/drunk-swing-grooves/pack-520.webp 520w, /funnels/drunk-swing-grooves/pack-900.webp 900w" : undefined}
+      sizes={w === 520 ? "(min-width: 900px) 420px, 80vw" : undefined}
+      width={w}
+      height={Math.round((w * 1721) / 1187)}
+      alt={w === 520 ? "The Drunk Swing Grooves box by GRIND STUDIO" : ""}
+      loading="lazy"
+      decoding="async"
+    />
+  );
+}
+
+function Mark({ ok }: { ok: boolean | null }) {
+  return (
+    <span className={ok === true ? s.markYes : ok === false ? s.markNo : s.markMeh} role="img" aria-label={ok === true ? "Yes" : ok === false ? "No" : "Partly"}>
+      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden>
+        {ok === true ? (
+          <path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+        ) : ok === false ? (
+          <path d="M5.5 5.5l9 9M14.5 5.5l-9 9" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+        ) : (
+          <path d="M5.5 10h9" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+        )}
+      </svg>
+    </span>
   );
 }
 
