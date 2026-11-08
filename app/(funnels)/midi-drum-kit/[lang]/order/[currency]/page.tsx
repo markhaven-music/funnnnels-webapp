@@ -13,7 +13,9 @@ import { pageEdits } from "@/lib/pageTexts";
 import { copyEdits } from "../../../texts";
 import { funnel } from "../../../funnel";
 import { AB_SCRIPT } from "../../../abtest";
-import { PAY, PAY_SCRIPT } from "../../../payTest";
+import { PAY_SCRIPT } from "../../../payTest";
+import { BONUS, BONUS_SCRIPT, BONUS_WORDS } from "../../../bonusTest";
+import { BonusBanner, BonusItem } from "../../../BonusClock";
 import { Beacon } from "../../../../Beacon";
 import { isLang, LANGS } from "../../../i18n";
 import { orderOffer } from "../../../offer";
@@ -55,6 +57,9 @@ export default async function OrderPage({ params }: { params: Params }) {
   const t = copyWith(lang, undefined, edits);
   const product = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
   const offer = await orderOffer(lang, currency, product, edits);
+  // The add-on the 5-minute bonus gives (none if it's off the form in Products).
+  const xp = offer.bumps.find((b) => b.id === BONUS.item);
+  const bonusWords = BONUS_WORDS[lang];
 
   return (
     <main className={`${s.page} ${fontVars} ${poppins.variable}`} lang={lang}>
@@ -62,8 +67,10 @@ export default async function OrderPage({ params }: { params: Params }) {
       <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
       {/* The step-2 test (../../../payTest.ts): its letter is what the visit counts under. */}
       <script dangerouslySetInnerHTML={{ __html: PAY_SCRIPT }} />
+      {/* The 5-minute bonus test (../../../bonusTest.ts): its letter is what the visit counts under. */}
+      <script dangerouslySetInnerHTML={{ __html: BONUS_SCRIPT }} />
       <Tracking value={offer.price} currency={currency} event={null} />
-      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={PAY.cookie} />
+      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={BONUS.cookie} />
       <div className={s.redbar}>
         <Rich text={t.orderTopbar} currency={currency} />
       </div>
@@ -71,6 +78,7 @@ export default async function OrderPage({ params }: { params: Params }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={s.logo} src={`${IMG}/logo.webp`} alt="GRIND STUDIO" width={900} height={103} />
       </header>
+      {xp && <BonusBanner w={bonusWords} />}
 
       <div className={s.secure}>
         <svg viewBox="0 0 448 512" aria-hidden>
@@ -87,6 +95,12 @@ export default async function OrderPage({ params }: { params: Params }) {
           <h2 className={s.colTitle}>{t.order.summaryTitle}</h2>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.productImg} src={`${IMG}/product.webp`} alt={t.order.productAlt} width={896} height={1200} fetchPriority="high" />
+          {/* The bonus, already in the order while its 5 minutes run (shown to the "bonus-on" half only). */}
+          {xp && (
+            <div className={d.bonusSlot}>
+              <BonusItem w={bonusWords} image={xp.image} price={xp.price} currency={currency} lang={lang} />
+            </div>
+          )}
           <p className={s.dl}>{t.order.dl}</p>
           <ul className={s.list}>
             {t.order.bullets.map((b) => (

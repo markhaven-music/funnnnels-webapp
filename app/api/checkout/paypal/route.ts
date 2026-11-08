@@ -8,6 +8,7 @@ import { PAYPAL_LOCALE, paypal, paypalConfigured, paypalValue, returnOrigin, typ
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { cleanVisitorId } from "@/lib/neoIds";
 import { notePayPalOrder } from "@/lib/orders";
+import { BONUS_COOKIE, orderBonus } from "@/lib/bonusClock";
 
 export const runtime = "nodejs";
 
@@ -35,6 +36,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Please enter a valid email." }, { status: 400 });
   }
   const bumps = pickedBumps(f, body);
+  // The Drum Kit order page's 5-minute bonus (lib/bonusClock.ts): free, so not in the amount.
+  const bonus = orderBonus(f, body, (await cookies()).get(BONUS_COOKIE)?.value, bumps);
+  if (bonus.expired) return NextResponse.json({ error: bonus.expired, bonusExpired: true }, { status: 409 });
   const country = visitorCountry(await headers(), body.country);
   const currency = currencyFor(country);
   const origin = returnOrigin(body.origin);
@@ -47,7 +51,7 @@ export async function POST(req: Request) {
       { status: 409 },
     );
   }
-  if (isDryRun(body)) return NextResponse.json({ dryRun: true, amount, currency, phase: checkoutPhase(f, now) });
+  if (isDryRun(body)) return NextResponse.json({ dryRun: true, amount, currency, phase: checkoutPhase(f, now), bonus: bonus.item });
 
   // PayPal has no metadata, only custom_id (127 chars). It carries what the
   // thank-you page and the download need; the step-1 email rides along when it fits.
@@ -70,7 +74,7 @@ export async function POST(req: Request) {
           {
             reference_id: f.slug,
             custom_id: customId,
-            description: orderDescription(f, bumps).slice(0, 127),
+            description: orderDescription(f, bonus.item ? [...bumps, bonus.item] : bumps).slice(0, 127),
             amount: { currency_code: currency.toUpperCase(), value: paypalValue(amount) },
           },
         ],
@@ -93,7 +97,7 @@ export async function POST(req: Request) {
     const approve = order.links?.find((l) => l.rel === "payer-action" || l.rel === "approve");
     if (!approve) throw new Error(`PayPal order ${order.id} came back without an approval link`);
     // What it sells, for the download and the thank-you page (lib/orders.ts).
-    await notePayPalOrder({ id: order.id, funnel: f.slug, amountCents: amount, currency, items: ["pack", ...bumps.map((b) => b.id)] });
+    await notePayPalOrder({ id: order.id, funnel: f.slug, amountCents: amount, currency, items: ["pack", ...bumps.map((b) => b.id), ...(bonus.item ? [bonus.item.id] : [])] });
     return NextResponse.json({ orderId: order.id, approveUrl: approve.href });
   } catch (err) {
     console.error("paypal order failed", err);

@@ -1,4 +1,5 @@
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
+import { BONUS as BONUS_TEST, BONUS_COLORS, BONUS_LABELS } from "@/app/(funnels)/midi-drum-kit/bonusTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import type { Step } from "@/lib/beacon";
 import { codeFunnels } from "@/lib/funnels";
@@ -532,6 +533,17 @@ type TestDef = {
 };
 const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 export const TESTS: TestDef[] = [
+  {
+    funnel: "midi-drum-kit",
+    // 11-08: half the order page's visitors get the Expansions free if they pay
+    // within 5 minutes (bonusTest.ts). Since it started, the order page's visits
+    // and the orders carry this test's letter instead of step 2's (all B).
+    name: "5-minute bonus: Expansions free",
+    where: "Order page, every language",
+    variants: BONUS_TEST.variants,
+    label: (v) => BONUS_LABELS[v as keyof typeof BONUS_LABELS],
+    color: (v) => BONUS_COLORS[v as keyof typeof BONUS_COLORS],
+  },
   {
     funnel: "midi-drum-kit",
     // Back on 11-06 evening in place of the button-colour test (whose colours

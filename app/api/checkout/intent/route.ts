@@ -7,6 +7,7 @@ import { currencyFor, visitorCountry } from "@/lib/geo";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { cleanVisitorId } from "@/lib/neoIds";
+import { BONUS_COOKIE, orderBonus } from "@/lib/bonusClock";
 
 export const runtime = "nodejs";
 
@@ -33,6 +34,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Please enter a valid email." }, { status: 400 });
   }
   const bumps = pickedBumps(f, body);
+  // The Drum Kit order page's 5-minute bonus (lib/bonusClock.ts): free, so not in the amount.
+  const bonus = orderBonus(f, body, (await cookies()).get(BONUS_COOKIE)?.value, bumps);
+  if (bonus.expired) return NextResponse.json({ error: bonus.expired, bonusExpired: true }, { status: 409 });
   const country = visitorCountry(await headers(), body.country);
   const currency = currencyFor(country);
   const name = [body.firstName, body.lastName]
@@ -49,7 +53,7 @@ export async function POST(req: Request) {
       { status: 409 },
     );
   }
-  if (isDryRun(body)) return NextResponse.json({ dryRun: true, amount, currency, phase: checkoutPhase(f, now) });
+  if (isDryRun(body)) return NextResponse.json({ dryRun: true, amount, currency, phase: checkoutPhase(f, now), bonus: bonus.item });
 
   try {
     // With one-click upsells after the order, the card is kept on a customer
@@ -63,11 +67,13 @@ export async function POST(req: Request) {
       // Cards only, matching the checkout's card fields (Apple Pay / Google Pay are cards).
       allowed_payment_method_types: ["card"],
       receipt_email: email,
-      description: orderDescription(f, bumps),
+      description: orderDescription(f, bonus.item ? [...bumps, bonus.item] : bumps),
       metadata: {
         funnel: f.slug,
-        // The add-ons' ids, comma-separated (one for single-bump products).
-        bump: bumps.map((b) => b.id).join(","),
+        // The add-ons' ids, comma-separated (one for single-bump products), the free bonus included.
+        bump: [...bumps, ...(bonus.item ? [bonus.item] : [])].map((b) => b.id).join(","),
+        // The add-on given free by the 5-minute bonus, if any.
+        bonus: bonus.item?.id ?? "",
         // Lower-case: the customer login finds orders by it (lib/account.ts).
         email: email.toLowerCase(),
         name,

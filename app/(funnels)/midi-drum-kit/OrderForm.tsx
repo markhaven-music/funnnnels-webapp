@@ -7,7 +7,9 @@ import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
 import { track } from "@/lib/beacon";
 import { readVariant } from "./abtest";
-import { PAY, readPay, type PayVariant } from "./payTest";
+import { readPay, type PayVariant } from "./payTest";
+import { BONUS, BONUS_WORDS, readBonus } from "./bonusTest";
+import { BonusItem, endBonus, useBonus } from "./BonusClock";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
@@ -72,6 +74,12 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
     document.cookie = `fv_owned=${picked.join(",")}; path=/; max-age=7200; samesite=lax`;
   }, [picked]);
   const [method, setMethod] = useState<Method>("card");
+  // The 5-minute bonus (./bonusTest.ts): while it runs the Expansions are in the
+  // order for free, so their €7 add-on is off the form (and unticked).
+  const bonusLive = useBonus().live && offer.bumps.some((b) => b.id === BONUS.item);
+  useEffect(() => {
+    if (bonusLive && picked.includes(BONUS.item)) setPicked(picked.filter((x) => x !== BONUS.item));
+  }, [bonusLive, picked]);
   const price = offer.price;
   const total = price + offer.bumps.filter((b) => picked.includes(b.id)).reduce((n, b) => n + b.price, 0);
   // Stripe.js (≈150 KB of script) loads once the buyer starts on the form, not
@@ -90,7 +98,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
         setInfo({ firstName: cart.firstName ?? "", lastName: cart.lastName ?? "", email: cart.email });
         setWanted(true);
         setStep(2);
-        track({ funnel: funnel.slug, page: "checkout", lang, abCookie: PAY.cookie });
+        track({ funnel: funnel.slug, page: "checkout", lang, abCookie: BONUS.cookie });
         // The token off the address bar: a shared or bookmarked link carries no one's cart.
         const url = new URL(location.href);
         url.searchParams.delete("c");
@@ -100,7 +108,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
       })
       .catch(() => {});
   }, [lang]);
-  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard, pay };
+  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard, pay, bonusLive };
 
   return (
     <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
@@ -141,7 +149,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
               pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant(), ab_pay: readPay() });
-              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: PAY.cookie });
+              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: BONUS.cookie });
             }}
           />
         </>
@@ -273,6 +281,7 @@ type PayState = {
   offer: OrderOffer;
   keepCard: boolean;
   pay: PayVariant;
+  bonusLive: boolean;
 };
 
 function CardPay({ stripePromise, ...props }: PayState & { stripePromise: ReturnType<typeof loadStripe> }) {
@@ -298,14 +307,17 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
         funnel: funnel.slug,
         ...props.info,
         bumps: props.picked,
-        // The step-2 test's letter: what the dashboard counts this order under.
-        variant: readPay(),
+        // The bonus test's letter (./bonusTest.ts): what the dashboard counts this order under.
+        variant: readBonus() ?? readPay(),
+        // The Expansions free, as the page shows them (the server checks the 5 minutes).
+        bonus: props.bonusLive,
         lang: props.lang,
         country: cookieCountry(props.currency, props.country),
         expected: props.total,
       }),
     });
     const json = await res.json().catch(() => ({}));
+    if (json.bonusExpired) endBonus();
     if (!res.ok || !json.clientSecret) throw new Error(json.error ?? props.t.paymentFailed);
     return json.clientSecret;
   }
@@ -371,6 +383,7 @@ function PayBody({
   cardOff,
   cardError,
   pay,
+  bonusLive,
 }: PayState & { onCard?: () => void; cardPaying?: boolean; cardOff?: boolean; cardError?: string | null }) {
   const [paypalBusy, setPaypalBusy] = useState(false);
   // The bar at the bottom shows while the real pay button is off screen (11-06: most
@@ -401,7 +414,8 @@ function PayBody({
           funnel: funnel.slug,
           ...info,
           bumps: picked,
-          variant: readPay(),
+          variant: readBonus() ?? readPay(),
+          bonus: bonusLive,
           country: cookieCountry(currency, country),
           origin: window.location.origin,
           lang,
@@ -409,6 +423,7 @@ function PayBody({
         }),
       });
       const json = await res.json().catch(() => ({}));
+      if (json.bonusExpired) endBonus();
       if (!res.ok || !json.approveUrl) throw new Error(json.error ?? t.paypalFailed);
       window.location.assign(json.approveUrl);
     } catch (err) {
@@ -419,6 +434,10 @@ function PayBody({
 
   const toggle = (id: string, on: boolean) => setPicked(on ? [...picked, id] : picked.filter((x) => x !== id));
   const chosen = offer.bumps.filter((b) => picked.includes(b.id));
+  // While the bonus runs, its add-on isn't offered: it's already in the order.
+  const offered = bonusLive ? offer.bumps.filter((b) => b.id !== BONUS.item) : offer.bumps;
+  const bonusBump = offer.bumps.find((b) => b.id === BONUS.item);
+  const w = BONUS_WORDS[lang];
 
   return (
     <>
@@ -428,13 +447,14 @@ function PayBody({
         </div>
       )}
 
+      {bonusLive && bonusBump && <BonusItem w={w} image={bonusBump.image} price={bonusBump.price} currency={currency} lang={lang} compact />}
       {pay === "b" &&
-        offer.bumps.map((b) => (
+        offered.map((b) => (
           <ShortBump key={b.id} b={b} on={picked.includes(b.id)} toggle={toggle} t={t} currency={currency} lang={lang} />
         ))}
       {/* Test A: the ClickFunnels add-on box as it was before 11-06. */}
       {pay === "a" &&
-        offer.bumps.map((b) => {
+        offered.map((b) => {
           const on = picked.includes(b.id);
           return (
             <label key={b.id} className={s.bump}>
@@ -484,6 +504,16 @@ function PayBody({
               <span>{fmt(b.price, currency, lang)}</span>
             </div>
           ))}
+          {bonusLive && bonusBump && (
+            <div className={s.sumRow}>
+              <span>
+                <span className={d.bonusBadge}>{w.badge}</span> {bonusBump.name}
+              </span>
+              <span>
+                <s className={d.was}>{fmt(bonusBump.price, currency, lang)}</s> {w.free}
+              </span>
+            </div>
+          )}
           <div className={`${s.sumRow} ${s.sumTotal}`}>
             <span>{t.total}</span>
             <span>{fmt(total, currency, lang)}</span>

@@ -357,3 +357,141 @@
 
 /* Phones: the checkout a little wider lives in ../top-hits-midi-bundle/order.module.css
    (.cols, .body), for every order page that shares that template (11-08). */
+
+/* ── the 5-minute bonus (./bonusTest.ts, ./BonusClock.tsx) ──
+   In the cached HTML for everyone; shown only to the "bonus-on" half, which
+   doesn't get the "reserved for" box (one clock on the page, the real one). */
+.bonusBar,
+.bonusSlot {
+  display: none;
+}
+:global(html[data-ab-bonus="on"]) .bonusBar,
+:global(html[data-ab-bonus="on"]) .bonusSlot {
+  display: block;
+}
+:global(html[data-ab-bonus="on"]) .timer {
+  display: none;
+}
+.bonusBar {
+  padding: 16px 16px 14px;
+  background: #000;
+  text-align: center;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.bonusLead {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.bonusSub {
+  margin: 6px 0 0;
+  color: rgb(255 255 255 / 0.62);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.bonusTime {
+  display: inline-block;
+  min-width: 3.2em;
+  color: #f5b800;
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+}
+.bonusBarOver .bonusLead {
+  color: rgb(255 255 255 / 0.62);
+  font-size: 16px;
+  font-weight: 700;
+}
+.bonusBadge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #f5b800;
+  color: #000;
+  font-size: 0.68em;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  vertical-align: 0.14em;
+}
+@media (max-width: 769px) {
+  .bonusLead {
+    font-size: 17px;
+  }
+  .bonusSub {
+    font-size: 13px;
+  }
+}
+
+.bonusItem {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0;
+  padding: 12px;
+  border-radius: 4px;
+  background: #1a1a1a;
+  color: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
+  text-align: left;
+}
+.bonusItemCompact {
+  grid-template-columns: 48px 1fr auto;
+  margin: 0 0 14px;
+  padding: 10px;
+}
+.bonusImg {
+  width: 100%;
+  height: auto;
+  border-radius: 3px;
+}
+.bonusInfo {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.bonusName {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.bonusLine {
+  color: rgb(255 255 255 / 0.62);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.bonusAdded {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  color: rgb(255 255 255 / 0.88);
+  font-size: 13px;
+  font-weight: 600;
+}
+.bonusAdded svg {
+  color: #f5b800;
+}
+.bonusTimeSmall {
+  color: #f5b800;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+.bonusPrice {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  font-size: 13px;
+}
+.bonusPrice s {
+  color: rgb(255 255 255 / 0.62);
+}
+.bonusPrice b {
+  color: #f5b800;
+  font-size: 17px;
+  font-weight: 900;
+}
+.bonusItemCompact .bonusName {
+  font-size: 14px;
+}
