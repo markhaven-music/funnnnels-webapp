@@ -8,8 +8,14 @@ import { funnel } from "./funnel";
 // (./astro/landing.ts), served as ../astroLanding.ts says, with its words
 // changed in the dashboard (funnel map → Edit, lib/htmlTexts.ts). marks: each
 // text marked for the editor's frame, never on a live page.
+// "€0.08 per groove" (twice) was worked out for €27: the price ÷ 320 grooves.
 export const landingHtml = (currency: Currency, price: number, edits: Record<string, string> = {}, marks = false) =>
-  astroHtml(applyHtmlTexts(TEMPLATE, edits, marks), { funnel: funnel.slug, orderPage: funnel.checkout.orderPage, currency, price });
+  astroHtml(applyHtmlTexts(TEMPLATE, edits, marks).replaceAll("€0.08", `€${(price / 320).toFixed(2)}`), {
+    funnel: funnel.slug,
+    orderPage: funnel.checkout.orderPage,
+    currency,
+    price,
+  });
 
 /** The page as the code has it, for the dashboard's editor. */
 export const landingTemplate = TEMPLATE;

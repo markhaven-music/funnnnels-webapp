@@ -107,8 +107,14 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
   const edits = markupEdits(allEdits, offerId as TextPage);
   const layout = layouts[offerId] ?? {};
   const strings: Copy = { ...page.copy.en, ...page.copy[lang], ...edits };
+  // Famous Beats' "€0.08 per hit transcription" was worked out for €27: the price ÷ 320 transcriptions.
+  const per = (t: string) => {
+    if (offerId !== "famous-beats" || offer.price[currency] === 27) return t;
+    const each = (offer.price[currency] / 320).toFixed(2);
+    return t.replace(/([€$])0\.08\b/g, `$1${each}`).replace(/\b0,08(\s|&nbsp;|\u00a0|\u202f)€/g, (_, sp: string) => `${each.replace(".", ",")}${sp}€`);
+  };
   const said = (key: string) =>
-    typeof strings[key] === "string" ? restate(strings[key] as string, was ?? offer.price[currency], offer.price[currency], lang) : "";
+    typeof strings[key] === "string" ? per(restate(strings[key] as string, was ?? offer.price[currency], offer.price[currency], lang)) : "";
   const dollars = (t: string) => (currency === "usd" ? t.replaceAll("€", "$") : t);
   const text = (key: string) => {
     let html = said(key);
