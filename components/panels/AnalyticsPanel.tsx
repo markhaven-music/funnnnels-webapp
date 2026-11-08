@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { I } from "@/components/icons";
-import type { Analytics, BonusStats, Metrics, TestStats } from "@/lib/analytics";
+import type { Analytics, AvailabilityStats, BonusStats, Metrics, TestStats } from "@/lib/analytics";
 import { RangePicker, useRange } from "@/components/RangePicker";
 import s from "./analytics.module.css";
 
@@ -85,6 +85,8 @@ export function AnalyticsPanel() {
         <Stat label="ORDERS" value={total ? int(total.orders) : "…"} sub={total ? pct(total.ratedOrders, total.visitors) : ""} color="var(--mint)" />
         <Stat label="REVENUE" value={total ? eur(total.revenue) : "…"} color="var(--accent)" />
       </div>
+
+      {data?.availability && <AvailabilityCard a={data.availability} />}
 
       {data?.bonus && <BonusCard b={data.bonus} />}
 
@@ -206,6 +208,95 @@ const when = (iso: string) =>
 const whenText = (p: Record<string, string>) => `${p.month}-${p.day} ${p.hour}:${p.minute}`;
 
 const mins = (sec: number) => (sec < 60 ? `${Math.round(sec)} s` : `${Math.floor(sec / 60)} min ${String(Math.round(sec % 60)).padStart(2, "0")} s`);
+
+const rate1 = (part: number, whole: number) => (whole > 0 ? `${((part / whole) * 100).toFixed(1)}%` : "—");
+const chance = (c: number | null) => (c == null ? "—" : `${Math.round(c * 100)}%`);
+
+/** Dashboard → Analytics: the funnels before and after the "Checking availability…" popup (lib/analytics.ts availabilityStats). */
+function AvailabilityCard({ a }: { a: AvailabilityStats }) {
+  const sides = [
+    { key: "before", title: `Before · ${whenText(when(a.before.from))} → ${whenText(when(a.before.to!))}`, v: a.before },
+    { key: "after", title: `After · since ${whenText(when(a.after.from))}`, v: a.after },
+  ] as const;
+  const left = Math.max(0, a.needed - a.after.landings);
+  // Under 200 visitors after, the normal approximation's % says more than the numbers do.
+  const shown = (c: number | null) => (a.after.landings < 200 ? `— (${int(a.after.landings)} of 200 visitors)` : chance(c));
+  const verdict =
+    a.after.landings === 0
+      ? "No visitor since the popup yet."
+      : left > 0
+        ? `Too early to call: ${int(a.after.landings)} of the ~${int(a.needed)} visitors needed after the popup to see a 5-point change in the click to the order page.`
+        : (a.chanceClickUp ?? 0.5) >= 0.95
+          ? "The click to the order page is up since the popup."
+          : (a.chanceClickUp ?? 0.5) <= 0.05
+            ? "The click to the order page is down since the popup."
+            : "No clear change in the click to the order page.";
+  return (
+    <section className={s.test}>
+      <div className={s.testHead}>
+        <div>
+          <div className={s.testTitle}>
+            <I.analytics size={14} /> Availability popup · every funnel
+          </div>
+          <div className={s.testSub}>
+            &ldquo;Checking availability…&rdquo; between the landing&apos;s button and the order page, live since {whenText(when(a.since))} · each browser counted once, on the side of the minute it first opened a landing · from the live tracking, kept 30 days · whatever the range above
+          </div>
+        </div>
+      </div>
+
+      <div className={s.variants}>
+        {sides.map(({ key, title, v }) => (
+          <div key={key} className={s.variant}>
+            <div className={s.variantHead}>{title}</div>
+            <div className={s.bonusBig}>
+              {rate1(v.orderViews, v.landings)} <small>landing → order</small>
+            </div>
+            <div className={s.bonusPct}>{rate1(v.orders, v.landings)} landing → paid order</div>
+            <dl className={s.kv}>
+              <dt>Hours</dt>
+              <dd>{int(Math.round(v.hours))}</dd>
+              <dt>Visitors on a landing</dt>
+              <dd>
+                {int(v.landings)} <small>{v.hours >= 1 ? `${int(Math.round((v.landings / v.hours) * 24))}/day` : ""}</small>
+              </dd>
+              <dt>Went on to the order page</dt>
+              <dd className={s.strong}>{int(v.orderViews)}</dd>
+              <dt>Orders paid</dt>
+              <dd className={s.strong}>{int(v.orders)}</dd>
+            </dl>
+          </div>
+        ))}
+
+        <div className={s.variant}>
+          <div className={s.variantHead}>Is it better after?</div>
+          <dl className={s.kv}>
+            <dt>Chance landing → order is up</dt>
+            <dd className={s.strong}>{shown(a.chanceClickUp)}</dd>
+            <dt>Chance landing → paid order is up</dt>
+            <dd>{shown(a.chanceOrderUp)}</dd>
+          </dl>
+          <div className={s.paidNote} style={{ marginTop: 10 }}>
+            {verdict}{" "}The 5-minute bonus started the same evening on the Drum Kit order page, so a change in orders can be either; the click to the order page is the popup&apos;s alone. Orders = first orders paid in the window, upsells apart.
+          </div>
+          <dl className={s.kv} style={{ marginTop: 12 }}>
+            {a.funnels.map((f) => (
+              <Fragment key={f.slug}>
+                <dt>{f.name}</dt>
+                <dd>
+                  {rate1(f.before.orderViews, f.before.landings)} → {rate1(f.after.orderViews, f.after.landings)}{" "}
+                  <small>
+                    {int(f.before.landings)} / {int(f.after.landings)}
+                  </small>
+                </dd>
+              </Fragment>
+            ))}
+          </dl>
+          <div className={s.paidNote}>Each funnel&apos;s landing → order, before → after (visitors before / after).</div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 /** Dashboard → Analytics: how many Drum Kit buyers pay within the order page's 5-minute bonus (lib/analytics.ts bonusStats). */
 function BonusCard({ b }: { b: BonusStats }) {

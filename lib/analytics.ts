@@ -1,6 +1,6 @@
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
-import type { Step } from "@/lib/beacon";
+import { ASTRO_FUNNEL, type Step } from "@/lib/beacon";
 import { codeFunnels } from "@/lib/funnels";
 import { KIT_HOME, SHOP_URL } from "@/lib/liveUrl";
 import { SHOP_SLUG } from "@/lib/shop";
@@ -200,6 +200,34 @@ export type BonusStats = {
   medianSec: number | null;
 };
 
+/** Before/after the "Checking availability…" popup on every funnel landing (lib/availability.ts), all funnels together. */
+export type AvailabilitySide = {
+  /** The minutes counted (ISO; to = null: now) and how many hours that is. */
+  from: string;
+  to: string | null;
+  hours: number;
+  /** Browsers that opened a landing (first landing in the window). */
+  landings: number;
+  /** Of them, those that opened an order page after it. */
+  orderViews: number;
+  /** Orders paid in the window (upsells apart). */
+  orders: number;
+};
+export type AvailabilityStats = {
+  /** When the popup went live (ISO). */
+  since: string;
+  before: AvailabilitySide;
+  after: AvailabilitySide;
+  /** Chance the landing → order rate is really higher after than before (normal approximation); null without visits on both sides. */
+  chanceClickUp: number | null;
+  /** The same for orders per landing visitor. */
+  chanceOrderUp: number | null;
+  /** Visitors needed on each side to see the landing → order click move 5 points. */
+  needed: number;
+  /** Each funnel's landing → order, before and after (by the landing first opened; orders not split). */
+  funnels: { slug: string; name: string; before: { landings: number; orderViews: number }; after: { landings: number; orderViews: number } }[];
+};
+
 /** One UTC day, all funnels together. */
 export type Day = {
   day: string; // "2026-10-21"
@@ -225,6 +253,8 @@ export type Analytics = {
   tests: TestStats[];
   /** The Drum Kit order page's 5-minute bonus, since everyone has it (bonusStats), whatever the range. */
   bonus: BonusStats | null;
+  /** Before/after the availability popup (availabilityStats), whatever the range. */
+  availability: AvailabilityStats | null;
   /** Day by day over the range (dashboard home), oldest first. */
   days: Day[];
   /** The same number of days just before the range, for the comparisons; null for "all". */
@@ -573,6 +603,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
       }),
     ),
     bonus: await soft("5-minute bonus", bonusStats(allSales), null),
+    availability: await soft("availability popup", availabilityStats(now), null),
     ...daily(range, since, last, dayRows, allSales, rate, trackingSince),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
@@ -910,6 +941,93 @@ async function bonusStats(sales: Sale[]): Promise<BonusStats> {
     timing,
     timed: timed.length,
     medianSec: sorted.length ? sorted[Math.floor((sorted.length - 1) / 2)] : null,
+  };
+}
+
+// The "Checking availability…" popup went live on every funnel landing on 11-08 at 20:15
+// (55a5834, "è possibile misurare se c'è una CR lift dopo che abbiamo inserito il checking
+// availability popup"). Counted from the live tracking (live_events: each page a browser
+// opens, to the minute, owner and bots never in it), so the cut is the minute itself:
+// before = from its first visit (11-02) to 20:15, after = since. live_events keeps 30 days
+// (db/live.sql), so the "before" side thins out from 12-02: read the card before then.
+// The 5-minute bonus started the same evening on the Drum Kit order page: it moves the
+// orders, not the click from the landing to the order page.
+const AVAILABILITY_SINCE = "2026-11-08T20:15:00+01:00";
+
+async function availabilityStats(now: number): Promise<AvailabilityStats> {
+  const db = supabase();
+  const since = Date.parse(AVAILABILITY_SINCE);
+  type E = { sid: string; at: string; host: string; funnel: string; page: string };
+  const events: E[] = [];
+  for (let at = 0; at < 100_000; at += 1000) {
+    const { data, error } = await db.from("live_events").select("sid, at, host, funnel, page").in("page", ["landing", "order"]).order("id").range(at, at + 999);
+    if (error) throw error;
+    events.push(...((data ?? []) as E[]));
+    if (!data || data.length < 1000) break;
+  }
+  // Dev servers write here too: production never counts their visits (lib/live.ts OFF_HOST).
+  const off = /^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/;
+  const shown = (host: string) => process.env.NODE_ENV !== "production" || !off.test(host);
+  // Each browser: its first landing (time, funnel) and whether it opened an order page after it.
+  const first = new Map<string, { at: number; funnel: string; order: boolean }>();
+  const orders = new Map<string, number[]>();
+  for (const e of events) {
+    if (!shown(e.host) || e.funnel === SHOP_SLUG) continue;
+    const t = Date.parse(e.at);
+    if (e.page === "order") (orders.get(e.sid) ?? orders.set(e.sid, []).get(e.sid)!).push(t);
+    else if (!first.has(e.sid) || t < first.get(e.sid)!.at) first.set(e.sid, { at: t, funnel: e.funnel, order: false });
+  }
+  for (const [sid, v] of first) v.order = (orders.get(sid) ?? []).some((t) => t >= v.at);
+
+  const names = new Map<string, string>(codeFunnels().map((f) => [f.slug, f.product]));
+  names.set(ASTRO_FUNNEL, "Drum Kit (old page)");
+  const blank = () => ({ landings: 0, orderViews: 0 });
+  const per = new Map<string, { before: ReturnType<typeof blank>; after: ReturnType<typeof blank> }>();
+  const totals = { before: { ...blank(), orders: 0 }, after: { ...blank(), orders: 0 } };
+  let firstAt = Infinity;
+  for (const v of first.values()) {
+    firstAt = Math.min(firstAt, v.at);
+    const side = v.at >= since ? "after" : "before";
+    const f = per.get(v.funnel) ?? per.set(v.funnel, { before: blank(), after: blank() }).get(v.funnel)!;
+    for (const t of [f[side], totals[side]]) {
+      t.landings += 1;
+      if (v.order) t.orderViews += 1;
+    }
+  }
+  // Orders by the minute they were paid (upsells apart), from the first visit tracked: from the
+  // orders table (every card and PayPal order, saved on payment), not Stripe's search, which lags.
+  if (Number.isFinite(firstAt)) {
+    const { data, error } = await db.from("orders").select("created_at, funnel, offer").eq("status", "succeeded").is("parent", null).gte("created_at", new Date(firstAt).toISOString()).limit(5000);
+    if (error) throw error;
+    for (const o of (data ?? []) as { created_at: string; funnel: string; offer: string | null }[]) {
+      if (o.offer || o.funnel === SHOP_SLUG) continue;
+      totals[Date.parse(o.created_at) >= since ? "after" : "before"].orders += 1;
+    }
+  }
+  const iso = (ms: number) => new Date(ms).toISOString();
+  const before = { from: Number.isFinite(firstAt) ? iso(firstAt) : AVAILABILITY_SINCE, to: AVAILABILITY_SINCE, hours: Math.max(0, (since - firstAt) / 3_600_000), ...totals.before };
+  const after = { from: AVAILABILITY_SINCE, to: null, hours: Math.max(0, (now - since) / 3_600_000), ...totals.after };
+  // Chance the after rate is above the before one (normal approximation).
+  const up = (a: number, n: number, b: number, m: number) => {
+    if (!n || !m) return null;
+    const [p, q] = [a / n, b / m];
+    const se = Math.sqrt((p * (1 - p)) / n + (q * (1 - q)) / m);
+    return se > 0 ? phi((p - q) / se) : null;
+  };
+  // Visitors per side to see the click go from the before rate to 5 points more, at 95% / 80% power.
+  const p1 = before.landings ? before.orderViews / before.landings : 0.2;
+  const p2 = p1 + 0.05;
+  const needed = Math.ceil((2.8 ** 2 * (p1 * (1 - p1) + p2 * (1 - p2))) / 0.05 ** 2);
+  return {
+    since: AVAILABILITY_SINCE,
+    before,
+    after,
+    chanceClickUp: up(after.orderViews, after.landings, before.orderViews, before.landings),
+    chanceOrderUp: up(after.orders, after.landings, before.orders, before.landings),
+    needed,
+    funnels: [...per.entries()]
+      .map(([slug, v]) => ({ slug, name: names.get(slug) ?? slug, ...v }))
+      .sort((a, b) => b.before.landings + b.after.landings - (a.before.landings + a.after.landings)),
   };
 }
 
