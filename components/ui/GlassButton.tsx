@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import "@/styles/glass-buttons.css";
 
 type Variant = "clear" | "glass" | "dark" | "solid";
-type Size = "xl" | "lg" | "md" | "sm";
+type Size = "xl" | "lg" | "md";
 
 type Props = {
   href?: string;

@@ -48,9 +48,9 @@ export function AddToCart({
 
   if (small) {
     return inCart ? (
-      <GlassButton href="/shop/cart" variant="clear" size="sm" label="In your cart ✓" />
+      <GlassButton href="/shop/cart" variant="clear" size="md" label="In your cart ✓" />
     ) : (
-      <GlassButton onClick={add} variant="dark" size="sm" label="Add to cart" icon={<CartIcon />} />
+      <GlassButton onClick={add} variant="dark" size="md" label="Add to cart" icon={<CartIcon />} />
     );
   }
   // Both states are the same height, so nothing below moves once the cart is read.
@@ -59,14 +59,14 @@ export function AddToCart({
       {inCart ? (
         <GlassButton
           href="/shop/cart"
-          variant="solid"
+          variant="clear"
           size="xl"
           label="Checkout"
           sub={`In your cart · ${slugs.length} product${slugs.length === 1 ? "" : "s"}`}
           cta
         />
       ) : (
-        <GlassButton onClick={add} variant="solid" size="xl" label="Add to cart" sub={`${money(price, currency)} · instant download`} cta />
+        <GlassButton onClick={add} variant="glass" size="lg" label="Add to cart" price={money(price, currency)} cta />
       )}
       <p className={s.buyNote}>
         {inCart ? (

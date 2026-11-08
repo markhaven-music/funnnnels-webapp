@@ -113,7 +113,7 @@ export function StoreCard({ item, currency, eager }: { item: StoreItem; currency
         <span className={s.price}>{money(item.price, currency)}</span>
       </a>
       {item.funnel ? (
-        <GlassButton href={item.href} variant="dark" size="sm" label="See the pack" />
+        <GlassButton href={item.href} variant="dark" size="md" label="See the pack" />
       ) : (
         <AddToCart slug={item.slug} name={item.name} price={item.price} currency={currency} small />
       )}

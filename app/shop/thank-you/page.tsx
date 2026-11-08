@@ -71,7 +71,7 @@ export default async function ShopThankYou({
               <GlassButton
                 key={slug}
                 href={`/shop/download?order=${encodeURIComponent(order.id)}&file=${slug}`}
-                variant={i === 0 ? "solid" : "clear"}
+                variant="clear"
                 size={i === 0 ? "xl" : "md"}
                 label={`Download ${labels[slug]?.name ?? slug}`}
                 sub={i === 0 ? ".zip" : undefined}
@@ -87,7 +87,7 @@ export default async function ShopThankYou({
         )}
         {!paid && !pending && (
           <div className={s.downloads}>
-            <GlassButton href="/shop/cart" variant="solid" size="xl" label="Back to my cart" />
+            <GlassButton href="/shop/cart" variant="clear" size="xl" label="Back to my cart" />
           </div>
         )}
       </section>
