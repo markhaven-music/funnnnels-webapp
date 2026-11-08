@@ -53,6 +53,31 @@ export function FunnelCard({ f }: { f: StoredFunnel }) {
             <div className="funnel-stats-note">
               {f.stats.visitors} visitors · {rangeLabel(f.statsRange)}
             </div>
+            {f.ads && (
+              <>
+                <div className="funnel-stats funnel-stats--ads">
+                  <div className="funnel-stat">
+                    <div className="funnel-stat-label">Ad spend</div>
+                    <div className="funnel-stat-value">{f.ads.spend}</div>
+                  </div>
+                  <div className="funnel-stat">
+                    <div className="funnel-stat-label" title="Ad spend ÷ landing visitors">Cost / visitor</div>
+                    <div className="funnel-stat-value">{f.ads.cpc}</div>
+                  </div>
+                  <div className="funnel-stat">
+                    <div className="funnel-stat-label" title="Revenue ÷ ad spend">ROAS</div>
+                    <div className="funnel-stat-value">{f.ads.roas}</div>
+                  </div>
+                  <div className="funnel-stat">
+                    <div className="funnel-stat-label" title="Revenue less payment fees, less ad spend">Net profit</div>
+                    <div className={`funnel-stat-value profit-${f.ads.profitTone}`}>{f.ads.profit}</div>
+                  </div>
+                </div>
+                <div className="funnel-stats-note">
+                  Meta ads since {f.ads.since} · {f.ads.visitors} visitors in those days
+                </div>
+              </>
+            )}
           </>
         ) : (
           <div className="funnel-meta">

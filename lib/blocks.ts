@@ -138,6 +138,11 @@ export type StoredFunnel = {
   statsRange?: string;
   /** The card's big numbers for that range, from dashboard → Analytics (lib/codeFunnels.ts withStats). */
   stats?: { revenue: string; orders: string; aov: string; cvr: string; visitors: string };
+  /**
+   * What its Meta ads cost and earned, all over the same days (from 2 Nov at
+   * the earliest, lib/funnelSpend.ts). profitTone: the net profit's sign.
+   */
+  ads?: { spend: string; cpc: string; roas: string; profit: string; profitTone: "up" | "down" | "flat"; visitors: string; since: string };
   /** "lead-magnet": listed apart, under Lead magnets (the free packs), not among the funnels that sell. */
   category?: "lead-magnet";
 };

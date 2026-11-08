@@ -432,9 +432,15 @@ async function kitFunnels(): Promise<{ slug: string; name: string }[]> {
   return data ?? [];
 }
 
-export async function getAnalytics(range: Range): Promise<Analytics> {
+/**
+ * opts.since: start the range later than its own first day (YYYY-MM-DD), for
+ * numbers that must cover the same days as something else: the funnel cards'
+ * ad spend, counted only from SPEND_SINCE (lib/funnelSpend.ts).
+ */
+export async function getAnalytics(range: Range, opts: { since?: string } = {}): Promise<Analytics> {
   const now = Date.now();
-  const { first: since, last } = rangeDays(range, now);
+  const { first: rangeFirst, last } = rangeDays(range, now);
+  const since = opts.since && (!rangeFirst || opts.since > rangeFirst) ? opts.since : rangeFirst;
   const sinceMs = since ? Date.parse(`${since}T00:00:00Z`) : 0;
   // The first day after the range, when it ends before today (Yesterday, Last month…).
   const after = last < dayOf(now) ? dayOf(Date.parse(`${last}T00:00:00Z`) + DAY) : null;

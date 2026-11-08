@@ -29,6 +29,7 @@ import { NAV } from "@/lib/data";
 import type { Analytics, Metrics } from "@/lib/analytics";
 import type { StoredFunnel } from "@/lib/blocks";
 import { withStats } from "@/lib/codeFunnels";
+import type { FunnelSpend } from "@/lib/funnelSpend";
 
 const NAV_LABELS: Record<string, string> = Object.fromEntries(
   NAV.flatMap((s) => s.items.map((it) => [it.id, it.label])),
@@ -66,10 +67,18 @@ export function Dashboard({ funnels: rows }: Props) {
       .then((a) => a && setAnalytics(a))
       .catch(() => {});
   }, []);
+  // The cards' ad spend, cost per visitor, ROAS and net profit (lib/funnelSpend.ts).
+  const [spend, setSpend] = useState<FunnelSpend | null>(null);
+  useEffect(() => {
+    fetch(`/api/analytics/funnel-spend?range=${CARD_RANGE}`, { cache: "no-store" })
+      .then((r) => (r.ok ? (r.json() as Promise<FunnelSpend>) : null))
+      .then((s) => s && setSpend(s))
+      .catch(() => {});
+  }, []);
   const funnels = useMemo(() => {
     const stats: Record<string, Metrics> = Object.fromEntries((analytics?.funnels ?? []).map((f) => [f.slug, f.total]));
-    return withStats(rows, stats, CARD_RANGE);
-  }, [rows, analytics]);
+    return withStats(rows, stats, CARD_RANGE, spend);
+  }, [rows, analytics, spend]);
   const topBarLabel = NAV_LABELS[activeNav] ?? "Dashboard";
   const trail = activeNav === "email-insights" ? [{ label: "Email" }, { label: topBarLabel }] : [{ label: topBarLabel }];
 
@@ -79,7 +88,7 @@ export function Dashboard({ funnels: rows }: Props) {
       <Sidebar funnelCount={funnels.filter((f) => !isLeadMagnet(f)).length} supportUnread={supportUnread} active={activeNav} onNav={setActiveNav} />
       <TopBar trail={trail} />
       {activeNav === "home"         && <DashboardHome funnels={funnels} analytics={analytics} />}
-      {activeNav === "funnels"      && <MainPanel funnels={funnels} />}
+      {activeNav === "funnels"      && <MainPanel funnels={funnels} spend={spend} />}
       {activeNav === "products"     && <ProductsPanel />}
       {activeNav === "launches"     && <LaunchesPanel />}
       {activeNav === "pages"        && <LandingPagesPanel funnels={funnels} />}

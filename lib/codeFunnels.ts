@@ -1,5 +1,6 @@
 import type { Metrics } from "@/lib/analytics";
 import type { StoredFunnel } from "@/lib/blocks";
+import type { FunnelSpend } from "@/lib/funnelSpend";
 
 // The funnels built in code (app/(funnels)/<slug>) on the dashboard's funnel
 // list. They have no row in the `funnels` table (only Jazz does, because its
@@ -79,11 +80,34 @@ const eur = (n: number) =>
 const eur2 = (n: number) =>
   new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
-/** The cards' visits, CVR and revenue from the Analytics numbers, keyed by funnel slug. */
-export function withStats(funnels: StoredFunnel[], stats: Record<string, Metrics>, range: string): StoredFunnel[] {
+// "2026-11-02" → "2 Nov"
+const shortDay = (d: string) =>
+  new Date(`${d}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+
+/** The card's ad numbers, when Meta is connected and the funnel had ad spend or sales in those days. */
+function adsOf(slug: string, spend: FunnelSpend | null): StoredFunnel["ads"] {
+  if (!spend?.connected) return undefined;
+  const a = spend.byFunnel[slug];
+  if (!a || (a.spend === 0 && a.revenue === 0)) return undefined;
+  const profit = a.net - a.spend;
+  return {
+    spend: eur2(a.spend),
+    // Cost per visitor: the spend over every landing visitor, ads or not.
+    cpc: a.visitors > 0 && a.spend > 0 ? eur2(a.spend / a.visitors) : "—",
+    roas: a.spend > 0 ? `${(a.revenue / a.spend).toFixed(2)}x` : "—",
+    profit: `${profit < 0 ? "−" : ""}${eur2(Math.abs(profit))}`,
+    profitTone: profit > 0.005 ? "up" : profit < -0.005 ? "down" : "flat",
+    visitors: a.visitors.toLocaleString("en-US"),
+    since: shortDay(spend.since),
+  };
+}
+
+/** The cards' visits, CVR and revenue from the Analytics numbers, keyed by funnel slug, and their ad numbers. */
+export function withStats(funnels: StoredFunnel[], stats: Record<string, Metrics>, range: string, spend: FunnelSpend | null = null): StoredFunnel[] {
   return funnels.map((f) => {
     const m = stats[f.id];
     if (!m) return f;
+    const ads = adsOf(f.id, spend);
     const cvr = m.visitors > 0 ? `${((m.ratedOrders / m.visitors) * 100).toFixed(1)}%` : "—";
     return {
       ...f,
@@ -99,6 +123,7 @@ export function withStats(funnels: StoredFunnel[], stats: Record<string, Metrics
         cvr,
         visitors: m.visitors.toLocaleString("en-US"),
       },
+      ...(ads ? { ads } : {}),
     };
   });
 }

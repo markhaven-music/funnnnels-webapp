@@ -7,13 +7,34 @@ import { FunnelCard } from "@/components/FunnelCard";
 import { isLeadMagnet, LeadMagnets } from "@/components/LeadMagnets";
 import { NewFunnelTile } from "@/components/NewFunnelTile";
 import type { FunnelStatus, StoredFunnel } from "@/lib/blocks";
+import type { FunnelSpend } from "@/lib/funnelSpend";
 
 type TabKey = "all" | FunnelStatus;
 const TABS: TabKey[] = ["all", "live", "test", "draft"];
 
-type Props = { funnels: StoredFunnel[] };
+type Props = { funnels: StoredFunnel[]; spend?: FunnelSpend | null };
 
-export function MainPanel({ funnels: all }: Props) {
+const eur2 = (n: number) =>
+  new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+
+// The whole Meta bill over the cards' ad days, and the part no card carries:
+// free packs (their own card under Lead magnets) and ads nobody visited from.
+function SpendLine({ spend }: { spend: FunnelSpend }) {
+  if (!spend.connected) return <p className="funnels-spend-note">Ad spend isn&apos;t loading: {spend.reason}</p>;
+  const onFunnels = Object.values(spend.byFunnel).reduce((s, f) => s + f.spend, 0);
+  const total = onFunnels + spend.leadMagnets + spend.unplaced;
+  if (total === 0) return null;
+  const day = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+  return (
+    <p className="funnels-spend-note">
+      Meta ads since {day(spend.since)}: <b>{eur2(total)}</b> · {eur2(onFunnels)} on these funnels
+      {spend.leadMagnets > 0 && <> · {eur2(spend.leadMagnets)} on the free packs</>}
+      {spend.unplaced > 0 && <> · {eur2(spend.unplaced)} on ads with no recorded visit, so no funnel</>}
+    </p>
+  );
+}
+
+export function MainPanel({ funnels: all, spend }: Props) {
   const [tab, setTab] = useState<TabKey>("all");
   // The lead magnets (free packs) have their own section under the funnels that sell.
   const funnels = useMemo(() => all.filter((f) => !isLeadMagnet(f)), [all]);
@@ -103,6 +124,7 @@ export function MainPanel({ funnels: all }: Props) {
         </div>
       )}
 
+      {spend && !empty && <SpendLine spend={spend} />}
       <div className={empty ? "funnels funnels--empty" : "funnels"}>
         <NewFunnelTile prominent={empty} />
         {filtered.map((f) => (

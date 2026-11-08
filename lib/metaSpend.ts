@@ -124,3 +124,29 @@ export async function spendByPack(labels: string[], since: string, until: string
   }
   return { connected: true, currency: "EUR", byPack };
 }
+
+export type AdSpend = { adId: string; adName: string; spend: number };
+
+/** Spend per ad between two days (YYYY-MM-DD, inclusive), for the funnel cards (lib/funnelSpend.ts). */
+export async function spendByAd(since: string, until: string): Promise<{ connected: false; reason: string } | { connected: true; currency: string; ads: AdSpend[] }> {
+  const token = process.env.META_ADS_TOKEN;
+  if (!token) return { connected: false, reason: "Meta isn't connected (no META_ADS_TOKEN)." };
+  if (since < SPEND_SINCE) since = SPEND_SINCE;
+  if (since > until) return { connected: true, currency: "EUR", ads: [] };
+  const rows = (await insightRows(
+    new URLSearchParams({
+      level: "ad",
+      fields: "ad_id,ad_name,spend,account_currency",
+      time_range: JSON.stringify({ since, until }),
+      limit: "500",
+      access_token: token,
+    }),
+    until,
+  )) as (Row & { ad_id?: string; ad_name?: string })[] | { reason: string };
+  if (!Array.isArray(rows)) return { connected: false, reason: rows.reason };
+  return {
+    connected: true,
+    currency: rows[0]?.account_currency ?? "EUR",
+    ads: rows.filter((r) => r.ad_id && Number(r.spend ?? 0) > 0).map((r) => ({ adId: r.ad_id!, adName: r.ad_name ?? "", spend: Number(r.spend ?? 0) })),
+  };
+}
