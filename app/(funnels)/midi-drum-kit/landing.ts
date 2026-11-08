@@ -181,6 +181,9 @@ const FALLBACK_FONTS: Record<string, { size: string; ascent: string; descent: st
   Poppins: { size: "112.16%", ascent: "93.62%", descent: "31.21%", lineGap: "8.92%" },
   Inter: { size: "107.12%", ascent: "90.44%", descent: "22.52%", lineGap: "0%" },
   "Open Sans": { size: "105.15%", ascent: "101.65%", descent: "27.86%", lineGap: "0%" },
+  // The upsells' headlines (2026-11-08: PageSpeed CLS 0.17, the video jumped when it
+  // swapped in). Measured in Chrome: its capitals run 57.5 % of Arial's width, ascent 0.90, descent 0.30.
+  "Bebas Neue": { size: "57.5%", ascent: "156.52%", descent: "52.17%", lineGap: "0%" },
 };
 const FALLBACK_CSS = Object.entries(FALLBACK_FONTS)
   .map(
