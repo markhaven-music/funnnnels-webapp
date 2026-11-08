@@ -127,15 +127,17 @@ export const funnel = {
     },
   ],
   value: { pack: 97 },
-  // Paid downloads, served from /private only after Stripe confirms payment.
-  files: {
-    pack: "private/jazz-midi-pack/Jazz MIDI Pack.zip",
-    "chord-pack": "private/jazz-midi-pack/Jazz MIDI Chord Pack.zip",
-    "anime-pack": "private/jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip",
-  } as Record<string, string>,
-  // Too big for the deployment: objects in the R2 bucket (lib/r2.ts), uploaded from
-  // ~/Desktop/midi jazz pack bonuses. Served through a 10-minute presigned link.
+  // None ship with the deployment any more: private/ is git-ignored, so a deploy
+  // made anywhere but the main checkout left the zips out and every Jazz download
+  // answered 503 (a buyer wrote in, 2026-11-08). All of them are in R2 now.
+  files: {} as Record<string, string>,
+  // Objects in the R2 bucket (lib/r2.ts): the pack and the small bonuses from
+  // private/jazz-midi-pack, the big ones from ~/Desktop/midi jazz pack bonuses.
+  // Served through a 10-minute presigned link. Re-upload here after a rebuild.
   remoteFiles: {
+    pack: "jazz-midi-pack/Jazz MIDI Pack.zip",
+    "chord-pack": "jazz-midi-pack/Jazz MIDI Chord Pack.zip",
+    "anime-pack": "jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip",
     bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
     "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
     "drum-loops": "jazz-midi-pack/Drum Loops for Songwriting.zip",
