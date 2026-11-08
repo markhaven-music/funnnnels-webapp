@@ -180,7 +180,9 @@ function quickNo(html: string, no: string): string {
 }
 
 // ClickFunnels' own bar on top ("ONE TIME OFFER...", a fixed 73 % / 90 %): its section, replaced by stepsBar.
-const HIDE_CF_BAR = ".id-6Z-8MQNDX-8{display:none!important}";
+// And the GRIND STUDIO logo above the headline keeps its place while it loads (it had no
+// aspect ratio, so the video and everything under it jumped: CLS 0.18 on PageSpeed).
+const HIDE_CF_BAR = '.id-6Z-8MQNDX-8{display:none!important}img[src^="/funnels/midi-drum-kit/up-19479683"]{aspect-ratio:2118/242;height:auto!important}';
 
 // Where the buyer is (2026-11-08, "metti una barra progress in linea con lo step in
 // cui siamo. fai capire che ci sono altri steps"): on top of every upsell page,
