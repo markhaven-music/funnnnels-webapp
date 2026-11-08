@@ -4,7 +4,7 @@ import { BRAND } from "@/app/(funnels)/_kit/brand";
 import { KitPurchasePixel } from "@/app/(funnels)/_kit/KitTracking";
 import { Beacon } from "@/app/(funnels)/Beacon";
 import { Clarity } from "@/app/(funnels)/Clarity";
-import b from "@/app/(funnels)/jazz-midi-pack/btn.module.css";
+import { GlassButton } from "@/components/ui/GlassButton";
 import { reportSaleToNeo } from "@/lib/neo";
 import { getOrder } from "@/lib/orders";
 import { noteSale } from "@/lib/sales";
@@ -68,11 +68,14 @@ export default async function ShopThankYou({
         {paid && order && (
           <div className={s.downloads}>
             {order.items.map((slug, i) => (
-              <a key={slug} href={`/shop/download?order=${encodeURIComponent(order.id)}&file=${slug}`} className={i === 0 ? `${b.btn} ${b.full}` : s.ghost}>
-                {i === 0 && <span className={b.shine} aria-hidden />}
-                <span className={i === 0 ? b.label : undefined}>Download {labels[slug]?.name ?? slug}</span>
-                {i === 0 && <span className={b.inner}>.zip</span>}
-              </a>
+              <GlassButton
+                key={slug}
+                href={`/shop/download?order=${encodeURIComponent(order.id)}&file=${slug}`}
+                variant={i === 0 ? "solid" : "clear"}
+                size={i === 0 ? "xl" : "md"}
+                label={`Download ${labels[slug]?.name ?? slug}`}
+                sub={i === 0 ? ".zip" : undefined}
+              />
             ))}
           </div>
         )}
@@ -84,10 +87,7 @@ export default async function ShopThankYou({
         )}
         {!paid && !pending && (
           <div className={s.downloads}>
-            <a href="/shop/cart" className={`${b.btn} ${b.full}`}>
-              <span className={b.shine} aria-hidden />
-              <span className={b.label}>Back to my cart</span>
-            </a>
+            <GlassButton href="/shop/cart" variant="solid" size="xl" label="Back to my cart" />
           </div>
         )}
       </section>

@@ -3,8 +3,9 @@ import type { Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import type { ShopItem } from "@/lib/shop";
 import { CATEGORIES, fromShopItem, type StoreItem } from "@/lib/storefront";
+import { GlassButton } from "@/components/ui/GlassButton";
 import { AddToCart, CartLink } from "./ShopClient";
-import { poppins } from "./fonts";
+import { interTight, poppins } from "./fonts";
 import s from "./shop.module.css";
 
 // What the store's pages share (the homepage, the shop, its products and
@@ -13,7 +14,7 @@ import s from "./shop.module.css";
 
 export function ShopFrame({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <main className={`${s.page} ${poppins.variable} ${className}`}>
+    <main className={`${s.page} ${poppins.variable} ${interTight.variable} ${className}`}>
       <header className={s.top}>
         <div className={`${s.wrap} ${s.bar}`}>
           <a href="/" className={s.logo}>
@@ -112,9 +113,7 @@ export function StoreCard({ item, currency, eager }: { item: StoreItem; currency
         <span className={s.price}>{money(item.price, currency)}</span>
       </a>
       {item.funnel ? (
-        <a href={item.href} className={s.add}>
-          See the pack
-        </a>
+        <GlassButton href={item.href} variant="dark" size="sm" label="See the pack" />
       ) : (
         <AddToCart slug={item.slug} name={item.name} price={item.price} currency={currency} small />
       )}

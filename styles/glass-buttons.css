@@ -1,0 +1,163 @@
+/* ==========================================================================
+   Grind Studio · bottoni in vetro, in rilievo
+   Font: Inter Tight 500/600/700/800 (Google Fonts, via next/font)
+   Varianti: .gs-btn--clear (2), .gs-btn--glass (5), .gs-btn--dark (6), .gs-btn--solid
+   Misure:   .gs-btn--xl (CTA a due righe), .gs-btn--lg, .gs-btn--md,
+             .gs-btn--sm (funnnnels: the shop's product cards, two to a phone row)
+   ========================================================================== */
+
+:root {
+  --gs-lip: 7px;              /* labbro sotto il bottone */
+  --gs-lip-color: #15171C;
+  --gs-press: 6px;            /* quanto scende al click */
+}
+
+.gs-btn {
+  /* here, not on :root: next/font sets --font-inter-tight on the page's <main>,
+     and a var() resolved on :root would come out empty */
+  --gs-font: var(--font-inter-tight), 'Inter Tight', system-ui, sans-serif;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 auto var(--gs-lip); /* centred when narrower than its box; room below for the lip */
+  padding: 0;
+  text-align: center;
+  font-family: var(--gs-font);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, .30);
+  background: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.06) 55%, rgba(255,255,255,.03) 100%);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -2px 0 rgba(0,0,0,.28),
+    0 var(--gs-lip) 0 var(--gs-lip-color),
+    0 var(--gs-lip) 0 1px rgba(255,255,255,.10),
+    0 24px 44px rgba(0,0,0,.6);
+  transition: transform .07s ease-out, box-shadow .07s ease-out, background .15s;
+}
+
+/* riflesso sulla metà alta */
+.gs-btn::before {
+  content: "";
+  position: absolute;
+  left: 1px; right: 1px; top: 1px;
+  height: 48%;
+  border-radius: inherit;
+  border-bottom-left-radius: 40% 30%;
+  border-bottom-right-radius: 40% 30%;
+  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+/* hover: non si muove, si illumina soltanto */
+.gs-btn:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.09) 55%, rgba(255,255,255,.04) 100%);
+  border-color: rgba(255,255,255,.42);
+}
+
+.gs-btn:active {
+  transform: translateY(var(--gs-press));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.4),
+    inset 0 2px 8px rgba(0,0,0,.35),
+    0 1px 0 var(--gs-lip-color),
+    0 1px 0 1px rgba(255,255,255,.08),
+    0 8px 18px rgba(0,0,0,.5);
+}
+
+.gs-btn:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+
+/* ---- Varianti ----------------------------------------------------------- */
+
+/* 2 · vetro trasparente */
+.gs-btn--clear {
+  background: linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.03) 60%, rgba(255,255,255,.01) 100%);
+  border-color: rgba(255,255,255,.26);
+}
+
+/* 5 · vetro satinato (usalo con .gs-btn__price) */
+.gs-btn--glass { justify-content: space-between; }
+
+/* 6 · vetro scuro */
+.gs-btn--dark {
+  --gs-lip-color: #000;
+  background: linear-gradient(180deg, rgba(40,43,50,.75) 0%, rgba(14,15,19,.8) 100%);
+  border-color: rgba(255,255,255,.18);
+}
+.gs-btn--dark::before { background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0)); }
+.gs-btn--dark:hover { background: linear-gradient(180deg, rgba(52,56,64,.8) 0%, rgba(18,19,24,.85) 100%); border-color: rgba(255,255,255,.28); }
+
+/* pieno bianco, per il CTA principale */
+.gs-btn--solid {
+  --gs-lip-color: #8C919B;
+  color: #0A0B0E;
+  border-color: #fff;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: linear-gradient(180deg, #fff 0%, #F1F2F5 50%, #DADDE3 100%);
+}
+.gs-btn--solid::before { background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0)); }
+.gs-btn--solid:hover { background: linear-gradient(180deg, #fff 0%, #F6F7F9 50%, #E3E5EA 100%); border-color: #fff; }
+.gs-btn--solid .gs-btn__sub { color: rgba(10,11,14,.6); }
+
+/* ---- Misure (telefono → desktop) ---------------------------------------- */
+
+.gs-btn--xl { flex-direction: column; gap: 2px; height: 84px;  border-radius: 20px; }
+.gs-btn--lg { height: 74px; border-radius: 18px; padding: 0 7px 0 24px; }
+.gs-btn--md { height: 70px; border-radius: 18px; gap: 14px; }
+.gs-btn--sm { --gs-lip: 5px; --gs-press: 4px; height: 50px; border-radius: 14px; gap: 8px; }
+
+.gs-btn__label { font-size: 27px; line-height: 1.05; }
+.gs-btn--lg .gs-btn__label { font-size: 23px; }
+.gs-btn--md .gs-btn__label { font-size: 22px; }
+.gs-btn--sm .gs-btn__label { font-size: 17px; }
+.gs-btn--sm .gs-btn__icon { width: 19px; height: 19px; }
+.gs-btn__sub   { font-weight: 500; font-size: 15px; line-height: 1.2; color: rgba(255,255,255,.75); }
+
+/* chip del prezzo, anch'esso in rilievo */
+.gs-btn__price {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 58px;
+  padding: 0 22px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 21px;
+  background: linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,.10));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -1px 0 rgba(0,0,0,.25), 0 2px 0 rgba(0,0,0,.35);
+}
+
+.gs-btn__icon { width: 24px; height: 24px; flex: none; }
+
+@media (min-width: 1024px) {
+  .gs-btn { max-width: 560px; }
+  .gs-btn--xl { gap: 3px; height: 100px; border-radius: 24px; }
+  .gs-btn--lg { height: 86px; border-radius: 22px; padding: 0 9px 0 32px; }
+  .gs-btn--md { height: 80px; border-radius: 22px; gap: 16px; }
+  .gs-btn__label { font-size: 33px; }
+  .gs-btn--lg .gs-btn__label { font-size: 28px; }
+  .gs-btn--md .gs-btn__label { font-size: 26px; }
+  .gs-btn--sm { height: 54px; border-radius: 16px; }
+  .gs-btn--sm .gs-btn__label { font-size: 18px; }
+  .gs-btn--sm .gs-btn__icon { width: 20px; height: 20px; }
+  .gs-btn__sub { font-size: 17px; }
+  .gs-btn__price { height: 66px; padding: 0 28px; font-size: 25px; border-radius: 14px; }
+  .gs-btn__icon { width: 28px; height: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gs-btn { transition: none; }
+}

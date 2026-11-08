@@ -3,9 +3,8 @@ import { notFound } from "next/navigation";
 import { BRAND } from "@/app/(funnels)/_kit/brand";
 import { Beacon } from "@/app/(funnels)/Beacon";
 import { Clarity } from "@/app/(funnels)/Clarity";
-import { Arrow } from "@/app/(funnels)/jazz-midi-pack/Cta";
-import b from "@/app/(funnels)/jazz-midi-pack/btn.module.css";
 import { ShopFrame, StoreCard } from "@/app/shop/ShopFrame";
+import { GlassButton } from "@/components/ui/GlassButton";
 import s from "@/app/shop/shop.module.css";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
@@ -81,16 +80,7 @@ export default async function Home({ params }: { params: Promise<{ currency: str
             <a href={kit.href} className={h.heroPic} tabIndex={-1} aria-hidden>
               <img src={kit.pic!.src} width={kit.pic!.width} height={kit.pic!.height} alt="" fetchPriority="high" />
             </a>
-            <a href={kit.href} className={b.btn} data-cta>
-              <span className={b.shine} aria-hidden />
-              <span className={b.label}>
-                <span>GET THE DRUM KIT</span>
-                <Arrow className={b.arrow} />
-              </span>
-              <span className={b.inner}>
-                {kit.name} · {money(kit.price, currency)}
-              </span>
-            </a>
+            <GlassButton href={kit.href} variant="solid" size="xl" label="GET THE DRUM KIT" sub={`${kit.name} · ${money(kit.price, currency)}`} cta />
             <p className={h.note}>Instant download · {BRAND.guaranteeDays}-day money-back guarantee</p>
           </div>
         </div>

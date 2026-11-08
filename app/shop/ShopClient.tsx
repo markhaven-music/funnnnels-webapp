@@ -3,9 +3,8 @@
 import { useEffect } from "react";
 import Script from "next/script";
 import { BRAND } from "@/app/(funnels)/_kit/brand";
-import { Arrow } from "@/app/(funnels)/jazz-midi-pack/Cta";
 import { BOOT, pixel } from "@/app/(funnels)/jazz-midi-pack/Tracking";
-import b from "@/app/(funnels)/jazz-midi-pack/btn.module.css";
+import { CartIcon, GlassButton } from "@/components/ui/GlassButton";
 import type { Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { cart, useCart } from "./cart";
@@ -49,38 +48,25 @@ export function AddToCart({
 
   if (small) {
     return inCart ? (
-      <a href="/shop/cart" className={`${s.add} ${s.added}`}>
-        In your cart ✓
-      </a>
+      <GlassButton href="/shop/cart" variant="clear" size="sm" label="In your cart ✓" />
     ) : (
-      <button type="button" className={s.add} onClick={add}>
-        Add to cart
-      </button>
+      <GlassButton onClick={add} variant="dark" size="sm" label="Add to cart" icon={<CartIcon />} />
     );
   }
   // Both states are the same height, so nothing below moves once the cart is read.
   return (
     <div className={s.buy}>
       {inCart ? (
-        <a href="/shop/cart" className={`${b.btn} ${b.full}`} data-cta>
-          <span className={b.shine} aria-hidden />
-          <span className={b.label}>
-            <span>Checkout</span>
-            <Arrow className={b.arrow} />
-          </span>
-          <span className={b.inner}>
-            In your cart · {slugs.length} product{slugs.length === 1 ? "" : "s"}
-          </span>
-        </a>
+        <GlassButton
+          href="/shop/cart"
+          variant="solid"
+          size="xl"
+          label="Checkout"
+          sub={`In your cart · ${slugs.length} product${slugs.length === 1 ? "" : "s"}`}
+          cta
+        />
       ) : (
-        <button type="button" className={`${b.btn} ${b.full}`} onClick={add} data-cta>
-          <span className={b.shine} aria-hidden />
-          <span className={b.label}>
-            <span>Add to cart</span>
-            <Arrow className={b.arrow} />
-          </span>
-          <span className={b.inner}>{money(price, currency)} · instant download</span>
-        </button>
+        <GlassButton onClick={add} variant="solid" size="xl" label="Add to cart" sub={`${money(price, currency)} · instant download`} cta />
       )}
       <p className={s.buyNote}>
         {inCart ? (

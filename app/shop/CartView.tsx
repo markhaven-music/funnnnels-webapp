@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { CheckoutWidget } from "@/app/(funnels)/jazz-midi-pack/CheckoutWidget";
+import { GlassButton } from "@/components/ui/GlassButton";
 import type { Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { cart, useCart } from "./cart";
@@ -53,9 +54,7 @@ export function CartView({
       <div className={s.emptyCart}>
         <h1 className={s.h1}>Your cart is empty.</h1>
         <p className={s.intro}>Everything in the shop is an instant download.</p>
-        <a href="/shop" className={s.ghost}>
-          Browse the shop
-        </a>
+        <GlassButton href="/shop" variant="clear" size="md" label="Browse the shop" />
       </div>
     );
   }
