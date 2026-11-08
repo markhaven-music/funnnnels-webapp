@@ -37,6 +37,16 @@ export const metadata: Metadata = {
 
 const FEEL_FILES = ["feel-light", "feel-medium", "feel-heavy", "feel-quintuplet"];
 
+// The Buy buttons take the ad's tags to the order page, so neo credits the sale to the ad
+// that sold (the Jazz page's lesson, ../../jazz-midi-pack/abtest.ts AB_CARRY_SCRIPT, 2026-11-08).
+const CARRY = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "campaign_id", "adset_id", "ad_id", "fbclid", "gclid"];
+const CARRY_SCRIPT = `(function(){try{document.addEventListener('click',function(e){try{
+var a=e.target&&e.target.closest&&e.target.closest('a[data-cta]');if(!a)return;
+var u=new URL(a.getAttribute('href'),location.href);if(u.origin!==location.origin)return;
+var q=new URLSearchParams(location.search),k=${JSON.stringify(CARRY)};
+for(var i=0;i<k.length;i++){var x=q.get(k[i]);if(x&&!u.searchParams.has(k[i]))u.searchParams.set(k[i],x);}
+a.setAttribute('href',u.pathname+u.search+u.hash);}catch(e){}},true);}catch(e){}})();`;
+
 export default async function DrunkSwingGrooves({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
@@ -50,6 +60,7 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
     <main className={`${s.page} ${display.variable}`}>
       <Tracking value={price} currency={currency} product={funnel.product} />
       <Beacon funnel={funnel.slug} page="landing" />
+      <script dangerouslySetInnerHTML={{ __html: CARRY_SCRIPT }} />
 
       <section className={s.hero}>
         <div className={s.narrow}>
