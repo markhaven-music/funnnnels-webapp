@@ -29,7 +29,7 @@ export const LANDING = {
   },
   ab: {
     title: "Play the beat, then flip the switch.",
-    straight: "Quantized",
+    straight: "On Tempo",
     drunk: "Drunk",
     caption: "Same notes, same sounds. Only the timing moves.",
     play: "Play the beat",
@@ -54,7 +54,7 @@ export const LANDING = {
       "The beats you love don't sit on the grid. The snare lands dead on the beat, and everything around it leans: the hats a hair early, the kick a little loose, the ghost notes dragging behind.",
       "That's microtiming. You can do it by hand, moving every hit a few milliseconds by ear, on every beat, for hours. Or you start from a groove that already has it.",
     ],
-    straight: "Quantized",
+    straight: "On Tempo",
     drunk: "Drunk",
   },
   feels: {

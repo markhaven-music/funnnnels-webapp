@@ -29,11 +29,11 @@ function Disc({ playing }: { playing: boolean }) {
   );
 }
 
-/** The same 8 bars, quantized and drunk, on one play button and a switch that swaps them at the same moment. */
+/** The same 8 bars, on tempo and drunk (on tempo first: the user, 2026-11-08), on one play button and a switch that swaps them at the same moment. */
 export function AbPlayer({ words }: { words: { straight: string; drunk: string; caption: string; play: string } }) {
   const a = useRef<HTMLAudioElement>(null);
   const b = useRef<HTMLAudioElement>(null);
-  const [drunk, setDrunk] = useState(true);
+  const [drunk, setDrunk] = useState(false);
   const [playing, setPlaying] = useState(false);
   const current = () => (drunk ? b.current : a.current);
   const other = () => (drunk ? a.current : b.current);
