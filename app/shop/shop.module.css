@@ -261,6 +261,8 @@
   transition: transform 0.25s ease;
 }
 .tile img.fade {
+  /* These pictures carry their own dark backdrop around a smaller box: zoom so the box is as big as the cut-out ones. */
+  scale: 1.32;
   mask-image: radial-gradient(closest-side, #000 74%, transparent);
 }
 .cardLink:hover .tile img {
