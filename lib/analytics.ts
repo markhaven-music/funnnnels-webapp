@@ -707,8 +707,8 @@ function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, sin
 }
 
 /**
- * Who started the checkout in the window (one per email) and how many orders
- * were paid in it (card and PayPal, upsells apart), leaving out the emails that
+ * Who started the checkout in the window (one per email) and how many of them
+ * paid after it (card or PayPal, upsells apart), leaving out the emails that
  * took a free pack before: since 11-05 the free packs send their sign-ups to the
  * order page with their name filled in, so they count as checkouts.
  */
@@ -730,8 +730,7 @@ async function checkoutPaid(funnel: string, w: { from: string; until: string | n
       at: Date.parse(r.created_at),
     })),
   ];
-  const orderEmails = orderRows.map((r) => r.e);
-  const emails = [...new Set([...startRows.map((r) => low(r.email)), ...orderEmails].filter(Boolean))];
+  const emails = [...new Set(startRows.map((r) => low(r.email)).filter(Boolean))];
   const optedAt = new Map<string, number>();
   for (let i = 0; i < emails.length; i += 300) {
     const { data, error } = await db.from("optins").select("email, created_at").in("email", emails.slice(i, i + 300)).lt("created_at", until);
@@ -744,7 +743,11 @@ async function checkoutPaid(funnel: string, w: { from: string; until: string | n
   }
   const free = (e: string, at: number) => (optedAt.get(e) ?? Infinity) <= at;
   const started = new Set(startRows.filter((r) => !free(low(r.email), Date.parse(r.started_at))).map((r) => low(r.email)));
-  return { from: w.from, until: w.until, starts: started.size, orders: orderRows.filter((r) => !free(r.e, r.at)).length };
+  // Only the orders of those who started the checkout in the window: a PayPal
+  // payment straight from elsewhere (11-03) has no checkout to count against.
+  const startedAt = new Map(startRows.map((r) => [low(r.email), Date.parse(r.started_at)]));
+  const paid = new Set(orderRows.filter((r) => started.has(r.e) && r.at >= (startedAt.get(r.e) ?? Infinity)).map((r) => r.e));
+  return { from: w.from, until: w.until, starts: started.size, orders: paid.size };
 }
 
 /** Standard normal CDF (Abramowitz–Stegun 7.1.26). */
