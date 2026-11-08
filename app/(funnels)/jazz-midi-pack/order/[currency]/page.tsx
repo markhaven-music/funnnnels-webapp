@@ -58,7 +58,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null,
     bump: f.bump ? { name: f.bump.name, price: f.bump.price[currency], pitch: f.bump.pitch, cover: splitName(f.bump.name) } : null,
     // Their words say the code's price ("just {c}27"): said again at Products' (lib/restate.ts).
-    bumps: (f.bumps ?? []).map((b) => {
+    // Jazz Record Samples hidden since 2026-11-08 ("lasciamo solo drunk swing grooves"), though Products still lists it.
+    bumps: (f.bumps ?? []).filter((b) => b.id !== "record-samples").map((b) => {
       const was = getFunnel(funnel.slug)?.bumps?.find((c) => c.id === b.id)?.price[currency] ?? b.price[currency];
       const copy = bumpCopy[b.id];
       const said = copy ? { ...copy, body: copy.body.map((p) => restate(p, was, b.price[currency])) } : {};

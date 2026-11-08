@@ -48,14 +48,8 @@ export const funnel = {
   // only here (the €27 floor is for products sold on their own elsewhere). Built by
   // ~/Desktop/Jazz MIDI Pack Tools/make_record_samples.py and make_swing_grooves.py,
   // zips in R2 under jazz-midi-pack/.
+  // Jazz Record Samples left on 2026-11-08 ("lasciamo solo drunk swing grooves"); no order had taken it.
   bumps: [
-    {
-      id: "record-samples",
-      name: "Jazz Record Samples (122 WAV Loops)",
-      price: { eur: 7, usd: 7 },
-      image: "/funnels/jazz-midi-pack/bump-records.webp",
-      pitch: "This pack's progressions as 122 WAV loops in Rhodes and piano, made to sound like an old record. Chop them like a sample, no clearance needed.",
-    },
     {
       id: "swing-grooves",
       name: "Drunk Swing Grooves (211 MIDI Files)",
