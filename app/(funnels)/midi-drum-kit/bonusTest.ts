@@ -41,13 +41,18 @@ export const BONUS_COLORS: Record<BonusVariant, { from: string; to: string }> = 
 
 const LIST = BONUS.variants.join("|");
 
-/** Runs first thing on the order page: <html data-ab-bonus="on|off"> before anything paints. */
+/**
+ * Runs first thing on the order page: <html data-ab-bonus="on|off"> before anything paints.
+ * "over": in the bonus half, but its 5 minutes ended on an earlier visit (this browser's
+ * fv_bonus_end): the page is the normal one, no bonus words ("se rivado sul checkout… è normale").
+ */
 export const BONUS_SCRIPT = `(function(){try{
 var re=/(?:^|; )${BONUS.cookie}=(${LIST})(?:;|$)/,q=(location.search.match(/[?&]bonus=(on|off)(?:&|$)/)||[])[1];
 var v=q?'bonus-'+q:(document.cookie.match(re)||[])[1];
 if(!v)v=Math.random()<0.5?'bonus-off':'bonus-on';
 document.cookie='${BONUS.cookie}='+v+'; path=/; max-age=15552000; samesite=lax';
 document.documentElement.setAttribute('data-ab-bonus',v==='bonus-on'?'on':'off');
+if(v==='bonus-on'){var e=Number(localStorage.getItem('fv_bonus_end'));if(e&&e<=Date.now())document.documentElement.setAttribute('data-ab-bonus','over');}
 }catch(e){}})();`;
 
 /** The visitor's letter, in the browser (null before the script ran). */

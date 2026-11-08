@@ -79,7 +79,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
   const bonus = useBonus();
   const bonusLive = bonus.live && offer.bumps.some((b) => b.id === BONUS.item);
   // In the bonus half: the row stays in step 2, as "Time's up" once the 5 minutes are over.
-  const bonusOn = bonus.on && bonus.left !== null;
+  const bonusOn = bonus.on && !bonus.gone && bonus.left !== null;
   useEffect(() => {
     if (bonusLive && picked.includes(BONUS.item)) setPicked(picked.filter((x) => x !== BONUS.item));
   }, [bonusLive, picked]);

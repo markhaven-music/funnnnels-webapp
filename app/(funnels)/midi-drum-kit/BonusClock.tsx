@@ -13,8 +13,17 @@ import d from "./order.module.css";
 // everyone and shown by CSS only for the "bonus-on" half (<html data-ab-bonus>),
 // so nothing moves when the clock arrives.
 
-type Clock = { on: boolean; end: number | null; dead: boolean };
-let clock: Clock = { on: false, end: null, dead: false };
+// gone: the 5 minutes were already over when the page opened (an earlier visit):
+// nothing about the bonus shows, the page is the normal one. Over while on the
+// page instead: "Time's up" where it was.
+type Clock = { on: boolean; end: number | null; dead: boolean; gone: boolean };
+let clock: Clock = { on: false, end: null, dead: false, gone: false };
+
+function markGone() {
+  clock = { ...clock, gone: true };
+  // The CSS shows the page as the bonus-off half sees it (./order.module.css).
+  document.documentElement.setAttribute("data-ab-bonus", "over");
+}
 let started = false;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
@@ -31,6 +40,7 @@ function start() {
     known = Number(localStorage.getItem(BONUS_END_KEY)) || null;
   } catch {}
   clock = { ...clock, on: true, end: known };
+  if (known !== null && known <= Date.now()) markGone();
   emit();
   fetch("/api/checkout/bonus", { method: "POST" })
     .then((r) => (r.ok ? r.json() : null))
@@ -38,6 +48,8 @@ function start() {
       // No answer: no bonus shown (the server wouldn't give it either).
       const end = j ? Date.now() + (j.end - j.now) : null;
       clock = end ? { ...clock, end } : { ...clock, dead: true };
+      // Over before anything counted down on this visit: the normal page.
+      if (end !== null && end <= Date.now() && (known === null || known <= Date.now())) markGone();
       try {
         if (end) localStorage.setItem(BONUS_END_KEY, String(end));
       } catch {}
@@ -56,7 +68,7 @@ export function endBonus() {
 }
 
 /** on: this visitor is in the bonus half; left: ms to go (null until known); live: the bonus is in the order. */
-export function useBonus(): { on: boolean; left: number | null; live: boolean } {
+export function useBonus(): { on: boolean; left: number | null; live: boolean; gone: boolean } {
   const [, render] = useState(0);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -78,11 +90,12 @@ export function useBonus(): { on: boolean; left: number | null; live: boolean } 
     }, 250);
     return () => clearInterval(id);
   }, [ticking]);
-  if (!clock.on) return { on: false, left: null, live: false };
-  if (clock.dead) return { on: true, left: 0, live: false };
-  if (clock.end === null) return { on: true, left: null, live: false };
+  if (!clock.on) return { on: false, left: null, live: false, gone: false };
+  if (clock.gone) return { on: true, left: 0, live: false, gone: true };
+  if (clock.dead) return { on: true, left: 0, live: false, gone: false };
+  if (clock.end === null) return { on: true, left: null, live: false, gone: false };
   const left = Math.max(0, clock.end - now);
-  return { on: true, left, live: left > 0 };
+  return { on: true, left, live: left > 0, gone: false };
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -107,7 +120,8 @@ function Lead({ text, left }: { text: string; left: number | null }) {
 
 /** Under the header: "Order in the next 04:56 and get the Expansions free." */
 export function BonusBanner({ w }: { w: BonusWords }) {
-  const { left, live } = useBonus();
+  const { left, live, gone } = useBonus();
+  if (gone) return null;
   const over = left === 0 && !live;
   return (
     <div className={`${d.bonusBar} ${over ? d.bonusBarOver : ""}`} aria-live="polite">
@@ -127,7 +141,8 @@ export function BonusBanner({ w }: { w: BonusWords }) {
 
 /** The bonus as a line of the order: picture, BONUS, name, €7 struck, FREE, the clock. At 00:00, "Time's up. The free Expansions are gone." in its place. */
 export function BonusItem({ w, image, price, currency, lang, compact }: { w: BonusWords; image: string; price: number; currency: Currency; lang: Lang; compact?: boolean }) {
-  const { left, live } = useBonus();
+  const { left, live, gone } = useBonus();
+  if (gone) return null;
   // Over: the row says so where the bonus was ("Time's up…"), not just gone.
   if (left === 0 && !live)
     return (
