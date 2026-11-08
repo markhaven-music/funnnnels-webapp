@@ -125,10 +125,16 @@ export function BonusBanner({ w }: { w: BonusWords }) {
   );
 }
 
-/** The bonus as a line of the order: picture, BONUS, name, €7 struck, FREE, the clock. Gone at 00:00. */
+/** The bonus as a line of the order: picture, BONUS, name, €7 struck, FREE, the clock. At 00:00, "Time's up. The free Expansions are gone." in its place. */
 export function BonusItem({ w, image, price, currency, lang, compact }: { w: BonusWords; image: string; price: number; currency: Currency; lang: Lang; compact?: boolean }) {
   const { left, live } = useBonus();
-  if (left === 0 && !live) return null;
+  // Over: the row says so where the bonus was ("Time's up…"), not just gone.
+  if (left === 0 && !live)
+    return (
+      <p className={`${d.bonusGone} ${compact ? d.bonusGoneCompact : ""}`} role="status">
+        {w.over}
+      </p>
+    );
   return (
     <div className={`${d.bonusItem} ${compact ? d.bonusItemCompact : ""}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}

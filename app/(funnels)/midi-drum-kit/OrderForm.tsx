@@ -76,7 +76,10 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
   const [method, setMethod] = useState<Method>("card");
   // The 5-minute bonus (./bonusTest.ts): while it runs the Expansions are in the
   // order for free, so their €7 add-on is off the form (and unticked).
-  const bonusLive = useBonus().live && offer.bumps.some((b) => b.id === BONUS.item);
+  const bonus = useBonus();
+  const bonusLive = bonus.live && offer.bumps.some((b) => b.id === BONUS.item);
+  // In the bonus half: the row stays in step 2, as "Time's up" once the 5 minutes are over.
+  const bonusOn = bonus.on && bonus.left !== null;
   useEffect(() => {
     if (bonusLive && picked.includes(BONUS.item)) setPicked(picked.filter((x) => x !== BONUS.item));
   }, [bonusLive, picked]);
@@ -108,7 +111,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
       })
       .catch(() => {});
   }, [lang]);
-  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard, pay, bonusLive };
+  const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard, pay, bonusLive, bonusOn };
 
   return (
     <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
@@ -282,6 +285,7 @@ type PayState = {
   keepCard: boolean;
   pay: PayVariant;
   bonusLive: boolean;
+  bonusOn: boolean;
 };
 
 function CardPay({ stripePromise, ...props }: PayState & { stripePromise: ReturnType<typeof loadStripe> }) {
@@ -384,6 +388,7 @@ function PayBody({
   cardError,
   pay,
   bonusLive,
+  bonusOn,
 }: PayState & { onCard?: () => void; cardPaying?: boolean; cardOff?: boolean; cardError?: string | null }) {
   const [paypalBusy, setPaypalBusy] = useState(false);
   // The bar at the bottom shows while the real pay button is off screen (11-06: most
@@ -447,7 +452,7 @@ function PayBody({
         </div>
       )}
 
-      {bonusLive && bonusBump && <BonusItem w={w} image={bonusBump.image} price={bonusBump.price} currency={currency} lang={lang} compact />}
+      {bonusOn && bonusBump && <BonusItem w={w} image={bonusBump.image} price={bonusBump.price} currency={currency} lang={lang} compact />}
       {pay === "b" &&
         offered.map((b) => (
           <ShortBump key={b.id} b={b} on={picked.includes(b.id)} toggle={toggle} t={t} currency={currency} lang={lang} />

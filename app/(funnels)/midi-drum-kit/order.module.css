@@ -532,3 +532,19 @@
   margin-left: 6px;
   font-weight: 800;
 }
+
+/* At 00:00, in the bonus row's place: "Time's up. The free Expansions are gone." */
+.bonusGone {
+  margin: 16px 0;
+  padding: 12px;
+  border-radius: 4px;
+  background: #1a1a1a;
+  color: rgb(255 255 255 / 0.62);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+.bonusGoneCompact {
+  margin: 0;
+}
