@@ -68,12 +68,16 @@
   display: block;
   line-height: 0;
   margin: 22px 0 26px;
+  /* the box's yellow glow, painted as a plain gradient under it (cheap) */
+  background: radial-gradient(closest-side, rgb(245 184 0 / 0.22), transparent) 50% 70% / 120% 90% no-repeat;
 }
 .heroPic img {
   display: block;
   width: min(250px, 48vw); /* small enough on a phone for the button to be on the first screen */
   height: auto;
-  filter: drop-shadow(0 30px 50px rgb(245 184 0 / 0.2));
+  /* no filter: drop-shadow here. A 50px blur over the whole picture held its
+     paint back (PageSpeed mobile 77-78, LCP render delay ~2 s); the glow is
+     the hero's radial gradient behind the box instead. */
 }
 .note {
   margin-top: 14px;
