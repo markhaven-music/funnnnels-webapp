@@ -1,5 +1,6 @@
 import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS } from "@/lib/beacon";
+import { AVAILABILITY_JS } from "@/lib/availability";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { restate } from "@/lib/restate";
 import { applySections, imageOrigins, swapImages } from "@/lib/cfSections";
@@ -126,7 +127,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = funn
     .replace("{{DESCRIPTION}}", escapeAttr(meta.description))
     .replace(
       "{{HEAD}}",
-      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${ab}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: AB.cookie })}</script>\n${headScripts(currency, price)}`,
+      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${ab}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: AB.cookie })}</script>\n<script>${AVAILABILITY_JS}</script>\n${headScripts(currency, price)}`,
     )
     .replace("{{BODY}}", BODY_SCRIPT);
   if (lang === "en") html = html.replace(FREE_BAR_AT, (at) => FREE_BAR + at);
