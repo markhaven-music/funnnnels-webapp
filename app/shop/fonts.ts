@@ -10,8 +10,12 @@ export const poppins = Poppins({
 });
 
 // The brand kit's glass buttons (components/ui/GlassButton.tsx) are set in it.
+// Not preloaded: the hero picture (the LCP) gets the bandwidth first, and the
+// buttons swap in from the size-matched fallback without moving. 500 = the
+// second line, 700 = the label (800, the price chip, isn't used in the store).
 export const interTight = Inter_Tight({
   subsets: ["latin"],
-  weight: ["500", "700", "800"],
+  weight: ["500", "700"],
   variable: "--font-inter-tight",
+  preload: false,
 });
