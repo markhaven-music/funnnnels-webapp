@@ -279,7 +279,7 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
   const langMetrics = (l: string) => (map.langs.length > 1 ? stats?.langs?.find((x) => x.lang === l)?.m : stats?.total);
   const metrics = stats ? langMetrics(lang) : undefined;
   // The test on the chosen language's pages, like the rest of the map.
-  const wholeTest = data?.tests.find((t) => t.funnel === map.statsSlug) ?? null;
+  const wholeTest = data?.tests.find((t) => t.funnel === map.statsSlug && t.map) ?? null;
   const test = wholeTest && map.langs.length > 1 ? (wholeTest.byLang?.[lang] ?? wholeTest) : wholeTest;
   const testScope = test !== wholeTest ? `${current.label} pages` : "every language";
   const hasOrderStep = current.steps.some((st) => st.kind === "order");

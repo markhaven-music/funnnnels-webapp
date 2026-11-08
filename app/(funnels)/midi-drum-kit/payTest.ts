@@ -13,13 +13,10 @@
 //      timer's place until the real button is on screen
 // Both have the same card fields (Stripe's Payment Element) and the same add-ons.
 //
-// Same mechanism as the button-colour test (./abtest.ts), which keeps showing
-// its colours at random but is no longer counted (3 orders each when this
-// started): each visitor gets a letter at random on the order page and keeps
-// it in a cookie. The letter travels with the page views (lib/beacon.ts
-// abCookie), the order (Stripe metadata.variant, PayPal custom_id "v"), the
-// upsells, and so into the dashboard (lib/analytics.ts TESTS, the funnel
-// map's lanes). ?ab=a|b forces one; with ?preview=1 too it's only shown and
+// Same mechanism as the button-colour test (./abtest.ts): each visitor gets a letter at random on the order page and keeps
+// it in a cookie. Since 11-09 the visits and orders carry the button colour
+// again, not this letter: the test is judged by its days (lib/analytics.ts
+// TESTS windows), in Analytics only, not on the funnel map. ?ab=a|b forces one; with ?preview=1 too it's only shown and
 // not counted. To end the test: keep the winner in OrderForm.tsx, take this
 // test out of TESTS and the pages.
 

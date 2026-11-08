@@ -12,7 +12,7 @@ import { copyWith } from "../../../copy";
 import { pageEdits } from "@/lib/pageTexts";
 import { copyEdits } from "../../../texts";
 import { funnel } from "../../../funnel";
-import { AB_SCRIPT } from "../../../abtest";
+import { AB, AB_SCRIPT } from "../../../abtest";
 import { PAY_SCRIPT } from "../../../payTest";
 import { BONUS, BONUS_SCRIPT, BONUS_TIME_SCRIPT, BONUS_WORDS } from "../../../bonusTest";
 import { BonusBanner, BonusItem } from "../../../BonusClock";
@@ -74,7 +74,7 @@ export default async function OrderPage({ params }: { params: Params }) {
       {/* The 5-minute bonus test (../../../bonusTest.ts): its letter is what the visit counts under. */}
       <script dangerouslySetInnerHTML={{ __html: BONUS_SCRIPT }} />
       <Tracking value={offer.price} currency={currency} event={null} />
-      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={BONUS.cookie} />
+      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={AB.cookie} />
       <div className={s.redbar}>
         <Rich text={t.orderTopbar} currency={currency} />
       </div>

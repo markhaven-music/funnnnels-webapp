@@ -13,7 +13,7 @@ import { copyEdits } from "../../texts";
 import { funnel, unlocked } from "../../funnel";
 import { isLang, paths } from "../../i18n";
 import { PurchasePixel } from "../../Tracking";
-import { BONUS } from "../../bonusTest";
+import { AB } from "../../abtest";
 import { Beacon } from "../../../Beacon";
 import { Clarity } from "../../../Clarity";
 import t from "../../thanks.module.css";
@@ -95,7 +95,7 @@ export default async function ThankYou({
 
   return (
     <main className={`${t.page} ${poppins.variable}`} lang={lang}>
-      <Beacon funnel={funnel.slug} page="thank-you" lang={lang} abCookie={BONUS.cookie} />
+      <Beacon funnel={funnel.slug} page="thank-you" lang={lang} abCookie={AB.cookie} />
       <Clarity purchase={paid && !!order} />
       {paid && order && <PurchasePixel orderId={order.id} value={order.amount} currency={order.currency} />}
       {upsells.map((up) => (

@@ -1,3 +1,4 @@
+import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import { ASTRO_FUNNEL, type Step } from "@/lib/beacon";
@@ -175,6 +176,9 @@ export type TestStats = {
   daysToGo: number | null;
   /** The same test on each language's pages alone (the funnel map's language tabs). */
   byLang?: Record<string, TestStats>;
+  /** Shown on the funnel map (its lanes): the tests that split the visitors. A test judged by
+   * its days (TestDef.windows, e.g. the order page's step 2) is read in Analytics alone. */
+  map?: boolean;
 };
 
 /** The Drum Kit order page's 5-minute bonus (app/(funnels)/midi-drum-kit/bonusTest.ts). */
@@ -596,7 +600,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
     funnels,
     tests: await Promise.all(
       TESTS.map(async (t, i) => {
-        const stats = t.windows ? windowTest(t, windowDays, allSales, rate, now) : testStats(t, allViews ?? views, allSales, rate, testStarts[i], now);
+        const stats = t.windows ? windowTest(t, windowDays, allSales, rate, now) : { ...testStats(t, allViews ?? views, allSales, rate, testStarts[i], now), map: true };
         if (!t.windows) return stats;
         const paid = await soft(`checkouts paid (${t.name})`, Promise.all(stats.variants.map((v) => (t.windows![v.variant] ? checkoutPaid(t.funnel, t.windows![v.variant]) : null))), null);
         return paid ? { ...stats, variants: stats.variants.map((v, j) => ({ ...v, paid: paid[j] ?? undefined })) } : stats;
@@ -646,8 +650,21 @@ const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 export const TESTS: TestDef[] = [
   {
     funnel: "midi-drum-kit",
-    // Back on 11-06 evening in place of the button-colour test (whose colours
-    // still show at random, uncounted): the old step 2 against the new one.
+    // The button colour, on the landing and order page since 10-20. Out of this
+    // list 11-06 → 11-09 by mistake (never asked): the colours kept showing, but
+    // orders and order-page visits carried step 2's letter instead, so the
+    // colour of those buyers is lost. Back 11-09 ("voglio vedere i risultati come
+    // prima"): the variant field is the colour again everywhere; step 2 is
+    // judged by its days, so it needs no letter.
+    name: "Button colour",
+    where: "Landing and order page, every language · orders paid 11-06 → 11-09 have no colour (not counted)",
+    variants: BUTTON_TEST.variants,
+    label: cap,
+    color: (v) => BUTTON_COLORS[v as keyof typeof BUTTON_COLORS],
+  },
+  {
+    funnel: "midi-drum-kit",
+    // Since 11-06 evening, beside the button-colour test: the old step 2 against the new one.
     // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
     // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
