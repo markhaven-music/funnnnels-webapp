@@ -93,7 +93,7 @@ export const compare = {
     { label: "Note-for-note accuracy", values: ["yes", "partial", "no"] },
     { label: "Commercial license to sell beats", values: ["yes", "partial", "yes"] },
     { label: "Free Updates", values: ["yes", "no", "no"] },
-    { label: "14-day money-back guarantee", values: ["yes", "no", "no"] },
+    { label: "14-day quality guarantee", values: ["yes", "no", "no"] },
     { label: "Total cost for 1,000 progressions", values: ["{c}27", "{c}10,000+", "100s of hours"] },
   ] as { label: string; values: Cell[] }[],
 };

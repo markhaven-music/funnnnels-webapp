@@ -32,7 +32,7 @@ a request conflict, the request wins; say which rule you are breaking.
   points. See `docs/copy-style.md` where it exists.
 - Headlines say the problem or the promise at once. No eyebrow lines above the
   headlines (the small uppercase labels): removed on 2026-11-02.
-- The guarantee is a **14-day satisfaction guarantee**, never "money-back".
+- The guarantee is a **14-day quality guarantee**. Never "money back" (or "Geld zurück", "rimborsati"…) anywhere on the site, in any language (the user, 2026-11-08). If we can't fix a file: "you get a refund".
 - Numbers are real and consistent across the page (the pack's count, the
   bonuses' count, the total only as "in total").
 - Angles that sell: the Jazz page sells "the progressions everyone wants and

@@ -146,7 +146,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
         <div className={s.gGrid}>
           <div className={s.g}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`${FB}/badge-guarantee.webp`} alt="14-day satisfaction guarantee" width={86} height={86} loading="lazy" decoding="async" />
+            <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="14-day quality guarantee" width={86} height={86} loading="lazy" decoding="async" />
             <div>
               <h3>{w.guarantee.title}</h3>
               <p>{fill(w.guarantee.text, { email: funnel.support, days: funnel.guaranteeDays })}</p>

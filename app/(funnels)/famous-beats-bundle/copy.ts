@@ -13,7 +13,7 @@ export const orderBullets = [
   "Never Feel Beat Block Again",
   "Works With Mac & PC and Any DAW",
   "Limited Time Sale",
-  "Money Back Guarantee (No Risk)",
+  "14-Day Quality Guarantee",
   "Limited To 1,250 Licenses",
 ];
 

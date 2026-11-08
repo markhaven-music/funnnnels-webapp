@@ -217,7 +217,7 @@ export function defaultProps<T extends BlockType>(
         heading: "Frequently asked",
         items: [
           { q: "Can I cancel anytime?", a: "Yes — no contract." },
-          { q: "Do you offer refunds?", a: "30-day money-back guarantee." },
+          { q: "Do you offer refunds?", a: "14-day quality guarantee: if a file is broken or not as described, we fix it, and if we can't, you get a refund." },
         ],
       } as BlockPropsByType[T];
   }

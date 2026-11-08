@@ -81,7 +81,7 @@ export default async function Home({ params }: { params: Promise<{ currency: str
               <img src={kit.pic!.src} width={kit.pic!.width} height={kit.pic!.height} alt="" fetchPriority="high" />
             </a>
             <GlassButton href={kit.href} variant="clear" size="xl" label="Get the kit" sub={`${kit.name} · ${money(kit.price, currency)}`} cta />
-            <p className={h.note}>Instant download · {BRAND.guaranteeDays}-day money-back guarantee</p>
+            <p className={h.note}>Instant download · {BRAND.guaranteeDays}-day quality guarantee</p>
           </div>
         </div>
       </section>
