@@ -1,5 +1,4 @@
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
-import { BONUS as BONUS_TEST, BONUS_COLORS, BONUS_LABELS } from "@/app/(funnels)/midi-drum-kit/bonusTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import type { Step } from "@/lib/beacon";
 import { codeFunnels } from "@/lib/funnels";
@@ -566,17 +565,6 @@ const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 export const TESTS: TestDef[] = [
   {
     funnel: "midi-drum-kit",
-    // 11-08: half the order page's visitors get the Expansions free if they pay
-    // within 5 minutes (bonusTest.ts). Since it started, the order page's visits
-    // and the orders carry this test's letter instead of step 2's (all B).
-    name: "5-minute bonus: Expansions free",
-    where: "Order page, every language",
-    variants: BONUS_TEST.variants,
-    label: (v) => BONUS_LABELS[v as keyof typeof BONUS_LABELS],
-    color: (v) => BONUS_COLORS[v as keyof typeof BONUS_COLORS],
-  },
-  {
-    funnel: "midi-drum-kit",
     // Back on 11-06 evening in place of the button-colour test (whose colours
     // still show at random, uncounted): the old step 2 against the new one.
     // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
@@ -586,7 +574,9 @@ export const TESTS: TestDef[] = [
     // C: the same step as B with the phone's pay bar docked to the bottom edge
     // (11-08 17:29, "contiamolo come test C"); no letter of its own, only days.
     variants: [...PAY_TEST.variants, "c"],
-    label: (v) => (v === "c" ? "C · B with the pay bar docked at the bottom" : PAY_LABELS[v as keyof typeof PAY_LABELS]),
+    // 11-08 evening: C also gives everyone the 5-minute Expansions bonus (bonusTest.ts,
+    // "metti a tutti il bonus e diventa semplicemente C"); its own A/B test is gone.
+    label: (v) => (v === "c" ? "C · Pay bar docked at the bottom + 5-minute bonus" : PAY_LABELS[v as keyof typeof PAY_LABELS]),
     color: (v) => (v === "c" ? { from: "#fbbf24", to: "#f59e0b" } : PAY_COLORS[v as keyof typeof PAY_COLORS]),
     // The split ran too short to say anything, so each step is judged on when
     // everyone had it: the old one from 11-02 (funnnnels' order page) until the

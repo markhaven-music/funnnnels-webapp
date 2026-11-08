@@ -1,6 +1,10 @@
 import type { Lang } from "./i18n";
 
-// A/B test on the Drum Kit order page (11-08, "order within 5 minutes and get
+// 11-08 evening: everyone gets the bonus ("metti a tutti il bonus e diventa
+// semplicemente C"): it's part of step 2's C in Analytics (lib/analytics.ts), no
+// test of its own. ?bonus=off still shows the page without it (previews).
+//
+// Was an A/B test on the Drum Kit order page (11-08, "order within 5 minutes and get
 // this exclusive bonus… not a trick… ed è vero"): half the visitors get the
 // Expansions (the €7 add-on) free if they pay within 5 minutes of reaching the
 // order page. The bonus is already in their order (a row in the summary with
@@ -49,7 +53,7 @@ const LIST = BONUS.variants.join("|");
 export const BONUS_SCRIPT = `(function(){try{
 var re=/(?:^|; )${BONUS.cookie}=(${LIST})(?:;|$)/,q=(location.search.match(/[?&]bonus=(on|off)(?:&|$)/)||[])[1];
 var v=q?'bonus-'+q:(document.cookie.match(re)||[])[1];
-if(!v)v=Math.random()<0.5?'bonus-off':'bonus-on';
+if(!q)v='bonus-on';
 document.cookie='${BONUS.cookie}='+v+'; path=/; max-age=15552000; samesite=lax';
 document.documentElement.setAttribute('data-ab-bonus',v==='bonus-on'?'on':'off');
 if(v==='bonus-on'){var e=Number(localStorage.getItem('fv_bonus_end'));if(e&&e<=Date.now())document.documentElement.setAttribute('data-ab-bonus','over');}
