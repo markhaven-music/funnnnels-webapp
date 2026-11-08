@@ -16,10 +16,13 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 
 ## The product (counted from ~/Desktop/Drunk Swing Grooves, built by
 ## ~/Desktop/Jazz MIDI Pack Tools/make_swing_grooves.py, 2026-11-08)
-- 131 MIDI files + a PDF guide, one zip (R2 `jazz-midi-pack/Drunk Swing Grooves.zip`, the Jazz bump's).
-- 2 Drum Grooves, 80 files: 10 patterns (Dusty Boom Bap 88, Lazy Sunday 80, Late Night Lofi 76, Neo Soul
-  Pocket 90, Sliding Kick 84, Half-Time Soul 72, Rimshot Shuffle 92, Broken Beat 86, Jazzy Hop 94, Tape Stop
-  Groove 78 bpm) × 4 feels (Light, Medium, Heavy Drunk; Quintuplet Swing), 4 bars each, in two versions:
+- 211 MIDI files + a PDF guide, one zip (R2 `jazz-midi-pack/Drunk Swing Grooves.zip`, the Jazz bump's).
+- 2026-11-08: the snare was on 3 only in every pattern (half-time, a generator mistake; the user heard it).
+  "metti entrambi nel pack": each pattern now with the snare on 2 and 4 AND in half-time. "Half-Time Soul" → "Slow Soul".
+- 2 Drum Grooves, 160 files = 80 grooves: 10 patterns (Dusty Boom Bap 88, Lazy Sunday 80, Late Night Lofi 76, Neo Soul
+  Pocket 90, Sliding Kick 84, Slow Soul 72, Rimshot Shuffle 92, Broken Beat 86, Jazzy Hop 94, Tape Stop
+  Groove 78 bpm) × 2 snare placements (2 and 4; half-time, snare on 3) × 4 feels (Light, Medium, Heavy Drunk;
+  Quintuplet Swing), 4 bars each, in two versions (folders Drum Rack / Multitrack, each with both snare sets):
   - Drum Rack (GM map): one track, kick C1, rim C#1, snare D1, clap D#1, closed hat F#1, open hat A#1.
   - Multitrack: a track per sound (Kick, Snare, Clap, Rim, Closed Hat, Open Hat), every note on C3 (MIDI 60).
 - 1 Groove Templates, 31 files: 2-bar 16th grids: swing 16ths 52-70% (9), swing 8ths 58/62/66%, septuplet
@@ -48,6 +51,7 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 
 ## Audio on the page
 - public/funnels/drunk-swing-grooves/audio, made by ~/Desktop/Jazz MIDI Pack Tools/make_grooves_demos.py
-  (fluidsynth + GeneralUser GS): the A/B (Dusty Boom Bap quantized vs Medium Drunk with the Jazz pack's
-  Royal Road lofi keys + bass, same 8 bars), the four feels (Dusty Boom Bap alone), the bonus (Royal Road
+  (fluidsynth + GeneralUser GS), in audio/v2 since 2026-11-08: the A/B (Neo Soul Pocket quantized vs Heavy Drunk
+  with the Jazz pack's Royal Road keys + bass, same 8 bars; Dusty Boom Bap Medium was too subtle), the four feels
+  (Neo Soul Pocket alone), the bonus (Royal Road
   neo soul keys + bass over Neo Soul Pocket, Quintuplet Swing).

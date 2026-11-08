@@ -5,7 +5,9 @@ import s from "./landing.module.css";
 
 // The page's audio. Nothing loads before a tap (docs/page-speed.md): each
 // <audio> has preload="none". One clip plays at a time across the page.
-const AUDIO = "/funnels/drunk-swing-grooves/audio";
+// v2 (2026-11-08): the snare on 2 and 4 and Neo Soul Pocket for more contrast; a new folder, since
+// visitors keep /funnels/* for a week.
+const AUDIO = "/funnels/drunk-swing-grooves/audio/v2";
 const STOP_OTHERS = "dsg-play";
 
 function useOnlyOne(id: string, stop: () => void) {
