@@ -1,0 +1,195 @@
+/* What only the Famous Beats page has: the play discs and song list, the drum roll,
+   the hero's three beats. Everything else is the Jazz page's own CSS
+   (../../jazz-midi-pack/jazz.module.css, bonus.module.css, value.module.css).
+   Colours come from .jazz: one yellow, white text, black. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.clip {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.disc {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--y);
+  box-shadow: 0 0 24px rgb(245 184 0 / 0.35);
+  transition: transform 0.12s;
+}
+.beatBtn:active .disc {
+  transform: scale(0.94);
+}
+.triangle {
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-style: solid;
+  border-width: 9px 0 9px 15px;
+  border-color: transparent transparent transparent #000;
+}
+.square {
+  width: 15px;
+  height: 15px;
+  background: #000;
+  border-radius: 2px;
+}
+.beats {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.beatBtn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.beatName b {
+  display: block;
+  font: 700 19px/1.25 var(--font-display), system-ui, sans-serif;
+  color: #fff;
+}
+.beatName span {
+  font-size: 14px;
+  color: var(--mute);
+}
+.browser {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+.search input {
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 4px;
+  background: #000;
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+}
+.search input::placeholder {
+  color: var(--mute);
+}
+.more {
+  justify-self: start;
+  min-height: 48px;
+  margin-top: 10px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 4px;
+  background: #1c1c1c;
+  color: #fff;
+  font: 700 16px/1 var(--font-display), system-ui, sans-serif;
+  cursor: pointer;
+}
+.none {
+  margin: 0;
+  color: var(--mute);
+}
+
+/* the hero's three beats, where the Jazz page has its video */
+.heroPlay {
+  width: 100%;
+  max-width: 560px;
+  margin: 8px auto 26px;
+  padding: 16px 18px 8px;
+  border-radius: 12px;
+  background: #0d0c10;
+  text-align: left;
+}
+.heroPlay p {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: var(--mute);
+}
+
+/* one bar of a real file: a lane per drum, line height = velocity, yellow = off the grid */
+.roll {
+  margin: 0;
+  padding: 18px;
+  border-radius: 12px;
+  background: #0d0c10;
+}
+.rollHead {
+  margin-bottom: 14px;
+}
+.rollBody {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.rollRow {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  gap: 8px;
+}
+.rollName {
+  align-self: center;
+  font-size: 13px;
+  color: var(--mute);
+}
+.rollLane {
+  position: relative;
+  height: 54px;
+  background: #050505;
+  border-radius: 3px;
+}
+.beatLine,
+.stepLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+.beatLine {
+  background: rgb(255 255 255 / 0.22);
+}
+.stepLine {
+  background: rgb(255 255 255 / 0.07);
+}
+.rollHit,
+.rollOff {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1px;
+  border-radius: 2px 2px 0 0;
+  background: rgb(255 255 255 / 0.7);
+}
+.rollOff {
+  background: var(--y);
+}
+.rollCap {
+  margin: 0;
+  font-size: 14px;
+  color: var(--mute);
+}
+.rollTight .rollLane {
+  height: 40px;
+}
+.mono {
+  font-family: var(--font-mono);
+}

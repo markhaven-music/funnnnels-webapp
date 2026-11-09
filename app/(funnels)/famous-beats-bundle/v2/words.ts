@@ -1,13 +1,13 @@
 // The Famous Beats Bundle sales page, Jazz-style (2026-11-09: "Ne crei uno più simile a
 // quello jazz per famous beats bundle? Offerta + simile e stile pagina più simile").
 // The words are the live page's (../astro/landing.ts), reordered into the Jazz page's
-// sections; every claim is in ../BRIEF.md. `*x*` = yellow, `**x**` = bold. {price} = the
+// sections; every claim is in ../BRIEF.md. `*x*` = yellow. {price} = the
 // visitor's price, {c} = their currency sign, {email} = support.
 
 export const LANDING = {
   hero: {
     pre: "MIDI · any DAW · transcribed, not sampled",
-    title: "The drums behind ==320 hits==. Note for note, in MIDI.",
+    title: "The drums behind *320 hits*. Note for note, in MIDI.",
     sub: "Hits by Drake, Travis Scott, Future, Metro Boomin and more. Kick, snare, hats and percussion on separate tracks. Load your sounds and start on a groove that already worked.",
     listen: "Press play. These are three of the 320 files, played on a drum kit.",
     bullets: [
@@ -18,24 +18,35 @@ export const LANDING = {
       "Any DAW, Mac Or PC. Commercial License",
       "4 Free Bonuses Included",
     ],
+    ticks: ["Any DAW", "BPM and artist in every file name", "14-day guarantee"],
     proof: [
-      ["320", "songs"],
-      ["76", "artists"],
-      ["32", "packs"],
-      ["14-day", "quality guarantee"],
+      ["2,847", "producers have the GRIND STUDIO MIDI Drum Kit in their sessions"],
+      ["4,700+", "producers on the GRIND STUDIO email list"],
+      ["14 days", "quality guarantee on every file"],
     ] as [string, string][],
   },
   cta: { label: "Get the bundle", note: "{price} · one payment · instant download" },
   letter: {
-    title: "You've been copying grooves ==by eye==.",
+    title: "You've been copying grooves *by eye*.",
     body: [
       "Pause the video. Squint at the piano roll. Rebuild it, note by note.",
       "Play it back. It's close. It doesn't sit the same.",
       "You can't read the small stuff off a paused video. Ghost notes, velocity, hats a hair behind the grid.",
       "So one pattern eats the night, and the beat never gets made.",
-      "**Or you open the actual file.** 320 drum grooves from hit records, in 32 packs of 10. Transcribed by hand and by ear into multi-track MIDI. Every kick, snare, hat and ghost note where the record has it.",
     ],
     rollCaption: "One bar of {song} ({artist}, {bpm} BPM), as it is in the file. The taller the line, the harder the hit.",
+  },
+  product: {
+    title: "Or you open",
+    titleEm: "the actual file.",
+    lead: "320 drum grooves from hit records, in 32 packs of 10. Transcribed by hand and by ear into multi-track MIDI. Every kick, snare, hat and ghost note where the record has it.",
+    ticks: [
+      "320 transcriptions, 32 packs of 10",
+      "Kick, snare, hats and percussion on separate tracks",
+      "Transcribed by ear, ghost notes included",
+      "BPM, artist and song in every file name",
+      "Any DAW, Mac or PC. Commercial license",
+    ],
   },
   getting: {
     title: "What you're actually getting.",
@@ -101,25 +112,29 @@ export const LANDING = {
         id: "essential-drums",
         name: "ESSENTIAL MIDI Drum Patterns",
         value: 7,
-        text: "163 MIDI drum patterns to build your own grooves: 158 one-part patterns (808, closed and open hats, kick, snare or clap, accents, kick + snare and kick + 808) and 5 complete multi-track beats.",
+        text: "163 MIDI drum files to build your own grooves, one part at a time.",
+        inside: ["158 one-part patterns: 808, closed and open hats, kick, snare or clap, accents", "Kick + snare and kick + 808 multi-track loops", "5 complete multi-track beats"],
       },
       {
         id: "drum-loops",
         name: "Drum Loops for Songwriting",
         value: 27,
-        text: "47 WAV drum loops to write over while the song takes shape.",
+        text: "Drums to write over while the song takes shape.",
+        inside: ["47 WAV drum loops", "Made for songwriting: put your chords and melody on top"],
       },
       {
         id: "bible",
         name: "The Chord Progressions Bible",
         value: 37,
-        text: "The 50 most used chord progressions of all time, three ways each: 150 MIDI files and 258 WAV loops. Chords to put on top of your drums.",
+        text: "The 50 most used chord progressions of all time, three ways each. Chords to put on top of your drums.",
+        inside: ["150 MIDI files", "258 piano and e-piano WAV loops"],
       },
       {
         id: "anime-pack",
         name: "Anime & Video Games MIDI Pack",
         value: 47,
-        text: "1,548 MIDI files: anime and video game progressions, from royal road to boss battle, in every key.",
+        text: "Anime and video game progressions, from royal road to boss battle, in every key.",
+        inside: ["1,548 MIDI files", "12 key pairs"],
       },
     ],
     free: "Free",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import s from "./landing.module.css";
+import s from "./fbb.module.css";
 
 // The page's audio: the pack's own previews (each file played on a drum kit, 12 seconds,
 // public/funnels/famous-beats-bundle/beats, made from the zip's WAV/MP3 previews on
@@ -150,7 +150,7 @@ export function BeatBrowser({ words }: { words: { search: string; showAll: strin
           </li>
         ))}
       </ol>
-      {beats && q && shown.length === 0 && <p className={s.caption}>{words.none}</p>}
+      {beats && q && shown.length === 0 && <p className={s.none}>{words.none}</p>}
       {beats && !q && !all && shown.length > FIRST && (
         <button type="button" className={s.more} onClick={() => setAll(true)}>
           {words.showAll}

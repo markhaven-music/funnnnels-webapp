@@ -6,7 +6,13 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 - 2026-11-03: the Astro landing cloned 1:1 (./astro), the ClickFunnels order page rebuilt on TOP HITS' template (./order).
 - 2026-11-09: "Ne crei uno più simile a quello jazz per famous beats bundle? Offerta + simile e stile pagina più
   simile." Proposal (offer + sections) answered "poi vediamo gli oto": the rest approved, the upsells left as they
-  are (TOP HITS) for now. Built beside the live page at /famous-beats-bundle/v2 (+ /v2/order) until the user
+  are (TOP HITS) for now.
+- 2026-11-09: first build copied the Drunk Swing Grooves page; the user: "sembra la pagina di Drunk Swing Grooves
+  non MIDI Jazz". Rebuilt on the Jazz page's own CSS (jazz/bonus/value/shot modules) and section order: topbar +
+  tag, centred hero, DAW strip, proof numbers, letter, product panel, letter beside the roll, browser, how it works
+  beside the folder path, ✓/✗ chart, bonus panels with covers, value stack, seal + license, after you pay beside the
+  download list, FAQ, final key. Proof numbers (2,847 Drum Kit producers, 4,700+ list) as on the Jazz page.
+- Value stack: the bundle at its own price ($27) + the bonuses' Jazz values; nothing else invented. Built beside the live page at /famous-beats-bundle/v2 (+ /v2/order) until the user
   switches. No VSL yet (the Jazz page has one; a Famous Beats one is a separate job). No reviews (the user's call).
 - Numbers before (11-02 → 11-09, own visits and bots out): 99 landing visitors, 14 on the order page, 3 checkout
   starts, 2 paid ($27, $54 with the Drum Kit add-on), 0 TOP HITS upsells; Meta €40.29.
@@ -29,8 +35,8 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 ## Offer (v2)
 - €27 / $27 (dashboard → Products). Red "BLACK FRIDAY: 90% Sale Ends Soon" bar as on Jazz.
 - Four bonuses in the price (`funnel.ts` includes.pack), values as the Jazz page has them:
-  1. ESSENTIAL MIDI Drum Patterns (€7, its ClickFunnels price €6.99): 158 one-part patterns (808 36, Hihat Closed 72,
-     Hihat Open 8, Kick 21, Snare or Clap 20, Accents 8, Kick and Snare 12, Kick and 808 6) + 5 complete multi-track
+  1. ESSENTIAL MIDI Drum Patterns (€7, its ClickFunnels price €6.99): 158 one-part patterns (808 33, Hihat Closed 66,
+     Hihat Open 7, Kick 18, Snare or Clap 17, Accents 7, Kick and Snare 5, Kick and 808 5 .mid) + 5 complete multi-track
      beats = 163 MIDI files. R2 `clickfunnels/ESSENTIAL MIDI Drum Patterns.zip` (also holds a Famous Beats Vol.1 and an
      Emotional Piano bonus folder).
   2. Drum Loops for Songwriting (€27): 47 WAV loops.
