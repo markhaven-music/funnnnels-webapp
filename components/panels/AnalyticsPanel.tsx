@@ -310,12 +310,12 @@ function BonusCard({ b }: { b: BonusStats }) {
           </div>
           <div className={s.testSub}>
             Order page: the {b.item} free if paid within 5 minutes of arriving ·{" "}
-            {b.clocksSince ? `since ${whenText(when(b.clocksSince))}` : "nobody yet"} · the date range above doesn&apos;t apply
+            since {whenText(when(b.step2.after.from))} · the date range above doesn&apos;t apply
           </div>
         </div>
       </div>
 
-      <div className={s.variants}>
+      <div className={`${s.variants} ${s.two}`}>
         <div className={s.variant}>
           <div className={s.variantHead}>Checkout step 2: who paid, before vs after</div>
           <div className={s.beforeAfter}>
@@ -341,36 +341,6 @@ function BonusCard({ b }: { b: BonusStats }) {
         </div>
 
         <div className={s.variant}>
-          <div className={s.variantHead}>From the order page to the payment</div>
-          <div className={s.bonusBig}>
-            {int(b.orders)} <small>bought, of {int(b.clocks)} visitors</small>
-          </div>
-          <div className={s.bonusPct}>{pct(b.orders, b.clocks)}</div>
-          <dl className={s.kv}>
-            <dt>Visitors to the order page</dt>
-            <dd>
-              {int(b.clocks)} <small>{int(b.clocksPhone)} on a phone</small>
-            </dd>
-            <dt>Bought</dt>
-            <dd className={s.strong}>{int(b.orders)}</dd>
-            <dt>· within 5 min, got the free {b.item}</dt>
-            <dd>{int(b.within)}</dd>
-            <dt>· after 5 min, no bonus</dt>
-            <dd>{int(b.after)}</dd>
-            {b.paypal > 0 && (
-              <>
-                <dt>· PayPal (doesn&apos;t tell us the time)</dt>
-                <dd>{int(b.paypal)}</dd>
-              </>
-            )}
-          </dl>
-          <div className={s.paidNote}>
-            Each visitor = a browser counted once, the first time it opens the order page (its 5 minutes start then); owner and test devices left out. Main product only, upsells not counted.
-            {b.earlier > 0 ? ` ${int(b.earlier)} earlier order${b.earlier === 1 ? "" : "s"} (bonus already on, visitors not counted yet) left out so the numbers match.` : ""}
-          </div>
-        </div>
-
-        <div className={s.variant}>
           <div className={s.variantHead}>How long they took to pay</div>
           <div className={s.bonusBars}>
             {b.timing.map((t) => (
@@ -388,7 +358,7 @@ function BonusCard({ b }: { b: BonusStats }) {
             <dd className={s.strong}>{b.medianSec == null ? "—" : mins(b.medianSec)}</dd>
           </dl>
           <div className={s.paidNote}>
-            From the first visit to the order page to the payment, card orders that recorded it ({int(b.timed)} so far, from 11-09); green = within the 5 minutes.
+            From the first visit to the order page to the payment. Only card orders since 11-09 02:29 record this ({int(b.timed)} so far): PayPal and earlier orders aren&apos;t here, so it can be fewer than &quot;paid&quot; on the left. Green = within the 5 minutes.
           </div>
         </div>
       </div>

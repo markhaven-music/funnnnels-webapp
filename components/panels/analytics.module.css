@@ -175,6 +175,9 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
+.variants.two {
+  grid-template-columns: repeat(2, 1fr);
+}
 .beforeAfter {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -191,7 +194,8 @@
   margin-top: 2px;
 }
 @media (max-width: 760px) {
-  .variants {
+  .variants,
+  .variants.two {
     grid-template-columns: 1fr;
   }
 }
