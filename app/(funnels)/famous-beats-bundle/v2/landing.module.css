@@ -1,0 +1,1030 @@
+/* Famous Beats Bundle landing (v2, Jazz-style; started as a copy of ../../drunk-swing-grooves/landing.module.css). The GRIND STUDIO funnel palette (grind-funnel-page §3):
+   one yellow #f5b800, white text (88% body, 62% muted), black page and #111 bands,
+   no borders, no outlines, 3-4px corners, 12px on the two-column panel. Mobile first. */
+.page {
+  --y: #f5b800;
+  --y-gloss: #ffe14d;
+  --y-deep: #c99700;
+  --y-lip: #6b5000;
+  --y-glow: rgb(245 184 0 / 0.55);
+  --text: rgb(255 255 255 / 0.88);
+  --muted: rgb(255 255 255 / 0.62);
+  min-height: 100vh;
+  background: #070707;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.page b {
+  color: #fff;
+  font-weight: 700;
+}
+.hl {
+  color: var(--y);
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.narrow {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.section,
+.band {
+  padding: 72px 0;
+}
+.band {
+  background: #111;
+}
+/* Below the fold: drawn only when scrolled near (docs/page-speed.md). */
+.lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* ─── hero ─────────────────────────────────────────── */
+.hero {
+  background: #000;
+  padding: 28px 0 64px;
+  text-align: center;
+  background-image: radial-gradient(ellipse 70% 40% at 50% 46%, rgb(255 255 255 / 0.06), transparent 70%);
+}
+.logo {
+  display: block;
+  width: 150px;
+  height: auto;
+  margin: 0 auto 30px;
+  opacity: 0.9;
+}
+.h1 {
+  margin: 0 auto 18px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(34px, 9vw, 62px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-wrap: balance;
+}
+.sub {
+  max-width: 620px;
+  margin: 0 auto 30px;
+  font-size: 18px;
+  color: var(--text);
+  text-wrap: pretty;
+}
+.h2 {
+  margin: 0 0 22px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(28px, 6.5vw, 40px);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: #fff;
+  text-wrap: balance;
+}
+.h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.2;
+  color: #fff;
+}
+
+/* the A/B player */
+.ab {
+  max-width: 520px;
+  margin: 0 auto 34px;
+  padding: 22px 18px 18px;
+  background: #121212;
+  border-radius: 4px;
+}
+.abRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.abPlay,
+.clip {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.disc {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--y);
+  box-shadow: 0 6px 22px rgb(245 184 0 / 0.35);
+  transition: transform 0.15s;
+}
+.abPlay:active .disc,
+.clip:active .disc {
+  transform: scale(0.94);
+}
+.clip .disc {
+  width: 52px;
+  height: 52px;
+}
+.triangle {
+  width: 0;
+  height: 0;
+  margin-left: 5px;
+  border-style: solid;
+  border-width: 11px 0 11px 18px;
+  border-color: transparent transparent transparent #000;
+}
+.square {
+  width: 18px;
+  height: 18px;
+  background: #000;
+  border-radius: 2px;
+}
+.switch {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: #000;
+  border-radius: 4px;
+}
+.switch button {
+  min-height: 52px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted);
+  font: 700 17px/1 var(--font-display), system-ui, sans-serif;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.switch button.on {
+  background: var(--y);
+  color: #000;
+}
+.abCaption {
+  margin: 14px 0 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.bullets {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+  margin: 0 auto 36px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.bullets li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.tick {
+  flex: none;
+  margin-top: 3px;
+  color: var(--y);
+}
+.cta {
+  margin: 0 auto;
+  max-width: 520px;
+  text-align: center;
+}
+.cta p {
+  color: var(--muted);
+  font-size: 15px;
+}
+.proof {
+  display: grid;
+  gap: 8px;
+  margin-top: 30px;
+  font-size: 15px;
+  color: var(--muted);
+}
+.proof p {
+  margin: 0;
+}
+.proof b {
+  color: var(--y);
+}
+
+/* ─── copy beside a visual (a panel, grind-funnel-page §4) ─── */
+.panel {
+  display: grid;
+  gap: 28px;
+  width: calc(100% - 32px);
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 22px;
+  background: #0d0c10;
+  border-radius: 12px;
+}
+.panelCopy p {
+  margin: 0 0 16px;
+}
+.gridPair {
+  display: grid;
+  gap: 18px;
+}
+.grid p {
+  margin: 0 0 8px;
+  font: 700 15px/1 var(--font-display), system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+.gridStraight {
+  color: var(--muted);
+}
+.gridDrunk {
+  color: var(--y);
+}
+.gridRow {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+}
+.gridName {
+  font-size: 13px;
+  color: var(--muted);
+}
+.gridLane {
+  position: relative;
+  height: 26px;
+  background: #050505;
+  border-radius: 3px;
+}
+.beatLine,
+.stepLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+.beatLine {
+  background: rgb(255 255 255 / 0.22);
+}
+.stepLine {
+  background: rgb(255 255 255 / 0.07);
+}
+.hit,
+.hitDrunk,
+.hitSnare {
+  position: absolute;
+  top: 4px;
+  width: 5%;
+  height: 18px;
+  border-radius: 2px;
+}
+.hit {
+  background: rgb(255 255 255 / 0.55);
+}
+.hitDrunk {
+  background: var(--y);
+}
+.hitSnare {
+  background: #fff;
+}
+
+/* ─── the four feels ─── */
+.feels {
+  display: grid;
+  gap: 26px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+.feels li {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.feels h3,
+.inside h3,
+.versions h3 {
+  margin: 0 0 4px;
+  font: 700 21px/1.25 var(--font-display), system-ui, sans-serif;
+  color: #fff;
+}
+.feels p,
+.inside p,
+.versions p {
+  margin: 0;
+}
+.caption {
+  margin: 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* ─── what's inside: one under the other, numbered ─── */
+.inside {
+  display: grid;
+  gap: 34px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: in;
+}
+.inside li {
+  position: relative;
+  padding-left: 52px;
+  counter-increment: in;
+}
+.inside li::before {
+  content: counter(in);
+  position: absolute;
+  left: 0;
+  top: -2px;
+  font: 800 34px/1 var(--font-display), system-ui, sans-serif;
+  color: var(--y);
+}
+.inlineClip {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-top: 16px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.versions {
+  display: grid;
+  gap: 30px;
+  margin-bottom: 44px;
+}
+
+.promise {
+  display: grid;
+  gap: 34px;
+}
+.promise p {
+  margin: 0;
+}
+
+.faq details {
+  padding: 18px 0;
+}
+.faq details + details {
+  margin-top: 4px;
+}
+.faq summary {
+  cursor: pointer;
+  font: 700 19px/1.35 var(--font-display), system-ui, sans-serif;
+  color: #fff;
+  list-style: none;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq summary::after {
+  content: " +";
+  color: var(--y);
+}
+.faq details[open] summary::after {
+  content: " −";
+}
+.faq p {
+  margin: 10px 0 0;
+}
+
+.final {
+  padding: 80px 0 90px;
+  background: #000;
+  text-align: center;
+}
+
+.footer {
+  padding: 30px 20px 40px;
+  background: #000;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+.footer a {
+  color: var(--muted);
+}
+
+/* ─── wider screens ─── */
+@media (min-width: 900px) {
+  .hero {
+    padding: 40px 0 90px;
+  }
+  .section,
+  .band {
+    padding: 104px 0;
+  }
+  .panel {
+    grid-template-columns: 45fr 55fr;
+    gap: 56px;
+    align-items: center;
+    padding: 48px;
+  }
+  .versions {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+  .promise {
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+}
+
+/* ─── the Jazz MIDI Pack upsell (../offer) ─── */
+.upBar {
+  margin: 0;
+  padding: 12px 20px;
+  background: var(--y);
+  color: #000;
+  font: 700 16px/1.35 var(--font-display), system-ui, sans-serif;
+  text-align: center;
+}
+.upBox {
+  display: block;
+  width: min(320px, 80vw);
+  height: auto;
+  margin: 0 auto 30px;
+}
+.upNote {
+  margin: 12px auto 0;
+  max-width: 440px;
+  font-size: 15px;
+  color: #fff;
+}
+/* No: a real button, as wide as Yes (2026-11-08, "bottoni piu chiari soprattutto su mobile"). */
+.noThanks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 32rem;
+  min-height: 56px;
+  margin: 14px auto 0;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 4px;
+  background: #1c1c1c;
+  color: rgb(255 255 255 / 0.88);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-decoration: none;
+  cursor: pointer;
+}
+.noThanks:hover,
+.noThanks:active {
+  background: #262626;
+  color: #fff;
+}
+
+/* ─── 2026-11-08: the D2C sections (Introducing, chart, stack, reviews, after) ─── */
+.center {
+  text-align: center;
+}
+.wide {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.lead {
+  font-size: 19px;
+  color: #fff;
+}
+.panelBox,
+.stackBox {
+  display: block;
+  width: min(300px, 72vw);
+  height: auto;
+  margin: 0 auto;
+  filter: drop-shadow(0 24px 40px rgb(0 0 0 / 0.6));
+}
+.panelCopy .bullets {
+  margin: 0 0 30px;
+}
+.panelCopy .cta {
+  margin: 0;
+}
+
+/* the ✓/✗ chart: phone = each row's label on its own line, the three answers under it */
+.chart {
+  display: grid;
+  gap: 0;
+  margin-top: 30px;
+}
+.chRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 6px;
+  padding: 14px 0;
+  align-items: start;
+}
+.chRow + .chRow {
+  background: transparent;
+}
+.chRow:nth-child(even) {
+  background: rgb(255 255 255 / 0.03);
+}
+.chRow > span:first-child {
+  grid-column: 1 / -1;
+}
+.chLabel {
+  margin-bottom: 10px;
+  padding: 0 8px;
+  font-weight: 700;
+  color: #fff;
+}
+.chHead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 4px;
+  font: 700 14px/1.2 var(--font-display), system-ui, sans-serif;
+  color: var(--muted);
+  text-align: center;
+}
+.chHead.chWin {
+  color: var(--y);
+}
+.chBox {
+  width: 64px;
+  height: auto;
+}
+.chCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 1.3;
+  text-align: center;
+}
+.chCell.chWin {
+  color: #fff;
+  font-weight: 600;
+}
+.chAlt {
+  color: var(--muted);
+}
+.markYes,
+.markNo,
+.markMeh {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+.markYes {
+  color: #0b0b0b;
+  background: #2fbf5b;
+}
+.markNo {
+  color: #fff;
+  background: #d8352a;
+}
+.markMeh {
+  color: #fff;
+  background: rgb(255 255 255 / 0.2);
+}
+
+/* everything you get */
+.stack {
+  display: grid;
+  gap: 30px;
+  margin: 30px 0 34px;
+}
+.stackList {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stackList li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.stackList b {
+  display: block;
+  font-size: 19px;
+}
+.stackSub {
+  display: block;
+  font-size: 16px;
+  color: var(--muted);
+}
+.today {
+  margin: 0 0 26px;
+  text-align: center;
+  font: 800 30px/1.1 var(--font-display), system-ui, sans-serif;
+  color: #fff;
+}
+.today b {
+  color: var(--y);
+  font-size: 46px;
+}
+
+/* the guarantee's seal */
+.sealRow {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.sealRow img {
+  flex: none;
+  width: 92px;
+  height: auto;
+}
+
+/* reviews: no cards, space between */
+.reviews {
+  display: grid;
+  gap: 36px;
+  margin: 30px 0 26px;
+  padding: 0;
+  list-style: none;
+}
+.stars {
+  display: block;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--y);
+}
+.quote {
+  margin: 8px 0 0;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #fff;
+}
+.who {
+  margin: 10px 0 0;
+}
+.who span {
+  display: block;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* after you pay */
+.after {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 0 0 0 22px;
+  font-size: 19px;
+}
+.after li::marker {
+  color: var(--y);
+  font-weight: 800;
+}
+
+@media (min-width: 720px) {
+  .reviews {
+    grid-template-columns: 1fr 1fr;
+    gap: 44px 56px;
+  }
+  .chRow {
+    grid-template-columns: 1.3fr repeat(3, minmax(0, 1fr));
+    gap: 0 12px;
+    align-items: center;
+    padding: 18px 0;
+  }
+  .chRow > span:first-child {
+    grid-column: auto;
+  }
+  .chLabel {
+    margin: 0;
+    padding-left: 14px;
+  }
+  .chCell {
+    font-size: 15px;
+  }
+  .chBox {
+    width: 84px;
+  }
+  .stack {
+    grid-template-columns: 240px 1fr;
+    gap: 44px;
+    align-items: center;
+  }
+  .stackBox {
+    width: 240px;
+  }
+}
+@media (min-width: 900px) {
+  .panelBox {
+    width: min(360px, 100%);
+  }
+}
+
+/* the VSL (Wistia's player), wider than the hero's text column, as the Jazz page's */
+.vsl {
+  position: relative;
+  left: 50%;
+  width: min(920px, calc(100vw - 32px));
+  aspect-ratio: 16 / 9;
+  margin: 0 0 34px;
+  transform: translateX(-50%);
+  overflow: hidden;
+  border-radius: 4px;
+  background: #000;
+  box-shadow: 0 30px 90px -40px rgb(245 184 0 / 0.45);
+}
+.vsl iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* every groove (Players.tsx GrooveBrowser) */
+.browse {
+  margin-top: 80px;
+}
+.browse > p {
+  margin: 0 0 24px;
+}
+.browser {
+  display: grid;
+  gap: 10px;
+}
+.switch4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.switch4 button {
+  font-size: 15px;
+}
+.beats {
+  display: grid;
+  gap: 4px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.beatBtn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.beatBtn .clip .disc {
+  width: 46px;
+  height: 46px;
+}
+.beatBtn .triangle {
+  border-width: 9px 0 9px 15px;
+}
+.beatBtn .square {
+  width: 15px;
+  height: 15px;
+}
+.beatName b {
+  display: block;
+  font: 700 19px/1.25 var(--font-display), system-ui, sans-serif;
+}
+.beatName span {
+  font-size: 14px;
+  color: var(--muted);
+}
+@media (min-width: 720px) {
+  .beats {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 40px;
+  }
+}
+
+/* ─── Famous Beats v2 ─────────────────────────────── */
+.bfbar {
+  padding: 10px 16px;
+  background: #9e1b1d;
+  color: #fff;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.bfbar b {
+  font-weight: 900;
+}
+.pre {
+  margin: 0 0 14px;
+  font-size: 15px;
+  color: var(--muted);
+}
+.heroBox {
+  display: block;
+  width: min(380px, 76vw);
+  height: auto;
+  margin: 6px auto 18px;
+  -webkit-mask-image: radial-gradient(closest-side, #000 72%, transparent);
+  mask-image: radial-gradient(closest-side, #000 72%, transparent);
+}
+.heroBeats {
+  max-width: 520px;
+  margin: 0 auto 34px;
+  padding: 18px 18px 8px;
+  background: #121212;
+  border-radius: 4px;
+  text-align: left;
+}
+.heroBeats .beats {
+  margin-top: 8px;
+}
+.equals {
+  margin: 34px 0 0;
+  font: 700 22px/1.3 var(--font-display), system-ui, sans-serif;
+  color: #fff;
+}
+.search input {
+  width: 100%;
+  min-height: 52px;
+  margin: 6px 0 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 4px;
+  background: #000;
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+}
+.search input::placeholder {
+  color: var(--muted);
+}
+.more {
+  justify-self: start;
+  min-height: 48px;
+  margin-top: 10px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 4px;
+  background: #1c1c1c;
+  color: #fff;
+  font: 700 16px/1 var(--font-display), system-ui, sans-serif;
+  cursor: pointer;
+}
+.quotes {
+  display: grid;
+  gap: 28px;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+}
+.quotes .quote {
+  margin: 0 0 6px;
+  font: 700 23px/1.3 var(--font-display), system-ui, sans-serif;
+  color: #fff;
+}
+.quotes .who {
+  margin: 0;
+  color: var(--muted);
+}
+.quotes .who b {
+  color: var(--y);
+}
+/* the roll beside the letter: a lane per drum, height = velocity */
+.roll {
+  margin: 0;
+}
+.rollHead {
+  margin-bottom: 14px;
+}
+.rollBody {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.rollRow {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  align-items: end;
+  gap: 8px;
+}
+.rollName {
+  font-size: 13px;
+  color: var(--muted);
+  align-self: center;
+}
+.rollLane {
+  position: relative;
+  height: 54px;
+  background: #050505;
+  border-radius: 3px;
+}
+.rollHit,
+.rollOff {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1px;
+  border-radius: 2px 2px 0 0;
+  background: rgb(255 255 255 / 0.7);
+}
+.rollOff {
+  background: var(--y);
+}
+/* the bonuses: one panel each, cover left */
+.bonusList {
+  display: grid;
+  gap: 22px;
+  margin-top: 34px;
+}
+.bonusCover {
+  display: block;
+  width: min(260px, 70%);
+  height: auto;
+  margin: 0 auto;
+  border-radius: 3px;
+}
+.bonusNo {
+  margin: 0 0 6px !important;
+  font: 700 14px/1 var(--font-display), system-ui, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--y);
+}
+.bonusValue {
+  font: 700 20px/1 var(--font-display), system-ui, sans-serif;
+}
+.bonusValue s {
+  color: var(--muted);
+  font-weight: 400;
+}
+.bonusValue b {
+  color: var(--y);
+}
+.folders {
+  padding: 20px;
+  background: #050505;
+  border-radius: 4px;
+  font-size: 15px;
+}
+.foldersHead {
+  margin: 0 0 12px;
+  font: 800 17px/1.2 var(--font-display), system-ui, sans-serif;
+  color: #fff;
+}
+.folders ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.folders li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.folders li span:last-child {
+  flex: none;
+  color: var(--y);
+}
+.legal {
+  max-width: 760px;
+  margin: 12px auto 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 0.45);
+}
+@media (min-width: 900px) {
+  .rollLane {
+    height: 64px;
+  }
+  .bonusCover {
+    position: sticky;
+    top: 24px;
+  }
+}

@@ -30,6 +30,26 @@ export const funnel = {
   // The three tick-box offers on step 2, in ClickFunnels order. Ids double as
   // file keys and travel in PayPal's 127-character custom_id, so keep them short.
   bumps: [
+    // Since 2026-11-09 ("più simile a quello jazz"): Drunk Swing Grooves €7 as on the Jazz
+    // order page, and the Expansions, which the order page gives free for 5 minutes
+    // (./fiveMinBonus.ts) and never shows as a tick box. Which add-ons are offered,
+    // and at what price, is dashboard → Products' (funnel_items); these give their pictures.
+    {
+      id: "swing-grooves",
+      name: "Drunk Swing Grooves (211 MIDI Files)",
+      headline: "YES! Add the Drunk Swing Grooves!",
+      price: { eur: 7, usd: 7 },
+      image: "/funnels/jazz-midi-pack/bump-grooves.webp",
+      pitch: "80 MIDI drum grooves with the drunk, J Dilla-style swing of lofi and neo soul, plus 31 groove templates.",
+    },
+    {
+      id: "expansions",
+      name: "MIDI Drum Kit Expansions (House, Lo-Fi, Afrobeat)",
+      headline: "YES! Add the MIDI Drum Kit Expansions!",
+      price: { eur: 7, usd: 7 },
+      image: "/funnels/midi-drum-kit/bump-expansions.webp",
+      pitch: "172 more MIDI drum files: Afrobeat, Lo-Fi and House.",
+    },
     {
       id: "emotional-keys",
       name: "Emotional Keys MIDI Bundle",
@@ -63,7 +83,25 @@ export const funnel = {
     "drum-kit": "midi-drum-kit/MIDI Drum Kit - Bundle.zip",
     hustle: "shared/HUSTLE MIDI Bundle.zip",
     "top-hits": "top-hits-midi-bundle/TOP HITS MIDI Bundle.zip",
+    "swing-grooves": "jazz-midi-pack/Drunk Swing Grooves.zip",
+    expansions: "midi-drum-kit/EXPLORER Expansions (House, Lofi, Afrobeat).zip",
+    // The bundle's four free bonuses (2026-11-09), the zips the other funnels give.
+    "essential-drums": "clickfunnels/ESSENTIAL MIDI Drum Patterns.zip",
+    "drum-loops": "jazz-midi-pack/Drum Loops for Songwriting.zip",
+    bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
+    "anime-pack": "jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip",
   },
+  // What a purchase brings beyond its own zip: the bundle comes with its four bonuses
+  // (2026-11-09, as the Jazz MIDI Pack comes with its own).
+  includes: { pack: ["essential-drums", "drum-loops", "bible", "anime-pack"] } as Record<string, readonly string[]>,
+  fileNames: {
+    "essential-drums": "ESSENTIAL MIDI Drum Patterns",
+    "drum-loops": "Drum Loops for Songwriting",
+    bible: "The Chord Progressions Bible",
+    "anime-pack": "Anime & Video Games MIDI Pack",
+    "swing-grooves": "Drunk Swing Grooves",
+    expansions: "MIDI Drum Kit Expansions",
+  } as Record<string, string>,
   // One-click upsell after the order (lib/funnels.ts nextStep): TOP HITS, the
   // product ClickFunnels' buyers of this bundle took next (neo: 11 of its
   // upsells), on the MIDI Drum Kit's TOP HITS page (midi-drum-kit/upsell.ts).
@@ -75,3 +113,6 @@ export const funnel = {
     orderPage: "/famous-beats-bundle/order",
   },
 } as const;
+
+/** An order's files: what it bought, plus what those bring along (`includes`). */
+export const unlocked = (items: readonly string[]) => [...new Set(items.flatMap((i) => [i, ...(funnel.includes[i] ?? [])]))];

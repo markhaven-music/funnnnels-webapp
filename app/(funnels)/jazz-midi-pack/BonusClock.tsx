@@ -3,6 +3,9 @@
 import { isPreview } from "@/lib/beacon";
 import { useEffect, useState } from "react";
 import { JAZZ_BONUS, type JazzBonusWords } from "./fiveMinBonus";
+
+/** Which funnel's clock: its slug, the browser key for the end it last heard, the add-on's picture. Jazz's by default. */
+export type BonusCfg = { funnel: string; endKey: string; image: string; minutes: number };
 import c from "./fiveMinBonus.module.css";
 
 // The Jazz order page's 5-minute bonus (./fiveMinBonus.ts): one clock for the
@@ -18,6 +21,8 @@ import c from "./fiveMinBonus.module.css";
 type Clock = { on: boolean; end: number | null; dead: boolean; gone: boolean };
 let clock: Clock = { on: false, end: null, dead: false, gone: false };
 let started = false;
+// The page's one bonus (the Jazz one unless the page says another, e.g. Famous Beats since 2026-11-09).
+let cfg: BonusCfg = JAZZ_BONUS;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
@@ -26,9 +31,10 @@ function markGone() {
   document.documentElement.setAttribute("data-jazz-bonus", "over");
 }
 
-function start() {
+function start(k: BonusCfg) {
   if (started) return;
   started = true;
+  cfg = k;
   (window as unknown as { __jazzBonusLive?: boolean }).__jazzBonusLive = true;
   if (/[?&]bonus=off(?:&|$)/.test(location.search)) {
     clock = { on: true, end: null, dead: true, gone: true };
@@ -38,12 +44,12 @@ function start() {
   }
   let known: number | null = null;
   try {
-    known = Number(localStorage.getItem(JAZZ_BONUS.endKey)) || null;
+    known = Number(localStorage.getItem(cfg.endKey)) || null;
   } catch {}
   clock = { ...clock, on: true, end: known };
   if (known !== null && known <= Date.now()) markGone();
   emit();
-  fetch("/api/checkout/bonus", { method: "POST", body: JSON.stringify({ funnel: JAZZ_BONUS.funnel, own: isPreview() }) })
+  fetch("/api/checkout/bonus", { method: "POST", body: JSON.stringify({ funnel: cfg.funnel, own: isPreview() }) })
     .then((r) => (r.ok ? r.json() : null))
     .then((j: { end: number; now: number } | null) => {
       // No answer: no bonus shown (the server wouldn't give it either).
@@ -51,7 +57,7 @@ function start() {
       clock = end ? { ...clock, end } : { ...clock, dead: true };
       if (end !== null && end <= Date.now() && (known === null || known <= Date.now())) markGone();
       try {
-        if (end) localStorage.setItem(JAZZ_BONUS.endKey, String(end));
+        if (end) localStorage.setItem(cfg.endKey, String(end));
       } catch {}
       emit();
     })
@@ -68,18 +74,19 @@ export function endJazzBonus() {
 }
 
 /** enabled: this checkout is the Jazz order page's. left: ms to go (null until known); live: the bonus is in the order. */
-export function useJazzBonus(enabled = true): { on: boolean; left: number | null; live: boolean; gone: boolean } {
+export function useJazzBonus(enabled = true, k: BonusCfg = JAZZ_BONUS): { on: boolean; left: number | null; live: boolean; gone: boolean } {
   const [, render] = useState(0);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     if (!enabled) return;
     const l = () => render((n) => n + 1);
     listeners.add(l);
-    start();
+    start(k);
     l();
     return () => {
       listeners.delete(l);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
   const ticking = enabled && clock.on && clock.end !== null && !clock.dead;
   useEffect(() => {
@@ -101,7 +108,7 @@ export function useJazzBonus(enabled = true): { on: boolean; left: number | null
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const mmss = (left: number | null) => {
-  const s = Math.ceil((left ?? JAZZ_BONUS.minutes * 60_000) / 1000);
+  const s = Math.ceil((left ?? cfg.minutes * 60_000) / 1000);
   return `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
 };
 
@@ -114,8 +121,8 @@ function Time({ left, small }: { left: number | null; small?: boolean }) {
 }
 
 /** Under the header: "Order in the next 04:56 and get the Jazz Record Samples free." */
-export function JazzBonusBanner({ w }: { w: JazzBonusWords }) {
-  const { left, live, gone } = useJazzBonus();
+export function JazzBonusBanner({ w, cfg: k = JAZZ_BONUS }: { w: JazzBonusWords; cfg?: BonusCfg }) {
+  const { left, live, gone } = useJazzBonus(true, k);
   if (gone) return null;
   const over = left === 0 && !live;
   const [before, after = ""] = w.lead.split("{time}");
@@ -138,8 +145,8 @@ export function JazzBonusBanner({ w }: { w: JazzBonusWords }) {
 }
 
 /** The bonus as a line of the order: picture, BONUS, name, what's inside, price struck, FREE, the clock. */
-export function JazzBonusItem({ w, price, compact, light }: { w: JazzBonusWords; price: string; compact?: boolean; light?: boolean }) {
-  const { left, live, gone, on } = useJazzBonus();
+export function JazzBonusItem({ w, price, compact, light, cfg: k = JAZZ_BONUS }: { w: JazzBonusWords; price: string; compact?: boolean; light?: boolean; cfg?: BonusCfg }) {
+  const { left, live, gone, on } = useJazzBonus(true, k);
   if (gone || (compact && !on)) return null;
   const cls = `${compact ? c.compact : ""} ${light ? c.light : ""}`;
   if (left === 0 && !live)
@@ -151,7 +158,7 @@ export function JazzBonusItem({ w, price, compact, light }: { w: JazzBonusWords;
   return (
     <div className={`${c.item} ${cls}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={JAZZ_BONUS.image} alt="" width={80} height={80} className={c.img} />
+      <img src={k.image} alt="" width={80} height={80} className={c.img} />
       <div className={c.info}>
         <span className={c.name}>
           <span className={c.badge}>{w.badge}</span> {w.name}

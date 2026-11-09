@@ -43,16 +43,18 @@ export type JazzBonusWords = typeof JAZZ_BONUS_WORDS;
  * 5 minutes ended on an earlier visit (or ?bonus=off): the page is the normal one,
  * nothing about the bonus shows ("se rivado sul checkout… è normale").
  */
-export const JAZZ_BONUS_SCRIPT = `(function(){try{
-var off=/[?&]bonus=off(?:&|$)/.test(location.search),e=Number(localStorage.getItem('${JAZZ_BONUS.endKey}'));
+export const bonusScript = (endKey: string) => `(function(){try{
+var off=/[?&]bonus=off(?:&|$)/.test(location.search),e=Number(localStorage.getItem('${endKey}'));
 if(off||(e&&e<=Date.now()))document.documentElement.setAttribute('data-jazz-bonus','over');
 }catch(x){}})();`;
+export const JAZZ_BONUS_SCRIPT = bonusScript(JAZZ_BONUS.endKey);
 
 /** Right after the banner and the row: the countdown from the end this browser knows, until React takes over (no 05:00 on a refresh). */
-export const JAZZ_BONUS_TIME_SCRIPT = `(function(){try{
-var e=Number(localStorage.getItem('${JAZZ_BONUS.endKey}'));if(!e)return;
+export const bonusTimeScript = (endKey: string) => `(function(){try{
+var e=Number(localStorage.getItem('${endKey}'));if(!e)return;
 var p=function(n){return(n<10?'0':'')+n;};
 var f=function(){if(window.__jazzBonusLive)return clearInterval(i);var s=Math.max(0,Math.ceil((e-Date.now())/1000)),t=p(Math.floor(s/60))+':'+p(s%60);
 document.querySelectorAll('[data-jazz-bonus-time]').forEach(function(x){x.textContent=t;});};
 var i=setInterval(f,250);f();
 }catch(x){}})();`;
+export const JAZZ_BONUS_TIME_SCRIPT = bonusTimeScript(JAZZ_BONUS.endKey);

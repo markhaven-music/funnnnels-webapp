@@ -12,8 +12,8 @@ import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
 import { isPreview, readCookie, track } from "@/lib/beacon";
 import { cookieCountry } from "@/lib/geo";
-import { endJazzBonus, JazzBonusItem, useJazzBonus } from "./BonusClock";
-import { JAZZ_BONUS_WORDS } from "./fiveMinBonus";
+import { endJazzBonus, JazzBonusItem, useJazzBonus, type BonusCfg } from "./BonusClock";
+import { JAZZ_BONUS, JAZZ_BONUS_WORDS, type JazzBonusWords } from "./fiveMinBonus";
 import c from "./fiveMinBonus.module.css";
 
 // The two-step order form, copied from the ClickFunnels checkout:
@@ -72,7 +72,8 @@ type Props = {
   light?: boolean;
   // The Jazz order page's 5-minute bonus (./fiveMinBonus.ts): the Record Samples
   // free in the order while the clock runs; `price` is what they'd cost.
-  fiveMinBonus?: { price: number };
+  // `cfg` / `words`: another funnel's clock and words (Famous Beats since 2026-11-09); Jazz's by default.
+  fiveMinBonus?: { price: number; cfg?: BonusCfg; words?: JazzBonusWords };
 };
 
 type Info = { firstName: string; lastName: string; email: string };
@@ -114,7 +115,7 @@ export function CheckoutWidget(props: Props) {
     () => (props.publishableKey && wanted ? stripeFor(props.publishableKey) : null),
     [props.publishableKey, wanted],
   );
-  const bonus = useJazzBonus(!!props.fiveMinBonus);
+  const bonus = useJazzBonus(!!props.fiveMinBonus, props.fiveMinBonus?.cfg ?? JAZZ_BONUS);
   const bonusLive = !!props.fiveMinBonus && bonus.live;
   const body = { ...props, info, method, offers, picked, toggle, total, bonusLive };
 
@@ -482,7 +483,9 @@ function PayStepBody({
       )}
 
       {/* The 5-minute bonus, already in the order; "Time's up" in its place at 00:00, then nothing. */}
-      {fiveMinBonus && <JazzBonusItem w={JAZZ_BONUS_WORDS} price={money(fiveMinBonus.price, currency)} compact light />}
+      {fiveMinBonus && (
+        <JazzBonusItem w={fiveMinBonus.words ?? JAZZ_BONUS_WORDS} cfg={fiveMinBonus.cfg} price={money(fiveMinBonus.price, currency)} compact light />
+      )}
 
       {offers.map((offer) => (
         <BumpBox key={offer.id} offer={offer} currency={currency} ticked={picked.includes(offer.id)} onTick={(on) => toggle(offer.id, on)} />
@@ -506,11 +509,11 @@ function PayStepBody({
         {bonusLive && fiveMinBonus && (
           <div className={s.sumRow}>
             <span>
-              {JAZZ_BONUS_WORDS.name} <b className={c.free}>{JAZZ_BONUS_WORDS.summaryTag}</b>
+              {(fiveMinBonus.words ?? JAZZ_BONUS_WORDS).name} <b className={c.free}>{(fiveMinBonus.words ?? JAZZ_BONUS_WORDS).summaryTag}</b>
             </span>
             <span className={c.free}>
               <s>{money(fiveMinBonus.price, currency)}</s>
-              {JAZZ_BONUS_WORDS.free}
+              {(fiveMinBonus.words ?? JAZZ_BONUS_WORDS).free}
             </span>
           </div>
         )}
