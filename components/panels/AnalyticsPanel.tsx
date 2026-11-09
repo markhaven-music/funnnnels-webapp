@@ -311,58 +311,58 @@ function BonusCard({ b }: { b: BonusStats }) {
           </div>
           <div className={s.testSub}>
             Order page: the {b.item} free if paid within 5 minutes of arriving ·{" "}
-            {b.since ? `since ${whenText(when(b.since))}, when everyone got it` : "no clock started yet"} · whatever the range above
+            {b.since ? `since ${whenText(when(b.since))}, when everyone got it` : "no clock started yet"} · the date range above doesn&apos;t apply
           </div>
         </div>
       </div>
 
       <div className={s.variants}>
         <div className={s.variant}>
-          <div className={s.variantHead}>Orders paid within the 5 minutes</div>
+          <div className={s.variantHead}>Buyers who paid in time</div>
           <div className={s.bonusBig}>
-            {int(b.within)} <small>of {int(card)}</small>
+            {int(b.within)} <small>of {int(card)} buyers</small>
           </div>
           <div className={s.bonusPct}>{pct(b.within, card)}</div>
           <dl className={s.kv}>
-            <dt>Within 5 min (free {b.item})</dt>
+            <dt>Within 5 min, got the free {b.item}</dt>
             <dd className={s.strong}>{int(b.within)}</dd>
-            <dt>After the 5 minutes</dt>
+            <dt>After 5 min, no bonus</dt>
             <dd>{int(b.after)}</dd>
             {b.paypal > 0 && (
               <>
-                <dt>PayPal (not known)</dt>
+                <dt>PayPal (can&apos;t tell)</dt>
                 <dd>{int(b.paypal)}</dd>
               </>
             )}
           </dl>
-          <div className={s.paidNote}>Card orders, upsells apart. PayPal doesn&apos;t record whether the bonus was given, so its orders are left out of the %.</div>
+          <div className={s.paidNote}>Card orders of the main product, upsells not counted. PayPal doesn&apos;t record the bonus, so PayPal orders are left out of the %.</div>
         </div>
 
         <div className={s.variant}>
-          <div className={s.variantHead}>Out of everyone who saw the clock</div>
+          <div className={s.variantHead}>Order page visitors who bought</div>
           <div className={s.bonusBig}>
-            {int(b.withinSinceClocks)} <small>of {int(b.clocks)}</small>
+            {int(b.ordersSinceClocks)} <small>of {int(b.clocks)} visitors</small>
           </div>
-          <div className={s.bonusPct}>{pct(b.withinSinceClocks, b.clocks)}</div>
+          <div className={s.bonusPct}>{pct(b.ordersSinceClocks, b.clocks)}</div>
           <dl className={s.kv}>
-            <dt>Clocks started</dt>
+            <dt>Reached the order page</dt>
             <dd>{int(b.clocks)}</dd>
-            <dt>On phones</dt>
+            <dt>Bought</dt>
+            <dd className={s.strong}>
+              {int(b.ordersSinceClocks)} <small>{pct(b.ordersSinceClocks, b.clocks)}</small>
+            </dd>
+            <dt>…of them in time for the free {b.item}</dt>
+            <dd>
+              {int(b.withinSinceClocks)} <small>{pct(b.withinSinceClocks, b.clocks)}</small>
+            </dd>
+            <dt>Visitors on a phone</dt>
             <dd>
               {int(b.clocksPhone)} <small>{pct(b.clocksPhone, b.clocks)}</small>
             </dd>
-            <dt>Paid within 5 min</dt>
-            <dd className={s.strong}>
-              {int(b.withinSinceClocks)} <small>{pct(b.withinSinceClocks, b.clocks)}</small>
-            </dd>
-            <dt>Paid at all</dt>
-            <dd>
-              {int(b.ordersSinceClocks)} <small>{pct(b.ordersSinceClocks, b.clocks)}</small>
-            </dd>
           </dl>
           <div className={s.paidNote}>
-            A clock starts the first time a browser reaches the order page (owner and test devices left out)
-            {b.clocksSince ? ` · counted since ${whenText(when(b.clocksSince))}` : " · none counted yet"}
+            Each browser counted once, the first time it reaches the order page (that&apos;s when its 5 minutes start); owner and test devices left out
+            {b.clocksSince ? ` · since ${whenText(when(b.clocksSince))}` : " · none yet"}
           </div>
         </div>
 
@@ -384,7 +384,7 @@ function BonusCard({ b }: { b: BonusStats }) {
             <dd className={s.strong}>{b.medianSec == null ? "—" : mins(b.medianSec)}</dd>
           </dl>
           <div className={s.paidNote}>
-            From the clock&apos;s start to the payment, card orders that recorded it ({int(b.timed)} so far, from 11-09); green = within the 5 minutes.
+            From the first visit to the order page to the payment, card orders that recorded it ({int(b.timed)} so far, from 11-09); green = within the 5 minutes.
           </div>
         </div>
       </div>
