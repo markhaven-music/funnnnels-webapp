@@ -10,7 +10,8 @@ import { Cta } from "../../../jazz-midi-pack/Cta";
 import { display } from "../../../jazz-midi-pack/fonts";
 import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
 import { funnel } from "../../funnel";
-import { BeatBrowser, BeatClip } from "../Beats";
+import { BeatClip } from "../Beats";
+import { PatternPlayer } from "../PatternPlayer";
 import { LANDING as w } from "../words";
 import roll from "../roll.json";
 import s from "../../../jazz-midi-pack/jazz.module.css";
@@ -67,7 +68,14 @@ const HERO_BEATS = [
 const SIGN = { eur: "€", usd: "$" } as const;
 const DIR = "/funnels/jazz-midi-pack";
 // Values as the Jazz page counts them (jazz-midi-pack/funnel.ts bonuses).
-const COVERS: Record<string, string | null> = { "essential-drums": null, "drum-loops": "bonus-5", bible: "bonus-2", "anime-pack": "bonus-3" };
+const COVERS: Record<string, [string, string]> = {
+  "essential-drums": ["/funnels/famous-beats-bundle/bonus-essential-360.webp", "/funnels/famous-beats-bundle/bonus-essential-640.webp"],
+  "chord-pack": [`${DIR}/bonus-1-360.webp`, `${DIR}/bonus-1-640.webp`],
+  "emotional-keys": [`${DIR}/bonus-4-360.webp`, `${DIR}/bonus-4-640.webp`],
+  "drum-loops": [`${DIR}/bonus-5-360.webp`, `${DIR}/bonus-5-640.webp`],
+  bible: [`${DIR}/bonus-2-360.webp`, `${DIR}/bonus-2-640.webp`],
+  "anime-pack": [`${DIR}/bonus-3-360.webp`, `${DIR}/bonus-3-640.webp`],
+};
 
 export default async function FamousBeatsV2({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
@@ -112,20 +120,19 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
             <Marked text={w.hero.title} />
           </h1>
           <p className={s.heroSub}>{w.hero.sub}</p>
-          {/* Where the Jazz page has its video: the box and three of the 320 beats to play. */}
-          <div className={shot.stage + " " + shot.box}>
+          {/* Where the Jazz page has its video: the hero render (Higgsfield, from the real box, 2026-11-09), then three of the 320 beats. */}
+          <div className={`${shot.stage} ${shot.hero}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              className={shot.img} style={{ WebkitMaskImage: "radial-gradient(closest-side, #000 70%, transparent)", maskImage: "radial-gradient(closest-side, #000 70%, transparent)" }}
-              src="/funnels/famous-beats-bundle/box-480.webp"
-              srcSet="/funnels/famous-beats-bundle/box-240.webp 240w, /funnels/famous-beats-bundle/box-480.webp 480w"
-              sizes="(min-width: 1000px) 360px, 64vw"
-              width={480}
-              height={480}
-              alt="The Famous Beats Bundle box: 320 transcriptions, 32 packs, MIDI format"
+              className={shot.img}
+              src="/funnels/famous-beats-bundle/hero-600.webp"
+              srcSet="/funnels/famous-beats-bundle/hero-600.webp 600w, /funnels/famous-beats-bundle/hero-960.webp 960w"
+              sizes="(min-width: 1000px) 380px, 86vw"
+              width={960}
+              height={1286}
+              alt="The Famous Beats Bundle box with MIDI drum lanes and .mid files coming out of it"
               fetchPriority="high"
             />
-            <span className={shot.floor} aria-hidden />
           </div>
           <div className={f.heroPlay}>
             <p>{w.hero.listen}</p>
@@ -193,13 +200,15 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
       <section className={s.sec}>
         <div className={s.wrap}>
           <div className={`${s.panel} ${s.introGrid}`}>
-            <div className={shot.stage + " " + shot.box}>
+            <div className={`${shot.stage} ${shot.box}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                className={shot.img} style={{ WebkitMaskImage: "radial-gradient(closest-side, #000 70%, transparent)", maskImage: "radial-gradient(closest-side, #000 70%, transparent)" }}
-                src="/funnels/famous-beats-bundle/box-480.webp"
-                width={480}
-                height={480}
+                className={shot.img}
+                src="/funnels/famous-beats-bundle/box3d-520.webp"
+                srcSet="/funnels/famous-beats-bundle/box3d-520.webp 520w, /funnels/famous-beats-bundle/box3d-900.webp 900w"
+                sizes="(min-width: 1000px) 360px, 64vw"
+                width={900}
+                height={1110}
                 alt="The Famous Beats Bundle box"
                 loading="lazy"
                 decoding="async"
@@ -254,7 +263,7 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
         <div className={s.wrap}>
           <h2 className={s.h2}>{w.browse.title}</h2>
           <p className={s.sub}>{w.browse.sub}</p>
-          <BeatBrowser words={w.browse} />
+          <PatternPlayer />
         </div>
       </section>
 
@@ -298,6 +307,18 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
       <section className={s.sec}>
         <div className={s.wrap}>
           <h2 className={s.h2}>{w.inside.title}</h2>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/funnels/famous-beats-bundle/daw-900.webp"
+            srcSet="/funnels/famous-beats-bundle/daw-900.webp 900w, /funnels/famous-beats-bundle/daw-1600.webp 1600w"
+            sizes="(min-width: 1160px) 1120px, 100vw"
+            width={1600}
+            height={905}
+            alt="The Famous Beats Bundle box beside a laptop with a multi-track drum pattern: kick, snare, closed hat, open hat, perc"
+            loading="lazy"
+            decoding="async"
+            style={{ display: "block", width: "100%", height: "auto", borderRadius: 12, marginBottom: 24 }}
+          />
           <div className={s.panel}>
             <ol className={s.steps}>
               {w.inside.items.map(([name, text], i) => (
@@ -339,7 +360,7 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
                 <span key={c} role="columnheader" className={i === 2 ? `${s.chHead} ${s.chWin}` : s.chHead}>
                   {i === 2 && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img className={s.chBox} src="/funnels/famous-beats-bundle/box-240.webp" width={160} height={160} alt="" loading="lazy" decoding="async" />
+                    <img className={s.chBox} src="/funnels/famous-beats-bundle/box3d-160.webp" width={160} height={197} alt="" loading="lazy" decoding="async" />
                   )}
                   {c}
                 </span>
@@ -376,8 +397,8 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
                     <div className={bn.cover}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`${DIR}/${cover}-360.webp`}
-                        srcSet={`${DIR}/${cover}-360.webp 360w, ${DIR}/${cover}-640.webp 640w`}
+                        src={cover[0]}
+                        srcSet={`${cover[0]} 360w, ${cover[1]} 640w`}
                         sizes="(min-width: 1000px) 200px, 96px"
                         width={640}
                         height={960}
@@ -420,7 +441,7 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
               <div className={vs.mainBox}>
                 <span className={vs.ribbon}>{worth(27)} value</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/funnels/famous-beats-bundle/box-480.webp" width={480} height={480} alt="The Famous Beats Bundle box" loading="lazy" decoding="async" style={{ WebkitMaskImage: "radial-gradient(closest-side, #000 70%, transparent)", maskImage: "radial-gradient(closest-side, #000 70%, transparent)" }} />
+                <img src="/funnels/famous-beats-bundle/box3d-520.webp" width={520} height={642} alt="The Famous Beats Bundle box" loading="lazy" decoding="async" />
               </div>
               <div>
                 <p className={vs.kicker}>The bundle</p>
@@ -438,14 +459,8 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
             <ol className={vs.list}>
               {w.bonuses.items.map((b, i) => (
                 <li key={b.id}>
-                  {COVERS[b.id] ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={`${DIR}/${COVERS[b.id]}-360.webp`} width={360} height={540} alt="" loading="lazy" decoding="async" />
-                  ) : (
-                    <span aria-hidden style={{ display: "grid", placeItems: "center", aspectRatio: "2 / 3", background: "#000", color: "#f5b800", fontWeight: 800, fontSize: 12, borderRadius: 3 }}>
-                      MIDI
-                    </span>
-                  )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={COVERS[b.id][0]} width={360} height={540} alt="" loading="lazy" decoding="async" />
                   <span className={vs.itemText}>
                     <span className={vs.kicker}>Bonus #{i + 1}</span>
                     <span className={vs.itemName}>{b.name}</span>
@@ -515,7 +530,7 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
                 <p className={s.illusTitle}>Your files are ready</p>
                 <ul className={s.dl}>
                   {[
-                    [funnel.product, "320 MIDI drum files · 32 packs · .zip"],
+                    [funnel.product, "320 multi-track MIDI drum files · 32 packs · .zip"],
                     ...w.bonuses.items.map((b) => [b.name, b.inside[0]]),
                   ].map(([name, meta]) => (
                     <li key={name}>
@@ -562,7 +577,20 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
         </div>
       </section>
 
-      <section className={`${s.sec} ${s.final} ${s.finalBare}`}>
+      <section className={`${s.sec} ${s.final}`}>
+        <div className={s.finalBg} aria-hidden>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/funnels/famous-beats-bundle/stage-1100.webp"
+            srcSet="/funnels/famous-beats-bundle/stage-1100.webp 1100w, /funnels/famous-beats-bundle/stage-2200.webp 2200w"
+            sizes="100vw"
+            width={2200}
+            height={943}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
         <div className={`${s.wrap} ${s.finalIn}`}>
           <h2 className={s.h2}>{w.final.title}</h2>
           {key(s.ctaBlock, w.cta.label, `${w.final.sub} · ${t(w.cta.note)}`)}

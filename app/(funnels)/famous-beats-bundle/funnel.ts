@@ -87,15 +87,18 @@ export const funnel = {
     expansions: "midi-drum-kit/EXPLORER Expansions (House, Lofi, Afrobeat).zip",
     // The bundle's four free bonuses (2026-11-09), the zips the other funnels give.
     "essential-drums": "clickfunnels/ESSENTIAL MIDI Drum Patterns.zip",
+    "chord-pack": "jazz-midi-pack/Jazz MIDI Chord Pack.zip",
     "drum-loops": "jazz-midi-pack/Drum Loops for Songwriting.zip",
     bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
     "anime-pack": "jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip",
   },
-  // What a purchase brings beyond its own zip: the bundle comes with its four bonuses
-  // (2026-11-09, as the Jazz MIDI Pack comes with its own).
-  includes: { pack: ["essential-drums", "drum-loops", "bible", "anime-pack"] } as Record<string, readonly string[]>,
+  // What a purchase brings beyond its own zip: the bundle comes with its six bonuses
+  // (2026-11-09, as the Jazz MIDI Pack comes with its own; six since "add more bonuses just like midi jazz pack").
+  includes: { pack: ["essential-drums", "chord-pack", "emotional-keys", "drum-loops", "bible", "anime-pack"] } as Record<string, readonly string[]>,
   fileNames: {
     "essential-drums": "ESSENTIAL MIDI Drum Patterns",
+    "chord-pack": "MIDI Chord Pack (Jazz Edition)",
+    "emotional-keys": "Emotional Keys MIDI Bundle",
     "drum-loops": "Drum Loops for Songwriting",
     bible: "The Chord Progressions Bible",
     "anime-pack": "Anime & Video Games MIDI Pack",

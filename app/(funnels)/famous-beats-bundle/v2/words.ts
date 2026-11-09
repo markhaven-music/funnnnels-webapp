@@ -16,7 +16,7 @@ export const LANDING = {
       "Transcribed By Ear: Ghost Notes, Rolls And Velocity Included",
       "BPM, Artist And Song In Every File Name",
       "Any DAW, Mac Or PC. Commercial License",
-      "4 Free Bonuses Included",
+      "6 Free Bonuses Included",
     ],
     ticks: ["Any DAW", "BPM and artist in every file name", "14-day guarantee"],
     proof: [
@@ -105,7 +105,7 @@ export const LANDING = {
     ] as [string, [boolean | null, string], [boolean | null, string], [boolean | null, string]][],
   },
   bonuses: {
-    title: "Four bonuses. All in the {price}.",
+    title: "Six bonuses. All in the {price}.",
     sub: "On the same download page as the bundle.",
     items: [
       {
@@ -114,6 +114,20 @@ export const LANDING = {
         value: 7,
         text: "163 MIDI drum files to build your own grooves, one part at a time.",
         inside: ["158 one-part patterns: 808, closed and open hats, kick, snare or clap, accents", "Kick + snare and kick + 808 multi-track loops", "5 complete multi-track beats"],
+      },
+      {
+        id: "chord-pack",
+        name: "MIDI Chord Pack (Jazz Edition)",
+        value: 47,
+        text: "Jazz chords and progressions in every key, to put on top of your drums.",
+        inside: ["2,304 MIDI files", "All 12 major/minor key pairs", "6 folders per key: best voicing, smooth bass, sevenths, extended, altered, progressions"],
+      },
+      {
+        id: "emotional-keys",
+        name: "Emotional Keys MIDI Bundle",
+        value: 27,
+        text: "Piano ideas to start a song from: songstarters, chords and melodies.",
+        inside: ["195 MIDI files in 3 volumes", "Each: 20 songstarters, 20 chord progressions, 25 melodies", "An MP3 preview of every file"],
       },
       {
         id: "drum-loops",
@@ -149,7 +163,7 @@ export const LANDING = {
       "BPM, artist and song in every file name",
       "Works in any DAW, Mac and PC",
       "Full commercial license",
-      "4 bonuses: ESSENTIAL MIDI Drum Patterns, Drum Loops for Songwriting, The Chord Progressions Bible, Anime & Video Games MIDI Pack",
+      "6 bonuses: ESSENTIAL MIDI Drum Patterns, MIDI Chord Pack (Jazz Edition), Emotional Keys MIDI Bundle, Drum Loops for Songwriting, The Chord Progressions Bible, Anime & Video Games MIDI Pack",
     ],
     today: "Today",
     perGroove: "That's {c}0.08 per groove.",
@@ -163,7 +177,7 @@ export const LANDING = {
     items: [
       ["Pay", "by card, Apple Pay, Google Pay or PayPal."],
       ["Download", "from the buttons on the next page. The same links come by email."],
-      ["Unzip", "32 packs of 10 songs, each with its MIDI files and its audio previews, plus the 4 bonuses."],
+      ["Unzip", "32 packs of 10 songs, each with its MIDI files and its audio previews, plus the 6 bonuses."],
       ["Drag a .mid", "onto a drum track and load your kit. You can be on a drum track in 5 minutes."],
     ] as [string, string][],
   },
@@ -202,7 +216,7 @@ export const ORDER = {
     "BPM, artist and song in every file name",
     "Any DAW, Mac and PC · commercial license",
   ],
-  bonusHead: "Plus 4 free bonuses",
+  bonusHead: "Plus 6 free bonuses",
   today: "Today",
   guarantee: "14-day quality guarantee. A file doesn't work? We fix it.",
   proof: [
@@ -219,12 +233,6 @@ export const BUMP_COPY: Record<string, { headline: string; body: string[] }> = {
     headline: "YES! Add the Drunk Swing Grooves!",
     body: [
       "80 MIDI drum grooves with the **drunk, J Dilla-style swing** of lofi and neo soul, in 4 feels, plus 31 groove templates. The snare stays on the beat, everything else lays back. Add it now for just {c}7.",
-    ],
-  },
-  "emotional-keys": {
-    headline: "YES! Add the Emotional Keys MIDI Bundle!",
-    body: [
-      "**Emotional Keys Vol.1, Vol.2 and Vol.3**: musical ideas, chord progressions and melodies written by pianist and composer Orazio Saracino. Put them on top of your drums. Add them now for just {c}7.",
     ],
   },
   hustle: {

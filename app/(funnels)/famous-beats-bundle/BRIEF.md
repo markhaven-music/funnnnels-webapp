@@ -12,6 +12,15 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
   tag, centred hero, DAW strip, proof numbers, letter, product panel, letter beside the roll, browser, how it works
   beside the folder path, ✓/✗ chart, bonus panels with covers, value stack, seal + license, after you pay beside the
   download list, FAQ, final key. Proof numbers (2,847 Drum Kit producers, 4,700+ list) as on the Jazz page.
+- 2026-11-09: "add player that lets you hear every pattern": v2/PatternPlayer.tsx, the Jazz browser's look (pack
+  Prev/menu/Next, song chips, search), each file's first bar drawn from its .mid (beats/rolls.json, 317 of 320: three
+  file names differ from their previews) and its preview playing.
+- 2026-11-09: "use higgsfield for images": gpt_image_2_6 from the real box: box3d (cutout with remove_background),
+  hero (box + KICK/SNARE/HI-HAT lanes + four real file names; a first take had invented names and was redone),
+  daw, stage, bonus-essential cover. public/funnels/famous-beats-bundle.
+- 2026-11-09: "add more bonuses just like midi jazz pack": six, as Jazz: + MIDI Chord Pack (Jazz Edition) (2,304 MIDI,
+  €47) and Emotional Keys MIDI Bundle (195 MIDI, €27), counts and values from jazz-midi-pack/funnel.ts. Emotional
+  Keys is therefore no longer a tick box (bumps: Drunk Swing Grooves €7, HUSTLE €27).
 - Value stack: the bundle at its own price ($27) + the bonuses' Jazz values; nothing else invented. Built beside the live page at /famous-beats-bundle/v2 (+ /v2/order) until the user
   switches. No VSL yet (the Jazz page has one; a Famous Beats one is a separate job). No reviews (the user's call).
 - Numbers before (11-02 → 11-09, own visits and bots out): 99 landing visitors, 14 on the order page, 3 checkout
@@ -34,7 +43,7 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 
 ## Offer (v2)
 - €27 / $27 (dashboard → Products). Red "BLACK FRIDAY: 90% Sale Ends Soon" bar as on Jazz.
-- Four bonuses in the price (`funnel.ts` includes.pack), values as the Jazz page has them:
+- Six bonuses in the price (2026-11-09; first four) (`funnel.ts` includes.pack), values as the Jazz page has them:
   1. ESSENTIAL MIDI Drum Patterns (€7, its ClickFunnels price €6.99): 158 one-part patterns (808 33, Hihat Closed 66,
      Hihat Open 7, Kick 18, Snare or Clap 17, Accents 7, Kick and Snare 5, Kick and 808 5 .mid) + 5 complete multi-track
      beats = 163 MIDI files. R2 `clickfunnels/ESSENTIAL MIDI Drum Patterns.zip` (also holds a Famous Beats Vol.1 and an

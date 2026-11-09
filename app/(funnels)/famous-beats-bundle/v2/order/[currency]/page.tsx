@@ -38,13 +38,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// The tick boxes, in this order (2026-11-09: the Jazz page's €7 Drunk Swing Grooves, Emotional
-// Keys €7, HUSTLE). Their prices are dashboard → Products'; until Products lists the new ones,
+// The tick boxes, in this order (2026-11-09: the Jazz page's €7 Drunk Swing Grooves, HUSTLE;
+// Emotional Keys is one of the six bonuses since "add more bonuses just like midi jazz pack"). Their prices are dashboard → Products'; until Products lists the new ones,
 // the code's (preview only: the checkout charges what Products says).
-const ORDER_BUMPS = ["swing-grooves", "emotional-keys", "hustle"];
+const ORDER_BUMPS = ["swing-grooves", "hustle"];
 
 const BONUS_THUMBS: Record<string, string | null> = {
-  "essential-drums": null,
+  "essential-drums": "/funnels/famous-beats-bundle/bonus-essential-360.webp",
+  "chord-pack": "/funnels/jazz-midi-pack/bonus-1-360.webp",
+  "emotional-keys": "/funnels/jazz-midi-pack/bonus-4-360.webp",
   "drum-loops": "/funnels/jazz-midi-pack/bonus-5-360.webp",
   bible: "/funnels/jazz-midi-pack/bonus-2-360.webp",
   "anime-pack": "/funnels/jazz-midi-pack/bonus-3-360.webp",
@@ -110,14 +112,14 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
             <div className={s.orderSummary}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/funnels/famous-beats-bundle/box-480.webp"
-                srcSet="/funnels/famous-beats-bundle/box-240.webp 240w, /funnels/famous-beats-bundle/box-480.webp 480w"
-                sizes="(min-width: 1000px) 360px, 64vw"
-                width={480}
-                height={480}
+                src="/funnels/famous-beats-bundle/box3d-520.webp"
+                srcSet="/funnels/famous-beats-bundle/box3d-520.webp 520w, /funnels/famous-beats-bundle/box3d-900.webp 900w"
+                sizes="(min-width: 1000px) 300px, 56vw"
+                width={900}
+                height={1110}
                 alt="The Famous Beats Bundle box: 320 transcriptions, 32 packs, MIDI format"
                 fetchPriority="high"
-                style={{ display: "block", width: "min(340px, 70vw)", height: "auto", margin: "0 auto 8px", WebkitMaskImage: "radial-gradient(closest-side, #000 72%, transparent)", maskImage: "radial-gradient(closest-side, #000 72%, transparent)" }}
+                style={{ display: "block", width: "min(300px, 56vw)", height: "auto", margin: "0 auto 8px", filter: "drop-shadow(0 24px 36px rgb(0 0 0 / 0.6))" }}
               />
               {ex && fiveMinBonus && (
                 <div className={c.slot}>
@@ -168,8 +170,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
               <CheckoutWidget
                 funnel={funnel.slug}
                 product={funnel.product}
-                tagline="320 MIDI drum transcriptions from hit records + 4 bonuses"
-                image="/funnels/famous-beats-bundle/box-240.webp"
+                tagline="320 MIDI drum transcriptions from hit records + 6 bonuses"
+                image="/funnels/famous-beats-bundle/box3d-160.webp"
                 currency={currency}
                 country={FALLBACK_COUNTRY[currency]}
                 price={amount}

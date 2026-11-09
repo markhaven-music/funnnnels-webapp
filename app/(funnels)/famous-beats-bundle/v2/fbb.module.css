@@ -174,8 +174,7 @@
 .rollOff {
   position: absolute;
   bottom: 0;
-  width: 3px;
-  margin-left: -1px;
+  width: max(4px, 3.2%);
   border-radius: 2px 2px 0 0;
   background: rgb(255 255 255 / 0.7);
 }
@@ -192,4 +191,13 @@
 }
 .mono {
   font-family: var(--font-mono);
+}
+
+/* the pattern player's viewer, under the Jazz browser's choices */
+.viewer {
+  padding: 16px 14px 14px;
+  background: #0d0c10;
+}
+.viewHead {
+  margin-bottom: 12px;
 }
