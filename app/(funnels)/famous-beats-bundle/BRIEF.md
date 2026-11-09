@@ -21,6 +21,14 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 - 2026-11-09: "add more bonuses just like midi jazz pack": six, as Jazz: + MIDI Chord Pack (Jazz Edition) (2,304 MIDI,
   €47) and Emotional Keys MIDI Bundle (195 MIDI, €27), counts and values from jazz-midi-pack/funnel.ts. Emotional
   Keys is therefore no longer a tick box (bumps: Drunk Swing Grooves €7, HUSTLE €27).
+- 2026-11-09: "come possiamo moltiplicare il numero di midi files" → "Sì, costruiscili": every song also as single
+  drum parts (03 - Single Drum Parts, 1,427 files, notes untouched, the tempo track kept) and as one track on General
+  MIDI drum notes (04 - One Track (GM Drum Map), 320 files: kick 36, snare 38, clap 39, closed hat 42, open hat 46,
+  cymbal 49, tambourine 54, tom 45, perc 37/75/76/77). 320 + 1,427 + 320 = 2,067 MIDI files, all parsed back, every
+  song's parts = its multi-track file note for note. Made by ~/Desktop/Famous Beats Tools/make_parts.py into the
+  same R2 key (shared/Famous Beats Bundle (320 MIDI Beats).zip; the old zip backed up first). The page says
+  "320 hit drum grooves in 2,067 MIDI files" + "4,360 more MIDI files and 305 WAV loops" in the bonuses
+  (163 + 2,304 + 195 + 150 + 1,548 MIDI; 47 + 258 WAV).
 - Value stack: the bundle at its own price ($27) + the bonuses' Jazz values; nothing else invented. Built beside the live page at /famous-beats-bundle/v2 (+ /v2/order) until the user
   switches. No VSL yet (the Jazz page has one; a Famous Beats one is a separate job). No reviews (the user's call).
 - Numbers before (11-02 → 11-09, own visits and bots out): 99 landing visitors, 14 on the order page, 3 checkout

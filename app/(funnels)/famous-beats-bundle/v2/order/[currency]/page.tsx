@@ -170,7 +170,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
               <CheckoutWidget
                 funnel={funnel.slug}
                 product={funnel.product}
-                tagline="320 MIDI drum transcriptions from hit records + 6 bonuses"
+                tagline="320 drum transcriptions in 2,067 MIDI files + 6 bonuses"
                 image="/funnels/famous-beats-bundle/box3d-160.webp"
                 currency={currency}
                 country={FALLBACK_COUNTRY[currency]}

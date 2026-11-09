@@ -64,6 +64,8 @@ These are transcriptions. We wrote down what's on the records. There's no audio 
 
 Every file comes in on separate tracks. Kick on one. Snare on one. Closed hats, open hats and percussion on their own. Mute the hats. Swap the kick. Move one snare. The rest of the groove stays where the record has it.
 
+And every song comes three ways. The multi-track file. The same groove on one track, with General MIDI drum notes, ready for a drum rack. And every drum as its own file, so you can drag in just the hats. That's 2,067 MIDI files, before the bonuses.
+
 [SHOW: list]
 
 Finding a groove takes seconds. The BPM, the artist and the song are in every file name, so you can search the folder. And every pack has audio previews, so you hear a groove before you drag it in.
@@ -74,7 +76,7 @@ It works in any DAW that opens MIDI. FL Studio, Ableton, Logic, Pro Tools, Studi
 
 [SHOW: card 6 free bonuses]
 
-You also get six bonuses, free, on the same download page.
+You also get six bonuses, free, on the same download page. 4,360 more MIDI files and 305 WAV loops.
 
 [SHOW: bonus 1]
 

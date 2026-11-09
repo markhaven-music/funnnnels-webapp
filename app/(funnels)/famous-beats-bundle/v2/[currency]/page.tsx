@@ -110,7 +110,7 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
             </span>
             <span className={s.tag}>
               <span className={s.dot} aria-hidden />
-              320 MIDI beats
+              2,067 MIDI files
             </span>
           </header>
         </div>
@@ -447,7 +447,7 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
                 <p className={vs.kicker}>The bundle</p>
                 <p className={vs.mainName}>{funnel.product}</p>
                 <ul className={s.stack}>
-                  {w.stack.items.slice(0, 6).map((x) => (
+                  {w.stack.items.slice(0, 7).map((x) => (
                     <li key={x}>
                       <Tick />
                       <span>{x}</span>
@@ -530,7 +530,7 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
                 <p className={s.illusTitle}>Your files are ready</p>
                 <ul className={s.dl}>
                   {[
-                    [funnel.product, "320 multi-track MIDI drum files · 32 packs · .zip"],
+                    [funnel.product, "2,067 MIDI files · 32 packs · .zip"],
                     ...w.bonuses.items.map((b) => [b.name, b.inside[0]]),
                   ].map(([name, meta]) => (
                     <li key={name}>

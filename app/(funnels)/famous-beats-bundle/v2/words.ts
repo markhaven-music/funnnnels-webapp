@@ -11,8 +11,8 @@ export const LANDING = {
     sub: "Hits by Drake, Travis Scott, Future, Metro Boomin and more. Kick, snare, hats and percussion on separate tracks. Load your sounds and start on a groove that already worked.",
     listen: "Press play. These are three of the 320 files, played on a drum kit.",
     bullets: [
-      "320 Drum Grooves From Hit Records, In MIDI",
-      "Kick, Snare, Hats And Percussion On Separate Tracks",
+      "320 Hit Drum Grooves In 2,067 MIDI Files",
+      "Every Song 3 Ways: Multi-Track, One Track, Part By Part",
       "Transcribed By Ear: Ghost Notes, Rolls And Velocity Included",
       "BPM, Artist And Song In Every File Name",
       "Any DAW, Mac Or PC. Commercial License",
@@ -41,8 +41,8 @@ export const LANDING = {
     titleEm: "the actual file.",
     lead: "320 drum grooves from hit records, in 32 packs of 10. Transcribed by hand and by ear into multi-track MIDI. Every kick, snare, hat and ghost note where the record has it.",
     ticks: [
-      "320 transcriptions, 32 packs of 10",
-      "Kick, snare, hats and percussion on separate tracks",
+      "320 transcriptions in 2,067 MIDI files, 32 packs of 10",
+      "Every song multi-track, as one General MIDI track, and part by part",
       "Transcribed by ear, ghost notes included",
       "BPM, artist and song in every file name",
       "Any DAW, Mac or PC. Commercial license",
@@ -69,7 +69,7 @@ export const LANDING = {
     title: "What you get when you open the folder.",
     items: [
       ["320 transcriptions", "Drum grooves from Drake, Travis Scott, Future, Metro Boomin, Kendrick Lamar, Lil Baby and more."],
-      ["One track per drum", "Kick, snare, hats and percussion come in on separate tracks. Mute the hats, swap the kick, move one snare."],
+      ["Every song three ways", "The multi-track file, with kick, snare, hats and percussion on separate tracks. The same groove on one track with General MIDI drum notes, for a drum rack. And every drum as its own file, to drag in one part at a time. 2,067 MIDI files in all."],
       ["Transcribed by ear", "Written by hand, note for note, ghost notes included. Not ripped from the master. An original transcription."],
       ["Find a groove in seconds", "BPM, artist and song are in every file name. Every pack has audio previews, so you hear it before you drag it."],
       ["Any DAW, Mac or PC", "Standard .mid files. Drag them into FL Studio, Ableton, Logic, Pro Tools or whatever you make beats in."],
@@ -106,7 +106,7 @@ export const LANDING = {
   },
   bonuses: {
     title: "Six bonuses. All in the {price}.",
-    sub: "On the same download page as the bundle.",
+    sub: "4,360 more MIDI files and 305 WAV loops, on the same download page as the bundle.",
     items: [
       {
         id: "essential-drums",
@@ -157,7 +157,8 @@ export const LANDING = {
     title: "320 transcriptions for about the price of one.",
     sub: "A transcriber charges {c}10–30 for a single song. This is the whole bundle, one payment.",
     items: [
-      "320 multi-track MIDI drum transcriptions",
+      "320 drum transcriptions in 2,067 MIDI files",
+      "Every song multi-track, one-track (General MIDI) and part by part",
       "32 packs of 10 songs",
       "Audio previews in every pack",
       "BPM, artist and song in every file name",
@@ -177,7 +178,7 @@ export const LANDING = {
     items: [
       ["Pay", "by card, Apple Pay, Google Pay or PayPal."],
       ["Download", "from the buttons on the next page. The same links come by email."],
-      ["Unzip", "32 packs of 10 songs, each with its MIDI files and its audio previews, plus the 6 bonuses."],
+      ["Unzip", "32 packs of 10 songs: each song multi-track, as one track and part by part, with its audio preview. Plus the 6 bonuses."],
       ["Drag a .mid", "onto a drum track and load your kit. You can be on a drum track in 5 minutes."],
     ] as [string, string][],
   },
@@ -187,7 +188,7 @@ export const LANDING = {
       ["Is this MIDI or samples?", "MIDI: the drum part as notes, every hit, when it lands and how hard. There is no audio from the songs in the files. Each pack also has audio previews of the drums so you can hear a groove before you load it."],
       ["Are these the original song files?", "No. They are transcriptions, written by hand and by ear, note for note, from the records. Load similar drum sounds and you'll recognize the groove."],
       ["Can I sell beats made with them?", "Yes. Full commercial license: sell on BeatStars, Airbit, Traktrain, lease to artists, release on Spotify and Apple Music, keep the money. You just can't resell or share the MIDI files themselves."],
-      ["Will it work in my DAW?", "Yes. Standard .mid files: FL Studio, Ableton Live, Logic Pro, Pro Tools, Studio One, Cubase, Reaper, Bitwig, GarageBand. Mac and Windows, plus mobile DAWs that read MIDI."],
+      ["Will it work in my DAW?", "Yes. Standard .mid files: FL Studio, Ableton Live, Logic Pro, Pro Tools, Studio One, Cubase, Reaper, Bitwig, GarageBand. Mac and Windows, plus mobile DAWs that read MIDI. Use the multi-track file, the one-track General MIDI version on a drum rack, or one drum at a time."],
       ["How do I find the right groove out of 320?", "Every pack has a folder of audio previews. Scroll and listen, no need to load each MIDI. File names carry the BPM, artist and song, so you can search the folder."],
       ["I don't know music theory. Can I use it?", "Yes. Drag a file onto a drum track, pick your sounds, press play. The groove is already written."],
       ["How fast do I get it?", "Right after payment: the download buttons are on the next page and the links come by email."],
@@ -211,7 +212,8 @@ export const ORDER = {
   secure: "Secure checkout",
   srTitle: "Complete your Famous Beats Bundle order",
   stack: [
-    "320 multi-track MIDI drum transcriptions",
+    "320 drum transcriptions in 2,067 MIDI files",
+    "Each song multi-track, one-track (GM) and part by part",
     "32 packs of 10 songs, with audio previews",
     "BPM, artist and song in every file name",
     "Any DAW, Mac and PC · commercial license",
