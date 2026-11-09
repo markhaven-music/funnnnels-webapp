@@ -634,3 +634,16 @@
   font-size: 12px;
   color: var(--fg-1);
 }
+
+/* Phones: the tile notes wrap instead of ending in "…", the card gives its
+   padding back to the numbers. */
+@media (max-width: 700px) {
+  .perf { padding: 12px 10px 14px; }
+  .tile { padding: 10px 10px 11px; }
+  .tileDelta,
+  .tileNote {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}

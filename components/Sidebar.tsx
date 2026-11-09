@@ -7,12 +7,13 @@ type Props = {
   funnelCount: number;
   supportUnread?: number;
   active: string;
+  open?: boolean;
   onNav: (id: string) => void;
 };
 
-export function Sidebar({ funnelCount, supportUnread = 0, active, onNav }: Props) {
+export function Sidebar({ funnelCount, supportUnread = 0, active, open = false, onNav }: Props) {
   return (
-    <aside className="nav">
+    <aside className={`nav ${open ? "open" : ""}`} id="main-nav">
       {NAV.map((s) => (
         <div className="nav-section" key={s.section}>
           <div className="nav-label">{s.section}</div>

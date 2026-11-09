@@ -513,8 +513,9 @@ export function Performance({ a, cur, periodName }: Props) {
   };
   const toggle = (key: string) => setHidden((h) => ({ ...h, [key]: !h[key] }));
 
-  // The x axis: about eight dates, always the last.
-  const every = n <= 8 ? 1 : Math.ceil(n / 8);
+  // The x axis: about eight dates (fewer on a phone: one every ~64 px), always the last.
+  const maxLabels = Math.max(3, Math.min(8, Math.floor((W - 50) / 64)));
+  const every = n <= maxLabels ? 1 : Math.ceil(n / maxLabels);
   const xLabel = (r: Row) =>
     iv === "week" ? shortDay(r.from) : iv === "day" && n <= 7 ? dayLabel(r.to, { weekday: "short", day: "numeric" }) : shortDay(r.to);
   const domainTotal = domain.length ? merge(domain) : null;

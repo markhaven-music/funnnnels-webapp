@@ -43,6 +43,8 @@ const CARD_RANGE = "28d";
 
 export function Dashboard({ funnels: rows }: Props) {
   const [activeNav, setActiveNav] = useState<string>("home");
+  // Phones: the sidebar is a drawer opened from the top bar.
+  const [navOpen, setNavOpen] = useState(false);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   // Conversations with unread email in dashboard → Support, for the sidebar.
   const [supportUnread, setSupportUnread] = useState(0);
@@ -85,8 +87,18 @@ export function Dashboard({ funnels: rows }: Props) {
   return (
     <div className="app">
       <Brand />
-      <Sidebar funnelCount={funnels.filter((f) => !isLeadMagnet(f)).length} supportUnread={supportUnread} active={activeNav} onNav={setActiveNav} />
-      <TopBar trail={trail} />
+      <Sidebar
+        funnelCount={funnels.filter((f) => !isLeadMagnet(f)).length}
+        supportUnread={supportUnread}
+        active={activeNav}
+        open={navOpen}
+        onNav={(id) => {
+          setActiveNav(id);
+          setNavOpen(false);
+        }}
+      />
+      {navOpen && <div className="nav-scrim" onClick={() => setNavOpen(false)} aria-hidden="true" />}
+      <TopBar trail={trail} onMenu={() => setNavOpen((o) => !o)} menuOpen={navOpen} />
       {activeNav === "home"         && <DashboardHome funnels={funnels} analytics={analytics} />}
       {activeNav === "funnels"      && <MainPanel funnels={funnels} spend={spend} />}
       {activeNav === "products"     && <ProductsPanel />}
