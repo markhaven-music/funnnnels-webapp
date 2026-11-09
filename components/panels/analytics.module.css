@@ -175,12 +175,23 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
-.variants.two {
-  grid-template-columns: repeat(2, 1fr);
+.beforeAfter {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 10px 0 12px;
+}
+.baLabel {
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.baSub {
+  font-size: 12px;
+  color: var(--fg-2);
+  margin-top: 2px;
 }
 @media (max-width: 760px) {
-  .variants,
-  .variants.two {
+  .variants {
     grid-template-columns: 1fr;
   }
 }

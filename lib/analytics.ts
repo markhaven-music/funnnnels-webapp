@@ -182,6 +182,7 @@ export type TestStats = {
 };
 
 /** An order page's 5-minute bonus: the Drum Kit's (app/(funnels)/midi-drum-kit/bonusTest.ts), Jazz's (app/(funnels)/jazz-midi-pack/fiveMinBonus.ts). */
+export type Step2Side = { from: string; to: string | null; people: number; paid: number };
 export type BonusStats = {
   funnel: string;
   /** The funnel's name and the add-on given free. */
@@ -200,6 +201,8 @@ export type BonusStats = {
   paypal: number;
   /** Orders between `since` and `clocksSince` (Drum Kit, 11-08 evening): bonus on, visitors not counted yet, so left out. */
   earlier: number;
+  /** Step 2 (the payment form) → paid, per person (email), before the bonus vs since: see step2Paid. */
+  step2: { before: Step2Side; after: Step2Side };
   /** Card orders whose clock start is known: how long after it they paid. */
   timing: { label: string; n: number; within: boolean }[];
   timed: number;
@@ -909,10 +912,64 @@ async function checkoutPaid(funnel: string, w: { from: string; until: string | n
 
 // The order pages with a 5-minute bonus. Everyone on the Drum Kit's has had it since
 // 11-08 19:50 (6bf35cf); Jazz's (the Record Samples free, 11-09) counts from its first clock.
-const BONUS_FUNNELS: { funnel: string; name: string; item: string; since: string | null }[] = [
-  { funnel: "midi-drum-kit", name: "MIDI Drum Kit", item: "Expansions", since: "2026-11-08T19:50:00+01:00" },
-  { funnel: "jazz-midi-pack", name: "Jazz MIDI Pack", item: "Jazz Record Samples", since: null },
+// start: when the bonus began, for the step-2 before/after (Jazz: 6af… bbad0d5 went live 05:33).
+// STEP2_FROM: the "before" side starts when card payments worked again on today's step 2
+// (6b8f6bc, 11-07 17:35; from 11-06 17:21 every card payment failed).
+const STEP2_FROM = "2026-11-07T17:35:00+01:00";
+const BONUS_FUNNELS: { funnel: string; name: string; item: string; since: string | null; start: string }[] = [
+  { funnel: "midi-drum-kit", name: "MIDI Drum Kit", item: "Expansions", since: "2026-11-08T19:50:00+01:00", start: "2026-11-08T19:50:00+01:00" },
+  { funnel: "jazz-midi-pack", name: "Jazz MIDI Pack", item: "Jazz Record Samples", since: null, start: "2026-11-09T05:33:00+01:00" },
 ];
+
+/**
+ * Step 2 → paid, before the bonus vs since ("mi interessa sapere before and after del checkout
+ * cioè step 2"): each person (email) once, from their first step-2 start (checkout_starts:
+ * step 1 filled in, owner/test left out) in the window; paid = an order of the main product
+ * (card or PayPal, upsells apart) by the same email after it. Free-pack opt-ins left out
+ * (they land on the order page and almost never buy).
+ */
+async function step2Paid(funnel: string, start: string): Promise<{ before: Step2Side; after: Step2Side }> {
+  const db = supabase();
+  const { data: starts, error } = await db.from("checkout_starts").select("email, started_at").eq("funnel", funnel).eq("own", false).gte("started_at", STEP2_FROM).limit(5000);
+  if (error) throw error;
+  const first = new Map<string, number>();
+  for (const r of (starts ?? []) as { email: string; started_at: string }[]) {
+    const e = r.email.toLowerCase().trim();
+    const at = Date.parse(r.started_at);
+    if (!first.has(e) || at < first.get(e)!) first.set(e, at);
+  }
+  const emails = [...first.keys()];
+  const free = new Set<string>();
+  const paidAt = new Map<string, number[]>();
+  for (let i = 0; i < emails.length; i += 300) {
+    const chunk = emails.slice(i, i + 300);
+    const [o, p] = await Promise.all([
+      db.from("optins").select("email, created_at").in("email", chunk),
+      db.from("orders").select("email, created_at").eq("funnel", funnel).eq("status", "succeeded").is("parent", null).is("offer", null).in("email", chunk),
+    ]);
+    if (o.error) throw o.error;
+    if (p.error) throw p.error;
+    for (const r of (o.data ?? []) as { email: string; created_at: string }[]) {
+      const e = r.email.toLowerCase().trim();
+      if (Date.parse(r.created_at) < (first.get(e) ?? 0) + 3_600_000) free.add(e);
+    }
+    for (const r of (p.data ?? []) as { email: string; created_at: string }[]) {
+      const e = r.email.toLowerCase().trim();
+      (paidAt.get(e) ?? paidAt.set(e, []).get(e)!).push(Date.parse(r.created_at));
+    }
+  }
+  const cut = Date.parse(start);
+  const side = (after: boolean): Step2Side => {
+    const people = emails.filter((e) => !free.has(e) && (first.get(e)! >= cut) === after);
+    return {
+      from: after ? start : STEP2_FROM,
+      to: after ? null : start,
+      people: people.length,
+      paid: people.filter((e) => (paidAt.get(e) ?? []).some((t) => t >= first.get(e)! - 600_000)).length,
+    };
+  };
+  return { before: side(false), after: side(true) };
+}
 const BONUS_BUCKETS: { label: string; upTo: number; within: boolean }[] = [
   { label: "Under 1 min", upTo: 60, within: true },
   { label: "1–2 min", upTo: 120, within: true },
@@ -933,7 +990,8 @@ const BONUS_BUCKETS: { label: string; upTo: number; within: boolean }[] = [
 async function bonusStats(sales: Sale[], cfg: (typeof BONUS_FUNNELS)[number]): Promise<BonusStats> {
   const db = supabase();
   const clocks = () => db.from("bonus_clocks").select("id", { count: "exact", head: true }).eq("own", false).eq("funnel", cfg.funnel);
-  const [first, all, phone] = await Promise.all([
+  const [step2, first, all, phone] = await Promise.all([
+    step2Paid(cfg.funnel, cfg.start),
     db.from("bonus_clocks").select("started_at").eq("own", false).eq("funnel", cfg.funnel).order("started_at").limit(1).maybeSingle(),
     clocks(),
     clocks().eq("device", "mobile"),
@@ -964,6 +1022,7 @@ async function bonusStats(sales: Sale[], cfg: (typeof BONUS_FUNNELS)[number]): P
     after: counted.filter((s) => !s.paypal && !s.bonus).length,
     paypal: counted.filter((s) => s.paypal).length,
     earlier: orders.length - counted.length,
+    step2,
     timing,
     timed: timed.length,
     medianSec: sorted.length ? sorted[Math.floor((sorted.length - 1) / 2)] : null,

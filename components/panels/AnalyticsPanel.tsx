@@ -315,7 +315,31 @@ function BonusCard({ b }: { b: BonusStats }) {
         </div>
       </div>
 
-      <div className={`${s.variants} ${s.two}`}>
+      <div className={s.variants}>
+        <div className={s.variant}>
+          <div className={s.variantHead}>Checkout step 2: who paid, before vs after</div>
+          <div className={s.beforeAfter}>
+            {(["before", "after"] as const).map((k) => {
+              const v = b.step2[k];
+              return (
+                <div key={k}>
+                  <div className={s.baLabel}>{k === "before" ? "Before the bonus" : "With the bonus"}</div>
+                  <div className={s.bonusBig}>{v.people ? pct(v.paid, v.people) : "—"}</div>
+                  <div className={s.baSub}>
+                    {int(v.paid)} paid of {int(v.people)}
+                  </div>
+                  <div className={s.baSub}>
+                    {whenText(when(v.from))} → {v.to ? whenText(when(v.to)) : "now"}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className={s.paidNote}>
+            People who filled in step 1 and reached the payment form, each counted once; paid = bought the {b.name} (card or PayPal). Free-pack sign-ups and owner/test left out. Before starts 11-07 17:35: step 2 as it is today, card payments working.
+          </div>
+        </div>
+
         <div className={s.variant}>
           <div className={s.variantHead}>From the order page to the payment</div>
           <div className={s.bonusBig}>
