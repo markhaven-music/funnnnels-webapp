@@ -10,6 +10,9 @@ import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content
 import { AB, AB_KEEP_SCRIPT } from "../../abtest";
 import { Checkout, OrderSummary, Proof, Reviews, Seal, fill, isSectionType, type Ctx } from "../../sections";
 import { Tracking } from "../../Tracking";
+import { JazzBonusBanner, JazzBonusItem } from "../../BonusClock";
+import { JAZZ_BONUS, JAZZ_BONUS_SCRIPT, JAZZ_BONUS_TIME_SCRIPT, JAZZ_BONUS_WORDS } from "../../fiveMinBonus";
+import c from "../../fiveMinBonus.module.css";
 import { splitName } from "../../../_kit/KitBox";
 import { Beacon } from "../../../Beacon";
 import { display } from "../../fonts";
@@ -19,8 +22,9 @@ import s from "../../jazz.module.css";
 // here. Cached on the CDN per currency like the landing (proxy.ts rewrites
 // /jazz-midi-pack/order); publishing from the editor refreshes it too. The
 // stack, guarantee and bonuses are the landing's own sections, so an edit there
-// shows here. The reviews are the landing's too. No timer (the brief rules out
-// fake urgency).
+// shows here. The reviews are the landing's too. No fake timer (the brief rules
+// it out); since 2026-11-09 a real one: the 5-minute Record Samples bonus
+// (../../fiveMinBonus.ts), its end kept by the server.
 
 export const revalidate = 3600;
 
@@ -69,6 +73,9 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     afterOrder: nextStep(f, "en", null),
     keepCard: upsellsOn(f),
   };
+  // The add-on the 5-minute bonus gives (none if it's gone from Products).
+  const rs = f.bumps?.find((b) => b.id === JAZZ_BONUS.item);
+  if (rs) ctx.fiveMinBonus = { price: rs.price[currency] };
   const offer = pick(sections, "s_offer");
   const guarantee = pick(sections, "s_guarantee");
   const reviews = pick(sections, "s_reviews");
@@ -79,6 +86,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       <script dangerouslySetInnerHTML={{ __html: AB_KEEP_SCRIPT }} />
       <Tracking value={amount} currency={currency} page="order" />
       <Beacon funnel={funnel.slug} page="order" abCookie={AB.cookie} />
+      {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
+      {rs && <script dangerouslySetInnerHTML={{ __html: JAZZ_BONUS_SCRIPT }} />}
       <div className={s.bfbar}>
         <b>BLACK FRIDAY:</b> 90% Sale Is Ending Soon
       </div>
@@ -92,13 +101,25 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
           </span>
         </header>
       </div>
+      {rs && <JazzBonusBanner w={JAZZ_BONUS_WORDS} />}
 
       <section id="buy" className={`${s.sec} ${s.order} ${s.orderPage}`}>
         <div className={s.wrap}>
           {/* No heading above the box and the form ("you can eliminate it"); the h1 stays for screen readers. */}
           <h1 className={s.srOnly}>Complete your Jazz MIDI Pack order</h1>
           <div className={s.orderGrid}>
-            <OrderSummary p={offer} ctx={ctx} />
+            <OrderSummary
+              p={offer}
+              ctx={ctx}
+              extra={
+                rs && (
+                  <div className={c.slot}>
+                    <JazzBonusItem w={JAZZ_BONUS_WORDS} price={money(rs.price[currency], currency)} />
+                    <script dangerouslySetInnerHTML={{ __html: JAZZ_BONUS_TIME_SCRIPT }} />
+                  </div>
+                )
+              }
+            />
             <div className={s.orderForm}>
               <Checkout ctx={ctx} />
               <Proof />

@@ -181,10 +181,14 @@ export type TestStats = {
   map?: boolean;
 };
 
-/** The Drum Kit order page's 5-minute bonus (app/(funnels)/midi-drum-kit/bonusTest.ts). */
+/** An order page's 5-minute bonus: the Drum Kit's (app/(funnels)/midi-drum-kit/bonusTest.ts), Jazz's (app/(funnels)/jazz-midi-pack/fiveMinBonus.ts). */
 export type BonusStats = {
-  /** Since everyone has the bonus (ISO). */
-  since: string;
+  funnel: string;
+  /** The funnel's name and the add-on given free. */
+  name: string;
+  item: string;
+  /** Since everyone has the bonus (ISO; Jazz: its first clock, null before any). */
+  since: string | null;
   /** Drum Kit orders paid since then (upsells apart): within the 5 minutes (they got the free Expansions) and after. */
   orders: number;
   within: number;
@@ -255,8 +259,8 @@ export type Analytics = {
   funnels: FunnelStats[];
   /** The running A/B tests (TESTS), each since it started, whatever the range. */
   tests: TestStats[];
-  /** The Drum Kit order page's 5-minute bonus, since everyone has it (bonusStats), whatever the range. */
-  bonus: BonusStats | null;
+  /** The order pages' 5-minute bonuses (Drum Kit, Jazz), each since everyone has it (bonusStats), whatever the range. */
+  bonuses: BonusStats[];
   /** Before/after the availability popup (availabilityStats), whatever the range. */
   availability: AvailabilityStats | null;
   /** Day by day over the range (dashboard home), oldest first. */
@@ -606,7 +610,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
         return paid ? { ...stats, variants: stats.variants.map((v, j) => ({ ...v, paid: paid[j] ?? undefined })) } : stats;
       }),
     ),
-    bonus: await soft("5-minute bonus", bonusStats(allSales), null),
+    bonuses: (await Promise.all(BONUS_FUNNELS.map((b) => soft(`5-minute bonus (${b.name})`, bonusStats(allSales, b), null)))).filter((b): b is BonusStats => !!b),
     availability: await soft("availability popup", availabilityStats(now), null),
     ...daily(range, since, last, dayRows, allSales, rate, trackingSince),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
@@ -905,8 +909,12 @@ async function checkoutPaid(funnel: string, w: { from: string; until: string | n
   };
 }
 
-// Everyone on the Drum Kit order page has had the 5-minute bonus since this minute (6bf35cf).
-const BONUS_SINCE = "2026-11-08T19:50:00+01:00";
+// The order pages with a 5-minute bonus. Everyone on the Drum Kit's has had it since
+// 11-08 19:50 (6bf35cf); Jazz's (the Record Samples free, 11-09) counts from its first clock.
+const BONUS_FUNNELS: { funnel: string; name: string; item: string; since: string | null }[] = [
+  { funnel: "midi-drum-kit", name: "MIDI Drum Kit", item: "Expansions", since: "2026-11-08T19:50:00+01:00" },
+  { funnel: "jazz-midi-pack", name: "Jazz MIDI Pack", item: "Jazz Record Samples", since: null },
+];
 const BONUS_BUCKETS: { label: string; upTo: number; within: boolean }[] = [
   { label: "Under 1 min", upTo: 60, within: true },
   { label: "1–2 min", upTo: 120, within: true },
@@ -919,22 +927,24 @@ const BONUS_BUCKETS: { label: string; upTo: number; within: boolean }[] = [
 ];
 
 /**
- * How many pay within the 5 minutes of the Drum Kit's bonus: every order since
- * everyone has it, split by whether it got the free Expansions, against the clocks
- * started (bonus_clocks, from 2026-11-09) and, for card orders that say when their
- * clock started, how long they took.
+ * How many pay within an order page's 5-minute bonus: every order since everyone
+ * has it, split by whether it got the free add-on, against the clocks started
+ * (bonus_clocks, the Drum Kit's from 2026-11-09, by funnel) and, for card orders
+ * that say when their clock started, how long they took.
  */
-async function bonusStats(sales: Sale[]): Promise<BonusStats> {
-  const from = Date.parse(BONUS_SINCE);
-  const orders = sales.filter((s) => s.funnel === "midi-drum-kit" && !s.offer && s.created >= from);
+async function bonusStats(sales: Sale[], cfg: (typeof BONUS_FUNNELS)[number]): Promise<BonusStats> {
   const db = supabase();
+  const clocks = () => db.from("bonus_clocks").select("id", { count: "exact", head: true }).eq("own", false).eq("funnel", cfg.funnel);
   const [first, all, phone] = await Promise.all([
-    db.from("bonus_clocks").select("started_at").eq("own", false).order("started_at").limit(1).maybeSingle(),
-    db.from("bonus_clocks").select("id", { count: "exact", head: true }).eq("own", false),
-    db.from("bonus_clocks").select("id", { count: "exact", head: true }).eq("own", false).eq("device", "mobile"),
+    db.from("bonus_clocks").select("started_at").eq("own", false).eq("funnel", cfg.funnel).order("started_at").limit(1).maybeSingle(),
+    clocks(),
+    clocks().eq("device", "mobile"),
   ]);
   for (const r of [first, all, phone]) if (r.error) throw r.error;
   const clocksSince = (first.data as { started_at: string } | null)?.started_at ?? null;
+  const since = cfg.since ?? clocksSince;
+  const from = since ? Date.parse(since) : Infinity;
+  const orders = sales.filter((s) => s.funnel === cfg.funnel && !s.offer && s.created >= from);
   const counted = clocksSince ? orders.filter((s) => s.created >= Date.parse(clocksSince)) : [];
   const timed = orders.filter((s) => s.bonusStart && s.created >= s.bonusStart).map((s) => (s.created - s.bonusStart!) / 1000);
   const timing = BONUS_BUCKETS.map((b, i) => ({
@@ -945,7 +955,10 @@ async function bonusStats(sales: Sale[]): Promise<BonusStats> {
   const sorted = [...timed].sort((a, b) => a - b);
   const within = orders.filter((s) => s.bonus).length;
   return {
-    since: BONUS_SINCE,
+    funnel: cfg.funnel,
+    name: cfg.name,
+    item: cfg.item,
+    since,
     orders: orders.length,
     within,
     after: orders.filter((s) => !s.paypal && !s.bonus).length,

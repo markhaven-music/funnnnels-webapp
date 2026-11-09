@@ -48,7 +48,12 @@ export default async function ThankYou({
   const order = await getOrder(payment_intent ?? paypal_order, funnel.slug);
   // The upsell's name as dashboard → Products has it.
   const f = await resolveFunnel(funnel.slug);
-  const labels: Record<string, string> = { ...LABELS, ...Object.fromEntries((f?.offers ?? []).map((x) => [x.id, x.name])) };
+  // The add-ons too: the Record Samples (the 5-minute bonus) are only in Products, not in funnel.ts.
+  const labels: Record<string, string> = {
+    ...Object.fromEntries((f?.bumps ?? []).map((x) => [x.id, x.name])),
+    ...LABELS,
+    ...Object.fromEntries((f?.offers ?? []).map((x) => [x.id, x.name])),
+  };
   // The upsells bought after this order, each checked with its provider.
   const upsells: Order[] = [];
   if (order && !order.offer) {

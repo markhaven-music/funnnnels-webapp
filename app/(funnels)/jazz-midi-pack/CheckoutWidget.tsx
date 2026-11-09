@@ -12,6 +12,9 @@ import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
 import { isPreview, readCookie, track } from "@/lib/beacon";
 import { cookieCountry } from "@/lib/geo";
+import { endJazzBonus, JazzBonusItem, useJazzBonus } from "./BonusClock";
+import { JAZZ_BONUS_WORDS } from "./fiveMinBonus";
+import c from "./fiveMinBonus.module.css";
 
 // The two-step order form, copied from the ClickFunnels checkout:
 //   1 · Your info  → name + email (saved as a lead before any card is asked for)
@@ -67,6 +70,9 @@ type Props = {
   // A white form on the dark page (the Jazz order page since 11-06: the dark
   // one "si fonde con lo sfondo scuro"): ./checkout.module.css .light.
   light?: boolean;
+  // The Jazz order page's 5-minute bonus (./fiveMinBonus.ts): the Record Samples
+  // free in the order while the clock runs; `price` is what they'd cost.
+  fiveMinBonus?: { price: number };
 };
 
 type Info = { firstName: string; lastName: string; email: string };
@@ -108,7 +114,9 @@ export function CheckoutWidget(props: Props) {
     () => (props.publishableKey && wanted ? stripeFor(props.publishableKey) : null),
     [props.publishableKey, wanted],
   );
-  const body = { ...props, info, method, offers, picked, toggle, total };
+  const bonus = useJazzBonus(!!props.fiveMinBonus);
+  const bonusLive = !!props.fiveMinBonus && bonus.live;
+  const body = { ...props, info, method, offers, picked, toggle, total, bonusLive };
 
   return (
     <div className={`${s.widget} ${props.light ? s.light : ""}`}>
@@ -313,6 +321,8 @@ type BodyState = {
   picked: string[];
   toggle: (id: string, on: boolean) => void;
   total: number;
+  /** The 5-minute bonus is in the order now. */
+  bonusLive: boolean;
 };
 
 function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromise: ReturnType<typeof loadStripe> }) {
@@ -340,9 +350,11 @@ function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromis
         expected: props.total,
         // The A/B variant the buyer saw, if the funnel runs a test.
         variant: props.abCookie ? readCookie(props.abCookie) : "",
+        bonus: props.bonusLive,
       }),
     });
     const json = await res.json().catch(() => ({}));
+    if (json.bonusExpired) endJazzBonus();
     if (!res.ok || !json.clientSecret) throw new Error(json.error ?? "Payment couldn't start.");
     return json.clientSecret;
   }
@@ -411,7 +423,9 @@ function PayStepBody({
   cardOff,
   cardError,
   abCookie,
-}: Pick<Props, "funnel" | "country" | "currency" | "price" | "product" | "cart" | "abCookie" | "bumps"> &
+  fiveMinBonus,
+  bonusLive,
+}: Pick<Props, "funnel" | "country" | "currency" | "price" | "product" | "cart" | "abCookie" | "bumps" | "fiveMinBonus"> &
   BodyState & {
     onCard?: () => void;
     cardPaying?: boolean;
@@ -441,9 +455,11 @@ function PayStepBody({
           origin: window.location.origin,
           expected: total,
           variant: abCookie ? readCookie(abCookie) : "",
+          bonus: bonusLive,
         }),
       });
       const json = await res.json().catch(() => ({}));
+      if (json.bonusExpired) endJazzBonus();
       if (!res.ok || !json.approveUrl) throw new Error(json.error ?? "PayPal couldn't start.");
       // PayPal's page takes over; it sends the buyer back to the thank-you page.
       window.location.assign(json.approveUrl);
@@ -465,6 +481,9 @@ function PayStepBody({
         </div>
       )}
 
+      {/* The 5-minute bonus, already in the order; "Time's up" in its place at 00:00, then nothing. */}
+      {fiveMinBonus && <JazzBonusItem w={JAZZ_BONUS_WORDS} price={money(fiveMinBonus.price, currency)} compact light />}
+
       {offers.map((offer) => (
         <BumpBox key={offer.id} offer={offer} currency={currency} ticked={picked.includes(offer.id)} onTick={(on) => toggle(offer.id, on)} />
       ))}
@@ -484,6 +503,17 @@ function PayStepBody({
               <span>{money(o.price, currency)}</span>
             </div>
           ))}
+        {bonusLive && fiveMinBonus && (
+          <div className={s.sumRow}>
+            <span>
+              {JAZZ_BONUS_WORDS.name} <b className={c.free}>{JAZZ_BONUS_WORDS.summaryTag}</b>
+            </span>
+            <span className={c.free}>
+              <s>{money(fiveMinBonus.price, currency)}</s>
+              {JAZZ_BONUS_WORDS.free}
+            </span>
+          </div>
+        )}
         <div className={`${s.sumRow} ${s.sumTotal}`}>
           <span>Total</span>
           <span>{money(total, currency)}</span>

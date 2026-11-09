@@ -42,6 +42,8 @@ export type Ctx = {
   // The page after paying (the upsell, else the thank-you page) and whether the card is kept for it (lib/funnels.ts nextStep, upsellsOn).
   afterOrder?: string;
   keepCard?: boolean;
+  // The order page's 5-minute bonus (./fiveMinBonus.ts): the Record Samples' price, free while the clock runs.
+  fiveMinBonus?: { price: number };
 };
 
 type Patch = (props: Record<string, unknown>) => void;
@@ -1023,10 +1025,11 @@ export function ValueStack({ p, patch, ctx, h = ALL }: { p: SectionProps["s_offe
 }
 
 /** What the order includes: the box, the stack, the bonuses with their value, the total, the guarantee. On the order page. */
-export function OrderSummary({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx }) {
+export function OrderSummary({ p, patch, ctx, extra }: { p: SectionProps["s_offer"]; patch?: Patch; ctx: Ctx; extra?: ReactNode }) {
   return (
     <div className={s.orderSummary}>
       <ProductBox />
+      {extra}
       <TickList items={p.stack} k="stack" patch={patch} ctx={ctx} className={s.stack} />
       <div className={s.bonusMini}>
         <p className={s.bonusMiniHead}>Plus {funnel.bonuses.length} free bonuses</p>
@@ -1075,6 +1078,7 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       keepCard={ctx.keepCard}
       publishableKey={ctx.publishableKey}
       abCookie={AB.cookie}
+      fiveMinBonus={ctx.fiveMinBonus}
       deferStripe
       secureRow={false}
       light

@@ -1,0 +1,185 @@
+/* The Jazz order page's 5-minute bonus (./fiveMinBonus.ts, ./BonusClock.tsx), the
+   Drum Kit's look (../midi-drum-kit/order.module.css): black bar, one yellow.
+   In the cached HTML for everyone; hidden before the first paint for a browser
+   whose 5 minutes ended on an earlier visit (<html data-jazz-bonus="over">). */
+:global(html[data-jazz-bonus="over"]) .bar,
+:global(html[data-jazz-bonus="over"]) .slot {
+  display: none;
+}
+
+.bar {
+  position: relative;
+  z-index: 1;
+  padding: 16px 16px 14px;
+  background: #000;
+  text-align: center;
+}
+.lead {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.sub {
+  margin: 6px 0 0;
+  color: rgb(255 255 255 / 0.62);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.time {
+  display: inline-block;
+  min-width: 3.2em;
+  color: #f5b800;
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+}
+.barOver .lead {
+  color: rgb(255 255 255 / 0.62);
+  font-size: 16px;
+  font-weight: 700;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #f5b800;
+  color: #000;
+  font-size: 0.68em;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  vertical-align: 0.14em;
+}
+@media (max-width: 769px) {
+  .lead {
+    font-size: 17px;
+  }
+  .sub {
+    font-size: 13px;
+  }
+}
+
+.slot {
+  margin: 16px 0 0;
+}
+.item {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 4px;
+  background: #000;
+  color: #fff;
+  text-align: left;
+}
+.compact {
+  grid-template-columns: 48px 1fr auto;
+  margin: 0 0 18px;
+  padding: 10px;
+}
+.light {
+  background: #111;
+}
+.img {
+  width: 100%;
+  height: auto;
+  border-radius: 3px;
+}
+.info {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.name {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.compact .name {
+  font-size: 14px;
+}
+.line {
+  color: rgb(255 255 255 / 0.62);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.list {
+  margin: 2px 0;
+  padding: 0;
+  list-style: none;
+  color: rgb(255 255 255 / 0.88);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.list li {
+  position: relative;
+  padding-left: 14px;
+}
+.list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f5b800;
+}
+.added {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  color: rgb(255 255 255 / 0.88);
+  font-size: 13px;
+  font-weight: 600;
+}
+.added svg {
+  color: #f5b800;
+}
+.timeSmall {
+  color: #f5b800;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+.price {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  font-size: 13px;
+}
+.price s {
+  color: rgb(255 255 255 / 0.62);
+}
+.price b {
+  color: #f5b800;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+/* At 00:00, in the row's place: "Time's up. The free Jazz Record Samples are gone." */
+.gone {
+  margin: 0;
+  padding: 12px;
+  border-radius: 4px;
+  background: #000;
+  color: rgb(255 255 255 / 0.62);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+.gone.compact {
+  margin: 0 0 18px;
+}
+
+/* Step 2's summary: the free row and "(+ FREE BONUS)". */
+.free {
+  color: #b07f00;
+  font-weight: 900;
+}
+.free s {
+  margin-right: 6px;
+  color: #777;
+  font-weight: 400;
+}

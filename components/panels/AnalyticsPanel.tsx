@@ -88,7 +88,7 @@ export function AnalyticsPanel() {
 
       {data?.availability && <AvailabilityCard a={data.availability} />}
 
-      {data?.bonus && <BonusCard b={data.bonus} />}
+      {data?.bonuses?.map((b) => <BonusCard key={b.funnel} b={b} />)}
 
       {data?.tests.map((t) => <TestCard key={`${t.funnel}|${t.name}`} t={t} />)}
 
@@ -298,7 +298,7 @@ function AvailabilityCard({ a }: { a: AvailabilityStats }) {
   );
 }
 
-/** Dashboard → Analytics: how many Drum Kit buyers pay within the order page's 5-minute bonus (lib/analytics.ts bonusStats). */
+/** Dashboard → Analytics: how many buyers pay within an order page's 5-minute bonus (Drum Kit, Jazz: lib/analytics.ts bonusStats). */
 function BonusCard({ b }: { b: BonusStats }) {
   const card = b.within + b.after;
   const top = Math.max(1, ...b.timing.map((t) => t.n));
@@ -307,10 +307,11 @@ function BonusCard({ b }: { b: BonusStats }) {
       <div className={s.testHead}>
         <div>
           <div className={s.testTitle}>
-            <I.analytics size={14} /> 5-minute bonus · MIDI Drum Kit
+            <I.analytics size={14} /> 5-minute bonus · {b.name}
           </div>
           <div className={s.testSub}>
-            Order page: the Expansions free if paid within 5 minutes of arriving · since {whenText(when(b.since))}, when everyone got it · whatever the range above
+            Order page: the {b.item} free if paid within 5 minutes of arriving ·{" "}
+            {b.since ? `since ${whenText(when(b.since))}, when everyone got it` : "no clock started yet"} · whatever the range above
           </div>
         </div>
       </div>
@@ -323,7 +324,7 @@ function BonusCard({ b }: { b: BonusStats }) {
           </div>
           <div className={s.bonusPct}>{pct(b.within, card)}</div>
           <dl className={s.kv}>
-            <dt>Within 5 min (free Expansions)</dt>
+            <dt>Within 5 min (free {b.item})</dt>
             <dd className={s.strong}>{int(b.within)}</dd>
             <dt>After the 5 minutes</dt>
             <dd>{int(b.after)}</dd>
