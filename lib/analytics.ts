@@ -189,19 +189,17 @@ export type BonusStats = {
   item: string;
   /** Since everyone has the bonus (ISO; Jazz: its first clock, null before any). */
   since: string | null;
-  /** Drum Kit orders paid since then (upsells apart): within the 5 minutes (they got the free Expansions) and after. */
-  orders: number;
-  within: number;
-  after: number;
-  /** PayPal orders: PayPal doesn't record whether the bonus was given, so they're in neither `within` nor `after`. */
-  paypal: number;
   /** Clocks started (a browser reaching the order page for the first time, owner and test devices left out), counted since `clocksSince`. */
   clocksSince: string | null;
   clocks: number;
   clocksPhone: number;
-  /** The orders paid since clocks are counted, for the rates per clock. */
-  ordersSinceClocks: number;
-  withinSinceClocks: number;
+  /** Orders paid since clocks are counted (upsells apart), so they sit against the same visitors: within the 5 minutes (free add-on), after, PayPal (doesn't record it). */
+  orders: number;
+  within: number;
+  after: number;
+  paypal: number;
+  /** Orders between `since` and `clocksSince` (Drum Kit, 11-08 evening): bonus on, visitors not counted yet, so left out. */
+  earlier: number;
   /** Card orders whose clock start is known: how long after it they paid. */
   timing: { label: string; n: number; within: boolean }[];
   timed: number;
@@ -953,21 +951,19 @@ async function bonusStats(sales: Sale[], cfg: (typeof BONUS_FUNNELS)[number]): P
     n: timed.filter((sec) => sec < b.upTo && (i === 0 || sec >= BONUS_BUCKETS[i - 1].upTo)).length,
   }));
   const sorted = [...timed].sort((a, b) => a - b);
-  const within = orders.filter((s) => s.bonus).length;
   return {
     funnel: cfg.funnel,
     name: cfg.name,
     item: cfg.item,
     since,
-    orders: orders.length,
-    within,
-    after: orders.filter((s) => !s.paypal && !s.bonus).length,
-    paypal: orders.filter((s) => s.paypal).length,
     clocksSince,
     clocks: all.count ?? 0,
     clocksPhone: phone.count ?? 0,
-    ordersSinceClocks: counted.length,
-    withinSinceClocks: counted.filter((s) => s.bonus).length,
+    orders: counted.length,
+    within: counted.filter((s) => s.bonus).length,
+    after: counted.filter((s) => !s.paypal && !s.bonus).length,
+    paypal: counted.filter((s) => s.paypal).length,
+    earlier: orders.length - counted.length,
     timing,
     timed: timed.length,
     medianSec: sorted.length ? sorted[Math.floor((sorted.length - 1) / 2)] : null,

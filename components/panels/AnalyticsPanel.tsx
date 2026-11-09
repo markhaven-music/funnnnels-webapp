@@ -300,7 +300,6 @@ function AvailabilityCard({ a }: { a: AvailabilityStats }) {
 
 /** Dashboard → Analytics: how many buyers pay within an order page's 5-minute bonus (Drum Kit, Jazz: lib/analytics.ts bonusStats). */
 function BonusCard({ b }: { b: BonusStats }) {
-  const card = b.within + b.after;
   const top = Math.max(1, ...b.timing.map((t) => t.n));
   return (
     <section className={s.test}>
@@ -311,58 +310,39 @@ function BonusCard({ b }: { b: BonusStats }) {
           </div>
           <div className={s.testSub}>
             Order page: the {b.item} free if paid within 5 minutes of arriving ·{" "}
-            {b.since ? `since ${whenText(when(b.since))}, when everyone got it` : "no clock started yet"} · the date range above doesn&apos;t apply
+            {b.clocksSince ? `since ${whenText(when(b.clocksSince))}` : "nobody yet"} · the date range above doesn&apos;t apply
           </div>
         </div>
       </div>
 
-      <div className={s.variants}>
+      <div className={`${s.variants} ${s.two}`}>
         <div className={s.variant}>
-          <div className={s.variantHead}>Buyers who paid in time</div>
+          <div className={s.variantHead}>From the order page to the payment</div>
           <div className={s.bonusBig}>
-            {int(b.within)} <small>of {int(card)} buyers</small>
+            {int(b.orders)} <small>bought, of {int(b.clocks)} visitors</small>
           </div>
-          <div className={s.bonusPct}>{pct(b.within, card)}</div>
+          <div className={s.bonusPct}>{pct(b.orders, b.clocks)}</div>
           <dl className={s.kv}>
-            <dt>Within 5 min, got the free {b.item}</dt>
-            <dd className={s.strong}>{int(b.within)}</dd>
-            <dt>After 5 min, no bonus</dt>
+            <dt>Visitors to the order page</dt>
+            <dd>
+              {int(b.clocks)} <small>{int(b.clocksPhone)} on a phone</small>
+            </dd>
+            <dt>Bought</dt>
+            <dd className={s.strong}>{int(b.orders)}</dd>
+            <dt>· within 5 min, got the free {b.item}</dt>
+            <dd>{int(b.within)}</dd>
+            <dt>· after 5 min, no bonus</dt>
             <dd>{int(b.after)}</dd>
             {b.paypal > 0 && (
               <>
-                <dt>PayPal (can&apos;t tell)</dt>
+                <dt>· PayPal (doesn&apos;t tell us the time)</dt>
                 <dd>{int(b.paypal)}</dd>
               </>
             )}
           </dl>
-          <div className={s.paidNote}>Card orders of the main product, upsells not counted. PayPal doesn&apos;t record the bonus, so PayPal orders are left out of the %.</div>
-        </div>
-
-        <div className={s.variant}>
-          <div className={s.variantHead}>Order page visitors who bought</div>
-          <div className={s.bonusBig}>
-            {int(b.ordersSinceClocks)} <small>of {int(b.clocks)} visitors</small>
-          </div>
-          <div className={s.bonusPct}>{pct(b.ordersSinceClocks, b.clocks)}</div>
-          <dl className={s.kv}>
-            <dt>Reached the order page</dt>
-            <dd>{int(b.clocks)}</dd>
-            <dt>Bought</dt>
-            <dd className={s.strong}>
-              {int(b.ordersSinceClocks)} <small>{pct(b.ordersSinceClocks, b.clocks)}</small>
-            </dd>
-            <dt>…of them in time for the free {b.item}</dt>
-            <dd>
-              {int(b.withinSinceClocks)} <small>{pct(b.withinSinceClocks, b.clocks)}</small>
-            </dd>
-            <dt>Visitors on a phone</dt>
-            <dd>
-              {int(b.clocksPhone)} <small>{pct(b.clocksPhone, b.clocks)}</small>
-            </dd>
-          </dl>
           <div className={s.paidNote}>
-            Each browser counted once, the first time it reaches the order page (that&apos;s when its 5 minutes start); owner and test devices left out
-            {b.clocksSince ? ` · since ${whenText(when(b.clocksSince))}` : " · none yet"}
+            Each visitor = a browser counted once, the first time it opens the order page (its 5 minutes start then); owner and test devices left out. Main product only, upsells not counted.
+            {b.earlier > 0 ? ` ${int(b.earlier)} earlier order${b.earlier === 1 ? "" : "s"} (bonus already on, visitors not counted yet) left out so the numbers match.` : ""}
           </div>
         </div>
 
