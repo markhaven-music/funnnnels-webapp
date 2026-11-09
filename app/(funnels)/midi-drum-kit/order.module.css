@@ -398,8 +398,12 @@
 :global(html[data-ab-bonus="on"]) .bonusSlot {
   display: block;
 }
-:global(html[data-ab-bonus="on"]) .timer {
-  display: none;
+/* Phones only: there the bonus clock is the one clock. A computer always keeps
+   the "reserved for" box (user, 11-09: "su desktop il timer dovrebbe apparire sempre"). */
+@media (max-width: 769px) {
+  :global(html[data-ab-bonus="on"]) .timer {
+    display: none;
+  }
 }
 .bonusBar {
   padding: 16px 16px 14px;
