@@ -683,7 +683,7 @@ export const TESTS: TestDef[] = [
     // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
     // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
-    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-08 alone (card payments failed until 11-07 17:35), C 11-09 → 11-10, D 11-11 → today; orders go to the step they were paid on · C and D also have the landing's "Checking availability…" popup (since 11-08 20:15), A and B don't",
+    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-08 alone (card payments failed until 11-07 17:35), C 11-09 → 11-10, D 11-11 → today; orders go to the step they were paid on · C and D also have the landing's “Checking availability…” popup (since 11-08 20:15), A and B don't",
     // The popup is named in C and D ("D ha anche check availability come variabile", 2026-11-10):
     // D against C is the bonus alone, D against A is the new step 2 and the popup together.
     // C: the same step as B with the phone's pay bar docked to the bottom edge
