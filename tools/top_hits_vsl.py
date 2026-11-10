@@ -3,7 +3,7 @@ per TOP HITS MIDI Bundle con TUTTO").
 
 Same voice, captions, synth and encoder as the Jazz VSL (tools/jazz_vsl.py, imported and
 pointed at this funnel). What differs:
-  - the demos are four real files of the bundle (app/(funnels)/top-hits-midi-bundle/_v2/rolls.json,
+  - the demos are four real files of the bundle (app/(funnels)/top-hits-chords/rolls.json,
     read from the pack by tools/extract_top_hits.py), their first bars on the page's sine, with
     the file's piano roll, a playhead and the file name on screen;
   - the pictures are this funnel's (public/funnels/top-hits-midi-bundle), the bonus covers the
@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import jazz_vsl as J  # noqa: E402
 
 ROOT = J.ROOT
-TH = os.path.join(ROOT, "app", "(funnels)", "top-hits-midi-bundle")
+TH = os.path.join(ROOT, "app", "(funnels)", "top-hits-chords")
 PUB = os.path.join(ROOT, "public", "funnels", "top-hits-midi-bundle")
 JPUB = os.path.join(ROOT, "public", "funnels", "jazz-midi-pack")
 FPUB = os.path.join(ROOT, "public", "funnels", "famous-beats-bundle")
@@ -43,7 +43,7 @@ J.SPOKEN = {
     "SZA": "Sizza",
     "The Weeknd": "The Weekend",
 }
-J.ROLLS = json.load(open(os.path.join(TH, "_v2", "rolls.json")))
+J.ROLLS = json.load(open(os.path.join(TH, "rolls.json")))
 # How much of each file plays: about 10 seconds.
 BEATS = {"blinding": 32, "killbill": 16, "lucid": 16, "someone": 16}
 J.DEMOS = {
@@ -52,7 +52,7 @@ J.DEMOS = {
     "lucid": ("Lucid Dreams · Juice WRLD · 84 BPM · F#m", Y),
     "someone": ("Someone Like You · Adele · 134 BPM · A", Y),
 }
-BONUS = [  # the page's order (_v2/words.ts) and covers
+BONUS = [  # the page's order (words.ts) and covers
     ("The Chord Progressions Bible", f"{JPUB}/bonus-2-640.webp"),
     ("MIDI Chord Pack (Jazz Edition)", f"{JPUB}/bonus-1-640.webp"),
     ("Anime & Video Games MIDI Pack", f"{JPUB}/bonus-3-640.webp"),

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { start, stop, toggle, unlock, type PlayOpts, type Roll } from "../../jazz-midi-pack/piano";
-import { Svg } from "../../jazz-midi-pack/PlayableRoll";
-import { SoundPicker } from "../../jazz-midi-pack/SoundPicker";
-import r from "../../jazz-midi-pack/roll.module.css";
-import b from "../../jazz-midi-pack/browse.module.css";
+import { start, stop, toggle, unlock, type PlayOpts, type Roll } from "../jazz-midi-pack/piano";
+import { Svg } from "../jazz-midi-pack/PlayableRoll";
+import { SoundPicker } from "../jazz-midi-pack/SoundPicker";
+import r from "../jazz-midi-pack/roll.module.css";
+import b from "../jazz-midi-pack/browse.module.css";
 import first from "./rolls.json";
 import t from "./th.module.css";
 

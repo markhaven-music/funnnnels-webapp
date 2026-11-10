@@ -4,30 +4,32 @@ import { Fragment, type CSSProperties } from "react";
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
-import { fill } from "@/lib/words";
-import { Beacon } from "../../../Beacon";
-import { Cta } from "../../../jazz-midi-pack/Cta";
-import { display } from "../../../jazz-midi-pack/fonts";
-import { Tracking } from "../../Tracking";
-import { funnel } from "../../funnel";
-import { BigRoll, HeroRolls } from "../../_v2/Rolls";
-import { SongPlayer } from "../../_v2/SongPlayer";
-import { LANDING as w } from "../../_v2/words";
-import first from "../../_v2/rolls.json";
-import s from "../../../jazz-midi-pack/jazz.module.css";
-import bn from "../../../jazz-midi-pack/bonus.module.css";
-import vs from "../../../jazz-midi-pack/value.module.css";
-import t from "../../_v2/th.module.css";
+import { fill, wordsFor } from "@/lib/words";
+import { Beacon } from "../../Beacon";
+import { Cta } from "../../jazz-midi-pack/Cta";
+import { display } from "../../jazz-midi-pack/fonts";
+import { Tracking } from "../../top-hits-midi-bundle/Tracking";
+import { funnel } from "../funnel";
+import { BigRoll, HeroRolls } from "../Rolls";
+import { SongPlayer } from "../SongPlayer";
+import { LANDING } from "../words";
+import first from "../rolls.json";
+import s from "../../jazz-midi-pack/jazz.module.css";
+import bn from "../../jazz-midi-pack/bonus.module.css";
+import vs from "../../jazz-midi-pack/value.module.css";
+import t from "../th.module.css";
 
-// The TOP HITS MIDI Bundle sales page, v2 (2026-11-10, "crea nuovo funnel per TOP HITS MIDI
-// Bundle con TUTTO"): built on the Jazz page's own CSS and in its order, as the Famous Beats
-// page is (../../../famous-beats-bundle/[currency]). Top to bottom: red bar, hero (logo + tag,
+// The TOP HITS MIDI Bundle sales page of its new funnel (2026-11-10, "crea nuovo funnel per
+// TOP HITS MIDI Bundle con TUTTO", "crea un funnel a parte"): built on the Jazz page's own CSS
+// and in its order, as the Famous Beats page is (../../famous-beats-bundle/[currency]). Top to
+// bottom: red bar, hero (logo + tag,
 // pre-title, headline, sub, the video, four playable files, bullets, big key, ticks, DAW
 // strip, proof), the letter, the product panel, what you get beside a playable roll, the
 // player of every file, how it works beside the folder path, what's inside, the ✓/✗ chart,
 // six bonuses with covers, the value stack, the seal and the license, after you pay beside
-// the download list, FAQ, the final key. Words in ../../_v2/words.ts, claims in ../../BRIEF.md.
-// Beside the live ClickFunnels copy (../../[currency]) until the switch; not indexed.
+// the download list, FAQ, the final key. Words in ../words.ts (with the
+// dashboard's edits: funnel map → Edit), claims in ../BRIEF.md.
+// The ClickFunnels copy of this product's page is its own funnel (../../top-hits-midi-bundle).
 
 export const revalidate = 3600;
 
@@ -40,18 +42,17 @@ const DIR = "/funnels/top-hits-midi-bundle";
 export const metadata: Metadata = {
   title: "TOP HITS MIDI Bundle · GRIND STUDIO",
   description: "The chords behind 1,000 hits, transcribed note for note into MIDI. The Weeknd, Taylor Swift, SZA, Drake, Bad Bunny and more. Any DAW.",
-  robots: { index: false, follow: false },
   openGraph: {
     title: "The chords behind 1,000 hits. Note for note, in MIDI.",
     description: "1,000 chord progressions from hit songs + 6 bonuses, by GRIND STUDIO. Drag into your DAW.",
     type: "website",
-    url: "https://m.thegrind.studio/top-hits-midi-bundle",
+    url: "https://m.thegrind.studio/top-hits-chords",
     images: [{ url: `https://m.thegrind.studio${DIR}/hero-880.webp`, width: 880, height: 663 }],
   },
 };
 
 // The Buy buttons take the ad's tags to the order page, so neo credits the sale to the
-// ad that sold (the Jazz page's lesson, ../../../jazz-midi-pack/abtest.ts AB_CARRY_SCRIPT).
+// ad that sold (the Jazz page's lesson, ../../jazz-midi-pack/abtest.ts AB_CARRY_SCRIPT).
 const CARRY = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "campaign_id", "adset_id", "ad_id", "fbclid", "gclid"];
 const CARRY_SCRIPT = `(function(){try{document.addEventListener('click',function(e){try{
 var a=e.target&&e.target.closest&&e.target.closest('a[data-cta]');if(!a)return;
@@ -74,16 +75,18 @@ const COVERS: Record<string, [string, string]> = {
 // The file the "how it works" picture shows: its place in the bundle and its first notes.
 const TREE = first.blinding;
 
-export default async function TopHitsV2({ params }: { params: Promise<{ currency: string }> }) {
+export default async function TopHitsLanding({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
+  // The page's words, with the dashboard's edits (funnel map → Edit).
+  const w = await wordsFor(funnel.slug, "landing", LANDING, { strict: true });
   // The price as dashboard → Products has it.
   const amount = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency];
   const price = money(amount, currency);
   // What one progression costs at that price (1,000 files).
   const per = `${SIGN[currency]}${(amount / funnel.counts.progressions).toFixed(2)}`;
   const tx = (text: string) => fill(text, { price, per, c: SIGN[currency], email: funnel.support });
-  const order = `/${funnel.slug}/v2/order`;
+  const order = `/${funnel.slug}/order`;
   const inner = `${price} · instant download`;
   const bonusValue = w.bonuses.items.reduce((sum, b) => sum + b.value, 0);
   const total = bonusValue + amount;
@@ -120,7 +123,7 @@ export default async function TopHitsV2({ params }: { params: Promise<{ currency
             <Marked text={w.hero.title} />
           </h1>
           <p className={s.heroSub}>{w.hero.sub}</p>
-          {/* The hero video, as on the Jazz page (../../vsl/script-en.md), in Wistia's own player. */}
+          {/* The hero video, as on the Jazz page (../vsl/script-en.md), in Wistia's own player. */}
           {funnel.vsl.wistiaId && (
             <div className={s.vsl}>
               <iframe
@@ -617,7 +620,7 @@ function Mark({ ok }: { ok: boolean | null }) {
   );
 }
 
-// The file's first notes as its piano roll, drawn in HTML from the real MIDI (../../_v2/rolls.json).
+// The file's first notes as its piano roll, drawn in HTML from the real MIDI (../rolls.json).
 function MiniRoll({ notes, beats }: { notes: number[][]; beats: number }) {
   const pitches = notes.map((n) => n[2]);
   const lo = Math.min(...pitches);

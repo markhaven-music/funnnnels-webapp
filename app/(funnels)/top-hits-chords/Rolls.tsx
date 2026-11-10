@@ -1,8 +1,8 @@
 "use client";
 
-import { PlayableRoll } from "../../jazz-midi-pack/PlayableRoll";
-import { SoundPicker } from "../../jazz-midi-pack/SoundPicker";
-import type { Roll } from "../../jazz-midi-pack/piano";
+import { PlayableRoll } from "../jazz-midi-pack/PlayableRoll";
+import { SoundPicker } from "../jazz-midi-pack/SoundPicker";
+import type { Roll } from "../jazz-midi-pack/piano";
 import first from "./rolls.json";
 import t from "./th.module.css";
 

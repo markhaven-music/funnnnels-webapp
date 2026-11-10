@@ -1,6 +1,6 @@
 import type { JazzBonusWords } from "../jazz-midi-pack/fiveMinBonus";
 
-// The TOP HITS v2 order page's 5-minute bonus (2026-11-10, "crea nuovo funnel per TOP HITS
+// This funnel's order page's 5-minute bonus (2026-11-10, "crea nuovo funnel per TOP HITS
 // MIDI Bundle con TUTTO"): the MIDI Drum Kit Expansions (172 MIDI drum files, the Drum Kit's
 // and Famous Beats' own 5-minute bonus) are free if the buyer pays within 5 real minutes of
 // reaching the order page: drums to put under the chords. At 00:00 they're gone and the
@@ -9,11 +9,11 @@ import type { JazzBonusWords } from "../jazz-midi-pack/fiveMinBonus";
 // Same mechanism as Jazz's (../jazz-midi-pack/fiveMinBonus.ts, lib/bonusClock.ts): a signed
 // httpOnly cookie of its own (fv_bonus_th), set by /api/checkout/bonus; the card and PayPal
 // routes give the add-on only while it runs. The add-on must be in dashboard → Products as
-// one of this funnel's add-ons (key "expansions"); the v2 order page hides it from the tick
+// one of this funnel's add-ons (key "expansions"); the order page hides it from the tick
 // boxes. ?bonus=off shows the page without it.
 
 export const TH_BONUS = {
-  funnel: "top-hits-midi-bundle",
+  funnel: "top-hits-chords",
   /** The add-on given free (the funnel_items key in dashboard → Products). */
   item: "expansions",
   cookie: "fv_bonus_th",

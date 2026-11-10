@@ -11,7 +11,7 @@ Writes
       { total, folders: [name], songs: [[artist, title, bpm, key, folder, chunk, index]] }
   public/funnels/top-hits-midi-bundle/browse-v1/<chunk>.json
       [ { file, bpm, beats, notes: [[startBeat, lenBeat, pitch]], chords: [] } ]   (50 songs each; chords: the Jazz roll type, unused)
-  app/(funnels)/top-hits-midi-bundle/_v2/rolls.json
+  app/(funnels)/top-hits-chords/rolls.json
       the files the page shows before anything is fetched (hero, letter, steps)
 
 The page plays the FIRST 8 BARS of each file (the whole file when it's shorter), empty
@@ -28,7 +28,7 @@ import unicodedata
 HERE = os.path.dirname(os.path.abspath(__file__))
 SONGS = os.path.expanduser("~/Desktop/Code Projects/grind-studio-landing-pages/src/data/top-hits-songs.json")
 PUB = os.path.join(HERE, "..", "public", "funnels", "top-hits-midi-bundle", "browse-v1")
-ROLLS = os.path.join(HERE, "..", "app", "(funnels)", "top-hits-midi-bundle", "_v2", "rolls.json")
+ROLLS = os.path.join(HERE, "..", "app", "(funnels)", "top-hits-chords", "rolls.json")
 FOLDERS = ["Modern Pop & Ballads", "Hiphop, Trap & Urban", "Dance & Electronic", "Vintage Classics, Rock & Country"]
 BARS = 8
 CHUNK = 50

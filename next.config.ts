@@ -12,10 +12,13 @@ const nextConfig: NextConfig = {
     return [{ source: "/funnels/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }] }];
   },
   // The Famous Beats v2 preview became the live page on 2026-11-10: old /v2 links land on it.
+  // The TOP HITS v2 preview became a funnel of its own the same day (/top-hits-chords).
   async redirects() {
     return [
       { source: "/famous-beats-bundle/v2", destination: "/famous-beats-bundle", permanent: false },
       { source: "/famous-beats-bundle/v2/order", destination: "/famous-beats-bundle/order", permanent: false },
+      { source: "/top-hits-midi-bundle/v2", destination: "/top-hits-chords", permanent: false },
+      { source: "/top-hits-midi-bundle/v2/order", destination: "/top-hits-chords/order", permanent: false },
     ];
   },
 };

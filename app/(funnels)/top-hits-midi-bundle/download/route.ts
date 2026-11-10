@@ -1,6 +1,6 @@
 import { deliver, fileFor } from "@/lib/catalog";
 import { getOrder } from "@/lib/orders";
-import { funnel, unlocked } from "../funnel";
+import { funnel } from "../funnel";
 
 export const runtime = "nodejs";
 
@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const key = url.searchParams.get("file") ?? "pack";
   const order = await getOrder(url.searchParams.get("order"), funnel.slug);
-  if (!order || order.status !== "succeeded" || !unlocked(order.items).includes(key)) {
+  if (!order || order.status !== "succeeded" || !order.items.includes(key)) {
     return new Response("This download link isn't valid for a completed order.", { status: 403 });
   }
 

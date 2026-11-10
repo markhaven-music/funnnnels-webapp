@@ -4,6 +4,8 @@ import { LANGS, paths, type Lang } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { codeTexts, TEXT_PAGES, type TextPage } from "@/app/(funnels)/midi-drum-kit/texts";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import { LANDING as TH_LANDING, ORDER as TH_ORDER, THANKS } from "@/app/(funnels)/top-hits-midi-bundle/words";
+import { funnel as topHitsChords } from "@/app/(funnels)/top-hits-chords/funnel";
+import { LANDING as THC_LANDING, ORDER as THC_ORDER } from "@/app/(funnels)/top-hits-chords/words";
 import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
 import { landingTemplate as famousLanding } from "@/app/(funnels)/famous-beats-bundle/landing";
 import { ORDER as FB_ORDER } from "@/app/(funnels)/famous-beats-bundle/words";
@@ -88,6 +90,22 @@ export function editableFunnel(id: string): EditableFunnel | null {
         { id: "landing", name: "Sales page", code: () => leaves(TH_LANDING), frame: () => inFrame(at), live: () => KIT_HOME + at, revalidate: rebuild(at), vars },
         { id: "order", name: "Order page", code: () => leaves(TH_ORDER), frame: () => inFrame(`${at}/order`), live: () => KIT_HOME + `${at}/order`, revalidate: rebuild(`${at}/order`), vars },
         { id: "thank-you", name: "Thank-you page", code: () => leaves(THANKS), frame: () => inFrame(topHits.checkout.thankYou), live: () => KIT_HOME + topHits.checkout.thankYou, revalidate: () => {}, vars },
+      ],
+    };
+  }
+  // TOP HITS' new funnel: its React pages' words (app/(funnels)/top-hits-chords/words.ts), the shared thank-you page.
+  if (id === topHitsChords.slug) {
+    const at = `/${topHitsChords.slug}`;
+    const eur = topHitsChords.price.eur;
+    const vars = { c: "€", price: `€${eur}`, per: `€${(eur / topHitsChords.counts.progressions).toFixed(2)}`, email: topHitsChords.support };
+    return {
+      id,
+      name: topHitsChords.label,
+      langs: ENGLISH,
+      pages: [
+        { id: "landing", name: "Sales page", code: () => leaves(THC_LANDING), frame: () => inFrame(at), live: () => KIT_HOME + at, revalidate: rebuild(at, `${at}/order`), vars },
+        { id: "order", name: "Order page", code: () => leaves(THC_ORDER), frame: () => inFrame(`${at}/order`), live: () => KIT_HOME + `${at}/order`, revalidate: rebuild(`${at}/order`), vars },
+        { id: "thank-you", name: "Thank-you page", code: () => leaves(THANKS), frame: () => inFrame(topHitsChords.checkout.thankYou), live: () => KIT_HOME + topHitsChords.checkout.thankYou, revalidate: () => {}, vars },
       ],
     };
   }

@@ -5,24 +5,24 @@ import { getFunnel, nextStep, resolveFunnel, upsellsOn, type Bump } from "@/lib/
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { restate } from "@/lib/restate";
-import { fill } from "@/lib/words";
-import { CheckoutWidget } from "../../../../jazz-midi-pack/CheckoutWidget";
-import { JazzBonusBanner, JazzBonusItem } from "../../../../jazz-midi-pack/BonusClock";
-import { bonusScript, bonusTimeScript } from "../../../../jazz-midi-pack/fiveMinBonus";
-import { Shield } from "../../../../jazz-midi-pack/sections";
-import { Tracking } from "../../../Tracking";
-import { Beacon } from "../../../../Beacon";
-import { display } from "../../../../jazz-midi-pack/fonts";
-import c from "../../../../jazz-midi-pack/fiveMinBonus.module.css";
-import s from "../../../../jazz-midi-pack/jazz.module.css";
-import { funnel } from "../../../funnel";
-import { TH_BONUS, TH_BONUS_WORDS } from "../../../fiveMinBonus";
-import { BUMP_COPY, LANDING, ORDER as w } from "../../../_v2/words";
+import { fill, wordsFor } from "@/lib/words";
+import { CheckoutWidget } from "../../../jazz-midi-pack/CheckoutWidget";
+import { JazzBonusBanner, JazzBonusItem } from "../../../jazz-midi-pack/BonusClock";
+import { bonusScript, bonusTimeScript } from "../../../jazz-midi-pack/fiveMinBonus";
+import { Shield } from "../../../jazz-midi-pack/sections";
+import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
+import { Beacon } from "../../../Beacon";
+import { display } from "../../../jazz-midi-pack/fonts";
+import c from "../../../jazz-midi-pack/fiveMinBonus.module.css";
+import s from "../../../jazz-midi-pack/jazz.module.css";
+import { funnel } from "../../funnel";
+import { TH_BONUS, TH_BONUS_WORDS } from "../../fiveMinBonus";
+import { BUMP_COPY, LANDING, ORDER } from "../../words";
 
-// The v2 order page, the Jazz order page's (../../../../jazz-midi-pack/order) as Famous Beats
-// has it: red bar, the 5-minute bonus (the MIDI Drum Kit Expansions, ../../../fiveMinBonus.ts),
+// This funnel's order page, the Jazz order page's (../../../jazz-midi-pack/order) as Famous Beats
+// has it: red bar, the 5-minute bonus (the MIDI Drum Kit Expansions, ../../fiveMinBonus.ts),
 // the box and what's in the order beside the white two-step checkout (card / PayPal, tick
-// boxes), the guarantee under it. Beside the live ClickFunnels copy (../../../order) until the switch.
+// boxes), the guarantee under it.
 
 export const revalidate = 3600;
 
@@ -58,6 +58,9 @@ const BONUS_THUMBS: Record<string, string> = {
 export default async function OrderPage({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
+  // The page's words and the sales page's (bonuses, guarantee), with the dashboard's edits (funnel map → Edit).
+  const w = await wordsFor(funnel.slug, "order", ORDER, { strict: true });
+  const landing = await wordsFor(funnel.slug, "landing", LANDING, { strict: true });
   const f = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
   const amount = f.price[currency];
   const price = money(amount, currency);
@@ -97,7 +100,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       </div>
       <div className={s.topband}>
         <header className={`${s.wrap} ${s.topbar}`}>
-          <a href={`/${funnel.slug}/v2`} className={s.logo} style={{ textDecoration: "none" }}>
+          <a href={`/${funnel.slug}`} className={s.logo} style={{ textDecoration: "none" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
           </a>
@@ -142,7 +145,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
               <div className={s.bonusMini}>
                 <p className={s.bonusMiniHead}>{w.bonusHead}</p>
                 <ul>
-                  {LANDING.bonuses.items.map((x) => (
+                  {landing.bonuses.items.map((x) => (
                     <li key={x.id}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={BONUS_THUMBS[x.id]} width={36} height={54} alt="" loading="lazy" />
@@ -202,8 +205,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="14-day quality guarantee" width={150} height={150} loading="lazy" decoding="async" />
             <div>
-              <h2 className={s.h2}>{LANDING.guarantee.title}</h2>
-              <p className={s.sub}>{t(LANDING.guarantee.text)}</p>
+              <h2 className={s.h2}>{landing.guarantee.title}</h2>
+              <p className={s.sub}>{t(landing.guarantee.text)}</p>
             </div>
           </div>
         </div>

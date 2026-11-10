@@ -2,7 +2,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { funnel as drumKit } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { funnel as jazz } from "@/app/(funnels)/jazz-midi-pack/funnel";
-import { funnel as topHits, includes as topHitsIncludes } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
+import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
+import { funnel as topHitsChords } from "@/app/(funnels)/top-hits-chords/funnel";
 import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
 import { funnel as drunkGrooves } from "@/app/(funnels)/drunk-swing-grooves/funnel";
 import type { Money } from "@/lib/launch";
@@ -102,7 +103,8 @@ type CodeFunnel = {
 
 export const CODE_FUNNELS: CodeFunnel[] = [
   { slug: jazz.slug, name: jazz.product, files: { ...jazz.files, ...jazz.remoteFiles }, bonuses: jazz.bonuses },
-  { slug: topHits.slug, name: topHits.product, files: topHits.files, includes: topHitsIncludes },
+  { slug: topHits.slug, name: topHits.product, files: topHits.files },
+  { slug: topHitsChords.slug, name: topHitsChords.label, files: topHitsChords.files, includes: topHitsChords.includes },
   { slug: drumKit.slug, name: drumKit.product, files: drumKit.files, includes: drumKit.includes },
   { slug: famousBeats.slug, name: famousBeats.product, files: famousBeats.files },
   { slug: drunkGrooves.slug, name: drunkGrooves.product, files: drunkGrooves.files, includes: drunkGrooves.includes },
@@ -345,6 +347,7 @@ export async function removeItem(funnel: string, role: ItemRole, key: string): P
 /** The upsells each code funnel has a page for, by key. */
 const CODE_UPSELLS: Record<string, string[]> = {
   [topHits.slug]: topHits.offers.map((o) => o.id),
+  [topHitsChords.slug]: topHitsChords.offers.map((o) => o.id),
   [drumKit.slug]: drumKit.offers.map((o) => o.id),
   [famousBeats.slug]: famousBeats.offers.map((o) => o.id),
   [jazz.slug]: jazz.offers.map((o) => o.id),
