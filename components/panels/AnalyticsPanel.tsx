@@ -377,16 +377,22 @@ function TestCard({ t }: { t: TestStats }) {
             <I.abtest size={14} /> {t.name} test · {t.product}
           </div>
           <div className={s.testSub}>
-            {t.where}{t.since ? ` · since ${t.since} (${t.days} day${t.days === 1 ? "" : "s"})` : ""} · whole test, whatever the range above
+            {t.where}
+            {t.since ? (t.ended ? ` · ${t.since} → ${t.ended.day}` : ` · since ${t.since}`) + ` (${t.days} day${t.days === 1 ? "" : "s"})` : ""} · whole test, whatever the range above
           </div>
         </div>
         <div className={`${s.verdict} ${t.verdict === "winner" ? s.win : ""}`}>
-          {t.verdict === "winner" && best ? `${name(best)} wins.` : VERDICT[t.verdict]}
+          {t.ended ? `Ended ${t.ended.day} · ${name(t.ended.kept)} kept.` : t.verdict === "winner" && best ? `${name(best)} wins.` : VERDICT[t.verdict]}
         </div>
       </div>
 
       <p className={s.testNote}>
-        {t.verdict === "early" || t.verdict === "waiting" ? (
+        {t.ended ? (
+          <>
+            Ended: everyone sees {name(t.ended.kept)} now and nothing new is counted here. The numbers below are the test as it finished, kept to compare later
+            {t.verdict === "winner" ? "" : ` (it stopped before a reliable answer: about ${t.target} sales per variant)`}.
+          </>
+        ) : t.verdict === "early" || t.verdict === "waiting" ? (
           <>
             A reliable answer needs about {t.target} sales per variant: {int(t.salesToGo)} to go
             {t.daysToGo != null ? `, about ${Math.ceil(t.daysToGo)} more day${Math.ceil(t.daysToGo) === 1 ? "" : "s"} at the current pace` : ""}.

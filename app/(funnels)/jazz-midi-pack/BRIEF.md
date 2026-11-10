@@ -261,6 +261,11 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   funnel map's A/B lanes. Number 15 said "3,536 Chords" in the list; the page says "{files} MIDI Files" (they're
   files of progressions, not single chords). At ~1 landing visitor a day the test needs ad traffic to say anything;
   the first number to read is "went to order page" per headline.
+- 2026-11-10, "jazz funnel variante Looping penso che ha vinto", then "D vince chiudi ma tieni i test in archivio per
+  eventuali confronti": the test is ended and D ("Stop Looping The Same Four Chords. {files} Jazz MIDI Files, Voiced
+  Like A Pianist, Drag One Onto Your Rhodes.") is the headline, in the editor again. Orders / landing visits at the
+  end: A 1 / 43, B 1 / 43, C 3 / 75, D 3 / 45, E 2 / 54 (10 orders: D had the best rate, not a reliable answer; the
+  user's call). The card stays in dashboard → Analytics as an ended test, off the funnel map.
 - "aggiungi anche banner rossi sopra black friday come gli altri funnels": the TOP HITS / Famous Beats order pages'
   red bar (#9e1b1d) on top of the landing ("BLACK FRIDAY: 90% Sale Ends Soon") and the order page ("BLACK FRIDAY:
   90% Sale Is Ending Soon"). The user's call over the "no 'sale ends'" rule in Offer; 90 % is the value stack's

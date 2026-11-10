@@ -15,8 +15,15 @@
 // with ?preview=1 too (the map's lanes) it's only shown and not counted.
 //
 // Every claim is in BRIEF.md. {files} is filled like any hero text (sections.tsx fill).
-// To end the test: put the winner in the editor's headline, then take this
-// test out of TESTS in lib/analytics.ts and out of the pages.
+//
+// ENDED 2026-11-10 ("D vince chiudi ma tieni i test in archivio per eventuali
+// confronti"): D is the editor's headline (content.ts and the funnels table),
+// the pages no longer pick, show or count a letter (AB_SCRIPT, AB_CSS and
+// AB_KEEP_SCRIPT are unused; AB_CARRY_SCRIPT still carries the ad tags). The
+// five headlines, their labels and the test's numbers stay: lib/analytics.ts
+// TESTS keeps it with `ended`, so dashboard → Analytics still shows the card.
+// At the end: A 1 order / 43 landing visits, B 1 / 43, C 3 / 75, D 3 / 45,
+// E 2 / 54: 10 orders, far from a reliable answer; D was the user's call.
 
 export const AB = {
   cookie: "ab_head",

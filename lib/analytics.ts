@@ -176,6 +176,8 @@ export type TestStats = {
   daysToGo: number | null;
   /** The same test on each language's pages alone (the funnel map's language tabs). */
   byLang?: Record<string, TestStats>;
+  /** A test that's over, kept for later comparisons: its last day and the variant that was kept (the user's call, whatever the numbers said). */
+  ended?: { day: string; kept: string };
   /** Shown on the funnel map (its lanes): the tests that split the visitors. A test judged by
    * its days (TestDef.windows, e.g. the order page's step 2) is read in Analytics alone. */
   map?: boolean;
@@ -605,7 +607,13 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
     funnels,
     tests: await Promise.all(
       TESTS.map(async (t, i) => {
-        const stats = t.windows ? windowTest(t, windowDays, allSales, rate, now) : { ...testStats(t, allViews ?? views, allSales, rate, testStarts[i], now), map: true };
+        // An ended test stops at its last minute and is off the funnel map.
+        const end = t.ended ? Date.parse(t.ended.at) : null;
+        const stats: TestStats = t.windows
+          ? windowTest(t, windowDays, allSales, rate, now)
+          : end !== null
+            ? { ...testStats(t, allViews ?? views, allSales.filter((s) => s.created <= end), rate, testStarts[i], Math.min(now, end)), ended: { day: t.ended!.at.slice(0, 10), kept: t.ended!.kept } }
+            : { ...testStats(t, allViews ?? views, allSales, rate, testStarts[i], now), map: true };
         if (!t.windows) return stats;
         const paid = await soft(`checkouts paid (${t.name})`, Promise.all(stats.variants.map((v) => (t.windows![v.variant] ? checkoutPaid(t.funnel, t.windows![v.variant]) : null))), null);
         return paid ? { ...stats, variants: stats.variants.map((v, j) => ({ ...v, paid: paid[j] ?? undefined })) } : stats;
@@ -650,6 +658,8 @@ type TestDef = {
   color: (v: string) => { from: string; to: string };
   /** When each variant was the only one shown, to compare the checkouts that paid (ISO times; until null = still now). */
   windows?: Record<string, { from: string; until: string | null; days: [string, string | null] }>;
+  /** Over, and kept as an archive: nothing after `at` counts, the card says which variant was kept, the map has no lanes for it. */
+  ended?: { at: string; kept: string };
 };
 const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 export const TESTS: TestDef[] = [
@@ -696,8 +706,11 @@ export const TESTS: TestDef[] = [
   {
     funnel: "jazz-midi-pack",
     name: "Headline",
-    where: "The landing's hero headline; the order page keeps the visitor's variant",
+    where: "The landing's hero headline; the order page kept the visitor's variant",
     variants: HEADLINE_TEST.variants,
+    // "D vince chiudi ma tieni i test in archivio per eventuali confronti" (2026-11-10):
+    // the pages show D to everyone and send no letter any more.
+    ended: { at: "2026-11-10T23:59:59Z", kept: "d" },
     label: (v) => HEADLINE_LABELS[v as keyof typeof HEADLINE_LABELS],
     color: (v) => HEADLINE_COLORS[v as keyof typeof HEADLINE_COLORS],
   },

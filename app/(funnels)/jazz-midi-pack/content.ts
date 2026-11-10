@@ -72,7 +72,8 @@ export const DEFAULT_SECTIONS: Section[] = [
     props: {
       tag: "{files} MIDI files",
       pre: "For producers who want a jazz vibe in their beats",
-      headline: "You Want A *Jazz Vibe* In Your Beat. These Are The Chords, _Already Played_ The Way A Pianist Plays Them.",
+      // Headline D of the A–E test, kept when it ended (2026-11-10, ./abtest.ts).
+      headline: "Stop Looping The Same Four Chords. {files} *Jazz MIDI Files*, Voiced Like A Pianist, _Drag One Onto Your Rhodes_.",
       sub: "{files} drag-and-drop MIDI files: the chords under lofi, neo soul and trap soul, in every key, with bass lines and full loops. Drag one onto your Rhodes.",
       bullets: [
         "{files} Drag-And-Drop Jazz MIDI Files",

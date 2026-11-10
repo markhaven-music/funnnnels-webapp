@@ -7,7 +7,6 @@ import { restate } from "@/lib/restate";
 import { getPublishedBlocks } from "@/lib/pages";
 import { bumpCopy, funnel } from "../../funnel";
 import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content";
-import { AB, AB_KEEP_SCRIPT } from "../../abtest";
 import { Checkout, OrderSummary, Proof, Reviews, Seal, fill, isSectionType, type Ctx } from "../../sections";
 import { Tracking } from "../../Tracking";
 import { JazzBonusBanner, JazzBonusItem } from "../../BonusClock";
@@ -82,10 +81,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
 
   return (
     <main className={`${s.page} ${s.jazz} ${s.orderMain} ${display.variable}`}>
-      {/* ?ab= from the landing's button back into the cookie, before the counts and the checkout read it (../../abtest.ts). */}
-      <script dangerouslySetInnerHTML={{ __html: AB_KEEP_SCRIPT }} />
       <Tracking value={amount} currency={currency} page="order" />
-      <Beacon funnel={funnel.slug} page="order" abCookie={AB.cookie} />
+      <Beacon funnel={funnel.slug} page="order" />
       {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
       {rs && <script dangerouslySetInnerHTML={{ __html: JAZZ_BONUS_SCRIPT }} />}
       <div className={s.bfbar}>

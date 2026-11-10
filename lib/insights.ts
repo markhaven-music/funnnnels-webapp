@@ -114,7 +114,7 @@ export function insights(a: Analytics, now = Date.now(), eur: (n: number) => str
 
   // Each A/B test, once it has an answer.
   for (const t of a.tests) {
-    if (t.verdict !== "winner" || !t.leader) continue;
+    if (t.ended || t.verdict !== "winner" || !t.leader) continue;
     const lead = t.variants.find((v) => v.variant === t.leader);
     say(2, "up", `${lead?.label ?? t.leader} wins the ${t.product} ${t.name.toLowerCase()} test${lead?.chanceBest ? ` (${pct(lead.chanceBest)} sure)` : ""}: make it the only one.`);
   }

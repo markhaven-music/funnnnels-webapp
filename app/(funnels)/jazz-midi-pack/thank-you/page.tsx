@@ -11,7 +11,6 @@ import { THANKS } from "../thanksWords";
 import { funnel, unlocked } from "../funnel";
 import { PurchasePixel } from "../PurchasePixel";
 import { Beacon } from "../../Beacon";
-import { AB } from "../abtest";
 import { Clarity } from "../../Clarity";
 import { display } from "../fonts";
 import s from "../jazz.module.css";
@@ -85,7 +84,7 @@ export default async function ThankYou({
 
   return (
     <main className={`${s.page} ${s.jazz} ${display.variable}`}>
-      <Beacon funnel={funnel.slug} page="thank-you" abCookie={AB.cookie} />
+      <Beacon funnel={funnel.slug} page="thank-you" />
       <Clarity purchase={paid && !!order} />
       {paid && order && <PurchasePixel orderId={order.id} value={order.amount} currency={order.currency} />}
       {upsells.map((up) => (
