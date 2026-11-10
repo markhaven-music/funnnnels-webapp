@@ -5,20 +5,20 @@ import { getFunnel, resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { fill } from "@/lib/words";
-import { Beacon } from "../../../Beacon";
-import { Cta } from "../../../jazz-midi-pack/Cta";
-import { display } from "../../../jazz-midi-pack/fonts";
-import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
-import { funnel } from "../../funnel";
-import { BeatClip } from "../Beats";
-import { PatternPlayer } from "../PatternPlayer";
-import { LANDING as w } from "../words";
-import roll from "../roll.json";
-import s from "../../../jazz-midi-pack/jazz.module.css";
-import bn from "../../../jazz-midi-pack/bonus.module.css";
-import vs from "../../../jazz-midi-pack/value.module.css";
-import shot from "../../../jazz-midi-pack/shot.module.css";
-import f from "../fbb.module.css";
+import { Beacon } from "../../Beacon";
+import { Cta } from "../../jazz-midi-pack/Cta";
+import { display } from "../../jazz-midi-pack/fonts";
+import { Tracking } from "../../top-hits-midi-bundle/Tracking";
+import { funnel } from "../funnel";
+import { BeatClip } from "../_v2/Beats";
+import { PatternPlayer } from "../_v2/PatternPlayer";
+import { LANDING as w } from "../_v2/words";
+import roll from "../_v2/roll.json";
+import s from "../../jazz-midi-pack/jazz.module.css";
+import bn from "../../jazz-midi-pack/bonus.module.css";
+import vs from "../../jazz-midi-pack/value.module.css";
+import shot from "../../jazz-midi-pack/shot.module.css";
+import f from "../_v2/fbb.module.css";
 
 // The Famous Beats Bundle sales page, built on the Jazz page's own CSS and in its order
 // (2026-11-09, "Ne crei uno più simile a quello jazz": the first version copied the Drunk Swing
@@ -28,7 +28,7 @@ import f from "../fbb.module.css";
 // the letter beside the roll, the pack browser, how it works beside its picture, what's
 // inside, the ✓/✗ chart, bonuses with covers, the value stack, the seal, after you pay beside
 // the download list, FAQ, the final key. Words in ../words.ts, claims in ../../BRIEF.md.
-// Built at /famous-beats-bundle/v2 beside the live page until the user switches.
+// Live at /famous-beats-bundle since 2026-11-10 ("Sì, passa alla v2"); the Astro clone it replaced is in ../astro.
 
 export const revalidate = 3600;
 
@@ -39,12 +39,12 @@ export function generateStaticParams() {
 export const metadata: Metadata = {
   title: "Famous Beats Bundle · GRIND STUDIO",
   description: "The drums behind 320 hits, transcribed note for note into multi-track MIDI. Drake, Travis Scott, Future, Metro Boomin and more. Any DAW.",
-  robots: { index: false, follow: false },
   openGraph: {
     title: "The drums behind 320 hits. Note for note, in MIDI.",
     description: "320 drum transcriptions from hit records + 4 bonuses, by GRIND STUDIO. Drag into your DAW.",
     type: "website",
-    images: [{ url: "/funnels/famous-beats-bundle/preview.webp", width: 720, height: 450 }],
+    url: "https://m.thegrind.studio/famous-beats-bundle",
+    images: [{ url: "https://m.thegrind.studio/funnels/famous-beats-bundle/hero-960.webp", width: 960, height: 1286 }, { url: "/funnels/famous-beats-bundle/preview.webp", width: 720, height: 450 }],
   },
 };
 
@@ -84,7 +84,7 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
   const amount = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency];
   const price = money(amount, currency);
   const t = (text: string) => fill(text, { price, c: SIGN[currency], email: funnel.support });
-  const order = `/${funnel.slug}/v2/order`;
+  const order = funnel.checkout.orderPage;
   const inner = `${price} · instant download`;
   const total = w.bonuses.items.reduce((sum, b) => sum + b.value, 0) + 27;
   const worth = (n: number) => money(n, currency);

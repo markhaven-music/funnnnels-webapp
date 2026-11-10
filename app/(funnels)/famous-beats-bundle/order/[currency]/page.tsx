@@ -1,31 +1,28 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
-import { getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
+import { getFunnel, nextStep, resolveFunnel, upsellsOn, type Bump } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
-import { OrderForm } from "../../../top-hits-midi-bundle/OrderForm";
-import { ReservedTimer } from "../../../midi-drum-kit/ReservedTimer";
-import { copyFor } from "../../../midi-drum-kit/copy";
-import { Check } from "../../../top-hits-midi-bundle/sections";
+import { money } from "@/lib/launch";
+import { restate } from "@/lib/restate";
+import { fill } from "@/lib/words";
+import { CheckoutWidget } from "../../../jazz-midi-pack/CheckoutWidget";
+import { JazzBonusBanner, JazzBonusItem } from "../../../jazz-midi-pack/BonusClock";
+import { bonusScript, bonusTimeScript } from "../../../jazz-midi-pack/fiveMinBonus";
+import { Shield } from "../../../jazz-midi-pack/sections";
 import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
-import base from "../../../top-hits-midi-bundle/order.module.css";
-import dk from "../../../midi-drum-kit/order.module.css";
-import { poppins } from "../../../midi-drum-kit/fonts";
 import { Beacon } from "../../../Beacon";
-import { withSkin } from "../../../skin";
-import { fill, wordsFor } from "@/lib/words";
-import { reviews } from "../../copy";
-import { ORDER } from "../../words";
-import { B } from "../../../top-hits-midi-bundle/Lines";
+import { display } from "../../../jazz-midi-pack/fonts";
+import c from "../../../jazz-midi-pack/fiveMinBonus.module.css";
+import s from "../../../jazz-midi-pack/jazz.module.css";
 import { funnel } from "../../funnel";
-import { fontVars, inter } from "../../fonts";
-import { orderOffer } from "../../offer";
-import skin from "../../order.module.css";
+import { FBB_BONUS, FBB_BONUS_WORDS } from "../../fiveMinBonus";
+import { BUMP_COPY, LANDING, ORDER as w } from "../../_v2/words";
 
-// The order page, a copy of ClickFunnels' /order-famous-beats-bundle: the
-// same ClickFunnels template as TOP HITS', so it's TOP HITS' page and form
-// with this bundle's picture, words and checkout, drawn in its landing's look
-// (../../order.module.css, a skin over the template's stylesheet).
-// Cached per currency like the landing (proxy.ts rewrites /famous-beats-bundle/order).
+// The order page, the Jazz order page's (../../../../jazz-midi-pack/order): red bar, the
+// 5-minute bonus (the MIDI Drum Kit Expansions, ../../../fiveMinBonus.ts), the box and
+// what's in the order beside the white two-step checkout (card / PayPal, tick boxes),
+// the guarantee under it. Live at /famous-beats-bundle/order since 2026-11-10 ("Sì, passa alla v2").
 
 export const revalidate = 3600;
 
@@ -34,140 +31,218 @@ export function generateStaticParams() {
 }
 
 const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
-const IMG = "/funnels/top-hits-midi-bundle";
-const OWN = `/funnels/${funnel.slug}`;
-const s = withSkin(base, skin);
-
+const SIGN = { eur: "€", usd: "$" } as const;
 
 export const metadata: Metadata = {
-  title: "Order Famous Beats Bundle",
+  title: "Order · Famous Beats Bundle · GRIND STUDIO",
   robots: { index: false, follow: false },
+};
+
+// The tick boxes, in this order (2026-11-09: the Jazz page's €7 Drunk Swing Grooves, HUSTLE;
+// Emotional Keys is one of the six bonuses since "add more bonuses just like midi jazz pack"). Their prices are dashboard → Products'; until Products lists the new ones,
+// the code's (preview only: the checkout charges what Products says).
+const ORDER_BUMPS = ["swing-grooves", "hustle"];
+
+const BONUS_THUMBS: Record<string, string | null> = {
+  "essential-drums": "/funnels/famous-beats-bundle/bonus-essential-360.webp",
+  "chord-pack": "/funnels/jazz-midi-pack/bonus-1-360.webp",
+  "emotional-keys": "/funnels/jazz-midi-pack/bonus-4-360.webp",
+  "drum-loops": "/funnels/jazz-midi-pack/bonus-5-360.webp",
+  bible: "/funnels/jazz-midi-pack/bonus-2-360.webp",
+  "anime-pack": "/funnels/jazz-midi-pack/bonus-3-360.webp",
 };
 
 export default async function OrderPage({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
-  // What it sells, as dashboard → Products has it (../../offer.ts); saving there revalidates the page.
-  const product = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
-  // Its words, with the dashboard's edits (funnel map → Edit).
-  const w = await wordsFor(funnel.slug, "order", ORDER, { strict: true });
-  const offer = await orderOffer(currency, product, w.bumps);
+  const f = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
+  const amount = f.price[currency];
+  const price = money(amount, currency);
+  const t = (text: string) => fill(text, { price, c: SIGN[currency], email: funnel.support });
+
+  const live = f.bumps ?? [];
+  const code = funnel.bumps as readonly (Bump & { headline: string })[];
+  const bumps = ORDER_BUMPS.flatMap((id) => {
+    const b = live.find((x) => x.id === id) ?? code.find((x) => x.id === id);
+    if (!b) return [];
+    const was = code.find((x) => x.id === id)?.price[currency] ?? b.price[currency];
+    const copy = BUMP_COPY[id];
+    const known = code.find((x) => x.id === id);
+    return [
+      {
+        id: b.id,
+        name: b.name,
+        price: b.price[currency],
+        pitch: b.pitch,
+        image: known?.image ?? b.image,
+        ...(copy ? { headline: copy.headline, body: copy.body.map((p) => restate(p, was, b.price[currency])) } : {}),
+      },
+    ];
+  });
+  // The add-on the 5-minute bonus gives (Products' price; the code's until it's there).
+  const ex = live.find((b) => b.id === FBB_BONUS.item) ?? code.find((b) => b.id === FBB_BONUS.item);
+  const fiveMinBonus = ex ? { price: ex.price[currency], cfg: FBB_BONUS, words: FBB_BONUS_WORDS } : undefined;
 
   return (
-    <main className={`${s.page} ${fontVars} ${inter.variable} ${poppins.variable}`}>
-      <Tracking value={offer.price} currency={currency} event={null} product={funnel.product} />
+    <main className={`${s.page} ${s.jazz} ${s.orderMain} ${display.variable}`}>
+      <Tracking value={amount} currency={currency} event={null} product={funnel.product} />
       <Beacon funnel={funnel.slug} page="order" />
-      <div className={`${base.redbar} ${skin.dk}`}>
-        <B text={w.redbar} />
+      {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
+      {ex && <script dangerouslySetInnerHTML={{ __html: bonusScript(FBB_BONUS.endKey) }} />}
+      <div className={s.bfbar}>
+        <b>BLACK FRIDAY:</b> {w.bfbar}
       </div>
-      <header className={s.header}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={s.logo} src={`${OWN}/logo.webp`} alt="GRIND STUDIO" width={236} height={27} />
-      </header>
-
-      <div className={s.secure}>
-        <svg viewBox="0 0 448 512" aria-hidden>
-          <path
-            fill="currentColor"
-            d="M400 224h-24v-72C376 68.2 307.8 0 224 0S72 68.2 72 152v72H48c-26.5 0-48 21.5-48 48v192c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V272c0-26.5-21.5-48-48-48zm-104 0H152v-72c0-39.7 32.3-72 72-72s72 32.3 72 72v72z"
-          />
-        </svg>
-        {w.secure}
+      <div className={s.topband}>
+        <header className={`${s.wrap} ${s.topbar}`}>
+          <a href={`/${funnel.slug}`} className={s.logo} style={{ textDecoration: "none" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
+          </a>
+          <span className={s.tag}>
+            <LockGlyph /> {w.secure}
+          </span>
+        </header>
       </div>
+      {ex && <JazzBonusBanner w={FBB_BONUS_WORDS} cfg={FBB_BONUS} />}
 
-      <div className={s.cols}>
-        <section className={s.summaryCol}>
-          <h2 className={s.colTitle}>{w.summaryTitle}</h2>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className={s.productImg}
-            src={`${OWN}/product.webp`}
-            srcSet={`${OWN}/product-720.webp 720w, ${OWN}/product.webp 944w`}
-            sizes="(max-width: 769px) calc(100vw - 30px), 535px"
-            alt="Famous Beats Bundle: 32 packs, 320 MIDI transcriptions"
-            width={944}
-            height={1172}
-            fetchPriority="high"
-          />
-          <p className={s.dl}>{w.dl}</p>
-          <ul className={s.list}>
-            {w.bullets.map((b, i) => (
-              <li key={i}>
-                <Check />
-                {b}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section id="complete-order">
-          <h2 className={s.colTitle}>{w.completeTitle}</h2>
-          {/* The MIDI Drum Kit order page's form, exactly: no skin, its buttons, its font (../../order.module.css .dk). */}
-          <div className={skin.dk}>
-            <OrderForm
-              currency={currency}
-              country={FALLBACK_COUNTRY[currency]}
-              publishableKey={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null}
-              afterOrder={nextStep(product, "en", null)}
-              upsell={product.offers?.[0]?.id ?? null}
-              offer={offer}
-              sells={{ slug: funnel.slug, tagline: "", thankYou: funnel.checkout.thankYou }}
-              buttons={dk}
-              words={w.form}
-            />
-          </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={s.paylogos} src={`${IMG}/payment-logos.webp`} alt="PayPal, Visa, Mastercard, American Express, Discover" width={190} height={22} />
-        </section>
-      </div>
-
-      <section className={s.reviews}>
-        <div className={s.reviewGrid}>
-          {w.reviews.map((r, i) => (
-            <figure key={i} className={s.review}>
+      <section id="buy" className={`${s.sec} ${s.order} ${s.orderPage}`}>
+        <div className={s.wrap}>
+          <h1 className={s.srOnly}>{w.srTitle}</h1>
+          <div className={s.orderGrid}>
+            <div className={s.orderSummary}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className={s.stars} src={`${IMG}/stars.png`} alt="5 stars" width={300} height={99} loading="lazy" decoding="async" />
-              <blockquote className={s.quote}>&quot;{r.quote}&quot;</blockquote>
-              <figcaption className={s.who}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`${IMG}/icon-${reviews[i]?.icon ?? "instagram"}.png`} alt="" width={50} height={50} loading="lazy" decoding="async" />
+              <img
+                src="/funnels/famous-beats-bundle/box3d-520.webp"
+                srcSet="/funnels/famous-beats-bundle/box3d-520.webp 520w, /funnels/famous-beats-bundle/box3d-900.webp 900w"
+                sizes="(min-width: 1000px) 300px, 56vw"
+                width={900}
+                height={1110}
+                alt="The Famous Beats Bundle box: 320 transcriptions, 32 packs, MIDI format"
+                fetchPriority="high"
+                style={{ display: "block", width: "min(300px, 56vw)", height: "auto", margin: "0 auto 8px", filter: "drop-shadow(0 24px 36px rgb(0 0 0 / 0.6))" }}
+              />
+              {ex && fiveMinBonus && (
+                <div className={c.slot}>
+                  <JazzBonusItem w={FBB_BONUS_WORDS} cfg={FBB_BONUS} price={money(fiveMinBonus.price, currency)} />
+                  <script dangerouslySetInnerHTML={{ __html: bonusTimeScript(FBB_BONUS.endKey) }} />
+                </div>
+              )}
+              <ul className={s.stack}>
+                {w.stack.map((x) => (
+                  <li key={x}>
+                    <Tick />
+                    <span>{x}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className={s.bonusMini}>
+                <p className={s.bonusMiniHead}>{w.bonusHead}</p>
+                <ul>
+                  {LANDING.bonuses.items.map((x) => (
+                    <li key={x.id}>
+                      {BONUS_THUMBS[x.id] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={BONUS_THUMBS[x.id]!} width={36} height={54} alt="" loading="lazy" />
+                      ) : (
+                        <span aria-hidden style={{ display: "grid", placeItems: "center", width: 36, height: 54, background: "#000", color: "#f5b800", fontSize: 10, fontWeight: 800, borderRadius: 2 }}>
+                          MIDI
+                        </span>
+                      )}
+                      <span>{x.name}</span>
+                      <span className={s.bonusMiniValue}>
+                        <s>{money(x.value, currency)}</s> Free
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <p className={s.totalMini}>
+                <span />
                 <span>
-                  <span className={s.name}>{r.name}</span>
-                  <span className={s.role}>{r.role}</span>
+                  {w.today} <b>{price}</b>
                 </span>
-              </figcaption>
-            </figure>
-          ))}
+              </p>
+              <p className={s.guaranteeMini}>
+                <Shield /> {w.guarantee}
+              </p>
+            </div>
+            <div className={s.orderForm}>
+              <CheckoutWidget
+                funnel={funnel.slug}
+                product={funnel.product}
+                tagline="320 drum transcriptions in 2,067 MIDI files + 6 bonuses"
+                image="/funnels/famous-beats-bundle/box3d-160.webp"
+                currency={currency}
+                country={FALLBACK_COUNTRY[currency]}
+                price={amount}
+                bump={null}
+                bumps={bumps}
+                thankYou={funnel.checkout.thankYou}
+                afterOrder={nextStep(f, "en", null)}
+                keepCard={upsellsOn(f)}
+                publishableKey={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null}
+                fiveMinBonus={fiveMinBonus}
+                deferStripe
+                secureRow={false}
+                light
+              />
+              <ul className={s.proof} style={{ "--n": 3 } as CSSProperties}>
+                {w.proof.map((p) => (
+                  <li key={p}>
+                    <Bold text={p} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className={s.guarantee}>
-        <div className={s.gGrid}>
-          <div className={s.g}>
+      <section className={`${s.sec} ${s.band}`}>
+        <div className={s.wrap}>
+          <div className={s.guarantee}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="14-day quality guarantee" width={86} height={86} loading="lazy" decoding="async" />
+            <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="14-day quality guarantee" width={150} height={150} loading="lazy" decoding="async" />
             <div>
-              <h3>{w.guarantee.title}</h3>
-              <p>{fill(w.guarantee.text, { email: funnel.support, days: funnel.guaranteeDays })}</p>
-            </div>
-          </div>
-          <div className={s.g}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`${OWN}/badge-secure.webp`} alt="Secure payments" width={86} height={86} loading="lazy" decoding="async" />
-            <div>
-              <h3>{w.payments.title}</h3>
-              <p>{w.payments.text}</p>
+              <h2 className={s.h2}>{LANDING.guarantee.title}</h2>
+              <p className={s.sub}>{t(LANDING.guarantee.text)}</p>
             </div>
           </div>
         </div>
       </section>
 
       <footer className={s.footer}>
-        © 2026 {funnel.brand} - <a href={funnel.legal.terms}>Terms and Conditions</a> -{" "}
-        <a href={funnel.legal.privacy}>Privacy Policy</a> - <a href={funnel.legal.refund}>Refund Policy</a> -{" "}
-        <b>Contact:</b> <a href={`mailto:${funnel.support}`}>{funnel.support}</a>
+        <p>
+          © 2026 {funnel.brand} · <a href={funnel.legal.terms} rel="noopener">Terms</a> ·{" "}
+          <a href={funnel.legal.privacy} rel="noopener">Privacy</a> ·{" "}
+          <a href={funnel.legal.refund} rel="noopener">Refund policy</a> ·{" "}
+          <a href={`mailto:${funnel.support}`}>{funnel.support}</a>
+        </p>
       </footer>
-      <ReservedTimer t={copyFor("en").order.timer} />
     </main>
+  );
+}
+
+function Bold({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(\*\*[^*]+\*\*)/g).map((p, i) => (p.startsWith("**") ? <b key={i}>{p.slice(2, -2)}</b> : p))}
+    </>
+  );
+}
+
+function Tick() {
+  return (
+    <svg className={s.tick} viewBox="0 0 20 20" width="18" height="18" aria-hidden>
+      <path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function LockGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
+      <path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7zm2 0h4V5a2 2 0 0 0-4 0z" fill="currentColor" />
+    </svg>
   );
 }

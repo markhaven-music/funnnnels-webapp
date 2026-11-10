@@ -14,7 +14,7 @@ import s from "../../top-hits-midi-bundle/order.module.css";
 import t from "../../top-hits-midi-bundle/thank-you/thanks.module.css";
 import { Beacon } from "../../Beacon";
 import { Clarity } from "../../Clarity";
-import { funnel } from "../funnel";
+import { funnel, unlocked } from "../funnel";
 
 // TOP HITS' thank-you page (../../top-hits-midi-bundle/thank-you) for this bundle.
 
@@ -28,6 +28,7 @@ const LABELS: Record<string, string> = {
   pack: funnel.product,
   ...Object.fromEntries(funnel.bumps.map((b) => [b.id, b.name])),
   ...Object.fromEntries(funnel.offers.map((o) => [o.id, o.name])),
+  ...funnel.fileNames,
 };
 
 // Stripe sends the buyer here with ?payment_intent=pi_…, PayPal's return with
@@ -70,9 +71,9 @@ export default async function ThankYou({
   const paid = sample || order?.status === "succeeded";
   const pending = order?.status === "processing";
   const downloads = sample
-    ? ["pack", ...funnel.bumps.map((b) => b.id), ...funnel.offers.map((o) => o.id)].map((key) => ({ order: "preview", key }))
+    ? unlocked(["pack", ...funnel.bumps.map((b) => b.id), ...funnel.offers.map((o) => o.id)]).map((key) => ({ order: "preview", key }))
     : paid && order
-      ? [order, ...upsells].flatMap((o) => o.items.map((key) => ({ order: o.id, key })))
+      ? [order, ...upsells].flatMap((o) => unlocked(o.items).map((key) => ({ order: o.id, key })))
       : [];
   const state = paid ? w.paid : pending ? w.pending : w.failed;
 

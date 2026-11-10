@@ -37,7 +37,7 @@ const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
 // The visitor keeps the plain URL; the country comes from ?country= (the
 // brand domain's rewrite sets it, and it lets you preview either price) or
 // from Vercel's geo header, and also goes into a cookie for the checkout.
-const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/jazz-midi-pack/offer", "/top-hits-midi-bundle", "/top-hits-midi-bundle/order", "/top-hits-midi-bundle/offer", "/famous-beats-bundle", "/famous-beats-bundle/order", "/famous-beats-bundle/offer", "/famous-beats-bundle/v2", "/famous-beats-bundle/v2/order", "/drunk-swing-grooves", "/drunk-swing-grooves/order", "/drunk-swing-grooves/offer", "/drunk-swing-grooves/offer-2", "/midi-drum-kit/bounce", "/home"]);
+const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/jazz-midi-pack/offer", "/top-hits-midi-bundle", "/top-hits-midi-bundle/order", "/top-hits-midi-bundle/offer", "/famous-beats-bundle", "/famous-beats-bundle/order", "/famous-beats-bundle/offer", "/drunk-swing-grooves", "/drunk-swing-grooves/order", "/drunk-swing-grooves/offer", "/drunk-swing-grooves/offer-2", "/midi-drum-kit/bounce", "/home"]);
 
 // Launch-kit products (dashboard → Launches) live at /<slug> and are served by
 // app/(funnels)/[slug]: the page per currency, /<slug>/thank-you and

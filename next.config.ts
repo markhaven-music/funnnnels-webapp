@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/funnels/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }] }];
   },
+  // The Famous Beats v2 preview became the live page on 2026-11-10: old /v2 links land on it.
+  async redirects() {
+    return [
+      { source: "/famous-beats-bundle/v2", destination: "/famous-beats-bundle", permanent: false },
+      { source: "/famous-beats-bundle/v2/order", destination: "/famous-beats-bundle/order", permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;
