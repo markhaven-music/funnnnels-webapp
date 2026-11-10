@@ -1,5 +1,10 @@
 import type { Lang } from "./i18n";
 
+// 11-10: the bonus is off for everyone ("direi di toglierlo", all four checkouts): the
+// first orders with it were all 27, nobody added Chords or HUSTLE, and the Expansions
+// are back as the paid add-on. ?bonus=on still shows it (previews). To put it back:
+// 'bonus-on' in BONUS_SCRIPT's default below.
+//
 // 11-08 evening: everyone gets the bonus ("metti a tutti il bonus e diventa
 // semplicemente C"): it's part of step 2's C in Analytics (lib/analytics.ts), no
 // test of its own. ?bonus=off still shows the page without it (previews).
@@ -53,7 +58,7 @@ const LIST = BONUS.variants.join("|");
 export const BONUS_SCRIPT = `(function(){try{
 var re=/(?:^|; )${BONUS.cookie}=(${LIST})(?:;|$)/,q=(location.search.match(/[?&]bonus=(on|off)(?:&|$)/)||[])[1];
 var v=q?'bonus-'+q:(document.cookie.match(re)||[])[1];
-if(!q)v='bonus-on';
+if(!q)v='bonus-off';
 document.cookie='${BONUS.cookie}='+v+'; path=/; max-age=15552000; samesite=lax';
 document.documentElement.setAttribute('data-ab-bonus',v==='bonus-on'?'on':'off');
 if(v==='bonus-on'){var e=Number(localStorage.getItem('fv_bonus_end'));if(e&&e<=Date.now())document.documentElement.setAttribute('data-ab-bonus','over');}

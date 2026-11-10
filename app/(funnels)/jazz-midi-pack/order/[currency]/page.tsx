@@ -10,7 +10,7 @@ import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content
 import { Checkout, OrderSummary, Proof, Reviews, Seal, fill, isSectionType, type Ctx } from "../../sections";
 import { Tracking } from "../../Tracking";
 import { JazzBonusBanner, JazzBonusItem } from "../../BonusClock";
-import { JAZZ_BONUS, JAZZ_BONUS_SCRIPT, JAZZ_BONUS_TIME_SCRIPT, JAZZ_BONUS_WORDS } from "../../fiveMinBonus";
+import { FIVE_MIN_BONUS_ON, JAZZ_BONUS, JAZZ_BONUS_SCRIPT, JAZZ_BONUS_TIME_SCRIPT, JAZZ_BONUS_WORDS } from "../../fiveMinBonus";
 import c from "../../fiveMinBonus.module.css";
 import { splitName } from "../../../_kit/KitBox";
 import { Beacon } from "../../../Beacon";
@@ -73,7 +73,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     keepCard: upsellsOn(f),
   };
   // The add-on the 5-minute bonus gives (none if it's gone from Products).
-  const rs = f.bumps?.find((b) => b.id === JAZZ_BONUS.item);
+  const rs = FIVE_MIN_BONUS_ON ? f.bumps?.find((b) => b.id === JAZZ_BONUS.item) : undefined;
   if (rs) ctx.fiveMinBonus = { price: rs.price[currency] };
   const offer = pick(sections, "s_offer");
   const guarantee = pick(sections, "s_guarantee");

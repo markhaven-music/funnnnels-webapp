@@ -12,6 +12,14 @@
 // dashboard → Analytics → "5-minute bonus · Jazz MIDI Pack" (bonus_clocks.funnel).
 // ?bonus=off shows the page without it (previews).
 
+/**
+ * Off since 2026-11-10 ("direi di toglierlo", all four checkouts): the order pages of Jazz,
+ * Famous Beats and TOP HITS v2 are the normal ones, as after 00:00: no banner, no free add-on,
+ * and the add-on doesn't come back as a tick box. A clock already running is still honoured
+ * by the server (lib/bonusClock.ts). true puts the bonus back on the three pages.
+ */
+export const FIVE_MIN_BONUS_ON: boolean = false;
+
 export const JAZZ_BONUS = {
   funnel: "jazz-midi-pack",
   /** The add-on given free (the funnel_items key in dashboard → Products). */

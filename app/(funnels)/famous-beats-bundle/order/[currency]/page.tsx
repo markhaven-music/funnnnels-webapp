@@ -8,7 +8,7 @@ import { restate } from "@/lib/restate";
 import { fill } from "@/lib/words";
 import { CheckoutWidget } from "../../../jazz-midi-pack/CheckoutWidget";
 import { JazzBonusBanner, JazzBonusItem } from "../../../jazz-midi-pack/BonusClock";
-import { bonusScript, bonusTimeScript } from "../../../jazz-midi-pack/fiveMinBonus";
+import { FIVE_MIN_BONUS_ON, bonusScript, bonusTimeScript } from "../../../jazz-midi-pack/fiveMinBonus";
 import { Shield } from "../../../jazz-midi-pack/sections";
 import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
 import { Beacon } from "../../../Beacon";
@@ -80,7 +80,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     ];
   });
   // The add-on the 5-minute bonus gives (Products' price; the code's until it's there).
-  const ex = live.find((b) => b.id === FBB_BONUS.item) ?? code.find((b) => b.id === FBB_BONUS.item);
+  const ex = FIVE_MIN_BONUS_ON ? (live.find((b) => b.id === FBB_BONUS.item) ?? code.find((b) => b.id === FBB_BONUS.item)) : undefined;
   const fiveMinBonus = ex ? { price: ex.price[currency], cfg: FBB_BONUS, words: FBB_BONUS_WORDS } : undefined;
 
   return (

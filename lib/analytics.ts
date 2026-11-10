@@ -683,14 +683,19 @@ export const TESTS: TestDef[] = [
     // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
     // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
-    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-07 → 11-08, C 11-09 → today; orders go to the step they were paid on",
+    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-08 alone (card payments failed until 11-07 17:35), C 11-09 → 11-10, D 11-11 → today; orders go to the step they were paid on",
     // C: the same step as B with the phone's pay bar docked to the bottom edge
     // (11-08 17:29, "contiamolo come test C"); no letter of its own, only days.
-    variants: [...PAY_TEST.variants, "c"],
+    variants: [...PAY_TEST.variants, "c", "d"],
     // 11-08 evening: C also gives everyone the 5-minute Expansions bonus (bonusTest.ts,
     // "metti a tutti il bonus e diventa semplicemente C"); its own A/B test is gone.
-    label: (v) => (v === "c" ? "C · Pay bar docked at the bottom + 5-minute bonus" : PAY_LABELS[v as keyof typeof PAY_LABELS]),
-    color: (v) => (v === "c" ? { from: "#fbbf24", to: "#f59e0b" } : PAY_COLORS[v as keyof typeof PAY_COLORS]),
+    // 11-10 evening: D is C without the bonus ("direi di toglierlo", "ok quindi torniamo a B":
+    // with it nobody paid for an add-on, 0 of 6 against 6 of 9 on A); the docked pay bar stays,
+    // the Expansions are the paid add-on again.
+    label: (v) =>
+      v === "c" ? "C · Pay bar docked at the bottom + 5-minute bonus" : v === "d" ? "D · Pay bar docked at the bottom, no bonus" : PAY_LABELS[v as keyof typeof PAY_LABELS],
+    color: (v) =>
+      v === "c" ? { from: "#fbbf24", to: "#f59e0b" } : v === "d" ? { from: "#a78bfa", to: "#8b5cf6" } : PAY_COLORS[v as keyof typeof PAY_COLORS],
     // The split ran too short to say anything, so each step is judged on when
     // everyone had it: the old one from 11-02 (funnnnels' order page) until the
     // first test on 11-06 16:00, the new one since 11-06 19:20 (everyone on B).
@@ -699,8 +704,12 @@ export const TESTS: TestDef[] = [
     windows: {
       a: { from: "2026-11-02T00:00:00+01:00", until: "2026-11-06T16:00:00+01:00", days: ["2026-11-02", "2026-11-05"] },
       // B's days take 11-08 whole (C went live at 17:29 that day); its checkouts stop at the minute.
-      b: { from: "2026-11-06T19:20:00+01:00", until: "2026-11-08T17:29:00+01:00", days: ["2026-11-07", "2026-11-08"] },
-      c: { from: "2026-11-08T17:29:00+01:00", until: null, days: ["2026-11-09", null] },
+      // Only 11-08 since 2026-11-10 ("dovremmo togliere le visite di quando la carta non funzionava"):
+      // every card payment failed from 11-06 17:21 to 11-07 17:35, and the visits are kept per UTC
+      // day, so 11-07 goes whole (its three orders with it: two by PayPal, one card at 17:37).
+      b: { from: "2026-11-08T01:00:00+01:00", until: "2026-11-08T17:29:00+01:00", days: ["2026-11-08", "2026-11-08"] },
+      c: { from: "2026-11-08T17:29:00+01:00", until: "2026-11-10T20:15:00+01:00", days: ["2026-11-09", "2026-11-10"] },
+      d: { from: "2026-11-10T20:15:00+01:00", until: null, days: ["2026-11-11", null] },
     },
   },
   {

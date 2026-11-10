@@ -73,3 +73,5 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
   hustle), so they don't appear.
 - thank-you + download use `unlocked()`, so the six bonuses download.
 - Lighthouse mobile on the live URL (PageSpeed API quota out): landing 97, order 91.
+
+- 2026-11-10: the order page's 5-minute bonus is off ("direi di toglierlo", "ok quindi torniamo a B"; all four checkouts). On the Drum Kit nobody paid for an add-on with it (0 of 6 orders, 6 of 9 before) and every order was 27. The switch: Drum Kit `bonusTest.ts` (BONUS_SCRIPT default), the others `jazz-midi-pack/fiveMinBonus.ts` FIVE_MIN_BONUS_ON.

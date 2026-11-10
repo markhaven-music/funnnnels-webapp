@@ -106,3 +106,5 @@ one title word for word; reviews are the user's call).
 
 ## Numbers before (the ClickFunnels copy in funnnnels)
 To fill from Analytics on the day of the switch (landing visitors, order page, checkout starts, sales).
+
+- 2026-11-10: the order page's 5-minute bonus is off ("direi di toglierlo", "ok quindi torniamo a B"; all four checkouts). On the Drum Kit nobody paid for an add-on with it (0 of 6 orders, 6 of 9 before) and every order was 27. The switch: Drum Kit `bonusTest.ts` (BONUS_SCRIPT default), the others `jazz-midi-pack/fiveMinBonus.ts` FIVE_MIN_BONUS_ON.
