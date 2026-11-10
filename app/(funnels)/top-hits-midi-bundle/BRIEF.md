@@ -65,6 +65,12 @@ one title word for word; reviews are the user's call).
   fetched as needed). A new pack: a new folder name.
 - Pictures: gpt_image_2_6 on Higgsfield from the real box (2026-11-10): `box3d-*` (cutout), `hero-*`
   (the box, a piano roll of chords, four real file names, checked letter by letter), `daw-*`, `stage-*`.
+- VSL in the hero: Wistia 47ic5iver0 (4:05, voice Aaron Sage on eleven_v4, every part checked with
+  speech-to-text), script `./vsl/script-en.md`, made by `tools/top_hits_vsl.py voice|render` (the Jazz
+  VSL's captions and synth; the demos are Blinding Lights, Kill Bill, Lucid Dreams and Someone Like You
+  from `_v2/rolls.json`). No price amount in it. Still = the frame at 116 s (media z84gwhhsa9). A first
+  take with a black box around one picture is in Wistia as "OLD RENDER, not used" (pl1r8oioox,
+  jfnydgc3hb): to delete.
 - Order `./v2/order/[currency]`: the Jazz order page as Famous Beats has it.
 - Upsell 1 `./jazz-offer/[currency]`: the Jazz MIDI Pack, one click (the Drunk Swing Grooves page's
   twin; the Jazz bonuses and value stack are left out, a TOP HITS buyer has five of the six).

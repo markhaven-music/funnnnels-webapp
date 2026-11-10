@@ -17,9 +17,9 @@ export const funnel = {
   },
   // The ClickFunnels page's Wistia video (hero).
   wistiaId: "8s55snt7vw",
-  // The v2 page's hero video (vsl/script-en.md, tools/top_hits_vsl.py), in Wistia's own player.
-  // Empty until it's made: the hero then shows the four playable files alone.
-  vsl: { wistiaId: "" as string },
+  // The v2 page's hero video (vsl/script-en.md, tools/top_hits_vsl.py, 2026-11-10, 4:05, voice
+  // Aaron Sage), in Wistia's own player; its still is a frame of the video (116 s).
+  vsl: { wistiaId: "47ic5iver0" as string },
   support: "support@thegrind.studio",
   guaranteeDays: 14,
   legal: {

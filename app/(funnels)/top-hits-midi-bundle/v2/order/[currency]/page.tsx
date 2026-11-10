@@ -117,7 +117,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
               <img
                 src={`${DIR}/box3d-520.webp`}
                 srcSet={`${DIR}/box3d-520.webp 520w, ${DIR}/box3d-853.webp 853w`}
-                sizes="(min-width: 1000px) 300px, 56vw"
+                // 200px: a phone then takes the 520 px file (38 KB), not the 853 px one (80 KB); it's the page's largest paint
+                sizes="(min-width: 1000px) 300px, 200px"
                 width={853}
                 height={1122}
                 alt="The TOP HITS MIDI Bundle box: 1000 chord progressions, MIDI format"
