@@ -20,7 +20,8 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
   /top-hits-midi-bundle/v2, waiting for a switch. The offer below is my proposal on the Jazz /
   Famous Beats pattern, not yet confirmed line by line by the user.
 - 2026-11-10, asked whether to make the v2 the live page: "crea un funnel a parte". So no switch:
-  the v2 became this funnel, with a slug of its own (`top-hits-chords`, my choice: the headline's
+  the v2 became this funnel, with a slug of its own (`top-hits-chords`, my choice, confirmed by the user the same evening,
+  "Sì, va bene": the headline's
   "the chords behind 1,000 hits"; the product's id in Products is already `top-hits`). The live
   funnel went back to exactly what it was before (its funnel.ts, downloads, thank-you page,
   /account shelf). /top-hits-midi-bundle/v2 and /v2/order redirect here (next.config.ts).
