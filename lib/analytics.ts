@@ -683,7 +683,9 @@ export const TESTS: TestDef[] = [
     // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
     // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
-    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-08 alone (card payments failed until 11-07 17:35), C 11-09 → 11-10, D 11-11 → today; orders go to the step they were paid on",
+    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-08 alone (card payments failed until 11-07 17:35), C 11-09 → 11-10, D 11-11 → today; orders go to the step they were paid on · C and D also have the landing's "Checking availability…" popup (since 11-08 20:15), A and B don't",
+    // The popup is named in C and D ("D ha anche check availability come variabile", 2026-11-10):
+    // D against C is the bonus alone, D against A is the new step 2 and the popup together.
     // C: the same step as B with the phone's pay bar docked to the bottom edge
     // (11-08 17:29, "contiamolo come test C"); no letter of its own, only days.
     variants: [...PAY_TEST.variants, "c", "d"],
@@ -693,7 +695,7 @@ export const TESTS: TestDef[] = [
     // with it nobody paid for an add-on, 0 of 6 against 6 of 9 on A); the docked pay bar stays,
     // the Expansions are the paid add-on again.
     label: (v) =>
-      v === "c" ? "C · Pay bar docked at the bottom + 5-minute bonus" : v === "d" ? "D · Pay bar docked at the bottom, no bonus" : PAY_LABELS[v as keyof typeof PAY_LABELS],
+      v === "c" ? "C · Pay bar docked at the bottom + 5-minute bonus + availability popup" : v === "d" ? "D · Pay bar docked at the bottom + availability popup, no bonus" : PAY_LABELS[v as keyof typeof PAY_LABELS],
     color: (v) =>
       v === "c" ? { from: "#fbbf24", to: "#f59e0b" } : v === "d" ? { from: "#a78bfa", to: "#8b5cf6" } : PAY_COLORS[v as keyof typeof PAY_COLORS],
     // The split ran too short to say anything, so each step is judged on when
