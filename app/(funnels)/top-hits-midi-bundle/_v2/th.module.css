@@ -1,0 +1,131 @@
+/* What only the TOP HITS page has: the hero's four rolls, the big roll, the player's
+   search and four tabs, the file tree's roll. Everything else is the Jazz page's own CSS
+   (../../jazz-midi-pack/jazz.module.css, bonus.module.css, value.module.css, roll.module.css,
+   browse.module.css). Colours come from .jazz: one yellow, white text, black. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* the hero's four files, under the video */
+.heroPlay {
+  width: 100%;
+  max-width: 920px;
+  margin: 22px auto 0;
+  padding: 16px 14px 14px;
+  border-radius: 12px;
+  background: #0d0c10;
+  text-align: left;
+}
+.heroPlayHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.heroPlayHead p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--mute);
+}
+.heroRolls {
+  display: grid;
+  gap: 8px;
+}
+@media (min-width: 760px) {
+  .heroRolls {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* one file, large */
+.big {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+.bigSound {
+  justify-self: end;
+}
+.big figcaption {
+  font-size: 15px;
+  color: var(--mute);
+}
+
+/* the player: four folders, not the Jazz pack's five */
+@media (min-width: 721px) {
+  .tabs4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.search input {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 3px;
+  background: #241f18;
+  color: #fff;
+  font: inherit;
+  /* 16px: below it an iPhone zooms the page on focus */
+  font-size: 16px;
+}
+.search input::placeholder {
+  color: #a69c8b;
+}
+.none {
+  margin: 0;
+  font-size: 14px;
+  color: var(--mute);
+}
+
+/* the file's own notes under the folder path (how it works) */
+.treeRoll {
+  position: relative;
+  height: 96px;
+  border-radius: 3px;
+  background: #050505;
+  overflow: hidden;
+}
+.treeRoll i {
+  position: absolute;
+  height: 5px;
+  border-radius: 2px;
+  background: var(--y);
+}
+.treeRoll b {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgb(255 255 255 / 0.12);
+}
+
+/* the product panel's picture: a render on pure black, so black takes the panel's colour */
+.shot {
+  display: grid;
+  place-items: center;
+  padding: 0 10px;
+}
+.shot img {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  mix-blend-mode: lighten;
+}
+
+/* the player's Sine / Piano on a phone: its own row under the title, not a column beside the play button */
+@media (max-width: 520px) {
+  .sounds {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}

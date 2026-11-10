@@ -3,6 +3,7 @@ import { BONUS, BONUS_MS, BONUS_WORDS } from "@/app/(funnels)/midi-drum-kit/bonu
 import type { Lang } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { JAZZ_BONUS, JAZZ_BONUS_WORDS } from "@/app/(funnels)/jazz-midi-pack/fiveMinBonus";
 import { FBB_BONUS, FBB_BONUS_WORDS } from "@/app/(funnels)/famous-beats-bundle/fiveMinBonus";
+import { TH_BONUS, TH_BONUS_WORDS } from "@/app/(funnels)/top-hits-midi-bundle/fiveMinBonus";
 import { offeredBumps, type Bump, type Product } from "@/lib/funnels";
 
 // The Drum Kit order page's 5-minute bonus (app/(funnels)/midi-drum-kit/bonusTest.ts):
@@ -19,6 +20,8 @@ export const BONUS_COOKIE = "fv_bonus";
  * Jazz since 2026-11-09: the Record Samples (app/(funnels)/jazz-midi-pack/fiveMinBonus.ts).
  * Famous Beats since 2026-11-09: the MIDI Drum Kit Expansions (app/(funnels)/famous-beats-bundle/fiveMinBonus.ts),
  * given only once "expansions" is one of its add-ons in dashboard → Products.
+ * TOP HITS (its v2 order page) since 2026-11-10: the same Expansions, on the same condition
+ * (app/(funnels)/top-hits-midi-bundle/fiveMinBonus.ts).
  */
 const BONUS_FUNNELS: Record<string, { item: string; cookie: string; expired: (lang: unknown) => string }> = {
   "midi-drum-kit": {
@@ -28,6 +31,7 @@ const BONUS_FUNNELS: Record<string, { item: string; cookie: string; expired: (la
   },
   [JAZZ_BONUS.funnel]: { item: JAZZ_BONUS.item, cookie: JAZZ_BONUS.cookie, expired: () => JAZZ_BONUS_WORDS.expired },
   [FBB_BONUS.funnel]: { item: FBB_BONUS.item, cookie: FBB_BONUS.cookie, expired: () => FBB_BONUS_WORDS.expired },
+  [TH_BONUS.funnel]: { item: TH_BONUS.item, cookie: TH_BONUS.cookie, expired: () => TH_BONUS_WORDS.expired },
 };
 
 /** The cookie holding a funnel's bonus clock (null: the funnel has no bonus). */

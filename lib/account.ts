@@ -4,7 +4,7 @@ import { funnel as drumKit, unlocked as drumKitUnlocked } from "@/app/(funnels)/
 import { funnel as jazz, unlocked as jazzUnlocked } from "@/app/(funnels)/jazz-midi-pack/funnel";
 import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
 import { funnel as drunkGrooves, unlocked as drunkGroovesUnlocked } from "@/app/(funnels)/drunk-swing-grooves/funnel";
-import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
+import { funnel as topHits, unlocked as topHitsUnlocked } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
 import { resolveFunnel } from "@/lib/funnels";
 import { SHOP_HOME } from "@/lib/liveUrl";
 import { getOrder, orderFromIntent, type Order } from "@/lib/orders";
@@ -110,9 +110,14 @@ const SHELVES: Record<string, Shelf> = {
   },
   [topHits.slug]: {
     product: topHits.product,
-    labels: { pack: topHits.product, ...Object.fromEntries(topHits.bumps.map((b) => [b.id, b.name])) },
-    unlocked: (items) => items,
-    cover: () => "/funnels/top-hits-midi-bundle/product.webp",
+    labels: {
+      pack: topHits.product,
+      ...Object.fromEntries(topHits.bumps.map((b) => [b.id, b.name])),
+      ...Object.fromEntries(topHits.offers.map((o) => [o.id, o.name])),
+      ...topHits.fileNames,
+    },
+    unlocked: (items) => topHitsUnlocked(items),
+    cover: (o) => (o.offer ? (OFFER_COVERS[o.offer] ?? "/funnels/top-hits-midi-bundle/product.webp") : "/funnels/top-hits-midi-bundle/product.webp"),
     download: (o, file) => `/${topHits.slug}/download?order=${o.id}&file=${file}`,
   },
   [famousBeats.slug]: {
