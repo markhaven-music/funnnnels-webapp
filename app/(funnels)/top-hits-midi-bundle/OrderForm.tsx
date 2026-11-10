@@ -7,7 +7,7 @@ import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
 import { isPreview, track } from "@/lib/beacon";
 import { pixel } from "../jazz-midi-pack/Tracking";
-import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
+import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet, useFirstTouch } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
 import { withSkin, type Styles } from "../skin";
 import type { OrderOffer } from "../midi-drum-kit/offer";
@@ -89,7 +89,9 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
   // Stripe.js (≈150 KB of script) loads once the buyer starts on the form, not
   // with the page, which kept the order page under 90 on PageSpeed mobile (docs/page-speed.md).
   const [wanted, setWanted] = useState(false);
-  const stripePromise = useMemo(() => (publishableKey && wanted ? stripeFor(publishableKey) : null), [publishableKey, wanted]);
+  // …or, sooner, once they do anything on the page (../CardFields.tsx useFirstTouch).
+  const touched = useFirstTouch();
+  const stripePromise = useMemo(() => (publishableKey && (wanted || touched) ? stripeFor(publishableKey) : null), [publishableKey, wanted, touched]);
   // Paid by card: the upsell, unless its product is already in the order.
   const next = upsell && picked.includes(upsell) ? sells.thankYou : afterOrder;
   const state: PayState = { currency, country, info, method, picked, setPicked, total, next, offer, slug: sells.slug };

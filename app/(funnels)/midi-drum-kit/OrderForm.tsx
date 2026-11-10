@@ -11,7 +11,7 @@ import { readPay, type PayVariant } from "./payTest";
 import { BONUS, BONUS_WORDS } from "./bonusTest";
 import { BonusItem, endBonus, useBonus } from "./BonusClock";
 import { pixel } from "../jazz-midi-pack/Tracking";
-import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet } from "../CardFields";
+import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet, useFirstTouch } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
 import { Rich } from "../top-hits-midi-bundle/Rich";
 import s from "../top-hits-midi-bundle/order.module.css";
@@ -88,7 +88,9 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
   // Stripe.js (≈150 KB of script) loads once the buyer starts on the form, not
   // with the page, which kept the order page under 90 on PageSpeed mobile (docs/page-speed.md).
   const [wanted, setWanted] = useState(false);
-  const stripePromise = useMemo(() => (publishableKey && wanted ? stripeFor(publishableKey) : null), [publishableKey, wanted]);
+  // …or, sooner, once they do anything on the page (../CardFields.tsx useFirstTouch).
+  const touched = useFirstTouch();
+  const stripePromise = useMemo(() => (publishableKey && (wanted || touched) ? stripeFor(publishableKey) : null), [publishableKey, wanted, touched]);
   // The abandoned-checkout emails' link ("I've saved your cart", ?c=, lib/mail.ts resumeToken):
   // their name and email filled, straight to step 2. No InitiateCheckout again: they had theirs.
   useEffect(() => {

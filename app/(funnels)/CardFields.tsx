@@ -88,19 +88,66 @@ function noZoomOnIos() {
   if (ios && meta && !/maximum-scale/.test(meta.content)) meta.content += ", maximum-scale=1";
 }
 
+/**
+ * True once the visitor has done anything on the page (scrolled, touched,
+ * moved the mouse, pressed a key): the moment Stripe.js starts loading. Before
+ * 11-10 it waited for the first tap on the form itself, so someone who filled
+ * step 1 fast (autofill) reached the card fields before Stripe did and looked
+ * at an empty space for seconds (6+ on a first visit). PageSpeed's robot
+ * doesn't scroll or touch, so the page weighs the same there (docs/page-speed.md).
+ */
+export function useFirstTouch() {
+  const [touched, setTouched] = useState(false);
+  useEffect(() => {
+    const events = ["scroll", "touchstart", "pointerdown", "pointermove", "keydown"] as const;
+    const on = () => setTouched(true);
+    const opts = { once: true, passive: true, capture: true } as const;
+    events.forEach((e) => window.addEventListener(e, on, opts));
+    return () => events.forEach((e) => window.removeEventListener(e, on, opts));
+  }, []);
+  return touched;
+}
+
+// The fields' outline while Stripe's own are still loading: the number on one
+// row, expiry and CVC on the next, in the fields' border and corners.
+const ghost = { height: 48, border: "2px solid #dbdcdd", borderRadius: 5, background: "#f6f7f7" } as const;
+
 export function CardFields(_: { words?: CardWords; look?: CardLook }) {
   useEffect(noZoomOnIos, []);
+  // Stripe says "ready" ~0.7 s before its fields are painted (seen on a preview,
+  // 11-10: ready at 0.6 s, fields at 1.3 s), and its frame is see-through until
+  // then: so the outline stays behind the frame, and goes 1.5 s after "ready",
+  // by when the fields cover it.
+  const [ready, setReady] = useState(false);
+  const [ghosts, setGhosts] = useState(true);
+  useEffect(() => {
+    if (!ready) return;
+    const t = setTimeout(() => setGhosts(false), 1500);
+    return () => clearTimeout(t);
+  }, [ready]);
   return (
-    <PaymentElement
-      options={{
-        layout: "tabs",
-        // Step 1 has them; the country is the visit's (Stripe gets it at payWithCard).
-        fields: { billingDetails: { name: "never", email: "never", address: { country: "never" } } },
-        // Apple / Google Pay have their own buttons above (<Wallet>); no Link.
-        wallets: { applePay: "never", googlePay: "never", link: "never" },
-        terms: { card: "never" },
-      }}
-    />
+    <div style={{ position: "relative", minHeight: ready ? undefined : 104 }}>
+      {ghosts && (
+        <div aria-hidden style={{ position: "absolute", inset: 0, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, alignContent: "start" }}>
+          <div style={{ ...ghost, gridColumn: "1 / -1" }} />
+          <div style={ghost} />
+          <div style={ghost} />
+        </div>
+      )}
+      <div style={{ position: "relative" }}>
+        <PaymentElement
+          onReady={() => setReady(true)}
+          options={{
+            layout: "tabs",
+            // Step 1 has them; the country is the visit's (Stripe gets it at payWithCard).
+            fields: { billingDetails: { name: "never", email: "never", address: { country: "never" } } },
+            // Apple / Google Pay have their own buttons above (<Wallet>); no Link.
+            wallets: { applePay: "never", googlePay: "never", link: "never" },
+            terms: { card: "never" },
+          }}
+        />
+      </div>
+    </div>
   );
 }
 

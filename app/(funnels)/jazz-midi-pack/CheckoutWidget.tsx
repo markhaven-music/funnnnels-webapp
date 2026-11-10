@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 // "pure": Stripe.js loads when loadStripe is called, not as soon as this file does.
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
-import { CardFields, cardElements, payWithCard, payWithWallet, Wallet, type CardLook } from "../CardFields";
+import { CardFields, cardElements, payWithCard, payWithWallet, Wallet, type CardLook, useFirstTouch } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
 import s from "./checkout.module.css";
 import b from "./btn.module.css";
@@ -111,9 +111,11 @@ export function CheckoutWidget(props: Props) {
   const total = props.price + offers.filter((o) => picked.includes(o.id)).reduce((sum, o) => sum + o.price, 0);
   const toggle = (id: string, on: boolean) => setPicked((now) => (on ? [...now.filter((x) => x !== id), id] : now.filter((x) => x !== id)));
   const [wanted, setWanted] = useState(!props.deferStripe);
+  // …or, sooner, once they do anything on the page (../CardFields.tsx useFirstTouch).
+  const touched = useFirstTouch();
   const stripePromise = useMemo(
-    () => (props.publishableKey && wanted ? stripeFor(props.publishableKey) : null),
-    [props.publishableKey, wanted],
+    () => (props.publishableKey && (wanted || touched) ? stripeFor(props.publishableKey) : null),
+    [props.publishableKey, wanted, touched],
   );
   const bonus = useJazzBonus(!!props.fiveMinBonus, props.fiveMinBonus?.cfg ?? JAZZ_BONUS);
   const bonusLive = !!props.fiveMinBonus && bonus.live;
