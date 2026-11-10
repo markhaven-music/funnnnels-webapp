@@ -66,8 +66,10 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 - Upsell: TOP HITS as now.
 - Guarantee: 14-day quality guarantee; "we fix it or replace it. If we can't, you get a refund". Never "money back".
 
-## To switch (when the user says so)
-- funnel_items: add swing-grooves €7 (pos 0), expansions €7 (hidden, the 5-minute bonus), keep emotional-keys €7,
-  hustle €27; remove drum-kit.
-- thank-you + download: `unlocked()` so the four bonuses download (as drunk-swing-grooves does).
-- Move v2 into the funnel's root ([currency] page + order/[currency]), drop the /v2 paths from proxy.ts.
+## Switch (done 2026-11-10, "Sì, passa alla v2" → "Yes, change and switch")
+- Live at /famous-beats-bundle (+ /order) since 2026-11-10 (3430584); /v2 and /v2/order redirect there (next.config.ts).
+- funnel_items: swing-grooves €7 and expansions €7 (the 5-minute bonus) added. The old drum-kit and emotional-keys
+  rows are still in the table (the user declined the delete); the order page shows only ORDER_BUMPS (swing-grooves,
+  hustle), so they don't appear.
+- thank-you + download use `unlocked()`, so the six bonuses download.
+- Lighthouse mobile on the live URL (PageSpeed API quota out): landing 97, order 91.
