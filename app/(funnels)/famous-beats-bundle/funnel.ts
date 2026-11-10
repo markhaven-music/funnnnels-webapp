@@ -29,6 +29,8 @@ export const funnel = {
   price: { eur: 27, usd: 27 },
   // The three tick-box offers on step 2, in ClickFunnels order. Ids double as
   // file keys and travel in PayPal's 127-character custom_id, so keep them short.
+  // The hero video (vsl/script-en.md, tools/famous_vsl.py, 2026-11-10), in Wistia's own player.
+  vsl: { wistiaId: "22n1sjknnn" },
   bumps: [
     // Since 2026-11-09 ("più simile a quello jazz"): Drunk Swing Grooves €7 as on the Jazz
     // order page, and the Expansions, which the order page gives free for 5 minutes

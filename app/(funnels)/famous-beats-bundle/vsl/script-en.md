@@ -7,8 +7,8 @@ sentences, no hype, no fake urgency, no "worth $X", no price amount ("your price
 video"). Same structure as the Jazz VSL: hear it first, the problem, why the file sounds right, the bundle,
 what's inside, more demos, how easy, bonuses, one payment, guarantee, one call to action.
 
-[DEMO: id] = a beat played on screen with its roll. `before` / `after` = one bar of Polo G "Martin And
-Gina" (94 BPM): `after` is the file as it is in the pack (hat rolls, velocities); `before` is the same bar
+[DEMO: id] = a beat played on screen with its roll. `before` / `after` = four bars of Polo G "Martin And
+Gina" (94 BPM): `after` is the file as it is in the pack (hat rolls, velocities); `before` is the same bars
 copied by eye (hats on the grid, every hit at one velocity, no rolls). Both rendered on the same drum kit,
 so only the notes differ. The others are the pack's own previews (public/funnels/famous-beats-bundle/beats).
 Not read aloud. Numbers as digits here and on screen, spelled out for the voice.
@@ -26,7 +26,7 @@ Listen to these two.
 
 [SHOW: none]
 
-Same bar. Same drum kit. Same tempo. The first one is close. The second one is the record. The difference isn't the sounds. It's where the hits land, and how hard. And by the end of this video, you'll have 320 of those in your DAW.
+Same beat. Same drum kit. Same tempo. The first one is copied by eye. The second one is the file from the pack. The difference isn't the sounds. It's where the hits land, and how hard. And by the end of this video, you'll have 320 of those in your DAW.
 
 [SHOW: roll before]
 
@@ -40,7 +40,7 @@ Here's why. The small stuff doesn't show on a paused screen. Look at the hats. O
 
 Hit producers know this. Metro Boomin said it in an interview: "I start with the drums to secure a bounce." The bounce is in those details. And it can take a whole night to get one pattern almost right.
 
-[SHOW: image box-480]
+[SHOW: image hero-960]
 
 So we did it for you. We're GRIND STUDIO. Our MIDI Drum Kit is in the sessions of 2,847 producers. This is the Famous Beats Bundle. 320 drum grooves from hit records, written down by ear, note for note, and saved as MIDI. Every kick, every snare, every hat, and every ghost note, where the record has it.
 
@@ -56,7 +56,7 @@ Roddy Ricch.
 
 [DEMO: 01-01117roddyricchthebox]
 
-[SHOW: image box-480]
+[SHOW: image daw-1600]
 
 These are transcriptions. We wrote down what's on the records. There's no audio from the songs in the files, and none of these artists is connected to us. You get the groove as notes, and you put your own sounds on it.
 
@@ -114,6 +114,6 @@ Compare that with the other ways. Copy one groove a night, by eye, and hope it s
 
 And it's covered by our 14-day quality guarantee. If a file is broken, missing, or not what we said, email us. We fix it or replace it. If we can't, you get a refund.
 
-[SHOW: image box-480]
+[SHOW: image box3d-900]
 
 Click the button below this video. Grab the bundle, open the song you've been trying to copy, and start your next beat on a groove that already worked.

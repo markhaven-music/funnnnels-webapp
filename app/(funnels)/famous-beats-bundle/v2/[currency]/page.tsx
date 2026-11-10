@@ -120,18 +120,13 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
             <Marked text={w.hero.title} />
           </h1>
           <p className={s.heroSub}>{w.hero.sub}</p>
-          {/* Where the Jazz page has its video: the hero render (Higgsfield, from the real box, 2026-11-09), then three of the 320 beats. */}
-          <div className={`${shot.stage} ${shot.hero}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className={shot.img}
-              src="/funnels/famous-beats-bundle/hero-600.webp"
-              srcSet="/funnels/famous-beats-bundle/hero-600.webp 600w, /funnels/famous-beats-bundle/hero-960.webp 960w"
-              sizes="(min-width: 1000px) 380px, 86vw"
-              width={960}
-              height={1286}
-              alt="The Famous Beats Bundle box with MIDI drum lanes and .mid files coming out of it"
-              fetchPriority="high"
+          {/* The hero video, as on the Jazz page (vsl/script-en.md, tools/famous_vsl.py, 2026-11-10 "metti la VSL"), in Wistia's own player. */}
+          <div className={s.vsl}>
+            <iframe
+              src={`https://fast.wistia.net/embed/iframe/${funnel.vsl.wistiaId}?playerColor=f5b800&videoFoam=false`}
+              title="Famous Beats Bundle: the drums behind 320 hits, note for note in MIDI"
+              allow="autoplay; fullscreen"
+              allowFullScreen
             />
           </div>
           <div className={f.heroPlay}>
@@ -204,16 +199,15 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 className={shot.img}
-                src="/funnels/famous-beats-bundle/box3d-520.webp"
-                srcSet="/funnels/famous-beats-bundle/box3d-520.webp 520w, /funnels/famous-beats-bundle/box3d-900.webp 900w"
+                src="/funnels/famous-beats-bundle/hero-600.webp"
+                srcSet="/funnels/famous-beats-bundle/hero-600.webp 600w, /funnels/famous-beats-bundle/hero-960.webp 960w"
                 sizes="(min-width: 1000px) 360px, 64vw"
-                width={900}
-                height={1110}
-                alt="The Famous Beats Bundle box"
+                width={960}
+                height={1286}
+                alt="The Famous Beats Bundle box with MIDI drum lanes and .mid files coming out of it"
                 loading="lazy"
                 decoding="async"
               />
-              <span className={shot.floor} aria-hidden />
             </div>
             <div>
               <h2 className={s.h2}>
