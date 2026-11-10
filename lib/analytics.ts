@@ -1,5 +1,6 @@
 import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
+import { ORDER_STACK } from "@/app/(funnels)/midi-drum-kit/stackSwitch";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import { ASTRO_FUNNEL, type Step } from "@/lib/beacon";
 import { codeFunnels, funnelLabel } from "@/lib/funnels";
@@ -662,6 +663,8 @@ type TestDef = {
   ended?: { at: string; kept: string };
 };
 const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
+/** The UTC day before a UTC midnight ("2026-11-14T00:00:00Z" → "2026-11-13"). */
+const dayBefore = (iso: string) => new Date(Date.parse(iso) - 86_400_000).toISOString().slice(0, 10);
 export const TESTS: TestDef[] = [
   {
     funnel: "midi-drum-kit",
@@ -683,12 +686,15 @@ export const TESTS: TestDef[] = [
     // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
     // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
-    where: "Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-08 alone (card payments failed until 11-07 17:35), C 11-09 → 11-10, D 11-11 → today; orders go to the step they were paid on · C and D also have the landing's “Checking availability…” popup (since 11-08 20:15), A and B don't",
+    where: `Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-08 alone (card payments failed until 11-07 17:35), C 11-09 → 11-10; orders go to the step they were paid on · C also has the landing's “Checking availability…” popup (since 11-08 20:15), A and B don't · D (no bonus, from 11-10 20:15) has no column: the order page got its “what you get” box ${ORDER_STACK.from.slice(0, 10)} 00:00 UTC, before D had a whole day (see the Order summary card)`,
     // The popup is named in C and D ("D ha anche check availability come variabile", 2026-11-10):
     // D against C is the bonus alone, D against A is the new step 2 and the popup together.
     // C: the same step as B with the phone's pay bar docked to the bottom edge
     // (11-08 17:29, "contiamolo come test C"); no letter of its own, only days.
-    variants: [...PAY_TEST.variants, "c", "d"],
+    // D (below) left out on 2026-11-10: the "what you get" box went live that night ("Stanotte"),
+    // ~5 hours after D, so D never had a whole day of visits; a column without visitors would
+    // also leave every other column without its "chance best".
+    variants: [...PAY_TEST.variants, "c"],
     // 11-08 evening: C also gives everyone the 5-minute Expansions bonus (bonusTest.ts,
     // "metti a tutti il bonus e diventa semplicemente C"); its own A/B test is gone.
     // 11-10 evening: D is C without the bonus ("direi di toglierlo", "ok quindi torniamo a B":
@@ -711,7 +717,22 @@ export const TESTS: TestDef[] = [
       // day, so 11-07 goes whole (its three orders with it: two by PayPal, one card at 17:37).
       b: { from: "2026-11-08T01:00:00+01:00", until: "2026-11-08T17:29:00+01:00", days: ["2026-11-08", "2026-11-08"] },
       c: { from: "2026-11-08T17:29:00+01:00", until: "2026-11-10T20:15:00+01:00", days: ["2026-11-09", "2026-11-10"] },
-      d: { from: "2026-11-10T20:15:00+01:00", until: null, days: ["2026-11-11", null] },
+    },
+  },
+  {
+    funnel: "midi-drum-kit",
+    // 2026-11-10, "Sì e poi tracciamola in analytics in maniera chiara": the order page's left
+    // column gets the Jazz order page's "what you get" box (midi-drum-kit/stackSwitch.ts), live that
+    // night ("Stanotte"). Judged by its days like step 2: Before is the last two days of the same
+    // page (step 2's C; its 5-minute bonus ended 11-10 20:15), After is since the box.
+    name: "Order summary: picture only vs what you get",
+    where: `Order page, left column, every language · Before = picture and 12 claims (the claims hidden on phones), 11-09 → ${dayBefore(ORDER_STACK.from)}, step 2's C (5-minute bonus until 11-10 20:15) · After = form first on phones, then what's inside, the 3 bonuses with their value, total value against today's price, on every screen, ${ORDER_STACK.from.slice(0, 10)} → today`,
+    variants: ["before", "after"],
+    label: (v) => (v === "before" ? "Before · Picture + 12 claims" : "After · What you get + bonuses + total value"),
+    color: (v) => (v === "before" ? { from: "#94a3b8", to: "#64748b" } : { from: "#34d399", to: "#059669" }),
+    windows: {
+      before: { from: "2026-11-08T17:29:00+01:00", until: ORDER_STACK.from, days: ["2026-11-09", dayBefore(ORDER_STACK.from)] },
+      after: { from: ORDER_STACK.from, until: null, days: [ORDER_STACK.from.slice(0, 10), null] },
     },
   },
   {

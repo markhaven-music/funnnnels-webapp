@@ -22,6 +22,8 @@ import { orderOffer } from "../../../offer";
 import { OrderForm } from "../../../OrderForm";
 import { ReservedTimer } from "../../../ReservedTimer";
 import { Tracking } from "../../../Tracking";
+import { ORDER_STACK_SCRIPT } from "../../../stackSwitch";
+import { OrderStack } from "../../../OrderStack";
 
 // The order page, a copy of ClickFunnels' /spot-available-midi-drum-kit-ad-15m30
 // (the same template as the TOP HITS one, so it shares its stylesheet).
@@ -73,6 +75,8 @@ export default async function OrderPage({ params }: { params: Params }) {
       <script dangerouslySetInnerHTML={{ __html: PAY_SCRIPT }} />
       {/* The 5-minute bonus test (../../../bonusTest.ts): its letter is what the visit counts under. */}
       <script dangerouslySetInnerHTML={{ __html: BONUS_SCRIPT }} />
+      {/* The "what you get" box, on from ORDER_STACK.from (../../../stackSwitch.ts). */}
+      <script dangerouslySetInnerHTML={{ __html: ORDER_STACK_SCRIPT }} />
       <Tracking value={offer.price} currency={currency} event={null} />
       <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={AB.cookie} />
       <div className={s.redbar}>
@@ -95,7 +99,8 @@ export default async function OrderPage({ params }: { params: Params }) {
       </div>
 
       <div className={`${s.cols} ${d.cols}`}>
-        <section className={s.summaryCol}>
+        {/* With the "what you get" box on, phones get the form first and this column after it, as on the Jazz order page. */}
+        <section className={`${s.summaryCol} ${d.summaryAfter}`}>
           <h2 className={s.colTitle}>{t.order.summaryTitle}</h2>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.productImg} src={`${IMG}/product.webp`} alt={t.order.productAlt} width={896} height={1200} fetchPriority="high" />
@@ -107,8 +112,9 @@ export default async function OrderPage({ params }: { params: Params }) {
               <script dangerouslySetInnerHTML={{ __html: BONUS_TIME_SCRIPT }} />
             </div>
           )}
+          <OrderStack w={copyWith(lang, currency, edits).order.stack} price={offer.price} currency={currency} lang={lang} />
           <p className={s.dl}>{t.order.dl}</p>
-          <ul className={s.list}>
+          <ul className={`${s.list} ${d.oldList}`}>
             {t.order.bullets.map((b) => (
               <li key={b}>
                 <Check />

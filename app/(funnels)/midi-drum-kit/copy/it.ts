@@ -38,6 +38,21 @@ export const it: Copy = {
       "Garanzia di qualità (zero rischi)",
       "Limitato a 1.250 licenze",
     ],
+    stack: {
+      title: "1050 pattern di batteria MIDI, una cartella per ogni pezzo",
+      items: [
+        "Kick, snare, hi-hat chiusi e aperti, 808 e una cartella extra di roll",
+        "500+ pattern da 4 battute pronti per la radio e 250+ frammenti (roll, fill)",
+        "File multitraccia: kick e snare, kick e 808 in un solo file MIDI",
+        "Drag & drop in qualsiasi DAW, su Mac o PC",
+        "Licenza commerciale: vendi i tuoi beat, niente royalty",
+      ],
+      bonusesTitle: "In più 3 bonus gratis: altri 415 file MIDI",
+      bonuses: ["Famous Beats MIDI Bundle", "Beat Starters MIDI Bundle", "Hit-Maker Drums Sample Pack"],
+      free: "Gratis",
+      totalValue: "Valore totale",
+      today: "Oggi",
+    },
     completeTitle: "Completa l'ordine:",
     paylogosAlt: "PayPal, Visa, Mastercard, American Express, Discover",
     reviews: [

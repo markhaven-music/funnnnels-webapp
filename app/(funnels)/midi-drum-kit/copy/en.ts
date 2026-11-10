@@ -36,6 +36,24 @@ export const en = {
       "Quality Guarantee (No Risk)",
       "Limited To 1,250 Licenses",
     ],
+    // The "what you get" box (../stackSwitch.ts, ../OrderStack.tsx), like the Jazz order page.
+    // Only the landing's own facts: 1050 files and their folders, 500+ patterns, 250+ fragments,
+    // the multi-track files, any DAW, the commercial license, 415 MIDI files in the bonuses.
+    stack: {
+      title: "1050 MIDI drum patterns, a folder per drum",
+      items: [
+        "Kick, snare, hi-hats, open hats, 808 and an extra rolls folder",
+        "500+ radio-ready 4-bar patterns and 250+ fragments (rolls, fills)",
+        "Multi-track files: kick & snare, kick & 808 in one MIDI file",
+        "Drag & drop into any DAW, on Mac or PC",
+        "Commercial license: sell your beats, no royalties",
+      ],
+      bonusesTitle: "Plus 3 free bonuses: 415 more MIDI files",
+      bonuses: ["Famous Beats MIDI Bundle", "Beat Starters MIDI Bundle", "Hit-Maker Drums Sample Pack"],
+      free: "Free",
+      totalValue: "Total value",
+      today: "Today",
+    },
     completeTitle: "Complete Order:",
     paylogosAlt: "PayPal, Visa, Mastercard, American Express, Discover",
     reviews: [

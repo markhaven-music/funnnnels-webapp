@@ -39,6 +39,21 @@ export const de: Copy = {
       "Qualitätsgarantie (ohne Risiko)",
       "Begrenzt auf 1.250 Lizenzen",
     ],
+    stack: {
+      title: "1050 MIDI-Drum-Patterns, ein Ordner pro Drum",
+      items: [
+        "Kick, Snare, Closed und Open Hi-Hats, 808 und ein Extra-Ordner für Rolls",
+        "500+ radiotaugliche 4-Takt-Patterns und 250+ Fragmente (Rolls, Fills)",
+        "Multitrack-Dateien: Kick & Snare, Kick & 808 in einer MIDI-Datei",
+        "Per Drag & Drop in jede DAW, auf Mac oder PC",
+        "Kommerzielle Lizenz: verkauf deine Beats, ohne Lizenzgebühren",
+      ],
+      bonusesTitle: "Plus 3 Gratis-Boni: 415 weitere MIDI-Dateien",
+      bonuses: ["Famous Beats MIDI Bundle", "Beat Starters MIDI Bundle", "Hit-Maker Drums Sample Pack"],
+      free: "Gratis",
+      totalValue: "Gesamtwert",
+      today: "Heute",
+    },
     completeTitle: "Bestellung abschließen:",
     paylogosAlt: "PayPal, Visa, Mastercard, American Express, Discover",
     reviews: [
