@@ -24,6 +24,10 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
   "the chords behind 1,000 hits"; the product's id in Products is already `top-hits`). The live
   funnel went back to exactly what it was before (its funnel.ts, downloads, thank-you page,
   /account shelf). /top-hits-midi-bundle/v2 and /v2/order redirect here (next.config.ts).
+- 2026-11-10 evening (decided in the checkout-AOV session): the order page's 5-minute bonus is off
+  ("direi di toglierlo", "ok quindi torniamo a B"; all four checkouts). On the Drum Kit nobody paid
+  for an add-on with it (0 of 6 orders, 6 of 9 before) and every order was 27. The switch:
+  `jazz-midi-pack/fiveMinBonus.ts` FIVE_MIN_BONUS_ON. So this funnel opened without it.
 
 ## The product (counted from the pack on the T7 drive, 2026-11-10)
 Source: `…/02. All products/11. TOP HITS MIDI Bundle/1. Hitmaker MIDI Pack`, read by
@@ -100,7 +104,9 @@ one title word for word; reviews are the user's call).
   Drum Loops for Songwriting (€27; 47 WAV), ESSENTIAL MIDI Drum Patterns (€7; 163 MIDI).
   4,360 MIDI files and 305 WAV loops in the bonuses (counts from ../famous-beats-bundle/BRIEF.md).
 - Value stack: the bundle at its own price + the bonuses' values; nothing else invented.
-- 5-minute bonus (`./fiveMinBonus.ts`, cookie fv_bonus_th): MIDI Drum Kit Expansions free (172 MIDI
+- 5-minute bonus: **off** since 2026-11-10 (see Decisions): no banner, no free add-on, and the
+  Expansions aren't a tick box either. When FIVE_MIN_BONUS_ON is true again (`./fiveMinBonus.ts`,
+  cookie fv_bonus_th): MIDI Drum Kit Expansions free (172 MIDI
   files: Afrobeat 61 patterns, 7 fragments, 5 complete beats; Lo-Fi 87; House 12).
 - Tick boxes: Drunk Swing Grooves €7, HUSTLE Bundle €25 (its price on the live TOP HITS funnel; Jazz
   and Famous Beats sell it at €27). Emotional Keys is a bonus here; Famous Beats is the second upsell,
@@ -111,7 +117,7 @@ one title word for word; reviews are the user's call).
 ## Where it's registered (a code funnel, like Drunk Swing Grooves)
 - `funnel_items` (dashboard → Products), funnel `top-hits-chords`, added 2026-11-10: main `pack`
   (top-hits, 9700/9700); add-ons `swing-grooves` (700), `hustle` (2500), `expansions` (700: the
-  5-minute bonus, never a tick box); upsells `jazz-pack` (2700) then `famous-beats` (2700).
+  5-minute bonus's, never a tick box, so not sold while the bonus is off); upsells `jazz-pack` (2700) then `famous-beats` (2700).
   Seed: db/catalog.sql.
 - lib/funnels.ts (CODE, with `label` for the dashboard's name), lib/catalog.ts (CODE_FUNNELS,
   CODE_UPSELLS), lib/account.ts (shelf), lib/bonusClock.ts, lib/codeFunnels.ts (card),
@@ -132,5 +138,3 @@ one title word for word; reviews are the user's call).
 
 ## Numbers to compare with (the ClickFunnels copy, /top-hits-midi-bundle)
 Both funnels run side by side: Analytics has each one's visitors, order page, checkout starts and sales.
-
-- 2026-11-10: the order page's 5-minute bonus is off ("direi di toglierlo", "ok quindi torniamo a B"; all four checkouts). On the Drum Kit nobody paid for an add-on with it (0 of 6 orders, 6 of 9 before) and every order was 27. The switch: `jazz-midi-pack/fiveMinBonus.ts` FIVE_MIN_BONUS_ON.
