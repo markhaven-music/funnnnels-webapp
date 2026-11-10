@@ -25,6 +25,12 @@ const CARDS: CodeCard[] = [
     steps: 3,
   },
   {
+    id: "top-hits-chords",
+    name: "TOP HITS MIDI Bundle (new funnel)",
+    image: "/funnels/top-hits-chords/preview.webp",
+    steps: 4,
+  },
+  {
     id: "famous-beats-bundle",
     name: "Famous Beats Bundle",
     image: "/funnels/famous-beats-bundle/preview.webp",

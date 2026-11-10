@@ -111,3 +111,12 @@ insert into public.funnel_items (funnel, role, key, product, name, price_eur_cen
   ('drunk-swing-grooves',  'bump',   'jazz-pack',      'jazz-midi-pack',      'Jazz MIDI Pack',                           2700, 2700, 2),
   ('drunk-swing-grooves',  'upsell', 'jazz-pack',      'jazz-midi-pack',      'Jazz MIDI Pack',                           2700, 2700, 0),
   ('drunk-swing-grooves',  'upsell', 'famous-beats',   'famous-beats',        'Famous Beats Bundle (320 MIDI Beats)',     2700, 2700, 1);
+
+-- TOP HITS' new funnel at /top-hits-chords (2026-11-10, its funnel.ts): the same product, sold by its own funnel.
+insert into public.funnel_items (funnel, role, key, product, name, price_eur_cents, price_usd_cents, position) values
+  ('top-hits-chords',      'main',   'pack',           'top-hits',            'TOP HITS MIDI Bundle',                              9700, 9700, 0),
+  ('top-hits-chords',      'bump',   'swing-grooves',  'drunk-swing-grooves', 'Drunk Swing Grooves (211 MIDI Files)',               700,  700, 0),
+  ('top-hits-chords',      'bump',   'hustle',         'hustle',              'HUSTLE Bundle (31 MIDI Packs)',                     2500, 2500, 1),
+  ('top-hits-chords',      'bump',   'expansions',     'expansions',          'MIDI Drum Kit Expansions (House, Lo-Fi, Afrobeat)',  700,  700, 2),
+  ('top-hits-chords',      'upsell', 'jazz-pack',      'jazz-midi-pack',      'Jazz MIDI Pack',                                    2700, 2700, 0),
+  ('top-hits-chords',      'upsell', 'famous-beats',   'famous-beats',        'Famous Beats Bundle (320 MIDI Beats)',              2700, 2700, 1);

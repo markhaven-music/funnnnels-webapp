@@ -1,6 +1,6 @@
 import { editUrl } from "@/lib/editableIndex";
 import { freePackStats, type FreePackRow } from "@/lib/freePacks";
-import { resolveFunnel, upsellsOn, type Product } from "@/lib/funnels";
+import { funnelLabel, resolveFunnel, upsellsOn, type Product } from "@/lib/funnels";
 import { KIT_HOME, PRODUCT_TYPE } from "@/lib/liveUrl";
 import { getFunnel } from "@/lib/store";
 
@@ -57,6 +57,7 @@ const landingPrefix = (slug: string, lang: string, prefix: string) => (slug === 
 const SHOTS: Record<string, Record<string, { landing: string; order?: string; thanks?: string }>> = {
   "jazz-midi-pack": { en: { landing: "preview", order: "order" } },
   "top-hits-midi-bundle": { en: { landing: "preview", order: "order" } },
+  "top-hits-chords": { en: { landing: "preview", order: "order" } },
   "famous-beats-bundle": { en: { landing: "preview", order: "order" } },
   "drunk-swing-grooves": { en: { landing: "preview", order: "order" } },
   "midi-drum-kit": { fr: { landing: "preview", order: "order", thanks: "thanks" }, en: { landing: "preview-en", order: "order-en", thanks: "thanks-en" } },
@@ -67,7 +68,7 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
   const langs = f.langs ? [...f.langs].sort((a, b) => (a === "en" ? 1 : b === "en" ? -1 : 0)) : ["en"];
   return {
     id: f.slug,
-    name: f.product,
+    name: funnelLabel(f),
     status: "live",
     statsSlug: f.slug,
     canTranslate: f.kind === "code",

@@ -15,11 +15,11 @@ import j from "../../../jazz-midi-pack/jazz.module.css";
 import { Rich } from "../../../drunk-swing-grooves/Rich";
 import { UpsellButtons } from "../../../drunk-swing-grooves/UpsellButtons";
 import s from "../../../drunk-swing-grooves/landing.module.css";
-import { Tracking } from "../../Tracking";
+import { Tracking } from "../../../top-hits-midi-bundle/Tracking";
 import { funnel } from "../../funnel";
-import { UPSELL as w } from "../../_v2/words";
+import { UPSELL as w } from "../../words";
 
-// Upsell 1 after the TOP HITS order (2026-11-10, "crea nuovo funnel … con TUTTO"): the Jazz
+// Upsell 1 after this funnel's TOP HITS order (2026-11-10, "crea nuovo funnel … con TUTTO"): the Jazz
 // MIDI Pack ("jazz-pack"), one click on the card or PayPal just used, the page the Drunk
 // Swing Grooves funnel has (../../../drunk-swing-grooves/offer): this page's top, the Jazz
 // VSL, then the Jazz landing's own published blocks with every button to the Jazz order page
@@ -27,7 +27,7 @@ import { UPSELL as w } from "../../_v2/words";
 // the Jazz MIDI Pack's (../../../jazz-midi-pack/BRIEF.md). The price is dashboard → Products'
 // (funnel_items upsell row "jazz-pack"): until that row exists the offer isn't part of the
 // funnel and this page is a 404. One page per currency; proxy.ts rewrites
-// /top-hits-midi-bundle/jazz-offer here.
+// /top-hits-chords/offer here.
 
 export const revalidate = 3600;
 

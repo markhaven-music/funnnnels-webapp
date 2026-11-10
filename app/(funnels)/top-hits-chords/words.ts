@@ -236,7 +236,7 @@ export const BUMP_COPY: Record<string, { headline: string; body: string[] }> = {
   },
 };
 
-// Upsell 1 after the order (../jazz-offer): the Jazz MIDI Pack, one click. Its claims are
+// Upsell 1 after the order (./offer): the Jazz MIDI Pack, one click. Its claims are
 // the Jazz MIDI Pack's (../../jazz-midi-pack/BRIEF.md). A TOP HITS buyer already has five
 // of its six bonuses, so the page sells the pack alone.
 export const UPSELL = {

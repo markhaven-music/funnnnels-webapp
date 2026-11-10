@@ -4,6 +4,7 @@
 const CODE_FUNNELS: Record<string, string> = {
   "jazz-midi-pack": "https://m.thegrind.studio/jazz-midi-pack",
   "top-hits-midi-bundle": "https://m.thegrind.studio/top-hits-midi-bundle",
+  "top-hits-chords": "https://m.thegrind.studio/top-hits-chords",
   "famous-beats-bundle": "https://m.thegrind.studio/famous-beats-bundle",
   "drunk-swing-grooves": "https://m.thegrind.studio/drunk-swing-grooves",
 };

@@ -34,6 +34,8 @@ shot midi-drum-kit thanks "https://funnnnels.vercel.app/fr/midi-drum-kit/thank-y
 shot midi-drum-kit thanks-en "https://funnnnels.vercel.app/midi-drum-kit/thank-you?country=US&preview=1&origin=1"
 shot top-hits-midi-bundle preview "https://funnnnels.vercel.app/top-hits-midi-bundle?country=US&origin=1"
 shot top-hits-midi-bundle order "https://funnnnels.vercel.app/top-hits-midi-bundle/order?country=US&origin=1"
+shot top-hits-chords preview "https://funnnnels.vercel.app/top-hits-chords?country=US&origin=1"
+shot top-hits-chords order "https://funnnnels.vercel.app/top-hits-chords/order?country=US&origin=1"
 shot famous-beats-bundle preview "https://funnnnels.vercel.app/famous-beats-bundle?country=US&origin=1"
 shot famous-beats-bundle order "https://funnnnels.vercel.app/famous-beats-bundle/order?country=US&origin=1"
 shot jazz-midi-pack preview "https://funnnnels.vercel.app/jazz-midi-pack?country=US&origin=1"

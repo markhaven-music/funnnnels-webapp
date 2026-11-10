@@ -55,6 +55,7 @@ export function revalidateDrumKitTexts(lang: string) {
     for (const page of ["", "/order", "/offer", "/last-offer"]) revalidatePath(`/midi-drum-kit/${lang}${page}/${currency}`);
     // The TOP HITS MIDI Bundle shows the Drum Kit's Famous Beats page after its own order.
     if (lang === "en") revalidatePath(`/top-hits-midi-bundle/offer/${currency}`);
+    if (lang === "en") revalidatePath(`/top-hits-chords/offer-2/${currency}`);
     // The Famous Beats Bundle shows its TOP HITS page.
     if (lang === "en") revalidatePath(`/famous-beats-bundle/offer/${currency}`);
   }

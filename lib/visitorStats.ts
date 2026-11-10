@@ -1,5 +1,5 @@
 import { ASTRO_FUNNEL } from "@/lib/beacon";
-import { codeFunnels } from "@/lib/funnels";
+import { codeFunnels, funnelLabel } from "@/lib/funnels";
 import { OFF_HOST } from "@/lib/live";
 import { rangeLength, rangeSpan, type Range } from "@/lib/range";
 import { SHOP_SLUG } from "@/lib/shop";
@@ -85,7 +85,7 @@ export async function getVisitorStats(range: Range, offset: number): Promise<Vis
   const visitors = vRows.filter((v) => shown(v.host));
   const events = eRows.filter((e) => shown(e.host));
 
-  const names = new Map<string, string>(codeFunnels().map((f) => [f.slug, f.product]));
+  const names = new Map<string, string>(codeFunnels().map((f) => [f.slug, funnelLabel(f)]));
   names.set(SHOP_SLUG, "Shop");
   names.set(ASTRO_FUNNEL, "Astro landings");
   const funnelName = (slug: string) => names.get(slug) ?? slug;

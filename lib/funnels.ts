@@ -4,6 +4,7 @@ import { funnel as drunkGrooves } from "@/app/(funnels)/drunk-swing-grooves/funn
 import { funnel as drumKit } from "@/app/(funnels)/midi-drum-kit/funnel";
 import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { funnel as topHits } from "@/app/(funnels)/top-hits-midi-bundle/funnel";
+import { funnel as topHitsChords } from "@/app/(funnels)/top-hits-chords/funnel";
 import type { Currency } from "@/lib/geo";
 import { phaseAt, toCents, unitPrice, type Launch, type Money, type Phase } from "@/lib/launch";
 import { funnelItems, type FunnelItem } from "@/lib/catalog";
@@ -42,6 +43,8 @@ export type Product = {
   kind: "code" | "kit" | "shop";
   slug: string;
   product: string; // display name
+  // The dashboard's name for the funnel when the product's isn't enough (two funnels selling one product).
+  label?: string;
   brand: string;
   tagline: string;
   price: Money;
@@ -94,6 +97,24 @@ const TOP_HITS: Product = {
   offers: topHits.offers,
 };
 
+// TOP HITS' new funnel (2026-11-10, "crea un funnel a parte"): the same product on its own pages at
+// /top-hits-chords, with the 5-minute bonus, the Jazz MIDI Pack then Famous Beats after the order.
+const TOP_HITS_CHORDS: Product = {
+  kind: "code",
+  slug: topHitsChords.slug,
+  product: topHitsChords.product,
+  label: topHitsChords.label,
+  brand: topHitsChords.brand,
+  tagline: topHitsChords.tagline,
+  price: topHitsChords.price,
+  bump: null,
+  bumps: topHitsChords.bumps.map(({ id, name, price, pitch, image }) => ({ id, name, price, pitch, image })),
+  checkout: topHitsChords.checkout,
+  optin: null,
+  launch: null,
+  offers: topHitsChords.offers,
+};
+
 const DRUM_KIT: Product = {
   kind: "code",
   slug: drumKit.slug,
@@ -141,7 +162,7 @@ const DRUNK_GROOVES: Product = {
   offers: drunkGrooves.offers,
 };
 
-const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS, [DRUM_KIT.slug]: DRUM_KIT, [FAMOUS_BEATS.slug]: FAMOUS_BEATS, [DRUNK_GROOVES.slug]: DRUNK_GROOVES };
+const CODE: Record<string, Product> = { [JAZZ.slug]: JAZZ, [TOP_HITS.slug]: TOP_HITS, [TOP_HITS_CHORDS.slug]: TOP_HITS_CHORDS, [DRUM_KIT.slug]: DRUM_KIT, [FAMOUS_BEATS.slug]: FAMOUS_BEATS, [DRUNK_GROOVES.slug]: DRUNK_GROOVES };
 
 // Named for the abandoned-checkout reminder ("Your GRIND STUDIO order is
 // waiting"); the receipt names the products themselves.
@@ -199,6 +220,9 @@ export function nextStep(f: Product, lang: unknown, after: string | null, owned:
   const next = after !== null && at < 0 ? undefined : offers.slice(at + 1).find((o) => !owned.includes(o.id));
   return next ? `${pages.lang ? `/${pages.lang}` : ""}/${f.slug}/${next.path}` : pages.thankYou;
 }
+
+/** A funnel's name on the dashboard: its label when it has one, else its product. */
+export const funnelLabel = (f: Pick<Product, "product" | "label">) => f.label ?? f.product;
 
 /** The hand-built funnels, in the order the dashboard lists them. */
 export const codeFunnels = (): Product[] => Object.values(CODE);

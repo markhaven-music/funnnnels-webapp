@@ -2,7 +2,7 @@ import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import { ASTRO_FUNNEL, type Step } from "@/lib/beacon";
-import { codeFunnels } from "@/lib/funnels";
+import { codeFunnels, funnelLabel } from "@/lib/funnels";
 import { KIT_HOME, SHOP_URL } from "@/lib/liveUrl";
 import { SHOP_SLUG } from "@/lib/shop";
 import { paypal, paypalConfigured, type PayPalOrder } from "@/lib/paypal";
@@ -543,7 +543,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
   const kits = await soft("products", kitFunnels(), []);
   const list = [
     ...[
-      ...codeFunnels().map((f) => ({ slug: f.slug, name: f.product, langs: f.langs ?? null })),
+      ...codeFunnels().map((f) => ({ slug: f.slug, name: funnelLabel(f), langs: f.langs ?? null })),
       ...kits.map((k) => ({ slug: k.slug, name: k.name, langs: null })),
       // m.thegrind.studio/midi-drum-kit is still the old Astro page: funnnnels' English one is /en/midi-drum-kit.
     ].map((f) => ({ ...f, url: `${KIT_HOME}${f.slug === "midi-drum-kit" ? "/en" : ""}/${f.slug}` })),
@@ -1086,7 +1086,7 @@ async function availabilityStats(now: number): Promise<AvailabilityStats> {
   }
   for (const [sid, v] of first) v.order = (orders.get(sid) ?? []).some((t) => t >= v.at);
 
-  const names = new Map<string, string>(codeFunnels().map((f) => [f.slug, f.product]));
+  const names = new Map<string, string>(codeFunnels().map((f) => [f.slug, funnelLabel(f)]));
   names.set(ASTRO_FUNNEL, "Drum Kit (old page)");
   const blank = () => ({ landings: 0, orderViews: 0 });
   const per = new Map<string, { before: ReturnType<typeof blank>; after: ReturnType<typeof blank> }>();

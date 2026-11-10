@@ -1,8 +1,13 @@
-# TOP HITS MIDI Bundle: product brief
+# TOP HITS MIDI Bundle, the new funnel (/top-hits-chords): product brief
 
 Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funnel-page`.
 The older brief (2026-10-07, in Italian, with the list of ClickFunnels claims not to repeat) is
-`grind-studio-landing-pages/docs/top-hits-brief.md`; what's here replaces it for the v2 pages.
+`grind-studio-landing-pages/docs/top-hits-brief.md`; what's here replaces it for this funnel's pages.
+
+Two funnels sell this product. `../top-hits-midi-bundle` is the 1:1 ClickFunnels copy at
+m.thegrind.studio/top-hits-midi-bundle: live, and not changed by anything here. This one is
+m.thegrind.studio/top-hits-chords, with its own rows in dashboard → Products, its own numbers
+in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new funnel)").
 
 ## Decisions (the user's words)
 - 2026-10-21: the ClickFunnels funnel copied 1:1 (./[currency], ./order): still the live page.
@@ -11,9 +16,14 @@ The older brief (2026-10-07, in Italian, with the list of ClickFunnels claims no
   (../famous-beats-bundle/BRIEF.md), with everything that funnel got in several rounds done at once:
   the Jazz page's CSS and section order, a player of every file, renders from the real box, six
   bonuses, the value stack, the 5-minute bonus, the tick boxes, two one-click upsells, the bonuses on
-  the thank-you page and in /account, a VSL. Beside the live page at /top-hits-midi-bundle/v2
-  (+ /v2/order), not indexed, until the user switches ("To switch" below). The offer below is my
-  proposal on the Jazz / Famous Beats pattern, not yet confirmed line by line by the user.
+  the thank-you page and in /account, a VSL. First put beside the live page at
+  /top-hits-midi-bundle/v2, waiting for a switch. The offer below is my proposal on the Jazz /
+  Famous Beats pattern, not yet confirmed line by line by the user.
+- 2026-11-10, asked whether to make the v2 the live page: "crea un funnel a parte". So no switch:
+  the v2 became this funnel, with a slug of its own (`top-hits-chords`, my choice: the headline's
+  "the chords behind 1,000 hits"; the product's id in Products is already `top-hits`). The live
+  funnel went back to exactly what it was before (its funnel.ts, downloads, thank-you page,
+  /account shelf). /top-hits-midi-bundle/v2 and /v2/order redirect here (next.config.ts).
 
 ## The product (counted from the pack on the T7 drive, 2026-11-10)
 Source: `…/02. All products/11. TOP HITS MIDI Bundle/1. Hitmaker MIDI Pack`, read by
@@ -47,36 +57,42 @@ Source: `…/02. All products/11. TOP HITS MIDI Bundle/1. Hitmaker MIDI Pack`, r
 - Typos in file names (the page shows the names corrected, the path line shows the real file name):
   The Weekend, Adelle, Rhianna, Beyonc‚, Ti统to, Expresso…
 
-## Not on the v2 pages (from the ClickFunnels copy)
+## Not on these pages (from the ClickFunnels copy)
 "Undetectable, unprovable, unstoppable", "zero copyright landmines, zero risk", "they sound identical
 to the originals", "a collective of platinum-certified producers", "limited to 1,250 licenses", the
 stock bar and the reserved-copy timer, "total real value €20,000", "free updates", the Wistia video
 8s55snt7vw (it's the Drum Kit's after-purchase upsell video), the eight order-page reviews (two share
 one title word for word; reviews are the user's call).
 
-## The v2 pages
-- Landing `./v2/[currency]` (words `./_v2/words.ts`): red bar, hero (video when there is one, four
+## The pages
+- Landing `./[currency]` (words `./words.ts`): red bar, hero (video when there is one, four
   playable files, bullets, key, proof: 2,847 Drum Kit producers, 4,700+ list, 14 days), letter, product
   panel, what you get beside a playable roll, the player, how it works beside the folder path, what's
   inside, ✓/✗ chart, six bonuses, value stack, seal + license, after you pay, FAQ, final key.
-- The player (`./_v2/SongPlayer.tsx`): the four folders, Prev / menu / Next, search by artist, song, key
+- The player (`./SongPlayer.tsx`): the four folders, Prev / menu / Next, search by artist, song, key
   or BPM. It plays **the first 8 bars** of each file (the whole file when shorter) on the page's sine or
   piano; data in `public/funnels/top-hits-midi-bundle/browse-v1` (songs.json + 20 chunks, ~920 KB in all,
-  fetched as needed). A new pack: a new folder name.
+  fetched as needed). A new pack: a new folder name. The pictures and the player's data stay in the
+  product's folder (`public/funnels/top-hits-midi-bundle`); `public/funnels/top-hits-chords` holds
+  only the dashboard's screenshots (preview.webp, order.webp).
 - Pictures: gpt_image_2_6 on Higgsfield from the real box (2026-11-10): `box3d-*` (cutout), `hero-*`
   (the box, a piano roll of chords, four real file names, checked letter by letter), `daw-*`, `stage-*`.
 - VSL in the hero: Wistia 47ic5iver0 (4:05, voice Aaron Sage on eleven_v4, every part checked with
   speech-to-text), script `./vsl/script-en.md`, made by `tools/top_hits_vsl.py voice|render` (the Jazz
   VSL's captions and synth; the demos are Blinding Lights, Kill Bill, Lucid Dreams and Someone Like You
-  from `_v2/rolls.json`). No price amount in it. Still = the frame at 116 s (media z84gwhhsa9). A first
+  from `rolls.json`). No price amount in it. Still = the frame at 116 s (media z84gwhhsa9). A first
   take with a black box around one picture is in Wistia as "OLD RENDER, not used" (pl1r8oioox,
   jfnydgc3hb): to delete.
-- Order `./v2/order/[currency]`: the Jazz order page as Famous Beats has it.
-- Upsell 1 `./jazz-offer/[currency]`: the Jazz MIDI Pack, one click (the Drunk Swing Grooves page's
+- Order `./order/[currency]`: the Jazz order page as Famous Beats has it.
+- Upsell 1 `./offer/[currency]`: the Jazz MIDI Pack, one click (the Drunk Swing Grooves page's
   twin; the Jazz bonuses and value stack are left out, a TOP HITS buyer has five of the six).
-  Upsell 2 `./offer`: Famous Beats, the Drum Kit's page, as today.
+  Upsell 2 `./offer-2`: Famous Beats, the Drum Kit's page (midi-drum-kit/upsell.ts).
+- Thank-you `./thank-you`: the live funnel's thank-you page (its words, shared) with this funnel's
+  downloads: the bundle, the six bonuses, the add-ons, the upsells. `./download`: the zips from R2.
+- The words of the sales, order and thank-you pages can be edited in the dashboard (funnel map →
+  Edit; lib/editablePages.ts).
 
-## Offer (v2)
+## Offer
 - €97 / $97 (dashboard → Products). Red "BLACK FRIDAY: 90% Sale Ends Soon" bar as on Jazz.
 - Six bonuses in the price (`funnel.ts` includes.pack), values as the Jazz page has them (192 in all):
   The Chord Progressions Bible (€37; 150 MIDI + 258 WAV), MIDI Chord Pack (Jazz Edition) (€47; 2,304 MIDI),
@@ -86,25 +102,35 @@ one title word for word; reviews are the user's call).
 - Value stack: the bundle at its own price + the bonuses' values; nothing else invented.
 - 5-minute bonus (`./fiveMinBonus.ts`, cookie fv_bonus_th): MIDI Drum Kit Expansions free (172 MIDI
   files: Afrobeat 61 patterns, 7 fragments, 5 complete beats; Lo-Fi 87; House 12).
-- Tick boxes: Drunk Swing Grooves €7, HUSTLE Bundle (€25 in Products today). Emotional Keys becomes a
-  bonus; Famous Beats is the second upsell, no longer a tick box.
+- Tick boxes: Drunk Swing Grooves €7, HUSTLE Bundle €25 (its price on the live TOP HITS funnel; Jazz
+  and Famous Beats sell it at €27). Emotional Keys is a bonus here; Famous Beats is the second upsell,
+  not a tick box.
 - Upsells: Jazz MIDI Pack €27, then Famous Beats Bundle €27.
 - Guarantee: 14-day quality guarantee; "we fix it or replace it. If we can't, you get a refund". Never "money back".
 
-## To switch (when the user says so)
-1. `funnel_items` for top-hits-midi-bundle: add bump `swing-grooves` (drunk-swing-grooves, 700/700),
-   bump `expansions` (expansions, 700/700), upsell `jazz-pack` (jazz-midi-pack, 2700/2700) before
-   `famous-beats`. The old `emotional-keys` and `famous-beats` bump rows can stay: the v2 order page shows
-   only its ORDER_BUMPS.
-2. `funnel.ts`: `V2_LIVE = true` (the six bonuses unlock on the thank-you page, in the downloads and in /account).
-3. Move `./v2/[currency]` and `./v2/order/[currency]` to `./[currency]` and `./order/[currency]` (the
-   ClickFunnels copy goes to `./_cf`), point `order` and the logo link at the root paths, remove
-   `robots: noindex` from the landing, redirect /v2 and /v2/order in next.config.ts, drop the two /v2
-   paths from proxy.ts CURRENCY_PAGES.
-4. `lib/editablePages.ts`: the landing's and order page's words become `_v2/words.ts`.
-5. Deploy, then check the live page, a test order on a Preview with Stripe test keys, PageSpeed mobile.
+## Where it's registered (a code funnel, like Drunk Swing Grooves)
+- `funnel_items` (dashboard → Products), funnel `top-hits-chords`, added 2026-11-10: main `pack`
+  (top-hits, 9700/9700); add-ons `swing-grooves` (700), `hustle` (2500), `expansions` (700: the
+  5-minute bonus, never a tick box); upsells `jazz-pack` (2700) then `famous-beats` (2700).
+  Seed: db/catalog.sql.
+- lib/funnels.ts (CODE, with `label` for the dashboard's name), lib/catalog.ts (CODE_FUNNELS,
+  CODE_UPSELLS), lib/account.ts (shelf), lib/bonusClock.ts, lib/codeFunnels.ts (card),
+  lib/funnelMap.ts (SHOTS), lib/liveUrl.ts, lib/products.ts (RESERVED_SLUGS), proxy.ts
+  (FUNNEL_HOME, CURRENCY_PAGES, APP_SEGMENTS, PUBLIC), lib/editablePages.ts + lib/editableIndex.ts,
+  tools/funnel-previews.sh, and four rewrites for /top-hits-chords in
+  grind-studio-landing-pages/vercel.json (the brand domain).
+- Buyers get the product's own tag (`buyer-top-hits-midi-bundle`, as on the live funnel) and
+  `owns-top-hits`; the six bonuses count as owned (lib/catalog.ts).
 
-## Numbers before (the ClickFunnels copy in funnnnels)
-To fill from Analytics on the day of the switch (landing visitors, order page, checkout starts, sales).
+## Not done
+- No paid test order yet: prices, add-ons, the 5-minute bonus and the downloads list were checked
+  with the checkout's dry run and the thank-you page's preview; a real card or PayPal order through
+  both upsells is still to make (a Preview deployment has Stripe's test keys).
+- No Meta ads point here. A new ad: the bare link https://m.thegrind.studio/top-hits-chords and
+  the standard string in URL parameters.
+- No reviews on the pages (see above). The pack's faults are the product's, fixed apart.
 
-- 2026-11-10: the order page's 5-minute bonus is off ("direi di toglierlo", "ok quindi torniamo a B"; all four checkouts). On the Drum Kit nobody paid for an add-on with it (0 of 6 orders, 6 of 9 before) and every order was 27. The switch: Drum Kit `bonusTest.ts` (BONUS_SCRIPT default), the others `jazz-midi-pack/fiveMinBonus.ts` FIVE_MIN_BONUS_ON.
+## Numbers to compare with (the ClickFunnels copy, /top-hits-midi-bundle)
+Both funnels run side by side: Analytics has each one's visitors, order page, checkout starts and sales.
+
+- 2026-11-10: the order page's 5-minute bonus is off ("direi di toglierlo", "ok quindi torniamo a B"; all four checkouts). On the Drum Kit nobody paid for an add-on with it (0 of 6 orders, 6 of 9 before) and every order was 27. The switch: `jazz-midi-pack/fiveMinBonus.ts` FIVE_MIN_BONUS_ON.

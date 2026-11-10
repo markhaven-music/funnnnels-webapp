@@ -4,14 +4,15 @@
 // which the map doesn't need to load.
 //   MIDI Drum Kit: every page in every language (the sales page and the
 //     upsells also their sections, pictures and button colour)
-//   TOP HITS, Famous Beats: sales page, order page, thank-you page (their
-//     upsells are the Drum Kit's pages, edited there)
+//   TOP HITS (both funnels), Famous Beats: sales page, order page, thank-you page
+//     (an upsell that is a Drum Kit page is edited there)
 //   Jazz: the thank-you page (the sales and order pages have the section editor)
 //   free: the free packs' sign-up pages, by page name (app/free/packs.ts)
 
 export const EDITABLE: Record<string, readonly string[]> = {
   "midi-drum-kit": ["landing", "order", "famous-beats", "top-hits", "thank-you"],
   "top-hits-midi-bundle": ["landing", "order", "thank-you"],
+  "top-hits-chords": ["landing", "order", "thank-you"],
   "famous-beats-bundle": ["landing", "order", "thank-you"],
   "jazz-midi-pack": ["thank-you"],
   free: ["rolls", "bounce", "hooks", "mystery-hooks", "free-store", "free-store-access", "bounce-midi-pack", "mystery-dopaspace-hooks"],
