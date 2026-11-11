@@ -70,6 +70,13 @@ alter table public.page_views add constraint page_views_page_check
 alter table public.paypal_sales add column offer text not null default '';
 alter table public.paypal_sales add column parent text;
 
+-- Third upsell (migration "funnel_analytics_upsell_3", 2026-11-11): the Drum
+-- Kit's upsell-3 step (added 11-08) was refused by the check above, so its
+-- views were never counted.
+alter table public.page_views drop constraint page_views_page_check;
+alter table public.page_views add constraint page_views_page_check
+  check (page in ('landing', 'order', 'checkout', 'upsell-1', 'upsell-2', 'upsell-3', 'thank-you'));
+
 -- Bots (migration "funnel_analytics_bots", 2026-10-21): beacons that
 -- lib/bots.ts turned away (Meta's ad reviewers, crawlers, headless browsers)
 -- are not counted in page_views; this only notes how many, and why.
