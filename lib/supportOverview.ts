@@ -9,7 +9,7 @@ import { listConversations, type Conversation } from "@/lib/support";
 // ClickFunnels purchases in legacy_purchases), and how long they've waited.
 
 export type Priority = "urgent" | "high" | "normal" | "low" | "ignore";
-export type Category = "dispute" | "refund" | "download" | "question" | "feedback" | "phishing" | "spam" | "notification" | "other";
+export type Category = "dispute" | "refund" | "download" | "checkout" | "question" | "feedback" | "phishing" | "spam" | "notification" | "other";
 export type OverviewItem = {
   customer: string;
   priority: Priority;
@@ -28,6 +28,9 @@ const DAY = 86_400_000;
 const DISPUTE = /\b(chargeback|dispute|scam|fraud|unauthori[sz]ed|did ?n[o']t (place|make|authori[sz]e|order)|never (ordered|placed|bought)|report (you|this)|lawyer|truffa|estafa|arnaque|betrug|stafa)\b/;
 const REFUND = /\b(refund|money back|reimburse|rimbors|reembols|rembours|erstatt|geld zur(ü|u)ck|charged twice|double charge|cancel (my|the) (order|purchase))/;
 const DOWNLOAD = /\b(download|scaric|t(é|e)l(é|e)charg|descarg|herunterlad|link|can'?t (access|open|find)|cannot (access|open|find)|does ?n[o']t work|not working|expired|can'?t be reached|unzip|zip file|corrupt|no (file|files)|missing file)/;
+// Wants to buy and can't get through the order page ("vorrei acquistare ma dopo il primo step
+// il sistema ritorna indietro", 2026-11-10): a sale waiting, not a download problem.
+const CHECKOUT = /\b(can'?t|cannot|could ?n[o']t|unable to|won'?t let me|does ?n[o']t let me|not able to) (buy|pay|purchase|order|check ?out|complete|finish|proceed|go (on|forward|ahead))|\b(payment|card|checkout|paypal) (is |was |keeps? |got )?(fail|declin|reject|refus|not (going|working)|error)|\b(vorrei|volevo|voglio|cerco di|provo a) (acquistar|comprar|pagar|ordinar)|\bnon (mi )?(permette|lascia|fa|riesco a|posso) (di )?(andare avanti|proseguire|completare|acquistar|comprar|pagar|procedere)|\b(je n'arrive pas|impossible de|je ne peux pas) (à |a )?(payer|acheter|commander|finaliser)|\bno (puedo|me deja) (pagar|comprar|completar|finalizar)|\bkann (nicht|die bestellung nicht) (bezahlen|kaufen|bestellen|abschlie(ß|ss)en)/;
 const QUESTION = /\?|\b(how (do|can)|which|price|discount|upgrade|bundle|is it possible|could you|can you|quanto|come posso|comment|cómo|wie kann)/;
 // Physical goods: we only sell files.
 const SHIPPING = /\b(packaging|package|parcel|shipment|shipping|freight|courier|delivery damage|damaged in transit|logistics)\b/;
@@ -46,7 +49,8 @@ function foreignScript(s: string): boolean {
 }
 // The new part of an email, without the quoted history under it.
 function fresh(text: string): string {
-  const m = text.match(/^(On .{4,200}wrote:\s*$|-{2,} ?Original Message ?-{2,}|_{8,}|From: .+$|>.*$)/m);
+  // "On … wrote:" in the five languages (an iPad in Italian: "Il giorno 10 nov 2026, alle ore 15:17, … ha scritto:").
+  const m = text.match(/^(On .{4,200}wrote:\s*$|(Il giorno|Il) .{4,200}ha scritto:\s*$|Le .{4,200}a écrit\s*:\s*$|El .{4,200}escribió:\s*$|Am .{4,200}schrieb.{0,120}:\s*$|-{2,} ?Original Message ?-{2,}|_{8,}|From: .+$|>.*$)/m);
   return (m && m.index && m.index > 0 ? text.slice(0, m.index) : text).trim();
 }
 
@@ -115,6 +119,11 @@ function classify(c: Conversation, msgs: Msg[], bought: Bought[], now: number): 
     score = 65;
     title = "Asks for a refund";
     action = "Check the order, then refund it in Stripe/PayPal or explain why not.";
+  } else if (CHECKOUT.test(body)) {
+    category = "checkout";
+    score = 70;
+    title = "Wants to buy, can't get through checkout";
+    action = buyer ? "Answer today: ask what they see, and send the order link again." : "Answer today: a sale is waiting. Ask what they see, and send the order link again.";
   } else if (DOWNLOAD.test(words) && (buyer || /order|#\d{3,}/.test(words))) {
     category = "download";
     score = 60;
@@ -199,6 +208,7 @@ function summarize(items: OverviewItem[], open: Conversation[], boughtBy: Map<st
   const issues = [
     [count("dispute"), "possible dispute", "possible disputes"],
     [count("refund"), "refund request", "refund requests"],
+    [count("checkout"), "checkout problem", "checkout problems"],
     [count("download"), "download problem", "download problems"],
   ] as const;
   const listed = issues.filter(([n]) => n > 0).map(([n, one, many]) => `${n} ${n === 1 ? one : many}`);

@@ -53,6 +53,28 @@ function stripeFor(key: string) {
   return stripeCache.get(key)!;
 }
 
+// Step 2 survives a reload: iPads reload a tab left for a moment (to fetch a card,
+// read a bank's text) and a refresh did the same, and the buyer was back on an
+// empty step 1 ("dopo il primo step il sistema ritorna indietro", 2026-11-10).
+// The tab remembers name, email and step for 2 hours (sessionStorage: this tab only).
+const KEEP = `fv:co:${funnel.slug}`;
+function keep(info: Info, step: 1 | 2) {
+  try {
+    if (info.email) sessionStorage.setItem(KEEP, JSON.stringify({ ...info, step, at: Date.now() }));
+  } catch {
+    // no storage: a reload starts over, as before
+  }
+}
+function kept(): (Info & { step: 1 | 2 }) | null {
+  try {
+    const k = JSON.parse(sessionStorage.getItem(KEEP) ?? "null");
+    if (!k || typeof k.email !== "string" || !k.email || Date.now() - k.at > 2 * 3600 * 1000) return null;
+    return { firstName: String(k.firstName ?? ""), lastName: String(k.lastName ?? ""), email: k.email, step: k.step === 2 ? 2 : 1 };
+  } catch {
+    return null;
+  }
+}
+
 export function OrderForm({ lang, currency, country, publishableKey, afterOrder, keepCard, offer, form }: Props) {
   const t = form ?? copyFor(lang, currency).form;
   const [step, setStep] = useState<1 | 2>(1);
@@ -61,6 +83,18 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
     if (/[?&]edit=1(&|$)/.test(location.search) && /[?&]step=2(&|$)/.test(location.search)) setStep(2);
   }, []);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
+  // Back after a reload: where they were, with what they typed. No lead, InitiateCheckout or "checkout" again.
+  const [restored, setRestored] = useState(0);
+  useEffect(() => {
+    const k = kept();
+    if (!k) return;
+    setInfo({ firstName: k.firstName, lastName: k.lastName, email: k.email });
+    setRestored(1);
+    if (k.step === 2) {
+      setWanted(true);
+      setStep(2);
+    }
+  }, []);
   // The step-2 test's letter (./payTest.ts); set before this mounts by the page's script.
   const [pay, setPay] = useState<PayVariant>("b");
   useEffect(() => setPay(readPay() ?? "b"), []);
@@ -100,7 +134,9 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
       .then((r) => (r.ok ? r.json() : null))
       .then((cart: Info | null) => {
         if (!cart?.email) return;
-        setInfo({ firstName: cart.firstName ?? "", lastName: cart.lastName ?? "", email: cart.email });
+        const saved = { firstName: cart.firstName ?? "", lastName: cart.lastName ?? "", email: cart.email };
+        setInfo(saved);
+        keep(saved, 2);
         setWanted(true);
         setStep(2);
         track({ funnel: funnel.slug, page: "checkout", lang, abCookie: AB.cookie });
@@ -145,11 +181,13 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
             </li>
           </ol>
           <InfoStep
+            key={restored}
             t={t}
             lang={lang}
             info={info}
             onDone={(next) => {
               setInfo(next);
+              keep(next, 2);
               setWanted(true);
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
@@ -160,7 +198,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
         </>
       ) : (
         <div className={`${s.body} ${d.body}`}>
-          <button type="button" className={s.back} onClick={() => setStep(1)}>
+          <button type="button" className={s.back} onClick={() => { keep(info, 1); setStep(1); }}>
             <svg viewBox="0 0 448 512" width="14" height="14" aria-hidden>
               <path
                 fill="currentColor"
