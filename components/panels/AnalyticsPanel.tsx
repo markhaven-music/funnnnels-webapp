@@ -57,6 +57,11 @@ export function AnalyticsPanel() {
     { visitors: 0, checkouts: 0, orders: 0, ratedOrders: 0, revenue: 0 },
   );
 
+  // Running tests, the latest started first; the ended ones go to the archive.
+  const tests = data?.tests ?? [];
+  const running = tests.filter((t) => !t.ended).sort((a, b) => (b.since ?? "").localeCompare(a.since ?? ""));
+  const ended = tests.filter((t) => t.ended);
+
   return (
     <main className="main">
       <div className="page-head">
@@ -86,11 +91,17 @@ export function AnalyticsPanel() {
         <Stat label="REVENUE" value={total ? eur(total.revenue) : "…"} color="var(--accent)" />
       </div>
 
-      {data?.availability && <AvailabilityCard a={data.availability} />}
-
-      {data?.bonuses?.map((b) => <BonusCard key={b.funnel} b={b} />)}
-
-      {data?.tests.map((t) => <TestCard key={`${t.funnel}|${t.name}`} t={t} />)}
+      {/* The tests first, the newest on top; the ended ones folded away at the end of the page. */}
+      {running.length > 0 && (
+        <div className="section-head">
+          <div className="section-title">
+            A/B tests <span className="count">{running.length} running</span>
+          </div>
+        </div>
+      )}
+      {running.map((t) => (
+        <TestCard key={`${t.funnel}|${t.name}`} t={t} />
+      ))}
 
       <div className="section-head">
         <div className="section-title">
@@ -147,6 +158,25 @@ export function AnalyticsPanel() {
           ))}
         </div>
       </div>
+
+      {(data?.availability || (data?.bonuses?.length ?? 0) > 0) && (
+        <div className="section-head" style={{ marginTop: 28 }}>
+          <div className="section-title">Other experiments</div>
+        </div>
+      )}
+      {data?.availability && <AvailabilityCard a={data.availability} />}
+      {data?.bonuses?.map((b) => <BonusCard key={b.funnel} b={b} />)}
+
+      {ended.length > 0 && (
+        <details className={s.archive}>
+          <summary>
+            Ended tests <span className="count">{ended.length}</span>
+          </summary>
+          {ended.map((t) => (
+            <TestCard key={`${t.funnel}|${t.name}`} t={t} />
+          ))}
+        </details>
+      )}
 
       {data && (
         <p className={s.foot}>
@@ -366,109 +396,159 @@ function BonusCard({ b }: { b: BonusStats }) {
   );
 }
 
+/** One test, read in a glance: the question, where it stands in a sentence, then each variant with a picture of its page, its conversion big, and the numbers behind it. */
 function TestCard({ t }: { t: TestStats }) {
   const name = (v: string) => t.variants.find((x) => x.variant === v)?.label ?? v;
   const best = t.leader;
+  const rateOf = (m: Metrics) => {
+    const n = m.visitors || m.orderViews;
+    return n > 0 ? m.ratedOrders / n : null;
+  };
+  const top = Math.max(0, ...t.variants.map((v) => rateOf(v.m) ?? 0));
+  const status = t.ended ? "Ended" : t.verdict === "winner" ? "Winner found" : t.verdict === "waiting" ? "Just started" : "Running";
   return (
-    <section className={s.test}>
-      <div className={s.testHead}>
+    <section className={s.tc}>
+      <header className={s.tcHead}>
         <div>
-          <div className={s.testTitle}>
-            <I.abtest size={14} /> {t.name} test · {t.product}
-          </div>
-          <div className={s.testSub}>
-            {t.where}
-            {t.since ? (t.ended ? ` · ${t.since} → ${t.ended.day}` : ` · since ${t.since}`) + ` (${t.days} day${t.days === 1 ? "" : "s"})` : ""} · whole test, whatever the range above
-          </div>
+          <div className={s.tcProduct}>{t.product}</div>
+          <h2 className={s.tcTitle}>{t.name}</h2>
+          {t.question && <p className={s.tcQuestion}>{t.question}</p>}
         </div>
-        <div className={`${s.verdict} ${t.verdict === "winner" ? s.win : ""}`}>
-          {t.ended ? `Ended ${t.ended.day} · ${name(t.ended.kept)} kept.` : t.verdict === "winner" && best ? `${name(best)} wins.` : VERDICT[t.verdict]}
+        <div className={s.tcStatus}>
+          <span className={`${s.tcBadge} ${t.ended ? s.tcEnded : t.verdict === "winner" ? s.tcWon : ""}`}>{status}</span>
+          {t.since && (
+            <span className={s.tcDays}>
+              {t.ended ? `${t.since} → ${t.ended.day}` : `since ${t.since}`} · {t.days} day{t.days === 1 ? "" : "s"}
+            </span>
+          )}
         </div>
-      </div>
+      </header>
 
-      <p className={s.testNote}>
+      <p className={`${s.tcVerdict} ${t.verdict === "winner" && !t.ended ? s.tcVerdictWin : ""}`}>
         {t.ended ? (
           <>
-            Ended: everyone sees {name(t.ended.kept)} now and nothing new is counted here. The numbers below are the test as it finished, kept to compare later
+            <b>{name(t.ended.kept)} was kept.</b> Everyone sees it now and nothing new is counted. These are the numbers as the test finished
             {t.verdict === "winner" ? "" : ` (it stopped before a reliable answer: about ${t.target} sales per variant)`}.
           </>
-        ) : t.verdict === "early" || t.verdict === "waiting" ? (
+        ) : t.verdict === "waiting" ? (
           <>
-            A reliable answer needs about {t.target} sales per variant: {int(t.salesToGo)} to go
-            {t.daysToGo != null ? `, about ${Math.ceil(t.daysToGo)} more day${Math.ceil(t.daysToGo) === 1 ? "" : "s"} at the current pace` : ""}.
+            <b>Waiting for the first visitors.</b> A reliable answer needs about {t.target} sales per variant.
+          </>
+        ) : t.verdict === "early" ? (
+          <>
+            <b>Too early to call.</b> A reliable answer needs about {t.target} sales per variant: {int(t.salesToGo)} to go
+            {t.daysToGo != null ? `, about ${Math.ceil(t.daysToGo)} more day${Math.ceil(t.daysToGo) === 1 ? "" : "s"} at this pace` : ""}.
             {best ? ` ${name(best)} leads for now, but early leads often flip.` : ""}
           </>
         ) : t.verdict === "winner" && best ? (
           <>
-            {name(best)} converts better than every other variant with at least 95% certainty. Keep it and end the test.
+            <b>{name(best)} wins.</b> It converts better than every other variant with at least 95% certainty. Keep it and end the test.
           </>
         ) : (
-          <>Every variant has {t.target}+ sales and none is clearly ahead: keep any of them and test something bigger.</>
+          <>
+            <b>No clear winner.</b> Every variant has {t.target}+ sales and none is clearly ahead: keep any of them and test something bigger.
+          </>
         )}
       </p>
 
-      <div className={s.variants}>
+      <div className={s.tcVariants}>
         {t.variants.map((v) => {
           const c = v.color;
+          const r = rateOf(v.m);
+          const of = v.m.visitors || v.m.orderViews;
+          const lead = best === v.variant;
           return (
-            <div key={v.variant} className={`${s.variant} ${best === v.variant ? s.leading : ""}`}>
-              <div className={s.variantHead}>
+            <div key={v.variant} className={`${s.tcVariant} ${lead ? s.tcLead : ""}`}>
+              {v.shot && (
+                <a className={s.tcShot} href={v.shot} target="_blank" rel="noreferrer" title="Open the picture">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={v.shot} alt={`What visitors saw: ${v.label}`} loading="lazy" />
+                </a>
+              )}
+              <div className={s.tcName}>
                 <span className={s.swatch} style={{ background: `linear-gradient(180deg, ${c.from}, ${c.to})` }} />
-                {name(v.variant)}
-                {best === v.variant && <span className={s.badge}>LEADING</span>}
+                <span>{v.label}</span>
+                {lead && <span className={s.badge}>LEADING</span>}
               </div>
-              <dl className={s.kv}>
-                <dt>Visitors</dt>
-                <dd>{int(v.m.visitors)}</dd>
-                <dt>Order page</dt>
-                <dd>{int(v.m.orderViews)}</dd>
-                <dt>Checkouts</dt>
-                <dd>
-                  {int(v.m.checkouts)} <small>{pct(v.m.checkouts, v.m.visitors)}</small>
-                </dd>
-                <dt>Orders</dt>
-                <dd>{int(v.m.orders)}</dd>
-                <dt>Conversion</dt>
-                <dd className={s.strong}>{pct(v.m.ratedOrders, v.m.visitors || v.m.orderViews)}</dd>
-                <dt>Revenue</dt>
-                <dd>{eur(v.m.revenue)}</dd>
-                <dt>€ / visitor</dt>
-                <dd>{perVisitor(v.m)}</dd>
-                <dt>Chance it&apos;s best</dt>
-                <dd>{v.chanceBest == null || v.m.orders === 0 ? "—" : `${Math.round(v.chanceBest * 100)}%`}</dd>
-              </dl>
               {v.paid && (
-                <div className={s.paid}>
-                  <dl className={s.kv}>
-                    <dt>Paid after checkout</dt>
-                    <dd className={s.strong}>
-                      {int(v.paid.orders)} of {int(v.paid.starts)} <small>{pct(v.paid.orders, v.paid.starts)}</small>
-                    </dd>
-                    {v.paid.phone && (
-                      <>
-                        <dt>On phones</dt>
-                        <dd className={s.strong}>
-                          {int(v.paid.phone.orders)} of {int(v.paid.phone.starts)} <small>{pct(v.paid.phone.orders, v.paid.phone.starts)}</small>
-                        </dd>
-                      </>
-                    )}
-                  </dl>
-                  <div className={s.paidNote}>
-                    {whenText(when(v.paid.from))} → {v.paid.until ? whenText(when(v.paid.until)) : "now"}, when everyone had it · MIDI Drum Kit buyers only, free-pack sign-ups left out
-                    {v.paid.phone?.unknown ? ` · device unknown for ${v.paid.phone.unknown}` : ""}
-                  </div>
+                <div className={s.tcPeriod}>
+                  {whenText(when(v.paid.from))} → {v.paid.until ? whenText(when(v.paid.until)) : "now"}
                 </div>
               )}
+
+              <div className={s.tcBig}>
+                <span className={s.tcRate}>{r == null ? "—" : `${(r * 100).toFixed(r < 0.1 ? 1 : 0)}%`}</span>
+                <span className={s.tcRateOf}>
+                  bought
+                  <br />
+                  {int(v.m.orders)} order{v.m.orders === 1 ? "" : "s"} · {int(of)} visitor{of === 1 ? "" : "s"}
+                </span>
+              </div>
+              <div className={s.tcBar}>
+                <span style={{ width: `${r != null && top > 0 ? Math.max(2, (r / top) * 100) : 0}%`, background: c.to }} />
+              </div>
+
+              {v.paid && (
+                <div className={s.tcPaid}>
+                  <div>
+                    <b>{pct(v.paid.orders, v.paid.starts)}</b> paid after starting the checkout
+                    <small>
+                      {int(v.paid.orders)} of {int(v.paid.starts)}
+                    </small>
+                  </div>
+                  {v.paid.phone && (
+                    <div>
+                      <b>{pct(v.paid.phone.orders, v.paid.phone.starts)}</b> on phones
+                      <small>
+                        {int(v.paid.phone.orders)} of {int(v.paid.phone.starts)}
+                        {v.paid.phone.unknown ? ` · device unknown for ${v.paid.phone.unknown}` : ""}
+                      </small>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <dl className={s.tcKv}>
+                <div>
+                  <dt>Checkouts</dt>
+                  <dd>
+                    {int(v.m.checkouts)} <small>{pct(v.m.checkouts, v.m.visitors)}</small>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Revenue</dt>
+                  <dd>{eur(v.m.revenue)}</dd>
+                </div>
+                <div>
+                  <dt>€ / visitor</dt>
+                  <dd>{perVisitor(v.m)}</dd>
+                </div>
+                <div>
+                  <dt>Chance it&apos;s best</dt>
+                  <dd>{v.chanceBest == null || v.m.orders === 0 ? "—" : `${Math.round(v.chanceBest * 100)}%`}</dd>
+                </div>
+              </dl>
+
               <div className={s.progress} title={`${v.m.orders} of ${t.target} sales`}>
                 <span style={{ width: `${Math.min(100, (v.m.orders / t.target) * 100)}%`, background: c.to }} />
               </div>
               <div className={s.progressLabel}>
-                {int(v.m.orders)} / {t.target} sales
+                {int(v.m.orders)} of {t.target} sales for a reliable answer
               </div>
             </div>
           );
         })}
       </div>
+
+      <details className={s.tcHow}>
+        <summary>How this is counted</summary>
+        <p>{t.where}</p>
+        <p>
+          &ldquo;Bought&rdquo; is orders per landing visitor (per order-page visitor when the landing has none), upsells apart. The whole test is counted, whatever the
+          date range picked above.
+          {t.variants.some((v) => v.paid) ? " “Paid after starting the checkout” counts people (one per email) who filled in step 1 while everyone had that page, free-pack sign-ups left out." : ""}
+        </p>
+      </details>
     </section>
   );
 }

@@ -335,3 +335,266 @@
   color: var(--fg-1);
   font-variant-numeric: tabular-nums;
 }
+
+/* ── the test cards (2026-11-12, "rendi la pagina analytics piu intuitiva… testi grandi e
+   immagini del funnel a cui il test si riferisce"): the question, the state in a sentence,
+   then each variant with a picture of its page and its conversion big. ── */
+.tc {
+  background: var(--bg-1);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 26px 26px 22px;
+  margin-bottom: 22px;
+}
+.tcHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.tcProduct {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+.tcTitle {
+  margin: 6px 0 0;
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--fg-0);
+}
+.tcQuestion {
+  margin: 8px 0 0;
+  max-width: 62ch;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--fg-1);
+}
+.tcStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.tcBadge {
+  padding: 6px 12px;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-weight: 650;
+  color: oklch(0.2 0.03 75);
+  background: var(--amber);
+}
+.tcWon {
+  color: oklch(0.2 0.04 165);
+  background: var(--mint);
+}
+.tcEnded {
+  color: var(--fg-1);
+  background: var(--bg-3);
+}
+.tcDays {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.tcVerdict {
+  margin: 20px 0 22px;
+  padding: 16px 18px;
+  border-radius: var(--radius-sm);
+  background: oklch(0.82 0.16 75 / 0.1);
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--fg-0);
+}
+.tcVerdict b {
+  font-weight: 700;
+}
+.tcVerdictWin {
+  background: oklch(0.86 0.16 165 / 0.12);
+}
+.tcVariants {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.tcVariant {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--bg-0);
+}
+.tcLead {
+  background: oklch(0.74 0.19 295 / 0.1);
+}
+.tcShot {
+  display: block;
+  height: 280px;
+  margin: -16px -16px 16px;
+  overflow: hidden;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: #000;
+}
+.tcShot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+.tcName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.3;
+  color: var(--fg-0);
+}
+.tcName .swatch {
+  flex: none;
+}
+.tcPeriod {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.tcBig {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 18px;
+}
+.tcRate {
+  font-size: 52px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+}
+.tcRateOf {
+  padding-bottom: 3px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--fg-2);
+}
+.tcBar {
+  height: 10px;
+  margin-top: 12px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-3);
+  overflow: hidden;
+}
+.tcBar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+.tcPaid {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: oklch(0.98 0.004 270 / 0.05);
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--fg-1);
+}
+.tcPaid b {
+  margin-right: 6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+}
+.tcPaid small {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.tcKv {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+  margin: 18px 0 0;
+}
+.tcKv dt {
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.tcKv dd {
+  margin: 2px 0 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+}
+.tcKv small {
+  margin-left: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--fg-2);
+}
+.tcVariant .progress {
+  margin-top: auto;
+}
+.tcVariant .tcKv {
+  margin-bottom: 18px;
+}
+.tcHow {
+  margin-top: 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--fg-2);
+}
+.tcHow summary {
+  width: fit-content;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-1);
+}
+.tcHow p {
+  margin: 10px 0 0;
+  max-width: 100ch;
+}
+.archive {
+  margin: 28px 0;
+}
+.archive > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin-bottom: 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-1);
+}
+@media (max-width: 640px) {
+  .tc {
+    padding: 18px 16px;
+  }
+  .tcTitle {
+    font-size: 22px;
+  }
+  .tcStatus {
+    align-items: flex-start;
+  }
+  .tcRate {
+    font-size: 44px;
+  }
+}

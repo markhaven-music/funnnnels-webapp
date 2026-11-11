@@ -22,7 +22,9 @@ export const ORDER_STACK = {
   /** The first whole UTC day with the box, where Analytics' After starts (11-11 was half and half: left out). */
   firstDay: "2026-11-12",
   /** When the box went from 3 bonuses to 6 (the deploy of 2026-11-12, ~00:30 in Italy): before After's first whole day. */
-  sixBonuses: "2026-11-11T23:30:00Z",
+  sixBonuses: "2026-11-11T23:12:00Z",
+  /** When the page became the Jazz order page's layout (16acc3f): where the "old vs Jazz-style" test starts. */
+  jazzStyle: "2026-11-11T23:27:00Z",
 };
 
 /**

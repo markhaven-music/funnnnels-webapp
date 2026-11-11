@@ -170,7 +170,11 @@ export type TestStats = {
     chanceBest: number | null;
     /** How many who started the checkout paid, in the window this variant was the only one shown (TestDef.windows). */
     paid?: CheckoutPaid;
+    /** A picture of what this variant's visitors saw (TestDef.shots), for the Analytics card. */
+    shot?: string;
   }[];
+  /** The test in one plain sentence, for the Analytics card. */
+  question?: string;
   leader: string | null;
   verdict: "waiting" | "early" | "winner" | "tie";
   salesToGo: number;
@@ -661,8 +665,13 @@ type TestDef = {
   windows?: Record<string, { from: string; until: string | null; days: [string, string | null] }>;
   /** Over, and kept as an archive: nothing after `at` counts, the card says which variant was kept, the map has no lanes for it. */
   ended?: { at: string; kept: string };
+  /** What the test asks, in one plain sentence, and a picture per variant (public/funnels/dashboard/tests), for the Analytics card. */
+  question?: string;
+  shots?: Record<string, string>;
 };
 const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
+/** The variants' pictures (tools/test_shots.sh). */
+const SHOTS = "/funnels/dashboard/tests";
 /** The UTC day before a UTC midnight ("2026-11-14T00:00:00Z" → "2026-11-13"). */
 const dayBefore = (iso: string) => new Date(Date.parse(iso) - 86_400_000).toISOString().slice(0, 10);
 export const TESTS: TestDef[] = [
@@ -675,6 +684,8 @@ export const TESTS: TestDef[] = [
     // prima"): the variant field is the colour again everywhere; step 2 is
     // judged by its days, so it needs no letter.
     name: "Button colour",
+    question: "Which colour of the buy button sells more: green, yellow or orange?",
+    shots: { green: `${SHOTS}/button-green.webp`, yellow: `${SHOTS}/button-yellow.webp`, orange: `${SHOTS}/button-orange.webp` },
     where: "Landing and order page, every language · orders paid 11-06 → 11-09 have no colour (not counted)",
     variants: BUTTON_TEST.variants,
     label: cap,
@@ -686,6 +697,8 @@ export const TESTS: TestDef[] = [
     // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
     // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
+    question: "Does the new payment step (pay bar, $297 → $27) get more people who start the checkout to pay?",
+    shots: { a: `${SHOTS}/step2-a.webp`, b: `${SHOTS}/step2-b.webp`, c: `${SHOTS}/step2-c.webp` },
     where: `Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-08 alone (card payments failed until 11-07 17:35), C 11-09 → 11-10; orders go to the step they were paid on · C also has the landing's “Checking availability…” popup (since 11-08 20:15), A and B don't · D (no bonus, from 11-10 20:15) has no column: the order page got its “what you get” box ${ORDER_STACK.from.slice(0, 10)} 00:00 UTC, before D had a whole day (see the Order summary card)`,
     // The popup is named in C and D ("D ha anche check availability come variabile", 2026-11-10):
     // D against C is the bonus alone, D against A is the new step 2 and the popup together.
@@ -729,19 +742,27 @@ export const TESTS: TestDef[] = [
     // neither column, After starts 11-12 (ORDER_STACK.live / firstDay).
     // 2026-11-12 ("rendiamola come jazz, aggiungi i bonus"): the box lists 6 bonuses, not 3, from
     // ORDER_STACK.sixBonuses on, before After's first whole day: After is the box with 6 bonuses.
-    name: "Order summary: picture only vs what you get",
-    where: `Order page, left column, every language · Before = picture and 12 claims (the claims hidden on phones), 11-09 → ${dayBefore(ORDER_STACK.from)}, step 2's C (5-minute bonus until 11-10 20:15) · After = form first on phones, then what's inside, 6 bonuses with their value (Drunk Swing Grooves, the MYSTERY Hooks Pack and a PDF guide added to the 3, in the download too), total value against today's price, on every screen, ${ORDER_STACK.firstDay} → today (the box live since 11-11 22:21 Italy with 3 bonuses, 6 from 11-12 ~00:30 Italy, before After's first whole day; 11-11 left out, half without the box)`,
+    // 2026-11-12 ("ok vai partire l'AB test da ora"): the order page was rebuilt as the Jazz MIDI
+    // Pack's (16acc3f, live 11-11 23:27 UTC = 11-12 00:27 Italy): its header, the summary with six
+    // bonuses and their covers on the left, the checkout sticky on the right. The test starts there:
+    // New counts orders from that minute and visits from 11-12, its first whole UTC day. The
+    // in-between page (the bordered box, 3 then 6 bonuses, 11-11 21:21 → 23:27 UTC) is in neither.
+    name: "Order page: old vs Jazz-style",
+    question: "Does the order page rebuilt like the Jazz MIDI Pack's get more people to pay than the old one?",
+    shots: { before: `${SHOTS}/order-old.webp`, after: `${SHOTS}/order-new.webp` },
+    where: `Order page, every language · Old = the product picture and 12 claims (hidden on phones), 3 bonuses, 11-09 → ${dayBefore(ORDER_STACK.from)} (step 2's C; 5-minute bonus until 11-10 20:15) · New = the Jazz order page's layout: wordmark and “Secure checkout” bar, the kit's box, tick list, 6 bonuses with their covers and values (Drunk Swing Grooves, the MYSTERY Hooks Pack and a PDF guide added, in the download too), total value against today's price, the checkout sticky on a computer and first on a phone, ${ORDER_STACK.firstDay} → today (live since 11-12 00:27 Italy) · 11-11 is in neither column: that day the page changed three times`,
     variants: ["before", "after"],
-    label: (v) => (v === "before" ? "Before · Picture + 12 claims" : "After · What you get + 6 bonuses + total value"),
+    label: (v) => (v === "before" ? "Old · Picture + 12 claims, 3 bonuses" : "New · Jazz-style page, 6 bonuses"),
     color: (v) => (v === "before" ? { from: "#94a3b8", to: "#64748b" } : { from: "#34d399", to: "#059669" }),
     windows: {
       before: { from: "2026-11-08T17:29:00+01:00", until: ORDER_STACK.from, days: ["2026-11-09", dayBefore(ORDER_STACK.from)] },
-      after: { from: ORDER_STACK.live, until: null, days: [ORDER_STACK.firstDay, null] },
+      after: { from: ORDER_STACK.jazzStyle, until: null, days: [ORDER_STACK.firstDay, null] },
     },
   },
   {
     funnel: "jazz-midi-pack",
     name: "Headline",
+    question: "Which hero headline on the Jazz landing sells more?",
     where: "The landing's hero headline; the order page kept the visitor's variant",
     variants: HEADLINE_TEST.variants,
     // "D vince chiudi ma tieni i test in archivio per eventuali confronti" (2026-11-10):
@@ -814,6 +835,7 @@ function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, sin
     m: withRevenue(m, rate),
     full: withRevenue(full.get(variant)!, rate),
     chanceBest: null as number | null,
+    shot: def.shots?.[variant],
   }));
   // Orders per landing visitor; the order page's visitors when the landing has none.
   const rateOf = (m: Metrics) => {
@@ -852,6 +874,7 @@ function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, sin
     name: def.name,
     product: codeFunnels().find((f) => f.slug === funnel)?.product ?? funnel,
     where: def.where,
+    question: def.question,
     since,
     days,
     target: TARGET_SALES,
