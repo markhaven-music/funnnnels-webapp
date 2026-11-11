@@ -724,15 +724,17 @@ export const TESTS: TestDef[] = [
     // 2026-11-10, "Sì e poi tracciamola in analytics in maniera chiara": the order page's left
     // column gets the Jazz order page's "what you get" box (midi-drum-kit/stackSwitch.ts), live that
     // night ("Stanotte"). Judged by its days like step 2: Before is the last two days of the same
-    // page (step 2's C; its 5-minute bonus ended 11-10 20:15), After is since the box.
+    // page (step 2's C; its 5-minute bonus ended 11-10 20:15), After is since the box. The box was due
+    // 11-11 00:00 UTC but only reached visitors at 11-11 21:21 UTC (its deploy had failed): 11-11 is in
+    // neither column, After starts 11-12 (ORDER_STACK.live / firstDay).
     name: "Order summary: picture only vs what you get",
-    where: `Order page, left column, every language · Before = picture and 12 claims (the claims hidden on phones), 11-09 → ${dayBefore(ORDER_STACK.from)}, step 2's C (5-minute bonus until 11-10 20:15) · After = form first on phones, then what's inside, the 3 bonuses with their value, total value against today's price, on every screen, ${ORDER_STACK.from.slice(0, 10)} → today`,
+    where: `Order page, left column, every language · Before = picture and 12 claims (the claims hidden on phones), 11-09 → ${dayBefore(ORDER_STACK.from)}, step 2's C (5-minute bonus until 11-10 20:15) · After = form first on phones, then what's inside, the 3 bonuses with their value, total value against today's price, on every screen, ${ORDER_STACK.firstDay} → today (live since 11-11 22:21 Italy; 11-11 left out, half without the box)`,
     variants: ["before", "after"],
     label: (v) => (v === "before" ? "Before · Picture + 12 claims" : "After · What you get + bonuses + total value"),
     color: (v) => (v === "before" ? { from: "#94a3b8", to: "#64748b" } : { from: "#34d399", to: "#059669" }),
     windows: {
       before: { from: "2026-11-08T17:29:00+01:00", until: ORDER_STACK.from, days: ["2026-11-09", dayBefore(ORDER_STACK.from)] },
-      after: { from: ORDER_STACK.from, until: null, days: [ORDER_STACK.from.slice(0, 10), null] },
+      after: { from: ORDER_STACK.live, until: null, days: [ORDER_STACK.firstDay, null] },
     },
   },
   {

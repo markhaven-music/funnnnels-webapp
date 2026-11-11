@@ -16,6 +16,11 @@ export const ORDER_STACK = {
   attr: "data-order-stack",
   /** When everyone gets the box: tonight ("Stanotte", 2026-11-10), 01:00 in Italy. */
   from: "2026-11-11T00:00:00Z",
+  /** When the box really reached visitors: its deploy (1e27e0b) failed on 11-10 (next/font
+   *  cache), so the cached page had no switch until 0ee5fe8 went live, 11-11 at 22:20 in Italy. */
+  live: "2026-11-11T21:21:00Z",
+  /** The first whole UTC day with the box, where Analytics' After starts (11-11 was half and half: left out). */
+  firstDay: "2026-11-12",
 };
 
 /** The values the landing's offer box already states (copy/landing: t129-t131, t140), so both pages say the same. */
