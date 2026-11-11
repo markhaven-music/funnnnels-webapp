@@ -35,12 +35,13 @@ const STRINGS: Record<Lang, Record<string, string>> = { en, fr, es, de, it };
 // ClickFunnels' badge-dont-overthink said "100% money back", 11-06). The value
 // stacks' "-w" files have a pure white background, as the card around them
 // (tools/value_stack_white.js).
+// value-stack-6*: the offer box's picture with six bonuses (tools/value_stack.py, 2026-11-12); value-stack*-w were the three-bonus ones.
 export const LANG_IMAGES: Partial<Record<Lang, Record<string, string>>> = {
-  en: { "value-stack": "value-stack-w", "badge-dont-overthink": "badge-quality" },
-  fr: { "value-stack": "value-stack-fr-w", "badge-dont-overthink": "badge-quality-fr" },
-  es: { "value-stack": "value-stack-es-w", "badge-dont-overthink": "badge-quality-es" },
-  de: { "value-stack": "value-stack-de-w", "badge-dont-overthink": "badge-quality-de" },
-  it: { "value-stack": "value-stack-it-w", "badge-dont-overthink": "badge-quality-it" },
+  en: { "value-stack": "value-stack-6", "badge-dont-overthink": "badge-quality" },
+  fr: { "value-stack": "value-stack-6-fr", "badge-dont-overthink": "badge-quality-fr" },
+  es: { "value-stack": "value-stack-6-es", "badge-dont-overthink": "badge-quality-es" },
+  de: { "value-stack": "value-stack-6-de", "badge-dont-overthink": "badge-quality-de" },
+  it: { "value-stack": "value-stack-6-it", "badge-dont-overthink": "badge-quality-it" },
 };
 
 // The hero video (Wistia) per language: English is ClickFunnels' (funnel.wistiaId);
@@ -103,6 +104,8 @@ const FREE_BAR = `<style>.fv-free{background:#f5b800;color:#000;text-align:cente
 // which tools/cf_clone.mjs writes. Texts: copy/landing/<lang>.json t263-t274.
 const PANEL_AT = '<div data-page-element="FlexContainer/V1" class=" elFlexNoWrapMobile elFlexNoWrap id-6Z-lLXzjA-111"';
 const PANEL_END = '<div data-page-element="UniversalBlock/21769640" class="id-6Z-lLXzjA-1786">';
+const PANEL2_AT = '<div data-page-element="FlexContainer/V1" class=" elFlexNoWrapMobile elFlexNoWrap id-6Z-lLXzjA-84"';
+const TREE2 = /<div data-page-element="Image\/V2"[^>]*><img class="elImage" src="\/funnels\/midi-drum-kit\/tree-starters\.webp"[^>]*><\/div>/;
 const TREE = /<div data-page-element="Image\/V2"[^>]*><img class="elImage" src="\/funnels\/midi-drum-kit\/tree-drums\.webp"[^>]*><\/div>/;
 const VALUE_ROW = /<li class="id-6Z-WOaYBj-1745">[\s\S]*?<\/li>/;
 const MORE_BONUSES = [
@@ -115,12 +118,21 @@ function sixBonuses(template: string): string {
   const to = template.indexOf(PANEL_END, from);
   const row = template.match(VALUE_ROW)?.[0];
   if (from < 0 || to < 0 || !row || !row.includes("{{t131}}")) return template;
-  const panel = template.slice(from, to).replace(TREE, "");
-  const panels = MORE_BONUSES.map((b) =>
-    ["t122", "t123", "t124"].reduce((html, key, i) => html.replaceAll(`data-t="${key}">{{${key}}}`, `data-t="${b.keys[i]}">{{${b.keys[i]}}}`), panel.replace("bonus-drums.webp", `${b.cover}" width="900" height="900`)),
-  ).join("");
+  // The panels alternate the side of their cover (1 right, 2 left, 3 right): 4 and 6 copy the second
+  // panel's markup (cover left), 5 the third's (cover right) ("to keep the patterns of orientations").
+  const third = template.slice(from, to).replace(TREE, "");
+  const secondAt = template.lastIndexOf(PANEL2_AT, from);
+  const second = secondAt < 0 ? null : template.slice(secondAt, from).replace(TREE2, "");
+  const panels = MORE_BONUSES.map((b, n) => {
+    const left = n % 2 === 0 && second;
+    const [base, keys, cover] = left ? [second, ["t119", "t120", "t121"], "bonus-starters.webp"] : [third, ["t122", "t123", "t124"], "bonus-drums.webp"];
+    return keys.reduce((html, key, i) => html.replaceAll(`data-t="${key}">{{${key}}}`, `data-t="${b.keys[i]}">{{${b.keys[i]}}}`), base.replace(cover, `${b.cover}" width="900" height="900`));
+  }).join("");
   const rows = MORE_BONUSES.map((b) => row.replace('data-t="t131">{{t131}}', `data-t="${b.row}">{{${b.row}}}`)).join("");
-  return (template.slice(0, to) + panels + template.slice(to)).replace(VALUE_ROW, row + rows);
+  // The value-stack picture is 1000 × 1240 since it shows six bonuses (tools/value_stack.py); it was a 1024 square.
+  return (template.slice(0, to) + panels + template.slice(to))
+    .replace(VALUE_ROW, row + rows)
+    .replace(/(src="\/funnels\/midi-drum-kit\/value-stack\.webp"[^>]*?) width="1024" height="1024"/, '$1 width="1000" height="1240"');
 }
 const TEMPLATE6 = sixBonuses(TEMPLATE);
 

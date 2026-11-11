@@ -35,7 +35,9 @@ export const ORDER_STACK = {
  */
 export const STACK_VALUES = {
   /** Famous Beats, Beat Starters, Hit-Maker Drums, Drunk Swing Grooves, MYSTERY Hooks Pack, the guide: the order of copy/<lang>.ts order.stack.bonuses. */
-  bonuses: [97, 97, 67, 37, 27, 17],
+  // 197, 197, 97 since 2026-11-12: the landing's picture always said them (497 + 197 + 197 + 97 = its 988), its list said
+  // 97, 97, 67 and added up to 758. Now the picture (tools/value_stack.py), the list and this box say the same.
+  bonuses: [197, 197, 97, 37, 27, 17],
   total: 988 + 37 + 27 + 17,
 };
 
