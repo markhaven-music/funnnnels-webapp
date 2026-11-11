@@ -727,10 +727,12 @@ export const TESTS: TestDef[] = [
     // page (step 2's C; its 5-minute bonus ended 11-10 20:15), After is since the box. The box was due
     // 11-11 00:00 UTC but only reached visitors at 11-11 21:21 UTC (its deploy had failed): 11-11 is in
     // neither column, After starts 11-12 (ORDER_STACK.live / firstDay).
+    // 2026-11-12 ("rendiamola come jazz, aggiungi i bonus"): the box lists 6 bonuses, not 3, from
+    // ORDER_STACK.sixBonuses on, before After's first whole day: After is the box with 6 bonuses.
     name: "Order summary: picture only vs what you get",
-    where: `Order page, left column, every language · Before = picture and 12 claims (the claims hidden on phones), 11-09 → ${dayBefore(ORDER_STACK.from)}, step 2's C (5-minute bonus until 11-10 20:15) · After = form first on phones, then what's inside, the 3 bonuses with their value, total value against today's price, on every screen, ${ORDER_STACK.firstDay} → today (live since 11-11 22:21 Italy; 11-11 left out, half without the box)`,
+    where: `Order page, left column, every language · Before = picture and 12 claims (the claims hidden on phones), 11-09 → ${dayBefore(ORDER_STACK.from)}, step 2's C (5-minute bonus until 11-10 20:15) · After = form first on phones, then what's inside, 6 bonuses with their value (Drunk Swing Grooves, the MYSTERY Hooks Pack and a PDF guide added to the 3, in the download too), total value against today's price, on every screen, ${ORDER_STACK.firstDay} → today (the box live since 11-11 22:21 Italy with 3 bonuses, 6 from 11-12 ~00:30 Italy, before After's first whole day; 11-11 left out, half without the box)`,
     variants: ["before", "after"],
-    label: (v) => (v === "before" ? "Before · Picture + 12 claims" : "After · What you get + bonuses + total value"),
+    label: (v) => (v === "before" ? "Before · Picture + 12 claims" : "After · What you get + 6 bonuses + total value"),
     color: (v) => (v === "before" ? { from: "#94a3b8", to: "#64748b" } : { from: "#34d399", to: "#059669" }),
     windows: {
       before: { from: "2026-11-08T17:29:00+01:00", until: ORDER_STACK.from, days: ["2026-11-09", dayBefore(ORDER_STACK.from)] },

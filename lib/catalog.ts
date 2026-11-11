@@ -91,6 +91,7 @@ const ZIP_PRODUCT: Record<string, string> = {
   "Drum Loops for Songwriting.zip": "drum-loops",
   "Drunk Swing Grooves.zip": "drunk-swing-grooves",
   "Jazz Record Samples.zip": "jazz-record-samples",
+  "MYSTERY Hooks Pack.zip": "mystery-hooks",
 };
 
 type CodeFunnel = {

@@ -21,13 +21,20 @@ export const ORDER_STACK = {
   live: "2026-11-11T21:21:00Z",
   /** The first whole UTC day with the box, where Analytics' After starts (11-11 was half and half: left out). */
   firstDay: "2026-11-12",
+  /** When the box went from 3 bonuses to 6 (the deploy of 2026-11-12, ~00:30 in Italy): before After's first whole day. */
+  sixBonuses: "2026-11-11T23:30:00Z",
 };
 
-/** The values the landing's offer box already states (copy/landing: t129-t131, t140), so both pages say the same. */
+/**
+ * The first three and 988 are what the landing's offer box states (copy/landing: t129-t131, t140).
+ * Since 2026-11-12 three more bonuses ("rendiamola come jazz, aggiungi i bonus"), valued like the
+ * Jazz pack's ("metti una cosa realistica che fa capire che hanno valore, non i prezzi a cui si
+ * vendono che sono gia scontati"): a MIDI pack 37, a small WAV pack 27, the PDF guide 17 as Jazz's.
+ */
 export const STACK_VALUES = {
-  /** Famous Beats, Beat Starters, Hit-Maker Drums: the order of copy/<lang>.ts order.stack.bonuses. */
-  bonuses: [97, 97, 67],
-  total: 988,
+  /** Famous Beats, Beat Starters, Hit-Maker Drums, Drunk Swing Grooves, MYSTERY Hooks Pack, the guide: the order of copy/<lang>.ts order.stack.bonuses. */
+  bonuses: [97, 97, 67, 37, 27, 17],
+  total: 988 + 37 + 27 + 17,
 };
 
 /** Runs first thing on the order page. */

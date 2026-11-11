@@ -87,6 +87,12 @@ export const funnel = {
     "jazz-chords": "jazz-midi-pack/Jazz MIDI Chord Pack.zip",
     "anime-pack": "jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip",
     bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
+    // Three more bonuses with the kit since 2026-11-12 ("rendiamola come jazz, aggiungi i bonus":
+    // the MYSTERY Hooks Pack, Drunk Swing Grooves, and a PDF guide like the Jazz pack's), each its
+    // own download beside the bundle's zip (`includes.pack`). The guide: tools/drum_kit_guide.py.
+    "swing-grooves": "jazz-midi-pack/Drunk Swing Grooves.zip",
+    hooks: "clickfunnels/MYSTERY Hooks Pack.zip",
+    guide: "midi-drum-kit/MIDI Drum Kit - Guide.pdf",
   },
   // One-click upsells after the order, in ClickFunnels order (its
   // /famous-beats-bundle and /last-offer-top-hits-midi-bundle): each its own
@@ -101,7 +107,8 @@ export const funnel = {
     { id: "top-hits", path: "last-offer", name: "TOP HITS MIDI Bundle (1000 Chord Progressions)", price: { eur: 27, usd: 27 } },
   ],
   // Files an add-on brings beyond its own (its key in `files`).
-  includes: { chords: ["drum-loops", "emotional-keys"], jazz: ["jazz-chords", "bible", "anime-pack", "emotional-keys", "drum-loops"] } as Record<string, readonly string[]>,
+  // `pack`: every buyer of the kit, those before 2026-11-12 too (their /account shelf shows them).
+  includes: { pack: ["swing-grooves", "hooks", "guide"], chords: ["drum-loops", "emotional-keys"], jazz: ["jazz-chords", "bible", "anime-pack", "emotional-keys", "drum-loops"] } as Record<string, readonly string[]>,
   // Download labels for the files that aren't the pack or an add-on.
   fileNames: {
     "drum-loops": "Drum Loops for Songwriting",
@@ -109,6 +116,9 @@ export const funnel = {
     "jazz-chords": "MIDI Chord Pack (Jazz Edition)",
     bible: "The Chord Progressions Bible",
     "anime-pack": "Anime & Video Games MIDI Pack",
+    "swing-grooves": "Bonus: Drunk Swing Grooves (211 MIDI Files)",
+    hooks: "Bonus: MYSTERY Hooks Pack (17 WAV Hooks)",
+    guide: "Bonus: MIDI Drum Kit Guide (PDF)",
   } as Record<string, string>,
   checkout: {
     leadTags: ["checkout-started"],
