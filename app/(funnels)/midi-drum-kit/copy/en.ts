@@ -53,6 +53,9 @@ export const en = {
       free: "Free",
       totalValue: "Total value",
       today: "Today",
+      // Under the bonuses and under the form, as on the Jazz order page (2026-11-12).
+      guarantee: "14-day quality guarantee. A file doesn't work? We fix it.",
+      proof: ["**2,847** producers have the MIDI Drum Kit in their sessions", "**4,700+** producers on the GRIND STUDIO email list", "**14 days** quality guarantee on every file"],
     },
     completeTitle: "Complete Order:",
     paylogosAlt: "PayPal, Visa, Mastercard, American Express, Discover",

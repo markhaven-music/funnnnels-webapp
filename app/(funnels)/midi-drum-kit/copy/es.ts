@@ -53,6 +53,8 @@ export const es: Copy = {
       free: "Gratis",
       totalValue: "Valor total",
       today: "Hoy",
+      guarantee: "Garantía de calidad de 14 días. ¿Un archivo no funciona? Lo arreglamos.",
+      proof: ["**2.847** productores tienen el MIDI Drum Kit en sus sesiones", "**4.700+** productores en la lista de email de GRIND STUDIO", "**14 días** de garantía de calidad en cada archivo"],
     },
     completeTitle: "Completa tu pedido:",
     paylogosAlt: "PayPal, Visa, Mastercard, American Express, Discover",

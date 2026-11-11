@@ -152,7 +152,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
   const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard, pay, bonusLive, bonusOn };
 
   return (
-    <div className={s.form} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
+    <div className={s.form} data-step={step} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
       {step === 1 ? (
         <>
           {/* While step 1 is filled in, Stripe's card fields load out of sight, so on

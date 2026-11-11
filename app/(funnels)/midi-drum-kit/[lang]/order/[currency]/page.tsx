@@ -5,7 +5,6 @@ import { CURRENCIES, type Currency } from "@/lib/geo";
 import { Rich } from "../../../../top-hits-midi-bundle/Rich";
 import { fontVars } from "../../../../top-hits-midi-bundle/fonts";
 import { poppins } from "../../../fonts";
-import { Check } from "../../../../top-hits-midi-bundle/sections";
 import s from "../../../../top-hits-midi-bundle/order.module.css";
 import d from "../../../order.module.css";
 import { copyWith } from "../../../copy";
@@ -17,13 +16,12 @@ import { PAY_SCRIPT } from "../../../payTest";
 import { BONUS, BONUS_SCRIPT, BONUS_TIME_SCRIPT, BONUS_WORDS } from "../../../bonusTest";
 import { BonusBanner, BonusItem } from "../../../BonusClock";
 import { Beacon } from "../../../../Beacon";
-import { isLang, LANGS } from "../../../i18n";
+import { isLang, LANGS, paths } from "../../../i18n";
 import { orderOffer } from "../../../offer";
 import { OrderForm } from "../../../OrderForm";
 import { ReservedTimer } from "../../../ReservedTimer";
 import { Tracking } from "../../../Tracking";
-import { ORDER_STACK_SCRIPT } from "../../../stackSwitch";
-import { OrderStack } from "../../../OrderStack";
+import { OrderProof, OrderStack } from "../../../OrderStack";
 
 // The order page, a copy of ClickFunnels' /spot-available-midi-drum-kit-ad-15m30
 // (the same template as the TOP HITS one, so it shares its stylesheet).
@@ -66,44 +64,45 @@ export default async function OrderPage({ params }: { params: Params }) {
   // The add-on the 5-minute bonus gives (none if it's off the form in Products).
   const xp = offer.bumps.find((b) => b.id === BONUS.item);
   const bonusWords = BONUS_WORDS[lang];
+  const stack = copyWith(lang, currency, edits).order.stack;
 
   return (
-    <main className={`${s.page} ${fontVars} ${poppins.variable}`} lang={lang}>
+    <main className={`${s.page} ${d.jazzLike} ${fontVars} ${poppins.variable}`} lang={lang}>
       {/* The button-colour test: before the buttons paint (see ../../../abtest.ts). */}
       <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
       {/* The step-2 test (../../../payTest.ts): its letter is what the visit counts under. */}
       <script dangerouslySetInnerHTML={{ __html: PAY_SCRIPT }} />
       {/* The 5-minute bonus test (../../../bonusTest.ts): its letter is what the visit counts under. */}
       <script dangerouslySetInnerHTML={{ __html: BONUS_SCRIPT }} />
-      {/* The "what you get" box, on from ORDER_STACK.from (../../../stackSwitch.ts). */}
-      <script dangerouslySetInnerHTML={{ __html: ORDER_STACK_SCRIPT }} />
       <Tracking value={offer.price} currency={currency} event={null} />
       <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={AB.cookie} />
       <div className={s.redbar}>
         <Rich text={t.orderTopbar} currency={currency} />
       </div>
-      <header className={s.header}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={s.logo} src={`${IMG}/logo.webp`} alt="GRIND STUDIO" width={900} height={103} />
-      </header>
+      {/* The Jazz order page's header: the wordmark on the left, "Secure checkout" on the right. */}
+      <div className={d.topband}>
+        <header className={d.topbar}>
+          <a href={paths(lang).landing} className={d.logo}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`${IMG}/logo.webp`} alt="GRIND STUDIO" width={360} height={42} />
+          </a>
+          <span className={d.tag}>
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
+              <path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7zm2 0h4V5a2 2 0 0 0-4 0z" fill="currentColor" />
+            </svg>
+            {t.order.secure}
+          </span>
+        </header>
+      </div>
       {xp && <BonusBanner w={bonusWords} />}
 
-      <div className={s.secure}>
-        <svg viewBox="0 0 448 512" aria-hidden>
-          <path
-            fill="currentColor"
-            d="M400 224h-24v-72C376 68.2 307.8 0 224 0S72 68.2 72 152v72H48c-26.5 0-48 21.5-48 48v192c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V272c0-26.5-21.5-48-48-48zm-104 0H152v-72c0-39.7 32.3-72 72-72s72 32.3 72 72v72z"
-          />
-        </svg>
-        {t.order.secure}
-      </div>
-
-      <div className={`${s.cols} ${d.cols}`}>
-        {/* With the "what you get" box on, phones get the form first and this column after it, as on the Jazz order page. */}
-        <section className={`${s.summaryCol} ${d.summaryAfter}`}>
-          <h2 className={s.colTitle}>{t.order.summaryTitle}</h2>
+      {/* As the Jazz order page (2026-11-12): the summary on the left, the checkout on the right and
+          sticky on a computer; on a phone the checkout first. No column titles; the h1 is for screen readers. */}
+      <h1 className={d.srOnly}>{t.meta.orderTitle}</h1>
+      <div className={d.grid}>
+        <section className={d.summary}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={s.productImg} src={`${IMG}/product.webp`} alt={t.order.productAlt} width={896} height={1200} fetchPriority="high" />
+          <img className={d.kitBox} src={`${IMG}/kit-box-640.webp`} alt={t.order.productAlt} width={640} height={879} fetchPriority="high" />
           {/* The bonus, already in the order while its 5 minutes run (shown to the "bonus-on" half only). */}
           {xp && (
             <div className={d.bonusSlot}>
@@ -112,20 +111,10 @@ export default async function OrderPage({ params }: { params: Params }) {
               <script dangerouslySetInnerHTML={{ __html: BONUS_TIME_SCRIPT }} />
             </div>
           )}
-          <OrderStack w={copyWith(lang, currency, edits).order.stack} price={offer.price} currency={currency} lang={lang} />
-          <p className={s.dl}>{t.order.dl}</p>
-          <ul className={`${s.list} ${d.oldList}`}>
-            {t.order.bullets.map((b) => (
-              <li key={b}>
-                <Check />
-                {b}
-              </li>
-            ))}
-          </ul>
+          <OrderStack w={stack} price={offer.price} currency={currency} lang={lang} />
         </section>
 
-        <section id="complete-order">
-          <h2 className={s.colTitle}>{t.order.completeTitle}</h2>
+        <section id="complete-order" className={d.checkout}>
           <OrderForm
             form={copyWith(lang, currency, edits).form}
             lang={lang}
@@ -138,6 +127,7 @@ export default async function OrderPage({ params }: { params: Params }) {
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={s.paylogos} src={`${IMG}/paylogos.webp`} alt={t.order.paylogosAlt} width={190} height={22} />
+          <OrderProof w={stack} currency={currency} />
         </section>
       </div>
 

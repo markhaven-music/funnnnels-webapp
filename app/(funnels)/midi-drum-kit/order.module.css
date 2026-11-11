@@ -575,116 +575,234 @@
   margin: 0;
 }
 
-/* ── the "what you get" box (./stackSwitch.ts, ./OrderStack.tsx) ──
-   In the cached HTML for everyone; shown from ORDER_STACK.from on. It takes the
-   place of the 12 claims (shown on computers only). On phones the form comes
-   first and the picture with the box after it, as on the Jazz order page. */
-.stack {
-  display: none;
-  margin: 18px 0 0;
-  padding: 16px 18px 14px;
-  border: 1px solid #2a2a2a;
-  border-radius: 6px;
-  background: #0d0d0d;
-  color: #ededed;
+/* ── the page as the Jazz MIDI Pack's order page (2026-11-12) ──
+   "Praticamente uguale a MIDI Jazz Pack ma con i prodotti cambiati e i colori di MIDI Drum
+   Kit ereditati dalla landing page": the wordmark and "Secure checkout" in one bar, the
+   summary on the left (the box, the tick list, the bonuses with their covers, the total),
+   the checkout on the right and sticky on a computer, first on a phone. The landing's
+   colours: black, its panels' #0d0c10, the gold of its dividers, its green ticks. */
+/* The shared page hides its overflow, which stops position: sticky; clip doesn't. */
+main.jazzLike {
+  overflow-x: clip;
 }
-:global(html[data-order-stack="on"]) .stack {
+.topband {
+  background: #111;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+.logo {
   display: block;
+  line-height: 0;
 }
-:global(html[data-order-stack="on"]) .oldList {
-  display: none;
+.logo img {
+  display: block;
+  width: auto;
+  height: 20px;
 }
-@media (max-width: 769px) {
-  :global(html[data-order-stack="on"]) .summaryAfter {
-    order: 2;
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 3px;
+  background: #1c1c1c;
+  color: rgb(255 255 255 / 0.88);
+  font: 500 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.grid {
+  display: grid;
+  gap: 30px;
+  align-items: start;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 18px 8px 48px;
+}
+.checkout {
+  order: -1;
+  min-width: 0;
+}
+.summary {
+  min-width: 0;
+  padding: 0 12px;
+}
+.kitBox {
+  display: block;
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  margin: 0 auto;
+}
+@media (max-width: 480px) {
+  .logo img {
+    height: 16px;
   }
 }
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 56px;
+    padding: 44px 20px 72px;
+  }
+  .checkout {
+    order: 0;
+    position: sticky;
+    top: 24px;
+  }
+  /* Step 2 is taller than most screens (the add-ons, the card, the pay button): it scrolls with the page. */
+  .checkout:has([data-step="2"]) {
+    position: static;
+  }
+  .summary {
+    padding: 0;
+  }
+  .kitBox {
+    max-width: 380px;
+    margin: 0;
+  }
+}
+.stack {
+  margin: 26px 0 0;
+  color: #fff;
+}
 .stackTitle {
-  margin: 0 0 10px;
-  font-size: 18px;
-  font-weight: 800;
-  line-height: 1.3;
+  margin: 0 0 14px;
+  font: 700 22px/1.25 var(--font-poppins), Poppins, var(--inter);
   color: #fff;
 }
 .stackList {
-  list-style: none;
+  display: grid;
+  gap: 10px;
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 .stackList li {
-  display: flex;
+  display: grid;
+  grid-template-columns: 18px 1fr;
   gap: 10px;
-  align-items: flex-start;
-  padding: 4px 0;
-  font-size: 15px;
-  line-height: 1.35;
+  align-items: start;
+  font-size: 17px;
+  line-height: 1.4;
+  color: rgb(255 255 255 / 0.88);
 }
 .stackList svg {
-  flex: none;
-  width: 15px;
-  height: 15px;
-  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  margin-top: 4px;
   color: #3ed43a;
 }
 .stackBonuses {
-  margin: 14px 0 0;
-  padding: 12px 0 0;
-  border-top: 1px solid #2a2a2a;
+  margin: 30px 0 0;
 }
 .stackBonusesTitle {
-  margin: 0 0 6px;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  margin: 0 0 12px;
+  font: 700 13px/1.2 var(--font-poppins), Poppins, var(--inter);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #f5b800;
+  color: #ffab0a;
 }
 .stackBonuses ul {
-  list-style: none;
+  display: grid;
+  gap: 10px;
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 .stackBonuses li {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  padding: 4px 0;
-  font-size: 15px;
-  line-height: 1.35;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.stackBonuses img {
+  flex: none;
+  width: 44px;
+  height: 44px;
 }
 .stackFree {
   flex: none;
-  font-weight: 700;
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
   color: #3ed43a;
 }
-.stackFree s,
-.stackTotal s {
-  color: #8a8a8a;
-  font-weight: 500;
+.stackFree s {
+  margin-right: 4px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.62);
 }
 .stackTotal {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 12px 0 0;
-  padding: 12px 0 0;
-  border-top: 1px solid #2a2a2a;
-  font-size: 16px;
+  margin: 16px 0 0;
+  padding: 14px 16px;
+  border-radius: 3px;
+  background: rgb(255 171 10 / 0.12);
+  font: 700 16px/1.2 var(--font-poppins), Poppins, var(--inter);
+}
+.stackTotal s {
+  color: rgb(255 255 255 / 0.62);
+  text-decoration-color: #e55a67;
+  text-decoration-thickness: 2px;
 }
 .stackTotal b {
-  font-size: 20px;
+  font-size: 28px;
   font-weight: 800;
+  color: #ffab0a;
+}
+.stackGuarantee {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 22px 0 0;
+  font-size: 16px;
+  line-height: 1.4;
+  color: rgb(255 255 255 / 0.88);
+}
+.stackGuarantee svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: #ffab0a;
+}
+/* Under the form: three real numbers, as the Jazz order page's. */
+.proof {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0 0;
+  padding: 0 12px;
+  list-style: none;
+}
+.proof li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.35;
   color: #fff;
 }
-@media (max-width: 769px) {
-  .stack {
-    padding: 14px 14px 12px;
-  }
-  .stackTitle {
-    font-size: 16px;
-  }
-  .stackList li,
-  .stackBonuses li {
-    font-size: 14px;
-  }
+.proof strong {
+  flex: none;
+  font: 800 22px/1.1 var(--font-poppins), Poppins, var(--inter);
+  letter-spacing: -0.02em;
+  color: #ffab0a;
 }
