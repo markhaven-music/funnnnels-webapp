@@ -10,8 +10,8 @@ import type { Copy } from "./en";
 
 export const it: Copy = {
   meta: {
-    title: "1050 pattern di batteria MIDI + 3 bonus",
-    description: "Crea beat pazzeschi con le drum MIDI drag-and-drop. 1050 pattern e roll di batteria MIDI + 3 bonus, by GRIND STUDIO.",
+    title: "1050 pattern di batteria MIDI + 6 bonus",
+    description: "Crea beat pazzeschi con le drum MIDI drag-and-drop. 1050 pattern e roll di batteria MIDI + 6 bonus, by GRIND STUDIO.",
     orderTitle: "Ordina il MIDI Drum Kit",
     thanksTitle: "Grazie · MIDI Drum Kit",
   },
@@ -22,7 +22,7 @@ export const it: Copy = {
   order: {
     secure: "Pagamento sicuro",
     summaryTitle: "Riepilogo ordine:",
-    productAlt: "MIDI Drum Kit: 1050 pattern di batteria MIDI + 3 bonus",
+    productAlt: "MIDI Drum Kit: 1050 pattern di batteria MIDI + 6 bonus",
     dl: "Ti mandiamo il link per il download anche via email.",
     bullets: [
       "Pattern di batteria da Grammy",

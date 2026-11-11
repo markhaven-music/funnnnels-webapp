@@ -11,8 +11,8 @@ import type { Copy } from "./en";
 
 export const fr: Copy = {
   meta: {
-    title: "1050 patterns de batterie MIDI + 3 bonus",
-    description: "Fais des beats qui bougent avec des drums MIDI en glisser-déposer. 1050 patterns et rolls de batterie MIDI + 3 bonus, par GRIND STUDIO.",
+    title: "1050 patterns de batterie MIDI + 6 bonus",
+    description: "Fais des beats qui bougent avec des drums MIDI en glisser-déposer. 1050 patterns et rolls de batterie MIDI + 6 bonus, par GRIND STUDIO.",
     orderTitle: "Commander le MIDI Drum Kit",
     thanksTitle: "Merci · MIDI Drum Kit",
   },
@@ -23,7 +23,7 @@ export const fr: Copy = {
   order: {
     secure: "Paiement sécurisé",
     summaryTitle: "Récapitulatif :",
-    productAlt: "MIDI Drum Kit : 1050 patterns de batterie MIDI + 3 bonus",
+    productAlt: "MIDI Drum Kit : 1050 patterns de batterie MIDI + 6 bonus",
     dl: "Le lien de téléchargement te sera aussi envoyé par email.",
     bullets: [
       "Des patterns de batterie dignes des Grammy",

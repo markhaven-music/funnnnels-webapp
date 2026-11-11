@@ -30,7 +30,7 @@ export const funnel = {
     privacy: "/privacy-policy",
     refund: "/refund-policy",
   },
-  tagline: "1050 MIDI Drum Patterns + 3 Bonuses.",
+  tagline: "1050 MIDI Drum Patterns + 6 Bonuses.",
   // ClickFunnels sells in euros only; dollars follow the €27 / $27 rule (lib/geo.ts).
   price: { eur: 27, usd: 27 },
   // The three tick-box offers on step 2, in ClickFunnels order. Ids double as

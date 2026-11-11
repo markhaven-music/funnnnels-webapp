@@ -7,8 +7,8 @@
 
 export const en = {
   meta: {
-    title: "1050 MIDI Drum Patterns + 3 Bonuses",
-    description: "Make great beats with drag-and-drop MIDI drums. 1050 MIDI drum patterns and rolls + 3 bonuses, by GRIND STUDIO.",
+    title: "1050 MIDI Drum Patterns + 6 Bonuses",
+    description: "Make great beats with drag-and-drop MIDI drums. 1050 MIDI drum patterns and rolls + 6 bonuses, by GRIND STUDIO.",
     orderTitle: "Order MIDI Drum Kit",
     thanksTitle: "Thank you · MIDI Drum Kit",
   },
@@ -20,7 +20,7 @@ export const en = {
   order: {
     secure: "Secure Checkout",
     summaryTitle: "Order Summary:",
-    productAlt: "MIDI Drum Kit: 1050 MIDI drum patterns + 3 bonuses",
+    productAlt: "MIDI Drum Kit: 1050 MIDI drum patterns + 6 bonuses",
     dl: "Download link will be sent to your email.",
     bullets: [
       "Grammy-Level Drum Patterns",

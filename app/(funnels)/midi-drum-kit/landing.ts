@@ -96,6 +96,34 @@ const FREE_BAR = `<style>.fv-free{background:#f5b800;color:#000;text-align:cente
 <script>(function(){var n=${JSON.stringify(FREE_PACKS)},m=/[?&]free=([a-z]+)/.exec(location.search),k=m&&m[1];if(!k||!Object.prototype.hasOwnProperty.call(n,k))return;document.getElementById('fv-free-pack').textContent=n[k];document.querySelector('.fv-free').hidden=false})()</script>
 `;
 
+// Six bonuses since 2026-11-12 ("Sì, aggiornale": the landing and the emails say what the order
+// page and the download give): Drunk Swing Grooves, the MYSTERY Hooks Pack and the PDF guide, as
+// three more panels after Hit-Maker Drums' (a copy of its markup, so they look the same, without
+// its folder-tree picture) and three more rows in the offer box. Done here, not in cf/template.ts,
+// which tools/cf_clone.mjs writes. Texts: copy/landing/<lang>.json t263-t274.
+const PANEL_AT = '<div data-page-element="FlexContainer/V1" class=" elFlexNoWrapMobile elFlexNoWrap id-6Z-lLXzjA-111"';
+const PANEL_END = '<div data-page-element="UniversalBlock/21769640" class="id-6Z-lLXzjA-1786">';
+const TREE = /<div data-page-element="Image\/V2"[^>]*><img class="elImage" src="\/funnels\/midi-drum-kit\/tree-drums\.webp"[^>]*><\/div>/;
+const VALUE_ROW = /<li class="id-6Z-WOaYBj-1745">[\s\S]*?<\/li>/;
+const MORE_BONUSES = [
+  { cover: "bonus-grooves.webp", keys: ["t263", "t264", "t265"], row: "t272" },
+  { cover: "bonus-hooks.webp", keys: ["t266", "t267", "t268"], row: "t273" },
+  { cover: "bonus-guide.webp", keys: ["t269", "t270", "t271"], row: "t274" },
+];
+function sixBonuses(template: string): string {
+  const from = template.indexOf(PANEL_AT);
+  const to = template.indexOf(PANEL_END, from);
+  const row = template.match(VALUE_ROW)?.[0];
+  if (from < 0 || to < 0 || !row || !row.includes("{{t131}}")) return template;
+  const panel = template.slice(from, to).replace(TREE, "");
+  const panels = MORE_BONUSES.map((b) =>
+    ["t122", "t123", "t124"].reduce((html, key, i) => html.replaceAll(`data-t="${key}">{{${key}}}`, `data-t="${b.keys[i]}">{{${b.keys[i]}}}`), panel.replace("bonus-drums.webp", `${b.cover}" width="900" height="900`)),
+  ).join("");
+  const rows = MORE_BONUSES.map((b) => row.replace('data-t="t131">{{t131}}', `data-t="${b.row}">{{${b.row}}}`)).join("");
+  return (template.slice(0, to) + panels + template.slice(to)).replace(VALUE_ROW, row + rows);
+}
+const TEMPLATE6 = sixBonuses(TEMPLATE);
+
 // price: the kit's in this currency, as dashboard → Products has it; the
 // words that say the code's price ("Only €297 €27") say this one.
 // edits: the texts changed in the dashboard (funnel map → Edit, ./texts.ts).
@@ -119,7 +147,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = funn
   // The button colour fixed in the dashboard ends the test on this page.
   const ab = isVariant(layout.button) ? fixedScript(layout.button) : AB_SCRIPT;
 
-  let html = applySections(TEMPLATE, layout, marks)
+  let html = applySections(TEMPLATE6, layout, marks)
     .replace(/\{\{(t\d{3})\}\}/g, (_, key: string) => (marks ? `<!--fx:${key}-->${words(key)}<!--/fx-->` : words(key)))
     .replaceAll("{{ORDER}}", paths(lang).order)
     .replace("{{LANG}}", lang)

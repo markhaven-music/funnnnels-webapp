@@ -67,7 +67,7 @@ I haven't heard back from you, so I'm assuming you've decided to pass on the MID
 
 I'm going to close out your cart request tonight so I don't keep clogging up your inbox.
 
-But before I do, I realized you maybe don't know that you are also walking away from the 3 free bonuses attached to MIDI Drum Kit.
+But before I do, I realized you maybe don't know that you are also walking away from the 6 free bonuses attached to MIDI Drum Kit.
 
 If you complete your order today, you still get instant access to:
 
@@ -77,11 +77,17 @@ If you complete your order today, you still get instant access to:
 
 **BONUS #3: Hit-Maker Drums** – The hard-hitting Kicks, Snares, and Hats we used to create the demos. No recycling weak sounds.
 
-You get all 750+ MIDI Drum Patterns plus these 3 Bonuses for the single price of ${price}.
+**BONUS #4: Drunk Swing Grooves** – 211 MIDI files: drum grooves, groove templates and neo soul keys.
+
+**BONUS #5: MYSTERY Hooks Pack** – 17 WAV hooks that leave space for the artist's voice.
+
+**BONUS #6: MIDI Drum Kit Guide** – A PDF that shows what is in every folder and a way to go from an empty project to a full beat.
+
+You get all 750+ MIDI Drum Patterns plus these 6 Bonuses for the single price of ${price}.
 
 This is your last chance to grab the full bundle before the link expires.
 
-**[[Click Here To Secure Your MIDI Kit + All 3 Free Bonuses]](${url})**
+**[[Click Here To Secure Your MIDI Kit + All 6 Free Bonuses]](${url})**
 
 Let me know.
 
@@ -137,7 +143,7 @@ Je n'ai pas eu de nouvelles, alors je suppose que tu as décidé de passer ton t
 
 Je vais fermer ta demande de panier ce soir pour ne pas continuer à encombrer ta boîte mail.
 
-Mais avant, je me suis dit que tu ne savais peut-être pas que tu renonces aussi aux 3 bonus gratuits inclus avec le MIDI Drum Kit.
+Mais avant, je me suis dit que tu ne savais peut-être pas que tu renonces aussi aux 6 bonus gratuits inclus avec le MIDI Drum Kit.
 
 Si tu finalises ta commande aujourd'hui, tu as toujours un accès immédiat à :
 
@@ -147,11 +153,17 @@ Si tu finalises ta commande aujourd'hui, tu as toujours un accès immédiat à :
 
 **BONUS N°3 : Hit-Maker Drums** – Les kicks, snares et hats qui frappent fort qu'on a utilisés pour créer les démos. Pas de sons faibles recyclés.
 
-Tu as les 750+ patterns de batterie MIDI plus ces 3 bonus pour un prix unique de ${price}.
+**BONUS N°4 : Drunk Swing Grooves** – 211 fichiers MIDI : grooves de batterie, templates de groove et accords neo soul.
+
+**BONUS N°5 : MYSTERY Hooks Pack** – 17 hooks WAV qui laissent de la place à la voix de l'artiste.
+
+**BONUS N°6 : Guide du MIDI Drum Kit** – Un PDF (en anglais) qui montre ce qu'il y a dans chaque dossier et comment passer d'un projet vide à un beat complet.
+
+Tu as les 750+ patterns de batterie MIDI plus ces 6 bonus pour un prix unique de ${price}.
 
 C'est ta dernière chance d'avoir le bundle complet avant que le lien expire.
 
-**[[Clique ici pour assurer ton MIDI Kit + les 3 bonus gratuits]](${url})**
+**[[Clique ici pour assurer ton MIDI Kit + les 6 bonus gratuits]](${url})**
 
 Dis-moi.
 
@@ -207,7 +219,7 @@ No he sabido nada de ti, así que supongo que decidiste pasar del MIDI Drum Kit.
 
 Voy a cerrar tu solicitud de carrito esta noche para no seguir llenando tu bandeja de entrada.
 
-Pero antes, me di cuenta de que quizás no sabes que también te vas sin los 3 bonos gratis incluidos con el MIDI Drum Kit.
+Pero antes, me di cuenta de que quizás no sabes que también te vas sin los 6 bonos gratis incluidos con el MIDI Drum Kit.
 
 Si completas tu pedido hoy, todavía tienes acceso inmediato a:
 
@@ -217,11 +229,17 @@ Si completas tu pedido hoy, todavía tienes acceso inmediato a:
 
 **BONO #3: Hit-Maker Drums** – Los kicks, snares y hats contundentes que usamos para crear las demos. Nada de reciclar sonidos flojos.
 
-Tienes los más de 750 patrones de batería MIDI más estos 3 bonos por un único precio de ${price}.
+**BONO #4: Drunk Swing Grooves** – 211 archivos MIDI: grooves de batería, plantillas de groove y acordes neo soul.
+
+**BONO #5: MYSTERY Hooks Pack** – 17 hooks WAV que dejan espacio para la voz del artista.
+
+**BONO #6: Guía del MIDI Drum Kit** – Un PDF (en inglés) que muestra qué hay en cada carpeta y cómo pasar de un proyecto vacío a un beat completo.
+
+Tienes los más de 750 patrones de batería MIDI más estos 6 bonos por un único precio de ${price}.
 
 Es tu última oportunidad de conseguir el bundle completo antes de que caduque el enlace.
 
-**[[Haz clic para asegurar tu MIDI Kit + los 3 bonos gratis]](${url})**
+**[[Haz clic para asegurar tu MIDI Kit + los 6 bonos gratis]](${url})**
 
 Dime algo.
 
@@ -277,7 +295,7 @@ ich habe nichts von dir gehört, also gehe ich davon aus, dass du beim MIDI Drum
 
 Ich schließe deine Warenkorb-Anfrage heute Abend, damit ich dein Postfach nicht weiter vollmülle.
 
-Aber vorher ist mir eingefallen, dass du vielleicht nicht weißt, dass du damit auch auf die 3 Gratis-Boni verzichtest, die zum MIDI Drum Kit gehören.
+Aber vorher ist mir eingefallen, dass du vielleicht nicht weißt, dass du damit auch auf die 6 Gratis-Boni verzichtest, die zum MIDI Drum Kit gehören.
 
 Wenn du deine Bestellung heute abschließt, bekommst du weiterhin sofort Zugriff auf:
 
@@ -287,11 +305,17 @@ Wenn du deine Bestellung heute abschließt, bekommst du weiterhin sofort Zugriff
 
 **BONUS #3: Hit-Maker Drums** – Die harten Kicks, Snares und Hats, mit denen wir die Demos gemacht haben. Keine recycelten schwachen Sounds.
 
-Du bekommst alle 750+ MIDI-Drum-Patterns plus diese 3 Boni zum Einzelpreis von ${price}.
+**BONUS #4: Drunk Swing Grooves** – 211 MIDI-Dateien: Drum-Grooves, Groove-Templates und Neo-Soul-Keys.
+
+**BONUS #5: MYSTERY Hooks Pack** – 17 WAV-Hooks, die Platz für die Stimme des Artists lassen.
+
+**BONUS #6: MIDI Drum Kit Guide** – Ein PDF (auf Englisch), das zeigt, was in jedem Ordner steckt und wie du vom leeren Projekt zum fertigen Beat kommst.
+
+Du bekommst alle 750+ MIDI-Drum-Patterns plus diese 6 Boni zum Einzelpreis von ${price}.
 
 Das ist deine letzte Chance, dir das komplette Bundle zu holen, bevor der Link abläuft.
 
-**[[Klick hier und sichere dir dein MIDI Kit + alle 3 Gratis-Boni]](${url})**
+**[[Klick hier und sichere dir dein MIDI Kit + alle 6 Gratis-Boni]](${url})**
 
 Sag mir Bescheid.
 
@@ -347,7 +371,7 @@ non ti ho più sentito, quindi immagino che tu abbia deciso di rinunciare al MID
 
 Stasera chiudo la tua richiesta di carrello, così non continuo a intasarti la casella email.
 
-Ma prima mi sono reso conto che forse non sai che stai rinunciando anche ai 3 bonus gratis inclusi con il MIDI Drum Kit.
+Ma prima mi sono reso conto che forse non sai che stai rinunciando anche ai 6 bonus gratis inclusi con il MIDI Drum Kit.
 
 Se completi il tuo ordine oggi, hai ancora accesso immediato a:
 
@@ -357,11 +381,17 @@ Se completi il tuo ordine oggi, hai ancora accesso immediato a:
 
 **BONUS #3: Hit-Maker Drums** – I kick, snare e hat potenti che abbiamo usato per creare le demo. Niente suoni deboli riciclati.
 
-Ottieni tutti gli oltre 750 pattern di batteria MIDI più questi 3 bonus a un prezzo unico di ${price}.
+**BONUS #4: Drunk Swing Grooves** – 211 file MIDI: groove di batteria, template di groove e accordi neo soul.
+
+**BONUS #5: MYSTERY Hooks Pack** – 17 hook WAV che lasciano spazio alla voce dell'artista.
+
+**BONUS #6: Guida al MIDI Drum Kit** – Un PDF (in inglese) che mostra cosa c'è in ogni cartella e come passare da un progetto vuoto a un beat completo.
+
+Ottieni tutti gli oltre 750 pattern di batteria MIDI più questi 6 bonus a un prezzo unico di ${price}.
 
 È la tua ultima occasione per prendere il bundle completo prima che il link scada.
 
-**[[Clicca per assicurarti il tuo MIDI Kit + tutti e 3 i bonus gratis]](${url})**
+**[[Clicca per assicurarti il tuo MIDI Kit + tutti e 6 i bonus gratis]](${url})**
 
 Fammi sapere.
 

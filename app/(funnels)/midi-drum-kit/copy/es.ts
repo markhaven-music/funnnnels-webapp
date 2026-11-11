@@ -11,8 +11,8 @@ import type { Copy } from "./en";
 
 export const es: Copy = {
   meta: {
-    title: "1050 patrones de batería MIDI + 3 bonos",
-    description: "Haz beats que se mueven con baterías MIDI de arrastrar y soltar. 1050 patrones y rolls de batería MIDI + 3 bonos, por GRIND STUDIO.",
+    title: "1050 patrones de batería MIDI + 6 bonos",
+    description: "Haz beats que se mueven con baterías MIDI de arrastrar y soltar. 1050 patrones y rolls de batería MIDI + 6 bonos, por GRIND STUDIO.",
     orderTitle: "Pedir el MIDI Drum Kit",
     thanksTitle: "Gracias · MIDI Drum Kit",
   },
@@ -23,7 +23,7 @@ export const es: Copy = {
   order: {
     secure: "Pago seguro",
     summaryTitle: "Resumen del pedido:",
-    productAlt: "MIDI Drum Kit: 1050 patrones de batería MIDI + 3 bonos",
+    productAlt: "MIDI Drum Kit: 1050 patrones de batería MIDI + 6 bonos",
     dl: "También te enviaremos el enlace de descarga por email.",
     bullets: [
       "Patrones de batería de nivel Grammy",

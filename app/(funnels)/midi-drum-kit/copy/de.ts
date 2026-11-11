@@ -11,8 +11,8 @@ import type { Copy } from "./en";
 
 export const de: Copy = {
   meta: {
-    title: "1050 MIDI-Drum-Patterns + 3 Boni",
-    description: "Mach Beats, die grooven, mit MIDI-Drums per Drag & Drop. 1050 MIDI-Drum-Patterns und Rolls + 3 Boni, von GRIND STUDIO.",
+    title: "1050 MIDI-Drum-Patterns + 6 Boni",
+    description: "Mach Beats, die grooven, mit MIDI-Drums per Drag & Drop. 1050 MIDI-Drum-Patterns und Rolls + 6 Boni, von GRIND STUDIO.",
     orderTitle: "MIDI Drum Kit bestellen",
     thanksTitle: "Danke · MIDI Drum Kit",
   },
@@ -23,7 +23,7 @@ export const de: Copy = {
   order: {
     secure: "Sichere Bezahlung",
     summaryTitle: "Bestellübersicht:",
-    productAlt: "MIDI Drum Kit: 1050 MIDI-Drum-Patterns + 3 Boni",
+    productAlt: "MIDI Drum Kit: 1050 MIDI-Drum-Patterns + 6 Boni",
     dl: "Den Download-Link bekommst du auch per E-Mail.",
     bullets: [
       "Drum-Patterns auf Grammy-Niveau",
