@@ -1,6 +1,7 @@
 import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
 import { ORDER_STACK } from "@/app/(funnels)/midi-drum-kit/stackSwitch";
+import { LP } from "@/app/(funnels)/midi-drum-kit/landingTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import { ASTRO_FUNNEL, type Step } from "@/lib/beacon";
 import { codeFunnels, funnelLabel } from "@/lib/funnels";
@@ -690,6 +691,9 @@ export const TESTS: TestDef[] = [
     shots: { green: `${SHOTS}/button-green.webp`, yellow: `${SHOTS}/button-yellow.webp`, orange: `${SHOTS}/button-orange.webp` },
     where: "Landing and order page, every language · orders paid 11-06 → 11-09 have no colour (not counted)",
     variants: BUTTON_TEST.variants,
+    // 2026-11-12 ("l'arancione sta vincendo", and it made the most money): over, orange on every
+    // button; the letter the visits and orders carry is the landing test's from then on.
+    ended: { at: LP.from, kept: "orange" },
     label: cap,
     color: (v) => BUTTON_COLORS[v as keyof typeof BUTTON_COLORS],
   },
@@ -763,6 +767,19 @@ export const TESTS: TestDef[] = [
       before: { from: "2026-11-08T17:29:00+01:00", until: ORDER_STACK.from, days: ["2026-11-09", dayBefore(ORDER_STACK.from)] },
       after: { from: ORDER_STACK.jazzStyle, until: null, days: [ORDER_STACK.firstDay, null] },
     },
+  },
+  {
+    funnel: "midi-drum-kit",
+    // 2026-11-12, "voglio fare un AB pulito tra vecchio funnel e nuovo senza cambiare URL": the old
+    // landing against a new one (midi-drum-kit/landingTest.ts, landingNew.ts), 50/50 at the same
+    // address, English and Italian, the same order page after both. Counted by letter, to the sale.
+    name: "Landing: old vs new",
+    question: "Does the new landing (new box pictures, Jazz-size headlines, a player with the kit's real MIDI files) sell more than the old one?",
+    shots: { "lp-old": `${SHOTS}/landing-old.webp`, "lp-new": `${SHOTS}/landing-new.webp` },
+    where: "Landing, English and Italian (French, Spanish and German keep the old page, not counted) · half the visitors on each page at the same address, each kept on theirs · the same Jazz-style order page after both · New = the boxes redone (kit and 11 folders), headlines the size of the Jazz page's, iridescent light on the cards, and a player with 155 of the kit's own MIDI files, after “What's inside”",
+    variants: LP.variants,
+    label: (v) => (v === "lp-old" ? "Old · the current page" : "New · new boxes, big headlines, player"),
+    color: (v) => (v === "lp-old" ? { from: "#94a3b8", to: "#64748b" } : { from: "#c084fc", to: "#22d3ee" }),
   },
   {
     funnel: "jazz-midi-pack",

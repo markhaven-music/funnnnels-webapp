@@ -2,6 +2,7 @@ import { after, NextResponse, type NextRequest } from "next/server";
 import { COUNTRY_COOKIE, currencyFor, visitorCountry } from "@/lib/geo";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
+import { isLp, LP, type LpVariant } from "@/app/(funnels)/midi-drum-kit/landingTest";
 import { CF_PATHS as FREE_PAGES, CF_REDIRECTS as FREE_REDIRECTS } from "@/app/free/packs";
 
 // funnnnels.com is the dashboard, behind ADMIN_PASSWORD. Funnels are public
@@ -172,9 +173,13 @@ export function proxy(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
     const country = visitorCountry(request.headers, request.nextUrl.searchParams.get("country"));
-    url.pathname = `/${loc.slug}/${loc.lang}${loc.page ? `/${loc.page}` : ""}/${currencyFor(country)}`;
+    // The MIDI Drum Kit landing's A/B test (app/(funnels)/midi-drum-kit/landingTest.ts): the old
+    // page or the new one at the same address, 50/50, each visitor kept on theirs by a cookie.
+    const lp = loc.slug === "midi-drum-kit" && !loc.page && LP.langs.includes(loc.lang) ? landingVariant(request) : null;
+    url.pathname = `/${loc.slug}/${loc.lang}${loc.page ? `/${loc.page}` : ""}${lp?.variant === "lp-new" ? "/new" : ""}/${currencyFor(country)}`;
     const res = NextResponse.rewrite(url);
     res.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax" });
+    if (lp?.assign) res.cookies.set(LP.cookie, lp.variant, { path: "/", sameSite: "lax", maxAge: 15552000 });
     return res;
   }
 
@@ -207,6 +212,18 @@ export function proxy(request: NextRequest) {
   return challenge();
 }
 
+/**
+ * Which landing this visitor sees: ?lp=old|new shows one without touching their cookie (a look,
+ * the funnel map's lanes); else their cookie's; else one of the two at random, kept from now on.
+ */
+function landingVariant(request: NextRequest): { variant: LpVariant; assign: boolean } {
+  const asked = request.nextUrl.searchParams.get("lp");
+  if (asked === "old" || asked === "new") return { variant: `lp-${asked}`, assign: false };
+  const kept = request.cookies.get(LP.cookie)?.value;
+  if (isLp(kept)) return { variant: kept, assign: false };
+  return { variant: Math.random() < 0.5 ? "lp-old" : "lp-new", assign: true };
+}
+
 const challenge = () =>
   new NextResponse("Authentication required", {
     status: 401,
@@ -230,5 +247,5 @@ function isAdmin(request: NextRequest): boolean {
 export const config = {
   // Funnel pictures, audio and zips in /public skip the proxy: they are public
   // anyway (PUBLIC above) and every run costs Vercel CPU time (free-plan limit).
-  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|funnels/[^/]+/.+\\.(?:webp|png|jpe?g|gif|svg|avif|ico|mp3|mp4|webm|wav|zip|mid|woff2?|pdf|txt)).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|funnels/[^/]+/.+\\.(?:webp|png|jpe?g|gif|svg|avif|ico|mp3|mp4|m4a|webm|wav|zip|mid|json|woff2?|pdf|txt)).*)"],
 };

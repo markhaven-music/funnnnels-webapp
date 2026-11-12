@@ -15,7 +15,7 @@ import j from "../../../../jazz-midi-pack/jazz.module.css";
 import b from "../../../../jazz-midi-pack/btn.module.css";
 import { funnel } from "../../../funnel";
 import { isLang, LANGS } from "../../../i18n";
-import { AB } from "../../../abtest";
+import { LP } from "../../../landingTest";
 import { beaconStep, headScripts, script, stepsBar } from "../../../upsell";
 import { Beacon } from "../../../../Beacon";
 import u from "./jazzOffer.module.css";
@@ -79,7 +79,7 @@ export default async function JazzOffer({ params }: { params: Params }) {
     <main className={`${j.page} ${j.jazz} ${display.variable}`} lang={lang}>
       <script dangerouslySetInnerHTML={{ __html: ORIGIN_BOUNCE_JS }} />
       <script dangerouslySetInnerHTML={{ __html: js(headScripts()) }} />
-      <Beacon funnel={funnel.slug} page={beaconStep(product, OFFER, "upsell-1")} lang={lang} abCookie={AB.cookie} />
+      <Beacon funnel={funnel.slug} page={beaconStep(product, OFFER, "upsell-1")} lang={lang} abCookie={LP.cookie} />
 
       {/* "✓ Payment received", where the downloads are, and the funnel's steps (upsell.ts stepsBar, 2026-11-08). */}
       <div dangerouslySetInnerHTML={{ __html: stepsBar(product, OFFER, lang) }} />

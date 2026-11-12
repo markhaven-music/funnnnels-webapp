@@ -5,6 +5,7 @@ and said three bonuses and 988. Built as HTML from the page's own pictures and n
 headless Google Chrome, one per language:
 
     /usr/bin/python3 tools/value_stack.py            # writes public/funnels/midi-drum-kit/value-stack-6*.webp
+    /usr/bin/python3 tools/value_stack.py v3         # the new landing's (landingTest.ts): the new box, value-stack-7{,-it}.webp
 
 Numbers: the kit 497 and the first three bonuses 197, 197, 97 are the old picture's (they add up to its
 988); the three new ones 37, 27, 17 (midi-drum-kit/stackSwitch.ts STACK_VALUES); was 297, now 27 (funnel.ts).
@@ -12,6 +13,7 @@ The price in the picture is in euros in every language, as it was.
 """
 import os
 import subprocess
+import sys
 import tempfile
 
 from PIL import Image
@@ -32,6 +34,12 @@ LANGS = {
     "-de": dict(bonus="Bonus #{n}:", value="Wert: {v} €", total="GESAMTWERT: {t} €", week="BLACK-FRIDAY-WOCHE", save="DU SPARST {s} €", guide="MIDI Drum Kit Guide", money="{v} €", thousands=""),
     "-it": dict(bonus="Bonus #{n}:", value="Valore {v} €", total="VALORE TOTALE: {t} €", week="SETTIMANA DEL BLACK FRIDAY", save="RISPARMI {s} €", guide="Guida al MIDI Drum Kit", money="{v} €", thousands=""),
 }
+
+
+# The kit's picture at the top, and the files' name: the old landing's, or the new one's (2026-11-12, its new box).
+BOX, OUT, ONLY = "kit-box", "value-stack-6", None
+if sys.argv[1:] == ["v3"]:
+    BOX, OUT, ONLY = "kit-box-v3", "value-stack-7", {"", "-it"}
 
 
 def page(w):
@@ -69,7 +77,7 @@ body {{ margin: 0; width: 1000px; background: #fff; font-family: Montserrat, Hel
 .save {{ width: fit-content; margin: 22px auto 0; padding: 10px 26px 10px 34px; background: #f26a1b; color: #fff; font-weight: 800; font-size: 27px;
   clip-path: polygon(22px 0, 100% 0, 100% 100%, 22px 100%, 0 50%); }}
 </style></head><body><div class="wrap">
-<div class="kit"><img src="file://{DIR}/kit-box.webp"><div class="ribbon">{w['value'].format(v=KIT)}</div></div>
+<div class="kit"><img src="file://{DIR}/{BOX}.webp"><div class="ribbon">{w['value'].format(v=KIT)}</div></div>
 <div class="grid">{cards}</div>
 <div class="total">{w['total'].format(t=num(TOTAL))}</div>
 <div class="week">{w['week']}</div>
@@ -80,6 +88,8 @@ body {{ margin: 0; width: 1000px; background: #fff; font-family: Montserrat, Hel
 
 def build():
     for suffix, w in LANGS.items():
+        if ONLY is not None and suffix not in ONLY:
+            continue
         with tempfile.TemporaryDirectory() as tmp:
             src, png = os.path.join(tmp, "v.html"), os.path.join(tmp, "v.png")
             open(src, "w", encoding="utf-8").write(page(w))
@@ -93,7 +103,7 @@ def build():
                 bottom -= 1
             im = im.crop((0, 0, im.width, min(im.height, bottom + 80))).resize((1000, round(min(im.height, bottom + 80) / 2)), Image.LANCZOS)
             # A new name, not value-stack*-w.webp: browsers keep /funnels/* for a week and would show the old picture.
-            out = os.path.join(DIR, f"value-stack-6{suffix}.webp")
+            out = os.path.join(DIR, f"{OUT}{suffix}.webp")
             im.save(out, quality=86, method=6)
             print(os.path.basename(out), im.size, os.path.getsize(out))
 

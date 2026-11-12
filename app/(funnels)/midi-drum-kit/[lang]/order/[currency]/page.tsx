@@ -11,7 +11,8 @@ import { copyWith } from "../../../copy";
 import { pageEdits } from "@/lib/pageTexts";
 import { copyEdits } from "../../../texts";
 import { funnel } from "../../../funnel";
-import { AB, AB_SCRIPT } from "../../../abtest";
+import { BUTTON_SCRIPT } from "../../../abtest";
+import { LP } from "../../../landingTest";
 import { PAY_SCRIPT } from "../../../payTest";
 import { BONUS, BONUS_SCRIPT, BONUS_TIME_SCRIPT, BONUS_WORDS } from "../../../bonusTest";
 import { BonusBanner, BonusItem } from "../../../BonusClock";
@@ -68,14 +69,14 @@ export default async function OrderPage({ params }: { params: Params }) {
 
   return (
     <main className={`${s.page} ${d.jazzLike} ${fontVars} ${poppins.variable}`} lang={lang}>
-      {/* The button-colour test: before the buttons paint (see ../../../abtest.ts). */}
-      <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
+      {/* The button colour the test kept (orange), before the buttons paint (../../../abtest.ts). */}
+      <script dangerouslySetInnerHTML={{ __html: BUTTON_SCRIPT }} />
       {/* The step-2 test (../../../payTest.ts): its letter is what the visit counts under. */}
       <script dangerouslySetInnerHTML={{ __html: PAY_SCRIPT }} />
       {/* The 5-minute bonus test (../../../bonusTest.ts): its letter is what the visit counts under. */}
       <script dangerouslySetInnerHTML={{ __html: BONUS_SCRIPT }} />
       <Tracking value={offer.price} currency={currency} event={null} />
-      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={AB.cookie} />
+      <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={LP.cookie} />
       <div className={s.redbar}>
         <Rich text={t.orderTopbar} currency={currency} />
       </div>

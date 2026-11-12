@@ -53,7 +53,7 @@ export function revalidateSalesPages(funnelId: string) {
     revalidatePath(`/${funnelId}/offer/${currency}`); // TOP HITS' upsell
     if (funnelId !== "midi-drum-kit") continue;
     for (const lang of DRUM_KIT_LANGS) {
-      for (const page of ["", "/order", "/offer", "/last-offer"]) revalidatePath(`/${funnelId}/${lang}${page}/${currency}`);
+      for (const page of ["", "/new", "/order", "/offer", "/last-offer"]) revalidatePath(`/${funnelId}/${lang}${page}/${currency}`);
     }
   }
 }

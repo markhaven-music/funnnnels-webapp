@@ -12,6 +12,8 @@
 // cookie, the tab keeps the shown one (sessionStorage ab_preview) for the
 // order page, and nothing is counted (lib/beacon.ts PREVIEW_JS).
 
+import { LP } from "./landingTest";
+
 export const AB = {
   cookie: "ab_btn",
   variants: ["green", "yellow", "orange"] as const,
@@ -43,15 +45,21 @@ document.cookie='${AB.cookie}='+v+'; path=/; max-age=15552000; samesite=lax';}
 document.documentElement.setAttribute('data-ab-btn',v);window.__abBtn=v;
 }catch(e){}})();`;
 
-/** The visitor's colour, in the browser (null before the script ran). */
-export function readVariant(): Variant | null {
+/**
+ * The test letter the checkout and the order carry (Stripe metadata.variant, PayPal custom_id), in the
+ * browser: since 2026-11-12 the landing's ("lp-old" / "lp-new", ./landingTest.ts), no longer the colour.
+ * The button test ended that day, orange kept ("l'arancione sta vincendo"): every button is orange
+ * (BUTTON_KEPT), unless the dashboard fixes another colour on a page.
+ */
+export function readVariant(): string | null {
   if (typeof document === "undefined") return null;
-  // A preview's colour (see AB_SCRIPT).
-  const shown = (window as unknown as { __abBtn?: string }).__abBtn;
-  if (shown && (AB.variants as readonly string[]).includes(shown)) return shown as Variant;
-  const m = document.cookie.match(new RegExp(`(?:^|; )${AB.cookie}=(${LIST})(?:;|$)`));
-  return (m?.[1] as Variant) ?? null;
+  const m = document.cookie.match(new RegExp(`(?:^|; )${LP.cookie}=(${LP.variants.join("|")})(?:;|$)`));
+  return m?.[1] ?? null;
 }
+
+/** The colour the button test kept: every visitor's, set before the buttons paint. */
+export const BUTTON_KEPT: Variant = "orange";
+export const BUTTON_SCRIPT = fixedScript(BUTTON_KEPT);
 
 /** A variant name the server accepts from the browser ("" if none). */
 export const cleanVariant = (v: unknown) => (typeof v === "string" && /^[a-z0-9-]{1,20}$/.test(v) ? v : "");

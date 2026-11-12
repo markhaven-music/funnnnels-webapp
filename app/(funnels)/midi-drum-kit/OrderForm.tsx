@@ -6,7 +6,8 @@ import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { cookieCountry, type Currency } from "@/lib/geo";
 import { isPreview, track } from "@/lib/beacon";
-import { AB, readVariant } from "./abtest";
+import { readVariant } from "./abtest";
+import { LP } from "./landingTest";
 import { readPay, type PayVariant } from "./payTest";
 import { BONUS, BONUS_WORDS } from "./bonusTest";
 import { BonusItem, endBonus, useBonus } from "./BonusClock";
@@ -139,7 +140,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
         keep(saved, 2);
         setWanted(true);
         setStep(2);
-        track({ funnel: funnel.slug, page: "checkout", lang, abCookie: AB.cookie });
+        track({ funnel: funnel.slug, page: "checkout", lang, abCookie: LP.cookie });
         // The token off the address bar: a shared or bookmarked link carries no one's cart.
         const url = new URL(location.href);
         url.searchParams.delete("c");
@@ -191,8 +192,8 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
               setWanted(true);
               setStep(2);
               window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
-              pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_btn: readVariant(), ab_pay: readPay() });
-              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: AB.cookie });
+              pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_lp: readVariant(), ab_pay: readPay() });
+              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: LP.cookie });
             }}
           />
         </>
@@ -352,7 +353,7 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
         funnel: funnel.slug,
         ...props.info,
         bumps: props.picked,
-        // The button colour (./abtest.ts): what the dashboard counts this order under.
+        // The landing the buyer saw (./landingTest.ts): what the dashboard counts this order under.
         // Step 2 (./payTest.ts) is judged by its days, so it needs no letter here.
         variant: readVariant() ?? "",
         // The Expansions free, as the page shows them (the server checks the 5 minutes).

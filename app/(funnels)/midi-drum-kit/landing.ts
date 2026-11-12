@@ -5,7 +5,9 @@ import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { restate } from "@/lib/restate";
 import { applySections, imageOrigins, swapImages } from "@/lib/cfSections";
 import type { Layout } from "@/lib/pageLayout";
-import { AB, AB_LANDING_CSS, AB_SCRIPT, fixedScript, isVariant } from "./abtest";
+import { AB_LANDING_CSS, BUTTON_KEPT, fixedScript, isVariant } from "./abtest";
+import { LP, type LpVariant } from "./landingTest";
+import { newLanding } from "./landingNew";
 import { TEMPLATE } from "./cf/template";
 import de from "./copy/landing/de.json";
 import en from "./copy/landing/en.json";
@@ -144,7 +146,8 @@ const TEMPLATE6 = sixBonuses(TEMPLATE);
 // (app/api/funnels/[id]/texts/frame); never on a live page.
 // layout: the page's sections hidden or moved, its pictures replaced and its
 // button colour, as edited in the dashboard (lib/pageLayout.ts, lib/cfSections.ts).
-export function landingHtml(lang: Lang, currency: Currency, price: number = funnel.price[currency], edits: PageEdits = {}, marks = false, layout: Layout = {}): string {
+// variant: the landing test's page (./landingTest.ts); "lp-new" is the new one (./landingNew.ts).
+export function landingHtml(lang: Lang, currency: Currency, price: number = funnel.price[currency], edits: PageEdits = {}, marks = false, layout: Layout = {}, variant: LpVariant = "lp-old"): string {
   const strings = { ...STRINGS.en, ...STRINGS[lang], ...markupEdits(edits, "landing") };
   const words = (key: string) => {
     let html = mapText(strings[key] ?? "", (t) => restate(t, funnel.price[currency], price, lang));
@@ -156,8 +159,8 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = funn
     return html;
   };
   const meta = copyWith(lang, undefined, copyEdits(edits)).meta;
-  // The button colour fixed in the dashboard ends the test on this page.
-  const ab = isVariant(layout.button) ? fixedScript(layout.button) : AB_SCRIPT;
+  // The button colour: the one the test kept (orange, 2026-11-12), or one fixed in the dashboard.
+  const ab = fixedScript(isVariant(layout.button) ? layout.button : BUTTON_KEPT);
 
   let html = applySections(TEMPLATE6, layout, marks)
     .replace(/\{\{(t\d{3})\}\}/g, (_, key: string) => (marks ? `<!--fx:${key}-->${words(key)}<!--/fx-->` : words(key)))
@@ -167,7 +170,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = funn
     .replace("{{DESCRIPTION}}", escapeAttr(meta.description))
     .replace(
       "{{HEAD}}",
-      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${ab}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: AB.cookie })}</script>\n<script>${AVAILABILITY_JS}</script>\n${headScripts(currency, price)}`,
+      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${ab}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: LP.cookie })}</script>\n<script>${AVAILABILITY_JS}</script>\n${headScripts(currency, price)}`,
     )
     .replace("{{BODY}}", BODY_SCRIPT);
   if (lang === "en") html = html.replace(FREE_BAR_AT, (at) => FREE_BAR + at);
@@ -179,6 +182,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = funn
   // The pictures replaced in the dashboard, keyed by the src the page shows in this language.
   const images = layout.images ?? {};
   html = faster(swapImages(html, images, marks), video.poster);
+  if (variant === "lp-new") html = newLanding(html, lang, paths(lang).order);
   const origins = imageOrigins(images);
   return origins ? html.replace("<head>", `<head>\n${origins}`) : html;
 }
@@ -359,6 +363,7 @@ function headScripts(currency: Currency, price: number): string {
   clarity('set', 'landing', location.pathname.replace(/\\/$/, '') || '/');
   var params = ${params};
   params.ab_btn = window.__abBtn;
+  params.ab_lp = (document.cookie.match(/(?:^|; )ab_lp=([a-z-]+)/) || [])[1];
   if (!window.fbq) {
     var n = window.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
     if (!window._fbq) window._fbq = n;

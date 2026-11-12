@@ -52,7 +52,7 @@ export async function saveTexts(funnel: string, page: string, lang: string, set:
 /** The cached pages of the MIDI Drum Kit in a language, rebuilt now so an edit is live in seconds. */
 export function revalidateDrumKitTexts(lang: string) {
   for (const currency of CURRENCIES) {
-    for (const page of ["", "/order", "/offer", "/last-offer"]) revalidatePath(`/midi-drum-kit/${lang}${page}/${currency}`);
+    for (const page of ["", "/new", "/order", "/offer", "/last-offer"]) revalidatePath(`/midi-drum-kit/${lang}${page}/${currency}`);
     // The TOP HITS MIDI Bundle shows the Drum Kit's Famous Beats page after its own order.
     if (lang === "en") revalidatePath(`/top-hits-midi-bundle/offer/${currency}`);
     if (lang === "en") revalidatePath(`/top-hits-chords/offer-2/${currency}`);

@@ -29,7 +29,9 @@ const MAX_K = 2;
 export function previewUrl(url: string, variant?: string): string {
   try {
     const u = new URL(url);
-    if (variant) u.searchParams.set("ab", variant);
+    // The MIDI Drum Kit landing test (lp-old / lp-new) picks its page with ?lp=old|new (proxy.ts).
+    if (variant?.startsWith("lp-")) u.searchParams.set("lp", variant.slice(3));
+    else if (variant) u.searchParams.set("ab", variant);
     u.searchParams.set("preview", "1");
     return u.toString();
   } catch {
