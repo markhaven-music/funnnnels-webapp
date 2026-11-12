@@ -656,6 +656,11 @@ ${pre ? `<div class="dkb-preview">${pre}</div>` : ""}
   return `<ol class="dkb">\n${items}\n</ol>\n`;
 }
 
+// The new landing's own video, where it has one: English since 2026-11-12, the cold-traffic VSL ("make a new high
+// converting (cold traffic) VSL for the product and publish it too": vsl/script-en.md, tools/drum_kit_vsl.py, on
+// Wistia), with its poster. Italian keeps the old page's video re-voiced.
+const NEW_VSL: Partial<Record<L, { id: string; poster: string }>> = { en: { id: "c66xeecqeg", poster: "vsl-en-cold" } };
+
 // Where things go in the old page's HTML.
 /** Where a top-level section of the old page starts (its SectionContainer, by its id class); -1 if it isn't there. */
 const at = (html: string, id: string) => html.search(new RegExp(`<div data-page-element="SectionContainer/V1" class="container fullContainer[^"]*\\b${id}(?=[ "])`));
@@ -749,6 +754,8 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
     // The video: its play button and Wistia's player in the page's orange (they were red).
     .replace('style="--vsl-play:#dd0000"', 'style="--vsl-play:#ec6a0c"')
     .replace("'&wmode=transparent'", "'&wmode=transparent&playerColor=ec6a0c'");
+  const vsl = NEW_VSL[l];
+  if (vsl) out = out.replace(/data-wistia="[a-z0-9]+"/, `data-wistia="${vsl.id}"`).replace(/\/funnels\/midi-drum-kit\/vsl-[a-z]+\.webp/g, `${IMG}${vsl.poster}.webp`);
   // The hero's headline at the Jazz page's weight (Poppins 800: the old page loads up to 700).
   out = out.replaceAll("Poppins:regular,bold,700,500,400", "Poppins:regular,bold,700,500,400,800");
   // The later one first: the positions before it don't move.
