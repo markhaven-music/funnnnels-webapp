@@ -102,8 +102,9 @@ export default async function OrderPage({ params }: { params: Params }) {
       <h1 className={d.srOnly}>{t.meta.orderTitle}</h1>
       <div className={d.grid}>
         <section className={d.summary}>
+          {/* The kit's new box (2026-11-12, the one on the new landing), as the bonuses' new boxes under it; kit-box-640 was the old one. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={d.kitBox} src={`${IMG}/kit-box-640.webp`} alt={t.order.productAlt} width={640} height={879} fetchPriority="high" />
+          <img className={d.kitBox} src={`${IMG}/kit-box-v3-640.webp`} alt={t.order.productAlt} width={640} height={824} fetchPriority="high" />
           {/* The bonus, already in the order while its 5 minutes run (shown to the "bonus-on" half only). */}
           {xp && (
             <div className={d.bonusSlot}>
