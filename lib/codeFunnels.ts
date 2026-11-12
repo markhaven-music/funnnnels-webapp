@@ -114,6 +114,7 @@ export function withStats(funnels: StoredFunnel[], stats: Record<string, Metrics
     const m = stats[f.id];
     if (!m) return f;
     const ads = adsOf(f.id, spend);
+    const a = spend?.connected ? spend.byFunnel[f.id] : undefined;
     const cvr = m.visitors > 0 ? `${((m.ratedOrders / m.visitors) * 100).toFixed(1)}%` : "—";
     return {
       ...f,
@@ -130,6 +131,7 @@ export function withStats(funnels: StoredFunnel[], stats: Record<string, Metrics
         visitors: m.visitors.toLocaleString("en-US"),
       },
       ...(ads ? { ads } : {}),
+      profitValue: ads && a ? a.net - a.spend : m.net,
     };
   });
 }

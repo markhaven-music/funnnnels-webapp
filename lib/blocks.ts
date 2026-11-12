@@ -143,6 +143,8 @@ export type StoredFunnel = {
    * the earliest, lib/funnelSpend.ts). profitTone: the net profit's sign.
    */
   ads?: { spend: string; cpc: string; roas: string; profit: string; profitTone: "up" | "down" | "flat"; visitors: string; since: string };
+  /** What the cards are ordered by on the home: the net profit (net revenue less ad spend, ads' days), else the net revenue. */
+  profitValue?: number;
   /** "lead-magnet": listed apart, under Lead magnets (the free packs), not among the funnels that sell. */
   category?: "lead-magnet";
 };

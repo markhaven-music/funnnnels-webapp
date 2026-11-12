@@ -199,8 +199,9 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
   );
 
   const filtered = useMemo(() => {
-    if (tab === "all") return funnels;
-    return funnels.filter((f) => f.status === tab);
+    // Most net profit first (net revenue for a funnel without ads); nothing counted yet last.
+    const list = tab === "all" ? funnels : funnels.filter((f) => f.status === tab);
+    return [...list].sort((x, y) => (y.profitValue ?? -Infinity) - (x.profitValue ?? -Infinity));
   }, [tab, funnels]);
   const shownMagnets = tab === "all" ? magnets : magnets.filter((f) => f.status === tab);
 
@@ -314,7 +315,8 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
       </div>
 
       <div className={funnels.length === 0 ? "funnels funnels--empty" : "funnels"}>
-        <NewFunnelTile prominent={funnels.length === 0} />
+        {/* "New with AI" is at the top; the tile only when there's no funnel yet. */}
+        {funnels.length === 0 && <NewFunnelTile prominent />}
         {filtered.map((f) => (
           <FunnelCard key={f.id} f={f} />
         ))}

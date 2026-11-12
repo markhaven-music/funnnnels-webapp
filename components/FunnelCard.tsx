@@ -35,8 +35,17 @@ export function FunnelCard({ f }: { f: StoredFunnel }) {
             <div className="funnel-stats">
               <div className="funnel-stat">
                 <div className="funnel-stat-label">Revenue</div>
-                <div className="funnel-stat-value money">{f.stats.revenue}</div>
+                <div className="funnel-stat-value">{f.stats.revenue}</div>
               </div>
+              {f.ads && (
+                // Next to the revenue, the one coloured number: green profit, red loss.
+                <div className="funnel-stat">
+                  <div className="funnel-stat-label" title={`Revenue less payment fees, less ad spend, since ${f.ads.since}`}>
+                    Net profit
+                  </div>
+                  <div className={`funnel-stat-value profit-${f.ads.profitTone}`}>{f.ads.profit}</div>
+                </div>
+              )}
               <div className="funnel-stat">
                 <div className="funnel-stat-label">Orders</div>
                 <div className="funnel-stat-value">{f.stats.orders}</div>
@@ -49,6 +58,12 @@ export function FunnelCard({ f }: { f: StoredFunnel }) {
                 <div className="funnel-stat-label">Conversion</div>
                 <div className="funnel-stat-value">{f.stats.cvr}</div>
               </div>
+              {f.ads && (
+                <div className="funnel-stat">
+                  <div className="funnel-stat-label" title="Revenue ÷ ad spend">ROAS</div>
+                  <div className="funnel-stat-value">{f.ads.roas}</div>
+                </div>
+              )}
             </div>
             <div className="funnel-stats-note">
               {f.stats.visitors} visitors · {rangeLabel(f.statsRange)}
@@ -63,14 +78,6 @@ export function FunnelCard({ f }: { f: StoredFunnel }) {
                   <div className="funnel-stat">
                     <div className="funnel-stat-label" title="Ad spend ÷ landing visitors">Cost / visitor</div>
                     <div className="funnel-stat-value">{f.ads.cpc}</div>
-                  </div>
-                  <div className="funnel-stat">
-                    <div className="funnel-stat-label" title="Revenue ÷ ad spend">ROAS</div>
-                    <div className="funnel-stat-value">{f.ads.roas}</div>
-                  </div>
-                  <div className="funnel-stat">
-                    <div className="funnel-stat-label" title="Revenue less payment fees, less ad spend">Net profit</div>
-                    <div className={`funnel-stat-value profit-${f.ads.profitTone}`}>{f.ads.profit}</div>
                   </div>
                 </div>
                 <div className="funnel-stats-note">
