@@ -81,8 +81,8 @@ const ZIP_PRODUCT: Record<string, string> = {
   "Jazz MIDI Pack.zip": "jazz-midi-pack",
   "TOP HITS MIDI Bundle.zip": "top-hits",
   "MIDI Drum Kit - Bundle.zip": "midi-drum-kit",
-  // The MIDI Drum Kit's zip since 2026-11-12 (1,040 MIDI files; the Bundle had 794).
-  "MIDI Drum Kit PRO MAX.zip": "midi-drum-kit",
+  // The MIDI Drum Kit's zip since 2026-11-12, the one ClickFunnels handed out (1,040 MIDI files; the Bundle had 794).
+  "MIDI Drum Kit Bundle V1.1.zip": "midi-drum-kit",
   "The Chord Progressions Bible.zip": "chord-bible",
   "Emotional Keys MIDI Bundle.zip": "emotional-keys",
   "HUSTLE MIDI Bundle.zip": "hustle",
