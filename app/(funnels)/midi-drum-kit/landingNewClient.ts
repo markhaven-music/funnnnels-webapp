@@ -179,22 +179,39 @@ export const CLIENT_JS = String.raw`
       onState('playing');
     }, function () { if (now === me) now = null; me.dead = true; onState('stopped'); });
   }
-  // Play a recording of a file once, the roll's line following it (the Drunk Swing Grooves, in their own sound).
-  function playRecording(url, song, onPos, onState) {
+  // A recording (an mp3 or m4a) played once through Web Audio, as the pads are: on an iPhone the <audio> element
+  // these used stayed silent (2026-11-12, "le demo di beat starters bundle non caricano… drunk swing grooves… hooks
+  // (sono da iphone)"). The context is woken inside the tap (audio()); the file comes after and plays then.
+  // onPos(seconds, duration) every frame; onState('loading' | 'playing' | 'stopped').
+  var recCache = {};
+  function recording(url) {
+    if (!recCache[url]) {
+      recCache[url] = fetchBuf(url).then(decode);
+      recCache[url].catch(function () { delete recCache[url]; });
+    }
+    return recCache[url];
+  }
+  function playBuffer(url, onPos, onState) {
     stopAll();
-    playback();
-    var a = new Audio(url), me = { dead: false, stop: function () { me.dead = true; a.pause(); onState('stopped'); } };
+    if (!audio()) return;
+    var me = { dead: false, src: null, stop: function () { me.dead = true; if (me.src) { try { me.src.stop(); } catch (e) {} } onState('stopped'); } };
     now = me;
     onState('loading');
-    function frame() {
+    recording(url).then(function (buf) {
       if (me.dead) return;
-      onPos(Math.min(song.len - 0.01, a.currentTime * song.bpm / 60));
-      requestAnimationFrame(frame);
-    }
-    a.addEventListener('playing', function () { if (!me.dead) { onState('playing'); requestAnimationFrame(frame); } }, { once: true });
-    a.addEventListener('ended', function () { if (now === me) stopAll(); });
-    var p = a.play();
-    if (p && p.catch) p.catch(function () { if (now === me) stopAll(); });
+      var src = ctx.createBufferSource(), g = ctx.createGain(), t0 = ctx.currentTime + 0.03;
+      src.buffer = buf; g.gain.value = 0.9;
+      src.connect(g); g.connect(ctx.destination);
+      src.onended = function () { if (now === me) stopAll(); };
+      src.start(t0);
+      me.src = src;
+      onState('playing');
+      (function frame() { if (me.dead) return; onPos(Math.max(0, ctx.currentTime - t0), buf.duration); requestAnimationFrame(frame); })();
+    }, function () { if (now === me) stopAll(); });
+  }
+  // Play a recording of a file once, the roll's line following it (the Drunk Swing Grooves, in their own sound).
+  function playRecording(url, song, onPos, onState) {
+    playBuffer(url, function (t) { onPos(Math.min(song.len - 0.01, t * song.bpm / 60)); }, onState);
   }
 
   // ---- the roll ----
@@ -521,38 +538,20 @@ export const CLIENT_JS = String.raw`
   var rollsAsked = false;
   [].forEach.call(document.querySelectorAll('[data-rolls]'), function (ol) { near(ol, function () { if (!rollsAsked) { rollsAsked = true; bonusRolls(); } }); });
 
-  // ---- the bonuses' audio clips (Beat Starters, MYSTERY hooks): one <audio>, nothing loads before a tap ----
-  var clipAudio = null, clipOn = null;
+  // ---- the bonuses' audio clips (Beat Starters, MYSTERY hooks): through Web Audio (playBuffer), nothing loads before a tap ----
+  var clipOn = null;
   function clipPaint(b, p) {
     var rs = b.querySelectorAll('rect');
     for (var i = 0; i < rs.length; i++) rs[i].setAttribute('class', p > 0 && i / rs.length <= p ? 'on' : '');
-  }
-  function clipOff() {
-    if (!clipOn) return;
-    var b = clipOn;
-    clipOn = null;
-    clipAudio.pause();
-    b.setAttribute('aria-pressed', 'false');
-    clipPaint(b, 0);
   }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.dkc');
     if (!b) return;
     if (clipOn === b) { stopAll(); return; }
-    stopAll();
-    if (!clipAudio) {
-      clipAudio = new Audio();
-      clipAudio.preload = 'none';
-      clipAudio.addEventListener('timeupdate', function () { if (clipOn && clipAudio.duration) clipPaint(clipOn, clipAudio.currentTime / clipAudio.duration); });
-      clipAudio.addEventListener('ended', function () { stopAll(); });
-    }
-    playback();
-    clipAudio.src = b.getAttribute('data-src');
-    clipOn = b;
-    b.setAttribute('aria-pressed', 'true');
-    now = { stop: clipOff };
-    var p = clipAudio.play();
-    if (p && p.catch) p.catch(function () { if (clipOn === b) stopAll(); });
+    playBuffer(b.getAttribute('data-src'), function (t, d) { clipPaint(b, t / d); }, function (st) {
+      if (st === 'stopped') { if (clipOn === b) clipOn = null; b.setAttribute('aria-pressed', 'false'); clipPaint(b, 0); }
+      else { clipOn = b; b.setAttribute('aria-pressed', 'true'); }
+    });
     clarityEvent('bonus_play');
   });
 
