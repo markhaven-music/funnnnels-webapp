@@ -164,7 +164,8 @@ export default async function OrderPage({ params }: { params: Params }) {
         </div>
       </section>
 
-      {/* The guarantee with the Jazz page's seal (14 days, in the page's language), then how the payment is handled. */}
+      {/* The guarantee with the Jazz page's seal (14 days, in the page's language). "Secure Payments" under it went on
+          2026-11-12 ("remove the Secure Payments part from the order page footer"). */}
       <section className={`${j.sec} ${j.band}`}>
         <div className={`${j.wrap} ${d.pledges}`}>
           <div className={j.guarantee}>
@@ -195,17 +196,6 @@ export default async function OrderPage({ params }: { params: Params }) {
             <div>
               <h2 className={j.h2}>{t.order.guaranteeTitle}</h2>
               <p className={j.sub}>{t.order.guaranteeText}</p>
-            </div>
-          </div>
-          <div className={j.guarantee}>
-            <svg className={j.seal} viewBox="0 0 200 200" aria-hidden>
-              <circle cx="100" cy="100" r="98" fill="url(#dk-seal)" />
-              <circle cx="100" cy="100" r="88" fill="#111" />
-              <path d="M72 92V76a28 28 0 0 1 56 0v16h6a6 6 0 0 1 6 6v42a6 6 0 0 1-6 6H66a6 6 0 0 1-6-6V98a6 6 0 0 1 6-6zm14 0h28V76a14 14 0 0 0-28 0z" fill="#ffa13d" />
-            </svg>
-            <div>
-              <h2 className={j.h2}>{t.order.secureTitle}</h2>
-              <p className={j.sub}>{t.order.secureText}</p>
             </div>
           </div>
         </div>

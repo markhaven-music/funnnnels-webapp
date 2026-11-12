@@ -7,8 +7,9 @@
 
 export const en = {
   meta: {
-    title: "1050 MIDI Drum Patterns + 6 Bonuses",
-    description: "Make great beats with drag-and-drop MIDI drums. 1050 MIDI drum patterns and rolls + 6 bonuses, by GRIND STUDIO.",
+    // 10,296 since 2026-11-12 (the zip V2): the browser tab and Google's title, of both landings
+    title: "10,296 MIDI Drum Files + 6 Bonuses · MIDI Drum Kit",
+    description: "Make great beats with drag-and-drop MIDI drums. 10,296 MIDI drum patterns, rolls and ready combinations + 6 bonuses, by GRIND STUDIO.",
     orderTitle: "Order MIDI Drum Kit",
     thanksTitle: "Thank you · MIDI Drum Kit",
   },
