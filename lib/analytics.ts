@@ -10,6 +10,7 @@ import { paypal, paypalConfigured, type PayPalOrder } from "@/lib/paypal";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import type Stripe from "stripe";
 import { rangeDays, rangeLength, type Range } from "@/lib/range";
+import { addDays, dayIn, startOfDay } from "@/lib/tz";
 import { supabase } from "@/lib/supabase";
 
 // Dashboard → Analytics: visitors, checkout starts, orders and revenue per
@@ -305,7 +306,7 @@ const DAY = 86_400_000;
 // About 100 sales per variant before the numbers mean much (at ~€25 a sale).
 const TARGET_SALES = 100;
 
-/** First UTC day of the range ("2026-10-14"), or null for all time. */
+/** First day of the range (Warsaw) ("2026-10-14"), or null for all time. */
 export function sinceDay(range: Range, now = Date.now()): string | null {
   return rangeDays(range, now).first;
 }
@@ -384,12 +385,13 @@ async function viewDays(since: string | null): Promise<DayRow[]> {
   return ((data ?? []) as DayRow[]).map((r) => ({ ...r, views: Number(r.views) }));
 }
 
-const dayOf = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+/** The Warsaw day of an instant (lib/tz.ts). */
+const dayOf = (ms: number) => dayIn(ms);
 
-/** Every UTC day from `first` to `last` ("2026-10-14"), both included. */
+/** Every day from `first` to `last` ("2026-10-14"), both included. */
 function dayList(first: string, last: string): string[] {
   const out: string[] = [];
-  for (let t = Date.parse(`${first}T00:00:00Z`); t <= Date.parse(`${last}T00:00:00Z`); t += DAY) out.push(dayOf(t));
+  for (let d = first; d <= last; d = addDays(d, 1)) out.push(d);
   return out;
 }
 
@@ -397,7 +399,7 @@ function dayList(first: string, last: string): string[] {
 function daily(range: Range, since: string | null, last: string, rows: DayRow[], sales: Sale[], rate: number, trackingSince: string | null) {
   const first = since ?? [trackingSince, ...sales.map((s) => dayOf(s.created))].filter(Boolean).sort()[0] ?? last;
   const days = dayList(first, last);
-  const before = since ? dayList(dayOf(Date.parse(`${first}T00:00:00Z`) - days.length * DAY), dayOf(Date.parse(`${first}T00:00:00Z`) - DAY)) : [];
+  const before = since ? dayList(addDays(first, -days.length), addDays(first, -1)) : [];
   const by = new Map<string, Day>(
     [...before, ...days].map((day) => [day, { day, orders: 0, upsells: 0, revenue: 0, net: 0, visitors: 0, orderViews: 0, checkouts: 0 }]),
   );
@@ -530,10 +532,10 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
   const now = Date.now();
   const { first: rangeFirst, last } = rangeDays(range, now);
   const since = opts.since && (!rangeFirst || opts.since > rangeFirst) ? opts.since : rangeFirst;
-  const sinceMs = since ? Date.parse(`${since}T00:00:00Z`) : 0;
+  const sinceMs = since ? startOfDay(since) : 0;
   // The first day after the range, when it ends before today (Yesterday, Last month…).
-  const after = last < dayOf(now) ? dayOf(Date.parse(`${last}T00:00:00Z`) + DAY) : null;
-  const untilMs = after ? Date.parse(`${after}T00:00:00Z`) : Infinity;
+  const after = last < dayOf(now) ? addDays(last, 1) : null;
+  const untilMs = after ? startOfDay(after) : Infinity;
   const errors: string[] = [];
   const soft = async <T,>(what: string, p: Promise<T>, fallback: T): Promise<T> => {
     try {
@@ -559,7 +561,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
   const hasStripe = stripeConfigured();
   // The day-by-day rows reach back one range more, for the comparison.
   const span = rangeLength(range, now) ?? 0;
-  const before = since ? dayOf(Date.parse(`${since}T00:00:00Z`) - span * DAY) : null;
+  const before = since ? addDays(since, -span) : null;
   const [views, allViews, dayRows, rate, trackingSince, testStarts, paypal, ...stripeLists] = await Promise.all([
     soft("visitors", viewTotals(since, after), []),
     range === "all" ? Promise.resolve(null) : soft("visitors (all time)", viewTotals(null), []),
@@ -574,7 +576,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
   // The visits per day since the first test that runs on days rather than letters (TestDef.windows).
   const firstWindow = TESTS.flatMap((t) => Object.values(t.windows ?? {}).map((w) => w.days[0])).sort()[0];
   const windowDays = firstWindow ? await soft("visitors per day (tests)", viewDays(firstWindow), []) : [];
-  const ratedFrom = trackingSince ? Date.parse(`${trackingSince}T00:00:00Z`) : Infinity;
+  const ratedFrom = trackingSince ? startOfDay(trackingSince) : Infinity;
   for (const s of allSales) s.rated = s.created >= ratedFrom;
   const sales = allSales.filter((s) => s.created >= sinceMs && s.created < untilMs);
 
@@ -790,7 +792,7 @@ async function firstDay(testFunnel?: string, variants?: readonly string[]): Prom
 
 /** A test, every language together and, for a funnel sold in several, each one apart (the map's language tabs). */
 function testStats(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, since: string | null, now: number): TestStats {
-  const from = since ? Date.parse(`${since}T00:00:00Z`) : Infinity;
+  const from = since ? startOfDay(since) : Infinity;
   const tested = sales.filter((s) => s.created >= from);
   const langs = codeFunnels().find((f) => f.slug === def.funnel)?.langs ?? ["en"];
   const whole = testOn(def, views, tested, rate, since, now);
@@ -870,7 +872,7 @@ function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, sin
     : null;
   const leader = leaderEntry && leaderEntry.m.orders > 0 ? leaderEntry.variant : null;
   const confident = leaderEntry?.chanceBest != null && leaderEntry.chanceBest >= 0.95;
-  const days = since ? Math.max(1, Math.floor((now - Date.parse(`${since}T00:00:00Z`)) / DAY) + 1) : 0;
+  const days = since ? Math.max(1, Math.floor((now - startOfDay(since)) / DAY) + 1) : 0;
 
   return {
     funnel,

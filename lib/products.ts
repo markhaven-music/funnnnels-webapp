@@ -1,4 +1,5 @@
 import { DEFAULT_KIT_SECTIONS } from "@/app/(funnels)/_kit/content";
+import { dayIn } from "@/lib/tz";
 import { pageId } from "@/lib/blocks";
 import type { Bump, Product } from "@/lib/funnels";
 import { playbookEmails, toCents, type EmailStep, type Launch, type Money } from "@/lib/launch";
@@ -508,7 +509,7 @@ export async function salesByDay(slug: string): Promise<{ days: DaySales[]; sour
       ...(page ? { page } : {}),
     });
     for (const pi of res.data) {
-      const day = new Date(pi.created * 1000).toISOString().slice(0, 10);
+      const day = dayIn(pi.created * 1000);
       const d = byDay.get(day) ?? { day, orders: 0, eur: 0, usd: 0 };
       d.orders += 1;
       if (pi.currency === "eur") d.eur += pi.amount / 100;

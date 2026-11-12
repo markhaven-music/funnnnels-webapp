@@ -1,4 +1,5 @@
 import { type MetaSpend, spendByPack } from "@/lib/metaSpend";
+import { dayIn } from "@/lib/tz";
 import { rangeSpan, type Range } from "@/lib/range";
 import { supabase } from "@/lib/supabase";
 
@@ -204,8 +205,8 @@ export async function freePackStats(range: Range | number = "90d"): Promise<Free
     spend: await spendByPack(
       Object.values(PACK_NAMES),
       // All time: from the first sign-up, not 1970.
-      span.from ? since.slice(0, 10) : (optins[0]?.created_at ?? new Date().toISOString()).slice(0, 10),
-      new Date(Math.min(Date.now(), span.until - DAY)).toISOString().slice(0, 10),
+      span.from ? dayIn(span.from) : dayIn(optins[0] ? Date.parse(optins[0].created_at) : Date.now()),
+      dayIn(Math.min(Date.now(), span.until - 1)),
     ),
   };
 }

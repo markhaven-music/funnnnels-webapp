@@ -1,8 +1,9 @@
 // The time ranges the dashboard offers everywhere (home, Analytics, a
 // funnel's map, Email → Insights, Free packs, Live): Today, Yesterday, the
 // last 7/28/90 days, this and last month, this and last year, all time.
-// Days are UTC days, like page_views and the sales (lib/analytics.ts), unless
-// a caller passes another offset (Live counts in the viewer's own time).
+// Days are Warsaw days (lib/tz.ts), like page_views and the sales
+// (lib/analytics.ts), unless a caller passes an offset (Live counts in the
+// viewer's own time).
 // Safe to import in the browser.
 
 export type Range = "today" | "yesterday" | "7d" | "28d" | "90d" | "this-month" | "last-month" | "this-year" | "last-year" | "all";
@@ -30,18 +31,20 @@ export const rangeParam = (url: string, fallback: Range = "28d"): Range => {
   return isRange(r) ? r : fallback;
 };
 
+import { addDays, dayIn, startOfDay } from "@/lib/tz";
+
 const DAY = 86_400_000;
 const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
 
 /**
  * The range's first and last day ("2026-11-01"), both included; first is
- * null for all time. offsetMin: minutes to add to UTC for the days (0 = UTC).
+ * null for all time. offsetMin: minutes to add to UTC for the days; left out,
+ * the days are Warsaw days (lib/tz.ts).
  */
-export function rangeDays(r: Range, now = Date.now(), offsetMin = 0): { first: string | null; last: string } {
-  const t = now + offsetMin * 60_000;
-  const today = iso(t);
+export function rangeDays(r: Range, now = Date.now(), offsetMin?: number): { first: string | null; last: string } {
+  const today = offsetMin === undefined ? dayIn(now) : iso(now + offsetMin * 60_000);
   const [y, m] = [Number(today.slice(0, 4)), Number(today.slice(5, 7))];
-  const back = (n: number) => iso(t - n * DAY);
+  const back = (n: number) => addDays(today, -n);
   switch (r) {
     case "today":
       return { first: today, last: today };
@@ -69,8 +72,9 @@ export function rangeDays(r: Range, now = Date.now(), offsetMin = 0): { first: s
 }
 
 /** The range as instants: [from, until) in ms (from 0 for all time), for rows with a timestamp. */
-export function rangeSpan(r: Range, now = Date.now(), offsetMin = 0): { from: number; until: number } {
+export function rangeSpan(r: Range, now = Date.now(), offsetMin?: number): { from: number; until: number } {
   const { first, last } = rangeDays(r, now, offsetMin);
+  if (offsetMin === undefined) return { from: first ? startOfDay(first) : 0, until: startOfDay(addDays(last, 1)) };
   const shift = offsetMin * 60_000;
   return {
     from: first ? Date.parse(`${first}T00:00:00Z`) - shift : 0,

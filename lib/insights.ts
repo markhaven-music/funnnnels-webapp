@@ -1,4 +1,5 @@
 import type { Analytics, Day, Metrics } from "@/lib/analytics";
+import { dayIn } from "@/lib/tz";
 import { rangePhrase } from "@/lib/range";
 
 // Dashboard home → Insights: what stands out in the numbers of the range,
@@ -49,7 +50,7 @@ export function insights(a: Analytics, now = Date.now(), eur: (n: number) => str
 
   // A quiet spell after a steady pace.
   // Only when the range runs up to today (not for Yesterday, Last month…).
-  if (hasSales && a.lastSale && a.until === new Date(now).toISOString().slice(0, 10)) {
+  if (hasSales && a.lastSale && a.until === dayIn(now)) {
     const quiet = Math.floor((now - a.lastSale) / DAY);
     const perDay = orders / days.length;
     if (quiet >= 2 && perDay >= 0.7)

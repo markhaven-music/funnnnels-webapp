@@ -45,7 +45,7 @@ const fmt = (day: string, year: boolean) =>
   new Date(`${day}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", ...(year ? { year: "numeric" } : {}), timeZone: "UTC" });
 
 /** "1 Nov – 7 Nov", "6 Nov", or "" for all time. */
-export function rangeSpanLabel(r: Range, offsetMin = 0): string {
+export function rangeSpanLabel(r: Range, offsetMin?: number): string {
   const { first, last } = rangeDays(r, Date.now(), offsetMin);
   if (!first) return "";
   const year = first.slice(0, 4) !== new Date().toISOString().slice(0, 4);
@@ -63,7 +63,7 @@ type Props = {
   bare?: boolean;
 };
 
-export function RangePicker({ value, onChange, ranges = RANGES, offsetMin = 0, bare = false }: Props) {
+export function RangePicker({ value, onChange, ranges = RANGES, offsetMin, bare = false }: Props) {
   const span = bare ? "" : rangeSpanLabel(value, offsetMin);
   return (
     <span className={s.pick}>

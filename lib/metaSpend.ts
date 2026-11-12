@@ -13,6 +13,8 @@
 // stale and showed €25 for a day Meta already had at €35. Past days are cached
 // 10 minutes. Amounts in the account's currency (EUR), never converted.
 
+import { addDays, dayIn, instantAt } from "@/lib/tz";
+
 const GRAPH = "https://graph.facebook.com/v23.0";
 const DEFAULT_ACCOUNT = "462189981361126";
 
@@ -32,8 +34,10 @@ type Row = {
 };
 
 /** Today in the ad account's time zone (GRIND STUDIO bills by Los Angeles days), YYYY-MM-DD. */
+const ACCOUNT_TZ = "America/Los_Angeles";
+const HOURLY = "hourly_stats_aggregated_by_advertiser_time_zone";
 function accountToday(): string {
-  return new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
+  return dayIn(Date.now(), ACCOUNT_TZ);
 }
 
 /** The account's insight rows, page after page; the reason when Meta says no. */
@@ -67,28 +71,46 @@ export const SPEND_SINCE = "2026-11-02";
 export type DaySpend = { day: string; spend: number; impressions: number; clicks: number };
 export type MetaDaily = { connected: false; reason: string } | { connected: true; currency: string; days: DaySpend[] };
 
-/** The whole account's spend day by day between two days (YYYY-MM-DD, inclusive), oldest first, in the account's currency. */
+/**
+ * The whole account's spend day by day between two Warsaw days (YYYY-MM-DD,
+ * inclusive), oldest first, in the account's currency. Meta bills by Los
+ * Angeles days, 9 hours behind Warsaw, so the spend is asked hour by hour and
+ * each hour put on the Warsaw day it fell in (lib/tz.ts).
+ */
 export async function spendByDay(since: string, until: string): Promise<MetaDaily> {
   const token = process.env.META_ADS_TOKEN;
   if (!token) return { connected: false, reason: "Meta isn't connected (no META_ADS_TOKEN)." };
   if (since < SPEND_SINCE) since = SPEND_SINCE;
   if (since > until) return { connected: true, currency: "EUR", days: [] };
-  const rows = await insightRows(
+  // A Warsaw day starts the afternoon before in Los Angeles: ask one Los Angeles day more at the front.
+  const laToday = accountToday();
+  const laUntil = until < laToday ? until : laToday;
+  const rows = (await insightRows(
     new URLSearchParams({
       level: "account",
       fields: "spend,impressions,inline_link_clicks,account_currency",
       time_increment: "1",
-      time_range: JSON.stringify({ since, until }),
+      breakdowns: HOURLY,
+      time_range: JSON.stringify({ since: addDays(since, -1), until: laUntil }),
       limit: "500",
       access_token: token,
     }),
-    until,
-  );
+    laUntil,
+  )) as (Row & { [HOURLY]?: string })[] | { reason: string };
   if (!Array.isArray(rows)) return { connected: false, reason: rows.reason };
-  const days = rows
-    .filter((r) => r.date_start)
-    .map((r) => ({ day: r.date_start!, spend: Number(r.spend ?? 0), impressions: Number(r.impressions ?? 0), clicks: Number(r.inline_link_clicks ?? 0) }))
-    .sort((a, b) => (a.day < b.day ? -1 : 1));
+  const by = new Map<string, DaySpend>();
+  for (const r of rows) {
+    const hour = Number((r[HOURLY] ?? "").slice(0, 2));
+    if (!r.date_start || !Number.isFinite(hour)) continue;
+    const day = dayIn(instantAt(r.date_start, hour, ACCOUNT_TZ));
+    if (day < since || day > until) continue;
+    const d = by.get(day) ?? { day, spend: 0, impressions: 0, clicks: 0 };
+    d.spend += Number(r.spend ?? 0);
+    d.impressions += Number(r.impressions ?? 0);
+    d.clicks += Number(r.inline_link_clicks ?? 0);
+    by.set(day, d);
+  }
+  const days = [...by.values()].map((d) => ({ ...d, spend: Math.round(d.spend * 100) / 100 })).sort((a, b) => (a.day < b.day ? -1 : 1));
   return { connected: true, currency: rows[0]?.account_currency ?? "EUR", days };
 }
 

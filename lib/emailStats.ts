@@ -1,4 +1,5 @@
 import { usdToEur } from "@/lib/analytics";
+import { addDays, dayIn, startOfDay } from "@/lib/tz";
 import { rangeDays, type Range } from "@/lib/range";
 import { WINDOW_DAYS, type EmailInsights, type EmailRow, type Tally } from "@/lib/emailInsights";
 import type { EmailKind } from "@/lib/mail";
@@ -81,9 +82,9 @@ async function statsBetween(since: string | null, until: string | null): Promise
 export async function getEmailInsights(range: Range): Promise<EmailInsights> {
   const db = supabase();
   const { first: day, last } = rangeDays(range);
-  const since = day ? `${day}T00:00:00Z` : null;
-  const today = new Date().toISOString().slice(0, 10);
-  const untilMs = last < today ? Date.parse(`${last}T00:00:00Z`) + DAY : null;
+  const since = day ? new Date(startOfDay(day)).toISOString() : null;
+  const today = dayIn(Date.now());
+  const untilMs = last < today ? startOfDay(addDays(last, 1)) : null;
   const until = untilMs ? new Date(untilMs).toISOString() : null;
   const [attr, statRows, rate, broadcasts, launchEmails, sequences] = await Promise.all([
     db.rpc("email_attribution", { p_since: since, p_days: WINDOW_DAYS }),
