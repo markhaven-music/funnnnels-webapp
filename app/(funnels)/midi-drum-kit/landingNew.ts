@@ -154,12 +154,12 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 /* The kit's folders: a card each, with the old panel's examples (its moving piano rolls) and the folder's real name and subfolders. */
 .dkf{display:grid;gap:12px;width:100%;max-width:1083px;margin:28px auto 40px;padding:0;list-style:none;text-align:left;font-family:${BODY};color:#fff}
 .dkf>li{width:100%;box-sizing:border-box;padding:14px 14px 16px;border-radius:12px;background:#0d0c10;break-inside:avoid}
-.dkf-top{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:12px}
-.dkf-top img{display:block;width:64px;height:64px;object-fit:contain}
-.dkf h3{margin:0;font:700 19px/1.2 ${DISPLAY};color:#fff}
-.dkf-top p{margin:3px 0 0;font-size:14px;line-height:1.4;color:rgba(255,255,255,.72)}
-.dkf-n{text-align:right;font:700 21px/1 ${DISPLAY};color:#ff9a2e}
-.dkf-n small{display:block;margin-top:5px;font:500 9.5px/1.2 ${MONO};letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.dkf-top{display:grid;grid-template-columns:112px minmax(0,1fr);align-items:center;gap:14px}
+.dkf-top img{display:block;width:112px;height:112px;object-fit:contain}
+.dkf h3{margin:0;font:700 20px/1.2 ${DISPLAY};color:#fff}
+.dkf-top p{margin:4px 0 0;font-size:14px;line-height:1.4;color:rgba(255,255,255,.72)}
+.dkf-n{display:block;margin-top:8px;font:700 18px/1 ${DISPLAY};color:#ff9a2e}
+.dkf-n small{font:500 10px/1.2 ${MONO};letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.55)}
 .dkf-path{display:flex;flex-wrap:wrap;align-items:center;gap:5px 6px;margin:12px 0 0;font:500 11px/1.4 ${MONO};color:rgba(255,255,255,.62)}
 .dkf-path svg{flex:none;width:14px;height:14px;color:#ff9a2e}
 .dkf-path b{margin-right:2px;font-weight:600;color:#fff}
@@ -168,13 +168,8 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkf-subs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 0;padding:0;list-style:none}
 .dkf-subs.one{grid-template-columns:minmax(0,1fr)}
 .dkf-subs li{min-width:0}
-.dkf-ex{display:block;width:100%;height:100%;padding:8px;border:0;border-radius:6px;background:#15141a;color:#fff;font:inherit;text-align:left;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.dkf-exl{display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;gap:8px;min-height:30px;font:600 12.5px/1.25 ${BODY}}
-.dkf-exl i{position:relative;width:22px;height:22px;border-radius:50%;background:linear-gradient(180deg,#ffa13d,#ec6a0c)}
-.dkf-exl i::after{content:"";position:absolute;top:50%;left:54%;translate:-50% -50%;border-left:7px solid #1a0d00;border-top:4.5px solid transparent;border-bottom:4.5px solid transparent}
-.dkf-ex[data-state=playing]{box-shadow:inset 0 0 0 2px #f5851f}
-.dkf-ex[data-state=playing] .dkf-exl i::after{left:50%;width:8px;height:8px;border:0;border-radius:1px;background:#1a0d00}
-.dkf-ex[data-state=loading]{opacity:.6}
+.dkf-ex{display:block;height:100%;padding:8px;border-radius:6px;background:#15141a;color:#fff;text-align:left}
+.dkf-exl{display:flex;align-items:center;min-height:26px;font:600 12.5px/1.25 ${BODY}}
 .dkf-ex img{display:block;width:100%;height:auto;margin-top:6px;border-radius:3px}
 .dkf-ex img.roll{aspect-ratio:4/1;object-fit:cover;background:#08121a}
 .dkf-subs.one .dkf-ex img.roll{aspect-ratio:5/1;object-position:left center}
@@ -268,7 +263,7 @@ details[open]>summary.dkt-row .c{rotate:90deg}
 @keyframes dkpad{from{background:#f5851f}to{background:#1c1b22}}
 
 @media (max-width:640px){.dkp-sec{padding:48px 12px 56px}.dkp-panel{padding:14px 14px 12px;margin-top:24px}.dkp-chips{margin:0 -14px;padding:0 14px}.dkp-grid{margin:0 -14px;padding:0 14px 6px}.dkp-opt .dkp-chips{margin:0 -14px 0 0;padding:0 14px 0 0}}
-@media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{display:block;columns:2;column-gap:12px}.dkf>li{margin-bottom:12px}.dkn{padding:30px 32px 26px}}
+@media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{display:block;columns:2;column-gap:12px}.dkf>li{margin-bottom:12px}.dkf-top{grid-template-columns:140px minmax(0,1fr);gap:18px}.dkf-top img{width:140px;height:140px}.dkf h3{font-size:22px}.dkn{padding:30px 32px 26px}}
 @media (min-width:1000px){.dkt-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:start}.dkt-side{position:sticky;top:72px;padding-top:8px}.dkb{gap:72px}.dkb>li{grid-template-columns:minmax(0,.36fr) minmax(0,.64fr);align-items:start;gap:0 56px;padding:44px 48px}.dkb-cover{grid-row:1/span 2;max-width:none;position:sticky;top:64px}.dkb-label{font-size:14px}.dkb h3{margin-top:10px;font-size:30px}.dkb-text{margin-top:14px;font-size:18px}.dkb-inside{gap:8px;margin-top:14px;font-size:17px}.dkb-preview{grid-column:2;margin-top:30px}.dkb>li.bare .dkb-preview{display:none}}
 `;
 
@@ -319,7 +314,7 @@ const WORDS: Record<L, Record<string, string>> = {
     bnOff: "No bounce",
     bnOn: "Bounce",
     bnOffWhat: "A plain beat: kick and 808 on the one, snare on the three, straight hi-hats.",
-    bnOnWhat: "Complete Beat 12 from the kit, exactly as it is in the zip.",
+    bnOnWhat: "Complete Beat 01 from the kit, exactly as it is in the zip.",
   },
   it: {
     h2: "Premi play. Ascolta il kit prima di prenderlo.",
@@ -366,7 +361,7 @@ const WORDS: Record<L, Record<string, string>> = {
     bnOff: "Senza bounce",
     bnOn: "Con bounce",
     bnOffWhat: "Un beat piatto: kick e 808 sull’uno, snare sul tre, hi-hat dritti.",
-    bnOnWhat: "Il Complete Beat 12 del kit, esattamente com’è nello zip.",
+    bnOnWhat: "Il Complete Beat 01 del kit, esattamente com’è nello zip.",
   },
 };
 // The groups' names as the kit's folders have them, and in Italian as the page calls them.
@@ -424,9 +419,10 @@ const TREE_BONUSES: { dir: string; n: string; subs?: string[] }[] = [
   { dir: "2 - BONUS - Famous Beats MIDI Bundle", n: "50 MIDI", subs: ["Famous Beats Vol.1", "Famous Beats Vol.2", "Famous Beats Vol.3", "Famous Beats Vol.4", "Famous Beats Vol.5"] },
   { dir: "3 - BONUS - Beat Starters MIDI Bundle", n: "355 MIDI", subs: ["Chord Progressions MIDI Pack", "Emotional Pianos MIDI Pack", "Guitars MIDI Pack", "Melodies MIDI Pack", "Strings MIDI Pack", "Trap Pianos MIDI Pack", "Trap Plucks MIDI Pack"] },
   { dir: "4 - BONUS - Hit-Making Drums - Drumkit", n: "281 WAV", subs: ["clap|22", "hihat|87", "kick|38", "perc|17", "rim|4", "snare|113"] },
-  { dir: "Drunk Swing Grooves", n: "160 grooves" },
-  { dir: "MYSTERY Hooks Pack", n: "17 WAV" },
-  { dir: "MIDI Drum Kit Guide", n: "PDF" },
+  // numbered as the three before them ("fix the bonuses folder file name you're missing the numbers")
+  { dir: "5 - BONUS - Drunk Swing Grooves", n: "160 grooves" },
+  { dir: "6 - BONUS - MYSTERY Hooks Pack", n: "17 WAV" },
+  { dir: "7 - BONUS - MIDI Drum Kit Guide", n: "PDF" },
 ];
 
 // The bonuses: the copy keys of the old panel (name with its "BONUS #n:", text), the cover, what is
@@ -514,8 +510,9 @@ const dirOf = (id: string) => tree.find((t) => t.id === id);
 
 /**
  * The kit's folders, a card each: box, name, the old panel's line, its files, the folder's real name with
- * its subfolders, and the old panel's examples with their moving piano rolls. A tap on an example plays a
- * file of that subfolder (it drives the player). Shorter than the old page's ten panels, with what they showed.
+ * its subfolders, and the old panel's examples with their moving piano rolls. Pictures only: the player
+ * further up is where the files are heard ("remove demos from the folder showcase, we already have it. but
+ * make the box image bigger"). Shorter than the old page's ten panels, with what they showed.
  */
 function folders(c: Ctx): string {
   const cards = FOLDERS.map((f) => {
@@ -530,9 +527,9 @@ function folders(c: Ctx): string {
         const still = STILLS[pic];
         return still ? `<img src="${IMG}${pic}.webp" width="${still[0]}" height="${still[1]}" alt="" loading="lazy" decoding="async">` : `<img class="roll" src="${IMG}${pic}.webp" width="600" height="150" alt="" loading="lazy" decoding="async">`;
       }).join("");
-      return `<li><button class="dkf-ex" type="button" data-dkf="${f.id}" data-dkg="${e.g}" data-state="stopped" aria-label="${esc(c.w.hearEx)} ${name}: ${label}"><span class="dkf-exl"><i aria-hidden="true"></i><span>${label}</span></span>${pics}</button></li>`;
+      return `<li><div class="dkf-ex"><span class="dkf-exl">${label}</span>${pics}</div></li>`;
     }).join("");
-    return `<li><div class="dkf-top"><img src="${IMG}box3-${f.box}.webp" width="64" height="64" alt="" loading="lazy" decoding="async"><div><h3>${name}</h3><p>${text}</p></div><span class="dkf-n">${f.n}<small>${esc(c.w.files)}</small></span></div>
+    return `<li><div class="dkf-top"><img src="${IMG}box3-${f.box}.webp" width="132" height="132" alt="" loading="lazy" decoding="async"><div><h3>${name}</h3><p>${text}</p><span class="dkf-n">${f.n} <small>${esc(c.w.files)}</small></span></div></div>
 <p class="dkf-path">${FOLDER}<b>${esc(dir?.dir ?? "")}</b>${subs}</p>
 <ul class="dkf-subs${ex.length < 2 ? " one" : ""}">${items}</ul></li>`;
   }).join("\n");
@@ -714,6 +711,9 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
   let out = html
     .replaceAll(`${IMG}kit-box.webp`, `${IMG}kit-box-v3.webp`)
     .replaceAll(`${IMG}boxes-all.webp`, `${IMG}boxes-all-v3.webp`)
+    // "Patterns" and "Fragments": the box's glass cubes in place of the gold MIDI notes (Higgsfield, the kit's box as reference)
+    .replaceAll(`${IMG}icon-patterns.webp`, `${IMG}icon-patterns-2.webp`)
+    .replaceAll(`${IMG}icon-fragments.webp`, `${IMG}icon-fragments-2.webp`)
     .replaceAll(`${IMG}value-stack-6.webp`, `${IMG}value-stack-8.webp`)
     .replaceAll(`${IMG}value-stack-6-it.webp`, `${IMG}value-stack-8-it.webp`)
     // value-stack-8 (dark, the new boxes) is 1000 × 1214 (value-stack-6, 1000 × 1240).
@@ -726,8 +726,8 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
   // The hero's headline at the Jazz page's weight (Poppins 800: the old page loads up to 700).
   out = out.replaceAll("Poppins:regular,bold,700,500,400", "Poppins:regular,bold,700,500,400,800");
   // The later one first: the positions before it don't move.
-  out = swap(out, BONUS_AT, BONUS_END, bonuses(c));
-  out = swap(out, FOLDERS_AT, BONUS_HEAD, folders(c) + license(j)); // the license right after the kit's folders
+  out = swap(out, BONUS_AT, BONUS_END, bonuses(c) + license(j)); // the license card after the bonuses ("commercial license show it after the bonuses")
+  out = swap(out, FOLDERS_AT, BONUS_HEAD, folders(c));
   // The sections from the folder tree down, each up to the next (which is still there for its own turn).
   out = cut(out, SEC.folders, SEC.reviews, folderTree(c));
   out = cut(out, SEC.reviews, SEC.faq, reviews(j));

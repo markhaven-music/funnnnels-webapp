@@ -283,7 +283,9 @@ export const CLIENT_JS = String.raw`
     if (grp.inst < 0) { notes = sel; len = e.len; bpm = e.bpm || 140; }
     else {
       var span = e.len, off;
-      len = span >= 16 ? span : 8;
+      // in a beat a fragment closes a two-bar loop, where it would be used; alone it plays at once
+      // ("can we make the rolls play sooner if auditioned alone?"): the loop is the file, two beats at least
+      len = span >= 16 ? span : beatOn ? 8 : Math.max(span, 2);
       off = len - span;
       bpm = tempo || e.bpm || kit.styles[style].bpm;
       notes = [];
@@ -417,7 +419,7 @@ export const CLIENT_JS = String.raw`
     }
     function load() {
       if (!wait) {
-        wait = fetch(DATA + 'bounce.json').then(function (r) { return r.json(); }).then(function (d) {
+        wait = fetch(DATA + 'bounce2.json').then(function (r) { return r.json(); }).then(function (d) {
           var a = unflat(d.off, 1), b = unflat(d.on, 1);
           sets2 = { f: d.f, notes: [a, b] };
           songB = { notes: a, len: d.len, bpm: d.bpm, rows: rowsOf(a.concat(b)), plain: true };

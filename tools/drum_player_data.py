@@ -433,7 +433,9 @@ def kits(z):
 # "NO BOUNCE VS BOUNCE": a Complete Beat of the kit as it is, and a plain beat with the same sounds at the same
 # tempo: a kick and an 808 on the one of every bar, the snare where the kit's beat has it, straight eighth hats
 # all as loud as each other. Nothing else differs, so what is heard is the pattern.
-BOUNCE = "9. Complete Beats (Multi-Track)/MDK_CompleteBeat12_128.mid"
+# Complete Beat 01 since the evening of 2026-11-12 ("bounce example midi isn't great. use one of the complete
+# beats"): the first try was Beat 12, whose 808 runs a melody that the page's plain 808 sound doesn't carry.
+BOUNCE = "9. Complete Beats (Multi-Track)/MDK_CompleteBeat01_164.mid"
 
 
 def bounce(z):
@@ -450,7 +452,7 @@ def bounce(z):
     plain += [(num(i * 0.5), 0.25, HAT, 0, 80) for i in range(e["len"] * 2)]
     plain.sort()
     out = {"f": e["f"], "bpm": e["bpm"], "len": e["len"], "on": e["n"], "off": [x for n in plain for x in n]}
-    print("bounce.json", write("bounce.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
+    print("bounce2.json", write("bounce2.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
 
 
 def main(argv):

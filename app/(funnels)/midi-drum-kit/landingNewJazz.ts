@@ -290,7 +290,7 @@ ${items.join("\n")}
 `;
 }
 
-/** The license card and what the license lets a buyer do: a panel right after the kit's folders ("put the commercial license higher up"). */
+/** The license card and what the license lets a buyer do: a panel after the bonuses (first asked "higher up" than the page's end, then "show it after the bonuses"). */
 export function license(c: JazzCtx): string {
   const w = WORDS[l(c)];
   return `<div class="jz dk-license"><div class="jz-guarantee jz-panel jz-two dk-foil"><div class="jz-twoBody jz-licenseArt"><img src="${IMG}dk-license-640.webp" srcset="${IMG}dk-license-640.webp 640w, ${IMG}dk-license-900.webp 900w" sizes="(min-width: 1000px) 420px, 90vw" width="1168" height="880" alt="${esc(w.licenseAlt)}" loading="lazy" decoding="async"></div>
@@ -347,17 +347,16 @@ export const JAZZ_MORE_CSS = `
 /* every key the same width on a phone, whatever box it sits in (they were 288 to 355px wide) */
 @media (max-width:719px){.jz-ctaBlock,.jz-heroCta{position:relative;left:50%;width:calc(100vw - 36px);max-width:512px;translate:-50% 0}}
 
-/* the comparison chart: the kit's column first, wide, in the button's orange; the others small and grey */
+/* the comparison chart: the kit's column first, wide, in the button's orange; the others small, their words white ("they're too dark") */
 .dkx-row{display:grid;grid-template-columns:minmax(0,1.8fr) repeat(3,minmax(0,1fr));gap:0 6px}
 .dkx-corner{display:none}
 .dkx-head{position:sticky;top:var(--dk-top,0px);z-index:4;align-items:stretch;padding:10px 0 4px;background:#070707}
-.dkx-col{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 2px 6px;font:700 10.5px/1.2 var(--font-display),sans-serif;letter-spacing:.05em;text-transform:uppercase;text-align:center;color:rgba(255,255,255,.55)}
+.dkx-col{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 2px 6px;font:700 10.5px/1.2 var(--font-display),sans-serif;letter-spacing:.05em;text-transform:uppercase;text-align:center;color:#fff}
 .dkx-col.dkx-win{flex-direction:row;justify-content:flex-start;gap:8px;padding:8px 10px;border-radius:10px;background:linear-gradient(180deg,#ffa13d,#f5851f 55%,#dd6408);box-shadow:0 10px 28px -12px rgba(236,106,12,.7);text-align:left;color:#1a0d00}
 .dkx-col.dkx-win b{font:800 16px/1.1 var(--font-display),sans-serif;letter-spacing:-.01em;text-transform:none}
 .dkx-box{flex:none;width:36px!important;height:auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,.45))}
 .dkx-label{grid-column:1/-1;padding:18px 2px 8px;font:700 16px/1.3 var(--font-display),sans-serif;color:#fff}
-.dkx-cell{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:10px;background:#0d0c10;font-size:11.5px;line-height:1.3;text-align:center;color:rgba(255,255,255,.5)}
-.dkx-cell.dkx-yes{color:rgba(255,255,255,.75)}
+.dkx-cell{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:10px;background:#0d0c10;font-size:11.5px;line-height:1.3;text-align:center;color:#fff}
 .dkx-cell .jz-mark{width:24px;height:24px}
 .dkx-cell.dkx-win{align-items:flex-start;gap:8px;padding:11px 10px 12px;background:#2a1808;box-shadow:inset 0 0 0 1.5px #f5851f;font-size:14px;font-weight:700;text-align:left;color:#fff}
 .dkx-cell.dkx-win .jz-mark{color:#06210f;background:#3fd16b;box-shadow:0 0 14px rgba(63,209,107,.45)}
@@ -392,7 +391,7 @@ export const JAZZ_MORE_CSS = `
 @media (min-width:1000px){.dk-guar .jz-two{grid-template-columns:minmax(0,.42fr) minmax(0,1fr);align-items:center}.dk-guar .jz-twoHead{grid-column:2}.dk-guar .jz-twoBody{grid-column:1}.dk-guar .jz-seal{width:220px;height:220px}}
 
 /* the license card, in the kit's own section */
-.dk-license{max-width:1083px;margin:0 auto 64px}
+.dk-license{max-width:1083px;margin:64px auto 8px}
 .dk-license .jz-twoBody{width:100%}
 .dk-license .jz-licenseArt{background:#0d0c10}
 .dk-license .jz-licenseArt img{max-width:340px}
