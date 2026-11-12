@@ -256,7 +256,11 @@ export type Day = {
   visitors: number; // of the landings
   orderViews: number;
   checkouts: number;
+  /** The same day per funnel (slug), for the home chart's "By funnel" lines; funnels with nothing that day left out. */
+  byFunnel: Record<string, FunnelDay>;
 };
+
+export type FunnelDay = { orders: number; upsells: number; revenue: number; net: number; visitors: number };
 
 export type Analytics = {
   range: Range;
@@ -402,23 +406,35 @@ function daily(range: Range, since: string | null, last: string, rows: DayRow[],
   const days = dayList(first, last);
   const before = since ? dayList(addDays(first, -days.length), addDays(first, -1)) : [];
   const by = new Map<string, Day>(
-    [...before, ...days].map((day) => [day, { day, orders: 0, upsells: 0, revenue: 0, net: 0, visitors: 0, orderViews: 0, checkouts: 0 }]),
+    [...before, ...days].map((day) => [day, { day, orders: 0, upsells: 0, revenue: 0, net: 0, visitors: 0, orderViews: 0, checkouts: 0, byFunnel: {} }]),
   );
+  const of = (d: Day, funnel: string) => (d.byFunnel[funnel] ??= { orders: 0, upsells: 0, revenue: 0, net: 0, visitors: 0 });
   for (const r of rows) {
     const d = by.get(r.day);
     if (!d) continue;
-    if (r.page === "landing") d.visitors += r.views;
+    if (r.page === "landing") {
+      d.visitors += r.views;
+      of(d, r.funnel).visitors += r.views;
+    }
     else if (r.page === "order") d.orderViews += r.views;
     else if (r.page === "checkout") d.checkouts += r.views;
   }
   for (const s of sales) {
     const d = by.get(dayOf(s.created));
     if (!d) continue;
-    if (s.offer) d.upsells += 1;
-    else d.orders += 1;
+    const f = of(d, s.funnel);
+    if (s.offer) {
+      d.upsells += 1;
+      f.upsells += 1;
+    } else {
+      d.orders += 1;
+      f.orders += 1;
+    }
     const r = s.currency === "usd" ? rate : 1;
     d.revenue += s.amount * r;
     d.net += (s.amount - (s.fee ?? 0)) * r;
+    f.revenue += s.amount * r;
+    f.net += (s.amount - (s.fee ?? 0)) * r;
   }
   return { days: days.map((d) => by.get(d)!), previous: range === "all" ? null : before.map((d) => by.get(d)!) };
 }

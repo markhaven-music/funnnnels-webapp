@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState, type KeyboardEvent, type PointerEvent } from "react";
 import type { Analytics, Day } from "@/lib/analytics";
+import { I } from "@/components/icons";
 import { SPEND_SINCE, type MetaDaily } from "@/lib/metaSpend";
 import s from "./home.module.css";
 
@@ -23,6 +24,10 @@ import s from "./home.module.css";
 // and dots round at any size. Hover, or focus and ← →, pick a day; one
 // tooltip lists every number of it. Nothing lives only in the tooltip: the
 // tiles, the legend's totals, the axis and the table carry the values.
+//
+// "By funnel" splits the picked metric into one line per funnel (Day.byFunnel).
+// Meta's spend isn't split by day per funnel, so profit, ad spend and ROAS
+// show each funnel's net revenue there. Refresh asks the server again.
 
 export type Currency = "EUR" | "USD";
 export const CURRENCIES: Currency[] = ["EUR", "USD"];
@@ -68,8 +73,8 @@ const spendCache = new Map<string, { at: number; data: MetaDaily }>();
 const SPEND_TTL = 2 * 60_000;
 const FAILED: MetaDaily = { connected: false, reason: "Couldn't load the ad spend." };
 
-function useAdSpend(since: string | undefined, until: string | undefined): MetaDaily | null {
-  const key = `${since}..${until}`;
+function useAdSpend(since: string | undefined, until: string | undefined, reload: number): MetaDaily | null {
+  const key = `${since}..${until}#${reload}`;
   const [got, setGot] = useState<{ key: string; data: MetaDaily } | null>(null);
   useEffect(() => {
     if (!since || !until) return;
@@ -88,7 +93,7 @@ function useAdSpend(since: string | undefined, until: string | undefined): MetaD
     return () => {
       gone = true;
     };
-  }, [key, since, until]);
+  }, [key, since, until, reload]);
   return got?.key === key ? got.data : (spendCache.get(key)?.data ?? null);
 }
 
@@ -107,7 +112,11 @@ type Row = {
   adNet: number; // the net revenue of the days whose spend counts: profit and ROAS
   adOrders: number;
   clicks: number;
+  /** The same per funnel (slug). */
+  funnels: Record<string, FunnelPart>;
 };
+
+type FunnelPart = { revenue: number; net: number; orders: number; upsells: number; visitors: number; ratedOrders: number };
 
 type DaySpend = Map<string, { spend: number; clicks: number }>;
 
@@ -127,12 +136,38 @@ function toRows(days: Day[], spend: DaySpend | null, k: number, trackingSince: s
       adNet: m ? d.net * k : 0,
       adOrders: m ? d.orders : 0,
       clicks: m ? m.clicks : 0,
+      funnels: Object.fromEntries(
+        Object.entries(d.byFunnel ?? {}).map(([slug, f]) => [
+          slug,
+          { revenue: f.revenue * k, net: f.net * k, orders: f.orders, upsells: f.upsells, visitors: f.visitors, ratedOrders: trackingSince && d.day >= trackingSince ? f.orders : 0 },
+        ]),
+      ),
     };
   });
 }
 
+/** One funnel's share of a row, as a row of its own (no ad spend: Meta's isn't split by day per funnel). */
+function partOf(r: Row, slug: string): Row {
+  const f = r.funnels[slug];
+  return {
+    from: r.from,
+    to: r.to,
+    revenue: f?.revenue ?? 0,
+    net: f?.net ?? 0,
+    orders: f?.orders ?? 0,
+    upsells: f?.upsells ?? 0,
+    visitors: f?.visitors ?? 0,
+    ratedOrders: f?.ratedOrders ?? 0,
+    spend: null,
+    adNet: 0,
+    adOrders: 0,
+    clicks: 0,
+    funnels: {},
+  };
+}
+
 function merge(rows: Row[]): Row {
-  const out: Row = { from: rows[0]?.from ?? "", to: rows[rows.length - 1]?.to ?? "", revenue: 0, net: 0, orders: 0, upsells: 0, visitors: 0, ratedOrders: 0, spend: null, adNet: 0, adOrders: 0, clicks: 0 };
+  const out: Row = { from: rows[0]?.from ?? "", to: rows[rows.length - 1]?.to ?? "", revenue: 0, net: 0, orders: 0, upsells: 0, visitors: 0, ratedOrders: 0, spend: null, adNet: 0, adOrders: 0, clicks: 0, funnels: {} };
   for (const r of rows) {
     out.revenue += r.revenue;
     out.net += r.net;
@@ -144,6 +179,15 @@ function merge(rows: Row[]): Row {
     out.adNet += r.adNet;
     out.adOrders += r.adOrders;
     out.clicks += r.clicks;
+    for (const [slug, f] of Object.entries(r.funnels)) {
+      const o = (out.funnels[slug] ??= { revenue: 0, net: 0, orders: 0, upsells: 0, visitors: 0, ratedOrders: 0 });
+      o.revenue += f.revenue;
+      o.net += f.net;
+      o.orders += f.orders;
+      o.upsells += f.upsells;
+      o.visitors += f.visitors;
+      o.ratedOrders += f.ratedOrders;
+    }
   }
   return out;
 }
@@ -190,6 +234,17 @@ const SPEND = "oklch(0.77 0.18 55)";
 const PROFIT = "oklch(0.85 0.17 162)";
 const LOSS = "oklch(0.72 0.2 18)";
 const PREV = "oklch(0.62 0.015 270)";
+/** One per funnel line, in order of the funnel's total; the rest are summed as "Other funnels". */
+const FUNNEL_COLORS = [
+  "oklch(0.76 0.2 295)",
+  "oklch(0.77 0.18 55)",
+  "oklch(0.8 0.14 235)",
+  "oklch(0.85 0.17 162)",
+  "oklch(0.78 0.17 345)",
+  "oklch(0.86 0.15 95)",
+  "oklch(0.84 0.13 195)",
+];
+const OTHER = "oklch(0.7 0.02 270)";
 
 const profitOf = (r: Row) => (r.spend === null ? null : r.adNet - r.spend);
 const roasOf = (r: Row) => (r.spend ? r.adNet / r.spend : null);
@@ -390,19 +445,26 @@ type Props = {
   cur: Currency;
   /** "7 days" / "28 days" / "period". */
   periodName: string;
+  /** Asks the server again for the range's numbers (and Meta for the spend). */
+  onRefresh?: () => void;
+  refreshing?: boolean;
+  /** When the numbers on screen were loaded (ms). */
+  updatedAt?: number | null;
 };
 
-export function Performance({ a, cur, periodName }: Props) {
+export function Performance({ a, cur, periodName, onRefresh, refreshing, updatedAt }: Props) {
   const [picked, setPicked] = useState<MetricId>("profit");
   const [interval, setIv] = useState<Interval>("day");
   const [view, setView] = useState<"chart" | "table">("chart");
+  const [split, setSplit] = useState(false);
+  const [reload, setReload] = useState(0);
   const [hidden, setHidden] = useState<Record<string, boolean>>({});
   const [hover, setHover] = useState<number | null>(null);
   const [plotRef, size] = useSize();
   const gid = useId().replace(/[^a-zA-Z0-9]/g, "");
   const days = a?.days ?? [];
   const before = a?.previous ?? [];
-  const spend = useAdSpend((before[0] ?? days[0])?.day, days[days.length - 1]?.day);
+  const spend = useAdSpend((before[0] ?? days[0])?.day, days[days.length - 1]?.day, reload);
 
   if (!a) {
     return (
@@ -443,8 +505,10 @@ export function Performance({ a, cur, periodName }: Props) {
   const prevTotal = prevRows.length ? merge(prevRows) : null;
   const spendState = spend === null ? "loading" : spend.connected ? "ok" : "off";
 
-  const m = METRICS.find((x) => x.id === picked)!;
-  const profitView = m.id === "profit";
+  const picked0 = METRICS.find((x) => x.id === picked)!;
+  // By funnel: the ads' metrics aren't split by day per funnel, so each funnel's net revenue.
+  const m = split && picked0.ads ? METRICS.find((x) => x.id === "net")! : picked0;
+  const profitView = !split && m.id === "profit";
 
   // What the chart draws: the range, or for the ads' metrics the part of it
   // from SPEND_SINCE; and as many days right before it.
@@ -461,16 +525,43 @@ export function Performance({ a, cur, periodName }: Props) {
   const hasSpend = spendS.some((v) => v !== null);
   const curS = rows.map(m.of);
   const prevS = prevBuckets?.map(m.of) ?? null;
-  const hasPrev = !profitView && !!prevS && prevS.some((v) => v !== null);
+  const hasPrev = !split && !profitView && !!prevS && prevS.some((v) => v !== null);
+
+  // By funnel: a line per funnel that had something in the range, biggest first
+  // (by the metric's total, else its visitors), the eighth on summed as "Other funnels".
+  const names = new Map(a.funnels.map((f) => [f.slug, f.name]));
+  const domainAll = domain.length ? merge(domain) : null;
+  const slugs = domainAll
+    ? Object.entries(domainAll.funnels)
+        .map(([slug]) => ({ slug, v: m.of(partOf(domainAll, slug)) ?? 0, visitors: domainAll.funnels[slug].visitors }))
+        // A funnel with nothing of the picked metric in the range would only draw a flat zero.
+        .filter((x) => x.v !== 0)
+        .sort((x, y) => y.v - x.v || y.visitors - x.visitors)
+        .map((x) => x.slug)
+    : [];
+  const lead = slugs.length > FUNNEL_COLORS.length ? slugs.slice(0, FUNNEL_COLORS.length - 1) : slugs;
+  const rest = slugs.slice(lead.length);
+  const restOf = (r: Row) => merge(rest.map((slug) => partOf(r, slug)).map((p) => ({ ...p, funnels: {} })));
+  const series = split
+    ? [
+        ...lead.map((slug, i) => ({ key: slug, name: names.get(slug) ?? slug, color: FUNNEL_COLORS[i], of: (r: Row) => partOf(r, slug) })),
+        ...(rest.length ? [{ key: "_other", name: `Other funnels (${rest.length})`, color: OTHER, of: restOf }] : []),
+      ].map((x) => ({ ...x, vals: rows.map((r) => m.of(x.of(r))), on: !hidden[`f:${x.key}`] }))
+    : [];
+
   const show = {
     net: profitView && !hidden.net,
     spend: profitView && hasSpend && !hidden.spend,
-    cur: !profitView,
+    cur: !profitView && !split,
     prev: hasPrev && !hidden.prev,
   };
-  const visible = [...(show.net ? netS : []), ...(show.spend ? spendS : []), ...(show.cur ? curS : []), ...(show.prev && prevS ? prevS : [])].filter(
-    (v): v is number => v !== null,
-  );
+  const visible = [
+    ...(show.net ? netS : []),
+    ...(show.spend ? spendS : []),
+    ...(show.cur ? curS : []),
+    ...(show.prev && prevS ? prevS : []),
+    ...series.filter((x) => x.on).flatMap((x) => x.vals),
+  ].filter((v): v is number => v !== null);
   const kind: Kind = profitView ? "money" : m.kind;
   const tks = ticks(Math.max(0, ...visible), kind);
   const top = tks[tks.length - 1] || 1;
@@ -494,6 +585,7 @@ export function Performance({ a, cur, periodName }: Props) {
   const spendLines = show.spend ? lineOf(spendS) : [];
   const curLines = show.cur ? lineOf(curS) : [];
   const prevLines = show.prev && prevS ? lineOf(prevS) : [];
+  const splitLines = series.filter((x) => x.on).map((x) => ({ key: x.key, color: x.color, lines: lineOf(x.vals) }));
   const fills = show.net && show.spend && spendS.every((v) => v !== null) && n > 1 ? bands(netLines[0] ?? [], spendLines[0] ?? []) : [];
   const dots = n <= 40;
   const hv = hover !== null && hover < n ? hover : null;
@@ -521,8 +613,12 @@ export function Performance({ a, cur, periodName }: Props) {
   const domainTotal = domain.length ? merge(domain) : null;
   const prevDomainTotal = prevDomain ? merge(prevDomain) : null;
 
-  const title = profitView ? "Profit: net revenue against ad spend" : m.label;
-  const what = profitView
+  const title = split ? `${m.label} by funnel` : profitView ? "Profit: net revenue against ad spend" : m.label;
+  const what = split
+    ? picked0.ads
+      ? `The ad spend isn't split by day per funnel, so ${picked0.id === "spend" ? "this" : picked0.label === "ROAS" ? "ROAS" : picked0.label.toLowerCase()} shows each funnel's net revenue. Click a funnel to hide its line.`
+      : "One line per funnel. Click a funnel to hide its line."
+    : profitView
     ? "Green where the net revenue beat the ad spend, red where it didn't."
     : hasPrev
       ? "Against the days just before."
@@ -610,6 +706,24 @@ export function Performance({ a, cur, periodName }: Props) {
               );
             })}
           </div>
+          {view === "chart" && (
+            <div className="tabs" role="group" aria-label="Lines">
+              {([false, true] as const).map((v) => (
+                <button
+                  key={String(v)}
+                  type="button"
+                  className={`tab ${split === v ? "active" : ""}`}
+                  aria-pressed={split === v}
+                  onClick={() => {
+                    setSplit(v);
+                    setHover(null);
+                  }}
+                >
+                  {v ? "By funnel" : "All funnels"}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="tabs" role="group" aria-label="View">
             {(["chart", "table"] as const).map((v) => (
               <button key={v} type="button" className={`tab ${view === v ? "active" : ""}`} aria-pressed={view === v} onClick={() => setView(v)}>
@@ -617,6 +731,25 @@ export function Performance({ a, cur, periodName }: Props) {
               </button>
             ))}
           </div>
+          {onRefresh && (
+            <div className="tabs">
+              <button
+                type="button"
+                className={`tab ${s.refresh}`}
+                disabled={refreshing}
+                title={updatedAt ? `Loaded at ${new Date(updatedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}` : undefined}
+                onClick={() => {
+                  setReload((n) => n + 1);
+                  onRefresh();
+                }}
+              >
+                <span className={refreshing ? s.spin : undefined} aria-hidden>
+                  <I.refresh size={12} />
+                </span>
+                {refreshing ? "Refreshing…" : updatedAt ? `Refresh · ${new Date(updatedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}` : "Refresh"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -626,7 +759,22 @@ export function Performance({ a, cur, periodName }: Props) {
         <>
           {/* The legend: one key per series with its total; a key that's a button hides its line. */}
           <div className={s.legend}>
-            {profitView ? (
+            {split ? (
+              series.length ? (
+                series.map((x) => (
+                  <LegendKey
+                    key={x.key}
+                    color={x.color}
+                    name={x.name}
+                    total={domainAll ? fmt(m.of(x.of(domainAll)), m.kind, cur) : "—"}
+                    off={!x.on}
+                    onClick={() => toggle(`f:${x.key}`)}
+                  />
+                ))
+              ) : (
+                <span className={s.lgName}>No funnel has any {m.label.toLowerCase()} in this range.</span>
+              )
+            ) : profitView ? (
               <>
                 <LegendKey color={NET} name="Net revenue" total={domainTotal ? money(domainTotal.net, cur) : "—"} off={!show.net} onClick={() => toggle("net")} />
                 <LegendKey
@@ -717,11 +865,13 @@ export function Performance({ a, cur, periodName }: Props) {
                   {curLines.map((pts, i) => (
                     <path key={`c${i}`} d={pathOf(pts)} stroke={m.color} className={s.line} />
                   ))}
+                  {splitLines.map((x) => x.lines.map((pts, i) => <path key={`f${x.key}${i}`} d={pathOf(pts)} stroke={x.color} className={s.line} />))}
                   {dots &&
                     [
                       ...(show.spend ? spendS.map((v, i) => ({ v, i, c: SPEND, k: "s" })) : []),
                       ...(show.net ? netS.map((v, i) => ({ v, i, c: NET, k: "n" })) : []),
                       ...(show.cur ? curS.map((v, i) => ({ v, i, c: m.color, k: "c" })) : []),
+                      ...series.filter((x) => x.on).flatMap((x) => x.vals.map((v, i) => ({ v, i, c: x.color, k: `f${x.key}` }))),
                     ].map((p) => (p.v === null ? null : <circle key={`${p.k}${p.i}`} cx={xOf(p.i)} cy={yOf(p.v)} r={3.5} fill={p.c} className={s.dot} />))}
                   {hv !== null && (
                     <g>
@@ -730,6 +880,7 @@ export function Performance({ a, cur, periodName }: Props) {
                       {show.spend && spendS[hv] !== null && <circle cx={xOf(hv)} cy={yOf(spendS[hv]!)} r={6} fill={SPEND} className={s.dot} />}
                       {show.net && <circle cx={xOf(hv)} cy={yOf(netS[hv])} r={6} fill={NET} className={s.dot} />}
                       {show.cur && curS[hv] !== null && <circle cx={xOf(hv)} cy={yOf(curS[hv]!)} r={6} fill={m.color} className={s.dot} />}
+                      {series.filter((x) => x.on && x.vals[hv] !== null).map((x) => <circle key={x.key} cx={xOf(hv)} cy={yOf(x.vals[hv]!)} r={5} fill={x.color} className={s.dot} />)}
                     </g>
                   )}
                 </svg>
@@ -742,13 +893,27 @@ export function Performance({ a, cur, periodName }: Props) {
               {hr && hv !== null && (
                 <div className={s.tip} style={xOf(hv) < W / 2 ? { left: xOf(hv) + 18 } : { right: W - xOf(hv) + 18 }}>
                   <div className={s.tipHead}>{iv === "total" ? `${span(hr.from, hr.to)} · running total` : span(hr.from, hr.to)}</div>
-                  <TipBig m={m} r={hr} cur={cur} />
-                  {!profitView && hasPrev && prevS && prevBuckets?.[hv] && (
+                  {split ? (
+                    <div className={s.tipRows}>
+                      {series
+                        .filter((x) => x.on)
+                        .map((x) => ({ x, v: x.vals[hv] }))
+                        .sort((p, q) => (q.v ?? -Infinity) - (p.v ?? -Infinity))
+                        .map(({ x, v }) => (
+                          <TipRow key={x.key} color={x.color} value={fmt(v, m.kind, cur, true)} label={x.name} />
+                        ))}
+                      <span className={s.tipRule} />
+                      <TipRow value={fmt(m.of(hr), m.kind, cur, true)} label={`${m.label.toLowerCase()}, all funnels`} />
+                    </div>
+                  ) : (
+                    <TipBig m={m} r={hr} cur={cur} />
+                  )}
+                  {!split && !profitView && hasPrev && prevS && prevBuckets?.[hv] && (
                     <div className={s.tipVs}>
                       {fmt(prevS[hv], m.kind, cur, true)} on {span(prevBuckets[hv].from, prevBuckets[hv].to)}
                     </div>
                   )}
-                  <Details r={hr} cur={cur} />
+                  {!split && <Details r={hr} cur={cur} />}
                 </div>
               )}
             </div>

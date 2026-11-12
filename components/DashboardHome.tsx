@@ -135,19 +135,43 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
   const magnets = useMemo(() => all.filter(isLeadMagnet), [all]);
   const [range, setRange] = useRange();
   const [loaded, setLoaded] = useState<Partial<Record<Range, Analytics>>>({});
-  const current = range === "28d" ? analytics : (loaded[range] ?? null);
+  const current = loaded[range] ?? (range === "28d" ? analytics : null);
+  // When what's on screen was loaded, for the chart's Refresh.
+  const [loadedAt, setLoadedAt] = useState<Partial<Record<Range, number>>>({});
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshed, setRefreshed] = useState(false);
+  const [firstAt] = useState(() => Date.now());
+  const refresh = () => {
+    setRefreshing(true);
+    fetch(`/api/analytics?range=${range}`, { cache: "no-store" })
+      .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
+      .then((a) => {
+        if (!a) return;
+        // The other ranges are as old: they load again when picked.
+        setLoaded({ [range]: a });
+        setRefreshed(true);
+        setLoadedAt({ [range]: Date.now() });
+      })
+      .catch(() => {})
+      .finally(() => setRefreshing(false));
+  };
   // While another range loads, the last one stays on screen, dimmed.
   const [shown, setShown] = useState<Analytics | null>(analytics);
   useEffect(() => {
     if (current) setShown(current);
   }, [current]);
   useEffect(() => {
-    if (range === "28d" || loaded[range]) return;
+    // 28 days comes with the page (Dashboard), until a refresh makes it as old as the rest.
+    if (loaded[range] || (range === "28d" && !refreshed)) return;
     fetch(`/api/analytics?range=${range}`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
-      .then((a) => a && setLoaded((l) => ({ ...l, [range]: a })))
+      .then((a) => {
+        if (!a) return;
+        setLoaded((l) => ({ ...l, [range]: a }));
+        setLoadedAt((l) => ({ ...l, [range]: Date.now() }));
+      })
       .catch(() => {});
-  }, [range, loaded]);
+  }, [range, loaded, refreshed]);
   const data = current ?? shown;
 
   // Euros or dollars for every number on the page; remembered in this browser.
@@ -237,7 +261,14 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
       </div>
 
       <div className={!current && shown ? s.stale : undefined}>
-        <Performance a={data} cur={cur} periodName={data ? previousName(data.range) : "period"} />
+        <Performance
+          a={data}
+          cur={cur}
+          periodName={data ? previousName(data.range) : "period"}
+          onRefresh={refresh}
+          refreshing={refreshing}
+          updatedAt={current ? (loadedAt[range] ?? (range === "28d" ? firstAt : null)) : null}
+        />
 
         {data && (
           <div className={s.below}>

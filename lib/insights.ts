@@ -17,7 +17,7 @@ const DAY = 86_400_000;
 
 const euro = (n: number) => `€${n >= 100 ? Math.round(n).toLocaleString("en-US") : n.toFixed(2).replace(/\.00$/, "")}`;
 const pct = (n: number) => `${n >= 0.1 ? Math.round(n * 100) : (n * 100).toFixed(1)}%`;
-const sum = (days: Day[], k: keyof Omit<Day, "day">) => days.reduce((n, d) => n + d[k], 0);
+const sum = (days: Day[], k: keyof Omit<Day, "day" | "byFunnel">) => days.reduce((n, d) => n + d[k], 0);
 const langName = (l: string) => ({ en: "English", fr: "French", es: "Spanish", de: "German", it: "Italian", nl: "Dutch" })[l] ?? l;
 // "the last 7 days", "this month", "October", "2025", "the whole period": after "in" or on its own.
 const lastDays = (a: Analytics) => {

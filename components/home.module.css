@@ -647,3 +647,28 @@
     text-overflow: clip;
   }
 }
+
+/* The chart's Refresh: one key in a .tabs group, its arrow turning while it loads. */
+.refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-0);
+}
+.refresh:disabled {
+  cursor: progress;
+}
+.spin {
+  display: inline-flex;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
