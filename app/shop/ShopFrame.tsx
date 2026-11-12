@@ -41,7 +41,7 @@ export function ShopFrame({ children, className = "" }: { children: React.ReactN
           © {new Date().getFullYear()} {BRAND.name} · <a href={BRAND.legal.terms} rel="noopener">Terms</a> ·{" "}
           <a href={BRAND.legal.privacy} rel="noopener">Privacy</a> ·{" "}
           <a href={BRAND.legal.refund} rel="noopener">Refund policy</a> ·{" "}
-          <a href={`mailto:${BRAND.support}`}>{BRAND.support}</a>
+          <a href="/blog">Blog</a> · <a href={`mailto:${BRAND.support}`}>{BRAND.support}</a>
         </p>
       </footer>
     </main>

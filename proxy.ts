@@ -29,6 +29,7 @@ const FUNNEL_HOME: Record<string, string> = {
   "privacy-policy": "https://m.thegrind.studio",
   "refund-policy": "https://m.thegrind.studio",
   free: "https://m.thegrind.studio", // the free packs' pages and downloads (app/free)
+  blog: "https://m.thegrind.studio", // the blog (app/blog)
 };
 // Terms, Privacy, Refund policy: served by app/legal at ClickFunnels' paths.
 const LEGAL = new Set(["/terms-and-conditions", "/privacy-policy", "/refund-policy"]);
@@ -53,7 +54,7 @@ const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/ja
 const LOCALIZED: Record<string, readonly string[]> = { "midi-drum-kit": DRUM_KIT_LANGS };
 const LANG_PREFIXES = new Set(["fr", "it", "de", "nl", "es"]);
 
-const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "top-hits-chords", "midi-drum-kit", "famous-beats-bundle", "drunk-swing-grooves", "shop", "home", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", "free", ...LANG_PREFIXES]);
+const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "top-hits-chords", "midi-drum-kit", "famous-beats-bundle", "drunk-swing-grooves", "shop", "home", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", "free", "blog", ...LANG_PREFIXES]);
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
@@ -98,10 +99,12 @@ const PUBLIC = [
   /^\/home(\/|$)/, // the homepage
   /^\/legal\/[a-z-]+$/, // the legal pages
   /^\/free\/[a-z-]+(\/[a-z-]+)?$/, // the free packs' pages and downloads (app/free)
+  /^\/blog(\/[a-z0-9-]+)?\/?$/, // the blog and its posts (app/blog)
+  /^\/(robots\.txt|sitemap\.xml)$/, // for search engines (app/robots.ts, app/sitemap.ts)
   /^\/api\/checkout\/shop\/(intent|paypal)$/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
-  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|here|me|upsell|owned|go|open|resume|bonus)$/, // go, open: a click on / an open of an email (lib/mail.ts); resume: its saved cart; here, me: dashboard → Live; bonus: the Drum Kit order page's 5-minute clock; owned: an upsell page asking if the buyer has it already
+  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|here|me|upsell|owned|go|open|resume|bonus|blog)$/, // go, open: a click on / an open of an email (lib/mail.ts); resume: its saved cart; here, me: dashboard → Live; bonus: the Drum Kit order page's 5-minute clock; owned: an upsell page asking if the buyer has it already
   /^\/account$/, // the customer login and its API
   /^\/api\/checkout\/account\/(login|verify|session)$/,
   // Email: Stripe's webhook, the email job (its own CRON_SECRET), unsubscribing.

@@ -9,6 +9,7 @@ import { TopBar } from "@/components/TopBar";
 import { ABTestsPanel } from "@/components/panels/ABTestsPanel";
 import { AnalyticsPanel } from "@/components/panels/AnalyticsPanel";
 import { AutomationsPanel } from "@/components/panels/AutomationsPanel";
+import { BlogPanel } from "@/components/panels/BlogPanel";
 import { BroadcastsPanel } from "@/components/panels/BroadcastsPanel";
 import { BrandKitPanel } from "@/components/panels/BrandKitPanel";
 import { ContactsPanel } from "@/components/panels/ContactsPanel";
@@ -109,6 +110,7 @@ export function Dashboard({ funnels: rows }: Props) {
       {activeNav === "shop"         && <ShopPanel />}
       {activeNav === "orders"       && <OrdersPanel />}
       {activeNav === "free-packs"   && <FreePacksPanel />}
+      {activeNav === "blog"         && <BlogPanel />}
       {activeNav === "support"      && <SupportPanel onUnread={setSupportUnread} />}
       {activeNav === "contacts"     && <ContactsPanel />}
       {activeNav === "email-insights" && <EmailInsightsPanel analytics={analytics} />}

@@ -31,6 +31,7 @@ export const NAV: NavSection[] = [
       { id: "shop", label: "Shop", icon: "bag" },
       { id: "orders", label: "Orders", icon: "receipt" },
       { id: "free-packs", label: "Free packs", icon: "sparkles" },
+      { id: "blog", label: "Blog", icon: "page" },
       { id: "support", label: "Support", icon: "inbox", badgeKey: "support" },
       { id: "analytics", label: "Analytics", icon: "analytics" },
     ],

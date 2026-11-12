@@ -1,0 +1,249 @@
+/* Dashboard → Blog (BlogPanel.tsx). docs/design.md: cards told apart by their
+   fill, nearly square corners, one chart, numbers only when real. */
+.tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.tile:hover {
+  background: var(--bg-2);
+}
+.tileOn,
+.tileOn:hover {
+  background: var(--accent-dim);
+}
+.tileOn :global(*) {
+  color: var(--fg-0);
+}
+
+.scope {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--accent-dim);
+  color: var(--fg-0);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.scopeHint {
+  color: var(--fg-1);
+  font-weight: 400;
+}
+
+/* ─── the chart ──────────────────────────── */
+.chart {
+  margin-bottom: 22px;
+  padding: 16px 18px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--bg-1);
+}
+.chartTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.chartTotal {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.chartTotal span {
+  color: var(--fg-2);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.chartHover {
+  color: var(--fg-1);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.plot {
+  position: relative;
+  height: 220px;
+  padding-left: 30px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.tick {
+  position: absolute;
+  left: 0;
+  right: 0;
+  transform: translateY(50%);
+  border-bottom: 1px dashed var(--line-soft);
+  color: var(--fg-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  padding-bottom: 3px;
+  pointer-events: none;
+}
+.bars {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  height: 100%;
+}
+.barSlot {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+}
+.barSlot:hover {
+  background: color-mix(in oklch, var(--fg-0) 5%, transparent);
+}
+.bar {
+  width: 100%;
+  min-height: 0;
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  background: var(--accent);
+}
+.barOn {
+  background: var(--mint);
+}
+.axis {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0 0 30px;
+  color: var(--fg-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.quiet {
+  margin: -8px 0 22px;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+/* ─── the posts ──────────────────────────── */
+.title {
+  margin: 22px 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sub {
+  margin-left: 6px;
+  color: var(--fg-2);
+  font-size: 12px;
+}
+.post {
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+}
+.post:hover {
+  background: var(--bg-2);
+}
+.postOn,
+.postOn:hover {
+  background: color-mix(in oklch, var(--accent) 22%, var(--bg-1));
+}
+.postName {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.postName > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.postMeta {
+  color: var(--fg-2);
+  font-size: 12px;
+}
+.sold {
+  color: var(--mint);
+  font-weight: 600;
+}
+.spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 26px;
+}
+.spark i {
+  flex: 1 1 0;
+  min-width: 1px;
+  border-radius: 1px 1px 0 0;
+  background: var(--accent-2);
+}
+.hint,
+.foot {
+  margin: 8px 0 0;
+  color: var(--fg-2);
+  font-size: 12px;
+}
+.foot {
+  margin-top: 22px;
+  max-width: 78ch;
+}
+
+/* ─── sources and sales ──────────────────── */
+.two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+}
+.source {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) 84px;
+}
+.sourceBar {
+  height: 8px;
+  border-radius: var(--radius-xs);
+  background: color-mix(in oklch, var(--fg-0) 6%, transparent);
+  overflow: hidden;
+}
+.sourceBar i {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-xs);
+  background: var(--accent);
+}
+.sale {
+  grid-template-columns: 104px minmax(0, 1fr) 60px;
+}
+
+@media (max-width: 900px) {
+  .two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hideNarrow {
+    display: none;
+  }
+  .cols {
+    grid-template-columns: minmax(0, 1.6fr) 56px 56px 78px 44px 70px !important;
+    gap: 8px;
+  }
+}
+@media (max-width: 560px) {
+  .cols {
+    grid-template-columns: minmax(0, 1fr) 52px 52px 44px !important;
+  }
+  .cols > :nth-child(4),
+  .cols > :nth-child(6) {
+    display: none;
+  }
+}
