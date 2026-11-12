@@ -9,20 +9,26 @@ exactly what is in them:
     /usr/bin/python3 tools/drum_player_data.py KIT.zip [DSG.zip] [HOOKS.zip]
     # KIT   = MIDI Drum Kit Bundle V1.1.zip (the kit and bonuses 1-3)
     # DSG   = Drunk Swing Grooves.zip (bonus 4), HOOKS = MYSTERY Hooks Pack.zip (bonus 5)
-    # writes public/funnels/midi-drum-kit/player/v4/
+    # writes public/funnels/midi-drum-kit/player/v5/
 
   kit.json            the 11 folders and their groups, and the base beat single parts play over
   <group>.json        every file of a group: its path in the zip, tempo, length, notes
+  tree.json           the kit's folders as they are in the zip: names, files, two file names each (the page's folder tree)
   bonus.json          a few files of Famous Beats and Drunk Swing Grooves, as notes
-  clips/*.m4a         10-second clips of the Beat Starters' MP3 samples and of the MYSTERY hooks,
+  bounce.json         one Complete Beat of the kit and a plain beat at its tempo ("NO BOUNCE VS BOUNCE")
+  kits/k<n>-*.m4a     a set of Hit-Maker Drums one-shots for each Famous Beats file after the first
+  clips/*.m4a         the Beat Starters' MP3 samples and the MYSTERY hooks, whole,
                       and Hit-Maker Drums one-shots for the pads (clips.json: names, tempo, waveform)
 
 Times are in beats (quarter notes). A note is five numbers, t, length, sound, pitch, velocity, one
 after the other in "n". sound is an index of INST. pitch: the 808's MIDI note; for the others the
 semitones from the file's middle C (0 in the kit's multi-track folders, as the first player had them).
-A new layout of these files goes in a new folder (v5…): v4 has the beat styles and the Drunk Swing Grooves clips; v3 because v2's first files were asked for before their deploy and the brand domain kept the 404s for a week: browsers keep /funnels/* for a week.
+A new layout of these files goes in a new folder (v6…): v5 (2026-11-12, "le demo in beatstarters si fermano
+a metà? falle suonare tutte", "nelle demo di famous beats bundle metti suoni diversi per ogni demo", "una sezione
+che te lo fa sentire. NO BOUNCE VS BOUNCE") has the whole clips, the sound sets, the bounce pair and the tree; v4 has the beat styles and the Drunk Swing Grooves clips; v3 because v2's first files were asked for before their deploy and the brand domain kept the 404s for a week: browsers keep /funnels/* for a week.
 """
 import json
+import math
 import os
 import re
 import struct
@@ -32,7 +38,7 @@ import tempfile
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "public", "funnels", "midi-drum-kit", "player", "v4")
+OUT = os.path.join(ROOT, "public", "funnels", "midi-drum-kit", "player", "v5")
 
 INST = ["808", "kick", "snare", "clap", "rim", "hat", "ohat", "perc"]
 I808, KICK, SNARE, CLAP, RIM, HAT, OHAT, PERC = range(8)
@@ -214,16 +220,23 @@ def write(name, obj):
 def kit(z):
     index = {"inst": INST, "folders": [], "base": {}}
     total = 0
+    tree = []
     for fid, fname, groups in FOLDERS:
         out_groups = []
+        subs = []
         for gid, gname, folder, sound in groups:
             files = sorted(n for n in z.namelist() if n.startswith(KIT_ROOT + folder + "/") and n.lower().endswith(".mid"))
             entries = [entry(n[len(KIT_ROOT):], z.read(n), sound) for n in files]
             size = write(f"{gid}.json", entries)
             out_groups.append({"id": gid, "name": gname, "n": len(entries), "inst": -1 if sound is None else sound})
+            subs.append({"id": gid, "dir": folder.split("/", 1)[1] if "/" in folder else "", "n": len(entries), "ex": [os.path.basename(n) for n in files[:2]]})
             total += len(entries)
             print(f"  {gid}: {len(entries)} files, {size} bytes")
         index["folders"].append({"id": fid, "name": fname, "groups": out_groups})
+        tree.append({"id": fid, "dir": groups[0][2].split("/")[0], "n": sum(g["n"] for g in subs), "groups": subs})
+    # the page lists the folders as the zip numbers them
+    tree.sort(key=lambda f: int(f["dir"].split(".")[0]))
+    print("tree.json", write("tree.json", tree), "bytes")
     for part, path in BASE.items():
         e = entry(path, z.read(KIT_ROOT + path), {"kick": KICK, "snare": SNARE, "hat": HAT}[part])
         index["base"][part] = {"f": e["f"], "n": e["n"]}
@@ -259,6 +272,10 @@ def bonus(z, dsg):
         n = by_vol[vol][0]
         e = entry(n.split("/", 1)[1], z.read(n), pitched=True, cap=16)
         e["t"] = title(os.path.basename(n)[:-4])
+        e["v"] = vol.replace("Famous Beats ", "")  # "Vol.1"
+        # its sounds: the player's own for the first, a set of its own for each of the others (KITS)
+        if out["famous"] and len(out["famous"]) < len(KITS):
+            e["k"] = len(out["famous"])
         out["famous"].append(e)
     if dsg:
         grooves = sorted(n for n in dsg.namelist() if "/2 Drum Grooves/Drum Rack (GM map)/" in n and "Medium Drunk" in n and n.lower().endswith(".mid"))
@@ -285,14 +302,29 @@ def bonus(z, dsg):
     print("bonus.json", write("bonus.json", out), "bytes")
 
 
-def clip(src_bytes, ext, dst, seconds=None, mono=False):
-    """A short AAC clip (fades out) and 56 peaks of its waveform, 0-100."""
+AAC = None
+
+
+def aac(src, dst, filters=None, seconds=None, mono=False):
+    """src (a file) as AAC at dst. In two steps: 16-bit PCM first (cut, filters, channels), then the encoder.
+    In one step ffmpeg's own AAC encoder gave the 24-bit stereo one-shots back some 3 dB louder and clipped
+    when it also had to fold them to mono (2026-11-12). Apple's encoder when ffmpeg has it: cleaner on drums."""
+    global AAC
+    if AAC is None:
+        AAC = "aac_at" if " aac_at " in subprocess.run(["ffmpeg", "-v", "error", "-encoders"], capture_output=True, text=True).stdout else "aac"
     os.makedirs(os.path.dirname(dst), exist_ok=True)
+    with tempfile.NamedTemporaryFile(suffix=".wav") as pcm:
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", src, *(["-t", str(seconds)] if seconds else []), *(["-af", ",".join(filters)] if filters else []),
+                        "-ac", "1" if mono else "2", "-ar", "44100", "-c:a", "pcm_s16le", pcm.name], check=True)
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", pcm.name, "-c:a", AAC, "-b:a", "96k", "-movflags", "+faststart", dst], check=True)
+
+
+def clip(src_bytes, ext, dst, seconds=None, mono=False):
+    """An AAC clip (cut to `seconds` with a fade out, when given) and 56 peaks of its waveform, 0-100."""
     with tempfile.NamedTemporaryFile(suffix=ext) as src:
         src.write(src_bytes)
         src.flush()
-        cut = ["-t", str(seconds), "-af", f"afade=t=out:st={seconds - 0.6}:d=0.6"] if seconds else []
-        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", src.name, *cut, "-ac", "1" if mono else "2", "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", dst], check=True)
+        aac(src.name, dst, [f"afade=t=out:st={seconds - 0.6}:d=0.6"] if seconds else None, seconds, mono)
         raw = subprocess.run(["ffmpeg", "-v", "error", "-i", dst, "-ac", "1", "-ar", "8000", "-f", "s16le", "-"], check=True, capture_output=True).stdout
     samples = struct.unpack(f"<{len(raw) // 2}h", raw[: len(raw) // 2 * 2])
     n = 56
@@ -302,13 +334,14 @@ def clip(src_bytes, ext, dst, seconds=None, mono=False):
     return [round(p * 100 / top) for p in peaks]
 
 
-# One clip per Beat Starters pack, and four hooks at different tempos; the pads' one-shots.
+# One sample per Beat Starters pack (all seven), whole, and four hooks at different tempos, whole; the pads' one-shots.
 STARTERS = [
     ("Chord Progressions", "Chord Progressions MIDI Pack/02 - MP3 Previews/"),
     ("Emotional Pianos", "Emotional Pianos MIDI Pack/03 - MP3 Samples/01 - Beat Starters/"),
     ("Guitars", "Guitars MIDI Pack/03 - MP3 Samples/01 - Beat Starters/"),
     ("Melodies", "Melodies MIDI Pack/02 - MP3 Samples/"),
     ("Strings", "Strings MIDI Pack/03 - MP3 Samples/01 - Beat Starters/"),
+    ("Trap Pianos", "Trap Pianos MIDI Pack/03 - MP3 Samples/01 - Beat Starters/"),
     ("Trap Plucks", "Trap Plucks MIDI Pack/03 - MP3 Samples/01 - Beat Starters/"),
 ]
 HOOKS = ["Hook03", "Hook05", "Hook08", "Hook13"]
@@ -323,18 +356,21 @@ def clips(z, hooks):
     out = {"starters": [], "hooks": [], "pads": []}
     for label, folder in STARTERS:
         files = sorted(n for n in z.namelist() if n.startswith("3 - BONUS - Beat Starters MIDI Bundle/" + folder) and n.lower().endswith(".mp3"))
-        n = files[len(files) // 2]
+        # the middle file of the pack, or the next whose song isn't on the page already (two packs share some songs)
+        song = lambda x: re.sub(r"^.*?_\d{2,3}_", "", os.path.basename(x)[:-4]).split("_")[0]
+        used = {song(c["file"]) for c in out["starters"]}
+        n = next(x for x in files[len(files) // 2:] + files if song(x) not in used)
         stem = os.path.basename(n)[:-4]
         bpm = re.search(r"_(\d{2,3})_", stem)
         i = len(out["starters"]) + 1
-        peaks = clip(z.read(n), ".mp3", os.path.join(OUT, "clips", f"starter-{i}.m4a"), 10)
+        peaks = clip(z.read(n), ".mp3", os.path.join(OUT, "clips", f"starter-{i}.m4a"))
         out["starters"].append({"name": label, "file": os.path.basename(n), "bpm": int(bpm.group(1)) if bpm else 0, "peaks": peaks})
     if hooks:
         for k, tag in enumerate(HOOKS, 1):
             n = next(x for x in hooks.namelist() if tag in x and x.lower().endswith(".wav"))
             stem = os.path.basename(n)[:-4]
             key, bpm = stem.split("_")[-2:]
-            peaks = clip(hooks.read(n), ".wav", os.path.join(OUT, "clips", f"hook-{k}.m4a"), 10)
+            peaks = clip(hooks.read(n), ".wav", os.path.join(OUT, "clips", f"hook-{k}.m4a"))
             out["hooks"].append({"name": f"Hook {tag[-2:]}", "file": os.path.basename(n), "key": key, "bpm": int(bpm), "peaks": peaks})
     for k, (label, path) in enumerate(PADS, 1):
         clip(z.read("4 - BONUS - Hit-Making Drums - Drumkit/" + path), ".wav", os.path.join(OUT, "clips", f"pad-{k}.m4a"), mono=True)
@@ -344,12 +380,87 @@ def clips(z, hooks):
         print(" ", k, [c["file"] for c in v])
 
 
+# A set of Hit-Maker Drums one-shots for each Famous Beats file on the page after the first, which plays the
+# player's own ("metti suoni diversi per ogni demo"). Picked by measuring the kit's files (length, brightness,
+# level): a deep, a long, a punchy and a round kick, bright and dark snares, short hats, different open hats.
+DRUMS = "4 - BONUS - Hit-Making Drums - Drumkit/"
+KITS = [
+    None,
+    {"kick": "kick/GRKick03.wav", "snare": "snare/GRSnare12.wav", "clap": "clap/GRClap03.wav", "rim": "rim/GRRim01.wav", "hat": "hihat/GRhihat03.wav", "ohat": "hihat/OPEN HAT 4.wav", "perc": "perc/GRPerc02.wav"},
+    {"kick": "kick/Kick17.wav", "snare": "snare/Snare10.wav", "clap": "clap/Clap06.wav", "rim": "rim/GRRim04.wav", "hat": "hihat/ClosedHat20.wav", "ohat": "hihat/OPEN HAT 8.wav", "perc": "perc/GRPerc03.wav"},
+    {"kick": "kick/KickC15.wav", "snare": "snare/SnareF01.wav", "clap": "clap/GRClap08.wav", "rim": "rim/GRRim03.wav", "hat": "hihat/ClosedHat01.wav", "ohat": "hihat/OPEN HAT 3.wav", "perc": "perc/PERC 17.wav"},
+    {"kick": "kick/GRKick14.wav", "snare": "snare/GRSnare10.wav", "clap": "clap/Clap07.wav", "rim": "rim/GRRim02.wav", "hat": "hihat/GRhihat11.wav", "ohat": "hihat/OPEN HAT 11.wav", "perc": "perc/PERC 6.wav"},
+]
+# how much of each one-shot the page keeps (seconds): a hat must be gone before the next one of a roll
+KEEP = {"kick": 0.5, "snare": 0.4, "clap": 0.4, "rim": 0.3, "hat": 0.2, "ohat": 0.6, "perc": 0.5}
+
+
+def level(path_or_bytes, ext=None):
+    """(peak, loudness of the first 100 ms), in dB, of a sound: a file's path, or bytes with their extension."""
+    if ext:
+        with tempfile.NamedTemporaryFile(suffix=ext) as f:
+            f.write(path_or_bytes)
+            f.flush()
+            return level(f.name)
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path_or_bytes, "-ac", "1", "-ar", "44100", "-f", "s16le", "-"], check=True, capture_output=True).stdout
+    s = struct.unpack(f"<{len(raw) // 2}h", raw[: len(raw) // 2 * 2])
+    head = s[:4410] or (0,)
+    db = lambda x: 20 * math.log10(max(x, 1) / 32768)
+    return db(max(abs(x) for x in s) if s else 0), db(math.sqrt(sum(x * x for x in head) / len(head)))
+
+
+def kits(z):
+    """Each set's one-shots, cut short and brought to the level of the player's own sound of that kind."""
+    base = os.path.dirname(OUT)
+    for k, kit_ in enumerate(KITS):
+        if not kit_:
+            continue
+        for name, path in kit_.items():
+            data = z.read(DRUMS + path)
+            peak, loud = level(data, ".wav")
+            _, want = level(os.path.join(base, f"{name}.m4a"))
+            gain = min(want - loud, -0.5 - peak)  # as loud as the player's, and never over full scale
+            keep = KEEP[name]
+            dst = os.path.join(OUT, "kits", f"k{k}-{name}.m4a")
+            with tempfile.NamedTemporaryFile(suffix=".wav") as src:
+                src.write(data)
+                src.flush()
+                aac(src.name, dst, [f"volume={gain:.1f}dB", f"afade=t=out:st={keep - 0.04}:d=0.04"], keep, mono=True)
+            got = level(dst)
+            print(f"  k{k}-{name}: {os.path.basename(path)} {gain:+.1f} dB → peak {got[0]:.1f}, first 100 ms {got[1]:.1f} (the player's {want:.1f}), {os.path.getsize(dst)} bytes")
+
+
+# "NO BOUNCE VS BOUNCE": a Complete Beat of the kit as it is, and a plain beat with the same sounds at the same
+# tempo: a kick and an 808 on the one of every bar, the snare where the kit's beat has it, straight eighth hats
+# all as loud as each other. Nothing else differs, so what is heard is the pattern.
+BOUNCE = "9. Complete Beats (Multi-Track)/MDK_CompleteBeat12_128.mid"
+
+
+def bounce(z):
+    e = entry(BOUNCE, z.read(KIT_ROOT + BOUNCE))
+    notes = [e["n"][i:i + 5] for i in range(0, len(e["n"]), 5)]
+    bars = e["len"] // 4
+    snare = [n for n in notes if n[2] in (SNARE, CLAP) and n[0] == int(n[0])]
+    sub = next((n[3] for n in notes if n[2] == I808), 36)
+    plain = []
+    for b in range(bars):
+        plain.append((b * 4, 1.5, I808, sub, 100))
+        plain.append((b * 4, 0.25, KICK, 0, 100))
+    plain += [(n[0], 0.25, n[2], 0, 100) for n in snare]
+    plain += [(num(i * 0.5), 0.25, HAT, 0, 80) for i in range(e["len"] * 2)]
+    plain.sort()
+    out = {"f": e["f"], "bpm": e["bpm"], "len": e["len"], "on": e["n"], "off": [x for n in plain for x in n]}
+    print("bounce.json", write("bounce.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
+
+
 def main(argv):
     z = zipfile.ZipFile(os.path.expanduser(argv[0]))
     dsg = zipfile.ZipFile(os.path.expanduser(argv[1])) if len(argv) > 1 else None
     hooks = zipfile.ZipFile(os.path.expanduser(argv[2])) if len(argv) > 2 else None
     kit(z)
     bonus(z, dsg)
+    bounce(z)
+    kits(z)
     clips(z, hooks)
 
 

@@ -26,7 +26,7 @@ FILES = {
     "jazz.module.css": ("jz-", set("""hero heroBg topband topbar logo tag dot wrap heroCenter heroPre heroHead heroSub vsl heroBullets heroCta
         proofRow dawStrip mono dawLogos proof tick shield sec band secHead h2 hl hl2 sub chart chWinBg chRow chCorner chHead chWin chBox
         chLabel chCell chAlt mark markYes markNo markMeh chNote ctaBlock order payList stack guarantee panel two twoBody twoHead license
-        licenseArt sealWrap final finalBg finalIn finalBare footer legal""".split())),
+        licenseArt sealWrap seal sealRing sealDays sealUnit col faq micro final finalBg finalIn finalBare footer legal""".split())),
     "btn.module.css": ("jzb-", None),
     "value.module.css": ("jzv-", None),
     "reviews.module.css": ("jzr-", None),

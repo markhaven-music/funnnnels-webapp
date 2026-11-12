@@ -9,10 +9,13 @@
 //     ("find a clever way to also let the users audition the fragments and other files on the pack",
 //     then "un browser che li fa vedere visivamente e spiega meglio il fatto beat on beat off e magari
 //     lascia che l'utente possa scegliere tra varie velocità e stili di beats", 2026-11-12.)
-//   - the folders list's play buttons (they drive the same player);
-//   - the bonuses, as on the Jazz MIDI Pack page: real files of Famous Beats and Drunk Swing Grooves
-//     as rolls (the grooves with their own hip hop sound, a recording), clips of the Beat Starters and
-//     of the MYSTERY hooks, Hit-Maker Drums as pads.
+//   - the folder cards' examples (a tap plays a file of that subfolder: they drive the same player);
+//   - "No bounce vs bounce" (#dkn): a Complete Beat of the kit and a plain beat with the same sounds at
+//     the same tempo, one switch between them while it plays ("una sezione che te lo fa sentire");
+//   - the bonuses, as on the Jazz MIDI Pack page: real files of Famous Beats (each with its own set of
+//     Hit-Maker Drums sounds and its own 808: "metti suoni diversi per ogni demo") and Drunk Swing
+//     Grooves as rolls (the grooves with their own hip hop sound, a recording), the Beat Starters'
+//     samples and the MYSTERY hooks whole, Hit-Maker Drums as pads.
 // Nothing is fetched before it is near the screen, no sound before a tap. Plain JS in a string:
 // the page is a static document outside React. No backticks or dollar-braces inside.
 export const CLIENT_JS = String.raw`
@@ -20,13 +23,15 @@ export const CLIENT_JS = String.raw`
   var cfgEl = document.getElementById('dk-cfg');
   if (!cfgEl) return;
   var W = JSON.parse(cfgEl.textContent);
-  var BASE = '/funnels/midi-drum-kit/player/', DATA = BASE + 'v4/';
+  var BASE = '/funnels/midi-drum-kit/player/', DATA = BASE + 'v5/';
   var SOUND = [null, 'kick', 'snare', 'clap', 'rim', 'hat', 'ohat', 'perc'];
   var LEVEL = [0.9, 1, 0.8, 0.75, 0.7, 0.5, 0.45, 0.6];
   var ORANGE = '#f5851f';
   var PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>';
   var STOP = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/></svg>';
-  var ctx = null, bufs = null, loading = null, now = null;
+  var ctx = null, bufs = null, loading = null, now = null, sets = {}, curves = {};
+  // The 808 is made here, not sampled: the wave, how far above the note it starts and how fast it falls to it, how hard it is driven.
+  var SUBS = [{ w: 'sine', m: 1.9, t: 0.035, d: 0 }, { w: 'sine', m: 1.5, t: 0.05, d: 3 }, { w: 'triangle', m: 2.2, t: 0.025, d: 0 }, { w: 'sine', m: 3, t: 0.06, d: 2 }, { w: 'triangle', m: 1.3, t: 0.02, d: 1.5 }];
 
   // ---- sound ----
   function playback() { try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {} }
@@ -49,6 +54,22 @@ export const CLIENT_JS = String.raw`
     }
     return loading;
   }
+  // A set of Hit-Maker Drums sounds of its own (player/v5/kits/k<n>-*.m4a), for a file that asks for one.
+  function soundSet(k) {
+    if (!sets[k]) {
+      sets[k] = Promise.all(SOUND.map(function (f) { return f ? fetchBuf(DATA + 'kits/k' + k + '-' + f + '.m4a').then(decode) : null; }));
+      sets[k].catch(function () { delete sets[k]; });
+    }
+    return sets[k];
+  }
+  function curve(d) {
+    if (!curves[d]) {
+      var c = new Float32Array(257), top = Math.tanh(d);
+      for (var i = 0; i < 257; i++) c[i] = Math.tanh(d * (i / 128 - 1)) / top;
+      curves[d] = c;
+    }
+    return curves[d];
+  }
   function stopAll() { if (now) { var n = now; now = null; n.stop(); } }
   function unflat(flat, sel) {
     var out = [];
@@ -64,6 +85,7 @@ export const CLIENT_JS = String.raw`
   // A song {notes, len, bpm} looping until stopped. onPos(beat) on every frame.
   function startLoop(song, onPos) {
     var s = 60 / song.bpm, t0 = ctx.currentTime + 0.06, cursor = 0, open = null, alive = true;
+    var B = song.bufs || bufs, sub = SUBS[song.kit || 0] || SUBS[0];
     var out = ctx.createGain();
     out.gain.value = 0.8;
     out.connect(ctx.destination);
@@ -72,21 +94,26 @@ export const CLIENT_JS = String.raw`
       if (ins === 0) {
         var o = ctx.createOscillator(), a = ctx.createGain(), f = 440 * Math.pow(2, (n[3] - 69 - 24) / 12);
         var len = Math.max(0.12, Math.min(n[1] * s, 1.6));
-        o.type = 'sine';
-        o.frequency.setValueAtTime(f * 1.9, t);
-        o.frequency.exponentialRampToValueAtTime(f, t + 0.035);
+        o.type = sub.w;
+        o.frequency.setValueAtTime(f * sub.m, t);
+        o.frequency.exponentialRampToValueAtTime(f, t + sub.t);
         a.gain.setValueAtTime(0, t);
         a.gain.linearRampToValueAtTime(LEVEL[0] * vel, t + 0.004);
         a.gain.setValueAtTime(LEVEL[0] * vel, t + len * 0.7);
         a.gain.exponentialRampToValueAtTime(0.001, t + len + 0.06);
-        o.connect(a); a.connect(out);
+        o.connect(a);
+        if (sub.d) {
+          var sh = ctx.createWaveShaper(), trim = ctx.createGain();
+          sh.curve = curve(sub.d); trim.gain.value = 0.7;
+          a.connect(sh); sh.connect(trim); trim.connect(out);
+        } else a.connect(out);
         o.start(t); o.stop(t + len + 0.08);
         return;
       }
-      if (!bufs[ins]) return;
+      if (!B[ins]) return;
       if (ins === 5 && open) { try { open.gain.setTargetAtTime(0, t, 0.01); } catch (e) {} }
       var src = ctx.createBufferSource(), g = ctx.createGain();
-      src.buffer = bufs[ins];
+      src.buffer = B[ins];
       if (n[3]) src.playbackRate.value = Math.pow(2, Math.max(-30, Math.min(24, n[3])) / 12);
       g.gain.value = LEVEL[ins] * (0.35 + 0.65 * vel) * (n[5] ? 1 : 0.8);
       src.connect(g); g.connect(out);
@@ -128,7 +155,7 @@ export const CLIENT_JS = String.raw`
     var me = { dead: false, off: null, stop: function () { me.dead = true; if (me.off) me.off(); onState('stopped'); } };
     now = me;
     onState('loading');
-    sounds().then(function () {
+    (song.kit ? soundSet(song.kit).then(function (b) { song.bufs = b; }) : sounds()).then(function () {
       if (me.dead) return;
       me.off = startLoop(song, onPos);
       onState('playing');
@@ -178,8 +205,8 @@ export const CLIENT_JS = String.raw`
       // a drum hit is drawn a sixteenth long at most; the 808 its real length
       var k = rs.indexOf(n[2]), x = x0 + n[0] * per, nw = Math.max(2.5, (n[2] ? Math.min(n[1], 0.25) : n[1]) * per - 1);
       var live = pos >= 0 && pos >= n[0] && pos < n[0] + Math.max(n[1], 0.12);
-      g.globalAlpha = live ? 1 : n[5] ? 0.4 + 0.6 * (n[4] / 127) : 0.26;
-      g.fillStyle = live || !n[5] ? '#ffffff' : ORANGE;
+      g.globalAlpha = live ? 1 : song.plain ? 0.62 : n[5] ? 0.4 + 0.6 * (n[4] / 127) : 0.26;
+      g.fillStyle = live || !n[5] || song.plain ? '#ffffff' : ORANGE;
       g.fillRect(x, 4 + k * opts.rh + pad, nw, opts.rh - pad * 2);
     });
     g.globalAlpha = 1;
@@ -306,7 +333,7 @@ export const CLIENT_JS = String.raw`
     state = s;
     setBtn(btn, s);
     var id = kit ? kit.folders[fi].id : '';
-    rowBtns.forEach(function (b) { setBtn(b, b.getAttribute('data-dkf') === id ? s : 'stopped'); });
+    rowBtns.forEach(function (b) { b.setAttribute('data-state', b.getAttribute('data-dkf') === id && +b.getAttribute('data-dkg') === gi ? s : 'stopped'); });
     if (s === 'stopped') draw(-1);
   }
   function start() { playSong(song, draw, setState); clarityEvent('player_play'); }
@@ -352,17 +379,70 @@ export const CLIENT_JS = String.raw`
     });
     rowBtns.forEach(function (b) {
       b.addEventListener('click', function () {
-        var id = b.getAttribute('data-dkf');
-        if (state !== 'stopped' && kit && kit.folders[fi].id === id) return stopAll();
+        var id = b.getAttribute('data-dkf'), g = +b.getAttribute('data-dkg');
+        if (b.getAttribute('data-state') !== 'stopped') return stopAll();
         audio();
-        setBtn(b, 'loading');
+        b.setAttribute('data-state', 'loading');
         loadKit().then(function () {
-          for (var i = 0; i < kit.folders.length; i++) if (kit.folders[i].id === id) return show(i, 0, 0, true);
+          for (var i = 0; i < kit.folders.length; i++) if (kit.folders[i].id === id) return show(i, g, 0, true);
         });
+        clarityEvent('folder_play');
       });
     });
     if ('ResizeObserver' in window) new ResizeObserver(function () { if (state === 'stopped') draw(-1); }).observe(cv);
   }
+
+  // ---- no bounce vs bounce: two beats, same sounds and tempo; the switch swaps the notes while it plays ----
+  (function () {
+    var el = document.getElementById('dkn');
+    if (!el) return;
+    var cvB = el.querySelector('canvas'), btnB = el.querySelector('.dk-play'), sw = [].slice.call(el.querySelectorAll('[data-bounce]'));
+    var what = el.querySelector('.dkn-what'), sets2 = null, songB = null, on = 0, st = 'stopped', last = 0, loops = 0, wait = null;
+    function o() { var narrow = (cvB.clientWidth || 600) < 520; return { lab: narrow ? 50 : 72, rh: narrow ? 16 : 20 }; }
+    function paint(pos) {
+      if (!songB) return;
+      // once round on "no bounce": point at the other side
+      if (pos >= 0 && pos < last && !on && ++loops === 1) sw[1].classList.add('nudge');
+      last = pos;
+      drawRoll(cvB, songB, pos, o());
+    }
+    function set(v) {
+      on = v;
+      sw.forEach(function (b) { b.setAttribute('aria-pressed', +b.getAttribute('data-bounce') === on); });
+      sw[1].classList.remove('nudge');
+      what.querySelector('b').textContent = W.bn[on][0];
+      what.querySelector('span').textContent = W.bn[on][1];
+      what.querySelector('small').textContent = on && sets2 ? 'MIDI Drum Kit / ' + sets2.f.replace('/', ' / ') : '';
+      if (songB) { songB.notes = sets2.notes[on]; songB.plain = !on; if (st === 'stopped') paint(-1); }
+    }
+    function load() {
+      if (!wait) {
+        wait = fetch(DATA + 'bounce.json').then(function (r) { return r.json(); }).then(function (d) {
+          var a = unflat(d.off, 1), b = unflat(d.on, 1);
+          sets2 = { f: d.f, notes: [a, b] };
+          songB = { notes: a, len: d.len, bpm: d.bpm, rows: rowsOf(a.concat(b)), plain: true };
+          set(on);
+        });
+        wait.catch(function () { wait = null; });
+      }
+      return wait;
+    }
+    function state(x) { st = x; setBtn(btnB, x); if (x === 'stopped') paint(-1); }
+    function start() {
+      audio();
+      load().then(function () { last = 0; playSong(songB, paint, state); clarityEvent('bounce_play'); });
+    }
+    near(el, load);
+    btnB.addEventListener('click', function () { if (st === 'loading') return; if (st === 'playing') return stopAll(); start(); });
+    sw.forEach(function (b) {
+      b.addEventListener('click', function () {
+        set(+b.getAttribute('data-bounce'));
+        if (st === 'stopped') start();
+        clarityEvent(on ? 'bounce_on' : 'bounce_off');
+      });
+    });
+    if ('ResizeObserver' in window) new ResizeObserver(function () { if (st === 'stopped') paint(-1); }).observe(cvB);
+  })();
 
   // ---- the bonuses' MIDI files: a short roll each, with its own play ----
   var MINI = { lab: 0, rh: 14 };
@@ -374,12 +454,12 @@ export const CLIENT_JS = String.raw`
         var files = data[ol.getAttribute('data-rolls')] || [];
         ol.innerHTML = '';
         files.forEach(function (e) {
-          var notes = unflat(e.n, 1), s = { notes: notes, len: e.len, bpm: e.bpm || 100, rows: rowsOf(notes) };
+          var notes = unflat(e.n, 1), s = { notes: notes, len: e.len, bpm: e.bpm || 100, rows: rowsOf(notes), kit: e.k || 0 };
           var li = document.createElement('li');
           li.className = 'dkr';
           li.innerHTML = '<div class="dkr-head"><button class="dk-play" type="button" data-state="stopped" aria-label="' + W.play + '">' + PLAY + '</button><div><b></b><span></span></div></div><canvas aria-hidden="true"></canvas>';
           li.querySelector('b').textContent = e.t;
-          li.querySelector('span').textContent = e.f.split('/').pop();
+          li.querySelector('span').textContent = (e.v ? e.v + ' · ' : '') + e.f.split('/').pop();
           ol.appendChild(li);
           var c = li.querySelector('canvas'), b = li.querySelector('button'), st = 'stopped';
           function paint(pos) { drawRoll(c, s, pos, MINI); }
