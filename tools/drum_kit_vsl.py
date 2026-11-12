@@ -75,8 +75,8 @@ def rolls():
     read = lambda path, sound=None: T.entry(path[len(KIT):], z.read(path), sound)
     cut = lambda notes, beats: [n for n in notes if n[0] < beats]
     out = {}
-    b = json.load(open(os.path.join(PLAYER, "v5", "bounce4.json")))
-    out["flat"] = {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["off"]), "file": "A plain beat: kick and 808 on the one and just before bar two, snare on the three, straight hi-hats"}
+    b = json.load(open(os.path.join(PLAYER, "v6", "bounce.json")))
+    out["flat"] = {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["off"]), "file": "A plain beat: kick and 808 on the one, and an 8th before the snare in bars 2 and 4; straight hi-hats"}
     out["bounce"] = {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["on"]), "file": f"{KIT}{b['f']}".replace("/", " / ")}
     # the same beat, its hats in the last two beats swapped for a Roll Up fragment
     frag = find("2. Hihat Closed/Roll Up/", "Fragment_10")

@@ -23,7 +23,10 @@ exactly what is in them:
 Times are in beats (quarter notes). A note is five numbers, t, length, sound, pitch, velocity, one
 after the other in "n". sound is an index of INST. pitch: the 808's MIDI note; for the others the
 semitones from the file's middle C (0 in the kit's multi-track folders, as the first player had them).
-A new layout of these files goes in a new folder (v6…): v5 (2026-11-12, "le demo in beatstarters si fermano
+A new layout of these files goes in a new folder (v7…): v6 (2026-11-12, late: "mostriamo più demo numero pari",
+"più drum pads", the hooks "i primi sono più belli", Drunk Swing Grooves "qualche file più estremo come primo", the
+plain beat's kicks an 8th before snares 2 and 4) has 6 Famous Beats, 6 grooves (a Heavy Drunk one first), 8 Beat
+Starters, the first 6 hooks, 24 pads and bounce.json; v5 (2026-11-12, "le demo in beatstarters si fermano
 a metà? falle suonare tutte", "nelle demo di famous beats bundle metti suoni diversi per ogni demo", "una sezione
 che te lo fa sentire. NO BOUNCE VS BOUNCE") has the whole clips, the sound sets, the bounce pair and the tree; v4 has the beat styles and the Drunk Swing Grooves clips; v3 because v2's first files were asked for before their deploy and the brand domain kept the 404s for a week: browsers keep /funnels/* for a week.
 """
@@ -38,7 +41,7 @@ import tempfile
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "public", "funnels", "midi-drum-kit", "player", "v5")
+OUT = os.path.join(ROOT, "public", "funnels", "midi-drum-kit", "player", "v6")
 
 INST = ["808", "kick", "snare", "clap", "rim", "hat", "ohat", "perc"]
 I808, KICK, SNARE, CLAP, RIM, HAT, OHAT, PERC = range(8)
@@ -268,14 +271,16 @@ def bonus(z, dsg):
     by_vol = {}
     for n in famous:
         by_vol.setdefault(n.split("/")[1], []).append(n)
-    for vol in sorted(by_vol):
-        n = by_vol[vol][0]
+    # one file of each volume, then a second of Vol.1: an even number, two columns on a computer
+    picks = [by_vol[vol][0] for vol in sorted(by_vol)] + [by_vol[sorted(by_vol)[0]][1]]
+    for n in picks:
+        vol = n.split("/")[1]
         e = entry(n.split("/", 1)[1], z.read(n), pitched=True, cap=16)
         e["t"] = title(os.path.basename(n)[:-4])
         e["v"] = vol.replace("Famous Beats ", "")  # "Vol.1"
         # its sounds: the player's own for the first, a set of its own for each of the others (KITS)
-        if out["famous"] and len(out["famous"]) < len(KITS):
-            e["k"] = len(out["famous"])
+        if len(out["famous"]) % len(KITS):
+            e["k"] = len(out["famous"]) % len(KITS)
         out["famous"].append(e)
     if dsg:
         grooves = sorted(n for n in dsg.namelist() if "/2 Drum Grooves/Drum Rack (GM map)/" in n and "Medium Drunk" in n and n.lower().endswith(".mid"))
@@ -287,13 +292,16 @@ def bonus(z, dsg):
                 continue
             seen.append((name, n))
         step = max(1, len(seen) // 5)
-        for name, n in seen[::step][:5]:
+        # first the most drunk one, Jazzy Hop half-time at Heavy Drunk, then five at Medium Drunk
+        heavy = next(n for n in dsg.namelist() if "/2 Drum Grooves/Drum Rack (GM map)/" in n and "09 Jazzy Hop (Half-Time) - Heavy Drunk" in n)
+        pool = [x for x in seen if x[0] != "Jazzy Hop (Half-Time)"]
+        for name, n in [("Jazzy Hop (Half-Time), Heavy Drunk", heavy)] + pool[::step][:5]:
             e = entry(n.split("/", 1)[1], dsg.read(n), gm=True)
             e["t"] = name
             # Its sound on the page: the groove as the Drunk Swing Grooves page plays it, a hip hop kit, not the
             # Drum Kit's trap sounds ("should be hiphop more than trap", 2026-11-12). public/funnels/drunk-swing-grooves/audio/all.
             num = os.path.basename(n)[:2]
-            clip = f"{num}-{'ht' if 'Half-Time' in n else '24'}-medium.mp3"
+            clip = f"{num}-{'ht' if 'Half-Time' in n else '24'}-{'heavy' if 'Heavy Drunk' in n else 'medium'}.mp3"
             assert os.path.exists(os.path.join(ROOT, "public", "funnels", "drunk-swing-grooves", "audio", "all", clip)), clip
             e["a"] = f"/funnels/drunk-swing-grooves/audio/all/{clip}"
             out["dsg"].append(e)
@@ -337,6 +345,7 @@ def clip(src_bytes, ext, dst, seconds=None, mono=False):
 # One sample per Beat Starters pack (all seven), whole, and four hooks at different tempos, whole; the pads' one-shots.
 STARTERS = [
     ("Chord Progressions", "Chord Progressions MIDI Pack/02 - MP3 Previews/"),
+    ("Chord Progressions 2", "Chord Progressions MIDI Pack/02 - MP3 Previews/"),  # 8, an even number
     ("Emotional Pianos", "Emotional Pianos MIDI Pack/03 - MP3 Samples/01 - Beat Starters/"),
     ("Guitars", "Guitars MIDI Pack/03 - MP3 Samples/01 - Beat Starters/"),
     ("Melodies", "Melodies MIDI Pack/02 - MP3 Samples/"),
@@ -344,11 +353,15 @@ STARTERS = [
     ("Trap Pianos", "Trap Pianos MIDI Pack/03 - MP3 Samples/01 - Beat Starters/"),
     ("Trap Plucks", "Trap Plucks MIDI Pack/03 - MP3 Samples/01 - Beat Starters/"),
 ]
-HOOKS = ["Hook03", "Hook05", "Hook08", "Hook13"]
+HOOKS = ["Hook01", "Hook02", "Hook03", "Hook04", "Hook05", "Hook06"]  # the first of the pack ("i primi sono più belli")
 PADS = [
     ("Kick 1", "kick/GRKick01.wav"), ("Kick 2", "kick/Kick05.wav"), ("Snare 1", "snare/GRSnare01.wav"), ("Snare 2", "snare/Snare10.wav"),
     ("Clap 1", "clap/Clap01.wav"), ("Clap 2", "clap/GRClap08.wav"), ("Hat 1", "hihat/ClosedHat02.wav"), ("Hat 2", "hihat/GRhihat08.wav"),
     ("Open hat", "hihat/OPEN HAT 1.wav"), ("Rim", "rim/GRRim02.wav"), ("Perc 1", "perc/GRPerc01.wav"), ("Perc 2", "perc/PERC 3.wav"),
+    # 24 since 2026-11-12 ("più drum pads"): 3 rows of 8 on a phone, 6 of 4 on a computer
+    ("Kick 3", "kick/GRKick03.wav"), ("Kick 4", "kick/KickC15.wav"), ("Snare 3", "snare/GRSnare12.wav"), ("Snare 4", "snare/SnareF01.wav"),
+    ("Clap 3", "clap/GRClap03.wav"), ("Clap 4", "clap/Clap06.wav"), ("Hat 3", "hihat/ClosedHat20.wav"), ("Hat 4", "hihat/GRhihat11.wav"),
+    ("Open hat 2", "hihat/OPEN HAT 4.wav"), ("Rim 2", "rim/GRRim01.wav"), ("Perc 3", "perc/GRPerc02.wav"), ("Perc 4", "perc/PERC 17.wav"),
 ]
 
 
@@ -372,7 +385,8 @@ def clips(z, hooks):
             key, bpm = stem.split("_")[-2:]
             peaks = clip(hooks.read(n), ".wav", os.path.join(OUT, "clips", f"hook-{k}.m4a"))
             out["hooks"].append({"name": f"Hook {tag[-2:]}", "file": os.path.basename(n), "key": key, "bpm": int(bpm), "peaks": peaks})
-    for k, (label, path) in enumerate(PADS, 1):
+    order = ["Kick", "Snare", "Clap", "Hat", "Open", "Rim", "Perc"]  # the pads grouped by drum
+    for k, (label, path) in enumerate(sorted(PADS, key=lambda p: next(i for i, w in enumerate(order) if p[0].startswith(w))), 1):
         clip(z.read("4 - BONUS - Hit-Making Drums - Drumkit/" + path), ".wav", os.path.join(OUT, "clips", f"pad-{k}.m4a"), mono=True)
         out["pads"].append({"name": label, "file": os.path.basename(path)})
     print("clips.json", write("clips.json", out), "bytes")
@@ -450,8 +464,10 @@ def bounce(z):
     snare = [n for n in notes if n[2] in (SNARE, CLAP) and n[0] == int(n[0])]
     sub = next((n[3] for n in notes if n[2] == I808), 36)
     plain = []
+    # then (same night) "la cassa/808 sul secondo movimento della seconda e quarta battuta, 1/8 prima del secondo e
+    # quarto rullante": kicks on the one of bars 1 and 3, and on the "and" of two in bars 2 and 4 (5.5, 13.5)
     for b in range(0, bars, 2):
-        for at, held in ((0, 1.5), (3.5, 1.5)):
+        for at, held in ((0, 1.5), (5.5, 2)):
             plain.append((num(b * 4 + at), held, I808, sub, 100))
             plain.append((num(b * 4 + at), 0.25, KICK, 0, 100))
     plain += [(n[0], 0.25, n[2], 0, 100) for n in snare]
@@ -459,7 +475,7 @@ def bounce(z):
     plain.sort()
     out = {"f": e["f"], "bpm": e["bpm"], "len": e["len"], "on": e["n"], "off": [x for n in plain for x in n]}
     # a new name: browsers keep /funnels/* for a week
-    print("bounce4.json", write("bounce4.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
+    print("bounce.json", write("bounce.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
 
 
 def main(argv):

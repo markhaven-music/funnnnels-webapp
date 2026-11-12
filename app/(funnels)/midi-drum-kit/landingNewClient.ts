@@ -23,13 +23,18 @@ export const CLIENT_JS = String.raw`
   var cfgEl = document.getElementById('dk-cfg');
   if (!cfgEl) return;
   var W = JSON.parse(cfgEl.textContent);
-  var BASE = '/funnels/midi-drum-kit/player/', DATA = BASE + 'v5/';
+  var BASE = '/funnels/midi-drum-kit/player/', DATA = BASE + 'v6/';
   var SOUND = [null, 'kick', 'snare', 'clap', 'rim', 'hat', 'ohat', 'perc'];
   var LEVEL = [0.9, 1, 0.8, 0.75, 0.7, 0.5, 0.45, 0.6];
   var ORANGE = '#ff9a2a';
   var PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>';
   var STOP = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/></svg>';
   var ctx = null, bufs = null, loading = null, now = null, sets = {}, curves = {};
+  // The kit player's mix ("un piccolo metronomo spegnibile", "permetti anche di mutare o cambiare suono dell'hihat o
+  // altre parts", 2026-11-12): a click on every beat, each drum muted or played with another sound: 0 = the player's
+  // own, 1-4 = the Hit-Maker Drums sets of player/v6/kits (for the 808: its five ways of being made, SUBS).
+  var metro = false, mute = {}, pick = {}, setBufs = {};
+  var SOUNDS = 5;
   // The 808 is made here, not sampled: the wave, how far above the note it starts and how fast it falls to it, how hard it is driven.
   var SUBS = [{ w: 'sine', m: 1.9, t: 0.035, d: 0 }, { w: 'sine', m: 1.5, t: 0.05, d: 3 }, { w: 'triangle', m: 2.2, t: 0.025, d: 0 }, { w: 'sine', m: 3, t: 0.06, d: 2 }, { w: 'triangle', m: 1.3, t: 0.02, d: 1.5 }];
 
@@ -58,6 +63,7 @@ export const CLIENT_JS = String.raw`
   function soundSet(k) {
     if (!sets[k]) {
       sets[k] = Promise.all(SOUND.map(function (f) { return f ? fetchBuf(DATA + 'kits/k' + k + '-' + f + '.m4a').then(decode) : null; }));
+      sets[k].then(function (b) { setBufs[k] = b; });
       sets[k].catch(function () { delete sets[k]; });
     }
     return sets[k];
@@ -89,8 +95,18 @@ export const CLIENT_JS = String.raw`
     var out = ctx.createGain();
     out.gain.value = 0.8;
     out.connect(ctx.destination);
+    function click(t, accent) {
+      var o = ctx.createOscillator(), a = ctx.createGain();
+      o.frequency.value = accent ? 1760 : 1175;
+      a.gain.setValueAtTime(0.22, t);
+      a.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+      o.connect(a); a.connect(ctx.destination);
+      o.start(t); o.stop(t + 0.05);
+    }
     function fire(t, n) {
       var vel = n[4] / 127, ins = n[2];
+      if (song.mix && mute[ins]) return;
+      if (song.mix) sub = SUBS[pick[0] || 0];
       if (ins === 0) {
         var o = ctx.createOscillator(), a = ctx.createGain(), f = 440 * Math.pow(2, (n[3] - 69 - 24) / 12);
         var len = Math.max(0.12, Math.min(n[1] * s, 1.6));
@@ -110,10 +126,11 @@ export const CLIENT_JS = String.raw`
         o.start(t); o.stop(t + len + 0.08);
         return;
       }
-      if (!B[ins]) return;
+      var buf = song.mix && pick[ins] && setBufs[pick[ins]] ? setBufs[pick[ins]][ins] : B[ins];
+      if (!buf) return;
       if (ins === 5 && open) { try { open.gain.setTargetAtTime(0, t, 0.01); } catch (e) {} }
       var src = ctx.createBufferSource(), g = ctx.createGain();
-      src.buffer = B[ins];
+      src.buffer = buf;
       if (n[3]) src.playbackRate.value = Math.pow(2, Math.max(-30, Math.min(24, n[3])) / 12);
       g.gain.value = LEVEL[ins] * (0.35 + 0.65 * vel) * (n[5] ? 1 : 0.8);
       src.connect(g); g.connect(out);
@@ -129,6 +146,7 @@ export const CLIENT_JS = String.raw`
           var n = song.notes[i];
           if (n[0] >= lo && n[0] < hi) fire(t0 + (base + n[0]) * s, n);
         }
+        if (song.mix && metro) for (var b = Math.ceil(lo - 1e-6); b < hi; b++) click(t0 + (base + b) * s, b % 4 === 0);
         cursor = end;
       }
     }
@@ -250,6 +268,7 @@ export const CLIENT_JS = String.raw`
   var chips = $('[data-row=folders]'), subs = $('[data-row=groups]'), styles = $('[data-row=styles]'), tempos = $('[data-row=tempos]'), grid = $('[data-row=files]');
   var btn = $('.dkp-play'), title = $('.dkp-title'), meta = $('.dkp-meta'), file = $('.dkp-file span'), cv = $('.dkp-roll'), box = $('.dkp-beatbox'), filesL = $('.dkp-filesl');
   var rowBtns = [].slice.call(document.querySelectorAll('[data-dkf]'));
+  var mixEl = $('.dkp-mix'), metroBtn = $('[data-metro]');
 
   function stylePicks() {
     var p = {}, parts = kit.styles[style].parts;
@@ -299,7 +318,7 @@ export const CLIENT_JS = String.raw`
       // a kick, snare or hat pattern the visitor plays takes that drum's place in the beat for what they try next
       if (span >= 16) Object.keys(PART).forEach(function (k) { if (PART[k] === grp.inst) picks[k] = unflat(e.n, 0); });
     }
-    song = { notes: notes, len: len, bpm: bpm, rows: rowsOf(notes) };
+    song = { notes: notes, len: len, bpm: bpm, rows: rowsOf(notes), mix: true };
   }
   function two(n) { return (n < 10 ? '0' : '') + n; }
   function pressed(row, attr, value) {
@@ -320,6 +339,14 @@ export const CLIENT_JS = String.raw`
     pressed(styles, 'data-style', style);
     pressed(tempos, 'data-tempo', tempo);
     box.classList.toggle('off', !beatOn);
+    // the mix: a line per drum this file plays (with the beat around it), built again when the drums change
+    var key = song.rows.join(',');
+    if (mixEl.getAttribute('data-rows') !== key) {
+      mixEl.setAttribute('data-rows', key);
+      mixEl.innerHTML = song.rows.map(function (r) {
+        return '<div class="dkp-mixi"><button type="button" data-mute="' + r + '" aria-pressed="' + !mute[r] + '">' + W.rows[r] + '</button><button type="button" data-snd="' + r + '" aria-label="' + W.change + ' ' + W.rows[r] + '">\u21bb ' + ((pick[r] || 0) + 1) + '</button></div>';
+      }).join('');
+    }
     // every file of the group as a small picture; built once per group
     if (shown !== grp.id) {
       shown = grp.id;
@@ -367,6 +394,19 @@ export const CLIENT_JS = String.raw`
       if (song) start(); else show(0, 0, 0, true);
     });
     root.addEventListener('click', function (e) {
+      var m = e.target.closest('[data-mute],[data-snd],[data-metro]');
+      if (m) {
+        if (m.hasAttribute('data-metro')) { metro = !metro; m.setAttribute('aria-pressed', metro); if (metro && state === 'stopped') btn.click(); return; }
+        var r = +m.getAttribute(m.hasAttribute('data-mute') ? 'data-mute' : 'data-snd');
+        if (m.hasAttribute('data-mute')) { mute[r] = !mute[r]; m.setAttribute('aria-pressed', !mute[r]); }
+        else {
+          pick[r] = ((pick[r] || 0) + 1) % SOUNDS;
+          if (r && pick[r]) { audio(); soundSet(pick[r]); }
+          m.textContent = '\u21bb ' + (pick[r] + 1);
+        }
+        if (state === 'stopped') btn.click();
+        return;
+      }
       var t = e.target.closest('[data-f],[data-g],[data-step],[data-i],[data-beat],[data-style],[data-tempo]');
       if (!t) return;
       var has = function (a) { return t.hasAttribute(a); }, val = function (a) { return +t.getAttribute(a); };
@@ -419,7 +459,7 @@ export const CLIENT_JS = String.raw`
     }
     function load() {
       if (!wait) {
-        wait = fetch(DATA + 'bounce4.json').then(function (r) { return r.json(); }).then(function (d) {
+        wait = fetch(DATA + 'bounce.json').then(function (r) { return r.json(); }).then(function (d) {
           var a = unflat(d.off, 1), b = unflat(d.on, 1);
           sets2 = { f: d.f, notes: [a, b] };
           songB = { notes: a, len: d.len, bpm: d.bpm, rows: rowsOf(a.concat(b)), plain: true };

@@ -1,6 +1,6 @@
 import type { Currency } from "@/lib/geo";
-import clips from "@/public/funnels/midi-drum-kit/player/v5/clips.json";
-import tree from "@/public/funnels/midi-drum-kit/player/v5/tree.json";
+import clips from "@/public/funnels/midi-drum-kit/player/v6/clips.json";
+import tree from "@/public/funnels/midi-drum-kit/player/v6/tree.json";
 import type { Copy } from "./copy";
 import type { Lang } from "./i18n";
 import { JAZZ_CSS } from "./jazzCss";
@@ -35,7 +35,7 @@ import { STACK_VALUES } from "./stackSwitch";
 // hear where the page explains bounce.
 
 const IMG = "/funnels/midi-drum-kit/";
-const V2 = `${IMG}player/v5/`;
+const V2 = `${IMG}player/v6/`;
 
 const HERO = ".id-6Z-Renrye-167";
 const H2 = [
@@ -124,6 +124,18 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkp-step{min-height:52px;padding:0 8px;white-space:nowrap;border:0;border-radius:3px;background:#ff9a2a;color:#1a0d00;font:700 15px/1 ${BODY};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .dkp-bar .dk-play{width:64px;height:64px}
 .dkp-bar .dk-play svg{width:26px;height:26px}
+.dkp-mixbox{margin-top:14px}
+.dkp-mixhead{display:flex;align-items:center;justify-content:space-between;gap:10px;font:600 11px/1.2 ${MONO};letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.dkp-metro{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border:0;border-radius:3px;background:#1c1b22;color:rgba(255,255,255,.75);font:700 13px/1 ${BODY};letter-spacing:0;text-transform:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.dkp-metro i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.3)}
+.dkp-metro[aria-pressed=true]{background:#2a2932;color:#fff}
+.dkp-metro[aria-pressed=true] i{background:#ff9a2a;box-shadow:0 0 8px #ff9a2a}
+.dkp-mix{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px}
+.dkp-mixi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px;min-width:0}
+.dkp-mixi button{min-height:40px;padding:0 10px;border:0;background:#1c1b22;color:#fff;font:600 13px/1 ${BODY};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.dkp-mixi button:first-child{border-radius:3px 0 0 3px}
+.dkp-mixi button:last-child{border-radius:0 3px 3px 0;color:#ffa83e;font:600 11px/1 ${MONO}}
+.dkp-mixi button[aria-pressed=false]{color:rgba(255,255,255,.35);text-decoration:line-through}
 .dkp-beatbox{margin-top:16px;padding:14px;border-radius:4px;background:#15141a}
 .dkp-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:4px;background:#0b0a0e}
 .dkp-seg button{min-height:44px;border:0;border-radius:3px;background:none;color:rgba(255,255,255,.62);font:700 15px/1 ${BODY};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -271,7 +283,7 @@ details[open]>summary.dkt-row .c{rotate:90deg}
 @keyframes dkpad{from{background:#ff9a2a}to{background:#1c1b22}}
 
 @media (max-width:640px){.dkp-sec{padding:48px 12px 56px}.dkp-panel{padding:14px 14px 12px;margin-top:24px}.dkp-chips{margin:0 -14px;padding:0 14px}.dkp-grid{margin:0 -14px;padding:0 14px 6px}.dkp-opt .dkp-chips{margin:0 -14px 0 0;padding:0 14px 0 0}}
-@media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{display:block;columns:2;column-gap:12px}.dkf>li{margin-bottom:12px}.dkf-top{grid-template-columns:140px minmax(0,1fr);gap:18px}.dkf-top img{width:140px;height:140px}.dkf h3{font-size:22px}.dkf-more ul{grid-template-columns:repeat(2,minmax(0,1fr))}.dkn{padding:30px 32px 26px}}
+@media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkp-mix{grid-template-columns:repeat(4,minmax(0,1fr))}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{display:block;columns:2;column-gap:12px}.dkf>li{margin-bottom:12px}.dkf-top{grid-template-columns:140px minmax(0,1fr);gap:18px}.dkf-top img{width:140px;height:140px}.dkf h3{font-size:22px}.dkf-more ul{grid-template-columns:repeat(2,minmax(0,1fr))}.dkn{padding:30px 32px 26px}}
 @media (min-width:1000px){.dkt-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:start}.dkt-side{position:sticky;top:72px;padding-top:8px}.dkb{gap:72px}.dkb>li{grid-template-columns:minmax(0,.36fr) minmax(0,.64fr);align-items:start;gap:0 56px;padding:44px 48px}.dkb-cover{grid-row:1/span 2;max-width:none;position:sticky;top:64px}.dkb-label{font-size:14px}.dkb h3{margin-top:10px;font-size:30px}.dkb-text{margin-top:14px;font-size:18px}.dkb-inside{gap:8px;margin-top:14px;font-size:17px}.dkb-preview{grid-column:2;margin-top:30px}.dkb>li.bare .dkb-preview{display:none}}
 `;
 
@@ -298,6 +310,10 @@ const WORDS: Record<L, Record<string, string>> = {
     beatOn: "Beat on",
     beatOff: "Beat off",
     reset: "Start over",
+    mixTitle: "Sounds · tap a drum to mute it",
+    metro: "Metronome",
+    sound: "Sound",
+    change: "Change the sound of",
     of: "of",
     inKit: "In the kit",
     files: "MIDI files",
@@ -323,7 +339,7 @@ const WORDS: Record<L, Record<string, string>> = {
     bnSub: "Same sounds, same tempo, four bars. Only the pattern changes. Press play, then flip the switch.",
     bnOff: "No bounce",
     bnOn: "Bounce",
-    bnOffWhat: "A plain beat: kick and 808 on the one and just before bar two, snare on the three, straight hi-hats.",
+    bnOffWhat: "A plain beat: kick and 808 on the one, and an 8th before the snare in bars 2 and 4; straight hi-hats.",
     bnOnWhat: "Complete Beat 13 from the kit, exactly as it is in the zip.",
   },
   it: {
@@ -347,6 +363,10 @@ const WORDS: Record<L, Record<string, string>> = {
     beatOn: "Beat on",
     beatOff: "Beat off",
     reset: "Ricomincia",
+    mixTitle: "Suoni · tocca un pezzo per silenziarlo",
+    metro: "Metronomo",
+    sound: "Suono",
+    change: "Cambia il suono di",
     of: "di",
     inKit: "Nel kit",
     files: "file MIDI",
@@ -372,7 +392,7 @@ const WORDS: Record<L, Record<string, string>> = {
     bnSub: "Stessi suoni, stesso tempo, quattro battute. Cambia solo il pattern. Premi play, poi sposta l’interruttore.",
     bnOff: "Senza bounce",
     bnOn: "Con bounce",
-    bnOffWhat: "Un beat piatto: kick e 808 sull’uno e appena prima della seconda battuta, snare sul tre, hi-hat dritti.",
+    bnOffWhat: "Un beat piatto: kick e 808 sull’uno, e un ottavo prima del rullante nella seconda e quarta battuta; hi-hat dritti.",
     bnOnWhat: "Il Complete Beat 13 del kit, esattamente com’è nello zip.",
   },
 };
@@ -451,7 +471,7 @@ const TREE_BONUSES: { dir: string; n: string; subs?: string[] }[] = [
 // The bonuses: the copy keys of the old panel (name with its "BONUS #n:", text), the cover, what is
 // inside (counted from the files buyers download) and what there is to play.
 type Preview = "famous" | "starters" | "pads" | "dsg" | "hooks" | null;
-const BONUSES: { name: string; text: string; cover: string; preview: Preview; inside: Record<L, string[]> }[] = [
+const BONUSES: { name: string; text: string; say?: Record<L, string>; cover: string; preview: Preview; inside: Record<L, string[]> }[] = [
   {
     name: "t116", text: "t117", cover: "bonus2-famous", preview: "famous",
     inside: {
@@ -476,9 +496,14 @@ const BONUSES: { name: string; text: string; cover: string; preview: Preview; in
   },
   {
     name: "t263", text: "t264", cover: "bonus2-grooves", preview: "dsg",
+    say: {
+      en: "The drunk, J Dilla-style swing of lofi and neo soul, as MIDI: drum grooves from a light lean to fully drunk, groove templates for any MIDI, and neo soul keys, with their own PDF guide.",
+      it: "Lo swing ubriaco alla J Dilla del lofi e del neo soul, in MIDI: groove di batteria da un leggero ritardo fino a completamente ubriachi, template di groove per qualsiasi MIDI e accordi neo soul, con la loro guida PDF.",
+    },
     inside: {
-      en: ["160 drum grooves", "31 groove templates", "20 neo soul keys MIDI files", "PDF guide"],
-      it: ["160 groove di batteria", "31 groove template", "20 file MIDI di neo soul keys", "Guida PDF"],
+      // "metti qualche file più estremo come primo e dici J Dilla nella copy" (2026-11-12): a Heavy Drunk groove plays first
+      en: ["160 drum grooves, from a light swing to the J Dilla kind of drunk", "31 groove templates", "20 neo soul keys MIDI files", "PDF guide"],
+      it: ["160 groove di batteria, da uno swing leggero all’ubriaco alla J Dilla", "31 groove template", "20 file MIDI di neo soul keys", "Guida PDF"],
     },
   },
   {
@@ -511,6 +536,7 @@ function player(c: Ctx): string {
 <div class="dkp-head"><div class="dkp-title">&nbsp;</div><div class="dkp-meta">&nbsp;</div></div>
 <canvas class="dkp-roll" aria-hidden="true"></canvas>
 <div class="dkp-bar"><button class="dkp-step" type="button" data-step="-1">‹ ${esc(w.prev)}</button><button class="dk-play dkp-play" type="button" data-state="stopped" aria-label="${esc(w.play)}">${PLAY}</button><button class="dkp-step" type="button" data-step="1">${esc(w.next)} ›</button></div>
+<div class="dkp-mixbox"><div class="dkp-mixhead"><span>${esc(w.mixTitle)}</span><button class="dkp-metro" type="button" data-metro aria-pressed="false"><i aria-hidden="true"></i>${esc(w.metro)}</button></div><div class="dkp-mix"></div></div>
 <div class="dkp-beatbox" hidden>
 <div class="dkp-seg" role="group"><button type="button" data-beat="1" aria-pressed="true">${esc(w.inBeat)}</button><button type="button" data-beat="0" aria-pressed="false">${esc(w.alone)}</button></div>
 <p class="dkp-legend"><span><i class="sel"></i>${esc(w.legendFile)}</span><span><i></i>${esc(w.legendBeat)}</span></p>
@@ -648,7 +674,7 @@ function bonuses(c: Ctx): string {
 <div class="dkb-cover"><img src="${IMG}${b.cover}.webp" width="640" height="952" alt="" loading="lazy" decoding="async"></div>
 <div class="dkb-info"><p class="dkb-label"><span>${esc(c.w.bonus)} ${i + 1}</span><span class="dkb-price"><s>${money(STACK_VALUES.bonuses[i], c)}</s> ${esc(c.w.free)}</span></p>
 <h3>${name}</h3>
-<p class="dkb-text">${c.words(b.text)}</p>
+<p class="dkb-text">${b.say ? esc(b.say[c.lang]) : c.words(b.text)}</p>
 <ul class="dkb-inside">${inside}</ul></div>
 ${pre ? `<div class="dkb-preview">${pre}</div>` : ""}
 </li>`;
@@ -663,7 +689,8 @@ ${pre ? `<div class="dkb-preview">${pre}</div>` : ""}
 // the first cut (c66xeecqeg, 3:37) stays on Wistia.
 // v3 the same night: the Drum Kit's orange, no serif, one box picture at a time, the folders on screen, the
 // first plain beat with its second kick earlier (5:58).
-const NEW_VSL: Partial<Record<L, { id: string; poster: string }>> = { en: { id: "stef7zb1s8", poster: "vsl-en-cold-3" } };
+// v4: the plain beat's second kick an 8th before snares 2 and 4 ("1/8 prima del secondo e quarto rullante").
+const NEW_VSL: Partial<Record<L, { id: string; poster: string }>> = { en: { id: "5zl9hkxqvy", poster: "vsl-en-cold-3" } };
 
 // Where things go in the old page's HTML.
 /** Where a top-level section of the old page starts (its SectionContainer, by its id class); -1 if it isn't there. */
@@ -790,6 +817,7 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
     out = out.replace('<link rel="preload" as="image" href="/funnels/midi-drum-kit/hero-bg.webp" fetchpriority="high">\n', ""); // the old hero's background
   }
   const cfg = {
+    sound: c.w.sound, change: c.w.change,
     play: c.w.play, stop: c.w.stop, loading: c.w.loading, of: c.w.of, all: c.w.all,
     bn: [[c.w.bnOff, c.w.bnOffWhat], [c.w.bnOn, c.w.bnOnWhat]],
     styles: STYLES[l],
