@@ -21,6 +21,10 @@ export const it: Copy = {
 
   order: {
     secure: "Pagamento sicuro",
+    // As the Jazz order page's: the title over the reviews, the words on the guarantee's seal.
+    reviewsTitle: "Cosa dicono i producer del kit.",
+    sealRing: "GARANZIA DI QUALITÀ · GARANZIA DI QUALITÀ · ",
+    sealDays: "GIORNI",
     summaryTitle: "Riepilogo ordine:",
     productAlt: "MIDI Drum Kit: 1050 pattern di batteria MIDI + 6 bonus",
     dl: "Ti mandiamo il link per il download anche via email.",
@@ -106,6 +110,12 @@ export const it: Copy = {
     total: "Totale",
     pay: "PRENDI IL PACK!",
     paySub: "Ottieni l'accesso immediato",
+    // Step 2 as the Jazz order page's (2026-11-12): the tag over the product's name, the line under it,
+    // "{price} · one payment", and the line inside the pay button after the total.
+    instant: "Download immediato",
+    orderDesc: "1050 pattern di batteria MIDI + 6 bonus",
+    onePayment: "un solo pagamento",
+    payInner: "download immediato · un solo pagamento",
     payBar: "Paga {price}",
     bumpMore: "Dettagli",
     bumpLess: "Nascondi",

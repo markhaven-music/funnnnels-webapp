@@ -806,3 +806,32 @@ main.jazzLike {
   letter-spacing: -0.02em;
   color: #ffab0a;
 }
+
+/* ── the page on the Jazz order page's own stylesheets (2026-11-12, the same evening) ──
+   "Make the checkout widget step 2 the same as the MIDI Jazz Pack order checkout widget", "font sizes of the
+   page are different between the two. Also column widths. Make them the same": the page and the form now
+   wear the Jazz page's classes (jazz.module.css, checkout.module.css, btn.module.css, reviews.module.css),
+   and this sets what differs: the Jazz yellow as the Drum Kit's orange, and the old template's Inter for
+   the parts that still name it (the "reserved for" box, the 5-minute bonus). The class twice, so it comes
+   after the Jazz page's own colours whatever order the stylesheets load in. */
+.dk.dk {
+  --y: #f5851f;
+  --y-gloss: #ffa13d;
+  --y-deep: #dd6408;
+  --y-lip: #7a3303;
+  --y-glow: rgb(236 106 12 / 0.55);
+  --y-rgb: 245 133 31;
+  --b-rgb: 245 133 31;
+  --brass: var(--y);
+  --brass-hi: #ff9a2e;
+  --brass-deep: var(--y-deep);
+  --inter: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+/* the guarantee, then how the payment is handled: two of the Jazz page's seal-and-promise rows */
+.pledges {
+  display: grid;
+  gap: clamp(40px, 6vw, 64px);
+}
+.pledges h2 {
+  font-size: clamp(26px, 4vw, 36px);
+}

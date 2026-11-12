@@ -12,31 +12,44 @@ import { readPay, type PayVariant } from "./payTest";
 import { BONUS, BONUS_WORDS } from "./bonusTest";
 import { BonusItem, endBonus, useBonus } from "./BonusClock";
 import { pixel } from "../jazz-midi-pack/Tracking";
-import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet, useFirstTouch } from "../CardFields";
+import { CardFields, cardElements, payWithCard, payWithWallet, Wallet, useFirstTouch, type CardLook } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
+import { Arrow } from "../jazz-midi-pack/Cta";
+import k from "../jazz-midi-pack/btn.module.css";
+import j from "../jazz-midi-pack/checkout.module.css";
 import { Rich } from "../top-hits-midi-bundle/Rich";
-import s from "../top-hits-midi-bundle/order.module.css";
 import d from "./order.module.css";
 import { copyFor, type Copy } from "./copy";
 import { funnel } from "./funnel";
 import { money as fmt, paths, type Lang } from "./i18n";
 import type { OrderOffer } from "./offer";
 
-// The ClickFunnels order form of /spot-available-midi-drum-kit-ad-15m30 (the
-// same template as TOP HITS' ../top-hits-midi-bundle/OrderForm.tsx), step for
-// step, in the page's language (words in ./copy, `form`):
-//   1 · Your Info → first, last, email (saved as a lead), "GO TO STEP 2"
-//   2 · Payment   → product card ($297 crossed out, $27 in green), Card | Paypal,
-//                   three tick-box offers, each whole (picture and text) on
-//                   phones and computers alike, Summary, "GET THE PACK!", and a "Pay $27" bar
-//                   at the bottom of the screen while that button is off it
-// Both buttons look like the sales page's ("stesso stile della pagina dalla
-// quale proviene"): ./order.module.css .cta, in the visitor's test colour.
+// The order form, in the page's language (words in ./copy, `form`). Its steps are the ClickFunnels form's
+// (/spot-available-midi-drum-kit-ad-15m30); since 2026-11-12 it is drawn as the Jazz MIDI Pack's checkout
+// (jazz-midi-pack/CheckoutWidget.tsx), with that page's own classes (checkout.module.css .light,
+// btn.module.css), so the two stay the same ("make the checkout widget step 2 the same as the MIDI Jazz
+// Pack order checkout widget. Same fonts sizes ways of presenting etc"):
+//   1 · Your Info → first, last, email (saved as a lead), the key "GO TO STEP 2"
+//   2 · Payment   → the product with its box ("Instant download", €297 crossed out, €27 · one payment),
+//                   Card | PayPal, the tick-box offers each with its picture, the order's lines and total,
+//                   the key "GET THE PACK!" with the total inside it, and on phones a "Pay" bar at the
+//                   bottom of the screen while that key is off it (the step-2 test's winner, ./payTest.ts)
+// The key is the Jazz page's, in the Drum Kit's orange (./order.module.css .dk sets the colour).
 // Card fields are Stripe's, laid out like ClickFunnels' (../CardFields.tsx);
 // PayPal sends the buyer to PayPal and back (/api/checkout/paypal → /api/checkout/paypal/return).
 // What it sells (`offer`: names, prices, add-ons) comes from the server page,
 // as dashboard → Products has it (./offer.ts). Prices shown here are only a
 // preview: the server prices the order itself.
+
+// The Jazz order page's card fields: its body face, black on white (jazz-midi-pack/CheckoutWidget.tsx GEIST).
+const GEIST: CardLook = {
+  font: "Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontCss: "https://fonts.googleapis.com/css2?family=Geist:wght@400&display=swap",
+  color: "#000000",
+  placeholder: "#6b6b6b",
+  focus: "#000000",
+};
+const BOX = "/funnels/midi-drum-kit/kit-box-v3-160.webp";
 
 const PAYPAL_ON = Boolean(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID);
 
@@ -152,35 +165,43 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
   }, [lang]);
   const state: PayState = { lang, t, currency, country, info, method, picked, setPicked, total, afterOrder, offer, keepCard, pay, bonusLive, bonusOn };
 
+  // €27, not €27.00: as the Jazz checkout writes its prices.
+  const cash = (n: number) => fmt(n, currency, lang, !Number.isInteger(n));
+
   return (
-    <div className={s.form} data-step={step} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
-      {step === 1 ? (
-        <>
-          {/* While step 1 is filled in, Stripe's card fields load out of sight, so on
-              step 2 they show at once ("ci mettono un po' a caricare"). */}
-          {stripePromise && (
-            <div aria-hidden style={{ position: "absolute", left: -10000, top: 0, width: 340, height: 0, overflow: "hidden" }}>
-              <Elements stripe={stripePromise} options={cardElements(INTER, lang, { total, currency })}>
-                <CardFields look={INTER} />
-              </Elements>
-            </div>
-          )}
-          <ol className={s.steps}>
-            <li className={s.stepOn}>
-              <span className={s.stepNum}>1</span>
-              <span>
-                <span className={s.stepTitle}>{t.step1}</span>
-                <span className={s.stepSub}>{t.step1Sub}</span>
-              </span>
-            </li>
-            <li>
-              <span className={s.stepNum}>2</span>
-              <span>
-                <span className={s.stepTitle}>{t.step2}</span>
-                <span className={s.stepSub}>{t.step2Sub}</span>
-              </span>
-            </li>
-          </ol>
+    <div className={`${j.widget} ${j.light}`} data-step={step} onFocusCapture={() => setWanted(true)} onPointerDownCapture={() => setWanted(true)}>
+      <ol className={j.tabs}>
+        <li>
+          <button type="button" className={`${j.tab} ${step === 1 ? j.tabOn : ""}`} onClick={() => { if (step === 2) { keep(info, 1); setStep(1); } }}>
+            <span className={j.tabNum}>1</span>
+            <span>
+              <span className={j.tabTitle}>{t.step1}</span>
+              <span className={j.tabSub}>{t.step1Sub}</span>
+            </span>
+          </button>
+        </li>
+        <li>
+          <div className={`${j.tab} ${step === 2 ? j.tabOn : ""}`} aria-current={step === 2}>
+            <span className={j.tabNum}>2</span>
+            <span>
+              <span className={j.tabTitle}>{t.step2}</span>
+              <span className={j.tabSub}>{t.step2Sub}</span>
+            </span>
+          </div>
+        </li>
+      </ol>
+
+      <div className={j.body}>
+        {/* While step 1 is filled in, Stripe's card fields load out of sight, so on
+            step 2 they show at once ("ci mettono un po' a caricare"). */}
+        {step === 1 && stripePromise && (
+          <div aria-hidden style={{ position: "absolute", left: -10000, top: 0, width: 340, height: 0, overflow: "hidden" }}>
+            <Elements stripe={stripePromise} options={cardElements(GEIST, lang, { total, currency })}>
+              <CardFields look={GEIST} />
+            </Elements>
+          </div>
+        )}
+        {step === 1 ? (
           <InfoStep
             key={restored}
             t={t}
@@ -196,73 +217,54 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
               track({ funnel: funnel.slug, page: "checkout", lang, abCookie: LP.cookie });
             }}
           />
-        </>
-      ) : (
-        <div className={`${s.body} ${d.body}`}>
-          <button type="button" className={s.back} onClick={() => { keep(info, 1); setStep(1); }}>
-            <svg viewBox="0 0 448 512" width="14" height="14" aria-hidden>
-              <path
-                fill="currentColor"
-                d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"
-              />
-            </svg>
-            {t.back}
-          </button>
-
-          <label className={s.product}>
-            <input type="radio" checked readOnly className={s.radio} />
-            <span className={s.productText}>
-              <span className={s.productName}>{pay === "a" ? funnel.orderNameBefore : offer.name}</span>
-            </span>
-            {pay === "a" ? (
-              <span className={s.productPrice}>{fmt(price, currency, lang)}</span>
-            ) : (
-              <span className={s.productPrice}>
-                {/* The price it's down from (funnel.ts wasPrice, the sales page's €297), then today's in green. */}
-                {funnel.wasPrice > price && <s className={d.was}>{fmt(funnel.wasPrice, currency, lang)}</s>}
-                <span className={d.now}>{fmt(price, currency, lang)}</span>
-              </span>
-            )}
-          </label>
-
-          <p className={s.label}>
-            <span>{t.paymentInfo}</span>
-          </p>
-          <div className={s.methods} role="radiogroup" aria-label={t.paymentMethod}>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={method === "card"}
-              className={`${s.method} ${method === "card" ? s.methodOn : ""}`}
-              onClick={() => setMethod("card")}
-            >
-              <CardGlyph /> {t.card}
+        ) : (
+          <>
+            <button type="button" className={j.back} onClick={() => { keep(info, 1); setStep(1); }}>
+              ← {t.back}
             </button>
-            {PAYPAL_ON && (
-              <button
-                type="button"
-                role="radio"
-                aria-checked={method === "paypal"}
-                className={`${s.method} ${method === "paypal" ? s.methodOn : ""}`}
-                onClick={() => setMethod("paypal")}
-              >
-                <PayPalGlyph /> {t.paypal}
-              </button>
-            )}
-          </div>
 
-          {stripePromise ? (
-            <Elements stripe={stripePromise} options={cardElements(INTER, lang, { total, currency })}>
-              <CardPay {...state} stripePromise={stripePromise} />
-            </Elements>
-          ) : (
-            <>
-              {method === "card" && <div className={s.notConnected}>{t.notConnected}</div>}
-              <PayBody {...state} cardOff />
-            </>
-          )}
-        </div>
-      )}
+            <div className={`${j.orderBox} ${j.orderBoxPic}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className={j.orderPic} src={BOX} alt="" width={52} height={67} />
+              <span className={j.orderText}>
+                <span className={j.orderTag}>{t.instant}</span>
+                <span className={j.orderName}>{pay === "a" ? funnel.orderNameBefore : offer.name}</span>
+                <span className={j.orderDesc}>{t.orderDesc}</span>
+                <span className={j.orderPrice}>
+                  {/* The price it's down from (funnel.ts wasPrice, the sales page's €297), then today's. */}
+                  {pay !== "a" && funnel.wasPrice > price && <s className={d.was}>{cash(funnel.wasPrice)}</s>}
+                  {cash(price)} · {t.onePayment}
+                </span>
+              </span>
+            </div>
+
+            <p className={j.label}>
+              <span>{t.paymentInfo}</span>
+            </p>
+            {PAYPAL_ON && (
+              <div className={j.methods} role="radiogroup" aria-label={t.paymentMethod}>
+                <button type="button" role="radio" aria-checked={method === "card"} className={`${j.method} ${method === "card" ? j.methodOn : ""}`} onClick={() => setMethod("card")}>
+                  <CardGlyph /> {t.card}
+                </button>
+                <button type="button" role="radio" aria-checked={method === "paypal"} className={`${j.method} ${method === "paypal" ? j.methodOn : ""}`} onClick={() => setMethod("paypal")}>
+                  <PayPalGlyph /> {t.paypal}
+                </button>
+              </div>
+            )}
+
+            {stripePromise ? (
+              <Elements stripe={stripePromise} options={cardElements(GEIST, lang, { total, currency })}>
+                <CardPay {...state} stripePromise={stripePromise} />
+              </Elements>
+            ) : (
+              <>
+                {method === "card" && <div className={j.notConnected}>{t.notConnected}</div>}
+                <PayBody {...state} cardOff />
+              </>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -282,31 +284,20 @@ function InfoStep({ t, lang, info, onDone }: { t: Copy["form"]; lang: Lang; info
     onDone(data);
   }
   return (
-    <form onSubmit={submit} className={`${s.body} ${d.body}`}>
-      <div className={s.fields}>
-        <input name="firstName" placeholder={t.firstName} autoComplete="given-name" defaultValue={info.firstName} required className={s.input} />
-        <input name="lastName" placeholder={t.lastName} autoComplete="family-name" defaultValue={info.lastName} className={s.input} />
-        <input
-          name="email"
-          type="email"
-          placeholder={t.email}
-          autoComplete="email"
-          inputMode="email"
-          defaultValue={info.email}
-          required
-          className={`${s.input} ${s.wide}`}
-        />
+    <form onSubmit={submit} className={j.form}>
+      <div className={j.row}>
+        <input name="firstName" placeholder={t.firstName} autoComplete="given-name" defaultValue={info.firstName} required className={j.input} />
+        <input name="lastName" placeholder={t.lastName} autoComplete="family-name" defaultValue={info.lastName} className={j.input} />
       </div>
-      <button className={d.cta}>
-        <svg viewBox="0 0 448 512" className={d.ctaArrow} aria-hidden>
-          <path
-            fill="currentColor"
-            d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
-          />
-        </svg>
-        {t.next}
+      <input name="email" type="email" placeholder={t.email} autoComplete="email" inputMode="email" defaultValue={info.email} required className={j.input} />
+      <button className={`${k.btn} ${k.full}`}>
+        <span className={k.shine} aria-hidden />
+        <span className={k.label}>
+          <span>{t.next}</span>
+          <Arrow className={k.arrow} />
+        </span>
       </button>
-      <p className={s.respect}>{t.respect}</p>
+      <p className={j.fine}>{t.respect}</p>
       <OwnerSkip onSkip={() => onDone(info)} />
     </form>
   );
@@ -384,7 +375,7 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
   return (
     <>
       {/* Hidden, not unmounted, on the Paypal tab: switching back keeps what was typed. */}
-      <div hidden={props.method !== "card"} className={s.cardPane}>
+      <div hidden={props.method !== "card"} className={j.cardPane}>
         <Elements
           stripe={stripePromise}
           options={{
@@ -403,11 +394,11 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
           />
         </Elements>
         {hasWallet && (
-          <div className={s.orCard}>
+          <div className={j.orCard}>
             <span>{props.t.orCard}</span>
           </div>
         )}
-        <CardFields words={{ number: props.t.cardNumber, expiry: props.t.cardExpiry, cvc: props.t.cardCvc }} look={INTER} />
+        <CardFields words={{ number: props.t.cardNumber, expiry: props.t.cardExpiry, cvc: props.t.cardCvc }} look={GEIST} />
       </div>
       <PayBody {...props} onCard={payByCard} cardPaying={paying || !stripe} cardError={error} />
     </>
@@ -487,111 +478,65 @@ function PayBody({
   const bonusBump = offer.bumps.find((b) => b.id === BONUS.item);
   const w = BONUS_WORDS[lang];
 
+  const cash = (n: number) => fmt(n, currency, lang, !Number.isInteger(n));
+
   return (
     <>
       {paypal && (
-        <div className={s.paypalNote}>
-          <PayPalGlyph /> {t.paypalNote}
+        <div className={j.paypalNote}>
+          <PayPalGlyph />
+          <span>{t.paypalNote}</span>
         </div>
       )}
 
       {bonusOn && bonusBump && <BonusItem w={w} image={bonusBump.image} price={bonusBump.price} currency={currency} lang={lang} compact />}
-      {pay === "b" &&
-        offered.map((b) => (
-          <ShortBump key={b.id} b={b} on={picked.includes(b.id)} toggle={toggle} t={t} currency={currency} lang={lang} />
-        ))}
-      {/* Test A: the ClickFunnels add-on box as it was before 11-06. */}
-      {pay === "a" &&
-        offered.map((b) => {
-          const on = picked.includes(b.id);
-          return (
-            <label key={b.id} className={s.bump}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
-              <span className={s.bumpHead}>
-                {/* Gone once ticked, as on ClickFunnels. */}
-                {!on && <BumpArrow />}
-                <input type="checkbox" checked={on} onChange={(e) => toggle(b.id, e.target.checked)} className={s.bumpCheck} />
-                <span className={s.bumpTitle}>{b.headline}</span>
-                <span className={s.bumpPrice}>{fmt(b.price, currency, lang)}</span>
-              </span>
-              <span className={s.bumpText}>
-                {b.body.map((p, i) => (
-                  <span key={i} className={s.bumpPara}>
-                    {i === 0 && <span className={s.oto}>{t.oto}</span>} <Rich text={p} currency={currency} />
-                  </span>
-                ))}
-              </span>
-            </label>
-          );
-        })}
+      {offered.map((o) => (
+        <BumpBox key={o.id} o={o} on={picked.includes(o.id)} toggle={toggle} t={t} currency={currency} price={cash(o.price)} />
+      ))}
 
-      <details className={s.summary}>
-        <summary>
-          <span className={s.sumLeft}>
-            <BasketGlyph /> {t.summary}
-            {bonusLive && bonusBump && <b className={d.sumBonus}>{w.summaryTag}</b>}
-          </span>
-          <span className={s.sumRight}>
-            {fmt(total, currency, lang)}
-            <svg viewBox="0 0 448 512" width="12" height="12" aria-hidden className={s.chev}>
-              <path
-                fill="currentColor"
-                d="M207 381.5L12.7 187.1c-9.4-9.4-9.4-24.6 0-33.9l22.7-22.7c9.4-9.4 24.5-9.4 33.9 0L224 284.5l154.7-154c9.4-9.3 24.5-9.3 33.9 0l22.7 22.7c9.4 9.4 9.4 24.6 0 33.9L241 381.5c-9.4 9.4-24.6 9.4-33.9 0z"
-              />
-            </svg>
-          </span>
-        </summary>
-        <div className={s.sumBody}>
-          <div className={s.sumRow}>
-            <span>{offer.name}</span>
-            <span>{fmt(offer.price, currency, lang)}</span>
-          </div>
-          {chosen.map((b) => (
-            <div key={b.id} className={s.sumRow}>
-              <span>{b.name}</span>
-              <span>{fmt(b.price, currency, lang)}</span>
-            </div>
-          ))}
-          {bonusLive && bonusBump && (
-            <div className={s.sumRow}>
-              <span>
-                <span className={d.bonusBadge}>{w.badge}</span> {bonusBump.name}
-              </span>
-              <span>
-                <s className={d.was}>{fmt(bonusBump.price, currency, lang)}</s> {w.free}
-              </span>
-            </div>
-          )}
-          <div className={`${s.sumRow} ${s.sumTotal}`}>
-            <span>{t.total}</span>
-            <span>{fmt(total, currency, lang)}</span>
-          </div>
+      {/* The order's lines, always open, as on the Jazz checkout. */}
+      <div className={j.summary}>
+        <div className={j.sumRow}>
+          <span>{offer.name}</span>
+          <span>{cash(offer.price)}</span>
         </div>
-      </details>
-
-      <button ref={payRef} type="button" className={`${d.cta} ${d.ctaPay}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
-        {busy && !cardOff ? (
-          paypal ? t.openingPaypal : t.processing
-        ) : (
-          <>
-            <svg viewBox="0 0 448 512" className={d.ctaArrow} aria-hidden>
-              <path
-                fill="currentColor"
-                d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
-              />
-            </svg>
-            {t.pay}
-            <span className={d.ctaSub}>{t.paySub}</span>
-          </>
+        {chosen.map((o) => (
+          <div key={o.id} className={j.sumRow}>
+            <span>{o.name}</span>
+            <span>{cash(o.price)}</span>
+          </div>
+        ))}
+        {bonusLive && bonusBump && (
+          <div className={j.sumRow}>
+            <span>
+              <span className={d.bonusBadge}>{w.badge}</span> {bonusBump.name}
+            </span>
+            <span>
+              <s className={d.was}>{cash(bonusBump.price)}</s> {w.free}
+            </span>
+          </div>
         )}
+        <div className={`${j.sumRow} ${j.sumTotal}`}>
+          <span>{t.total}</span>
+          <span>{cash(total)}</span>
+        </div>
+      </div>
+
+      <button ref={payRef} type="button" className={`${k.btn} ${k.full}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
+        <span className={k.shine} aria-hidden />
+        <span className={k.label}>
+          <span>{busy && !cardOff ? (paypal ? t.openingPaypal : t.processing) : t.pay}</span>
+          {!busy && <Arrow className={k.arrow} />}
+        </span>
+        <span className={k.inner}>
+          {cash(total)} · {t.payInner}
+        </span>
       </button>
       {error && (
-        <p className={s.error} role="alert">
+        <p className={j.error} role="alert">
           {error}
         </p>
       )}
-      <p className={s.respect}>{t.respect}</p>
       {/* Always there, slid out of sight while the real button is on screen (./order.module.css .payBarOn). */}
       {pay === "b" && (
         <div className={`${d.payBar} ${payInView ? "" : d.payBarOn}`} aria-hidden={payInView} inert={payInView}>
@@ -626,69 +571,49 @@ function PayBody({
   );
 }
 
-// An add-on: tick, name and price on one line, then its picture and text (no "Details" button since 11-06).
-function ShortBump({
-  b,
+// One tick-box offer, as the Jazz checkout draws it: its picture, the red arrow until ticked, headline and
+// price, then its words after the red "ONE-TIME OFFER:".
+function BumpBox({
+  o,
   on,
   toggle,
   t,
   currency,
-  lang,
+  price,
 }: {
-  b: OrderOffer["bumps"][number];
+  o: OrderOffer["bumps"][number];
   on: boolean;
   toggle: (id: string, on: boolean) => void;
   t: Copy["form"];
   currency: Currency;
-  lang: Lang;
+  price: string;
 }) {
-  const [open, setOpen] = useState(false);
   return (
-    // The whole box ticks it, as the ClickFunnels box did; "Details" and the tick's own row don't toggle twice.
-    <div
-      className={`${s.bump} ${d.bumpShort}`}
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest("button, label, a")) return;
-        toggle(b.id, !on);
-      }}
-    >
-      <label className={`${s.bumpHead} ${d.bumpRow}`}>
+    <label className={j.bump}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className={j.bumpPic} src={o.image} alt="" width={84} height={84} loading="lazy" decoding="async" />
+      <span className={j.bumpHead}>
+        {/* Gone once ticked, as on ClickFunnels. */}
         {!on && <BumpArrow />}
-        <input type="checkbox" checked={on} onChange={(e) => toggle(b.id, e.target.checked)} className={s.bumpCheck} />
-        <span className={s.bumpTitle}>{b.headline}</span>
-        <span className={s.bumpPrice}>{fmt(b.price, currency, lang)}</span>
-      </label>
-      <button type="button" className={d.bumpMore} aria-expanded={open} onClick={() => setOpen(!open)}>
-        {open ? t.bumpLess : t.bumpMore}
-        <svg viewBox="0 0 448 512" width="10" height="10" aria-hidden className={open ? d.bumpMoreOpen : undefined}>
-          <path
-            fill="currentColor"
-            d="M207 381.5L12.7 187.1c-9.4-9.4-9.4-24.6 0-33.9l22.7-22.7c9.4-9.4 24.5-9.4 33.9 0L224 284.5l154.7-154c9.4-9.3 24.5-9.3 33.9 0l22.7 22.7c9.4 9.4 9.4 24.6 0 33.9L241 381.5c-9.4 9.4-24.6 9.4-33.9 0z"
-          />
-        </svg>
-      </button>
-      {/* Always shown, phones included (./order.module.css). */}
-      {(
-        <div className={`${d.bumpDetails} ${open ? d.bumpOpen : ""}`}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
-          <span className={s.bumpText}>
-            {b.body.map((p, i) => (
-              <span key={i} className={s.bumpPara}>
-                {i === 0 && <span className={s.oto}>{t.oto}</span>} <Rich text={p} currency={currency} />
-              </span>
-            ))}
+        <input type="checkbox" checked={on} onChange={(e) => toggle(o.id, e.target.checked)} className={j.bumpCheck} />
+        <span className={j.bumpTitle}>{o.headline}</span>
+        <span className={j.bumpPrice}>{price}</span>
+      </span>
+      <span className={j.bumpPitch}>
+        {o.body.map((p, i) => (
+          <span key={i} className={j.bumpPara}>
+            {i === 0 && <span className={j.bumpOffer}>{t.oto}</span>} <Rich text={p} currency={currency} />
           </span>
-        </div>
-      )}
-    </div>
+        ))}
+      </span>
+    </label>
   );
 }
 
 // ClickFunnels' red arrow: Font Awesome's long-arrow-alt-right at 16px, wobbling.
 function BumpArrow() {
   return (
-    <svg viewBox="0 0 448 512" className={s.bumpArrow} aria-hidden>
+    <svg viewBox="0 0 448 512" className={j.bumpArrow} aria-hidden>
       <path
         fill="currentColor"
         d="M313.941 216H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h301.941v46.059c0 21.382 25.851 32.09 40.971 16.971l86.059-86.059c9.373-9.373 9.373-24.569 0-33.941l-86.059-86.059c-15.119-15.119-40.971-4.411-40.971 16.971V216z"
@@ -699,7 +624,7 @@ function BumpArrow() {
 
 function CardGlyph() {
   return (
-    <svg viewBox="0 0 20 16" width="16" height="13" aria-hidden>
+    <svg viewBox="0 0 20 16" width="18" height="15" aria-hidden>
       <rect x="1" y="1" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <rect x="1" y="4.5" width="18" height="3" fill="currentColor" />
       <rect x="4" y="10.5" width="5" height="1.8" rx="0.9" fill="currentColor" />
@@ -709,7 +634,7 @@ function CardGlyph() {
 
 function PayPalGlyph() {
   return (
-    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden>
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden className={j.ppGlyph}>
       <path
         fill="#179bd7"
         d="M20.07 7.62c.02-.13.02-.27.02-.4C19.86 4 17.4 3 14.27 3H8.4c-.42 0-.78.3-.85.72L5.12 19.14c-.05.3.18.57.48.57h3.6l-.25 1.57c-.04.26.16.5.43.5h3.04c.37 0 .68-.27.74-.63l.03-.16.59-3.72.04-.2c.06-.37.37-.64.74-.64h.47c3.03 0 5.4-1.23 6.09-4.79.29-1.49.14-2.73-.63-3.6a3 3 0 0 0-.42-.42z"
@@ -717,17 +642,6 @@ function PayPalGlyph() {
       <path
         fill="#253b80"
         d="M19.06 7.87c-.1-.06-.21-.11-.33-.15l-.4-.1-.42-.08a10.7 10.7 0 0 0-1.66-.12h-5.03a.8.8 0 0 0-.79.68l-1.07 6.79-.03.2c.07-.45.45-.78.9-.78h1.89c3.7 0 6.6-1.5 7.45-5.86l.07-.37a4.6 4.6 0 0 0-.58-.21zM10.43 7.4a.8.8 0 0 1 .79-.68h5.03c.6 0 1.15.04 1.66.12a7.9 7.9 0 0 1 1.15.28c.25.08.48.18.7.3.25-1.6 0-2.7-.87-3.7C17.94 2.63 16.2 2.1 13.96 2.1H7.48c-.46 0-.85.33-.92.78L3.86 19.98c-.05.34.21.65.55.65h4l1-6.36 1.02-6.87z"
-      />
-    </svg>
-  );
-}
-
-function BasketGlyph() {
-  return (
-    <svg viewBox="0 0 576 512" width="15" height="13" aria-hidden>
-      <path
-        fill="currentColor"
-        d="M576 216v16c0 13.3-10.7 24-24 24h-8l-26.1 182.8C514.5 462.5 494.2 480 470.3 480H105.7c-23.9 0-44.2-17.5-47.5-41.2L32 256h-8c-13.3 0-24-10.7-24-24v-16c0-13.3 10.7-24 24-24h67.3l106.8-146.8c10.4-14.3 30.4-17.5 44.7-7.1 14.3 10.4 17.5 30.4 7.1 44.7L170.4 192h235.2L326.1 82.8c-10.4-14.3-7.2-34.3 7.1-44.7 14.3-10.4 34.3-7.2 44.7 7.1L484.7 192H552c13.3 0 24 10.7 24 24z"
       />
     </svg>
   );

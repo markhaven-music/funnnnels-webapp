@@ -19,6 +19,10 @@ export const en = {
   // ─── order page ────────────────────────────────────────────
   order: {
     secure: "Secure Checkout",
+    // As the Jazz order page's: the title over the reviews, the words on the guarantee's seal.
+    reviewsTitle: "What producers say about the kit.",
+    sealRing: "QUALITY GUARANTEE · QUALITY GUARANTEE · ",
+    sealDays: "DAYS",
     summaryTitle: "Order Summary:",
     productAlt: "MIDI Drum Kit: 1050 MIDI drum patterns + 6 bonuses",
     dl: "Download link will be sent to your email.",
@@ -113,6 +117,12 @@ export const en = {
     pay: "GET THE PACK!",
     // Under it, as on ClickFunnels' order page.
     paySub: "Get Instant Access",
+    // Step 2 as the Jazz order page's (2026-11-12): the tag over the product's name, the line under it,
+    // "{price} · one payment", and the line inside the pay button after the total.
+    instant: "Instant download",
+    orderDesc: "1050 MIDI drum patterns + 6 bonuses",
+    onePayment: "one payment",
+    payInner: "instant download · one payment",
     // Step 2: the bar fixed at the bottom of the screen while the button is off screen, {price} = the total.
     payBar: "Pay {price}",
     // Step 2: each add-on on one line, the rest behind this link.
