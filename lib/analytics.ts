@@ -773,12 +773,16 @@ export const TESTS: TestDef[] = [
     // 2026-11-12, "voglio fare un AB pulito tra vecchio funnel e nuovo senza cambiare URL": the old
     // landing against a new one (midi-drum-kit/landingTest.ts, landingNew.ts), 50/50 at the same
     // address, English and Italian, the same order page after both. Counted by letter, to the sale.
+    // Same day, ~45 minutes in: the new page got the player earlier with all 11 folders, the folders as
+    // a short list and the bonuses rebuilt like the Jazz page's ("put the player earlier in the page",
+    // "i want them to audition the bonuses, just like MIDI Jazz Pack"); the test goes on, its first
+    // minutes are of the first version.
     name: "Landing: old vs new",
     question: "Does the new landing (new box pictures, Jazz-size headlines, a player with the kit's real MIDI files) sell more than the old one?",
-    shots: { "lp-old": `${SHOTS}/landing-old.webp`, "lp-new": `${SHOTS}/landing-new.webp` },
-    where: "Landing, English and Italian (French, Spanish and German keep the old page, not counted) · half the visitors on each page at the same address, each kept on theirs · the same Jazz-style order page after both · New = the boxes redone (kit and 11 folders), headlines the size of the Jazz page's, iridescent light on the cards, and a player with 155 of the kit's own MIDI files, after “What's inside”",
+    shots: { "lp-old": `${SHOTS}/landing-old.webp`, "lp-new": `${SHOTS}/landing-new-2.webp` },
+    where: "Landing, English and Italian (French, Spanish and German keep the old page, not counted) · half the visitors on each page at the same address, each kept on theirs · the same Jazz-style order page after both · New = the boxes redone (kit and 11 folders), headlines the size of the Jazz page's, a player right after the hero with every file of the kit's 11 folders (a single part plays over a simple beat), the ten folder panels as one short list, the bonuses like the Jazz page's with files, clips and pads to play · until 11-12 ~16:20 Italy the new page had the player after “What's inside” with 155 files and the old folder and bonus panels",
     variants: LP.variants,
-    label: (v) => (v === "lp-old" ? "Old · the current page" : "New · new boxes, big headlines, player"),
+    label: (v) => (v === "lp-old" ? "Old · the current page" : "New · new boxes, player first, Jazz-style bonuses"),
     color: (v) => (v === "lp-old" ? { from: "#94a3b8", to: "#64748b" } : { from: "#c084fc", to: "#22d3ee" }),
   },
   {

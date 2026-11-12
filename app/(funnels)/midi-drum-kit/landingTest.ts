@@ -16,7 +16,7 @@ export const LP = {
   cookie: "ab_lp",
   variants: ["lp-old", "lp-new"] as const,
   /** When the test went live (its deploy): the button-colour test ended there, orange kept. */
-  from: "2026-11-12T15:00:00Z",
+  from: "2026-11-12T14:50:00Z",
   /** The languages the test runs in; the others always get the old page. */
   langs: ["en", "it"] as readonly string[],
 };
