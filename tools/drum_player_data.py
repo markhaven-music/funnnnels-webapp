@@ -433,9 +433,12 @@ def kits(z):
 # "NO BOUNCE VS BOUNCE": a Complete Beat of the kit as it is, and a plain beat with the same sounds at the same
 # tempo: a kick and an 808 on the one of every bar, the snare where the kit's beat has it, straight eighth hats
 # all as loud as each other. Nothing else differs, so what is heard is the pattern.
-# Complete Beat 01 since the evening of 2026-11-12 ("bounce example midi isn't great. use one of the complete
-# beats"): the first try was Beat 12, whose 808 runs a melody that the page's plain 808 sound doesn't carry.
-BOUNCE = "9. Complete Beats (Multi-Track)/MDK_CompleteBeat01_164.mid"
+# Complete Beat 13 since the night of 2026-11-12 (it was 01, then: "for the 'with bounce' beat example use the midi you
+# used later, COMPLETE BEAT 13 OF THE KIT 140BPM, it works better"). The plain side is a beat someone would really
+# write, not a straw man ("nobody puts the kick just on the 1st beat… at least the second kick should be
+# syncopated, otherwise it feels disingenuous"): every bar a kick on the one and a second one on the "and" of two,
+# the 808 with each kick on the beat's first 808 note, the snare where the kit's beat has it, straight 8th hats.
+BOUNCE = "9. Complete Beats (Multi-Track)/MDK_CompleteBeat13_140.mid"
 
 
 def bounce(z):
@@ -446,13 +449,15 @@ def bounce(z):
     sub = next((n[3] for n in notes if n[2] == I808), 36)
     plain = []
     for b in range(bars):
-        plain.append((b * 4, 1.5, I808, sub, 100))
-        plain.append((b * 4, 0.25, KICK, 0, 100))
+        for at, held in ((0, 1.25), (1.5, 0.5)):
+            plain.append((num(b * 4 + at), held, I808, sub, 100))
+            plain.append((num(b * 4 + at), 0.25, KICK, 0, 100))
     plain += [(n[0], 0.25, n[2], 0, 100) for n in snare]
     plain += [(num(i * 0.5), 0.25, HAT, 0, 80) for i in range(e["len"] * 2)]
     plain.sort()
     out = {"f": e["f"], "bpm": e["bpm"], "len": e["len"], "on": e["n"], "off": [x for n in plain for x in n]}
-    print("bounce2.json", write("bounce2.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
+    # a new name: browsers keep /funnels/* for a week
+    print("bounce3.json", write("bounce3.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
 
 
 def main(argv):

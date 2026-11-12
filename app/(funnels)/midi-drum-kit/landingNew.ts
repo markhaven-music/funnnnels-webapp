@@ -323,8 +323,8 @@ const WORDS: Record<L, Record<string, string>> = {
     bnSub: "Same sounds, same tempo, four bars. Only the pattern changes. Press play, then flip the switch.",
     bnOff: "No bounce",
     bnOn: "Bounce",
-    bnOffWhat: "A plain beat: kick and 808 on the one, snare on the three, straight hi-hats.",
-    bnOnWhat: "Complete Beat 01 from the kit, exactly as it is in the zip.",
+    bnOffWhat: "A plain beat: kick and 808 on the one and on the “and” of two, snare on the three, straight hi-hats.",
+    bnOnWhat: "Complete Beat 13 from the kit, exactly as it is in the zip.",
   },
   it: {
     h2: "Premi play. Ascolta il kit prima di prenderlo.",
@@ -372,8 +372,8 @@ const WORDS: Record<L, Record<string, string>> = {
     bnSub: "Stessi suoni, stesso tempo, quattro battute. Cambia solo il pattern. Premi play, poi sposta l’interruttore.",
     bnOff: "Senza bounce",
     bnOn: "Con bounce",
-    bnOffWhat: "Un beat piatto: kick e 808 sull’uno, snare sul tre, hi-hat dritti.",
-    bnOnWhat: "Il Complete Beat 01 del kit, esattamente com’è nello zip.",
+    bnOffWhat: "Un beat piatto: kick e 808 sull’uno e sul “e” del due, snare sul tre, hi-hat dritti.",
+    bnOnWhat: "Il Complete Beat 13 del kit, esattamente com’è nello zip.",
   },
 };
 // The groups' names as the kit's folders have them, and in Italian as the page calls them.
@@ -659,7 +659,9 @@ ${pre ? `<div class="dkb-preview">${pre}</div>` : ""}
 // The new landing's own video, where it has one: English since 2026-11-12, the cold-traffic VSL ("make a new high
 // converting (cold traffic) VSL for the product and publish it too": vsl/script-en.md, tools/drum_kit_vsl.py, on
 // Wistia), with its poster. Italian keeps the old page's video re-voiced.
-const NEW_VSL: Partial<Record<L, { id: string; poster: string }>> = { en: { id: "c66xeecqeg", poster: "vsl-en-cold" } };
+// v2 the same night, in the Jazz video's style and length (6:24), a syncopated plain beat against Complete Beat 13;
+// the first cut (c66xeecqeg, 3:37) stays on Wistia.
+const NEW_VSL: Partial<Record<L, { id: string; poster: string }>> = { en: { id: "fk0o8sokeb", poster: "vsl-en-cold-2" } };
 
 // Where things go in the old page's HTML.
 /** Where a top-level section of the old page starts (its SectionContainer, by its id class); -1 if it isn't there. */

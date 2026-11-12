@@ -1,47 +1,45 @@
-"""The MIDI Drum Kit VSL (English, cold traffic), from its script to an mp4 (2026-11-12, "make a new high
-converting (cold traffic) VSL for the product and publish it too").
+"""The MIDI Drum Kit VSL (English, cold traffic), from its script to an mp4.
 
-Same voice, captions and encoder as the Jazz VSL (tools/jazz_vsl.py, imported and pointed at this funnel,
-as tools/top_hits_vsl.py does). What differs:
-  - the demos are drums: the two sides of the landing's "No bounce vs bounce" switch (player/v5/bounce2.json:
-    a plain beat, and Complete Beat 01 of the kit) and Complete Beat 13, played with the page's own sounds
-    (the Hit-Maker Drums one-shots of public/funnels/midi-drum-kit/player and its 808, as landingNewClient.ts
-    plays them), each drum on its own line with a playhead;
-  - the pictures are this funnel's (the kit's box, the folders' boxes, the six bonus covers, the license card),
-    the accent the button's orange.
+2026-11-12, "make a new high converting (cold traffic) VSL for the product and publish it too"; rewritten the same
+night in the Jazz video's style ("make the copy of the VSL closer to the style you used for the Jazz MIDI Pack VSL?
+Even how the text appears on video I liked it more there"). So everything on screen is the Jazz video's
+(tools/jazz_vsl.py, imported and pointed at this funnel, as tools/top_hits_vsl.py does): its warm black, its cream
+words with the one being said in a yellow box, its serif cards, its scenes filling the frame. What differs:
+  - the demos are drums from the kit (the zip V2), played with the landing player's own sounds (the Hit-Maker
+    Drums one-shots of public/funnels/midi-drum-kit/player and its 808, as landingNewClient.ts plays them), each
+    drum on its own line with a playhead; a fragment dropped into a beat is drawn in yellow;
+  - the pictures are this funnel's: the kit's box, the studio scenes, the six bonus covers.
 
   voice   ElevenLabs, cached in <work>/voice (needs ELEVENLABS_API_KEY)
   render  <work>/drum-kit-vsl-en.mp4
   poster  <work>/poster.png
 
-usage: /usr/bin/python3 tools/drum_kit_vsl.py voice|render|poster <work dir>
+usage: /usr/bin/python3 tools/drum_kit_vsl.py voice|render|poster <work dir> [kit zip V2]
 """
-import json, os, subprocess, sys
+import json, os, subprocess, sys, zipfile
 import numpy as np
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import jazz_vsl as J  # noqa: E402
+import drum_player_data as T  # noqa: E402
 
 ROOT = J.ROOT
 DK = os.path.join(ROOT, "app", "(funnels)", "midi-drum-kit")
 PUB = os.path.join(ROOT, "public", "funnels", "midi-drum-kit")
 PLAYER = os.path.join(PUB, "player")
+ZIP = sys.argv[3] if len(sys.argv) > 3 else os.path.expanduser("~/Downloads/MIDI Drum Kit Bundle V2.zip")
 W, H, SR, FPS, GAP = J.W, J.H, J.SR, J.FPS, J.GAP
-
-# The page's colours: black, white, the button's orange; red and green for the two beats.
-ORANGE, ORANGE_HI = (245, 133, 31), (255, 161, 61)
-J.INK, J.CREAM, J.DIM = (0, 0, 0), (255, 255, 255), (96, 96, 100)  # pure black: the pictures' own black then has no edge
-J.BRASS, J.BRASS_HI, J.RULE = ORANGE, ORANGE_HI, (44, 43, 50)
-RED, GREEN, CREAM, DIM, RULE = J.RED, J.GREEN, J.CREAM, J.DIM, J.RULE
-PANEL = (13, 12, 16)
+RED, GREEN, YELLOW, YELLOW_HI, CREAM, DIM, RULE = J.RED, J.GREEN, J.BRASS, J.BRASS_HI, J.CREAM, J.DIM, J.RULE
+PANEL = (22, 19, 15)  # the Jazz piano roll's panel
 
 J.SCRIPT = os.path.join(DK, "vsl", "script-en.md")
 J.PUB = PUB
-# What the voice reads for what the captions show. Longest first.
+# What the voice reads for what the captions show. Longest first: each is a plain replace.
 J.SPOKEN = {
     "10,296": "ten thousand two hundred ninety-six",
     "2,847": "two thousand, eight hundred and forty-seven",
+    "1,944": "one thousand, nine hundred and forty-four",
     "355": "three hundred and fifty-five",
     "281": "two hundred and eighty-one",
     "160": "one hundred and sixty",
@@ -60,29 +58,42 @@ BONUSES = [("famous", "Famous Beats Bundle"), ("starters", "Beat Starters Bundle
 INST = ["808", "Kick", "Snare", "Clap", "Rim", "Hat", "Open hat", "Perc"]
 FILES = [None, "kick", "snare", "clap", "rim", "hat", "ohat", "perc"]
 LEVEL = [0.9, 1, 0.8, 0.75, 0.7, 0.5, 0.45, 0.6]  # landingNewClient.ts LEVEL
+KIT = "1 - MIDI Drum Kit/"
 
 
-def five(flat):
-    return [tuple(flat[i:i + 5]) for i in range(0, len(flat), 5)]
+def five(flat, mark=0):
+    return [tuple(flat[i:i + 5]) + (mark,) for i in range(0, len(flat), 5)]
 
 
 def rolls():
-    b = json.load(open(os.path.join(PLAYER, "v5", "bounce2.json")))
-    beats = json.load(open(os.path.join(PLAYER, "v5", "beats.json")))
-    b13 = beats[12]
-    kit = "MIDI Drum Kit / "
-    return {
-        "flat": {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["off"]), "file": "A plain beat: kick and 808 on the one, snare on the three, straight hi-hats"},
-        "bounce": {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["on"]), "file": kit + b["f"].replace("/", " / ")},
-        "beat13": {"bpm": b13["bpm"], "beats": min(b13["len"], 16), "notes": [n for n in five(b13["n"]) if n[0] < 16], "file": kit + b13["f"].replace("/", " / ")},
-    }
+    z = zipfile.ZipFile(ZIP)
+    find = lambda folder, part: next(n for n in sorted(z.namelist()) if n.startswith(KIT + folder) and part in n and n.endswith(".mid"))
+    read = lambda path, sound=None: T.entry(path[len(KIT):], z.read(path), sound)
+    cut = lambda notes, beats: [n for n in notes if n[0] < beats]
+    out = {}
+    b = json.load(open(os.path.join(PLAYER, "v5", "bounce3.json")))
+    out["flat"] = {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["off"]), "file": "A plain beat: kick and 808 on the one and on the “and” of two, snare on the three, straight hi-hats"}
+    out["bounce"] = {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["on"]), "file": f"{KIT}{b['f']}".replace("/", " / ")}
+    # the same beat, its hats in the last two beats swapped for a Roll Up fragment
+    frag = find("2. Hihat Closed/Roll Up/", "Fragment_10")
+    roll = [n for n in five(b["on"]) if not (n[2] == T.HAT and n[0] >= 14)]
+    roll += [(n[0] + 14,) + n[1:5] + (1,) for n in five(read(frag, T.HAT)["n"])]
+    out["roll"] = {"bpm": b["bpm"], "beats": b["len"], "notes": sorted(roll), "file": f"Complete Beat 13 + {os.path.basename(frag)[:-4]} (2. Hihat Closed / Roll Up)"}
+    for rid, folder, part in (("combo", "17. ", "MDK_Beat07_Hats07"), ("beat14", "9. ", "CompleteBeat14_"), ("beat11", "9. ", "CompleteBeat11_")):
+        path = find(folder, part)
+        e = read(path)
+        out[rid] = {"bpm": e["bpm"], "beats": min(e["len"], 16), "notes": cut(five(e["n"]), 16), "file": path.replace("/", " / ")}
+    return out
 
 
 ROLLS = rolls()
 DEMOS = {
     "flat": ("NO BOUNCE · a plain beat", RED),
-    "bounce": ("BOUNCE · Complete Beat 01 of the kit", GREEN),
-    "beat13": (f"Complete Beat 13 of the kit · {ROLLS['beat13']['bpm']} BPM", ORANGE),
+    "bounce": ("BOUNCE · Complete Beat 13 of the kit · 140 BPM", GREEN),
+    "roll": ("Complete Beat 13 + a Roll Up fragment in the last bar", YELLOW),
+    "combo": (f"Folder 17 · Kick & Snare Beat 07 + Hi-Hats 07 · {ROLLS['combo']['bpm']} BPM", YELLOW),
+    "beat14": (f"Complete Beat 14 of the kit · {ROLLS['beat14']['bpm']} BPM", YELLOW),
+    "beat11": (f"Complete Beat 11 of the kit · {ROLLS['beat11']['bpm']} BPM", YELLOW),
 }
 _samples = {}
 
@@ -99,14 +110,14 @@ def drums(rid):
     spb = 60 / r["bpm"]
     dur = r["beats"] * spb
     out = np.zeros(int((dur + 2.0) * SR), np.float32)
-    for t, ln, s, p, v in r["notes"]:
+    for t, ln, s, p, v, _ in r["notes"]:
         i, vel = int(t * spb * SR), v / 127
         if s == 0:
             f = 440 * 2 ** ((p - 69 - 24) / 12)
             hold = max(0.12, min(ln * spb, 1.6))
             n = int((hold + 0.1) * SR)
             tt = np.arange(n) / SR
-            freq = f * 1.9 ** (1 - np.minimum(tt, 0.035) / 0.035)  # from 1.9 × the note down to it in 35 ms
+            freq = f * 1.9 ** (1 - np.minimum(tt, 0.035) / 0.035)  # from 1.9 x the note down to it in 35 ms
             tone = np.sin(2 * np.pi * np.cumsum(freq) / SR)
             env = np.minimum(tt / 0.004, 1.0)
             k = int(hold * 0.7 * SR)
@@ -129,66 +140,59 @@ J.piano = drums  # jazz_vsl.timeline plays each [DEMO] with this
 
 
 def draw_drums(r, box, color, title=None, now=None):
-    """The beat on a new RGBA layer: a line per drum, a playhead at `now` beats."""
+    """The beat on a new RGBA layer, in the Jazz piano roll's look: a line per drum, a playhead at `now` beats."""
     x0, y0, x1, y1 = box
     layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer)
-    d.rounded_rectangle(box, 14, fill=PANEL + (255,))
+    d.rounded_rectangle(box, 10, fill=PANEL + (255,), outline=RULE, width=2)
     rows = sorted({n[2] for n in r["notes"]})
-    lab = 190 if x1 - x0 > 1200 else 130
-    top, left, right = y0 + 34, x0 + lab, x1 - 28
-    rh = (y1 - 34 - top) / len(rows)
+    lab = 180 if x1 - x0 > 1200 else 120
+    top, left, right = y0 + 28, x0 + lab, x1 - 24
+    rh = (y1 - 28 - top) / len(rows)
     bx = lambda b: left + (right - left) * b / r["beats"]
     lf = J.font(30 if lab > 150 else 22, 5)
     for k, s in enumerate(rows):
         y = top + k * rh
-        if k:
-            d.line((x0 + 20, y, x1 - 20, y), fill=RULE, width=1)
-        d.text((x0 + 28, y + rh / 2), INST[s], font=lf, fill=(170, 170, 176), anchor="lm")
+        if k % 2:
+            d.rectangle((left, y, right, y + rh), fill=(17, 15, 12, 255))
+        d.text((x0 + 24, y + rh / 2), INST[s], font=lf, fill=J.CREAM if now is None else J.DIM, anchor="lm")
     for q in range(r["beats"] * 4 + 1):
-        d.line((bx(q / 4), top, bx(q / 4), y1 - 34), fill=(88, 86, 98) if q % 16 == 0 else (52, 50, 60) if q % 4 == 0 else (26, 25, 31), width=2 if q % 16 == 0 else 1)
+        if q % 4 == 0:
+            d.line((bx(q / 4), top, bx(q / 4), y1 - 28), fill=(78, 69, 55) if q % 16 == 0 else RULE, width=2 if q % 16 == 0 else 1)
     pad = max(4, rh * 0.2)
-    for t, ln, s, p, v in r["notes"]:
+    for t, ln, s, p, v, mark in r["notes"]:
         y = top + rows.index(s) * rh
         w = (ln if s == 0 else min(ln, 0.25)) * (right - left) / r["beats"]
         on = now is not None and t <= now < t + max(ln, 0.14)
-        shade = 0.45 + 0.55 * v / 127
-        fill = (255, 255, 255) if on else tuple(int(c * shade * (1 if now is None or now >= t else 0.6)) for c in color)
+        base = YELLOW_HI if mark else color
+        shade = 0.5 + 0.5 * v / 127
+        fill = (255, 236, 190) if on else tuple(int(c * shade * (1 if now is None or now >= t else 0.55)) for c in base)
         d.rounded_rectangle((bx(t) + 1, y + pad, max(bx(t) + w - 1, bx(t) + 5), y + rh - pad), 3, fill=fill)
     if now is not None:
-        d.line((bx(now), top - 8, bx(now), y1 - 26), fill=CREAM, width=4)
+        d.line((bx(now), top - 6, bx(now), y1 - 22), fill=CREAM, width=3)
     if title:
-        d.text(((x0 + x1) / 2, y0 - 34), title[0], font=J.font(40 if lab > 150 else 30, 0), fill=title[1], anchor="ms")
+        d.text(((x0 + x1) / 2, y0 - 34), title[0], font=J.font(34 if lab > 150 else 28, 0), fill=title[1], anchor="ms")
     return layer
 
 
 def visual(show):
-    """The still layer for a [SHOW], above the captions (None for 'none')."""
+    """The still layer for a [SHOW], above the captions (None for 'none'). Scenes and cards are the Jazz video's own."""
     kind, _, arg = show.partition(" ")
+    if kind in ("none", "image", "card"):
+        return J.visual(show)
     layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    if kind == "none":
-        return None
-    if kind == "image":
-        img = J.fit(J.pub(arg), 1500, 720)
-        layer.alpha_composite(img, ((W - img.width) // 2, 60 + (720 - img.height) // 2))
-    elif kind == "bonus":
+    if kind == "bonus":
         slug, name = BONUSES[int(arg) - 1]
-        img = J.fit(J.pub(f"bonus2-{slug}"), 560, 660)
-        layer.alpha_composite(img, ((W - img.width) // 2, 110))
-        ImageDraw.Draw(layer).text((W / 2, 84), f"BONUS {arg} · {name}", font=J.font(40, 0), fill=ORANGE_HI, anchor="ms")
-    elif kind == "card":
-        d = ImageDraw.Draw(layer)
-        f = J.font(150, 0)
-        while f.getlength(arg) > W - 240:  # a long card a size smaller
-            f = J.font(f.size - 10, 0)
-        d.text((W / 2, 440), arg, font=f, fill=ORANGE_HI, anchor="ms")
-        d.line((W / 2 - 180, 510, W / 2 + 180, 510), fill=ORANGE, width=4)
+        img = J.fit(J.pub(f"bonus2-{slug}"), 600, 640)
+        layer.alpha_composite(img, ((W - img.width) // 2, 80))
+        ImageDraw.Draw(layer).text((W / 2, 64), f"BONUS {arg} · {name}", font=J.font(36, 0), fill=YELLOW, anchor="ms")
     elif kind == "roll":
-        layer = draw_drums(ROLLS[arg], (200, 150, 1720, 760), DEMOS[arg][1], title=DEMOS[arg])
+        layer = draw_drums(ROLLS[arg], (260, 110, 1660, 720), DEMOS[arg][1], title=DEMOS[arg])
     elif kind == "compare":
-        layer = draw_drums(ROLLS["flat"], (50, 190, 940, 740), RED, title=DEMOS["flat"])
-        layer.alpha_composite(draw_drums(ROLLS["bounce"], (980, 190, 1870, 740), GREEN, title=("BOUNCE · Complete Beat 01", GREEN)))
+        layer = draw_drums(ROLLS["flat"], (60, 130, 940, 720), RED, title=("NO BOUNCE", RED))
+        layer.alpha_composite(draw_drums(ROLLS["bounce"], (980, 130, 1860, 720), GREEN, title=("BOUNCE · Complete Beat 13", GREEN)))
     return layer
+
 
 
 # ---------------------------------------------------------------- render
@@ -206,7 +210,7 @@ def render(work):
          "-shortest", out], stdin=subprocess.PIPE)
     bg = Image.new("RGBA", (W, H), J.INK + (255,))
     visuals, cache = {}, {}
-    box = (120, 190, 1800, 900)
+    box = (120, 200, 1800, 900)  # the Jazz demos' frame
     for n in range(int(total * FPS)):
         t = n / FPS
         part = next((p for p in parts if p["start"] - GAP / 2 <= t < p["start"] + p["dur"] + GAP / 2), None)
@@ -225,7 +229,7 @@ def render(work):
             if key[0] == "demo":
                 r = ROLLS[key[1]]
                 frame.alpha_composite(draw_drums(r, box, DEMOS[key[1]][1], title=DEMOS[key[1]], now=None if key[2] is None else key[2] / 16))
-                ImageDraw.Draw(frame).text((W / 2, 985), r["file"], font=J.font(30, 5), fill=(150, 150, 156), anchor="ms")
+                ImageDraw.Draw(frame).text((W / 2, 980), r["file"], font=J.font(28, 5), fill=DIM, anchor="ms")
             elif key[0] == "talk":
                 if part["show"] not in visuals:
                     visuals[part["show"]] = visual(part["show"])
@@ -244,17 +248,17 @@ def render(work):
 
 
 def poster(work):
-    """1920×1080, the promise alone in the captions' type: a line above Wistia's play button, one below, clear of the time bar."""
+    """1920x1080 in the Jazz poster's way: the promise alone in the captions' type, one line above Wistia's play button, one below."""
     frame = Image.new("RGB", (W, H), J.INK)
     d = ImageDraw.Draw(frame)
-    f = J.font(128, 0)
+    f = J.font(124, 0)
     space = f.getlength(" ")
-    for y, words in ((250, ["Same", "drums."]), (830, ["This", "one", "bounces."])):
+    for y, words in ((250, ["Same", "drums."]), (820, ["This", "one", "bounces."])):
         widths = [f.getlength(w) for w in words]
         x = (W - sum(widths) - space * (len(words) - 1)) / 2
         for w, wd in zip(words, widths):
             if w == "bounces.":
-                d.rounded_rectangle((x - 18, y - f.size * 0.82, x + wd + 18, y + f.size * 0.28), 10, fill=ORANGE)
+                d.rounded_rectangle((x - 18, y - f.size * 0.82, x + wd + 18, y + f.size * 0.28), 10, fill=YELLOW)
             d.text((x, y), w, font=f, fill=J.INK if w == "bounces." else CREAM, anchor="ls")
             x += wd + space
     frame.save(f"{work}/poster.png")

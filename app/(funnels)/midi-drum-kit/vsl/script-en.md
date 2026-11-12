@@ -1,25 +1,28 @@
 # VSL MIDI Drum Kit, English script (cold traffic)
 
-The hero video of the new landing (`../landingNew.ts`), since 2026-11-12 ("make a new high converting (cold
-traffic) VSL for the product"). For someone who has never heard of GRIND STUDIO: it opens on the sound, not
-on us. Structure: hear it first (no bounce / bounce), the problem, the mechanism (bounce is the pattern, not
-the sounds), the kit, what's inside, the 10,296 files, a second beat, how easy it is, the six bonuses, the
-license, the guarantee, one payment (no amount: the page shows each visitor's own price), one call to action.
+The hero video of the new landing (`../landingNew.ts`). First made 2026-11-12 ("make a new high converting (cold
+traffic) VSL for the product"), rewritten the same night in the Jazz MIDI Pack video's style and length ("make
+the copy of the VSL closer to the style you used for the Jazz MIDI Pack VSL… 6 minutes like the JAZZ VSL is
+great"). Structure, as the Jazz video: hear it first (no bounce / bounce), the problem, the mechanism (bounce is
+the pattern), who we are, the kit folder by folder, demos, how easy it is, the six bonuses one by one, one payment
+(no amount: the page shows each visitor's own price), the other ways, the guarantee, one call to action.
 
 Voice "Diretto": producer to producer, short sentences, no hype, no fake urgency, no "worth $X", never "money
-back" (the 14-day quality guarantee, in its own words). Every claim is the page's: 2,847 producers, 10,296
-MIDI files (1,040 written by hand, the rest their key versions and combinations), the bonuses' own counts.
-Nothing about notes on or off the grid, nothing about who in the charts uses it.
+back" (the 14-day quality guarantee, in its own words). Every claim is the page's: 2,847 producers, 10,296 MIDI
+files in 17 folders (1,040 written by hand, the rest their key versions and combinations), the bonuses' own
+counts. Nothing about notes on or off the grid, nothing about who in the charts uses it.
 
-[DEMO: id] = real notes played with the page's own sounds (the Hit-Maker Drums one-shots of the player and
-its 808), the piano roll on screen with a playhead. Not read aloud. `flat` and `bounce` are the two sides of
-the page's "No bounce vs bounce" switch (player/v5/bounce2.json: a plain beat, and Complete Beat 01 of the
-kit, same sounds and tempo); `beat13` is Complete Beat 13. Made by `tools/drum_kit_vsl.py` (voice: ElevenLabs
-"Aaron Sage - Friendly & Conversational", eleven_v4, as the Jazz and TOP HITS videos).
+[DEMO: id] = real files of the kit (the zip V2) played with the page's own sounds, the Hit-Maker Drums one-shots
+of the player and its 808, each drum on its own line with a playhead. Not read aloud. `flat` and `bounce` are the
+two sides of the page's "No bounce vs bounce" switch (player/v5/bounce3.json): a plain beat with a syncopated
+second kick ("nobody puts the kick just on the 1st beat"), and Complete Beat 13 of the kit, same sounds, same
+tempo. `roll` is Complete Beat 13 with a Roll Up fragment in its last bar, `combo` a file of folder 17, `beat14`
+and `beat11` Complete Beats 14 and 11. Made by `tools/drum_kit_vsl.py` (voice: ElevenLabs "Aaron Sage - Friendly
+& Conversational", eleven_v4, the Jazz video's).
 
-[SHOW: x] = what's on screen from that paragraph on, above the captions: `roll flat|bounce` (a still roll),
-`compare` (both), `image <file>` (from public/funnels/midi-drum-kit), `bonus <n>` (its cover), `card <text>`
-(big text), `none` (captions alone).
+[SHOW: x] = what's on screen from that paragraph on, behind or above the captions: `roll flat|bounce`, `compare`,
+`image <file>` (from public/funnels/midi-drum-kit; a wide one fills the frame), `bonus <n>`, `card <text>` (big
+serif text), `none` (captions alone, big).
 
 ---
 
@@ -31,66 +34,98 @@ Listen to these two beats.
 
 [SHOW: none]
 
-Same kick. Same snare. Same hi-hats. Same tempo. The first one just sits there. The second one makes your head move. Nothing changed in the sounds. Only the pattern changed. That's bounce. And by the end of this video, you'll know how to get it into your own beats.
+Same kick. Same snare. Same 808. Same tempo. The first one is a correct beat. It just sits there. The second one makes your head move. The difference isn't the sounds. It's the pattern. And by the end of this video, you'll have patterns like that in your DAW, without programming a single hit.
 
 [SHOW: roll flat]
 
-If you make beats, you know the first one. You open the piano roll. Kick on the one. Snare on the three. Hi-hats straight across. It's correct, and it's dead. So you start moving notes around. An hour later you have the same beat, and a headache.
+If you make beats, you've been here. You load a good kit. Kick on the one, a second kick after it, snare on the three, hi-hats straight across. It's right, and it's dead. So you start moving notes around. You add a roll. You take it out. An hour later, it's the same beat, and the idea is gone.
 
 [SHOW: compare]
 
-Here's what nobody tells you. Bounce isn't in your drum sounds. It isn't in a plugin. It's in the pattern. Where the kick answers the snare. Where the hi-hat leaves a space. Where a roll pulls you into the next bar. The producers who have it spent years finding those patterns. You don't have to.
+Here's what the producers with bounce know. Look at the kick. In the plain beat, it lands in the same two places every bar. In the second one, it pushes into the snare and answers it. The hi-hats leave a gap, then come back. The open hat breathes. The 808 moves with the kick, not just under it. Every bar pulls you into the next one. That's bounce. It's in the pattern, not in a plugin. The catch: finding those patterns by ear takes years of making beats.
+
+[SHOW: image dk-stage-1344]
+
+So we did it for you. We're GRIND STUDIO. We spent four years writing the drum patterns that make beats bounce, one by one, as MIDI. 2,847 producers have them in their sessions. It's called the MIDI Drum Kit.
 
 [SHOW: image kit-box-v3]
 
-We wrote them down. We're GRIND STUDIO, and this is the MIDI Drum Kit. The drum patterns behind beats that bounce, as MIDI files you drag into your DAW. 2,847 producers already have it in their sessions.
+That's 10,296 MIDI files, in 17 folders.
 
-[SHOW: image boxes-all-v3]
+[SHOW: image dk-daw-1600]
 
-Every drum has its own folder. Kicks. Snares. Closed and open hi-hats. 808s. Accents. Rolls. In each one you get patterns, which are full four-bar parts, and fragments: the fills, the rolls and the switch-ups you drop wherever the beat needs a change.
+Folders one to eleven are written by hand. One folder for every drum. 808s. Closed hi-hats. Open hi-hats. Kicks. Snares and claps. Accents: claps, rims and percussion. Rolls. And base rhythms, the straight and triplet hats every beat starts from.
 
-[SHOW: card 10,296 MIDI files]
+In each folder you get two kinds of files. Patterns: full parts, one to four bars long. And fragments: the fills, the rolls and the switch-ups you drop wherever the beat needs a change. The hi-hats are sorted by how busy they are. Basic, complex and hyper-complex, plus rolls that go up and rolls that go down.
 
-And you don't have to build anything yourself. Every 808 line comes in all 12 keys. Every kick pattern is already paired with every snare pattern. The kick and snare beats come with hi-hats on top. That's 10,296 MIDI files, ready to drag.
-
-[DEMO: beat13]
+Then the multi-track folders. Kick and snare, together. Kick and 808, together. And 50 complete beats, every drum on its own track, like the one you just heard.
 
 [SHOW: none]
 
-It's MIDI, so the sounds are yours. Load your own kick, your own snare, your own 808. Change any note. Change the tempo. It works in FL Studio, Ableton, Logic, and any other DAW. Drag a file onto a drum track, press play, and the bounce is there.
+Here's a fragment at work. The same beat, with a hi-hat roll from the Roll Up folder dropped into the last bar.
+
+[DEMO: roll]
+
+[SHOW: card 6 ready-made folders]
+
+Folders twelve to seventeen take those patterns and hand them to you ready. Every 808, in all 12 keys, so it sits under your melody without transposing a note. The kick and 808 beats, and the complete beats, in all 12 keys too. Every kick pattern, already paired with every snare pattern. That's 1,944 grooves on their own. The kick and 808 beats, with every snare pattern. And the kick and snare beats, with every hi-hat pattern on top. Here's one of those, straight from folder seventeen.
+
+[DEMO: combo]
+
+[SHOW: none]
+
+And two more complete beats from the kit.
+
+[DEMO: beat14]
+
+[DEMO: beat11]
+
+[SHOW: image dk-daw-1600]
+
+And you don't need to know drum programming to use them. Most file names carry the tempo, and the 808 files say their key. Drag a file onto a drum track, and press play.
+
+It's MIDI, so the sounds are yours. Your kick, your snare, your 808. Change any note, change the tempo, and the pattern stays. It works in any DAW that opens MIDI. FL Studio, Ableton, Logic, Pro Tools, Cubase, Studio One, Reaper, GarageBand. And you can use it in your own releases, commercial ones included. No royalties.
+
+[SHOW: card 6 free bonuses]
+
+You also get six bonuses, free, on the same download page.
 
 [SHOW: bonus 1]
 
-You also get six bonuses. Famous Beats: 50 transcriptions of famous beats, with every drum on its own track.
+One: Famous Beats. 50 transcriptions of famous beats, in five volumes, every drum on its own track.
 
 [SHOW: bonus 2]
 
-Beat Starters: 355 MIDI files of chords, pianos, guitars and melodies, to put on top of your drums.
+Two: the Beat Starters bundle. 355 MIDI files in seven packs. Chord progressions, emotional pianos, guitars, melodies, strings, trap pianos and plucks. The part that goes on top of your drums.
 
 [SHOW: bonus 3]
 
-Hit-Maker Drums: 281 drum sounds. They're the ones you're hearing in this video.
+Three: Hit-Maker Drums. 281 one-shots. Kicks, snares, claps, hi-hats, rims and percussion. They're the sounds you heard in this video.
 
 [SHOW: bonus 4]
 
-Drunk Swing Grooves: 160 drum grooves with the laid-back swing of lofi and neo soul.
+Four: Drunk Swing Grooves. 160 drum grooves with the laid-back swing of lofi and neo soul.
 
 [SHOW: bonus 5]
 
-The MYSTERY Hooks Pack: 17 hooks, as audio, to build a beat around.
+Five: the MYSTERY Hooks Pack. 17 hooks, as audio, to build a beat around.
 
 [SHOW: bonus 6]
 
-And a short guide that shows you how to use all of it.
+And six: a short PDF guide to the kit. What each folder is for, and how to use it.
 
-[SHOW: card Commercial license]
+[SHOW: card One payment]
 
-Everything you make with it is yours. The commercial license is included. Sell your beats, lease them, release them. No royalties.
+All of it, the kit and the six bonuses, is one payment. Your price is right below this video. No subscription. You download it right after you pay.
 
-[SHOW: card 14 days]
+[SHOW: none]
 
-And if a file doesn't open, or isn't what this page says, write to us within 14 days. We fix it, we replace it, or we refund you.
+Compare that with the other ways. Years of programming drums, hit by hit. Loop packs that everyone else has too. Or free MIDI files you have to sort through before you find one that works.
+
+[SHOW: card 14-day quality guarantee]
+
+And it's covered by our 14-day quality guarantee. If anything's wrong with your files, email us, and we make it right. A fresh download, a replacement, or a refund if we can't fix it.
 
 [SHOW: image kit-box-v3]
 
-It's one payment. No subscription. You download it right after you pay. Click the button under this video, and make your next beat bounce.
+Click the button below this video. Grab the kit, and drag a complete beat into your next session. Same sounds. This time, it bounces.
