@@ -174,7 +174,8 @@ export function proxy(request: NextRequest) {
     }
     const country = visitorCountry(request.headers, request.nextUrl.searchParams.get("country"));
     // The MIDI Drum Kit landing's A/B test (app/(funnels)/midi-drum-kit/landingTest.ts): the old
-    // page or the new one at the same address, 50/50, each visitor kept on theirs by a cookie.
+    // page or the new one at the same address, 50/50, each visitor kept on theirs by a cookie; since 2026-11-12
+    // evening everyone gets the new one (LP.live).
     const lp = loc.slug === "midi-drum-kit" && !loc.page && LP.langs.includes(loc.lang) ? landingVariant(request) : null;
     url.pathname = `/${loc.slug}/${loc.lang}${loc.page ? `/${loc.page}` : ""}${lp?.variant === "lp-new" ? "/new" : ""}/${currencyFor(country)}`;
     const res = NextResponse.rewrite(url);
@@ -220,6 +221,8 @@ function landingVariant(request: NextRequest): { variant: LpVariant; assign: boo
   const asked = request.nextUrl.searchParams.get("lp");
   if (asked === "old" || asked === "new") return { variant: `lp-${asked}`, assign: false };
   const kept = request.cookies.get(LP.cookie)?.value;
+  // no split (LP.live): everyone on that page, their cookie set to it
+  if (LP.live) return { variant: LP.live, assign: kept !== LP.live };
   if (isLp(kept)) return { variant: kept, assign: false };
   return { variant: Math.random() < 0.5 ? "lp-old" : "lp-new", assign: true };
 }

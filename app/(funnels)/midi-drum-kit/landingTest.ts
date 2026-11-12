@@ -19,6 +19,14 @@ export const LP = {
   from: "2026-11-12T14:50:00Z",
   /** The languages the test runs in; the others always get the old page. */
   langs: ["en", "it"] as readonly string[],
+  /**
+   * Everyone on this page, no split, since 2026-11-12 ~20:40 UTC ("lets not do A/B at the same time, we have data
+   * for previous pages"): the new page is judged against the old one's days before the test (lib/analytics.ts).
+   * The cookie is set to it too, so checkouts and orders carry it. null = split 50/50 again.
+   */
+  live: "lp-new" as "lp-old" | "lp-new" | null,
+  /** When `live` took over (its deploy). */
+  liveFrom: "2026-11-12T20:40:00Z",
 };
 export type LpVariant = (typeof LP.variants)[number];
 export const isLp = (v: unknown): v is LpVariant => (LP.variants as readonly string[]).includes(v as string);
