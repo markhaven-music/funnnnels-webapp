@@ -148,6 +148,8 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkp-file{margin-top:12px;font:500 11px/1.5 ${MONO};color:rgba(255,255,255,.45);overflow-wrap:anywhere}
 .dkp-file b{margin-right:6px;color:#ff9a2e;font-weight:600;letter-spacing:.12em}
 .dkp-keywrap{margin-top:8px}
+/* centred: the rule above that zeroes side margins in the player would push the key left */
+.dkp-keywrap .jzb-btn{margin-left:auto;margin-right:auto}
 
 /* The kit's folders: a card each, with the old panel's examples (its moving piano rolls) and the folder's real name and subfolders. */
 .dkf{display:grid;gap:12px;width:100%;max-width:1083px;margin:28px auto 40px;padding:0;list-style:none;text-align:left;font-family:${BODY};color:#fff}
