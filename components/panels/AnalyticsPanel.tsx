@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { I } from "@/components/icons";
 import type { Analytics, AvailabilityStats, BonusStats, Metrics, TestStats } from "@/lib/analytics";
 import { RangePicker, useRange } from "@/components/RangePicker";
@@ -459,7 +459,9 @@ function TestCard({ t }: { t: TestStats }) {
           const lead = best === v.variant;
           return (
             <div key={v.variant} className={`${s.tcVariant} ${lead ? s.tcLead : ""}`}>
-              {v.shot && (
+              {v.live ? (
+                <LiveShot url={v.live} label={v.label} />
+              ) : v.shot && (
                 <a className={s.tcShot} href={v.shot} target="_blank" rel="noreferrer" title="Open the picture">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={v.shot} alt={`What visitors saw: ${v.label}`} loading="lazy" />
@@ -550,5 +552,35 @@ function TestCard({ t }: { t: TestStats }) {
         </p>
       </details>
     </section>
+  );
+}
+
+/**
+ * A variant's page as it is now, in a phone-sized frame scaled to the card (TestDef.live): it updates by itself.
+ * Loaded when the card comes near the screen; the page is in preview (not counted) and can't be clicked here.
+ */
+function LiveShot({ url, label }: { url: string; label: string }) {
+  const box = useRef<HTMLAnchorElement>(null);
+  const [k, setK] = useState(0);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setK(el.clientWidth / 390));
+    ro.observe(el);
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), { rootMargin: "400px" });
+    io.observe(el);
+    return () => {
+      ro.disconnect();
+      io.disconnect();
+    };
+  }, []);
+  return (
+    <a ref={box} className={`${s.tcShot} ${s.tcLive}`} href={url} target="_blank" rel="noreferrer" title="Open the page (preview, not counted)">
+      {near && k > 0 && (
+        <iframe src={url} title={`The page now: ${label}`} tabIndex={-1} loading="lazy" style={{ width: 390, height: 280 / k, transform: `scale(${k})` }} />
+      )}
+      <span className={s.tcLiveTag}>LIVE</span>
+    </a>
   );
 }

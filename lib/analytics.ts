@@ -174,6 +174,8 @@ export type TestStats = {
     paid?: CheckoutPaid;
     /** A picture of what this variant's visitors saw (TestDef.shots), for the Analytics card. */
     shot?: string;
+    /** The page this variant's visitors see now, shown live in the card in place of the picture (TestDef.live). */
+    live?: string;
   }[];
   /** The test in one plain sentence, for the Analytics card. */
   question?: string;
@@ -687,6 +689,12 @@ type TestDef = {
   /** What the test asks, in one plain sentence, and a picture per variant (public/funnels/dashboard/tests), for the Analytics card. */
   question?: string;
   shots?: Record<string, string>;
+  /**
+   * The variants still shown to visitors: their page itself, in a small frame on the card, so the card always shows
+   * the page as it is now ("le thumbnails degli ab test in analytics dovrebbero updatarsi da sole", 2026-11-12).
+   * A URL with ?preview=1 (not counted). A variant without one keeps its picture: what visitors saw then.
+   */
+  live?: Record<string, string>;
 };
 const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 /** The variants' pictures (tools/test_shots.sh). */
@@ -775,6 +783,7 @@ export const TESTS: TestDef[] = [
     name: "Order page: old vs Jazz-style",
     question: "Does the order page rebuilt like the Jazz MIDI Pack's get more people to pay than the old one?",
     shots: { before: `${SHOTS}/order-old.webp`, after: `${SHOTS}/order-new.webp` },
+    live: { after: "https://m.thegrind.studio/midi-drum-kit/order?preview=1" },
     where: `Order page, every language · Old = the product picture and 12 claims (hidden on phones), 3 bonuses, 11-09 → ${dayBefore(ORDER_STACK.from)} (step 2's C; 5-minute bonus until 11-10 20:15) · New = the Jazz order page's layout: wordmark and “Secure checkout” bar, the kit's box, tick list, 6 bonuses with their covers and values (Drunk Swing Grooves, the MYSTERY Hooks Pack and a PDF guide added, in the download too), total value against today's price, the checkout sticky on a computer and first on a phone, ${ORDER_STACK.firstDay} → today (live since 11-12 00:27 Italy) · 11-11 is in neither column: that day the page changed three times`,
     variants: ["before", "after"],
     label: (v) => (v === "before" ? "Old · Picture + 12 claims, 3 bonuses" : "New · Jazz-style page, 6 bonuses"),
@@ -796,6 +805,7 @@ export const TESTS: TestDef[] = [
     name: "Landing: old vs new",
     question: "Does the new landing (new box pictures, Jazz-size headlines, a player with the kit's real MIDI files) sell more than the old one?",
     shots: { "lp-old": `${SHOTS}/landing-old.webp`, "lp-new": `${SHOTS}/landing-new-4.webp` },
+    live: { "lp-new": "https://m.thegrind.studio/en/midi-drum-kit?lp=new&preview=1" },
     where: "Landing, English and Italian (French, Spanish and German keep the old page, not counted) · half the visitors on each page at the same address, each kept on theirs · the same Jazz-style order page after both · New = the boxes redone (kit and 11 folders), headlines the size of the Jazz page's, a player right after the hero with every file of the kit's 11 folders (a single part plays over a simple beat), the ten folder panels as one short list, the bonuses like the Jazz page's with files, clips and pads to play; since 11-12 ~17:00 Italy also one page background with dark cards, one accent (the button's orange: highlighted words, player, video) and the bonus boxes redone in the Jazz bonuses' style; since 11-12 ~18:30 Italy the hero, the buttons, a comparison chart, the summary before the checkout, the reviews, a license card, the last section and the footer are built like the Jazz page's, and the player shows every file as a small picture with a choice of beat and tempo; since 11-12 ~19:00 Italy the comparison chart has the kit's column first, the folders are cards with their moving examples again, the folder tree, the questions (13 of them) and the guarantee are rebuilt, the license card comes right after the folders, every button is the same key with no card logos under it, and a “No bounce vs bounce” switch lets the visitor hear what bounce is; since 11-12 ~19:15 Italy the order page after both pages is drawn with the Jazz order page's own styles (the same checkout in both steps, the same font sizes and column widths, no card logos); since 11-12 ~20:45 Italy every buyer downloads the kit with 10,296 MIDI files (the 1,040 patterns plus their key versions and combinations) and the new landing and the order page say 10,296, while the old landing still says 1050; since 11-12 ~21:45 Italy the new landing in English plays a new video (the cold-traffic VSL that opens on “no bounce vs bounce”: 3:37 first, from ~23:00 Italy a 6:24 version in the Jazz video's style; the same hour the page's switch got the same two beats: a plain beat with a syncopated second kick against Complete Beat 13); since 11-12 ~23:30 Italy both landings' page title says 10,296 (it said 1050) and the order page has no “Secure Payments” block; since 11-12 20:38 Italy there is no split: every English and Italian visitor gets the new page, judged against the old page's 7 days before the test; since 11-12 ~22:15 Italy the new page's hero has its own words in the Jazz hero's shape (no “Used in Billboard Charts”), Wistia's player with its progress bar in place of the still, and a lighter orange; since 11-12 ~23:30 Italy the player has a metronome and lets the visitor mute or change each drum's sound, the bonuses show 6 Famous Beats, 6 grooves (a Heavy Drunk one first), 8 Beat Starters, 6 hooks and 24 pads, the old landing and the Italian pages keep theirs · until 11-12 ~16:20 Italy the new page had the player after “What's inside” with 155 files and the old folder and bonus panels",
     variants: LP.variants,
     label: (v) => (v === "lp-old" ? "Old · its last 7 days before the test" : "New · built like the Jazz page, with the player · since everyone has it"),
@@ -887,6 +897,7 @@ function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, sin
     full: withRevenue(full.get(variant)!, rate),
     chanceBest: null as number | null,
     shot: def.shots?.[variant],
+    live: def.ended ? undefined : def.live?.[variant],
   }));
   // Orders per landing visitor; the order page's visitors when the landing has none.
   const rateOf = (m: Metrics) => {
