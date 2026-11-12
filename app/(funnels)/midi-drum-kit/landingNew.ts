@@ -165,6 +165,14 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkf-path b{margin-right:2px;font-weight:600;color:#fff}
 .dkf-path span{padding:2px 6px;border-radius:3px;background:#1c1b22;white-space:nowrap}
 .dkf-path i{margin-left:5px;font-style:normal;color:#ff9a2e}
+.dkf-more{column-span:all}
+.dkf-more h3{font-size:21px;line-height:1.25}
+.dkf-more>p{margin:8px 0 0;font-size:15px;line-height:1.45;color:rgba(255,255,255,.72)}
+.dkf-more ul{display:grid;gap:6px;margin:14px 0 0;padding:0;list-style:none}
+.dkf-more li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:baseline;padding:10px 12px;border-radius:6px;background:#15141a}
+.dkf-more b{font:600 13px/1.3 ${MONO};color:#fff}
+.dkf-more span{grid-column:1;font-size:13.5px;line-height:1.4;color:rgba(255,255,255,.7)}
+.dkf-more i{grid-column:2;grid-row:1/span 2;align-self:center;font:700 18px/1 ${DISPLAY};font-style:normal;color:#ff9a2e}
 .dkf-subs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 0;padding:0;list-style:none}
 .dkf-subs.one{grid-template-columns:minmax(0,1fr)}
 .dkf-subs li{min-width:0}
@@ -263,7 +271,7 @@ details[open]>summary.dkt-row .c{rotate:90deg}
 @keyframes dkpad{from{background:#f5851f}to{background:#1c1b22}}
 
 @media (max-width:640px){.dkp-sec{padding:48px 12px 56px}.dkp-panel{padding:14px 14px 12px;margin-top:24px}.dkp-chips{margin:0 -14px;padding:0 14px}.dkp-grid{margin:0 -14px;padding:0 14px 6px}.dkp-opt .dkp-chips{margin:0 -14px 0 0;padding:0 14px 0 0}}
-@media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{display:block;columns:2;column-gap:12px}.dkf>li{margin-bottom:12px}.dkf-top{grid-template-columns:140px minmax(0,1fr);gap:18px}.dkf-top img{width:140px;height:140px}.dkf h3{font-size:22px}.dkn{padding:30px 32px 26px}}
+@media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{display:block;columns:2;column-gap:12px}.dkf>li{margin-bottom:12px}.dkf-top{grid-template-columns:140px minmax(0,1fr);gap:18px}.dkf-top img{width:140px;height:140px}.dkf h3{font-size:22px}.dkf-more ul{grid-template-columns:repeat(2,minmax(0,1fr))}.dkn{padding:30px 32px 26px}}
 @media (min-width:1000px){.dkt-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:start}.dkt-side{position:sticky;top:72px;padding-top:8px}.dkb{gap:72px}.dkb>li{grid-template-columns:minmax(0,.36fr) minmax(0,.64fr);align-items:start;gap:0 56px;padding:44px 48px}.dkb-cover{grid-row:1/span 2;max-width:none;position:sticky;top:64px}.dkb-label{font-size:14px}.dkb h3{margin-top:10px;font-size:30px}.dkb-text{margin-top:14px;font-size:18px}.dkb-inside{gap:8px;margin-top:14px;font-size:17px}.dkb-preview{grid-column:2;margin-top:30px}.dkb>li.bare .dkb-preview{display:none}}
 `;
 
@@ -271,7 +279,7 @@ type L = "en" | "it";
 const WORDS: Record<L, Record<string, string>> = {
   en: {
     h2: "Press play. Hear the kit before you get it.",
-    sub: "All 11 folders of the kit are in this player, with their real MIDI files, played with the Hit-Maker Drums bonus sounds. In your DAW they play whatever drums you load.",
+    sub: "The kit’s 11 folders of hand-written patterns are in this player, with their real MIDI files, played with the Hit-Maker Drums bonus sounds. In your DAW they play whatever drums you load.",
     hint: "A single part plays over a simple beat made of the kit’s own files. Play a kick, a snare or a hat pattern and it stays in the beat while you try the rest.",
     inBeat: "In a beat",
     alone: "Alone",
@@ -307,7 +315,9 @@ const WORDS: Record<L, Record<string, string>> = {
     treeWin: "MIDI Drum Kit Bundle",
     treeBonus: "Bonuses",
     more: "more",
-    facts: "**11 numbered folders**, one for each drum|**Patterns and fragments** in their own subfolders|**Hi-hats sorted by difficulty**: Basic, Complex, Hyper-Complex, plus Roll Up and Roll Down|**File names tell you what’s inside**: the tempo, the 808’s key, notes like (triplets)|**Every bonus in its own folder**",
+    moreTitle: "And every pattern again, ready in more ways: 9,256 more files",
+    moreText: "Folders 12 to 17 are the kit’s own patterns in every key and in ready combinations, so you don’t have to build them.",
+    facts: "**17 numbered folders**: 11 written by hand, 6 with every key and ready combinations|**Patterns and fragments** in their own subfolders|**Hi-hats sorted by difficulty**: Basic, Complex, Hyper-Complex, plus Roll Up and Roll Down|**File names tell you what’s inside**: the tempo, the 808’s key, notes like (triplets)|**Every bonus in its own folder**",
     bnTag: "Hear it",
     bnTitle: "No bounce vs bounce.",
     bnSub: "Same sounds, same tempo, four bars. Only the pattern changes. Press play, then flip the switch.",
@@ -318,7 +328,7 @@ const WORDS: Record<L, Record<string, string>> = {
   },
   it: {
     h2: "Premi play. Ascolta il kit prima di prenderlo.",
-    sub: "In questo player ci sono tutte le 11 cartelle del kit, con i loro file MIDI veri, suonati con i suoni del bonus Hit-Maker Drums. Nella tua DAW suonano con la batteria che carichi tu.",
+    sub: "In questo player ci sono le 11 cartelle di pattern scritti a mano del kit, con i loro file MIDI veri, suonati con i suoni del bonus Hit-Maker Drums. Nella tua DAW suonano con la batteria che carichi tu.",
     hint: "Una parte singola suona sopra un beat semplice fatto con i file del kit. Fai partire un pattern di kick, snare o hi-hat e resta nel beat mentre provi il resto.",
     inBeat: "Dentro un beat",
     alone: "Da solo",
@@ -354,7 +364,9 @@ const WORDS: Record<L, Record<string, string>> = {
     treeWin: "MIDI Drum Kit Bundle",
     treeBonus: "Bonus",
     more: "altri",
-    facts: "**11 cartelle numerate**, una per ogni pezzo della batteria|**Pattern e frammenti** nelle loro sottocartelle|**Hi-hat ordinati per difficoltà**: Basic, Complex, Hyper-Complex, più Roll Up e Roll Down|**I nomi dei file dicono cosa c’è dentro**: il tempo, la tonalità dell’808, note come (triplets)|**Ogni bonus nella sua cartella**",
+    moreTitle: "E ogni pattern di nuovo, già pronto in più modi: altri 9.256 file",
+    moreText: "Le cartelle dalla 12 alla 17 sono i pattern del kit in tutte le tonalità e in combinazioni pronte, così non devi costruirle tu.",
+    facts: "**17 cartelle numerate**: 11 scritte a mano, 6 con tutte le tonalità e le combinazioni pronte|**Pattern e frammenti** nelle loro sottocartelle|**Hi-hat ordinati per difficoltà**: Basic, Complex, Hyper-Complex, più Roll Up e Roll Down|**I nomi dei file dicono cosa c’è dentro**: il tempo, la tonalità dell’808, note come (triplets)|**Ogni bonus nella sua cartella**",
     bnTag: "Ascoltalo",
     bnTitle: "Senza bounce vs con bounce.",
     bnSub: "Stessi suoni, stesso tempo, quattro battute. Cambia solo il pattern. Premi play, poi sposta l’interruttore.",
@@ -414,6 +426,17 @@ const EXAMPLES: Record<string, { label: string | null; pics: string[]; g: number
 };
 // The still pictures' sizes (the moving ones are drawn 4:1, whatever theirs).
 const STILLS: Record<string, [number, number]> = { "cb-1": [900, 139], "cb-2": [900, 139], "ks-1": [900, 46], "ks-2": [900, 46], "ks-3": [900, 46], "k8-1": [900, 46], "k8-2": [900, 46], "k8-3": [900, 46] };
+// Folders 12 to 17 of the zip V2 (tools/drum_kit_expand.py prints these counts): the kit's own patterns in every key and in combinations.
+const MORE: { dir: string; n: number; text: Record<L, string> }[] = [
+  { dir: "12. 808 in All 12 Keys", n: 1958, text: { en: "Every 808 pattern and fragment, in the 11 other keys", it: "Ogni pattern e frammento di 808, nelle altre 11 tonalità" } },
+  { dir: "13. Kick and 808 in All 12 Keys (Multi-Track)", n: 605, text: { en: "Every Kick & 808 beat, its 808 on every note", it: "Ogni beat Kick & 808, con l’808 su ogni nota" } },
+  { dir: "14. Complete Beats in All 12 Keys (Multi-Track)", n: 319, text: { en: "Every Complete Beat that has an 808, on every note", it: "Ogni Complete Beat con l’808, su ogni nota" } },
+  { dir: "15. Kick + Snare Combos (Multi-Track)", n: 1944, text: { en: "Every kick pattern with every snare pattern", it: "Ogni pattern di kick con ogni pattern di snare" } },
+  { dir: "16. Kick, 808 + Snare Combos (Multi-Track)", n: 1980, text: { en: "Every Kick & 808 beat with every snare pattern", it: "Ogni beat Kick & 808 con ogni pattern di snare" } },
+  { dir: "17. Beats with Hi-Hats (Multi-Track)", n: 2450, text: { en: "Every Kick & Snare beat with every basic 4-bar hi-hat pattern", it: "Ogni beat Kick & Snare con ogni pattern base di hi-hat da 4 battute" } },
+];
+// 1,958 and 1.958: by hand, as Italian leaves four-digit numbers ungrouped
+const thousands = (n: number, lang: L) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, lang === "it" ? "." : ",");
 // The bonuses in the folder tree: the three in the kit's zip by their folder's name there, the others by their own.
 const TREE_BONUSES: { dir: string; n: string; subs?: string[] }[] = [
   { dir: "2 - BONUS - Famous Beats MIDI Bundle", n: "50 MIDI", subs: ["Famous Beats Vol.1", "Famous Beats Vol.2", "Famous Beats Vol.3", "Famous Beats Vol.4", "Famous Beats Vol.5"] },
@@ -533,7 +556,8 @@ function folders(c: Ctx): string {
 <p class="dkf-path">${FOLDER}<b>${esc(dir?.dir ?? "")}</b>${subs}</p>
 <ul class="dkf-subs${ex.length < 2 ? " one" : ""}">${items}</ul></li>`;
   }).join("\n");
-  return `<ul class="dkf">\n${cards}\n</ul>\n`;
+  const more = MORE.map((m) => `<li><b>${esc(m.dir.replace(" (Multi-Track)", ""))}</b><span>${esc(m.text[c.lang])}</span><i>${thousands(m.n, c.lang)}</i></li>`).join("");
+  return `<ul class="dkf">\n${cards}\n<li class="dkf-more"><h3>${esc(c.w.moreTitle)}</h3><p>${esc(c.w.moreText)}</p><ul>${more}</ul></li>\n</ul>\n`;
 }
 
 /** "Folder Structure Breakdown" as the tree it is: the zip's folders by their names, their files counted, a file name or two each; then the bonuses' folders. */
@@ -562,7 +586,9 @@ function folderTree(c: Ctx): string {
 <ul class="dkt-tree">
 <li><div class="dkt-row"><span></span>${FOLDER}<span>1 - MIDI Drum Kit</span><b></b></div><ul>
 ${kit}
+${MORE.map((m) => `<li><div class="dkt-row"><span></span>${FOLDER}<span>${esc(m.dir)}</span>${count(m.n)}</div></li>`).join("\n")}
 <li class="dkt-file">READ ME - Meaning of words and labels.txt</li>
+<li class="dkt-file">READ ME - The new folders (12 to 17).txt</li>
 </ul></li>
 </ul>
 <p class="dkt-label">${esc(w.treeBonus)}</p>

@@ -76,7 +76,9 @@ export const funnel = {
     // ClickFunnels' own zip since 2026-11-12 ("ora ti mando il file che ha girato su clickfunnels negli ultimi
     // mesi"): 1,040 MIDI files in the kit, the "1050" the pages promise. The "Bundle" zip first copied here had
     // 794; the PRO MAX one has the same 2,209 files as this, under other folder names.
-    pack: "midi-drum-kit/MIDI Drum Kit Bundle V1.1.zip",
+    // V2 since the evening of 2026-11-12 ("let's get them to 10k+"): everything V1.1 has, untouched, plus folders
+    // 12 to 17 made from the kit's own files (tools/drum_kit_expand.py): 10,296 MIDI files in the kit.
+    pack: "midi-drum-kit/MIDI Drum Kit Bundle V2.zip",
     expansions: "midi-drum-kit/EXPLORER Expansions (House, Lofi, Afrobeat).zip",
     hustle: "shared/HUSTLE MIDI Bundle.zip",
     chords: "jazz-midi-pack/The Chord Progressions Bible.zip",

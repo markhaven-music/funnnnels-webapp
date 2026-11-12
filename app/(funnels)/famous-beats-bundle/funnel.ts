@@ -82,7 +82,7 @@ export const funnel = {
   files: {
     pack: "shared/Famous Beats Bundle (320 MIDI Beats).zip",
     "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
-    "drum-kit": "midi-drum-kit/MIDI Drum Kit Bundle V1.1.zip",
+    "drum-kit": "midi-drum-kit/MIDI Drum Kit Bundle V2.zip",
     hustle: "shared/HUSTLE MIDI Bundle.zip",
     "top-hits": "top-hits-midi-bundle/TOP HITS MIDI Bundle.zip",
     "swing-grooves": "jazz-midi-pack/Drunk Swing Grooves.zip",

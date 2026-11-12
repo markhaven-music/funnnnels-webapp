@@ -26,7 +26,7 @@ export const it: Copy = {
     sealRing: "GARANZIA DI QUALITÀ · GARANZIA DI QUALITÀ · ",
     sealDays: "GIORNI",
     summaryTitle: "Riepilogo ordine:",
-    productAlt: "MIDI Drum Kit: 1050 pattern di batteria MIDI + 6 bonus",
+    productAlt: "MIDI Drum Kit: 10.296 file MIDI di batteria + 6 bonus",
     dl: "Ti mandiamo il link per il download anche via email.",
     bullets: [
       "Pattern di batteria da Grammy",
@@ -43,11 +43,12 @@ export const it: Copy = {
       "Limitato a 1.250 licenze",
     ],
     stack: {
-      title: "1050 pattern di batteria MIDI, una cartella per ogni pezzo",
+      title: "10.296 file MIDI di batteria, una cartella per ogni pezzo",
       items: [
         "Kick, snare, hi-hat chiusi e aperti, 808 e una cartella extra di roll",
         "500+ pattern da 4 battute pronti per la radio e 250+ frammenti (roll, fill)",
         "File multitraccia: kick e snare, kick e 808 in un solo file MIDI",
+        "Ogni 808 in tutte le 12 tonalità, più oltre 6.000 combinazioni pronte di kick, snare, 808 e hi-hat",
         "Drag & drop in qualsiasi DAW, su Mac o PC",
         "Licenza commerciale: vendi i tuoi beat, niente royalty",
       ],
@@ -113,7 +114,7 @@ export const it: Copy = {
     // Step 2 as the Jazz order page's (2026-11-12): the tag over the product's name, the line under it,
     // "{price} · one payment", and the line inside the pay button after the total.
     instant: "Download immediato",
-    orderDesc: "1050 pattern di batteria MIDI + 6 bonus",
+    orderDesc: "10.296 file MIDI di batteria + 6 bonus",
     onePayment: "un solo pagamento",
     payInner: "download immediato · un solo pagamento",
     payBar: "Paga {price}",

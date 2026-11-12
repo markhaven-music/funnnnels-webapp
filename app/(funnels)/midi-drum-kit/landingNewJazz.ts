@@ -18,12 +18,15 @@ type L = "en" | "it";
 
 const WORDS: Record<L, Record<string, string>> = {
   en: {
-    tag: "1050 MIDI files",
+    // 10,296 since the evening of 2026-11-12 ("let's get them to 10k+"): the kit's 1,040 files and their 9,256 key
+    // versions and combinations (tools/drum_kit_expand.py, the zip V2). The old landing still says 1050.
+    tag: "10,296 MIDI files",
+    count: "10,296",
     inner: "{price} · instant download",
     worksIn: "Works in",
     daws: "Ableton Live, FL Studio, Logic Pro, Pro Tools, Cubase, Studio One, Reason, Reaper, GarageBand and more",
     compareTitle: "Why *MIDI Drum Kit* beats the other ways to make drums.",
-    summaryTitle: "1050 MIDI drum patterns + 616 more MIDI files in the bonuses. Today {price}.",
+    summaryTitle: "10,296 MIDI drum files + 616 more MIDI files in the bonuses. Today {price}.",
     kit: "The kit",
     value: "value",
     bonus: "Bonus",
@@ -43,12 +46,13 @@ const WORDS: Record<L, Record<string, string>> = {
     sealAlt: "14-day quality guarantee",
   },
   it: {
-    tag: "1050 file MIDI",
+    tag: "10.296 file MIDI",
+    count: "10.296",
     inner: "{price} · download immediato",
     worksIn: "Funziona in",
     daws: "Ableton Live, FL Studio, Logic Pro, Pro Tools, Cubase, Studio One, Reason, Reaper, GarageBand e altre",
     compareTitle: "Perché il *MIDI Drum Kit* batte gli altri modi di fare la batteria.",
-    summaryTitle: "1050 pattern di batteria MIDI + altri 616 file MIDI nei bonus. Oggi {price}.",
+    summaryTitle: "10.296 file MIDI di batteria + altri 616 file MIDI nei bonus. Oggi {price}.",
     kit: "Il kit",
     value: "di valore",
     bonus: "Bonus",
@@ -88,7 +92,7 @@ const CHART: Record<L, { kit: string; alts: string[]; rows: { label: string; kit
     alts: ["By hand", "Audio loops", "Free MIDI"],
     rows: [
       { label: "Your drums bounce", kit: "From the first file you drag in", alts: [no("Only if you already know how"), meh("The loop’s bounce, not yours"), meh("Some files do")] },
-      { label: "You never start from an empty piano roll", kit: "Over 1,000 places to start", alts: [no("Every single beat"), yes("A loop gets you going"), meh("Until the good ones run out")] },
+      { label: "You never start from an empty piano roll", kit: "Over 10,000 places to start", alts: [no("Every single beat"), yes("A loop gets you going"), meh("Until the good ones run out")] },
       { label: "It sounds like you, not like a pack", kit: "Your sounds, your mix", alts: [yes("Yes"), no("Everyone has that loop"), yes("Yes")] },
       { label: "Fills and rolls are already made", kit: "250+ fragments to drop in", alts: [no("You draw each one"), no("Only what’s in the loop"), meh("Rarely")] },
       { label: "You find the right part in seconds", kit: "A numbered folder per drum", alts: [no("Nothing to pick from"), meh("Scroll and audition"), no("A pile of files")] },
@@ -102,7 +106,7 @@ const CHART: Record<L, { kit: string; alts: string[]; rows: { label: string; kit
     alts: ["A mano", "Loop audio", "MIDI gratis"],
     rows: [
       { label: "La tua batteria ha il bounce", kit: "Dal primo file che trascini", alts: [no("Solo se sai già come si fa"), meh("È il bounce del loop, non il tuo"), meh("Solo alcuni file")] },
-      { label: "Non parti mai dal piano roll vuoto", kit: "Più di 1.000 punti di partenza", alts: [no("A ogni singolo beat"), yes("Un loop ti fa partire"), meh("Finché durano quelli buoni")] },
+      { label: "Non parti mai dal piano roll vuoto", kit: "Più di 10.000 punti di partenza", alts: [no("A ogni singolo beat"), yes("Un loop ti fa partire"), meh("Finché durano quelli buoni")] },
       { label: "Suona come te, non come un pack", kit: "I tuoi suoni, il tuo mix", alts: [yes("Sì"), no("Quel loop ce l’hanno tutti"), yes("Sì")] },
       { label: "Fill e roll sono già fatti", kit: "250+ frammenti da inserire", alts: [no("Li disegni uno a uno"), no("Solo quelli del loop"), meh("Di rado")] },
       { label: "Trovi la parte giusta in pochi secondi", kit: "Una cartella numerata per ogni pezzo", alts: [no("Niente tra cui scegliere"), meh("Scorri e ascolti"), no("Un mucchio di file")] },
@@ -118,6 +122,7 @@ const CHART: Record<L, { kit: string; alts: string[]; rows: { label: string; kit
 // counts, the download page, the guarantee's words. `at`: where it goes among the old four (0 = before the first).
 const FAQ: Record<L, { at: number; q: string; a: string }[]> = {
   en: [
+    { at: 1, q: "What are the 10,296 files?", a: "1,040 are patterns and fragments written by hand, one by one. The other 9,256 are those same patterns ready in more ways, so you don’t have to build them: every 808 in all 12 keys, every kick pattern with every snare pattern, the kick and 808 beats with snares, the kick and snare beats with hi-hats." },
     { at: 1, q: "I’m just starting out. Is this too advanced for me?", a: "No. You drag a file onto a drum track and it plays. Start with the Complete Beats folder, where every drum is in one file, then swap single parts as you go." },
     { at: 1, q: "What’s the difference between a pattern and a fragment?", a: "A pattern is a full part for one drum, 1 to 4 bars long. A fragment is a short piece (a roll, a fill, a syncopation) you drop where you want a change. Any fragment goes on any beat." },
     { at: 1, q: "Which genres is it for?", a: "Hip hop and trap first: 808s, hi-hat rolls, half-time snares. The files run from 70 to 200 BPM, and since it’s MIDI you can use any part at any tempo, in any style that wants that bounce." },
@@ -129,6 +134,7 @@ const FAQ: Record<L, { at: number; q: string; a: string }[]> = {
     { at: 4, q: "What if something is wrong with my files?", a: "Email support@thegrind.studio within 14 days. We send a fresh download or a replacement, and if we can’t fix it you get a refund." },
   ],
   it: [
+    { at: 1, q: "Cosa sono i 10.296 file?", a: "1.040 sono pattern e frammenti scritti a mano, uno per uno. Gli altri 9.256 sono gli stessi pattern già pronti in più modi, così non devi costruirli tu: ogni 808 in tutte le 12 tonalità, ogni pattern di kick con ogni pattern di snare, i beat di kick e 808 con le snare, i beat di kick e snare con gli hi-hat." },
     { at: 1, q: "Ho appena iniziato. È troppo avanzato per me?", a: "No. Trascini un file su una traccia di batteria e suona. Parti dalla cartella Complete Beats, dove tutta la batteria è in un solo file, poi cambi le singole parti man mano." },
     { at: 1, q: "Che differenza c’è tra un pattern e un frammento?", a: "Un pattern è una parte intera per un pezzo della batteria, lunga da 1 a 4 battute. Un frammento è un pezzo corto (un roll, un fill, una sincope) che metti dove vuoi un cambio. Ogni frammento va su qualsiasi beat." },
     { at: 1, q: "Per quali generi va bene?", a: "Hip hop e trap prima di tutto: 808, roll di hi-hat, snare in half-time. I file vanno da 70 a 200 BPM e, essendo MIDI, puoi usare ogni parte a qualsiasi tempo, in qualsiasi stile che voglia quel bounce." },
@@ -202,7 +208,8 @@ const ticks = (items: string[], cls: string) => `<ul class="${cls}">${items.map(
 /** The hero: wordmark and tag, pre-title, headline, sub, the video, the benefits in two columns, the key, the DAWs, three real numbers. */
 export function hero(c: JazzCtx, video: string): string {
   const w = WORDS[l(c)];
-  const bullets = ["t005", "t006", "t007", "t008", "t009", "t010"].map((k) => c.words(k));
+  // the old page's "1050" in the first bullet becomes the kit's files today
+  const bullets = ["t005", "t006", "t007", "t008", "t009", "t010"].map((k) => c.words(k).replace(/1[.,]?050/g, w.count));
   return `<div class="jz" id="dk-hero"><section class="jz-hero">
 <div class="jz-heroBg" aria-hidden="true"></div>
 <div class="jz-topband"><header class="jz-wrap jz-topbar"><span class="jz-logo"><img src="${IMG}logo.webp" alt="GRIND STUDIO" width="360" height="42"></span><span class="jz-tag"><span class="jz-dot" aria-hidden="true"></span>${esc(w.tag)}</span></header></div>

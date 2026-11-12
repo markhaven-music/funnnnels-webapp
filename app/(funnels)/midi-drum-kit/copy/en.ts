@@ -24,7 +24,7 @@ export const en = {
     sealRing: "QUALITY GUARANTEE · QUALITY GUARANTEE · ",
     sealDays: "DAYS",
     summaryTitle: "Order Summary:",
-    productAlt: "MIDI Drum Kit: 1050 MIDI drum patterns + 6 bonuses",
+    productAlt: "MIDI Drum Kit: 10,296 MIDI drum files + 6 bonuses",
     dl: "Download link will be sent to your email.",
     bullets: [
       "Grammy-Level Drum Patterns",
@@ -44,11 +44,13 @@ export const en = {
     // Only the landing's own facts: 1050 files and their folders, 500+ patterns, 250+ fragments,
     // the multi-track files, any DAW, the commercial license, 415 MIDI files in the bonuses.
     stack: {
-      title: "1050 MIDI drum patterns, a folder per drum",
+      // 10,296 since 2026-11-12 (the zip V2: the 1,040 patterns, every 808 in all 12 keys, 6,374 combinations).
+      title: "10,296 MIDI drum files, a folder per drum",
       items: [
         "Kick, snare, hi-hats, open hats, 808 and an extra rolls folder",
         "500+ radio-ready 4-bar patterns and 250+ fragments (rolls, fills)",
         "Multi-track files: kick & snare, kick & 808 in one MIDI file",
+        "Every 808 in all 12 keys, plus 6,000+ ready kick, snare, 808 and hi-hat combinations",
         "Drag & drop into any DAW, on Mac or PC",
         "Commercial license: sell your beats, no royalties",
       ],
@@ -120,7 +122,7 @@ export const en = {
     // Step 2 as the Jazz order page's (2026-11-12): the tag over the product's name, the line under it,
     // "{price} · one payment", and the line inside the pay button after the total.
     instant: "Instant download",
-    orderDesc: "1050 MIDI drum patterns + 6 bonuses",
+    orderDesc: "10,296 MIDI drum files + 6 bonuses",
     onePayment: "one payment",
     payInner: "instant download · one payment",
     // Step 2: the bar fixed at the bottom of the screen while the button is off screen, {price} = the total.
