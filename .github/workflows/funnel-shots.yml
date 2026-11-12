@@ -1,0 +1,33 @@
+# The funnel cards' and maps' screenshots, taken again after every production
+# deploy (Vercel reports it to GitHub as a deployment), so the dashboard shows
+# each page as it is now. tools/funnel-previews.sh shoots funnnnels.vercel.app
+# (no Pixel, no visit counted) and sends each picture to funnnnels.com/api/shots.
+name: Funnel screenshots
+
+on:
+  deployment_status:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * *" # once a day too, in case a deploy's run failed
+
+concurrency:
+  group: funnel-shots
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  shots:
+    if: github.event_name != 'deployment_status' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cwebp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq webp
+      - name: Take and upload the screenshots
+        env:
+          SHOTS_TOKEN: ${{ secrets.SHOTS_TOKEN }}
+          CHROME: google-chrome
+        run: bash tools/funnel-previews.sh

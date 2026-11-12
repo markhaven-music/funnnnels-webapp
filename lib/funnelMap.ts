@@ -2,6 +2,7 @@ import { editUrl } from "@/lib/editableIndex";
 import { freePackStats, type FreePackRow } from "@/lib/freePacks";
 import { funnelLabel, resolveFunnel, upsellsOn, type Product } from "@/lib/funnels";
 import { KIT_HOME, PRODUCT_TYPE } from "@/lib/liveUrl";
+import { shotSrc } from "@/lib/shots";
 import { getFunnel } from "@/lib/store";
 
 // The funnel map (/funnels/<id>, like ClickFunnels' funnel view): where the
@@ -76,6 +77,8 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
       const prefix = lang === "en" ? "" : `/${lang}`;
       const shots = SHOTS[f.slug]?.[lang] ?? SHOTS[f.slug]?.en;
       const img = (name?: string) => (name ? `/funnels/${f.slug}/${name}.webp` : null);
+      // The landing, order and thank-you screenshots are taken again after each deploy (lib/shots.ts).
+      const shot = (name?: string) => (name ? shotSrc(f.slug, name) : null);
       const edit = editable.has(f.slug) ? `/funnels/${f.slug}/edit` : null;
       // Pages built in code: their words are edited page by page (app/funnels/[id]/texts, lib/editableIndex.ts);
       // an upsell that is a Drum Kit page is edited there.
@@ -86,14 +89,14 @@ function codeMap(f: Product, editable: Set<string>): FunnelMap {
       };
       const steps = [
         // Launch-kit products sell on the landing itself (#buy): no order step.
-        step("landing", f.checkout.orderPage ? "Sales page" : "Sales page + checkout", `/${f.slug}`, img(shots?.landing), edit ?? texts("landing")),
+        step("landing", f.checkout.orderPage ? "Sales page" : "Sales page + checkout", `/${f.slug}`, shot(shots?.landing), edit ?? texts("landing")),
         // Jazz's order page shows the same edited sections as its landing.
-        ...(f.checkout.orderPage ? [step("order", "Order page", f.checkout.orderPage, img(shots?.order), edit ?? texts("order"))] : []),
+        ...(f.checkout.orderPage ? [step("order", "Order page", f.checkout.orderPage, shot(shots?.order), edit ?? texts("order"))] : []),
         ...(f.offers ?? []).map((o, i) => ({
           ...step("upsell", `Upsell ${i + 1}: ${o.name}`, `/${f.slug}/${o.path}`, img(o.path), texts(o.id)),
           offer: { id: o.id, page: `upsell-${i + 1}`, live: upsellsOn(f) },
         })),
-        step("thank-you", "Thank-you page", f.checkout.thankYou, img(shots?.thanks), texts("thank-you")),
+        step("thank-you", "Thank-you page", f.checkout.thankYou, shot(shots?.thanks), texts("thank-you")),
       ];
       return { lang, label: LANG_LABEL[lang] ?? lang.toUpperCase(), steps };
     }),
@@ -169,7 +172,7 @@ async function freePacksMap(only?: FreePackTab): Promise<FunnelMap> {
           name: `Sign-up page: free ${t.label} pack`,
           path: t.page,
           url: `${KIT_HOME}${t.page}`,
-          image: `/funnels/free/${t.shot}.webp`,
+          image: shotSrc("free", t.shot),
           editUrl: editUrl("free", t.tab),
           numbers: optinNumbers,
         },

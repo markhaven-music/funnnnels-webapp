@@ -1,6 +1,7 @@
 import type { Metrics } from "@/lib/analytics";
 import type { StoredFunnel } from "@/lib/blocks";
 import type { FunnelSpend } from "@/lib/funnelSpend";
+import { shotSrc } from "@/lib/shots";
 
 // The funnels built in code (app/(funnels)/<slug>) on the dashboard's funnel
 // list. They have no row in the `funnels` table (only Jazz does, because its
@@ -15,31 +16,31 @@ const CARDS: CodeCard[] = [
   {
     id: "midi-drum-kit",
     name: "MIDI Drum Kit",
-    image: "/funnels/midi-drum-kit/preview.webp",
+    image: shotSrc("midi-drum-kit", "preview"),
     steps: 3,
   },
   {
     id: "top-hits-midi-bundle",
     name: "TOP HITS MIDI Bundle",
-    image: "/funnels/top-hits-midi-bundle/preview.webp",
+    image: shotSrc("top-hits-midi-bundle", "preview"),
     steps: 3,
   },
   {
     id: "top-hits-chords",
     name: "TOP HITS MIDI Bundle (new funnel)",
-    image: "/funnels/top-hits-chords/preview.webp",
+    image: shotSrc("top-hits-chords", "preview"),
     steps: 4,
   },
   {
     id: "famous-beats-bundle",
     name: "Famous Beats Bundle",
-    image: "/funnels/famous-beats-bundle/preview.webp",
+    image: shotSrc("famous-beats-bundle", "preview"),
     steps: 3,
   },
   {
     id: "drunk-swing-grooves",
     name: "Drunk Swing Grooves",
-    image: "/funnels/drunk-swing-grooves/preview.webp",
+    image: shotSrc("drunk-swing-grooves", "preview"),
     steps: 4,
   },
   // The free lead magnets (app/free), listed apart under Lead magnets, one card per
@@ -50,12 +51,12 @@ const CARDS: CodeCard[] = [
     { id: "free-rolls", name: "Free Rolls Pack", shot: "optin-rolls" },
     { id: "free-bounce", name: "Free Bounce Pack", shot: "optin-bounce" },
     { id: "free-hooks", name: "Free Mystery Hooks Pack", shot: "optin-hooks" },
-  ].map((p): CodeCard => ({ id: p.id, name: p.name, image: `/funnels/free/${p.shot}.webp`, steps: 4, tag: "Lead magnet", category: "lead-magnet" })),
+  ].map((p): CodeCard => ({ id: p.id, name: p.name, image: shotSrc("free", p.shot), steps: 4, tag: "Lead magnet", category: "lead-magnet" })),
 ];
 
-// The cards show a screenshot of the first page: public/funnels/<slug>/preview.webp,
-// made by tools/funnel-previews.sh. Jazz has a row, so it gets its screenshot here.
-const IMAGES: Record<string, string> = { "jazz-midi-pack": "/funnels/jazz-midi-pack/preview.webp" };
+// The cards show a screenshot of the first page (lib/shots.ts), taken again
+// after every production deploy by tools/funnel-previews.sh. Jazz has a row, so it gets its screenshot here.
+const IMAGES: Record<string, string> = { "jazz-midi-pack": shotSrc("jazz-midi-pack", "preview") };
 
 /** The code funnels missing from the table, first, then the table's funnels. */
 export function withCodeFunnels(funnels: StoredFunnel[]): StoredFunnel[] {

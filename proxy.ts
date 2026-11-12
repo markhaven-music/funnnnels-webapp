@@ -104,6 +104,7 @@ const PUBLIC = [
   /^\/api\/checkout\/shop\/(intent|paypal)$/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
+  /^\/api\/shots$/, // new screenshots of the funnel pages, from the GitHub Action (its own SHOTS_TOKEN)
   /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|here|me|upsell|owned|go|open|resume|bonus|blog)$/, // go, open: a click on / an open of an email (lib/mail.ts); resume: its saved cart; here, me: dashboard → Live; bonus: the Drum Kit order page's 5-minute clock; owned: an upsell page asking if the buyer has it already
   /^\/account$/, // the customer login and its API
   /^\/api\/checkout\/account\/(login|verify|session)$/,
