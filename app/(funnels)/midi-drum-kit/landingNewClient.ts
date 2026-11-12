@@ -16,7 +16,7 @@ export const CLIENT_JS = String.raw`
   var cfgEl = document.getElementById('dk-cfg');
   if (!cfgEl) return;
   var W = JSON.parse(cfgEl.textContent);
-  var BASE = '/funnels/midi-drum-kit/player/', V2 = BASE + 'v2/';
+  var BASE = '/funnels/midi-drum-kit/player/', V2 = BASE + 'v3/';
   var SOUND = [null, 'kick', 'snare', 'clap', 'rim', 'hat', 'ohat', 'perc'];
   var LEVEL = [0.9, 1, 0.8, 0.75, 0.7, 0.5, 0.45, 0.6];
   var PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>';

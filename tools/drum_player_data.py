@@ -9,7 +9,7 @@ exactly what is in them:
     /usr/bin/python3 tools/drum_player_data.py KIT.zip [DSG.zip] [HOOKS.zip]
     # KIT   = MIDI Drum Kit Bundle V1.1.zip (the kit and bonuses 1-3)
     # DSG   = Drunk Swing Grooves.zip (bonus 4), HOOKS = MYSTERY Hooks Pack.zip (bonus 5)
-    # writes public/funnels/midi-drum-kit/player/v2/
+    # writes public/funnels/midi-drum-kit/player/v3/
 
   kit.json            the 11 folders and their groups, and the base beat single parts play over
   <group>.json        every file of a group: its path in the zip, tempo, length, notes
@@ -20,7 +20,7 @@ exactly what is in them:
 Times are in beats (quarter notes). A note is five numbers, t, length, sound, pitch, velocity, one
 after the other in "n". sound is an index of INST. pitch: the 808's MIDI note; for the others the
 semitones from the file's middle C (0 in the kit's multi-track folders, as the first player had them).
-A new layout of these files goes in a new folder (v3…): browsers keep /funnels/* for a week.
+A new layout of these files goes in a new folder (v4…); v3 because v2's first files were asked for before their deploy and the brand domain kept the 404s for a week: browsers keep /funnels/* for a week.
 """
 import json
 import os
@@ -32,7 +32,7 @@ import tempfile
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "public", "funnels", "midi-drum-kit", "player", "v2")
+OUT = os.path.join(ROOT, "public", "funnels", "midi-drum-kit", "player", "v3")
 
 INST = ["808", "kick", "snare", "clap", "rim", "hat", "ohat", "perc"]
 I808, KICK, SNARE, CLAP, RIM, HAT, OHAT, PERC = range(8)

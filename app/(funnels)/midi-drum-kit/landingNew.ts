@@ -1,5 +1,5 @@
 import type { Currency } from "@/lib/geo";
-import clips from "@/public/funnels/midi-drum-kit/player/v2/clips.json";
+import clips from "@/public/funnels/midi-drum-kit/player/v3/clips.json";
 import type { Lang } from "./i18n";
 import { CLIENT_JS } from "./landingNewClient";
 import { STACK_VALUES } from "./stackSwitch";
@@ -17,7 +17,7 @@ import { STACK_VALUES } from "./stackSwitch";
 //     style, boxes-all-v3, value-stack-7 (tools/value_stack.py v3);
 //   - the headlines at the Jazz landing's sizes (jazz-midi-pack/jazz.module.css .heroHead, .h2);
 //   - the player right after the hero: all 11 folders, every file (tools/drum_player_data.py →
-//     player/v2), single parts over a simple beat of the kit's own files (./landingNewClient.ts);
+//     player/v3), single parts over a simple beat of the kit's own files (./landingNewClient.ts);
 //   - the ten folder panels as one short list, a play button each (it drives the player);
 //   - the bonuses as the Jazz page's (jazz-midi-pack/bonus.module.css): cover, "Bonus 1 · $197 Free",
 //     name, text, what's inside counted from the files, and something to play;
@@ -25,7 +25,7 @@ import { STACK_VALUES } from "./stackSwitch";
 //     box with the same model): streaks in a panel's top right corner and a thin foil band on its top edge.
 
 const IMG = "/funnels/midi-drum-kit/";
-const V2 = `${IMG}player/v2/`;
+const V2 = `${IMG}player/v3/`;
 
 const HERO = ".id-6Z-Renrye-167";
 const H2 = [
@@ -48,8 +48,8 @@ ${H2.map((s) => `${s} .elHeadline`).join(",")}{font-family:${DISPLAY}!important;
 ${H2.map((s) => `${s} .elHeadline *`).join(",")}{font-family:inherit!important;letter-spacing:inherit!important}
 
 ${FOIL.join(",")}{position:relative;isolation:isolate;overflow:hidden}
-${FOIL.map((s) => `${s}::before`).join(",")}{content:"";position:absolute;z-index:-1;top:0;right:0;width:min(420px,68%);aspect-ratio:720/309;background:url(${IMG}iris-streaks.webp) right top/cover no-repeat;-webkit-mask:radial-gradient(115% 130% at 100% 0,#000 8%,rgba(0,0,0,.45) 42%,transparent 72%);mask:radial-gradient(115% 130% at 100% 0,#000 8%,rgba(0,0,0,.45) 42%,transparent 72%);opacity:.5;pointer-events:none}
-${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index:1;top:0;left:0;right:0;height:3px;background:url(${IMG}iris-foil.webp) center/cover no-repeat;pointer-events:none}
+${FOIL.map((s) => `${s}::before`).join(",")}{content:"";position:absolute;z-index:-1;top:0;right:0;width:min(420px,68%);aspect-ratio:720/309;background:url(${IMG}iris-streaks-2.webp) right top/cover no-repeat;-webkit-mask:radial-gradient(115% 130% at 100% 0,#000 8%,rgba(0,0,0,.45) 42%,transparent 72%);mask:radial-gradient(115% 130% at 100% 0,#000 8%,rgba(0,0,0,.45) 42%,transparent 72%);opacity:.5;pointer-events:none}
+${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index:1;top:0;left:0;right:0;height:3px;background:url(${IMG}iris-foil-2.webp) center/cover no-repeat;pointer-events:none}
 
 /* The old page's reset gives every element margin: 0 auto, which shrinks and centres a grid or flex child. */
 .dkp-sec *,.dkf *,.dkb *{margin-left:0;margin-right:0}
