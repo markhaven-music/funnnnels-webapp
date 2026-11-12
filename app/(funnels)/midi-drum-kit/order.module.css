@@ -732,8 +732,8 @@ main.jazzLike {
 }
 .stackBonuses img {
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: auto;
 }
 .stackFree {
   flex: none;

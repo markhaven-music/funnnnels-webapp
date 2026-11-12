@@ -13,7 +13,8 @@ import d from "./order.module.css";
 // list, the six bonuses each with its cover and its value struck out, total value against
 // today's price, the guarantee in a line. Words: copy/<lang>.ts order.stack.
 
-/** The bonuses' covers, in the order of order.stack.bonuses (132px squares of the landing's). */
+/** The bonuses' boxes, in the order of order.stack.bonuses: the ones in the Jazz bonuses' style (2026-11-12,
+ *  bonus2-*-132.webp, 132 × 196, shown 36px wide as on the Jazz order page); bonus-*-132 were the old square covers. */
 const COVERS = ["famous", "starters", "drums", "grooves", "hooks", "guide"];
 const IMG = "/funnels/midi-drum-kit";
 
@@ -40,7 +41,7 @@ export function OrderStack({ w, price, currency, lang }: { w: Copy["order"]["sta
           {w.bonuses.map((name, i) => (
             <li key={name}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              {COVERS[i] && <img src={`${IMG}/bonus-${COVERS[i]}-132.webp`} alt="" width={44} height={44} loading="lazy" decoding="async" />}
+              {COVERS[i] && <img src={`${IMG}/bonus2-${COVERS[i]}-132.webp`} alt="" width={132} height={196} loading="lazy" decoding="async" />}
               <span>{name}</span>
               <span className={d.stackFree}>
                 <s>{fmt(STACK_VALUES.bonuses[i])}</s> {w.free}
