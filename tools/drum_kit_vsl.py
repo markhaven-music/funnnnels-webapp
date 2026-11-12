@@ -32,7 +32,7 @@ ZIP = sys.argv[3] if len(sys.argv) > 3 else os.path.expanduser("~/Downloads/MIDI
 W, H, SR, FPS, GAP = J.W, J.H, J.SR, J.FPS, J.GAP
 # The Jazz video's look in the Drum Kit's orange, not the Jazz yellow ("hai usato giallo?", 2026-11-12): the word
 # being said, the fragment drawn in a beat, the bonus titles, the cards, the folders.
-J.BRASS, J.BRASS_HI = (245, 133, 31), (255, 161, 61)
+J.BRASS, J.BRASS_HI = (255, 154, 42), (255, 184, 92)
 RED, GREEN, YELLOW, YELLOW_HI, CREAM, DIM, RULE = J.RED, J.GREEN, J.BRASS, J.BRASS_HI, J.CREAM, J.DIM, J.RULE
 PANEL = (22, 19, 15)  # the Jazz piano roll's panel
 

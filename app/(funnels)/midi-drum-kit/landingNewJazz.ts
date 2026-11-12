@@ -20,6 +20,12 @@ const WORDS: Record<L, Record<string, string>> = {
   en: {
     // 10,296 since the evening of 2026-11-12 ("let's get them to 10k+"): the kit's 1,040 files and their 9,256 key
     // versions and combinations (tools/drum_kit_expand.py, the zip V2). The old landing still says 1050.
+    // The hero in the Jazz page's words' shape (its pre, its headline with one *highlighted* and one _underlined_
+    // part, its bold sub), 2026-11-12: "la pagina jazz midi pack looks way better above the fold. Let's achieve the
+    // same impact. Change the headlines". The old page's t002-t004 (and its "Used in Billboard Charts") are not shown.
+    heroPre: "For producers who want drums that bounce",
+    heroHead: "Stop Programming Drums Hit By Hit. 10,296 *MIDI Drum Patterns* That Bounce, _Drag One Into Your Beat_.",
+    heroSub: "10,296 drag-and-drop MIDI files: kicks, snares, hi-hats, 808s, rolls and complete beats, in every key. Drag one into your DAW.",
     tag: "10,296 MIDI files",
     count: "10,296",
     inner: "{price} · instant download",
@@ -46,6 +52,9 @@ const WORDS: Record<L, Record<string, string>> = {
     sealAlt: "14-day quality guarantee",
   },
   it: {
+    heroPre: "Per i producer che vogliono una batteria con il bounce",
+    heroHead: "Smetti Di Programmare La Batteria Colpo Per Colpo. 10.296 *Pattern MIDI Di Batteria* Con Il Bounce, _Trascinane Uno Nel Tuo Beat_.",
+    heroSub: "10.296 file MIDI drag-and-drop: kick, snare, hi-hat, 808, roll e beat completi, in ogni tonalità. Trascinane uno nella tua DAW.",
     tag: "10.296 file MIDI",
     count: "10.296",
     inner: "{price} · download immediato",
@@ -163,6 +172,8 @@ const KIT_VALUE = STACK_VALUES.total - STACK_VALUES.bonuses.reduce((a, b) => a +
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 const plain = (html: string) => html.replace(/<[^>]+>/g, "").replace(/&nbsp;|[ ​‌]/g, " ").replace(/\s+/g, " ").trim();
+/** The Jazz hero's marks: *words* highlighted, _words_ underlined (jazz-midi-pack/sections.tsx Marked). */
+const marked = (s: string) => esc(s).replace(/\*([^*]+)\*/g, '<span class="jz-hl2">$1</span>').replace(/_([^_]+)_/g, "<u>$1</u>");
 /** *words* in the page's orange. */
 const hl = (s: string) => esc(s).replace(/\*(.+?)\*/g, '<em class="jz-hl">$1</em>');
 /** copy.ts's **bold** as <b>. */
@@ -214,9 +225,9 @@ export function hero(c: JazzCtx, video: string): string {
 <div class="jz-heroBg" aria-hidden="true"></div>
 <div class="jz-topband"><header class="jz-wrap jz-topbar"><span class="jz-logo"><img src="${IMG}logo.webp" alt="GRIND STUDIO" width="360" height="42"></span><span class="jz-tag"><span class="jz-dot" aria-hidden="true"></span>${esc(w.tag)}</span></header></div>
 <div class="jz-wrap jz-heroCenter">
-<p class="jz-heroPre">${c.words("t002")}</p>
-<h1 class="jz-heroHead">${c.words("t003")}</h1>
-<p class="jz-heroSub">${c.words("t004")}</p>
+<p class="jz-heroPre">${esc(w.heroPre)}</p>
+<h1 class="jz-heroHead">${marked(w.heroHead)}</h1>
+<p class="jz-heroSub">${esc(w.heroSub)}</p>
 <div class="jz-vsl">${video}</div>
 ${ticks(bullets, "jz-heroBullets")}
 <div class="jz-heroCta">${key(c)}</div>
@@ -327,7 +338,7 @@ ${items.map((x) => `<details><summary>${x.q}</summary><p>${x.a}</p></details>`).
 /** The guarantee as the Jazz page's panel: the seal, the old page's words (t252–t254), and its promise as three steps ("remake the Risk Free section"). */
 export function guarantee(c: JazzCtx): string {
   const w = WORDS[l(c)];
-  const seal = `<svg class="jz-seal" viewBox="0 0 200 200" role="img" aria-label="${esc(w.sealAlt)}"><defs><linearGradient id="dk-seal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb866"/><stop offset=".5" stop-color="#f5851f"/><stop offset="1" stop-color="#c85a06"/></linearGradient><path id="dk-seal-arc" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0"/></defs><circle cx="100" cy="100" r="98" fill="url(#dk-seal)"/><circle cx="100" cy="100" r="88" fill="#0d0c10"/><circle cx="100" cy="100" r="60" fill="none" stroke="url(#dk-seal)" stroke-width="1.5"/><text class="jz-sealRing" fill="#ffa13d"><textPath href="#dk-seal-arc" textLength="462">${esc(w.sealRing)}</textPath></text><text x="100" y="108" text-anchor="middle" class="jz-sealDays" fill="#ffa13d">14</text><text x="100" y="134" text-anchor="middle" class="jz-sealUnit" fill="#fff">${esc(w.sealDays)}</text></svg>`;
+  const seal = `<svg class="jz-seal" viewBox="0 0 200 200" role="img" aria-label="${esc(w.sealAlt)}"><defs><linearGradient id="dk-seal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb866"/><stop offset=".5" stop-color="#ff9a2a"/><stop offset="1" stop-color="#c85a06"/></linearGradient><path id="dk-seal-arc" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0"/></defs><circle cx="100" cy="100" r="98" fill="url(#dk-seal)"/><circle cx="100" cy="100" r="88" fill="#0d0c10"/><circle cx="100" cy="100" r="60" fill="none" stroke="url(#dk-seal)" stroke-width="1.5"/><text class="jz-sealRing" fill="#ffb85c"><textPath href="#dk-seal-arc" textLength="462">${esc(w.sealRing)}</textPath></text><text x="100" y="108" text-anchor="middle" class="jz-sealDays" fill="#ffb85c">14</text><text x="100" y="134" text-anchor="middle" class="jz-sealUnit" fill="#fff">${esc(w.sealDays)}</text></svg>`;
   const steps = STEPS[l(c)].map((s, i) => `<li><b>${i + 1}</b><span>${esc(s)}</span></li>`).join("");
   return `<div class="jz"><section class="jz-sec dk-guar"><div class="jz-wrap">
 <div class="jz-guarantee jz-panel jz-two dk-foil"><div class="jz-sealWrap jz-twoBody">${seal}</div>
@@ -348,7 +359,7 @@ export function finale(c: JazzCtx): string {
 export const JAZZ_MORE_CSS = `
 /* the hero's headline in the Jazz page's face at its weight: the old page's words carry their own spans */
 .jz-heroHead *{font-family:inherit!important;font-weight:inherit!important;letter-spacing:inherit!important}
-.dk-eyebrow{margin-bottom:10px;font:700 13px/1.3 var(--font-display),sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#ff9a2e}
+.dk-eyebrow{margin-bottom:10px;font:700 13px/1.3 var(--font-display),sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#ffa83e}
 .dk-cta{padding:8px 0 0}
 .dk-cta .jz-ctaBlock{margin-top:20px}
 /* every key the same width on a phone, whatever box it sits in (they were 288 to 355px wide) */
@@ -359,13 +370,13 @@ export const JAZZ_MORE_CSS = `
 .dkx-corner{display:none}
 .dkx-head{position:sticky;top:var(--dk-top,0px);z-index:4;align-items:stretch;padding:10px 0 4px;background:#070707}
 .dkx-col{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 2px 6px;font:700 10.5px/1.2 var(--font-display),sans-serif;letter-spacing:.05em;text-transform:uppercase;text-align:center;color:#fff}
-.dkx-col.dkx-win{flex-direction:row;justify-content:flex-start;gap:8px;padding:8px 10px;border-radius:10px;background:linear-gradient(180deg,#ffa13d,#f5851f 55%,#dd6408);box-shadow:0 10px 28px -12px rgba(236,106,12,.7);text-align:left;color:#1a0d00}
+.dkx-col.dkx-win{flex-direction:row;justify-content:flex-start;gap:8px;padding:8px 10px;border-radius:10px;background:linear-gradient(180deg,#ffb85c,#ff9a2a 55%,#e8740e);box-shadow:0 10px 28px -12px rgba(240,122,18,.7);text-align:left;color:#1a0d00}
 .dkx-col.dkx-win b{font:800 16px/1.1 var(--font-display),sans-serif;letter-spacing:-.01em;text-transform:none}
 .dkx-box{flex:none;width:36px!important;height:auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,.45))}
 .dkx-label{grid-column:1/-1;padding:18px 2px 8px;font:700 16px/1.3 var(--font-display),sans-serif;color:#fff}
 .dkx-cell{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:10px;background:#0d0c10;font-size:11.5px;line-height:1.3;text-align:center;color:#fff}
 .dkx-cell .jz-mark{width:24px;height:24px}
-.dkx-cell.dkx-win{align-items:flex-start;gap:8px;padding:11px 10px 12px;background:#2a1808;box-shadow:inset 0 0 0 1.5px #f5851f;font-size:14px;font-weight:700;text-align:left;color:#fff}
+.dkx-cell.dkx-win{align-items:flex-start;gap:8px;padding:11px 10px 12px;background:#2a1808;box-shadow:inset 0 0 0 1.5px #ff9a2a;font-size:14px;font-weight:700;text-align:left;color:#fff}
 .dkx-cell.dkx-win .jz-mark{color:#06210f;background:#3fd16b;box-shadow:0 0 14px rgba(63,209,107,.45)}
 .dkx-no .jz-mark{color:#ff8a73;background:rgba(224,87,63,.24)}
 @media (min-width:860px){
@@ -392,7 +403,7 @@ export const JAZZ_MORE_CSS = `
 /* the guarantee's three steps */
 .dk-steps{display:grid;gap:8px;margin-top:22px;text-align:left}
 .dk-steps li{display:grid;grid-template-columns:30px minmax(0,1fr);align-items:center;gap:12px;padding:12px 14px;border-radius:8px;background:#15141a;font-size:15px;font-weight:600;line-height:1.35;color:#fff;overflow-wrap:anywhere}
-.dk-steps b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:linear-gradient(180deg,#ffa13d,#ec6a0c);font:800 14px/1 var(--font-display),sans-serif;color:#1a0d00}
+.dk-steps b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:linear-gradient(180deg,#ffb85c,#f07a12);font:800 14px/1 var(--font-display),sans-serif;color:#1a0d00}
 .dk-guar .jz-sub{margin-top:12px}
 .dk-guar .jz-twoHead,.dk-license .jz-twoHead{position:static}
 @media (min-width:1000px){.dk-guar .jz-two{grid-template-columns:minmax(0,.42fr) minmax(0,1fr);align-items:center}.dk-guar .jz-twoHead{grid-column:2}.dk-guar .jz-twoBody{grid-column:1}.dk-guar .jz-seal{width:220px;height:220px}}

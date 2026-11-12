@@ -33,8 +33,9 @@ FILES = {
 }
 ROOTS = {"page", "jazz"}  # the Jazz page's root classes: both become .jz
 
-# The Drum Kit button's orange (abtest.ts COLORS.orange) where the Jazz page has its yellow.
-ORANGE = "--y:#f5851f;--y-gloss:#ffa13d;--y-deep:#dd6408;--y-lip:#7a3303;--y-glow:rgb(236 106 12 / .55);--y-rgb:245 133 31;--b-rgb:245 133 31;--brass:var(--y);--brass-hi:var(--y);--brass-deep:var(--y-deep)"
+# The Drum Kit button's orange (abtest.ts COLORS.orange) where the Jazz page has its yellow; a lighter one since
+# 2026-11-12 ("the tint of orange (maybe a bit lighter so it pops more)"), the headline's words a shade lighter still.
+ORANGE = "--y:#ff9a2a;--y-gloss:#ffb85c;--y-deep:#e8740e;--y-lip:#8a4206;--y-glow:rgb(240 122 18 / .55);--y-rgb:255 154 42;--b-rgb:255 154 42;--brass:var(--y);--brass-hi:#ffa83e;--brass-deep:var(--y-deep)"
 FONTS = '--font-display:Poppins,"Poppins Fallback";--font-sans:Inter,"Inter Fallback",sans-serif;--font-mono:ui-monospace,SFMono-Regular,Menlo,monospace'
 
 
