@@ -4,13 +4,14 @@ import { Clarity } from "@/app/(funnels)/Clarity";
 import { ShopFrame } from "@/app/shop/ShopFrame";
 import { BlogBeacon } from "./BlogBeacon";
 import { PackPanel } from "./Blocks";
-import { BLOG, POSTS, SITE } from "./posts";
+import { BLOG, livePosts, SITE } from "./posts";
 import b from "./blog.module.css";
 
 // The blog's index, m.thegrind.studio/blog: every post (posts.ts), newest
 // first, in the store's frame. Static.
 
-export const dynamic = "force-static";
+// Rebuilt every hour: a scheduled post shows up here on its day (schedule.ts).
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: `Blog · ${BRAND.name}`,
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default function BlogIndex() {
-  const posts = [...POSTS].sort((a, c) => c.date.localeCompare(a.date));
+  const posts = livePosts().reverse();
   return (
     <ShopFrame className={b.blog}>
       <Clarity />

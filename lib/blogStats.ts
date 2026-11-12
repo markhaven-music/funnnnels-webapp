@@ -1,4 +1,5 @@
 import { POSTS, SITE } from "@/app/blog/posts";
+import { isLive } from "@/app/blog/schedule";
 import { rangeDays, rangeSpan, type Range } from "@/lib/range";
 import { supabase } from "@/lib/supabase";
 import { addDays } from "@/lib/tz";
@@ -56,6 +57,8 @@ export type BlogPostStats = {
   title: string;
   url: string;
   published: string | null;
+  /** Out now (false: scheduled for `published`). */
+  live: boolean;
   visitors: number;
   search: number;
   clicks: number;
@@ -100,6 +103,7 @@ export async function blogStats(range: Range): Promise<BlogStats> {
     title,
     url: slug === INDEX ? `${SITE}/blog` : `${SITE}/blog/${slug}`,
     published,
+    live: slug === INDEX || isLive(slug),
     visitors: 0,
     search: 0,
     clicks: 0,

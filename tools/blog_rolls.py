@@ -54,6 +54,45 @@ PICKS = {
     "loop_neo_4321": ("Genre loops", ["Neo Soul", "Neo Soul 4-3-2-1", "Full"]),
     "loop_neo_minor": ("Genre loops", ["Neo Soul", "Neo Soul Minor Loop", "Full"]),
     "loop_trap_jttou": ("Genre loops", ["Trap Soul", "Just the Two of Us", "Full"]),
+    # the standards' changes (the scheduled posts, app/blog/more.ts)
+    "fly": ("Progressions", ["Fly Me to the Moon", "Best Voicing", "Pads"]),
+    "fly_swing": ("Progressions", ["Fly Me to the Moon", "Best Voicing", "Swing Comping"]),
+    "bluebossa": ("Progressions", ["Blue Bossa", "Best Voicing", "Pads"]),
+    "bluebossa_bossa": ("Progressions", ["Blue Bossa", "Best Voicing", "Bossa Nova"]),
+    "misty": ("Progressions", ["Misty", "Best Voicing", "Pads"]),
+    "misty_ballad": ("Progressions", ["Misty", "Best Voicing", "Ballad Arpeggios"]),
+    "ipanema": ("Progressions", ["Ipanema", "Best Voicing", "Pads"]),
+    "ipanema_bossa": ("Progressions", ["Ipanema", "Best Voicing", "Bossa Nova"]),
+    "summertime": ("Progressions", ["Summertime", "Best Voicing", "Pads"]),
+    "loop_lofi_summertime": ("Genre loops", ["Lofi Hip Hop", "Summertime", "Full"]),
+    "valentine": ("Progressions", ["Funny Valentine", "Best Voicing", "Pads"]),
+    "valentine_ballad": ("Progressions", ["Funny Valentine", "Best Voicing", "Ballad Arpeggios"]),
+    "attya": ("Progressions", ["All the Things", "Best Voicing", "Pads"]),
+    "attya_swing": ("Progressions", ["All the Things", "Best Voicing", "Swing Comping"]),
+    "autumn_walking": ("Bass lines", ["Autumn Leaves", "Walking"]),
+    "loop_lofi_royal": ("Genre loops", ["Lofi Hip Hop", "Royal Road", "Full"]),
+    # blues
+    "blues": ("Progressions", ["Jazz Blues in F", "Best Voicing", "Pads"]),
+    "blues_swing": ("Progressions", ["Jazz Blues in F", "Best Voicing", "Swing Comping"]),
+    "blues_walking": ("Bass lines", ["Jazz Blues in F", "Walking"]),
+    "minorblues": ("Progressions", ["Minor Blues in C", "Best Voicing", "Pads"]),
+    "birdblues": ("Progressions", ["Bird Blues", "Best Voicing", "Pads"]),
+    # bass
+    "iiVI_twofeel": ("Bass lines", ["ii-V-I Major", "Two-Feel"]),
+    "iiVI_bossabass": ("Bass lines", ["ii-V-I Major", "Bossa Nova"]),
+    # voicings
+    "iiVI_drop3": ("Progressions", ["ii-V-I Major", "Drop 3", "Pads"]),
+    "iiVI_spread": ("Progressions", ["ii-V-I Major", "Spread", "Pads"]),
+    "iiVI_close": ("Progressions", ["ii-V-I Major", "Voice-Led Close", "Pads"]),
+    # trap soul and deep house loops
+    "loop_trap_sad": ("Genre loops", ["Trap Soul", "Sad Lofi", "Full"]),
+    "loop_trap_minor": ("Genre loops", ["Trap Soul", "Neo Soul Minor Loop", "Full"]),
+    "loop_trap_circle": ("Genre loops", ["Trap Soul", "Minor Circle of Fifths", "Full"]),
+    "loop_trap_ballad": ("Genre loops", ["Trap Soul", "Minor Lofi Ballad", "Full"]),
+    "loop_house_dorian": ("Genre loops", ["Deep House", "Dorian Vamp", "Full"]),
+    "loop_house_4321": ("Genre loops", ["Deep House", "Neo Soul 4-3-2-1", "Full"]),
+    "loop_house_circle": ("Genre loops", ["Deep House", "Minor Circle of Fifths", "Full"]),
+    "loop_house_minor": ("Genre loops", ["Deep House", "Neo Soul Minor Loop", "Full"]),
 }
 
 

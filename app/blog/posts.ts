@@ -11,6 +11,8 @@
 // Inline marks in text: **bold**, [words](/path or https://…), and {pack} for
 // the Jazz MIDI Pack's address with this post's utm tags (page.tsx).
 import rolls from "./rolls.json";
+import { MORE } from "./more";
+import { isLive, RELEASE } from "./schedule";
 
 export type RollKey = keyof typeof rolls;
 
@@ -25,6 +27,8 @@ export type Block =
   | { table: { head: string[]; rows: string[][] } }
   /** A real file of the pack, drawn as a piano roll with a play button. */
   | { roll: RollKey; title: string }
+  /** That file's chords bar by bar, four bars to a line (read from the file, never typed). */
+  | { chart: RollKey; caption?: string }
   | { note: string }
   /** The pack's panel: box, one line, button. */
   | { cta: string };
@@ -39,25 +43,26 @@ export type Post = {
   description: string;
   /** The line under the title on the blog's index. */
   teaser: string;
-  date: string; // YYYY-MM-DD
+  /** The day it comes out, from schedule.ts (YYYY-MM-DD). */
+  date: string;
   minutes: number;
   blocks: Block[];
   faq: { q: string; a: string }[];
 };
 
-const PACK_LINE =
+export const PACK_LINE =
   "Every progression on this page is in the Jazz MIDI Pack: 10,496 MIDI files, each progression in 12 voicings, 8 rhythms and all 12 keys, with bass lines and full lofi, neo soul, trap soul and deep house loops. Drag one onto a Rhodes and change what you like.";
 
-export const POSTS: Post[] = [
+const FIRST: Post[] = [
   // ───────────────────────────────────────────────────────────────────────
   {
     slug: "jazz-chord-progressions-for-producers",
+    date: RELEASE["jazz-chord-progressions-for-producers"],
     title: "10 Jazz Chord Progressions Every Producer Should Know",
     seoTitle: "10 Jazz Chord Progressions for Producers (Chords + MIDI)",
     description:
       "The ten jazz chord progressions behind lofi, neo soul and trap soul: the chords, what each one does in a beat, and a piano roll you can play.",
     teaser: "The short list behind lofi, neo soul and trap soul, each with its chords and a piano roll you can play.",
-    date: "2026-11-12",
     minutes: 8,
     blocks: [
       { p: "Most of the jazz you hear in lofi, neo soul and trap soul comes from a short list of progressions. Learn these ten and you can read almost any chord chart, and you have a starting point for every beat that needs that sound." },
@@ -132,12 +137,12 @@ export const POSTS: Post[] = [
   // ───────────────────────────────────────────────────────────────────────
   {
     slug: "lofi-chord-progressions",
+    date: RELEASE["lofi-chord-progressions"],
     title: "Lofi Chord Progressions: 6 That Work, and How to Voice Them",
     seoTitle: "Lofi Chord Progressions: 6 That Work (With MIDI Examples)",
     description:
       "Six lofi chord progressions with the exact chords, a piano roll to play for each, and the voicing moves that make them sound like a record.",
     teaser: "Six progressions with the exact chords, a roll to play for each, and the moves that make them sound like a record.",
-    date: "2026-11-12",
     minutes: 7,
     blocks: [
       { p: "Lofi is jazz harmony slowed down. The chords come from jazz standards and soul records: sevenths and ninths, played soft, somewhere between 70 and 90 bpm." },
@@ -202,12 +207,12 @@ export const POSTS: Post[] = [
   // ───────────────────────────────────────────────────────────────────────
   {
     slug: "neo-soul-chord-progressions",
+    date: RELEASE["neo-soul-chord-progressions"],
     title: "Neo Soul Chord Progressions: 6 Loops and the Chords Behind Them",
     seoTitle: "Neo Soul Chord Progressions: 6 Loops (With MIDI Examples)",
     description:
       "Six neo soul chord progressions with the exact chords and a piano roll to play, plus what makes a chord sound neo soul in the first place.",
     teaser: "Six loops with the exact chords, a roll to play for each, and what makes a chord sound neo soul.",
-    date: "2026-11-12",
     minutes: 7,
     blocks: [
       { p: "Neo soul is a Rhodes playing ninth chords over a lazy drum groove. Think D'Angelo and Erykah Badu. The progressions are short loops of two to four chords. The color comes from the extensions and from how one chord slides into the next." },
@@ -272,12 +277,12 @@ export const POSTS: Post[] = [
   // ───────────────────────────────────────────────────────────────────────
   {
     slug: "how-to-make-chords-sound-jazzy",
+    date: RELEASE["how-to-make-chords-sound-jazzy"],
     title: "How to Make Chords Sound Jazzy in Your DAW",
     seoTitle: "How to Make Chords Sound Jazzy in Your DAW (5 Moves)",
     description:
       "Five moves that turn stiff piano-roll chords into chords that sound played: sevenths, ninths, voice leading and rhythm. With before and after rolls.",
     teaser: "Five moves that turn stiff piano-roll chords into chords that sound played, with before and after rolls.",
-    date: "2026-11-12",
     minutes: 7,
     blocks: [
       { p: "You put Cmaj7, Am7, Dm7 and G7 in the piano roll. They're the right chords, and it still sounds like a ringtone. What you're hearing is the way they're stacked." },
@@ -347,12 +352,12 @@ export const POSTS: Post[] = [
   // ───────────────────────────────────────────────────────────────────────
   {
     slug: "ii-v-i-progression-explained",
+    date: RELEASE["ii-v-i-progression-explained"],
     title: "The ii-V-I Progression, Explained for Producers",
     seoTitle: "ii-V-I (2-5-1) Chord Progression in All 12 Keys, Explained",
     description:
       "What a ii-V-I (2-5-1) is, why it works, the chords in all 12 keys, the minor version, and the variations producers use in lofi, neo soul and R&B.",
     teaser: "What a 2-5-1 is, why it works, the chords in all 12 keys, and the variations worth stealing.",
-    date: "2026-11-12",
     minutes: 6,
     blocks: [
       { p: "The ii-V-I, also written 2-5-1, is three chords: the ones built on the 2nd, 5th and 1st notes of a key. In C major that's Dm7, G7 and Cmaj7. It's the most used progression in jazz, and lofi, neo soul and R&B borrow it all the time." },
@@ -427,12 +432,12 @@ export const POSTS: Post[] = [
   // ───────────────────────────────────────────────────────────────────────
   {
     slug: "just-the-two-of-us-chord-progression",
+    date: RELEASE["just-the-two-of-us-chord-progression"],
     title: "The Just the Two of Us Chord Progression, in Every Key",
     seoTitle: "Just the Two of Us Chord Progression (IV-III7-vi), Every Key",
     description:
       "The Just the Two of Us chord progression (IV-III7-vi): the chords, why it works, a table for all 12 keys, and how producers use it in lofi and trap soul.",
     teaser: "The chords, why they pull so hard, a table for all 12 keys, and how to use it in lofi and trap soul.",
-    date: "2026-11-12",
     minutes: 5,
     blocks: [
       { p: "Three chords from Grover Washington Jr. and Bill Withers' 1981 hit turned into one of the most reused loops in music. In the original key, F minor, they are Dbmaj7, C7 and Fm7, followed by a quick Ebm7 and Ab7 that lead back to the start." },
@@ -490,6 +495,12 @@ export const POSTS: Post[] = [
     ],
   },
 ];
+
+/** Every post, out or scheduled, in the order they come out. */
+export const POSTS: Post[] = [...FIRST, ...MORE].sort((a, b) => a.date.localeCompare(b.date));
+
+/** The posts that are out now. Pages that list posts are rebuilt every hour (revalidate), so a post joins them on its day. */
+export const livePosts = (now = Date.now()) => POSTS.filter((p) => isLive(p.slug, now));
 
 export const post = (slug: string) => POSTS.find((p) => p.slug === slug);
 export const roll = (key: RollKey) => rolls[key];

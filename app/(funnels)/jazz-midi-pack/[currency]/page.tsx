@@ -35,6 +35,8 @@ const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
 
 export const metadata: Metadata = {
   title: "Jazz MIDI Pack · GRIND STUDIO",
+  // One address for search, whatever tags a link carries (the blog's and the ads' utm_*).
+  alternates: { canonical: "https://m.thegrind.studio/jazz-midi-pack" },
   description:
     "The most used jazz progressions, voiced the way a pianist plays them. 10,496 MIDI files: 12 voicings, 8 rhythms, all 12 keys, bass lines, lofi / neo soul / trap soul / deep house loops.",
   openGraph: {

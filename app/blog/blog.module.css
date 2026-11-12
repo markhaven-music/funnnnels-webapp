@@ -130,6 +130,51 @@
   font-size: 15px;
 }
 
+/* A tune's chords bar by bar: four bars to a line, like a lead sheet. */
+.chart {
+  margin: 22px 0 0;
+}
+.chart ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chart li {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 2px 8px;
+  min-height: 58px;
+  padding: 16px 8px 8px;
+  border-radius: 4px;
+  background: var(--ink-3);
+  color: #fff;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: clamp(12px, 3.4vw, 16px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.chart .held {
+  color: rgb(255 255 255 / 0.38);
+}
+.barNo {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  color: var(--mute);
+  font-size: 10px;
+  font-weight: 400;
+}
+.chart figcaption {
+  margin-top: 8px;
+  color: var(--mute);
+  font-size: 15px;
+}
+
 /* A file of the pack: the landing's roll (roll.module.css), a little room around it. */
 .roll {
   margin-top: 22px;

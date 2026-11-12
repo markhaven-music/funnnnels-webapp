@@ -3,6 +3,7 @@ import { COUNTRY_COOKIE, currencyFor, visitorCountry } from "@/lib/geo";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { isLp, LP, type LpVariant } from "@/app/(funnels)/midi-drum-kit/landingTest";
+import { isLive } from "@/app/blog/schedule";
 import { CF_PATHS as FREE_PAGES, CF_REDIRECTS as FREE_REDIRECTS } from "@/app/free/packs";
 
 // funnnnels.com is the dashboard, behind ADMIN_PASSWORD. Funnels are public
@@ -99,7 +100,7 @@ const PUBLIC = [
   /^\/home(\/|$)/, // the homepage
   /^\/legal\/[a-z-]+$/, // the legal pages
   /^\/free\/[a-z-]+(\/[a-z-]+)?$/, // the free packs' pages and downloads (app/free)
-  /^\/blog(\/[a-z0-9-]+)?\/?$/, // the blog and its posts (app/blog)
+  /^\/blog(\/(og\/)?[a-z0-9-]+)?\/?$/, // the blog, its posts and their share pictures (app/blog)
   /^\/(robots\.txt|sitemap\.xml)$/, // for search engines (app/robots.ts, app/sitemap.ts)
   /^\/api\/checkout\/shop\/(intent|paypal)$/,
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
@@ -145,6 +146,12 @@ export function proxy(request: NextRequest) {
   // sent buyers on to /contacts/sign_in): its old links and bookmarks now open
   // ours, shown in place, since a redirect from here would leave the brand
   // domain that forwards to us.
+  // A blog post that isn't out yet (app/blog/schedule.ts) doesn't exist until its day, nor does its share picture.
+  const blogPost = plain.match(/^\/blog\/(?:og\/)?([a-z0-9-]+)$/)?.[1];
+  // (`next dev` shows it with ?soon=1, to read a scheduled post before its day.)
+  const peek = process.env.NODE_ENV !== "production" && request.nextUrl.searchParams.get("soon") === "1";
+  if (blogPost && !isLive(blogPost) && !peek) return new NextResponse("Not found", { status: 404, headers: { "cache-control": "no-store" } });
+
   if (LEGAL.has(pathname.replace(/\/$/, ""))) {
     const url = request.nextUrl.clone();
     url.pathname = `/legal${pathname.replace(/\/$/, "")}`;

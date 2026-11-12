@@ -212,7 +212,8 @@ export function BlogPanel() {
                   <span className={e.strong}>{p.title}</span>
                   <span className={b.postMeta}>
                     {p.url.replace("https://", "")}
-                    {p.published ? ` · published ${dayLabel(p.published)}` : ""}
+                    {p.published ? (p.live ? ` · published ${dayLabel(p.published)}` : "") : ""}
+                    {p.published && !p.live ? <span className={b.soon}> · scheduled for {dayLabel(p.published)}</span> : null}
                   </span>
                 </span>
                 <span className={b.num}>{p.visitors}</span>

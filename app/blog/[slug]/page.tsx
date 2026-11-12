@@ -5,7 +5,7 @@ import { Clarity } from "@/app/(funnels)/Clarity";
 import { ShopFrame } from "@/app/shop/ShopFrame";
 import { BlogBeacon } from "../BlogBeacon";
 import { Blocks } from "../Blocks";
-import { BLOG, POSTS, post as find, SITE } from "../posts";
+import { BLOG, livePosts, POSTS, post as find, SITE } from "../posts";
 import b from "../blog.module.css";
 
 // A blog post (posts.ts), at m.thegrind.studio/blog/<slug>: the brand domain
@@ -14,7 +14,10 @@ import b from "../blog.module.css";
 // address on the brand domain, and the post, its questions and its place on
 // the site as structured data.
 
-export const dynamic = "force-static";
+// Every post is built ahead, the scheduled ones too: proxy.ts answers 404 for
+// a post until its day (schedule.ts). Rebuilt every hour so "Keep reading"
+// picks up the posts that came out since.
+export const revalidate = 3600;
 export const dynamicParams = false;
 
 export function generateStaticParams() {
@@ -23,7 +26,8 @@ export function generateStaticParams() {
 
 type Params = { slug: string };
 
-const IMAGE = { url: `${SITE}/funnels/jazz-midi-pack/vsl-en-1600.webp`, width: 1600, height: 900 };
+/** The post's own share picture: its title over its first piano roll (og/[slug]/route.tsx). */
+const image = (slug: string) => ({ url: `${SITE}/blog/og/${slug}`, width: 1200, height: 630 });
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const p = find((await params).slug);
@@ -33,7 +37,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: p.seoTitle,
     description: p.description,
     alternates: { canonical: url },
-    openGraph: { title: p.title, description: p.description, type: "article", url, siteName: BRAND.name, publishedTime: p.date, images: [IMAGE] },
+    openGraph: { title: p.title, description: p.description, type: "article", url, siteName: BRAND.name, publishedTime: p.date, images: [image(p.slug)] },
+    twitter: { card: "summary_large_image", title: p.title, description: p.description, images: [image(p.slug).url] },
   };
 }
 
@@ -43,7 +48,10 @@ export default async function BlogPost({ params }: { params: Promise<Params> }) 
   const p = find((await params).slug);
   if (!p) notFound();
   const url = `${SITE}/blog/${p.slug}`;
-  const others = POSTS.filter((o) => o.slug !== p.slug).slice(0, 3);
+  // Three other posts that are out: the ones after this one first, then round to the start.
+  const live = livePosts().filter((o) => o.slug !== p.slug);
+  const at = live.findIndex((o) => o.date > p.date || (o.date === p.date && POSTS.indexOf(o) > POSTS.indexOf(p)));
+  const others = (at < 0 ? live : [...live.slice(at), ...live.slice(0, at)]).slice(0, 3);
 
   const ld = [
     {
@@ -53,7 +61,7 @@ export default async function BlogPost({ params }: { params: Promise<Params> }) 
       description: p.description,
       datePublished: p.date,
       dateModified: p.date,
-      image: IMAGE.url,
+      image: image(p.slug).url,
       mainEntityOfPage: url,
       author: { "@type": "Organization", name: BRAND.name, url: SITE },
       publisher: { "@type": "Organization", name: BRAND.name, url: SITE, logo: { "@type": "ImageObject", url: `${SITE}/funnels/shop/logo.webp` } },

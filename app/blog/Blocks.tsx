@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { PlayableRoll } from "@/app/(funnels)/jazz-midi-pack/PlayableRoll";
 import { GlassButton } from "@/components/ui/GlassButton";
-import { packUrl, roll, type Block, type Post } from "./posts";
+import { packUrl, roll, type Block, type Post, type RollKey } from "./posts";
+import { isLive } from "./schedule";
 import b from "./blog.module.css";
 
 // A post's blocks as HTML (posts.ts). Server-rendered; the piano rolls are the
@@ -19,6 +20,10 @@ export function inline(text: string, slug: string): ReactNode[] {
     if (m[1]) out.push(<strong key={m.index}>{inline(m[1], slug)}</strong>);
     else {
       const pack = m[3] === "{pack}";
+      // A link to a post that isn't out yet stays plain words until its day (schedule.ts).
+      const other = m[3].match(/^\/blog\/([a-z0-9-]+)$/)?.[1];
+      if (other && !isLive(other)) out.push(m[2]);
+      else
       out.push(
         <a key={m.index} href={pack ? packUrl(slug, "text") : m[3]} {...(pack ? { "data-cta": "" } : {})}>
           {m[2]}
@@ -113,6 +118,7 @@ export function Blocks({ post }: { post: Post }) {
           </table>
         </div>
       );
+    if ("chart" in x) return <Chart key={i} id={x.chart} caption={x.caption} />;
     if ("roll" in x)
       return (
         <div key={i} className={b.roll}>
@@ -121,6 +127,37 @@ export function Blocks({ post }: { post: Post }) {
       );
     return <PackPanel key={i} slug={slug} text={x.cta} spot={i === lastCta ? "end" : "box"} />;
   });
+}
+
+/** A file's chords bar by bar, four bars to a line, read from the file's chord markers. A bar with no new chord repeats the last one, dimmed. */
+function Chart({ id, caption }: { id: RollKey; caption?: string }) {
+  const r = roll(id);
+  const starts = r.chords as (number | string)[][];
+  let bars = Math.ceil(r.beats / 4);
+  const inBar = (n: number) => starts.filter((c) => (c[0] as number) >= n * 4 && (c[0] as number) < n * 4 + 4).map((c) => c[1] as string);
+  while (bars > 1 && inBar(bars - 1).length === 0) bars--; // a loop's ringing tail
+  let last = "";
+  const cells = Array.from({ length: bars }, (_, n) => {
+    const names = inBar(n);
+    const cell = names.length ? { names, held: false } : { names: [last], held: true };
+    if (names.length) last = names[names.length - 1];
+    return cell;
+  });
+  return (
+    <figure className={b.chart}>
+      <ol>
+        {cells.map((c, n) => (
+          <li key={n} className={c.held ? b.held : undefined}>
+            <span className={b.barNo}>{n + 1}</span>
+            {c.names.map((name, k) => (
+              <span key={k}>{name}</span>
+            ))}
+          </li>
+        ))}
+      </ol>
+      <figcaption>{caption ?? `${bars} bars, one box per bar. Two chords in a box get two beats each.`}</figcaption>
+    </figure>
+  );
 }
 
 /** The Jazz MIDI Pack beside a few lines and the button: the Jazz landing's panel (box left, copy right). */
