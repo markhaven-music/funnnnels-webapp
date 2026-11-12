@@ -1,14 +1,18 @@
 // The new MIDI Drum Kit landing's script (./landingNew.ts puts it at the end of <body>): one small
 // sound engine for everything a visitor can press play on.
-//   - the kit's player (#dkp): the 11 folders, their groups, Previous / Play / Next. A multi-track
-//     file plays as it is. A single part (a kick pattern, a hat fragment, an 808…) plays over a
-//     simple beat made of the kit's own basic files, so it is heard where it will be used; a
-//     fragment sits at the end of a two-bar loop. A kick, snare or hat pattern the visitor picks
-//     stays in the beat for what they try next ("find a clever way to also let the users audition
-//     the fragments and other files on the pack", 2026-11-12). Beat off = the file alone;
+//   - the kit's player (#dkp): the 11 folders, their groups, every file as a small picture to tap,
+//     Previous / Play / Next. A multi-track file plays as it is. A single part (a kick pattern, a hat
+//     fragment, an 808…) plays "in a beat": over a kick, a snare and hats from the kit, so it is heard
+//     where it will be used; a fragment sits at the end of a two-bar loop. The visitor picks the beat
+//     (five of them, tools/drum_player_data.py STYLES) and the tempo, or hears the file alone. A kick,
+//     snare or hat pattern they play takes that drum's place in the beat for what they try next.
+//     ("find a clever way to also let the users audition the fragments and other files on the pack",
+//     then "un browser che li fa vedere visivamente e spiega meglio il fatto beat on beat off e magari
+//     lascia che l'utente possa scegliere tra varie velocità e stili di beats", 2026-11-12.)
 //   - the folders list's play buttons (they drive the same player);
-//   - the bonuses, as on the Jazz MIDI Pack page: real files of Famous Beats and Drunk Swing
-//     Grooves as rolls, clips of the Beat Starters and of the MYSTERY hooks, Hit-Maker Drums as pads.
+//   - the bonuses, as on the Jazz MIDI Pack page: real files of Famous Beats and Drunk Swing Grooves
+//     as rolls (the grooves with their own hip hop sound, a recording), clips of the Beat Starters and
+//     of the MYSTERY hooks, Hit-Maker Drums as pads.
 // Nothing is fetched before it is near the screen, no sound before a tap. Plain JS in a string:
 // the page is a static document outside React. No backticks or dollar-braces inside.
 export const CLIENT_JS = String.raw`
@@ -16,21 +20,22 @@ export const CLIENT_JS = String.raw`
   var cfgEl = document.getElementById('dk-cfg');
   if (!cfgEl) return;
   var W = JSON.parse(cfgEl.textContent);
-  var BASE = '/funnels/midi-drum-kit/player/', V2 = BASE + 'v3/';
+  var BASE = '/funnels/midi-drum-kit/player/', DATA = BASE + 'v4/';
   var SOUND = [null, 'kick', 'snare', 'clap', 'rim', 'hat', 'ohat', 'perc'];
   var LEVEL = [0.9, 1, 0.8, 0.75, 0.7, 0.5, 0.45, 0.6];
+  var ORANGE = '#f5851f';
   var PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>';
   var STOP = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/></svg>';
   var ctx = null, bufs = null, loading = null, now = null;
 
   // ---- sound ----
+  function playback() { try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {} }
   function audio() {
     if (!ctx) {
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return null;
       ctx = new AC();
-      // iOS: play with the ringer switch off too (Safari 16.4+), or silent mode mutes it
-      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+      playback(); // iOS: play with the ringer switch off too (Safari 16.4+), or silent mode mutes it
     }
     if (ctx.state === 'suspended') ctx.resume();
     return ctx;
@@ -129,6 +134,23 @@ export const CLIENT_JS = String.raw`
       onState('playing');
     }, function () { if (now === me) now = null; me.dead = true; onState('stopped'); });
   }
+  // Play a recording of a file once, the roll's line following it (the Drunk Swing Grooves, in their own sound).
+  function playRecording(url, song, onPos, onState) {
+    stopAll();
+    playback();
+    var a = new Audio(url), me = { dead: false, stop: function () { me.dead = true; a.pause(); onState('stopped'); } };
+    now = me;
+    onState('loading');
+    function frame() {
+      if (me.dead) return;
+      onPos(Math.min(song.len - 0.01, a.currentTime * song.bpm / 60));
+      requestAnimationFrame(frame);
+    }
+    a.addEventListener('playing', function () { if (!me.dead) { onState('playing'); requestAnimationFrame(frame); } }, { once: true });
+    a.addEventListener('ended', function () { if (now === me) stopAll(); });
+    var p = a.play();
+    if (p && p.catch) p.catch(function () { if (now === me) stopAll(); });
+  }
 
   // ---- the roll ----
   // opts: lab (label column, 0 = none), rh (row height)
@@ -157,11 +179,26 @@ export const CLIENT_JS = String.raw`
       var k = rs.indexOf(n[2]), x = x0 + n[0] * per, nw = Math.max(2.5, (n[2] ? Math.min(n[1], 0.25) : n[1]) * per - 1);
       var live = pos >= 0 && pos >= n[0] && pos < n[0] + Math.max(n[1], 0.12);
       g.globalAlpha = live ? 1 : n[5] ? 0.4 + 0.6 * (n[4] / 127) : 0.26;
-      g.fillStyle = live || !n[5] ? '#ffffff' : '#ff9a2e';
+      g.fillStyle = live || !n[5] ? '#ffffff' : ORANGE;
       g.fillRect(x, 4 + k * opts.rh + pad, nw, opts.rh - pad * 2);
     });
     g.globalAlpha = 1;
     if (pos >= 0) { g.fillStyle = '#ffffff'; g.fillRect(Math.round(x0 + pos * per), 2, 2, cssH - 4); }
+  }
+  // A file as a small picture: its notes only, each sound on its line.
+  function drawThumb(cv, e) {
+    var g = cv.getContext('2d'), dpr = Math.min(2, window.devicePixelRatio || 1), w = 92, h = 34;
+    cv.width = w * dpr; cv.height = h * dpr;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var notes = unflat(e.n, 1), rs = rowsOf(notes), rh = (h - 6) / rs.length, per = (w - 4) / e.len;
+    g.fillStyle = 'rgba(255,255,255,.1)';
+    for (var b = 4; b < e.len; b += 4) g.fillRect(Math.round(2 + b * per), 2, 1, h - 4);
+    g.fillStyle = ORANGE;
+    notes.forEach(function (n) {
+      g.globalAlpha = 0.45 + 0.55 * (n[4] / 127);
+      g.fillRect(2 + n[0] * per, 3 + rs.indexOf(n[2]) * rh + (rh > 6 ? 1 : 0), Math.max(1.5, (n[2] ? Math.min(n[1], 0.25) : n[1]) * per - 0.5), Math.max(2, rh - (rh > 6 ? 2 : 0.5)));
+    });
+    g.globalAlpha = 1;
   }
   function setBtn(btn, state) {
     btn.dataset.state = state;
@@ -175,33 +212,38 @@ export const CLIENT_JS = String.raw`
     io.observe(el);
   }
   function clarityEvent(name) { try { window.clarity && clarity('event', name); } catch (e) {} }
+  function centre(row, el) { if (el) row.scrollLeft = el.offsetLeft - (row.clientWidth - el.offsetWidth) / 2; }
 
   // ---- the kit's player ----
   var root = document.getElementById('dkp');
-  var kit = null, kitWait = null, cache = {}, fi = 0, gi = 0, idx = 0, entries = null, song = null, state = 'stopped', seq = 0;
-  var beatOn = true, picks = null, picked = {}, lastBpm = 140;
+  var kit = null, kitWait = null, cache = {}, fi = 0, gi = 0, idx = 0, entries = null, song = null, state = 'stopped', seq = 0, shown = '';
+  var beatOn = true, style = 0, tempo = 0, picks = null;
   var PART = { kick: 1, snare: 2, hat: 5 };
-  var chips = root && root.querySelector('[data-row=folders]'), subs = root && root.querySelector('[data-row=groups]');
-  var btn = root && root.querySelector('.dkp-play'), title = root && root.querySelector('.dkp-title'), meta = root && root.querySelector('.dkp-meta');
-  var file = root && root.querySelector('.dkp-file span'), cv = root && root.querySelector('.dkp-roll');
-  var beatBtn = root && root.querySelector('.dkp-beat'), resetBtn = root && root.querySelector('.dkp-reset');
+  var $ = function (s) { return root && root.querySelector(s); };
+  var chips = $('[data-row=folders]'), subs = $('[data-row=groups]'), styles = $('[data-row=styles]'), tempos = $('[data-row=tempos]'), grid = $('[data-row=files]');
+  var btn = $('.dkp-play'), title = $('.dkp-title'), meta = $('.dkp-meta'), file = $('.dkp-file span'), cv = $('.dkp-roll'), box = $('.dkp-beatbox'), filesL = $('.dkp-filesl');
   var rowBtns = [].slice.call(document.querySelectorAll('[data-dkf]'));
 
-  function basePicks() {
-    var p = {};
-    Object.keys(PART).forEach(function (k) { p[k] = unflat(kit.base[k].n, 0); });
+  function stylePicks() {
+    var p = {}, parts = kit.styles[style].parts;
+    Object.keys(PART).forEach(function (k) { p[k] = unflat(parts[k], 0); });
     return p;
   }
   function loadKit() {
     if (!kitWait) {
-      kitWait = fetch(V2 + 'kit.json').then(function (r) { return r.json(); }).then(function (k) { kit = k; picks = basePicks(); });
+      kitWait = fetch(DATA + 'kit.json').then(function (r) { return r.json(); }).then(function (k) {
+        kit = k; picks = stylePicks();
+        styles.innerHTML = kit.styles.map(function (s, i) {
+          return '<button class="dkp-chip" type="button" aria-pressed="' + (i === style) + '" data-style="' + i + '">' + (W.styles[s.name] || s.name) + '</button>';
+        }).join('');
+      });
       kitWait.catch(function () { kitWait = null; });
     }
     return kitWait;
   }
   function group(g) {
     if (!cache[g.id]) {
-      cache[g.id] = fetch(V2 + g.id + '.json').then(function (r) { return r.json(); });
+      cache[g.id] = fetch(DATA + g.id + '.json').then(function (r) { return r.json(); });
       cache[g.id].catch(function () { delete cache[g.id]; });
     }
     return cache[g.id];
@@ -216,8 +258,7 @@ export const CLIENT_JS = String.raw`
       var span = e.len, off;
       len = span >= 16 ? span : 8;
       off = len - span;
-      if (e.bpm) lastBpm = e.bpm;
-      bpm = lastBpm;
+      bpm = tempo || e.bpm || kit.styles[style].bpm;
       notes = [];
       if (beatOn) Object.keys(PART).forEach(function (k) {
         var same = PART[k] === grp.inst;
@@ -226,18 +267,18 @@ export const CLIENT_JS = String.raw`
       });
       sel.forEach(function (n) { notes.push([n[0] + off, n[1], n[2], n[3], n[4], 1]); });
       notes.sort(function (a, b) { return a[0] - b[0]; });
-      // a kick, snare or hat pattern the visitor plays stays in the beat for what they try next
-      if (span >= 16) Object.keys(PART).forEach(function (k) { if (PART[k] === grp.inst) { picks[k] = unflat(e.n, 0); picked[k] = 1; } });
+      // a kick, snare or hat pattern the visitor plays takes that drum's place in the beat for what they try next
+      if (span >= 16) Object.keys(PART).forEach(function (k) { if (PART[k] === grp.inst) picks[k] = unflat(e.n, 0); });
     }
     song = { notes: notes, len: len, bpm: bpm, rows: rowsOf(notes) };
   }
   function two(n) { return (n < 10 ? '0' : '') + n; }
+  function pressed(row, attr, value) {
+    [].forEach.call(row.children, function (c) { c.setAttribute('aria-pressed', String(c.getAttribute(attr)) === String(value)); });
+  }
   function render() {
-    var fo = kit.folders[fi], grp = fo.groups[gi], e = entries[idx];
-    [].forEach.call(chips.children, function (c, i) {
-      c.setAttribute('aria-selected', i === fi);
-      if (i === fi) chips.scrollLeft = c.offsetLeft - (chips.clientWidth - c.offsetWidth) / 2;
-    });
+    var fo = kit.folders[fi], grp = fo.groups[gi], e = entries[idx], part = grp.inst >= 0;
+    [].forEach.call(chips.children, function (c, i) { c.setAttribute('aria-selected', i === fi); if (i === fi) centre(chips, c); });
     subs.hidden = fo.groups.length < 2;
     subs.innerHTML = fo.groups.length < 2 ? '' : fo.groups.map(function (g, i) {
       return '<button class="dkp-chip" type="button" role="tab" aria-selected="' + (i === gi) + '" data-g="' + i + '">' + (W.groups[g.name] || g.name) + ' <i>' + g.n + '</i></button>';
@@ -245,13 +286,21 @@ export const CLIENT_JS = String.raw`
     title.textContent = W.folders[fo.id] + (grp.name ? ' · ' + (W.groups[grp.name] || grp.name) : '') + ' ' + two(idx + 1);
     meta.textContent = song.bpm + ' BPM · ' + (idx + 1) + ' ' + W.of + ' ' + entries.length;
     file.textContent = e.f;
-    var part = grp.inst >= 0;
-    beatBtn.hidden = !part;
-    beatBtn.setAttribute('aria-pressed', beatOn);
-    beatBtn.textContent = beatOn ? W.beatOn : W.beatOff;
-    // Start over: only when a part other than the one being tried was picked
-    resetBtn.hidden = !(part && Object.keys(picked).some(function (k) { return PART[k] !== grp.inst; }));
-    root.querySelector('.dkp-hint').hidden = !part;
+    box.hidden = !part;
+    pressed(box.querySelector('.dkp-seg'), 'data-beat', beatOn ? 1 : 0);
+    pressed(styles, 'data-style', style);
+    pressed(tempos, 'data-tempo', tempo);
+    box.classList.toggle('off', !beatOn);
+    // every file of the group as a small picture; built once per group
+    if (shown !== grp.id) {
+      shown = grp.id;
+      filesL.textContent = W.all.replace('{n}', entries.length);
+      grid.innerHTML = entries.map(function (x, i) {
+        return '<button class="dkp-thumb" type="button" data-i="' + i + '" aria-label="' + two(i + 1) + '"><canvas aria-hidden="true"></canvas><span>' + two(i + 1) + '</span></button>';
+      }).join('');
+      [].forEach.call(grid.children, function (b, i) { drawThumb(b.firstChild, entries[i]); });
+    }
+    [].forEach.call(grid.children, function (b, i) { b.setAttribute('aria-current', i === idx); if (i === idx) centre(grid, b); });
   }
   function setState(s) {
     state = s;
@@ -273,6 +322,13 @@ export const CLIENT_JS = String.raw`
       if (play) start(); else { if (state !== 'stopped') stopAll(); draw(-1); }
     });
   }
+  // A setting changed: the same file again, as it now sounds.
+  function again() {
+    if (!entries) return;
+    var was = state !== 'stopped';
+    compose(); render();
+    if (was) start(); else draw(-1);
+  }
   if (root) {
     // unless the visitor already asked for a file (a folder's play button further down)
     near(root, function () { if (!seq) show(0, 0, 0, false); });
@@ -281,21 +337,18 @@ export const CLIENT_JS = String.raw`
       if (state === 'playing') return stopAll();
       if (song) start(); else show(0, 0, 0, true);
     });
-    chips.addEventListener('click', function (e) { var t = e.target.closest('[data-f]'); if (t) show(+t.getAttribute('data-f'), 0, 0, true); });
-    subs.addEventListener('click', function (e) { var t = e.target.closest('[data-g]'); if (t) show(fi, +t.getAttribute('data-g'), 0, true); });
-    root.addEventListener('click', function (e) { var t = e.target.closest('[data-step]'); if (t && kit) show(fi, gi, idx + (+t.getAttribute('data-step')), true); });
-    beatBtn.addEventListener('click', function () {
-      beatOn = !beatOn;
-      if (!entries) return;
-      var was = state !== 'stopped';
-      compose(); render();
-      if (was) start(); else draw(-1);
-    });
-    resetBtn.addEventListener('click', function () {
-      picks = basePicks(); picked = {};
-      var was = state !== 'stopped';
-      compose(); render();
-      if (was) start(); else draw(-1);
+    root.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-f],[data-g],[data-step],[data-i],[data-beat],[data-style],[data-tempo]');
+      if (!t) return;
+      var has = function (a) { return t.hasAttribute(a); }, val = function (a) { return +t.getAttribute(a); };
+      if (has('data-f')) return show(val('data-f'), 0, 0, true);
+      if (!kit) return;
+      if (has('data-g')) return show(fi, val('data-g'), 0, true);
+      if (has('data-step')) return show(fi, gi, idx + val('data-step'), true);
+      if (has('data-i')) return show(fi, gi, val('data-i'), true);
+      if (has('data-beat')) { beatOn = !!val('data-beat'); return again(); }
+      if (has('data-style')) { style = val('data-style'); picks = stylePicks(); beatOn = true; return again(); }
+      if (has('data-tempo')) { tempo = val('data-tempo'); return again(); }
     });
     rowBtns.forEach(function (b) {
       b.addEventListener('click', function () {
@@ -316,7 +369,7 @@ export const CLIENT_JS = String.raw`
   function bonusRolls() {
     var lists = [].slice.call(document.querySelectorAll('[data-rolls]'));
     if (!lists.length) return;
-    fetch(V2 + 'bonus.json').then(function (r) { return r.json(); }).then(function (data) {
+    fetch(DATA + 'bonus.json').then(function (r) { return r.json(); }).then(function (data) {
       lists.forEach(function (ol) {
         var files = data[ol.getAttribute('data-rolls')] || [];
         ol.innerHTML = '';
@@ -330,18 +383,21 @@ export const CLIENT_JS = String.raw`
           ol.appendChild(li);
           var c = li.querySelector('canvas'), b = li.querySelector('button'), st = 'stopped';
           function paint(pos) { drawRoll(c, s, pos, MINI); }
+          function on(x) { st = x; setBtn(b, x); if (x === 'stopped') paint(-1); }
           paint(-1);
           b.addEventListener('click', function () {
-            if (st === 'loading') return;
-            if (st === 'playing') return stopAll();
-            playSong(s, paint, function (x) { st = x; setBtn(b, x); if (x === 'stopped') paint(-1); });
+            if (st !== 'stopped') return stopAll();
+            // e.a: a recording of the file in its own sound, where the Drum Kit's sounds would be the wrong ones
+            if (e.a) playRecording(e.a, s, paint, on); else playSong(s, paint, on);
             clarityEvent('bonus_play');
           });
         });
       });
     }).catch(function () {});
   }
-  near(document.querySelector('[data-rolls]'), bonusRolls);
+  // whichever list comes near first
+  var rollsAsked = false;
+  [].forEach.call(document.querySelectorAll('[data-rolls]'), function (ol) { near(ol, function () { if (!rollsAsked) { rollsAsked = true; bonusRolls(); } }); });
 
   // ---- the bonuses' audio clips (Beat Starters, MYSTERY hooks): one <audio>, nothing loads before a tap ----
   var clipAudio = null, clipOn = null;
@@ -368,7 +424,7 @@ export const CLIENT_JS = String.raw`
       clipAudio.addEventListener('timeupdate', function () { if (clipOn && clipAudio.duration) clipPaint(clipOn, clipAudio.currentTime / clipAudio.duration); });
       clipAudio.addEventListener('ended', function () { stopAll(); });
     }
-    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (er) {}
+    playback();
     clipAudio.src = b.getAttribute('data-src');
     clipOn = b;
     b.setAttribute('aria-pressed', 'true');

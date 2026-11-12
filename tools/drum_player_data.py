@@ -9,7 +9,7 @@ exactly what is in them:
     /usr/bin/python3 tools/drum_player_data.py KIT.zip [DSG.zip] [HOOKS.zip]
     # KIT   = MIDI Drum Kit Bundle V1.1.zip (the kit and bonuses 1-3)
     # DSG   = Drunk Swing Grooves.zip (bonus 4), HOOKS = MYSTERY Hooks Pack.zip (bonus 5)
-    # writes public/funnels/midi-drum-kit/player/v3/
+    # writes public/funnels/midi-drum-kit/player/v4/
 
   kit.json            the 11 folders and their groups, and the base beat single parts play over
   <group>.json        every file of a group: its path in the zip, tempo, length, notes
@@ -20,7 +20,7 @@ exactly what is in them:
 Times are in beats (quarter notes). A note is five numbers, t, length, sound, pitch, velocity, one
 after the other in "n". sound is an index of INST. pitch: the 808's MIDI note; for the others the
 semitones from the file's middle C (0 in the kit's multi-track folders, as the first player had them).
-A new layout of these files goes in a new folder (v4…); v3 because v2's first files were asked for before their deploy and the brand domain kept the 404s for a week: browsers keep /funnels/* for a week.
+A new layout of these files goes in a new folder (v5…): v4 has the beat styles and the Drunk Swing Grooves clips; v3 because v2's first files were asked for before their deploy and the brand domain kept the 404s for a week: browsers keep /funnels/* for a week.
 """
 import json
 import os
@@ -32,7 +32,7 @@ import tempfile
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "public", "funnels", "midi-drum-kit", "player", "v3")
+OUT = os.path.join(ROOT, "public", "funnels", "midi-drum-kit", "player", "v4")
 
 INST = ["808", "kick", "snare", "clap", "rim", "hat", "ohat", "perc"]
 I808, KICK, SNARE, CLAP, RIM, HAT, OHAT, PERC = range(8)
@@ -64,6 +64,19 @@ BASE = {
     "snare": "5. Snare or Clap/1. Patterns/MDK_Snare_Basic_Pattern_01_150.mid",
     "hat": "11. Base Rhythms/Basic_4_bars_8th_Hats.mid",
 }
+# The beats a visitor can pick for a single part to play over ("lascia che l'utente possa scegliere tra varie
+# velocità e stili di beats", 2026-11-12): kick and snare from one of the kit's Kick and Snare files (or the
+# two basic patterns), hats from a Base Rhythms file. Named by what they are: where the snare falls, how the
+# hats run. (id, name, the kick's file, the snare's file or None = the same multi-track file, the hats' file)
+KS = "7. Kick and Snare (Multi-Track)/MDK_Kickandsnare_Beat{}.mid"
+HATS = "11. Base Rhythms/Basic_4_bars_{}_Hats.mid"
+STYLES = [
+    ("simple", "Simple", BASE["kick"], BASE["snare"], HATS.format("8th")),
+    ("half", "Half-time", KS.format("21_150"), None, HATS.format("8th")),
+    ("two-four", "2 and 4", KS.format("25_95"), None, HATS.format("8th")),
+    ("triplets", "Triplet hats", KS.format("37_151"), None, HATS.format("Triplets_8th")),
+    ("sixteenths", "16th hats", KS.format("42_157"), None, HATS.format("16th")),
+]
 KIT_ROOT = "1 - MIDI Drum Kit/"
 
 GM = {35: KICK, 36: KICK, 37: RIM, 38: SNARE, 40: SNARE, 39: CLAP, 42: HAT, 44: HAT, 46: OHAT}
@@ -214,6 +227,17 @@ def kit(z):
     for part, path in BASE.items():
         e = entry(path, z.read(KIT_ROOT + path), {"kick": KICK, "snare": SNARE, "hat": HAT}[part])
         index["base"][part] = {"f": e["f"], "n": e["n"]}
+    for sid, name, kick, snare, hat in STYLES:
+        k = entry(kick, z.read(KIT_ROOT + kick), KICK if snare else None)
+        notes = [k["n"][i:i + 5] for i in range(0, len(k["n"]), 5)]
+        parts = {"kick": [x for n in notes if n[2] == KICK for x in n]}
+        if snare:
+            parts["snare"] = entry(snare, z.read(KIT_ROOT + snare), SNARE)["n"]
+        else:  # a Kick and Snare file: its other track (snare, rim or clap)
+            parts["snare"] = [x for n in notes if n[2] != KICK for x in n]
+        parts["hat"] = entry(hat, z.read(KIT_ROOT + hat), HAT)["n"]
+        index.setdefault("styles", []).append({"id": sid, "name": name, "bpm": k["bpm"] or 140, "parts": parts,
+                                               "files": [os.path.basename(f) for f in ([kick] + ([snare] if snare else []) + [hat])]})
     index["total"] = total
     print("kit.json", write("kit.json", index), "bytes ·", total, "files")
 
@@ -249,6 +273,12 @@ def bonus(z, dsg):
         for name, n in seen[::step][:5]:
             e = entry(n.split("/", 1)[1], dsg.read(n), gm=True)
             e["t"] = name
+            # Its sound on the page: the groove as the Drunk Swing Grooves page plays it, a hip hop kit, not the
+            # Drum Kit's trap sounds ("should be hiphop more than trap", 2026-11-12). public/funnels/drunk-swing-grooves/audio/all.
+            num = os.path.basename(n)[:2]
+            clip = f"{num}-{'ht' if 'Half-Time' in n else '24'}-medium.mp3"
+            assert os.path.exists(os.path.join(ROOT, "public", "funnels", "drunk-swing-grooves", "audio", "all", clip)), clip
+            e["a"] = f"/funnels/drunk-swing-grooves/audio/all/{clip}"
             out["dsg"].append(e)
     for k, v in out.items():
         print(" ", k, [(e["t"], e["bpm"], e["len"], len(e["n"]) // 5) for e in v])

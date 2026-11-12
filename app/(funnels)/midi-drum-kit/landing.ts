@@ -182,7 +182,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = funn
   // The pictures replaced in the dashboard, keyed by the src the page shows in this language.
   const images = layout.images ?? {};
   html = faster(swapImages(html, images, marks), video.poster);
-  if (variant === "lp-new") html = newLanding(html, lang, currency, paths(lang).order, words);
+  if (variant === "lp-new") html = newLanding(html, lang, currency, paths(lang).order, words, price, copyWith(lang, currency, copyEdits(edits)).order.stack);
   const origins = imageOrigins(images);
   return origins ? html.replace("<head>", `<head>\n${origins}`) : html;
 }

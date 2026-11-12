@@ -1,7 +1,10 @@
 import type { Currency } from "@/lib/geo";
-import clips from "@/public/funnels/midi-drum-kit/player/v3/clips.json";
+import clips from "@/public/funnels/midi-drum-kit/player/v4/clips.json";
+import type { Copy } from "./copy";
 import type { Lang } from "./i18n";
+import { JAZZ_CSS } from "./jazzCss";
 import { CLIENT_JS } from "./landingNewClient";
+import { compare, finale, hero, key, license, reviews, summary, type JazzCtx } from "./landingNewJazz";
 import { STACK_VALUES } from "./stackSwitch";
 
 // The new MIDI Drum Kit landing (B of the landing test, ./landingTest.ts), made from the old page's
@@ -25,7 +28,7 @@ import { STACK_VALUES } from "./stackSwitch";
 //     box with the same model): streaks in a panel's top right corner and a thin foil band on its top edge.
 
 const IMG = "/funnels/midi-drum-kit/";
-const V2 = `${IMG}player/v3/`;
+const V2 = `${IMG}player/v4/`;
 
 const HERO = ".id-6Z-Renrye-167";
 const H2 = [
@@ -50,7 +53,7 @@ const DISPLAY = 'Poppins,"Poppins Fallback",sans-serif';
 const BODY = 'Inter,"Inter Fallback",sans-serif';
 const MONO = "ui-monospace,SFMono-Regular,Menlo,monospace";
 
-const CSS = `
+const CSS = `${JAZZ_CSS}
 ${HERO} .elHeadline{font-family:${DISPLAY}!important;font-size:clamp(30px,6.4vw,52px)!important;font-weight:800!important;line-height:1.14!important;letter-spacing:-.015em!important;text-wrap:balance}
 ${HERO} .elHeadline *{font-family:inherit!important;letter-spacing:inherit!important}
 ${H2.map((s) => `${s} .elHeadline`).join(",")}{font-family:${DISPLAY}!important;font-size:clamp(29px,5.4vw,46px)!important;font-weight:700!important;line-height:1.14!important;letter-spacing:-.022em!important;text-wrap:balance}
@@ -77,12 +80,30 @@ ${BOXES.join(",")}{background:#0d0c10!important;border:0!important;border-radius
 .id-6Z-WOXX4V-654 .elDivider{border-color:rgba(255,255,255,.14)!important}
 .id-6Z-wzeml9-5588{color:${ACCENT}!important}
 
-${FOIL.join(",")}{position:relative;isolation:isolate;overflow:hidden}
+/* clip, not hidden: a hidden box would stop the bonus cover from staying on screen (position: sticky) */
+${FOIL.join(",")}{position:relative;isolation:isolate;overflow:hidden;overflow:clip}
 ${FOIL.map((s) => `${s}::before`).join(",")}{content:"";position:absolute;z-index:-1;top:0;right:0;width:min(420px,68%);aspect-ratio:720/309;background:url(${IMG}iris-streaks-2.webp) right top/cover no-repeat;-webkit-mask:radial-gradient(115% 130% at 100% 0,#000 8%,rgba(0,0,0,.45) 42%,transparent 72%);mask:radial-gradient(115% 130% at 100% 0,#000 8%,rgba(0,0,0,.45) 42%,transparent 72%);opacity:.5;pointer-events:none}
 ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index:1;top:0;left:0;right:0;height:3px;background:url(${IMG}iris-foil-2.webp) center/cover no-repeat;pointer-events:none}
 
 /* The old page's reset gives every element margin: 0 auto, which shrinks and centres a grid or flex child. */
 .dkp-sec *,.dkf *,.dkb *{margin-left:0;margin-right:0}
+/* The old page's sections that this one rebuilds further up or down: the last call, the disclaimer, the footer. */
+.pageRoot>.container.id-6Z-dO4RNz-1939,.pageRoot>.container.id-6Z-dO4RNz-1983,.pageRoot>.container.id-6Z-N7M7VX-43{display:none!important}
+/* The old page's buttons that stay (Introducing, after the bonuses, after the questions) as the Jazz page's key:
+   the lip underneath, the gloss, the breathing, dark words; it sinks when pressed ("make the button more like
+   the MIDI Jazz Pack button"). After abtest.ts AB_LANDING_CSS, same weight, so it wins. */
+html[data-ab-btn] #glass-btn.elBTN a.elButton,html[data-ab-btn] #glass-btn.elBTN a.elButton:hover,html[data-ab-btn] #glass-btn-white.elBTN a.elButton,html[data-ab-btn] #glass-btn-white.elBTN a.elButton:hover{border:0!important;border-radius:22px!important;background:linear-gradient(180deg,#ffa13d 0%,#f5851f 44%,#dd6408 100%)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.6),inset 0 -4px 0 rgba(0,0,0,.14),0 7px 0 #7a3303,0 22px 48px -12px rgba(236,106,12,.55),0 0 42px -8px rgba(236,106,12,.55)!important;backdrop-filter:none!important;animation:jzb-breathe 2.8s ease-in-out infinite;transition:translate 90ms ease-out}
+html[data-ab-btn] #glass-btn.elBTN a.elButton:active,html[data-ab-btn] #glass-btn-white.elBTN a.elButton:active{translate:0 6px;animation-play-state:paused;box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 1px 0 #7a3303,0 8px 22px -10px rgba(236,106,12,.55)!important}
+html[data-ab-btn] #glass-btn-white.elBTN a.elButton::before,html[data-ab-btn] #glass-btn-white.elBTN a.elButton::after{display:none!important}
+html[data-ab-btn] #glass-btn.elBTN a.elButton,html[data-ab-btn] #glass-btn.elBTN a.elButton *,html[data-ab-btn] #glass-btn-white.elBTN a.elButton span,html[data-ab-btn] #glass-btn-white.elBTN a.elButton i{color:#1a1206!important;text-shadow:none!important}
+/* the value ribbon above the box, not over its name (this box has its name at the top) */
+.jzv-mainBox{margin-top:26px}
+.jzv-ribbon{top:-18px}
+/* the last section: the old page's "decision time" line under the headline; on a computer both stay left of the box in the picture */
+.jz-finalIn .jz-sub{margin-top:14px}
+@media (min-width:1000px){.jz-finalIn .jz-h2,.jz-finalIn .jz-sub{max-width:580px}.jz-finalIn .jzb-note{margin-left:0;text-align:left}}
+/* the license card sits right under the guarantee, as on the Jazz page */
+.dk-licenseSec{padding-top:0!important}
 .dk-play{position:relative;flex:none;display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:linear-gradient(180deg,#ffa13d,#ec6a0c);color:#1a0d00;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .dk-play svg{width:18px;height:18px;pointer-events:none}
 .dk-play[data-state=loading]{opacity:.6;cursor:progress}
@@ -108,15 +129,30 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkp-step{min-height:52px;padding:0 8px;white-space:nowrap;border:0;border-radius:3px;background:#f5851f;color:#1a0d00;font:700 15px/1 ${BODY};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .dkp-bar .dk-play{width:64px;height:64px}
 .dkp-bar .dk-play svg{width:26px;height:26px}
-.dkp-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
-.dkp-panel [hidden]{display:none!important}
-.dkp-beat,.dkp-reset{min-height:40px;padding:0 14px;border:0;border-radius:3px;background:none;color:rgba(255,255,255,.62);font:700 13px/1 ${BODY};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.dkp-beat[aria-pressed=true]{background:#2a2932;color:#fff}
-.dkp-reset{text-decoration:underline;text-underline-offset:3px}
-.dkp-hint{margin:6px 0 0;font-size:13px;line-height:1.45;color:rgba(255,255,255,.55)}
+.dkp-beatbox{margin-top:16px;padding:14px;border-radius:4px;background:#15141a}
+.dkp-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:4px;background:#0b0a0e}
+.dkp-seg button{min-height:44px;border:0;border-radius:3px;background:none;color:rgba(255,255,255,.62);font:700 15px/1 ${BODY};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.dkp-seg button[aria-pressed=true]{background:#f5851f;color:#1a0d00}
+.dkp-explain{margin:10px 0 0;font-size:13px;line-height:1.5;color:rgba(255,255,255,.62)}
+.dkp-legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:10px 0 0;font:500 11px/1.4 ${MONO};color:rgba(255,255,255,.62)}
+.dkp-legend i{display:inline-block;width:14px;height:8px;margin-right:6px;border-radius:1px;background:rgba(255,255,255,.3)}
+.dkp-legend i.sel{background:#f5851f}
+.dkp-opt{display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:8px;margin-top:10px}
+.dkp-optl{font:600 11px/1.2 ${MONO};letter-spacing:.1em;text-transform:uppercase;color:#ff9a2e}
+.dkp-opt .dkp-chips{margin:0;padding:0}
+.dkp-opt .dkp-chip{min-height:40px;padding:0 12px;font-size:13px}
+.dkp-opt .dkp-chip[aria-pressed=true]{background:#2a2932;color:#fff;font-weight:700}
+.dkp-beatbox.off .dkp-opt{opacity:.4}
+.dkp-filesl{margin:16px 0 8px;font:600 11px/1.2 ${MONO};letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.dkp-grid{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);grid-auto-columns:100px;gap:6px;overflow-x:auto;margin:0 -20px;padding:0 20px 6px;scrollbar-width:thin;scrollbar-color:#2a2932 transparent;-webkit-overflow-scrolling:touch;min-height:118px}
+.dkp-thumb{display:block;width:100px;padding:4px 4px 3px;border:0;border-radius:3px;background:#15141a;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.dkp-thumb canvas{display:block;width:92px;height:34px}
+.dkp-thumb span{display:block;margin-top:2px;font:500 10px/1.2 ${MONO};color:rgba(255,255,255,.5);text-align:left}
+.dkp-thumb[aria-current=true]{background:#2a2932;box-shadow:inset 0 0 0 2px #f5851f}
+.dkp-thumb[aria-current=true] span{color:#fff}
 .dkp-file{margin-top:12px;font:500 11px/1.5 ${MONO};color:rgba(255,255,255,.45);overflow-wrap:anywhere}
 .dkp-file b{margin-right:6px;color:#ff9a2e;font-weight:600;letter-spacing:.12em}
-.dkp-cta{display:block;width:fit-content;max-width:100%;margin:32px auto 0;padding:20px 40px;border-radius:999px;background:linear-gradient(180deg,#ffa13d,#ec6a0c);border:1px solid #b04c05;box-shadow:0 8px 28px rgba(236,106,12,.45),inset 0 1px 0 rgba(255,255,255,.45);color:#fff;font:800 clamp(17px,2.2vw,21px)/1.2 ${DISPLAY};text-align:center;text-decoration:none;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.dkp-keywrap{margin-top:36px}
 
 .dkf{display:grid;gap:10px;width:100%;max-width:1083px;margin:28px auto 56px;padding:0;list-style:none;text-align:left;font-family:${BODY};color:#fff}
 .dkf li{width:100%;box-sizing:border-box;display:grid;grid-template-columns:72px minmax(0,1fr) 48px;align-items:center;gap:14px;padding:12px 14px 12px 12px;border-radius:12px;background:#0d0c10}
@@ -165,9 +201,9 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkpad.hit{animation:dkpad .28s ease-out}
 @keyframes dkpad{from{background:#f5851f}to{background:#1c1b22}}
 
-@media (max-width:640px){.dkp-sec{padding:48px 12px 56px}.dkp-panel{padding:14px 14px 12px;margin-top:24px}.dkp-chips{margin:0 -14px;padding:0 14px}.dkp-cta{padding:18px 26px}}
+@media (max-width:640px){.dkp-sec{padding:48px 12px 56px}.dkp-panel{padding:14px 14px 12px;margin-top:24px}.dkp-chips{margin:0 -14px;padding:0 14px}.dkp-grid{margin:0 -14px;padding:0 14px 6px}.dkp-opt .dkp-chips{margin:0 -14px 0 0;padding:0 14px 0 0}}
 @media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
-@media (min-width:1000px){.dkb{gap:72px}.dkb>li{grid-template-columns:minmax(0,.42fr) minmax(0,.58fr);align-items:start;gap:0 56px;padding:44px 48px}.dkb-cover{grid-row:1/span 2;max-width:none;position:sticky;top:28px}.dkb-label{font-size:14px}.dkb h3{margin-top:10px;font-size:30px}.dkb-text{margin-top:14px;font-size:18px}.dkb-inside{gap:8px;margin-top:14px;font-size:17px}.dkb-preview{grid-column:2;margin-top:30px}.dkb>li.bare .dkb-preview{display:none}}
+@media (min-width:1000px){.dkb{gap:72px}.dkb>li{grid-template-columns:minmax(0,.36fr) minmax(0,.64fr);align-items:start;gap:0 56px;padding:44px 48px}.dkb-cover{grid-row:1/span 2;max-width:none;position:sticky;top:64px}.dkb-label{font-size:14px}.dkb h3{margin-top:10px;font-size:30px}.dkb-text{margin-top:14px;font-size:18px}.dkb-inside{gap:8px;margin-top:14px;font-size:17px}.dkb-preview{grid-column:2;margin-top:30px}.dkb>li.bare .dkb-preview{display:none}}
 `;
 
 type L = "en" | "it";
@@ -176,6 +212,15 @@ const WORDS: Record<L, Record<string, string>> = {
     h2: "Press play. Hear the kit before you get it.",
     sub: "All 11 folders of the kit are in this player, with their real MIDI files, played with the Hit-Maker Drums bonus sounds. In your DAW they play whatever drums you load.",
     hint: "A single part plays over a simple beat made of the kit’s own files. Play a kick, a snare or a hat pattern and it stays in the beat while you try the rest.",
+    inBeat: "In a beat",
+    alone: "Alone",
+    explain: "In a beat: you hear the file where you would use it, over a kick, a snare and hats from the kit. Alone: only the file. A kick, snare or hat pattern you play takes that drum’s place in the beat.",
+    legendFile: "this file",
+    legendBeat: "the beat around it",
+    beatLabel: "Beat",
+    tempoLabel: "Tempo",
+    auto: "File",
+    all: "All {n} files of this folder · tap one",
     play: "Play",
     stop: "Stop",
     loading: "Loading the sounds…",
@@ -200,6 +245,15 @@ const WORDS: Record<L, Record<string, string>> = {
     h2: "Premi play. Ascolta il kit prima di prenderlo.",
     sub: "In questo player ci sono tutte le 11 cartelle del kit, con i loro file MIDI veri, suonati con i suoni del bonus Hit-Maker Drums. Nella tua DAW suonano con la batteria che carichi tu.",
     hint: "Una parte singola suona sopra un beat semplice fatto con i file del kit. Fai partire un pattern di kick, snare o hi-hat e resta nel beat mentre provi il resto.",
+    inBeat: "Dentro un beat",
+    alone: "Da solo",
+    explain: "Dentro un beat: senti il file dove lo useresti, sopra kick, snare e hi-hat presi dal kit. Da solo: solo il file. Un pattern di kick, snare o hi-hat che fai partire prende il posto di quel pezzo nel beat.",
+    legendFile: "questo file",
+    legendBeat: "il beat intorno",
+    beatLabel: "Beat",
+    tempoLabel: "Tempo",
+    auto: "File",
+    all: "Tutti i {n} file di questa cartella · toccane uno",
     play: "Play",
     stop: "Stop",
     loading: "Carico i suoni…",
@@ -222,6 +276,12 @@ const WORDS: Record<L, Record<string, string>> = {
   },
 };
 // The groups' names as the kit's folders have them, and in Italian as the page calls them.
+// The beats a single part can play over (tools/drum_player_data.py STYLES), in Italian.
+const STYLES: Record<L, Record<string, string>> = {
+  en: {},
+  it: { Simple: "Semplice", "2 and 4": "2 e 4", "Triplet hats": "Hi-hat in terzine", "16th hats": "Hi-hat in sedicesimi" },
+};
+const TEMPOS = [90, 110, 130, 150, 170];
 const GROUPS: Record<L, Record<string, string>> = {
   en: {},
   it: { Patterns: "Pattern", Fragments: "Frammenti", Basic: "Base", Complex: "Complessi", "Hyper-Complex": "Ipercomplessi", "Roll Up": "Roll in salita", "Roll Down": "Roll in discesa" },
@@ -288,13 +348,14 @@ const TICK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5l3.5 
 const PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>';
 
 type Words = (key: string) => string;
-type Ctx = { lang: L; w: Record<string, string>; words: Words; currency: Currency; order: string };
+type Ctx = { lang: L; w: Record<string, string>; words: Words; currency: Currency; order: string; j: JazzCtx };
 
 const folderName = (f: (typeof FOLDERS)[number], c: Ctx) => (f.name ? plain(c.words(f.name)) : c.w.base);
 
 function player(c: Ctx): string {
   const { w } = c;
   const chips = FOLDERS.map((f, i) => `<button class="dkp-chip" type="button" role="tab" aria-selected="${i === 0}" data-f="${i}">${folderName(f, c)}</button>`).join("");
+  const tempos = [0, ...TEMPOS].map((t) => `<button class="dkp-chip" type="button" aria-pressed="${t === 0}" data-tempo="${t}">${t || esc(w.auto)}</button>`).join("");
   return `<div class="dkp-sec" id="player"><div class="dkp-wrap">
 <h2 class="dkp-h2">${esc(w.h2)}</h2>
 <p class="dkp-sub">${esc(w.sub)}</p>
@@ -304,11 +365,18 @@ function player(c: Ctx): string {
 <div class="dkp-head"><div class="dkp-title">&nbsp;</div><div class="dkp-meta">&nbsp;</div></div>
 <canvas class="dkp-roll" aria-hidden="true"></canvas>
 <div class="dkp-bar"><button class="dkp-step" type="button" data-step="-1">‹ ${esc(w.prev)}</button><button class="dk-play dkp-play" type="button" data-state="stopped" aria-label="${esc(w.play)}">${PLAY}</button><button class="dkp-step" type="button" data-step="1">${esc(w.next)} ›</button></div>
-<div class="dkp-foot"><button class="dkp-beat" type="button" aria-pressed="true" hidden>${esc(w.beatOn)}</button><button class="dkp-reset" type="button" hidden>${esc(w.reset)}</button></div>
-<p class="dkp-hint" hidden>${esc(w.hint)}</p>
+<div class="dkp-beatbox" hidden>
+<div class="dkp-seg" role="group"><button type="button" data-beat="1" aria-pressed="true">${esc(w.inBeat)}</button><button type="button" data-beat="0" aria-pressed="false">${esc(w.alone)}</button></div>
+<p class="dkp-legend"><span><i class="sel"></i>${esc(w.legendFile)}</span><span><i></i>${esc(w.legendBeat)}</span></p>
+<p class="dkp-explain">${esc(w.explain)}</p>
+<div class="dkp-opt"><span class="dkp-optl">${esc(w.beatLabel)}</span><div class="dkp-chips" data-row="styles"></div></div>
+<div class="dkp-opt"><span class="dkp-optl">${esc(w.tempoLabel)}</span><div class="dkp-chips" data-row="tempos">${tempos}</div></div>
+</div>
+<p class="dkp-filesl">&nbsp;</p>
+<div class="dkp-grid" data-row="files"></div>
 <div class="dkp-file"><b>${esc(w.inKit.toUpperCase())}</b>MIDI Drum Kit / <span></span></div>
 </div>
-<a class="dkp-cta" href="${c.order}" data-cta>${esc(w.cta)}</a>
+<div class="jz dkp-keywrap">${key(c.j)}</div>
 </div></div>
 `;
 }
@@ -364,6 +432,32 @@ ${pre ? `<div class="dkb-preview">${pre}</div>` : ""}
 }
 
 // Where things go in the old page's HTML.
+/** Where a top-level section of the old page starts (its SectionContainer, by its id class); -1 if it isn't there. */
+const at = (html: string, id: string) => html.search(new RegExp(`<div data-page-element="SectionContainer/V1" class="container fullContainer[^"]*\\b${id}(?=[ "])`));
+/** The old page from one top-level section up to another, replaced. */
+function cut(html: string, fromId: string, toId: string, by: string): string {
+  const a = at(html, fromId);
+  const b = at(html, toId);
+  return a < 0 || b < a ? html : html.slice(0, a) + by + html.slice(b);
+}
+function before(html: string, id: string, add: string): string {
+  const a = at(html, id);
+  return a < 0 ? html : html.slice(0, a) + add + html.slice(a);
+}
+// The old page's top-level sections, by their id class.
+const SEC = {
+  strip: "id-6Z-XnX8GG-213", // the producers' logos, right after the hero
+  offer: "id-6Z-wzeml9-5288",
+  steps: "id-6Z-kBro4X-73",
+  daws: "id-6Z-dOX4QP-336",
+  why: "id-6Z-kBro4X-185",
+  reviews: "id-6Z-dO4RNz-394",
+  faq: "id-6Z-dO4RNz-787",
+  last: "id-6Z-dO4RNz-1939",
+};
+// The wordmark bar above the old hero: the new hero starts there (it has the wordmark in its own top bar).
+const LOGO_BAR = '<div data-page-element="UniversalBlock/21784872" class="id-6Z-ALeVQA-41"';
+const POSTER = /<div class="vsl-poster"[\s\S]*?<\/span><\/div>/;
 // The player: right after the hero and its producers strip, before the story ("put the player earlier").
 const STORY = /<div data-page-element="SectionContainer\/V1" class="container fullContainer id-6Z-DBR54N-480[^"]*"/;
 // The ten folder panels: from the first to the bonuses' headline. The bonus panels: from the first to the button after them.
@@ -383,9 +477,10 @@ function swap(html: string, from: string, to: string, by: string): string {
  * The new landing from the old one's finished HTML (after its words, images and speed-ups).
  * words: the old page's copy by key, in this language and currency (./landing.ts).
  */
-export function newLanding(html: string, lang: Lang, currency: Currency, order: string, words: Words): string {
+export function newLanding(html: string, lang: Lang, currency: Currency, order: string, words: Words, price: number, stack: Copy["order"]["stack"]): string {
   const l: L = lang === "it" ? "it" : "en";
-  const c: Ctx = { lang: l, w: WORDS[l], words, currency, order };
+  const j: JazzCtx = { lang, currency, words, order, price, stack };
+  const c: Ctx = { lang: l, w: WORDS[l], words, currency, order, j };
   let out = html
     .replaceAll(`${IMG}kit-box.webp`, `${IMG}kit-box-v3.webp`)
     .replaceAll(`${IMG}boxes-all.webp`, `${IMG}boxes-all-v3.webp`)
@@ -401,9 +496,23 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
   // The later one first: the positions before it don't move.
   out = swap(out, BONUS_AT, BONUS_END, bonuses(c));
   out = swap(out, FOLDERS_AT, BONUS_HEAD, folders(c));
-  out = out.replace(STORY, (at) => player(c) + at);
+  // The Jazz-style sections, from the bottom of the page up.
+  out = before(out, SEC.last, license(j) + finale(j)); // under the guarantee; the old last call, disclaimer and footer are hidden (CSS)
+  out = cut(out, SEC.reviews, SEC.faq, reviews(j));
+  out = cut(out, SEC.daws, SEC.why, ""); // "Works in any DAW": the hero has the logos now
+  out = cut(out, SEC.offer, SEC.steps, compare(j) + summary(j));
+  out = out.replace(STORY, (start) => player(c) + start);
+  // The hero: the old one's video (its poster, the player comes on the first tap) in the Jazz page's hero.
+  const video = out.match(POSTER)?.[0];
+  const from = out.indexOf(LOGO_BAR);
+  const to = at(out, SEC.strip);
+  if (video && from >= 0 && to > from) {
+    out = out.slice(0, from) + hero(j, video) + out.slice(to);
+    out = out.replace('<link rel="preload" as="image" href="/funnels/midi-drum-kit/hero-bg.webp" fetchpriority="high">\n', ""); // the old hero's background
+  }
   const cfg = {
-    play: c.w.play, stop: c.w.stop, loading: c.w.loading, of: c.w.of, beatOn: c.w.beatOn, beatOff: c.w.beatOff,
+    play: c.w.play, stop: c.w.stop, loading: c.w.loading, of: c.w.of, all: c.w.all,
+    styles: STYLES[l],
     rows: c.w.rows.split(","),
     groups: GROUPS[l],
     folders: Object.fromEntries(FOLDERS.map((f) => [f.id, folderName(f, c).replace(/&amp;/g, "&")])),
