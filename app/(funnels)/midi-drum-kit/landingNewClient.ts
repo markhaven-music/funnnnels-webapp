@@ -51,7 +51,14 @@ export const CLIENT_JS = String.raw`
     return ctx;
   }
   function decode(ab) { return new Promise(function (ok, no) { ctx.decodeAudioData(ab, ok, no); }); }
-  function fetchBuf(url) { return fetch(url).then(function (r) { return r.arrayBuffer(); }); }
+  // The CDN can answer a whole-file request with a partial one (a 2-byte 206) for a few seconds after a browser's
+  // range request for the same file (seen 2026-11-12 on m.thegrind.studio): then ask again under another address.
+  function fetchBuf(url) {
+    return fetch(url).then(function (r) {
+      if (r.status === 206 || !r.ok) return fetch(url + (url.indexOf('?') < 0 ? '?' : '&') + 'whole=1').then(function (r2) { return r2.arrayBuffer(); });
+      return r.arrayBuffer();
+    });
+  }
   function sounds() {
     if (!loading) {
       loading = Promise.all(SOUND.map(function (f) { return f ? fetchBuf(BASE + f + '.m4a').then(decode) : null; })).then(function (b) { bufs = b; });
