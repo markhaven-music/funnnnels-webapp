@@ -436,8 +436,10 @@ def kits(z):
 # Complete Beat 13 since the night of 2026-11-12 (it was 01, then: "for the 'with bounce' beat example use the midi you
 # used later, COMPLETE BEAT 13 OF THE KIT 140BPM, it works better"). The plain side is a beat someone would really
 # write, not a straw man ("nobody puts the kick just on the 1st beat… at least the second kick should be
-# syncopated, otherwise it feels disingenuous"): every bar a kick on the one and a second one on the "and" of two,
-# the 808 with each kick on the beat's first 808 note, the snare where the kit's beat has it, straight 8th hats.
+# syncopated, otherwise it feels disingenuous"). A kick on every "and" of two was then "troppo complesso": it is the
+# first plain beat again (a kick and the 808 on the one, the snare on the three, straight 8th hats) with its second
+# kick "un po' prima", on the "and" of four before bar 2 ("il beat no bounce di prima era quasi perfetto
+# semplicemente la seconda cassa spostala un po' prima"): kicks on 1 and 4-and, every two bars.
 BOUNCE = "9. Complete Beats (Multi-Track)/MDK_CompleteBeat13_140.mid"
 
 
@@ -448,8 +450,8 @@ def bounce(z):
     snare = [n for n in notes if n[2] in (SNARE, CLAP) and n[0] == int(n[0])]
     sub = next((n[3] for n in notes if n[2] == I808), 36)
     plain = []
-    for b in range(bars):
-        for at, held in ((0, 1.25), (1.5, 0.5)):
+    for b in range(0, bars, 2):
+        for at, held in ((0, 1.5), (3.5, 1.5)):
             plain.append((num(b * 4 + at), held, I808, sub, 100))
             plain.append((num(b * 4 + at), 0.25, KICK, 0, 100))
     plain += [(n[0], 0.25, n[2], 0, 100) for n in snare]
@@ -457,7 +459,7 @@ def bounce(z):
     plain.sort()
     out = {"f": e["f"], "bpm": e["bpm"], "len": e["len"], "on": e["n"], "off": [x for n in plain for x in n]}
     # a new name: browsers keep /funnels/* for a week
-    print("bounce3.json", write("bounce3.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
+    print("bounce4.json", write("bounce4.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
 
 
 def main(argv):

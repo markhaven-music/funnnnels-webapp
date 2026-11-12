@@ -21,8 +21,10 @@ and `beat11` Complete Beats 14 and 11. Made by `tools/drum_kit_vsl.py` (voice: E
 & Conversational", eleven_v4, the Jazz video's).
 
 [SHOW: x] = what's on screen from that paragraph on, behind or above the captions: `roll flat|bounce`, `compare`,
-`image <file>` (from public/funnels/midi-drum-kit; a wide one fills the frame), `bonus <n>`, `card <text>` (big
-serif text), `none` (captions alone, big).
+`image <file>` (from public/funnels/midi-drum-kit; a wide one fills the frame), `folders all|hand|open|multi|ready`
+(the zip's 17 folders as a list, the ones being talked about lit), `bonus <n>`, `card <text>` (big text, no serif:
+"non usare serif font"), `none` (captions alone, big). One picture of the box at a time ("non cambiare così tante
+volte l'immagine quando mostri software box"): the box, then the folders, then one photo of it on a desk.
 
 ---
 
@@ -44,21 +46,25 @@ If you make beats, you've been here. You load a good kit. Kick on the one, a sec
 
 Here's what the producers with bounce know. Look at the kick. In the plain beat, it lands in the same two places every bar. In the second one, it pushes into the snare and answers it. The hi-hats leave a gap, then come back. The open hat breathes. The 808 moves with the kick, not just under it. Every bar pulls you into the next one. That's bounce. It's in the pattern, not in a plugin. The catch: finding those patterns by ear takes years of making beats.
 
-[SHOW: image dk-stage-1344]
+[SHOW: image kit-box-v3]
 
 So we did it for you. We're GRIND STUDIO. We spent four years writing the drum patterns that make beats bounce, one by one, as MIDI. 2,847 producers have them in their sessions. It's called the MIDI Drum Kit.
 
-[SHOW: image kit-box-v3]
+[SHOW: folders all]
 
-That's 10,296 MIDI files, in 17 folders.
+Inside, there are 10,296 MIDI files, in 17 folders.
 
-[SHOW: image dk-daw-1600]
+[SHOW: folders hand]
 
-Folders one to eleven are written by hand. One folder for every drum. 808s. Closed hi-hats. Open hi-hats. Kicks. Snares and claps. Accents: claps, rims and percussion. Rolls. And base rhythms, the straight and triplet hats every beat starts from.
+Folders one to eleven are the patterns, written by hand. One folder for each drum. 808. Hi-hats. Open hats. Kick. Snare. Accents. Rolls.
 
-In each folder you get two kinds of files. Patterns: full parts, one to four bars long. And fragments: the fills, the rolls and the switch-ups you drop wherever the beat needs a change. The hi-hats are sorted by how busy they are. Basic, complex and hyper-complex, plus rolls that go up and rolls that go down.
+[SHOW: folders open]
 
-Then the multi-track folders. Kick and snare, together. Kick and 808, together. And 50 complete beats, every drum on its own track, like the one you just heard.
+Open one, and you find two folders. Patterns: whole parts, one to four bars, to loop. And fragments: short fills and rolls, to drop in where the beat needs a change.
+
+[SHOW: folders multi]
+
+Folders seven, eight and nine have more drums in one file. Kick and snare. Kick and 808. And 50 complete beats, every drum on its own track, like the one you just heard.
 
 [SHOW: none]
 
@@ -66,9 +72,9 @@ Here's a fragment at work. The same beat, with a hi-hat roll from the Roll Up fo
 
 [DEMO: roll]
 
-[SHOW: card 6 ready-made folders]
+[SHOW: folders ready]
 
-Folders twelve to seventeen take those patterns and hand them to you ready. Every 808, in all 12 keys, so it sits under your melody without transposing a note. The kick and 808 beats, and the complete beats, in all 12 keys too. Every kick pattern, already paired with every snare pattern. That's 1,944 grooves on their own. The kick and 808 beats, with every snare pattern. And the kick and snare beats, with every hi-hat pattern on top. Here's one of those, straight from folder seventeen.
+Folders twelve to seventeen are the same patterns, ready to use. Every 808, in all 12 keys. And kicks, snares, 808s and hi-hats already put together, in every combination. That's 9,256 more files you don't have to build. Here's one, from folder seventeen.
 
 [DEMO: combo]
 
@@ -80,7 +86,7 @@ And two more complete beats from the kit.
 
 [DEMO: beat11]
 
-[SHOW: image dk-daw-1600]
+[SHOW: image dk-desk-1600]
 
 And you don't need to know drum programming to use them. Most file names carry the tempo, and the 808 files say their key. Drag a file onto a drum track, and press play.
 

@@ -323,7 +323,7 @@ const WORDS: Record<L, Record<string, string>> = {
     bnSub: "Same sounds, same tempo, four bars. Only the pattern changes. Press play, then flip the switch.",
     bnOff: "No bounce",
     bnOn: "Bounce",
-    bnOffWhat: "A plain beat: kick and 808 on the one and on the “and” of two, snare on the three, straight hi-hats.",
+    bnOffWhat: "A plain beat: kick and 808 on the one and just before bar two, snare on the three, straight hi-hats.",
     bnOnWhat: "Complete Beat 13 from the kit, exactly as it is in the zip.",
   },
   it: {
@@ -372,7 +372,7 @@ const WORDS: Record<L, Record<string, string>> = {
     bnSub: "Stessi suoni, stesso tempo, quattro battute. Cambia solo il pattern. Premi play, poi sposta l’interruttore.",
     bnOff: "Senza bounce",
     bnOn: "Con bounce",
-    bnOffWhat: "Un beat piatto: kick e 808 sull’uno e sul “e” del due, snare sul tre, hi-hat dritti.",
+    bnOffWhat: "Un beat piatto: kick e 808 sull’uno e appena prima della seconda battuta, snare sul tre, hi-hat dritti.",
     bnOnWhat: "Il Complete Beat 13 del kit, esattamente com’è nello zip.",
   },
 };
@@ -661,7 +661,9 @@ ${pre ? `<div class="dkb-preview">${pre}</div>` : ""}
 // Wistia), with its poster. Italian keeps the old page's video re-voiced.
 // v2 the same night, in the Jazz video's style and length (6:24), a syncopated plain beat against Complete Beat 13;
 // the first cut (c66xeecqeg, 3:37) stays on Wistia.
-const NEW_VSL: Partial<Record<L, { id: string; poster: string }>> = { en: { id: "fk0o8sokeb", poster: "vsl-en-cold-2" } };
+// v3 the same night: the Drum Kit's orange, no serif, one box picture at a time, the folders on screen, the
+// first plain beat with its second kick earlier (5:58).
+const NEW_VSL: Partial<Record<L, { id: string; poster: string }>> = { en: { id: "stef7zb1s8", poster: "vsl-en-cold-3" } };
 
 // Where things go in the old page's HTML.
 /** Where a top-level section of the old page starts (its SectionContainer, by its id class); -1 if it isn't there. */

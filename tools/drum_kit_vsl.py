@@ -30,6 +30,9 @@ PUB = os.path.join(ROOT, "public", "funnels", "midi-drum-kit")
 PLAYER = os.path.join(PUB, "player")
 ZIP = sys.argv[3] if len(sys.argv) > 3 else os.path.expanduser("~/Downloads/MIDI Drum Kit Bundle V2.zip")
 W, H, SR, FPS, GAP = J.W, J.H, J.SR, J.FPS, J.GAP
+# The Jazz video's look in the Drum Kit's orange, not the Jazz yellow ("hai usato giallo?", 2026-11-12): the word
+# being said, the fragment drawn in a beat, the bonus titles, the cards, the folders.
+J.BRASS, J.BRASS_HI = (245, 133, 31), (255, 161, 61)
 RED, GREEN, YELLOW, YELLOW_HI, CREAM, DIM, RULE = J.RED, J.GREEN, J.BRASS, J.BRASS_HI, J.CREAM, J.DIM, J.RULE
 PANEL = (22, 19, 15)  # the Jazz piano roll's panel
 
@@ -38,6 +41,7 @@ J.PUB = PUB
 # What the voice reads for what the captions show. Longest first: each is a plain replace.
 J.SPOKEN = {
     "10,296": "ten thousand two hundred ninety-six",
+    "9,256": "nine thousand two hundred fifty-six",
     "2,847": "two thousand, eight hundred and forty-seven",
     "1,944": "one thousand, nine hundred and forty-four",
     "355": "three hundred and fifty-five",
@@ -71,8 +75,8 @@ def rolls():
     read = lambda path, sound=None: T.entry(path[len(KIT):], z.read(path), sound)
     cut = lambda notes, beats: [n for n in notes if n[0] < beats]
     out = {}
-    b = json.load(open(os.path.join(PLAYER, "v5", "bounce3.json")))
-    out["flat"] = {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["off"]), "file": "A plain beat: kick and 808 on the one and on the “and” of two, snare on the three, straight hi-hats"}
+    b = json.load(open(os.path.join(PLAYER, "v5", "bounce4.json")))
+    out["flat"] = {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["off"]), "file": "A plain beat: kick and 808 on the one and just before bar two, snare on the three, straight hi-hats"}
     out["bounce"] = {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["on"]), "file": f"{KIT}{b['f']}".replace("/", " / ")}
     # the same beat, its hats in the last two beats swapped for a Roll Up fragment
     frag = find("2. Hihat Closed/Roll Up/", "Fragment_10")
@@ -175,11 +179,77 @@ def draw_drums(r, box, color, title=None, now=None):
     return layer
 
 
+# The zip's 17 folders as the video shows them while it talks about them ("mostra le folders mentre ne parli").
+FOLDERS = [("1. 808", 178), ("2. Hihat Closed", 263), ("3. Hihat Open", 42), ("4. Kick", 104), ("5. Snare or Clap", 120),
+           ("6. Accents (clap, rim, perc)", 76), ("7. Kick and Snare (Multi-Track)", 50), ("8. Kick and 808 (Multi-Track)", 55),
+           ("9. Complete Beats (Multi-Track)", 50), ("10. Rolls", 94), ("11. Base Rhythms", 8), ("12. 808 in All 12 Keys", 1958),
+           ("13. Kick and 808 in All 12 Keys", 605), ("14. Complete Beats in All 12 Keys", 319), ("15. Kick + Snare Combos", 1944),
+           ("16. Kick, 808 + Snare Combos", 1980), ("17. Beats with Hi-Hats", 2450)]
+LIT = {"all": range(1, 18), "hand": range(1, 12), "open": [1], "multi": [7, 8, 9], "ready": range(12, 18)}
+
+
+def folder_icon(d, x, y, s, fill):
+    d.rounded_rectangle((x, y + s * 0.18, x + s * 1.25, y + s), 4, fill=fill)
+    d.rounded_rectangle((x, y, x + s * 0.55, y + s * 0.4), 3, fill=fill)
+
+
+def folders(which):
+    """The folder list, a window like the landing's tree: the folders `which` names lit, the others dim. `open`
+    shows folder 1 opened on its two folders, Patterns and Fragments."""
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    x0, y0, x1, y1 = 300, 26, 1620, 878
+    d.rounded_rectangle((x0, y0, x1, y1), 14, fill=PANEL + (255,), outline=RULE, width=2)
+    d.text((x0 + 30, y0 + 32), "MIDI Drum Kit Bundle  /  1 - MIDI Drum Kit", font=J.font(28, 5), fill=DIM, anchor="lm")
+    rows = list(FOLDERS)
+    sub = []
+    if which == "open":
+        sub = [("1. Patterns", 110), ("2. Fragments", 68)]
+        rows = rows[:1] + [None, None] + rows[1:9]
+    rh = (y1 - y0 - 80) / len(rows)
+    f, fn = J.font(int(min(40, rh * 0.78)), 2), J.font(int(min(34, rh * 0.68)), 5)
+    lit = set(LIT[which])
+    k_sub = 0
+    for k, row in enumerate(rows):
+        y = y0 + 64 + k * rh
+        if row is None:
+            name, n = sub[k_sub]
+            k_sub += 1
+            on, indent = True, 70
+        else:
+            name, n = row
+            on, indent = int(name.split(".")[0]) in lit, 0
+        col = CREAM if on else (70, 64, 54)
+        if on and which != "all":
+            d.rounded_rectangle((x0 + 16, y + 3, x1 - 16, y + rh - 3), 8, fill=(40, 33, 24, 255))
+        s = rh * 0.42
+        folder_icon(d, x0 + 34 + indent, y + (rh - s) / 2, s, YELLOW if on else (90, 70, 45))
+        d.text((x0 + 34 + indent + s * 1.25 + 18, y + rh / 2), name, font=f, fill=col, anchor="lm")
+        d.text((x1 - 36, y + rh / 2), f"{n:,}", font=fn, fill=YELLOW_HI if on else (70, 64, 54), anchor="rm")
+    return layer
+
+
+def card(text):
+    """The Jazz video's card in the captions' face, not its serif ("non usare serif font")."""
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    f = J.font(130, 0)
+    while f.getlength(text) > W - 240:
+        f = J.font(f.size - 8, 0)
+    d.text((W / 2, 440), text, font=f, fill=YELLOW_HI, anchor="ms")
+    d.line((W / 2 - 160, 500, W / 2 + 160, 500), fill=YELLOW, width=4)
+    return layer
+
+
 def visual(show):
-    """The still layer for a [SHOW], above the captions (None for 'none'). Scenes and cards are the Jazz video's own."""
+    """The still layer for a [SHOW], above the captions (None for 'none'). Scenes are the Jazz video's own."""
     kind, _, arg = show.partition(" ")
-    if kind in ("none", "image", "card"):
+    if kind in ("none", "image"):
         return J.visual(show)
+    if kind == "card":
+        return card(arg)
+    if kind == "folders":
+        return folders(arg)
     layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     if kind == "bonus":
         slug, name = BONUSES[int(arg) - 1]
