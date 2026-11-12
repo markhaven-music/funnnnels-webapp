@@ -110,7 +110,10 @@ export async function upsertContact(
   const tags = Array.from(new Set([...(row.tags ?? []), ...(data.tags ?? [])]));
   const { data: updated, error: upErr } = await supabase()
     .from("contacts")
-    .update({ tags, name: row.name ?? data.name ?? null, lang: row.lang ?? data.lang ?? null, updated_at: new Date().toISOString() })
+    // The language they last used wins: someone who opted in on the English page and
+    // then buys in Italian gets the Italian after-purchase sequence (start_sequences
+    // picks it by contacts.lang, and this update sets lang together with the new tags).
+    .update({ tags, name: row.name ?? data.name ?? null, lang: data.lang ?? row.lang ?? null, updated_at: new Date().toISOString() })
     .eq("id", row.id)
     .select("*")
     .single();

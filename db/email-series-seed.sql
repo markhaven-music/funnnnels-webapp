@@ -355,7 +355,7 @@ abbiamo preparato un documento molto semplice con qualche consiglio per sfruttar
 
 Niente di speciale: solo qualche nota su come abbiamo pensato l'uso dei file, così puoi iniziare subito.
 
-**[Clicca qui per aprire il Google Doc su come usare il MIDI Drum Kit nella tua DAW](https://docs.google.com/document/d/e/2PACX-1vRb1KHNY5p1HfUCmsLKUCvleVBSTFH-J60O2d57y0KXFbICwFpiVxwAxelqfa4T0ORpQ559S8tm5tXF/pub)**
+**[Clicca qui per aprire il Google Doc su come usare il MIDI Drum Kit nella tua DAW](https://docs.google.com/document/d/1SCLyy-Pw_boLAplfXUSPWOb5fq0IjK2C0U1ak5pqQCs/view)**
 
 Facci sapere se hai suggerimenti, feedback o domande. Siamo qui per aiutarti.
 
