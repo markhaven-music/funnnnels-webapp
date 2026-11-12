@@ -568,7 +568,8 @@ function folders(c: Ctx): string {
     const name = folderName(f, c);
     const text = f.text ? c.words(f.text).replace(/[\u200b\u200c]/g, " ") : esc(c.w.baseText);
     const dir = dirOf(f.id);
-    const subs = dir && dir.groups.length > 1 ? dir.groups.map((g) => `<span>${esc(g.dir.replace(/^\d+\. /, ""))}<i>${g.n}</i></span>`).join("") : "";
+    // no file counts on the cards: "50 MIDI files" under Complete Beats "feels like it's so few" (2026-11-12)
+    const subs = dir && dir.groups.length > 1 ? dir.groups.map((g) => `<span>${esc(g.dir.replace(/^\d+\. /, ""))}</span>`).join("") : "";
     const ex = EXAMPLES[f.id] ?? [];
     const items = ex.map((e) => {
       const label = e.label ? plain(c.words(e.label)) : esc(c.w.baseEx);
@@ -578,7 +579,7 @@ function folders(c: Ctx): string {
       }).join("");
       return `<li><div class="dkf-ex"><span class="dkf-exl">${label}</span>${pics}</div></li>`;
     }).join("");
-    return `<li><div class="dkf-top"><img src="${IMG}box3-${f.box}.webp" width="132" height="132" alt="" loading="lazy" decoding="async"><div><h3>${name}</h3><p>${text}</p><span class="dkf-n">${f.n} <small>${esc(c.w.files)}</small></span></div></div>
+    return `<li><div class="dkf-top"><img src="${IMG}box3-${f.box}.webp" width="132" height="132" alt="" loading="lazy" decoding="async"><div><h3>${name}</h3><p>${text}</p></div></div>
 <p class="dkf-path">${FOLDER}<b>${esc(dir?.dir ?? "")}</b>${subs}</p>
 <ul class="dkf-subs${ex.length < 2 ? " one" : ""}">${items}</ul></li>`;
   }).join("\n");
@@ -590,12 +591,13 @@ function folders(c: Ctx): string {
 function folderTree(c: Ctx): string {
   const { w } = c;
   const count = (n: number | string) => `<b>${n}</b>`;
-  const file = (names: string[], n: number) => names.slice(0, 1).map((x) => `<li class="dkt-file">${esc(x)}${n > 1 ? `<i>+ ${n - 1} ${esc(w.more)}</i>` : ""}</li>`).join("");
+  // the hand-written folders without their counts (see folders()); 12 to 17 keep theirs
+  const file = (names: string[]) => names.slice(0, 1).map((x) => `<li class="dkt-file">${esc(x)}<i>…</i></li>`).join("");
   const kit = tree.map((t) => {
     const inner = t.groups.length > 1
-      ? t.groups.map((g) => `<li><div class="dkt-row"><span></span>${FOLDER}<span>${esc(g.dir)}</span>${count(g.n)}</div><ul>${file(g.ex, g.n)}</ul></li>`).join("")
-      : file(t.groups[0].ex, t.n);
-    return `<li><details${t.id === "808" ? " open" : ""}><summary class="dkt-row">${CHEVRON}${FOLDER}<span>${esc(t.dir)}</span>${count(t.n)}</summary><ul>${inner}</ul></details></li>`;
+      ? t.groups.map((g) => `<li><div class="dkt-row"><span></span>${FOLDER}<span>${esc(g.dir)}</span><b></b></div><ul>${file(g.ex)}</ul></li>`).join("")
+      : file(t.groups[0].ex);
+    return `<li><details${t.id === "808" ? " open" : ""}><summary class="dkt-row">${CHEVRON}${FOLDER}<span>${esc(t.dir)}</span><b></b></summary><ul>${inner}</ul></details></li>`;
   }).join("\n");
   const bonus = TREE_BONUSES.map((b) => {
     const head = `${FOLDER}<span>${esc(b.dir)}</span>${count(b.n)}`;
