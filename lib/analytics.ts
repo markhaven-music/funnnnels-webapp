@@ -615,7 +615,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
         // An ended test stops at its last minute and is off the funnel map.
         const end = t.ended ? Date.parse(t.ended.at) : null;
         const stats: TestStats = t.windows
-          ? windowTest(t, windowDays, allSales, rate, now)
+          ? { ...windowTest(t, windowDays, allSales, rate, now), ...(t.ended ? { ended: { day: t.ended.at.slice(0, 10), kept: t.ended.kept } } : {}) }
           : end !== null
             ? { ...testStats(t, allViews ?? views, allSales.filter((s) => s.created <= end), rate, testStarts[i], Math.min(now, end)), ended: { day: t.ended!.at.slice(0, 10), kept: t.ended!.kept } }
             : { ...testStats(t, allViews ?? views, allSales, rate, testStarts[i], now), map: true };
@@ -698,6 +698,9 @@ export const TESTS: TestDef[] = [
     // live): kept here so A's numbers stay beside B's for the comparison.
     name: "Step 2: as it was vs new",
     question: "Does the new payment step (pay bar, $297 → $27) get more people who start the checkout to pay?",
+    // Ended 2026-11-12 ("metti a posto il resto"): since 11-10 20:15 everyone has B's step with the pay
+    // bar docked (C without its bonus) and no column counts it any more; the Order summary card took over.
+    ended: { at: "2026-11-10T19:15:00Z", kept: "b" },
     shots: { a: `${SHOTS}/step2-a.webp`, b: `${SHOTS}/step2-b.webp`, c: `${SHOTS}/step2-c.webp` },
     where: `Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-08 alone (card payments failed until 11-07 17:35), C 11-09 → 11-10; orders go to the step they were paid on · C also has the landing's “Checking availability…” popup (since 11-08 20:15), A and B don't · D (no bonus, from 11-10 20:15) has no column: the order page got its “what you get” box ${ORDER_STACK.from.slice(0, 10)} 00:00 UTC, before D had a whole day (see the Order summary card)`,
     // The popup is named in C and D ("D ha anche check availability come variabile", 2026-11-10):

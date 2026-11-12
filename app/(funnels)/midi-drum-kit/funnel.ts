@@ -73,7 +73,9 @@ export const funnel = {
   // HUSTLE is the same zip the TOP HITS funnel sells; the Chord Progressions
   // Bundle is three zips the Jazz funnel also gives (its bonuses).
   files: {
-    pack: "midi-drum-kit/MIDI Drum Kit - Bundle.zip",
+    // The PRO MAX zip since 2026-11-12: 1,040 MIDI files in the kit, the "1050" the pages promise. The
+    // "Bundle" zip copied from ClickFunnels had 794, with the same bonuses ("sono sicuro che erano 1050").
+    pack: "clickfunnels/MIDI Drum Kit PRO MAX.zip",
     expansions: "midi-drum-kit/EXPLORER Expansions (House, Lofi, Afrobeat).zip",
     hustle: "shared/HUSTLE MIDI Bundle.zip",
     chords: "jazz-midi-pack/The Chord Progressions Bible.zip",

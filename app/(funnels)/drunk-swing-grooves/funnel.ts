@@ -69,7 +69,7 @@ export const funnel = {
   files: {
     pack: "jazz-midi-pack/Drunk Swing Grooves.zip",
     "record-samples": "jazz-midi-pack/Jazz Record Samples.zip",
-    "drum-kit": "midi-drum-kit/MIDI Drum Kit - Bundle.zip",
+    "drum-kit": "clickfunnels/MIDI Drum Kit PRO MAX.zip",
     "jazz-pack": "jazz-midi-pack/Jazz MIDI Pack.zip",
     "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
     // The Jazz MIDI Pack upsell's five bonuses, the zips its own funnel gives with it

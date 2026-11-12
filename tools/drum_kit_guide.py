@@ -3,7 +3,7 @@
 cosa simile per midi drum kit bundle"). Like the Jazz MIDI Pack's guide (~/Desktop/Jazz MIDI Pack Tools/
 make_guide.py): written as HTML and printed by headless Google Chrome.
 
-Only what the bundle's zip shows (R2 midi-drum-kit/MIDI Drum Kit - Bundle.zip, read 2026-11-12): its folders,
+Only what the kit's zip shows (R2 midi-drum-kit/MIDI Drum Kit - Bundle.zip, read 2026-11-12; since then the kit is clickfunnels/MIDI Drum Kit PRO MAX.zip, the same folders with more files): its folders,
 its "READ ME - Meaning of words and labels.txt", its file names (the number at the end is the tempo the file
 was written at, checked in the MIDI), and the landing's three steps. No file counts: the page states its own.
 
