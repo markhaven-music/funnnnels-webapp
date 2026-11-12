@@ -5,7 +5,8 @@ and said three bonuses and 988. Built as HTML from the page's own pictures and n
 headless Google Chrome, one per language:
 
     /usr/bin/python3 tools/value_stack.py            # writes public/funnels/midi-drum-kit/value-stack-6*.webp
-    /usr/bin/python3 tools/value_stack.py v3         # the new landing's (landingTest.ts): the new box, value-stack-7{,-it}.webp
+    /usr/bin/python3 tools/value_stack.py v3         # the new landing's (landingTest.ts): the new box and bonus boxes on
+                                                     # the page's dark card, value-stack-8{,-it}.webp (value-stack-7 was white)
 
 Numbers: the kit 497 and the first three bonuses 197, 197, 97 are the old picture's (they add up to its
 988); the three new ones 37, 27, 17 (midi-drum-kit/stackSwitch.ts STACK_VALUES); was 297, now 27 (funnel.ts).
@@ -37,15 +38,17 @@ LANGS = {
 
 
 # The kit's picture at the top, and the files' name: the old landing's, or the new one's (2026-11-12, its new box).
-BOX, OUT, ONLY = "kit-box", "value-stack-6", None
+BOX, OUT, ONLY, COVER, DARK = "kit-box", "value-stack-6", None, "bonus-{key}", False
 if sys.argv[1:] == ["v3"]:
-    BOX, OUT, ONLY = "kit-box-v3", "value-stack-7", {"", "-it"}
+    BOX, OUT, ONLY, COVER, DARK = "kit-box-v3", "value-stack-8", {"", "-it"}, "bonus2-{key}", True
+# The new landing's card is #0d0c10 with white words (2026-11-12, "let's keep it card like MIDI Jazz Pack").
+PAGE, INK, CARD = ("#0d0c10", "#fff", "#1a1920") if DARK else ("#fff", "#111", "#1c1c1c")
 
 
 def page(w):
     num = lambda n: f"{n:,}".replace(",", w["thousands"])
     cards = "".join(
-        f"""<div class="card"><img src="file://{DIR}/bonus-{key}.webp"><div><div class="n">{w['bonus'].format(n=i + 1)}</div>
+        f"""<div class="card"><img src="file://{DIR}/{COVER.format(key=key)}.webp"><div><div class="n">{w['bonus'].format(n=i + 1)}</div>
 <div class="name">{name or w['guide']}</div><div class="v">{w['value'].format(v=v)}</div></div></div>"""
         for i, (key, name, v) in enumerate(BONUSES)
     )
@@ -53,25 +56,25 @@ def page(w):
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=block">
 <style>
 * {{ box-sizing: border-box; }}
-body {{ margin: 0; width: 1000px; background: #fff; font-family: Montserrat, Helvetica, Arial, sans-serif; color: #111; }}
+body {{ margin: 0; width: 1000px; background: {PAGE}; font-family: Montserrat, Helvetica, Arial, sans-serif; color: {INK}; }}
 .wrap {{ padding: 34px 44px 40px; }}
 .kit {{ position: relative; width: 290px; margin: 0 auto 30px; }}
 .kit img {{ display: block; width: 100%; filter: drop-shadow(0 18px 26px rgba(0,0,0,.28)); }}
 .ribbon {{ position: absolute; left: -84px; top: 6px; width: 220px; padding: 7px 0; transform: rotate(-38deg); background: #f26a1b; color: #fff;
   font-weight: 800; font-size: 19px; text-align: center; box-shadow: 0 6px 14px rgba(0,0,0,.25); }}
 .grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; }}
-.card {{ display: flex; align-items: center; gap: 16px; height: 128px; padding: 10px 16px 10px 10px; border-radius: 12px; background: #1c1c1c; color: #fff; }}
+.card {{ display: flex; align-items: center; gap: 16px; height: 128px; padding: 10px 16px 10px 10px; border-radius: 12px; background: {CARD}; color: #fff; }}
 .card img {{ flex: none; width: 108px; height: 108px; object-fit: contain; }}
 .n {{ font-weight: 700; font-size: 19px; color: #f58a3c; }}
 .name {{ margin: 3px 0 4px; font-weight: 800; font-size: 25px; line-height: 1.1; }}
 .v {{ font-weight: 800; font-size: 21px; color: #f26a1b; }}
 .total {{ display: flex; align-items: center; gap: 22px; margin: 34px 4px 0; font-weight: 800; font-size: 34px; white-space: nowrap; }}
-.total::before, .total::after {{ content: ""; flex: 1; height: 22px; border: 4px solid #111; border-top: 0; margin-top: -22px; }}
+.total::before, .total::after {{ content: ""; flex: 1; height: 22px; border: 4px solid {INK}; border-top: 0; margin-top: -22px; }}
 .total::before {{ border-right: 0; border-radius: 0 0 0 18px; }}
 .total::after {{ border-left: 0; border-radius: 0 0 18px 0; }}
 .week {{ margin-top: 14px; text-align: center; font-weight: 800; font-size: 32px; }}
 .price {{ display: flex; align-items: center; justify-content: center; gap: 22px; margin-top: 18px; font-weight: 800; }}
-.was {{ position: relative; font-size: 56px; color: #222; }}
+.was {{ position: relative; font-size: 56px; color: {"#cfcfcf" if DARK else "#222"}; }}
 .was::after {{ content: ""; position: absolute; left: -8px; right: -8px; top: 52%; height: 7px; background: #f26a1b; transform: rotate(-9deg); border-radius: 4px; }}
 .now {{ padding: 12px 30px; border: 7px solid #f26a1b; border-radius: 999px; font-size: 62px; line-height: 1; box-shadow: 0 0 22px rgba(242,106,27,.55); }}
 .save {{ width: fit-content; margin: 22px auto 0; padding: 10px 26px 10px 34px; background: #f26a1b; color: #fff; font-weight: 800; font-size: 27px;
@@ -99,7 +102,8 @@ def build():
             # Cut the empty white under the last line (the window is taller than the picture).
             px = im.load()
             bottom = im.height - 1
-            while bottom > 0 and all(px[x, bottom] == (255, 255, 255) for x in range(0, im.width, 7)):
+            blank = px[0, im.height - 1]  # the page's colour: white, or the dark card's
+            while bottom > 0 and all(px[x, bottom] == blank for x in range(0, im.width, 7)):
                 bottom -= 1
             im = im.crop((0, 0, im.width, min(im.height, bottom + 80))).resize((1000, round(min(im.height, bottom + 80) / 2)), Image.LANCZOS)
             # A new name, not value-stack*-w.webp: browsers keep /funnels/* for a week and would show the old picture.

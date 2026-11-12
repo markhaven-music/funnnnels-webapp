@@ -34,9 +34,18 @@ const H2 = [
   "id-6Z-jLXXba-658", "id-6Z-dO4RNz-1942",
 ].map((id) => `.${id}`);
 // The old page's dark panels that stay on this one: Introducing, the science box, Patterns, Fragments, the folder tree.
-const CARDS = ["id-6Z-WOaYBj-1502", "id-6Z-wzeml9-854", "id-6Z-lLXzjA-420", "id-6Z-lLXzjA-450", "id-6Z-lLXzjA-209"].map((id) => `.${id}`);
+const CARDS = ["id-6Z-WOaYBj-1502", "id-6Z-wzeml9-854", "id-6Z-lLXzjA-420", "id-6Z-lLXzjA-450", "id-6Z-lLXzjA-209", "id-6Z-wzeml9-5419"].map((id) => `.${id}`);
 const FOIL = [...CARDS, ".dk-foil"];
+// The producers' quotes and the reviews: columns with a grey or blue-grey fill and a 1px border.
+const BOXES = [
+  "id-6Z-gYXZX5-1294", "id-6Z-gYXZX5-1318", "id-6Z-WOaYBj-1579", "id-6Z-WOaYBj-1581", "id-6Z-WOaYBj-1616", "id-6Z-WOaYBj-1644",
+  "id-6Z-dO4RNz-409", "id-6Z-dO4RNz-410", "id-6Z-dO4RNz-411", "id-6Z-dO4RNz-412", "id-6Z-dO4RNz-494", "id-6Z-dO4RNz-510", "id-6Z-dO4RNz-526",
+  "id-6Z-dO4RNz-544", "id-6Z-dO4RNz-563", "id-6Z-dO4RNz-579", "id-6Z-dO4RNz-595", "id-6Z-dO4RNz-613", "id-6Z-dO4RNz-632", "id-6Z-dO4RNz-648",
+  "id-6Z-dO4RNz-664", "id-6Z-dO4RNz-682",
+].map((id) => `.${id}>.col-inner`);
 
+// The button's orange (abtest.ts COLORS.orange: #ffa13d → #ec6a0c), as text on black.
+const ACCENT = "#ff9a2e";
 const DISPLAY = 'Poppins,"Poppins Fallback",sans-serif';
 const BODY = 'Inter,"Inter Fallback",sans-serif';
 const MONO = "ui-monospace,SFMono-Regular,Menlo,monospace";
@@ -47,17 +56,38 @@ ${HERO} .elHeadline *{font-family:inherit!important;letter-spacing:inherit!impor
 ${H2.map((s) => `${s} .elHeadline`).join(",")}{font-family:${DISPLAY}!important;font-size:clamp(29px,5.4vw,46px)!important;font-weight:700!important;line-height:1.14!important;letter-spacing:-.022em!important;text-wrap:balance}
 ${H2.map((s) => `${s} .elHeadline *`).join(",")}{font-family:inherit!important;letter-spacing:inherit!important}
 
+/* One page background and dark cards, as on the Jazz MIDI Pack page ("check the backgrounds of all sections.
+   let's keep it card like MIDI Jazz Pack", 2026-11-12): the old page's sections were black, four greys, a
+   two-tone strip and a navy fade; its cards three greys, a green one and a white one. The hero keeps its picture. */
+html:root,.pageRoot{background:#070707}
+.pageRoot>.container:not(.stickyTop):not(.id-6Z-Renrye-150){background:#070707!important}
+.id-6Z-WOaYBj-1502,.id-6Z-lLXzjA-209,.id-6Z-gYXZX5-1221,.id-6Z-gYXZX5-1248,.id-6Z-gYXZX5-1263,.id-6Z-dO4RNz-1880,.id-6Z-wzeml9-5419{background:#0d0c10!important;border:0!important;box-shadow:none!important}
+${BOXES.join(",")}{background:#0d0c10!important;border:0!important;border-radius:12px!important}
+.id-6Z-dO4RNz-787 .elAccordionItemHeader,.id-6Z-dO4RNz-787 .elAccordionItemBody{background:#0d0c10!important}
+.id-6Z-dO4RNz-1921{background:#15141a!important;border:0!important}
+.id-6Z-dO4RNz-1924{color:rgba(255,255,255,.88)!important}
+.id-6Z-dO4RNz-1960{border:0!important}
+/* the offer card was white with navy words */
+.id-6Z-wzeml9-5419,.id-6Z-wzeml9-5580,.id-6Z-wzeml9-5585,.id-6Z-wzeml9-5591,.id-6Z-wzeml9-5440,.id-6Z-wzeml9-5419 .price-wrap,.id-6Z-wzeml9-5419 .price-wrap .new,.id-6Z-wzeml9-5419 .elBulletList,.id-6Z-wzeml9-5419 .elBulletList *:not(i){color:#fff!important}
+/* One accent, the button's orange ("same color button and accents right now accents are green but button is
+   orange. also wistia player color should be consistent"): the highlighted words (a green gradient), the
+   short rules, "Black Deal:". The ticks stay green and the crosses red, as on the Jazz page. */
+.pageRoot strike{background:none!important;-webkit-text-fill-color:currentColor!important;color:${ACCENT}!important}
+.id-6Z-wzeml9-864 .elDivider,.id-6Z-lLXzjA-430 .elDivider,.id-6Z-lLXzjA-481 .elDivider{border-color:${ACCENT}!important}
+.id-6Z-WOXX4V-654 .elDivider{border-color:rgba(255,255,255,.14)!important}
+.id-6Z-wzeml9-5588{color:${ACCENT}!important}
+
 ${FOIL.join(",")}{position:relative;isolation:isolate;overflow:hidden}
 ${FOIL.map((s) => `${s}::before`).join(",")}{content:"";position:absolute;z-index:-1;top:0;right:0;width:min(420px,68%);aspect-ratio:720/309;background:url(${IMG}iris-streaks-2.webp) right top/cover no-repeat;-webkit-mask:radial-gradient(115% 130% at 100% 0,#000 8%,rgba(0,0,0,.45) 42%,transparent 72%);mask:radial-gradient(115% 130% at 100% 0,#000 8%,rgba(0,0,0,.45) 42%,transparent 72%);opacity:.5;pointer-events:none}
 ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index:1;top:0;left:0;right:0;height:3px;background:url(${IMG}iris-foil-2.webp) center/cover no-repeat;pointer-events:none}
 
 /* The old page's reset gives every element margin: 0 auto, which shrinks and centres a grid or flex child. */
 .dkp-sec *,.dkf *,.dkb *{margin-left:0;margin-right:0}
-.dk-play{position:relative;flex:none;display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:linear-gradient(180deg,#ffe14d,#f5b800);color:#1a1206;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.dk-play{position:relative;flex:none;display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:linear-gradient(180deg,#ffa13d,#ec6a0c);color:#1a0d00;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .dk-play svg{width:18px;height:18px;pointer-events:none}
 .dk-play[data-state=loading]{opacity:.6;cursor:progress}
 
-.dkp-sec{width:100%;box-sizing:border-box;background:#000;padding:64px 16px 72px;color:#fff;font-family:${BODY}}
+.dkp-sec{width:100%;box-sizing:border-box;background:#070707;padding:64px 16px 72px;color:#fff;font-family:${BODY}}
 .dkp-wrap{max-width:920px;margin:0 auto}
 .dkp-h2{margin:0 auto;max-width:820px;text-align:center;font-family:${DISPLAY};font-size:clamp(29px,5.4vw,46px);font-weight:700;line-height:1.14;letter-spacing:-.022em;text-wrap:balance}
 .dkp-sub{margin:16px auto 0;max-width:680px;text-align:center;font-size:clamp(16px,2vw,18px);line-height:1.5;color:rgba(255,255,255,.72)}
@@ -67,7 +97,7 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkp-chips+.dkp-chips{margin-top:8px}
 .dkp-chip{flex:none;min-height:44px;padding:0 14px;border:0;border-radius:3px;background:#1c1b22;color:rgba(255,255,255,.78);font:600 14px/1 ${BODY};white-space:nowrap;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .dkp-chip i{font:500 11px/1 ${MONO};font-style:normal;opacity:.6;margin-left:4px}
-.dkp-chip[aria-selected=true]{background:#f5b800;color:#1a1206;font-weight:700}
+.dkp-chip[aria-selected=true]{background:#f5851f;color:#1a0d00;font-weight:700}
 [data-row=groups] .dkp-chip{min-height:40px;background:none;color:rgba(255,255,255,.62)}
 [data-row=groups] .dkp-chip[aria-selected=true]{background:#2a2932;color:#fff}
 .dkp-head{margin-top:18px;min-height:46px}
@@ -75,7 +105,7 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkp-meta{margin-top:3px;font:500 12px/1.3 ${MONO};color:rgba(255,255,255,.55)}
 .dkp-roll{display:block;width:100%;height:140px;margin-top:12px;border-radius:4px;background:#08070a}
 .dkp-bar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin-top:14px}
-.dkp-step{min-height:52px;padding:0 8px;white-space:nowrap;border:0;border-radius:3px;background:#f5b800;color:#1a1206;font:700 15px/1 ${BODY};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.dkp-step{min-height:52px;padding:0 8px;white-space:nowrap;border:0;border-radius:3px;background:#f5851f;color:#1a0d00;font:700 15px/1 ${BODY};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .dkp-bar .dk-play{width:64px;height:64px}
 .dkp-bar .dk-play svg{width:26px;height:26px}
 .dkp-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
@@ -85,7 +115,7 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkp-reset{text-decoration:underline;text-underline-offset:3px}
 .dkp-hint{margin:6px 0 0;font-size:13px;line-height:1.45;color:rgba(255,255,255,.55)}
 .dkp-file{margin-top:12px;font:500 11px/1.5 ${MONO};color:rgba(255,255,255,.45);overflow-wrap:anywhere}
-.dkp-file b{margin-right:6px;color:#f5b800;font-weight:600;letter-spacing:.12em}
+.dkp-file b{margin-right:6px;color:#ff9a2e;font-weight:600;letter-spacing:.12em}
 .dkp-cta{display:block;width:fit-content;max-width:100%;margin:32px auto 0;padding:20px 40px;border-radius:999px;background:linear-gradient(180deg,#ffa13d,#ec6a0c);border:1px solid #b04c05;box-shadow:0 8px 28px rgba(236,106,12,.45),inset 0 1px 0 rgba(255,255,255,.45);color:#fff;font:800 clamp(17px,2.2vw,21px)/1.2 ${DISPLAY};text-align:center;text-decoration:none;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 
 .dkf{display:grid;gap:10px;width:100%;max-width:1083px;margin:28px auto 56px;padding:0;list-style:none;text-align:left;font-family:${BODY};color:#fff}
@@ -93,15 +123,15 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkf img{display:block;width:72px;height:72px;object-fit:contain}
 .dkf h3{margin:0;font:700 17px/1.25 ${DISPLAY};color:#fff}
 .dkf p{margin:3px 0 0;font-size:14px;line-height:1.4;color:rgba(255,255,255,.72)}
-.dkf span{display:block;margin-top:4px;font:500 11px/1.3 ${MONO};color:#f5b800}
+.dkf span{display:block;margin-top:4px;font:500 11px/1.3 ${MONO};color:#ff9a2e}
 .dkf .dk-play{width:48px;height:48px}
 
 .dkb{display:grid;gap:48px;width:100%;max-width:1083px;margin:32px auto 0;padding:0;list-style:none;text-align:left;font-family:${BODY};color:#fff}
 .dkb>li{width:100%;box-sizing:border-box;display:grid;gap:18px;padding:24px 22px 28px;border-radius:12px;background:#0d0c10}
 .dkb-cover{max-width:300px;margin:0 auto}
 .dkb-cover img{display:block;width:100%;height:auto;filter:drop-shadow(0 12px 18px rgba(0,0,0,.55))}
-.dkb-label{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0;font:700 12px/1.2 ${DISPLAY};letter-spacing:.14em;text-transform:uppercase;color:#f5b800}
-.dkb-price{padding:4px 8px 3px;border-radius:3px;background:linear-gradient(180deg,#ffe14d,#f5b800);font-weight:800;letter-spacing:.08em;color:#1a1206}
+.dkb-label{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0;font:700 12px/1.2 ${DISPLAY};letter-spacing:.14em;text-transform:uppercase;color:#ff9a2e}
+.dkb-price{padding:4px 8px 3px;border-radius:3px;background:linear-gradient(180deg,#ffa13d,#ec6a0c);font-weight:800;letter-spacing:.08em;color:#1a0d00}
 .dkb-price s{margin-right:3px;font-weight:700;opacity:.6}
 .dkb h3{margin:8px 0 0;font:700 18px/1.28 ${DISPLAY};letter-spacing:-.01em;color:#fff}
 .dkb-text{margin:10px 0 0;font-size:15px;line-height:1.5;color:rgba(255,255,255,.88)}
@@ -119,21 +149,21 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkr-head span{display:block;margin-top:2px;font:500 11px/1.3 ${MONO};color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dkr canvas{display:block;width:100%;height:60px;background:#0b0a0e}
 .dkc{display:grid;grid-template-columns:44px minmax(96px,auto) minmax(0,1fr);grid-template-areas:"ico name wave" "ico bpm wave";column-gap:12px;align-items:center;width:100%;min-height:60px;padding:8px 14px 8px 8px;border:0;border-radius:4px;background:#15141a;color:#fff;font:inherit;text-align:left;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.dkc[aria-pressed=true]{background:rgba(245,184,0,.14)}
-.dkc-ico{grid-area:ico;position:relative;width:44px;height:44px;border-radius:50%;background:linear-gradient(180deg,#ffe14d,#f5b800)}
-.dkc-ico::after{content:"";position:absolute;top:50%;left:54%;translate:-50% -50%;border-left:13px solid #1a1206;border-top:8px solid transparent;border-bottom:8px solid transparent}
-.dkc[aria-pressed=true] .dkc-ico::after{inset:15px;left:15px;top:15px;translate:none;border:0;border-radius:2px;background:#1a1206}
+.dkc[aria-pressed=true]{background:rgba(236,106,12,.2)}
+.dkc-ico{grid-area:ico;position:relative;width:44px;height:44px;border-radius:50%;background:linear-gradient(180deg,#ffa13d,#ec6a0c)}
+.dkc-ico::after{content:"";position:absolute;top:50%;left:54%;translate:-50% -50%;border-left:13px solid #1a0d00;border-top:8px solid transparent;border-bottom:8px solid transparent}
+.dkc[aria-pressed=true] .dkc-ico::after{inset:15px;left:15px;top:15px;translate:none;border:0;border-radius:2px;background:#1a0d00}
 .dkc-name{grid-area:name;font-size:14px;font-weight:700;line-height:1.2}
 .dkc-bpm{grid-area:bpm;font:500 12px/1.3 ${MONO};color:rgba(255,255,255,.55)}
 .dkc svg{grid-area:wave;display:block;width:100%;height:34px}
 .dkc rect{fill:rgba(255,255,255,.28)}
-.dkc rect.on{fill:#ffe14d}
+.dkc rect.on{fill:#ffb45e}
 .dkpads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .dkpad{min-height:64px;padding:8px 6px;border:0;border-radius:4px;background:#1c1b22;color:#fff;font:700 14px/1.2 ${BODY};cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 .dkpad small{display:block;margin-top:4px;font:500 10px/1.2 ${MONO};color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dkpad:active{background:#f5b800;color:#1a1206}
+.dkpad:active{background:#f5851f;color:#1a0d00}
 .dkpad.hit{animation:dkpad .28s ease-out}
-@keyframes dkpad{from{background:#f5b800}to{background:#1c1b22}}
+@keyframes dkpad{from{background:#f5851f}to{background:#1c1b22}}
 
 @media (max-width:640px){.dkp-sec{padding:48px 12px 56px}.dkp-panel{padding:14px 14px 12px;margin-top:24px}.dkp-chips{margin:0 -14px;padding:0 14px}.dkp-cta{padding:18px 26px}}
 @media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
@@ -218,38 +248,38 @@ const FOLDERS: { id: string; name: string | null; text: string | null; box: stri
 type Preview = "famous" | "starters" | "pads" | "dsg" | "hooks" | null;
 const BONUSES: { name: string; text: string; cover: string; preview: Preview; inside: Record<L, string[]> }[] = [
   {
-    name: "t116", text: "t117", cover: "bonus-famous", preview: "famous",
+    name: "t116", text: "t117", cover: "bonus2-famous", preview: "famous",
     inside: {
       en: ["50 multi-track MIDI drum patterns, in 5 volumes", "Kick, snare, clap, hats and percs on their own tracks", "50 MP3 samples"],
       it: ["50 pattern di batteria MIDI multitraccia, in 5 volumi", "Kick, snare, clap, hi-hat e percussioni su tracce separate", "50 sample MP3"],
     },
   },
   {
-    name: "t119", text: "t120", cover: "bonus-starters", preview: "starters",
+    name: "t119", text: "t120", cover: "bonus2-starters", preview: "starters",
     inside: {
       en: ["355 MIDI files in 7 packs", "Chord progressions, pianos, guitars, melodies, strings and plucks", "371 MP3 previews"],
       it: ["355 file MIDI in 7 pack", "Progressioni di accordi, piani, chitarre, melodie, archi e pluck", "371 anteprime MP3"],
     },
   },
   {
-    name: "t122", text: "t123", cover: "bonus-drums", preview: "pads",
+    name: "t122", text: "t123", cover: "bonus2-drums", preview: "pads",
     inside: {
       en: ["281 WAV one-shots", "113 snares, 87 hi-hats, 38 kicks, 22 claps, 17 percs, 4 rims"],
       it: ["281 one-shot WAV", "113 snare, 87 hi-hat, 38 kick, 22 clap, 17 percussioni, 4 rim"],
     },
   },
   {
-    name: "t263", text: "t264", cover: "bonus-grooves", preview: "dsg",
+    name: "t263", text: "t264", cover: "bonus2-grooves", preview: "dsg",
     inside: {
       en: ["160 drum grooves", "31 groove templates", "20 neo soul keys MIDI files", "PDF guide"],
       it: ["160 groove di batteria", "31 groove template", "20 file MIDI di neo soul keys", "Guida PDF"],
     },
   },
   {
-    name: "t266", text: "t267", cover: "bonus-hooks", preview: "hooks",
+    name: "t266", text: "t267", cover: "bonus2-hooks", preview: "hooks",
     inside: { en: ["17 WAV hooks", "From 86 to 160 BPM"], it: ["17 hook WAV", "Da 86 a 160 BPM"] },
   },
-  { name: "t269", text: "t270", cover: "bonus-guide", preview: null, inside: { en: ["PDF, 5 pages"], it: ["PDF, 5 pagine"] } },
+  { name: "t269", text: "t270", cover: "bonus2-guide", preview: null, inside: { en: ["PDF, 5 pages"], it: ["PDF, 5 pagine"] } },
 ];
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
@@ -322,7 +352,7 @@ function bonuses(c: Ctx): string {
     const inside = b.inside[c.lang].map((x) => `<li>${TICK}<span>${esc(x)}</span></li>`).join("");
     const pre = preview(b.preview, c);
     return `<li class="dk-foil${pre ? "" : " bare"}">
-<div class="dkb-cover"><img src="${IMG}${b.cover}.webp" width="900" height="900" alt="" loading="lazy" decoding="async"></div>
+<div class="dkb-cover"><img src="${IMG}${b.cover}.webp" width="640" height="952" alt="" loading="lazy" decoding="async"></div>
 <div class="dkb-info"><p class="dkb-label"><span>${esc(c.w.bonus)} ${i + 1}</span><span class="dkb-price"><s>${money(STACK_VALUES.bonuses[i], c)}</s> ${esc(c.w.free)}</span></p>
 <h3>${name}</h3>
 <p class="dkb-text">${c.words(b.text)}</p>
@@ -359,10 +389,15 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
   let out = html
     .replaceAll(`${IMG}kit-box.webp`, `${IMG}kit-box-v3.webp`)
     .replaceAll(`${IMG}boxes-all.webp`, `${IMG}boxes-all-v3.webp`)
-    .replaceAll(`${IMG}value-stack-6.webp`, `${IMG}value-stack-7.webp`)
-    .replaceAll(`${IMG}value-stack-6-it.webp`, `${IMG}value-stack-7-it.webp`)
-    // value-stack-7 is 1000 × 1214 (value-stack-6, 1000 × 1240).
-    .replace(/(value-stack-7(?:-it)?\.webp"[^>]*?) height="1240"/g, '$1 height="1214"');
+    .replaceAll(`${IMG}value-stack-6.webp`, `${IMG}value-stack-8.webp`)
+    .replaceAll(`${IMG}value-stack-6-it.webp`, `${IMG}value-stack-8-it.webp`)
+    // value-stack-8 (dark, the new boxes) is 1000 × 1214 (value-stack-6, 1000 × 1240).
+    .replace(/(value-stack-8(?:-it)?\.webp"[^>]*?) height="1240"/g, '$1 height="1214"')
+    // "Sciences PROVES that BOUNCE releases…": its words are glued with no-break spaces and ran out of the card.
+    .replace(/(data-t="t063">)([\s\S]*?)(<\/span><\/span>)/, (_, a: string, b: string, c: string) => a + b.replaceAll("&nbsp;", " ") + c)
+    // The video: its play button and Wistia's player in the page's orange (they were red).
+    .replace('style="--vsl-play:#dd0000"', 'style="--vsl-play:#ec6a0c"')
+    .replace("'&wmode=transparent'", "'&wmode=transparent&playerColor=ec6a0c'");
   // The later one first: the positions before it don't move.
   out = swap(out, BONUS_AT, BONUS_END, bonuses(c));
   out = swap(out, FOLDERS_AT, BONUS_HEAD, folders(c));

@@ -157,7 +157,7 @@ export const CLIENT_JS = String.raw`
       var k = rs.indexOf(n[2]), x = x0 + n[0] * per, nw = Math.max(2.5, (n[2] ? Math.min(n[1], 0.25) : n[1]) * per - 1);
       var live = pos >= 0 && pos >= n[0] && pos < n[0] + Math.max(n[1], 0.12);
       g.globalAlpha = live ? 1 : n[5] ? 0.4 + 0.6 * (n[4] / 127) : 0.26;
-      g.fillStyle = live || !n[5] ? '#ffffff' : '#f5b800';
+      g.fillStyle = live || !n[5] ? '#ffffff' : '#ff9a2e';
       g.fillRect(x, 4 + k * opts.rh + pad, nw, opts.rh - pad * 2);
     });
     g.globalAlpha = 1;
