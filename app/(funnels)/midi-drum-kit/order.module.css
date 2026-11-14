@@ -147,7 +147,7 @@
      order form's white card it reads as an outline */
   border: 1px solid transparent;
   border-radius: 12px;
-  background: linear-gradient(180deg, #ffb85c 0%, #f07a12 100%);
+  background: linear-gradient(180deg, #ffa13d 0%, #ec6a0c 100%);
   box-shadow: 0 8px 28px rgba(236, 106, 12, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   color: #fff;
   font: 700 28px/1 var(--font-poppins), Poppins, var(--inter);
@@ -208,7 +208,7 @@
   text-shadow: none;
 }
 :global(html[data-ab-btn="orange"]) .cta {
-  background: linear-gradient(180deg, #ffb85c 0%, #f07a12 100%);
+  background: linear-gradient(180deg, #ffa13d 0%, #ec6a0c 100%);
   box-shadow: 0 8px 28px rgba(236, 106, 12, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -279,7 +279,7 @@
      azzeccasse alla parte finale della pagina senza bordi"): Safari tints its
      bottom bar with this colour, and the page gets the room the float took. */
   padding: 0;
-  background: #f07a12;
+  background: #ec6a0c;
   pointer-events: none;
 }
 /* The same button as the one in the form ("stesso CTA, stessa grandezza"),
@@ -299,7 +299,7 @@
    ("togli gradiente così è un blocco con la base che crea safari"). */
 :global(html) .payBar,
 :global(html) .payBar > .payBarBtn {
-  background: #f07a12;
+  background: #ec6a0c;
 }
 :global(html[data-ab-btn="green"]) .payBar,
 :global(html[data-ab-btn="green"]) .payBar > .payBarBtn {
@@ -815,15 +815,15 @@ main.jazzLike {
    the parts that still name it (the "reserved for" box, the 5-minute bonus). The class twice, so it comes
    after the Jazz page's own colours whatever order the stylesheets load in. */
 .dk.dk {
-  --y: #ff9a2a;
-  --y-gloss: #ffb85c;
-  --y-deep: #e8740e;
-  --y-lip: #8a4206;
-  --y-glow: rgb(240 122 18 / 0.55);
-  --y-rgb: 255 154 42;
-  --b-rgb: 255 154 42;
+  --y: #f5851f;
+  --y-gloss: #ffa13d;
+  --y-deep: #dd6408;
+  --y-lip: #7a3303;
+  --y-glow: rgb(236 106 12 / 0.55);
+  --y-rgb: 245 133 31;
+  --b-rgb: 245 133 31;
   --brass: var(--y);
-  --brass-hi: #ffa83e;
+  --brass-hi: #ff9a2e;
   --brass-deep: var(--y-deep);
   --inter: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }

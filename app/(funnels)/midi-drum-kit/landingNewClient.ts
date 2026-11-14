@@ -26,7 +26,7 @@ export const CLIENT_JS = String.raw`
   var BASE = '/funnels/midi-drum-kit/player/', DATA = BASE + 'v6/';
   var SOUND = [null, 'kick', 'snare', 'clap', 'rim', 'hat', 'ohat', 'perc'];
   var LEVEL = [0.9, 1, 0.8, 0.75, 0.7, 0.5, 0.45, 0.6];
-  var ORANGE = '#ff9a2a';
+  var ORANGE = '#f5851f';
   var PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>';
   var STOP = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/></svg>';
   var ctx = null, bufs = null, loading = null, now = null, sets = {}, curves = {};
