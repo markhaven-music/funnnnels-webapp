@@ -93,7 +93,7 @@ export const fr: Copy = {
     firstName: "Prénom",
     lastName: "Nom",
     email: "Email",
-    next: "CONTINUER",
+    next: "Continuer",
     back: "Retour",
     respect: "Nous respectons ta vie privée et tes informations.",
     paymentInfo: "INFORMATIONS DE PAIEMENT",

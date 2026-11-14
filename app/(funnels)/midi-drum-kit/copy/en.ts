@@ -100,7 +100,7 @@ export const en = {
     firstName: "First Name",
     lastName: "Last Name",
     email: "Email",
-    next: "GO TO STEP 2",
+    next: "Go to step 2",
     back: "Go Back",
     respect: "We respect your privacy & information.",
     paymentInfo: "PAYMENT INFORMATION",
