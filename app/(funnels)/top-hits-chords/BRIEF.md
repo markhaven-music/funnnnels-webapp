@@ -47,8 +47,11 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
     `top-hits-midi-bundle/TOP HITS MIDI Bundle.zip` is the old zip with that one file replaced by the
     T7's (E3 → F3, four bytes; 1,449 entries, nothing else changed), read back through a buyer's
     link. The zip of 2026-10-20 is kept at `top-hits-midi-bundle/backup/`.
-  - Not done: the hero VSL (Wistia 47ic5iver0) still plays the old chord: its cached voice files are
-    gone, so a new render needs a new ElevenLabs take; no proof email (no reviews); no paid test order.
+  - "Sì, rifallo" (2026-11-15): the hero VSL rendered again with Blinding Lights' right chord. The
+    cached voice files were gone, so the voice is a new ElevenLabs take (same voice, model and
+    script; all 20 parts checked with speech-to-text). Wistia x8jj158ddq, still = the frame at
+    117.3 s (media 3exn59wcek). The 2026-11-10 render (47ic5iver0) is still in Wistia, not on the page.
+  - Not done: no proof email (no reviews); no paid test order.
 - 2026-11-10: "crea nuovo funnel per TOP HITS MIDI Bundle con TUTTO." Built as Famous Beats v2 was
   (../famous-beats-bundle/BRIEF.md), with everything that funnel got in several rounds done at once:
   the Jazz page's CSS and section order, a player of every file, renders from the real box, six
@@ -119,10 +122,10 @@ one title word for word; reviews are the user's call).
   only the dashboard's screenshots (preview.webp, order.webp).
 - Pictures: gpt_image_2_6 on Higgsfield from the real box (2026-11-10): `box3d-*` (cutout), `hero-*`
   (the box, a piano roll of chords, four real file names, checked letter by letter), `daw-*`, `stage-*`.
-- VSL in the hero: Wistia 47ic5iver0 (4:05, voice Aaron Sage on eleven_v4, every part checked with
+- VSL in the hero: Wistia x8jj158ddq since 2026-11-15 (47ic5iver0 before; 4:05, voice Aaron Sage on eleven_v4, every part checked with
   speech-to-text), script `./vsl/script-en.md`, made by `tools/top_hits_vsl.py voice|render` (the Jazz
   VSL's captions and synth; the demos are Blinding Lights, Kill Bill, Lucid Dreams and Someone Like You
-  from `rolls.json`). No price amount in it. Still = the frame at 116 s (media z84gwhhsa9). A first
+  from `rolls.json`). No price amount in it. Still = the frame at 117.3 s (media 3exn59wcek). A first
   take with a black box around one picture is in Wistia as "OLD RENDER, not used" (pl1r8oioox,
   jfnydgc3hb): to delete.
 - Order `./order/[currency]`: the Jazz order page as Famous Beats has it.

@@ -20,9 +20,10 @@ export const funnel = {
     clarityId: "yum5a2rsel",
     neoSnippet: "https://t.thegrind.studio/api/s/3d5ba6a05e6bcaea",
   },
-  // The hero video (vsl/script-en.md, tools/top_hits_vsl.py, 2026-11-10, 4:05, voice Aaron Sage),
-  // in Wistia's own player; its still is a frame of the video (116 s).
-  vsl: { wistiaId: "47ic5iver0" as string },
+  // The hero video (vsl/script-en.md, tools/top_hits_vsl.py, 4:05, voice Aaron Sage), in Wistia's
+  // own player; its still is a frame of the video (117.3 s). Rendered again 2026-11-15 with a new
+  // voice take, for Blinding Lights' corrected last chord; 47ic5iver0 was the 2026-11-10 render.
+  vsl: { wistiaId: "x8jj158ddq" as string },
   support: "support@thegrind.studio",
   guaranteeDays: 14,
   legal: {
