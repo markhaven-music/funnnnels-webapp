@@ -31,8 +31,8 @@ export const funnel = {
     refund: "/refund-policy",
   },
   tagline: "Bundle of 1000 Chord Progressions from Top Hits.",
-  // The price the product has in dashboard → Products since 2026-11-08.
-  price: { eur: 97, usd: 97 },
+  // The launch price, dashboard → Products' since 2026-11-15 ("okay lets' keep 27 then"); it was 97 from 11-08.
+  price: { eur: 27, usd: 27 },
   // The order page's add-ons. Ids double as file keys and travel in PayPal's 127-character
   // custom_id, so keep them short. Drunk Swing Grooves and HUSTLE are tick boxes (the order
   // page's ORDER_BUMPS); the Expansions are the 5-minute bonus (./fiveMinBonus.ts): free

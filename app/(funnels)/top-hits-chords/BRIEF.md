@@ -12,6 +12,15 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
 ## Decisions (the user's words)
 - 2026-10-21: the ClickFunnels funnel copied 1:1 (./[currency], ./order): still the live page.
 - 2026-11-08: price set to €97 / $97 in dashboard → Products (was 27).
+- 2026-11-15, the day before the launch email ("TOP HITS MIDI Bundle is live", 11-16 08:00 UTC, then
+  daily to 11-30, funnnnels Broadcasts): the price is €27 / $27 again, everywhere TOP HITS is sold
+  ("okay lets' keep 27 then", after "Yes, €27 everywhere"). The pre-launch emails (ClickFunnels, 11-02
+  to 11-15) announce "the launch price is €27, limited to the first 100 copies"; the pages said 97.
+  funnel_items rows of product `top-hits` set to 2700: main on this funnel and on
+  top-hits-midi-bundle, the bump on Jazz and the Drum Kit, the upsell on the Drum Kit and Famous
+  Beats. Nothing on the site counts the 100 copies or puts the price back up: a real end to the
+  launch price is still to decide. The same day: "let's follow the PRODUCT LAUNCH FORMULA playbook
+  for this launch".
 - 2026-11-10: "crea nuovo funnel per TOP HITS MIDI Bundle con TUTTO." Built as Famous Beats v2 was
   (../famous-beats-bundle/BRIEF.md), with everything that funnel got in several rounds done at once:
   the Jazz page's CSS and section order, a player of every file, renders from the real box, six
@@ -50,7 +59,7 @@ Source: `…/02. All products/11. TOP HITS MIDI Bundle/1. Hitmaker MIDI Pack`, r
 - Any DAW (FL Studio, Ableton Live, Logic Pro, Pro Tools, Studio One, Cubase, Reaper, Bitwig, GarageBand),
   Mac and Windows, mobile DAWs that read MIDI. Commercial license; the MIDI files can't be resold or shared.
 - A transcriber charges €10–30 per song and takes 3–7 days (the live page's comparison). Price per
-  progression = the price ÷ 1,000 (€0.10 at €97), worked out by the page.
+  progression = the price ÷ 1,000 (€0.03 at €27), worked out by the page.
 
 ### Known faults in the pack (the product, not the page)
 - "LE SSERAFIM - Perfect Night (136 BPM - Dm)).mid" has no notes: 999 files play in the page's player.
@@ -98,7 +107,7 @@ one title word for word; reviews are the user's call).
   Edit; lib/editablePages.ts).
 
 ## Offer
-- €97 / $97 (dashboard → Products). Red "BLACK FRIDAY: 90% Sale Ends Soon" bar as on Jazz.
+- €27 / $27, the launch price (dashboard → Products, 2026-11-15; 97 from 11-08 to 11-15). Red "BLACK FRIDAY: 90% Sale Ends Soon" bar as on Jazz.
 - Six bonuses in the price (`funnel.ts` includes.pack), values as the Jazz page has them (192 in all):
   The Chord Progressions Bible (€37; 150 MIDI + 258 WAV), MIDI Chord Pack (Jazz Edition) (€47; 2,304 MIDI),
   Anime & Video Games MIDI Pack (€47; 1,548 MIDI), Emotional Keys MIDI Bundle (€27; 195 MIDI),
@@ -117,7 +126,7 @@ one title word for word; reviews are the user's call).
 
 ## Where it's registered (a code funnel, like Drunk Swing Grooves)
 - `funnel_items` (dashboard → Products), funnel `top-hits-chords`, added 2026-11-10: main `pack`
-  (top-hits, 9700/9700); add-ons `swing-grooves` (700), `hustle` (2500), `expansions` (700: the
+  (top-hits, 2700/2700 since 2026-11-15; 9700 before); add-ons `swing-grooves` (700), `hustle` (2500), `expansions` (700: the
   5-minute bonus's, never a tick box, so not sold while the bonus is off); upsells `jazz-pack` (2700) then `famous-beats` (2700).
   Seed: db/catalog.sql.
 - lib/funnels.ts (CODE, with `label` for the dashboard's name), lib/catalog.ts (CODE_FUNNELS,
