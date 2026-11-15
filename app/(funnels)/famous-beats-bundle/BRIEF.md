@@ -87,5 +87,10 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
   fbclid, gclid) to the order page; the Astro page's own script only took fbclid and utm_*, the ids were added.
 - The old page is back with one change of words: "hats and 808 on separate tracks" → "hats and percussion" (808 is a
   track in 3 files, see above). Its pictures, its offer text (no bonuses named) and the rest are as they were.
-- A third page "more like the Jazz one" was asked for; the page live since 11-10 already is the Jazz-style one (/v2
-  only redirects to it), so the third waits for what should differ.
+- 2026-11-15, the third page: "just model it after jazz and midi drum kit". `fbb-v3` (route ./v3) is the Jazz-style
+  page's own sections, words and pictures in the new MIDI Drum Kit landing's order: hero, the player right after it,
+  the letter, the product, the producers' quotes, what you're getting + the roll, what's inside, the bonuses, the
+  offer, guarantee + license, the steps, the chart, after you pay, FAQ, final key. Nothing added, nothing removed
+  (no reviews: still the user's call). One component draws both orders (./_v2/Landing.tsx ORDER). In the split from
+  ~17:00 UTC, about two hours after the other two: three pages, a third of the new visitors each; visitors who
+  already drew a page keep it. Look: ?lp=v3&preview=1.
