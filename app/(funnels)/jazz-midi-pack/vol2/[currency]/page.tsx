@@ -13,7 +13,7 @@ import { funnel } from "../../funnel";
 import j from "../../jazz.module.css";
 import type { Roll } from "../../piano";
 import { PlayableRoll } from "../../PlayableRoll";
-import { ProductBox } from "../../ProductBox";
+import shot from "../../shot.module.css";
 import groups from "../groups.json";
 import rolls from "../rolls.json";
 import { vol2 } from "../vol2";
@@ -94,9 +94,22 @@ export default async function Vol2Offer({ params }: { params: Params }) {
             </p>
             {buttons}
           </div>
-          <div className={v.box}>
-            <ProductBox variant="box" priority />
-            <span className={v.badge}>VOL. 2</span>
+          {/* Vol. 2's own box (2026-11-15, "needs to be similar to the one we have but slightly different to indicate a
+              vol.2": the pack's box and lettering, a guitar where the piano and saxophone were). Made on Higgsfield
+              from the pack's box, cut from its black background by tools/cut_box.cjs. */}
+          <div className={`${shot.stage} ${shot.box} ${v.box}`}>
+            <img
+              className={shot.img}
+              src="/funnels/jazz-midi-pack/box-vol2-520.webp"
+              srcSet="/funnels/jazz-midi-pack/box-vol2-340.webp 340w, /funnels/jazz-midi-pack/box-vol2-520.webp 520w, /funnels/jazz-midi-pack/box-vol2-680.webp 680w"
+              sizes="(min-width: 960px) 340px, 64vw"
+              width={680}
+              height={1005}
+              alt="Jazz MIDI Pack Vol. 2 box by GRIND STUDIO: 82 more jazz chord progressions as MIDI files"
+              fetchPriority="high"
+              decoding="async"
+            />
+            <span className={shot.floor} aria-hidden />
           </div>
         </div>
       </section>

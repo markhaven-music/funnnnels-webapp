@@ -9,24 +9,7 @@
   min-width: 0;
 }
 .box {
-  position: relative;
-  width: min(64vw, 300px);
   margin: 0 auto;
-}
-/* Until Vol. 2 has its own box: the pack's box with the volume on it. */
-.badge {
-  position: absolute;
-  z-index: 3;
-  top: 4%;
-  right: 2%;
-  padding: 8px 12px;
-  border-radius: 4px;
-  background: var(--y, #f5b800);
-  color: #140f00;
-  font: 800 15px/1 var(--font-sans, system-ui), sans-serif;
-  letter-spacing: 0.04em;
-  transform: rotate(6deg);
-  box-shadow: 0 6px 18px rgb(0 0 0 / 0.5);
 }
 @media (min-width: 960px) {
   .hero {
@@ -42,10 +25,6 @@
   }
   .buttons {
     max-width: 32rem;
-  }
-  .box {
-    width: 100%;
-    max-width: 340px;
   }
 }
 .demos {
