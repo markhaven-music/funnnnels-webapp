@@ -852,7 +852,7 @@ export const TESTS: TestDef[] = [
     name: "Price: 27 vs 37",
     question: "Does the Jazz MIDI Pack bring in more money per visitor at 37 than at 27? It does while it loses fewer than 27 % of the orders.",
     live: { p37: "https://m.thegrind.studio/jazz-midi-pack/order?preview=1" },
-    where: `Landing and order page, € and $ alike · 27 = six bonuses, 11-11 → 11-15 (after the 5-minute bonus ended) · 37 = the same pages with the Jazz Record Samples (122 WAV loops, until then a €7 add-on) as a seventh bonus, ${PRICE_37.afterFrom.slice(0, 10)} → today (live since 11-15 23:45 Italy) · the Black Friday bar is on both · as another funnel's upsell the pack is still 27`,
+    where: `Landing and order page, € and $ alike · 27 = six bonuses, 11-11 → 11-15 (after the 5-minute bonus ended) · 37 = the same pages with the Jazz Record Samples (122 WAV loops, until then a €7 add-on) as a seventh bonus, ${PRICE_37.afterFrom.slice(0, 10)} → today (live since 11-15 23:28 Italy) · the Black Friday bar is on both · as another funnel's upsell the pack is still 27`,
     variants: ["p27", "p37"],
     label: (v) => (v === "p27" ? "27 · six bonuses" : "37 · seven bonuses"),
     color: (v) => (v === "p27" ? { from: "#94a3b8", to: "#64748b" } : { from: "#34d399", to: "#059669" }),

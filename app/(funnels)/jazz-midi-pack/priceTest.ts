@@ -8,8 +8,8 @@
 export const PRICE_37 = {
   /** Before: the page's last five whole UTC days at 27 with nothing else changing (the 5-minute bonus ended 11-10). */
   beforeFrom: "2026-11-11T00:00:00Z",
-  /** The minute 37 reached visitors (the production deploy). */
-  live: "2026-11-15T22:45:00Z",
+  /** The minute 37 reached visitors (dashboard → Products set to 37 at 22:28 UTC; the pages' deploy followed at 22:30). */
+  live: "2026-11-15T22:28:00Z",
   /** After: its first whole UTC day, orders and visits alike. */
   afterFrom: "2026-11-16T00:00:00Z",
 };
