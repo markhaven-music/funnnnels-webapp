@@ -21,6 +21,26 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
   Beats. Nothing on the site counts the 100 copies or puts the price back up: a real end to the
   launch price is still to decide. The same day: "let's follow the PRODUCT LAUNCH FORMULA playbook
   for this launch".
+- 2026-11-15, the launch by the playbook (Jeff Walker's "Launch"; the summary the user linked:
+  cdn.bookey.app/files/pdf/book/en/launch.pdf): open cart 11-16 08:00 UTC, one offer, a real end.
+  Asked when the €27 ends: "Sun 22 Nov, midnight". Taken as midnight Pacific time (2026-11-23
+  08:00 UTC), so nobody in the Americas is cut off early; after it the bundle is €97 / $97 again.
+  - The end is enforced in the database, not by hand: `public.top_hits_launch_close()`
+    (db/top-hits-launch-close.sql), run every 5 minutes by pg_cron job `top-hits-launch-close`.
+    It puts every funnel_items row of product `top-hits` back to 9700 at 2026-11-23 08:00 UTC, or
+    as soon as 100 copies are sold since the launch email (orders of the two TOP HITS funnels plus
+    the add-on and upsell on the other funnels), then removes its own job. The pages follow within
+    the hour (revalidate 3600); a card payment from a page still showing the old price is refused
+    with "The price just changed" (api/checkout/intent).
+  - Emails (funnnnels Broadcasts), all to /top-hits-chords: 16 open ("€27 for the first 100 copies,
+    or until Sunday at midnight Pacific time, whichever comes first. After that it's €97."), 17
+    questions, 18 five-minute workflow, 19 voicings, 20 song list, 21 five songs test, each with the
+    same PS; 22 three closing emails and 23 "closed" written as DRAFTS for the user to read. The
+    Drum Kit and Famous Beats emails moved after the close (24 to 30) with the kit's present numbers
+    (10,296 MIDI files, 6 bonuses); "Try a genre you never make" and "Last note on TOP HITS" are
+    drafts again.
+  - Not done: no deadline on the page itself (the red bar still says "BLACK FRIDAY: 90% Sale Ends
+    Soon"); no proof email (no reviews); no paid test order.
 - 2026-11-10: "crea nuovo funnel per TOP HITS MIDI Bundle con TUTTO." Built as Famous Beats v2 was
   (../famous-beats-bundle/BRIEF.md), with everything that funnel got in several rounds done at once:
   the Jazz page's CSS and section order, a player of every file, renders from the real box, six
