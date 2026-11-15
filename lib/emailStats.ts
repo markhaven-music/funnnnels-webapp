@@ -44,6 +44,9 @@ function merge(into: Counts, c: Counts) {
     for (const f of ["orders", "upsells", "eur", "usd", "revenue"] as const) into[k][f] += c[k][f];
 }
 
+/** Kinds credited with every order in the window after them, click or not, as ClickFunnels counted its workflows. */
+const AS_CF = new Set<EmailKind>(["reminder", "sequence"]);
+
 const SANDBOX = /sandbox/i;
 const RECENT_MS = 7 * 86_400_000;
 
@@ -115,8 +118,11 @@ export async function getEmailInsights(range: Range): Promise<EmailInsights> {
   for (const a of (attr.data ?? []) as Attribution[]) {
     if (untilMs && Date.parse(a.created_at) >= untilMs) continue;
     if (!a.how || !a.kind || !a.ref) continue;
-    addSale(at(a.kind, a.ref)[a.how === "click" ? "clicked" : "received"], a, rate);
-    if (a.how === "click") addSale(byKind[a.kind], a, rate);
+    // Automations count like ClickFunnels' workflows: anyone who buys in the
+    // days after one reached them, clicked or not ("ok then lets count like CF").
+    const counted = a.how === "click" || AS_CF.has(a.kind);
+    addSale(at(a.kind, a.ref)[counted ? "clicked" : "received"], a, rate);
+    if (counted) addSale(byKind[a.kind], a, rate);
   }
   for (const c of per.values()) merge(total, c);
 

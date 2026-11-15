@@ -78,7 +78,7 @@ export function EmailInsightsPanel({ analytics }: { analytics: Analytics | null 
         <div>
           <h1 className="page-title">Email insights</h1>
           <p className="page-sub">
-            What your emails bring in. An order counts for an email when the buyer clicked a link in it in the {WINDOW_DAYS} days before paying.
+            What your emails bring in. An order counts for a broadcast when the buyer clicked a link in it in the {WINDOW_DAYS} days before paying; for an automation (the abandoned-checkout reminder, sequences) when it reached them in those days, clicked or not, as ClickFunnels counted.
           </p>
         </div>
       </div>
@@ -97,7 +97,7 @@ export function EmailInsightsPanel({ analytics }: { analytics: Analytics | null 
               <div className={x.card}>
                 <div className={s.cardHead}>
                   <div className={s.title}>Revenue by email</div>
-                  <div className={s.sub}>after a click, in €</div>
+                  <div className={s.sub}>in €</div>
                 </div>
                 <ByKind d={d} />
               </div>
@@ -129,7 +129,7 @@ export function EmailInsightsPanel({ analytics }: { analytics: Analytics | null 
             <p className={x.foot}>
               Revenue in euros, dollar sales at {d.usdToEur.toFixed(2)}. Upsells bought right after an order count with it.
               {d.total.received.revenue > 0 &&
-                ` Not counted above: ${eur(d.total.received.revenue)} (${sales(d.total.received)} orders) from people who bought within ${WINDOW_DAYS} days of getting an email without clicking it.`}
+                ` Not counted above: ${eur(d.total.received.revenue)} (${sales(d.total.received)} orders) from people who bought within ${WINDOW_DAYS} days of getting a broadcast without clicking it. Automations count every order in the ${WINDOW_DAYS} days after them, clicked or not, as ClickFunnels did.`}
             </p>
           </>
         )}
@@ -163,14 +163,14 @@ function Tiles({ d, allRevenue }: { d: EmailInsights | null; allRevenue: number 
         ? "no sale after a click yet"
         : allRevenue && allRevenue > 0
           ? `${pct(Math.min(1, t.clicked.revenue / allRevenue))} of all revenue (${eur(allRevenue)})`
-          : "after a click",
+          : "after a click, or an automation",
     },
     {
       label: "Orders from email",
       color: "oklch(0.82 0.18 295)",
       value: num(t.clicked.orders),
       unit: t.clicked.upsells ? `+ ${t.clicked.upsells} upsell${t.clicked.upsells === 1 ? "" : "s"}` : undefined,
-      note: t.received.orders ? `+ ${t.received.orders} after getting one, no click` : `clicked in the ${WINDOW_DAYS} days before`,
+      note: t.received.orders ? `+ ${t.received.orders} after a broadcast, no click` : `in the ${WINDOW_DAYS} days after an email`,
     },
     {
       label: "Emails sent",

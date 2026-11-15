@@ -8,7 +8,10 @@ import type { EmailKind } from "@/lib/mail";
 //
 // An order counts for an email when its buyer clicked a link in it in the
 // WINDOW_DAYS before paying; the last email clicked wins. Bought in those
-// days after getting one, without a click: "received", shown apart.
+// days after getting one, without a click: "received", shown apart for
+// broadcasts and launch emails. Automations (the abandoned-checkout reminder,
+// sequences) count those too, as ClickFunnels counted its workflows
+// (lib/emailStats.ts AS_CF): their "clicked" tally holds both.
 
 export const WINDOW_DAYS = 5;
 /** When the links in emails started going through the click counter (lib/mail.ts clickUrl). */
@@ -83,7 +86,7 @@ export function emailNotes(d: EmailInsights, allRevenue: number | null, now = Da
   // What email brought in, and its share of everything.
   if (t.clicked.revenue > 0) {
     const share = allRevenue && allRevenue > 0 ? `, ${pct(Math.min(1, t.clicked.revenue / allRevenue))} of all revenue` : "";
-    say(1, "up", `Email brought in ${eur(t.clicked.revenue)} ${when}${share}: ${sales(t.clicked)} from people who clicked an email in the ${WINDOW_DAYS} days before buying.`);
+    say(1, "up", `Email brought in ${eur(t.clicked.revenue)} ${when}${share}: ${sales(t.clicked)} from people who clicked a broadcast or got an automation in the ${WINDOW_DAYS} days before buying.`);
   }
 
   // The one-off email that made the most.
@@ -125,7 +128,7 @@ export function emailNotes(d: EmailInsights, allRevenue: number | null, now = Da
 
   // Bought after getting one, without a click.
   if (t.received.revenue > 0)
-    say(6, "info", `Another ${eur(t.received.revenue)} (${sales(t.received)}) came from people who bought within ${WINDOW_DAYS} days of getting an email but didn't click it: not counted above.`);
+    say(6, "info", `Another ${eur(t.received.revenue)} (${sales(t.received)}) came from people who bought within ${WINDOW_DAYS} days of getting an email but didn't click it: not counted above (automations count them).`);
 
   return out
     .sort((x, y) => x.rank - y.rank)
