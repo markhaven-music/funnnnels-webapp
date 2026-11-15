@@ -43,7 +43,12 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
     scheduled as written; the red bar of the landing and the order page says "LAUNCH PRICE: €27
     until Sunday midnight PT, then €97" while the launch price is the one in force (`launchOn` in
     funnel.ts: before the end and the Products price still 27), and "BLACK FRIDAY: …" again after.
-  - Not done: no proof email (no reviews); no paid test order.
+  - The buyers' zip has the right Blinding Lights since 2026-11-15 15:41 CET: the R2 object
+    `top-hits-midi-bundle/TOP HITS MIDI Bundle.zip` is the old zip with that one file replaced by the
+    T7's (E3 → F3, four bytes; 1,449 entries, nothing else changed), read back through a buyer's
+    link. The zip of 2026-10-20 is kept at `top-hits-midi-bundle/backup/`.
+  - Not done: the hero VSL (Wistia 47ic5iver0) still plays the old chord: its cached voice files are
+    gone, so a new render needs a new ElevenLabs take; no proof email (no reviews); no paid test order.
 - 2026-11-10: "crea nuovo funnel per TOP HITS MIDI Bundle con TUTTO." Built as Famous Beats v2 was
   (../famous-beats-bundle/BRIEF.md), with everything that funnel got in several rounds done at once:
   the Jazz page's CSS and section order, a player of every file, renders from the real box, six
