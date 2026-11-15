@@ -1,0 +1,126 @@
+/* Jazz MIDI Pack Vol. 2 upsell (vol2/[currency]/page.tsx): its own pieces; the rest is jazz.module.css and
+   the Jazz upsell's jazzOffer.module.css. */
+.hero {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+}
+.pitch {
+  min-width: 0;
+}
+.box {
+  position: relative;
+  width: min(64vw, 300px);
+  margin: 0 auto;
+}
+/* Until Vol. 2 has its own box: the pack's box with the volume on it. */
+.badge {
+  position: absolute;
+  z-index: 3;
+  top: 4%;
+  right: 2%;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: var(--y, #f5b800);
+  color: #140f00;
+  font: 800 15px/1 var(--font-sans, system-ui), sans-serif;
+  letter-spacing: 0.04em;
+  transform: rotate(6deg);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.5);
+}
+@media (min-width: 960px) {
+  .hero {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    text-align: left;
+  }
+  .hero :global(.oto-note) {
+    margin-left: 0;
+  }
+  .pitch h1,
+  .pitch p {
+    margin-left: 0;
+  }
+  .buttons {
+    max-width: 32rem;
+  }
+  .box {
+    width: 100%;
+    max-width: 340px;
+  }
+}
+.demos {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 860px) {
+  .demos {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.groups {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 860px) {
+  .groups {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.group,
+.only {
+  padding: 20px;
+  border: 1px solid var(--rule, #332d24);
+  border-radius: 6px;
+  background: var(--ink-2, #16130f);
+}
+.groupTitle {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font: 700 20px/1.2 var(--font-display), var(--font-sans), sans-serif;
+  color: #fff;
+}
+.count {
+  font: 700 13px/1 var(--font-sans, system-ui), sans-serif;
+  color: var(--y, #f5b800);
+}
+.blurb {
+  margin-top: 6px;
+  color: var(--cream-2, rgb(255 255 255 / 0.75));
+  font-size: 15px;
+  line-height: 1.5;
+}
+.names {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  columns: 1;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--cream-2, rgb(255 255 255 / 0.75));
+}
+.names li {
+  break-inside: avoid;
+}
+.inside {
+  display: grid;
+  gap: 28px;
+  align-items: start;
+}
+@media (min-width: 960px) {
+  .inside {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+}
+.only p {
+  margin-top: 10px;
+  color: var(--cream-2, rgb(255 255 255 / 0.75));
+  font-size: 16px;
+  line-height: 1.55;
+}
+.only a {
+  color: #fff;
+}
+.buttons {
+  margin-top: 28px;
+}

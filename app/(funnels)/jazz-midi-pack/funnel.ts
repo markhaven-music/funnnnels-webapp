@@ -176,12 +176,23 @@ export const funnel = {
     expansions: "midi-drum-kit/EXPLORER Expansions (House, Lofi, Afrobeat).zip",
     // The one-click upsell's zip (offers below), the one the other funnels sell.
     "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
+    // Jazz MIDI Pack Vol. 2 (offers below), built by ~/Desktop/Jazz MIDI Pack Tools/make_pack_vol2.py.
+    // NOT in R2 yet (2026-11-15): upload the zip under this key before funnel_items sells "vol2".
+    vol2: "jazz-midi-pack/Jazz MIDI Pack Vol. 2.zip",
   } as Record<string, string>,
   // One-click upsell after the order (2026-11-07, "Solo Famous Beats"): the
   // MIDI Drum Kit's Famous Beats page (midi-drum-kit/upsell.ts) selling for
   // this funnel, as after the TOP HITS order. Not a tick-box offer here, so
   // nobody sees it twice. Price and name: dashboard → Products (funnel_items).
-  offers: [{ id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } }],
+  // 2026-11-15 ("Sì, parti"): a ladder. First Vol. 2 (./vol2, 82 more progressions through the same engine,
+  // sold only on that page, 27), an upgrade of what was just bought; Famous Beats stays second until the
+  // Complete Collection page replaces it. Vol. 2 is on sale only once funnel_items has its row (lib/funnels.ts
+  // withItems keeps the upsells the database lists): until then its page is a preview and Yes answers
+  // "This offer isn't available".
+  offers: [
+    { id: "vol2", path: "vol2", name: "Jazz MIDI Pack Vol. 2", price: { eur: 27, usd: 27 } },
+    { id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } },
+  ],
   checkout: {
     leadTags: ["checkout-started"],
     buyerTags: ["buyer"],
