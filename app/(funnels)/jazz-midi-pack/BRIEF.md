@@ -278,3 +278,15 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   this landing's own product, voicing + before/after rolls, bonuses and guarantee blocks). English in every language.
 
 - 2026-11-10: the order page's 5-minute bonus is off ("direi di toglierlo", "ok quindi torniamo a B"; all four checkouts). On the Drum Kit nobody paid for an add-on with it (0 of 6 orders, 6 of 9 before) and every order was 27. The switch: Drum Kit `bonusTest.ts` (BONUS_SCRIPT default), the others `jazz-midi-pack/fiveMinBonus.ts` FIVE_MIN_BONUS_ON.
+
+## 2026-11-15: price 37, seven bonuses
+
+- "ok allora alziamo prezzo Jazz (metti in analytics il cambio e teniamolo d'occhio)": the pack is 37 (€ and $) on its
+  own funnel, from 27. Why: the average order was about €35, 2 buyers in 3 paid the bare 27, the target is €45.
+  As an upsell of the MIDI Drum Kit, TOP HITS and Drunk Swing Grooves it stays 27.
+- "aggiungendo un bonus dei samples inclusi cosi andiamo a 7 bonuses": the Jazz Record Samples (122 WAV loops:
+  82 lofi chord loops in Rhodes, 40 neo soul chord loops in piano; the €7 add-on of 11-08) are bonus 7, valued at
+  the 7 they sold for. The page says seven bonuses and 427 WAV loops (305 + 122). Its cover (bonus-7) is the add-on's
+  square art on a flat black front, not a box render like the other six.
+- The VSL still says six bonuses.
+- Read in Analytics → "Price: 27 vs 37" (priceTest.ts): 37 wins while it loses fewer than 27 % of the orders.

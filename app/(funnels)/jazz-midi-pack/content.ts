@@ -33,7 +33,7 @@ type Fields = {
   // A comparison chart: one column per way to get voicings, the last one is the pack.
   // ok: true = ✓, false = ✗, null = neutral.
   s_math: { eyebrow: string; title: string; cols: string[]; rows: ChartRow[]; note: string };
-  // The free bonuses: item n shows the cover bonus-n in public/funnels/jazz-midi-pack (1–5).
+  // The free bonuses: item n shows the cover bonus-n in public/funnels/jazz-midi-pack (1–7).
   s_bonuses: { eyebrow: string; title: string; sub: string; items: ({ name: string; text: string } & Hide)[] };
   s_offer: { eyebrow: string; title: string; stack: string[]; guarantee: string };
   s_guarantee: { title: string; text: string };
@@ -81,7 +81,7 @@ export const DEFAULT_SECTIONS: Section[] = [
         "Voiced Like A Pianist: Chords That Sound Played",
         "Chord Names In Every File, No Theory Needed",
         "All 12 Keys, Bass Lines And Combo Loops",
-        "5 Free Bonuses Included",
+        "7 Free Bonuses Included",
       ],
       ticks: ["Any DAW", "Chord names in every file", "{days}-day guarantee"],
       hud: [".mid · drag & drop", "12 voicings", "chords on the timeline"],
@@ -238,8 +238,8 @@ export const DEFAULT_SECTIONS: Section[] = [
     type: "s_bonuses",
     props: {
       eyebrow: "Free with the pack",
-      title: "Six bonuses. All in the {price}.",
-      sub: "4,197 more MIDI files, 305 WAV loops and two PDFs, on the same download page as the pack. Press play on any of them.",
+      title: "Seven bonuses. All in the {price}.",
+      sub: "4,197 more MIDI files, 427 WAV loops and two PDFs, on the same download page as the pack. Press play on any of them.",
       items: [
         {
           name: "MIDI Chord Pack (Jazz Edition)",
@@ -264,6 +264,10 @@ export const DEFAULT_SECTIONS: Section[] = [
         {
           name: "The Jazz MIDI Pack Guide (PDF)",
           text: "The idea behind the pack, what every voicing and rhythm is for, and every progression's chords, bar by bar.",
+        },
+        {
+          name: "Jazz Record Samples",
+          text: "This pack's progressions as WAV loops that sound like an old record, ready to chop.",
         },
       ],
     },

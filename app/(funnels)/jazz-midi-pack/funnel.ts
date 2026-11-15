@@ -19,7 +19,11 @@ export const funnel = {
     refund: "/refund-policy",
   },
   tagline: "The most used jazz progressions, 12 voicings × 8 rhythms, all 12 keys",
-  price: { eur: 27, usd: 27 },
+  // 37 since 2026-11-15 ("ok allora alziamo prezzo Jazz", to lift the average order: 2 buyers in 3 paid
+  // the bare 27), with the Jazz Record Samples as a seventh bonus. Read in Analytics → "Price: 27 vs 37"
+  // (priceTest.ts). Where the pack is another funnel's upsell (MIDI Drum Kit, TOP HITS, Drunk Swing
+  // Grooves) it stays 27. The price buyers pay is dashboard → Products' (funnel_items), set to 37 too.
+  price: { eur: 37, usd: 37 },
   // The hero video: Wistia media, in Wistia's player (Vsl.tsx). Its thumbnail
   // is a frame of the video itself (85.3 s, "Watch the top note.", Wistia still
   // kogs5rd7zh since 2026-11-05; "no custom image", 2026-11-02), also saved as
@@ -131,6 +135,17 @@ export const funnel = {
       value: 17,
       inside: ["How voice leading works, in one page", "The 12 voicings and 8 rhythms: what each is for", "Every progression with its key, length and chords, bar by bar"],
     },
+    // The €7 add-on of 2026-11-08 (make_record_samples.py), hidden from the order page since that day and
+    // the 5-minute bonus of 11-09/11-10; a bonus since 2026-11-15, with the price at 37 ("aggiungendo un
+    // bonus dei samples inclusi cosi andiamo a 7 bonuses"). `value`: the 7 it sold for.
+    {
+      id: "record-samples",
+      name: "Jazz Record Samples",
+      count: "122 WAV loops",
+      midi: 0,
+      value: 7,
+      inside: ["82 lofi chord loops in Rhodes", "40 neo soul chord loops in piano", "Chop them like a sample, no clearance needed"],
+    },
   ],
   value: { pack: 97 },
   // None ship with the deployment any more: private/ is git-ignored, so a deploy
@@ -147,6 +162,7 @@ export const funnel = {
     bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
     "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
     "drum-loops": "jazz-midi-pack/Drum Loops for Songwriting.zip",
+    "record-samples": "jazz-midi-pack/Jazz Record Samples.zip",
     // The one-click upsell's zip (offers below), the one the other funnels sell.
     "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
   } as Record<string, string>,

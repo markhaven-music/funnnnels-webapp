@@ -888,7 +888,7 @@ function Bonuses({ p, patch, ctx }: { p: SectionProps["s_bonuses"]; patch?: Patc
               <li key={i} className={ih.on("cover") ? bn.bonus : `${bn.bonus} ${bn.bare}`}>
                 {ih.on("cover") && (
                   <div className={ih.host(bn.cover)}>
-                    {i < 6 && (
+                    {i < funnel.bonuses.length && (
                       <img
                         src={`${DIR}/bonus-${i + 1}-360.webp`}
                         srcSet={`${DIR}/bonus-${i + 1}-360.webp 360w, ${DIR}/bonus-${i + 1}-640.webp 640w`}
