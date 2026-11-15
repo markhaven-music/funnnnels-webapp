@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   description: "The chord progressions of 1,000 hit songs, transcribed note for note into MIDI, in all 12 keys. The Weeknd, Taylor Swift, SZA, Drake, Bad Bunny and more. Any DAW.",
   openGraph: {
     title: "We Copied The Chord Progressions Of Top Hits So You Can Use Them.",
-    description: "1,000 hit chord progressions in all 12 keys (11,976 MIDI files) + 6 bonuses, by GRIND STUDIO. Drag into your DAW.",
+    description: "1,000 hit chord progressions in all 12 keys (12,000 MIDI files) + 6 bonuses, by GRIND STUDIO. Drag into your DAW.",
     type: "website",
     url: "https://m.thegrind.studio/top-hits-chords",
     images: [{ url: `https://m.thegrind.studio${DIR}/hero-880.webp`, width: 880, height: 663 }],
@@ -573,7 +573,7 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
               <div className={s.illus} aria-hidden>
                 <p className={s.illusTitle}>Your files are ready</p>
                 <ul className={s.dl}>
-                  {[[funnel.product, "1,000 progressions in all 12 keys · 11,976 MIDI files · .zip"], ...w.bonuses.items.map((b) => [b.name, b.inside[0]])].map(([name, meta]) => (
+                  {[[funnel.product, "1,000 progressions in all 12 keys · 12,000 MIDI files · .zip"], ...w.bonuses.items.map((b) => [b.name, b.inside[0]])].map(([name, meta]) => (
                     <li key={name}>
                       <span className={s.dlIco}>↓</span>
                       <span>

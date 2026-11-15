@@ -14,11 +14,11 @@ import t from "./th.module.css";
 // artist, song, key or BPM. The file's first 8 bars are drawn as a piano roll from the
 // real MIDI and played on the page's synth (sine or piano, ../../jazz-midi-pack/piano.ts),
 // looping until Stop. tools/extract_top_hits.py reads them from the pack into
-// public/funnels/top-hits-midi-bundle/browse-v1: songs.json (the list, loaded when the
+// public/funnels/top-hits-midi-bundle/browse-v2 (v1 until 2026-11-15, before the two replaced files): songs.json (the list, loaded when the
 // player nears the screen) and 20 chunks of 50 files (one fetched when a song in it is
 // picked), so the page itself carries only the first file.
 
-const DIR = "/funnels/top-hits-midi-bundle/browse-v1";
+const DIR = "/funnels/top-hits-midi-bundle/browse-v2";
 // [artist, title, bpm, key, folder, chunk, index in chunk]
 type Song = [string, string, number | null, string | null, number, number, number];
 type List = { total: number; folders: string[]; songs: Song[] };

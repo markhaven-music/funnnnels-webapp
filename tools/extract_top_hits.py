@@ -7,9 +7,9 @@ names (grind-studio-landing-pages/src/data/top-hits-songs.json: artist, title, B
 folder, file; typos in the file names fixed for display, the files untouched).
 
 Writes
-  public/funnels/top-hits-midi-bundle/browse-v1/songs.json
+  public/funnels/top-hits-midi-bundle/browse-v2/songs.json
       { total, folders: [name], songs: [[artist, title, bpm, key, folder, chunk, index]] }
-  public/funnels/top-hits-midi-bundle/browse-v1/<chunk>.json
+  public/funnels/top-hits-midi-bundle/browse-v2/<chunk>.json
       [ { file, bpm, beats, notes: [[startBeat, lenBeat, pitch]], chords: [] } ]   (50 songs each; chords: the Jazz roll type, unused)
   app/(funnels)/top-hits-chords/rolls.json
       the files the page shows before anything is fetched (hero, letter, steps)
@@ -27,7 +27,7 @@ import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SONGS = os.path.expanduser("~/Desktop/Code Projects/grind-studio-landing-pages/src/data/top-hits-songs.json")
-PUB = os.path.join(HERE, "..", "public", "funnels", "top-hits-midi-bundle", "browse-v1")
+PUB = os.path.join(HERE, "..", "public", "funnels", "top-hits-midi-bundle", "browse-v2")
 ROLLS = os.path.join(HERE, "..", "app", "(funnels)", "top-hits-chords", "rolls.json")
 FOLDERS = ["Modern Pop & Ballads", "Hiphop, Trap & Urban", "Dance & Electronic", "Vintage Classics, Rock & Country"]
 BARS = 8

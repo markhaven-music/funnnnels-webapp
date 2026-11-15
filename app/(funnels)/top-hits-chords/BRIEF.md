@@ -78,6 +78,18 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
     since 16:20 CET, beside the pack as it was; on the T7 "5. All 12 Keys (11,976 MIDI)". The zip
     before it is in R2 `top-hits-midi-bundle/backup/`. The launch emails still say "1,000 chord
     progressions" (true) and don't mention the keys.
+  - "fix the notes of the 2 midi files and lets do 12000" (2026-11-15): the two files that kept the
+    count at 11,976 are replaced in the pack (T7), the zip and the page's player (browse-v2).
+    "LE SSERAFIM - Perfect Night (136 BPM - Dm)" has notes now: Bbmaj7 Am7 Gm7 Am7 D7sus4 from
+    Hooktheory, checked against the iTunes preview with the TOP HITS 2 tools (key best of 12 by
+    0.245, every chord agrees); the passing Am7 of bar 1 is 1 beat long as the best fit, 2 beats
+    is nearly as likely (rhythm gap 0.003), so the tools' batch rule alone would have left it out:
+    it is in on the user's order to fix it. "Ed Sheeran - I Don't Care … copy" (the same file
+    twice) is now "Ed Sheeran - South of the Border (98 BPM - Dm)" (Dm F Bb Am7, the top Ultimate
+    Guitar tab, passed every check; not in Vol. 2). Both are one 8-bar loop, as Vol. 2's files.
+    The old files, the old list and an MP3 of each new file over the record's preview are on the
+    T7 in "6. Replaced 2026-11-15 …". So 1,000 songs × 12 keys = **12,000 MIDI files** exactly; the
+    pages, the FAQ and the launch email say 12,000.
   - Not done: no proof email (no reviews); no paid test order.
 - 2026-11-10: "crea nuovo funnel per TOP HITS MIDI Bundle con TUTTO." Built as Famous Beats v2 was
   (../famous-beats-bundle/BRIEF.md), with everything that funnel got in several rounds done at once:
@@ -114,8 +126,8 @@ Source: `…/02. All products/11. TOP HITS MIDI Bundle/1. Hitmaker MIDI Pack`, r
 - Genres as the live page names them: Pop, Trap, R&B, Country, EDM, Afrobeats, K-pop, Latin.
 - The zip (R2 `top-hits-midi-bundle/TOP HITS MIDI Bundle.zip`) also holds The Chord Progressions Bible
   (150 MIDI + 258 WAV), which is bonus 1 on the page.
-- Since 2026-11-15 also in all 12 keys: folder "3. All 12 Keys" of the zip, 998 songs × 12 = 11,976
-  MIDI files (Modern Pop & Ballads 6,648, Hiphop, Trap & Urban 2,280, Dance & Electronic 1,752,
+- Since 2026-11-15 also in all 12 keys: folder "3. All 12 Keys" of the zip, 1,000 songs × 12 = 12,000
+  MIDI files (11,976 until the two files were replaced; Modern Pop & Ballads 6,672, Hiphop, Trap & Urban 2,280, Dance & Electronic 1,752,
   Vintage Classics, Rock & Country 1,296); the original key is one of the twelve.
 - Any DAW (FL Studio, Ableton Live, Logic Pro, Pro Tools, Studio One, Cubase, Reaper, Bitwig, GarageBand),
   Mac and Windows, mobile DAWs that read MIDI. Commercial license; the MIDI files can't be resold or shared.
@@ -123,8 +135,8 @@ Source: `…/02. All products/11. TOP HITS MIDI Bundle/1. Hitmaker MIDI Pack`, r
   progression = the price ÷ 1,000 (€0.03 at €27), worked out by the page.
 
 ### Known faults in the pack (the product, not the page)
-- "LE SSERAFIM - Perfect Night (136 BPM - Dm)).mid" has no notes: 999 files play in the page's player.
-- Duplicates: "Ed Sheeran - I Don't Care … copy.mid", "Starboy" twice (G and C), "Trevor Daniel - Falling"
+- (Fixed 2026-11-15.) "LE SSERAFIM - Perfect Night (136 BPM - Dm)).mid" had no notes: 999 files played in the page's player; 1,000 do now.
+- Duplicates: "Ed Sheeran - I Don't Care … copy.mid" (replaced 2026-11-15 by South of the Border), "Starboy" twice (G and C), "Trevor Daniel - Falling"
   twice (A#m and Bbm), "SZA - Kill Bill" in two folders. 996 or so different songs in 1,000 files.
 - No key in the name: Toni Braxton - Let It Flow, Kendrick Lamar - N95, Lil Durk - Free Jamell,
   Nadia Ali - Starkillers & Alex Kenji. No BPM: Stars On 45. No artist: "Incomplete", "One More Try".

@@ -114,9 +114,9 @@ export const funnel = {
     orderPage: "/top-hits-chords/order",
   },
   // Counted from the pack (BRIEF.md): 1,000 files, 478 artist credits ("470+" on the page).
-  // 1,000 files; since 2026-11-15 every one that has notes also in all 12 keys (tools/top_hits_keys.py):
-  // 998 of them (one file is empty, one is in the pack twice) × 12 = 11,976 MIDI files.
-  counts: { progressions: 1000, artists: 478, files: 11976 },
+  // 1,000 files; since 2026-11-15 each one also in all 12 keys (tools/top_hits_keys.py):
+  // 1,000 × 12 = 12,000 MIDI files (the empty file and the duplicate were replaced that day, BRIEF.md).
+  counts: { progressions: 1000, artists: 478, files: 12000 },
 } as const;
 
 // The launch (BRIEF.md, 2026-11-15, "Sun 22 Nov, midnight"): €27 / $27 until Sunday 22 Nov at
@@ -135,7 +135,7 @@ export const launchOn = (amount: number, currency: "eur" | "usd", now = Date.now
 // 12 keys, the artists with the most songs in it (counted from the file names), its box
 // (public/funnels/top-hits-midi-bundle/folder-<box>-360/640.webp, GPT Image 2.6 from the bundle's box).
 export const folders = [
-  { name: "Modern Pop & Ballads", box: "pop", songs: 556, files: 6648, artists: "Taylor Swift, The Weeknd, Sabrina Carpenter, Chappell Roan, Tate McRae, Ariana Grande, Doja Cat, Dua Lipa" },
+  { name: "Modern Pop & Ballads", box: "pop", songs: 556, files: 6672, artists: "Taylor Swift, The Weeknd, Sabrina Carpenter, Chappell Roan, Tate McRae, Ariana Grande, Doja Cat, Dua Lipa" },
   { name: "Hiphop, Trap & Urban", box: "hiphop", songs: 190, files: 2280, artists: "Drake, SZA, Bad Bunny, KAROL G, Rihanna, Post Malone, Tyla, Chris Brown" },
   { name: "Dance & Electronic", box: "dance", songs: 146, files: 1752, artists: "David Guetta, Charli xcx, Calvin Harris, Daft Punk, Ava Max, Zedd, deadmau5, Avicii" },
   { name: "Vintage Classics, Rock & Country", box: "vintage", songs: 108, files: 1296, artists: "Michael Jackson, Madonna, Whitney Houston, Stevie Wonder, Beyoncé, Hozier, Myles Smith" },
