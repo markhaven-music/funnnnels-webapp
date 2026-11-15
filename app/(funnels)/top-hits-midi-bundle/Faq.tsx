@@ -1,5 +1,6 @@
 "use client";
 
+import { priceIn } from "@/lib/geo";
 import { useState } from "react";
 import type { Currency } from "@/lib/geo";
 import { restate } from "@/lib/restate";
@@ -30,7 +31,7 @@ export function Faq({ currency, price, w = LANDING.faq }: { currency: Currency; 
               <div className={s.faqPanelInner}>
                 {item.a.map((p, j) => (
                   <p key={j}>
-                    <Rich text={restate(p, funnel.price[currency], price)} currency={currency} />
+                    <Rich text={restate(p, priceIn(funnel.price, currency), price)} currency={currency} />
                   </p>
                 ))}
               </div>

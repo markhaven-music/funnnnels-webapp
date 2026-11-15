@@ -1,5 +1,5 @@
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { cfLandingHtml } from "../../cfLanding";
 import { funnel } from "../../funnel";
 
@@ -17,6 +17,6 @@ export function generateStaticParams() {
 export async function GET(_req: Request, { params }: { params: Promise<{ currency: string }> }) {
   const { currency } = await params;
   if (!CURRENCIES.includes(currency as Currency)) return new Response("Not found", { status: 404 });
-  const price = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency as Currency];
+  const price = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency as Currency);
   return new Response(cfLandingHtml(currency as Currency, price), { headers: { "content-type": "text/html; charset=utf-8" } });
 }

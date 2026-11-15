@@ -1,3 +1,4 @@
+import { priceIn } from "@/lib/geo";
 import type { Currency } from "@/lib/geo";
 import { resolveFunnel } from "@/lib/funnels";
 import { liveProducts, type ShopImage, type ShopItem } from "@/lib/shop";
@@ -91,7 +92,7 @@ export function fromShopItem(p: ShopItem, currency: Currency): StoreItem {
     name: p.name,
     line: p.tagline,
     category: CATEGORY[p.slug] ?? "more",
-    price: p.price[currency],
+    price: priceIn(p.price, currency),
     href: `/shop/${p.slug}`,
     pic: shopPic(p.image),
     funnel: false,
@@ -108,7 +109,7 @@ export async function funnelPacks(currency: Currency): Promise<StoreItem[]> {
         name: f.product,
         line: p.line,
         category: CATEGORY[p.slug] ?? "more",
-        price: f.price[currency],
+        price: priceIn(f.price, currency),
         href: p.href,
         pic: p.pic,
         funnel: true,

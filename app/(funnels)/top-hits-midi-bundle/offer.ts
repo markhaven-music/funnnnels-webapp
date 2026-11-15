@@ -1,3 +1,4 @@
+import { priceIn } from "@/lib/geo";
 import { getFunnel, resolveFunnel, type Product } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { restate } from "@/lib/restate";
@@ -17,17 +18,17 @@ export async function orderOffer(currency: Currency, product?: Product, words: R
   return {
     product: f.product,
     name: f.product === code.product ? funnel.orderName : f.product,
-    price: f.price[currency],
+    price: priceIn(f.price, currency),
     bumps: (f.bumps ?? []).map((b) => {
       const known = funnel.bumps.find((x) => x.id === b.id);
-      const was = known?.price[currency] ?? b.price[currency];
+      const was = priceIn(known?.price, currency) ?? priceIn(b.price, currency);
       return {
         id: b.id,
         name: b.name,
-        price: b.price[currency],
+        price: priceIn(b.price, currency),
         image: known?.image ?? b.image ?? "",
         headline: known?.headline ?? `YES! Add ${b.name}!`,
-        body: (words[b.id] ?? bumpCopy[b.id] ?? (b.pitch ? [b.pitch] : [])).map((p) => restate(p, was, b.price[currency])),
+        body: (words[b.id] ?? bumpCopy[b.id] ?? (b.pitch ? [b.pitch] : [])).map((p) => restate(p, was, priceIn(b.price, currency))),
       };
     }),
   };

@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   const lang = typeof body.lang === "string" && f.langs?.includes(body.lang) ? body.lang : "en";
   // The price the order page showed: proxy.ts picked it by country and left the country in this cookie.
   const cookie = req.headers.get("cookie")?.match(new RegExp(`(?:^|; )${COUNTRY_COOKIE}=([A-Z]{2})(?:;|$)`))?.[1];
-  const currency = currencyFor(visitorCountry(req.headers, cookie));
+  const currency = currencyFor(visitorCountry(req.headers, cookie), f.kind === "code");
 
   try {
     await upsertContact({

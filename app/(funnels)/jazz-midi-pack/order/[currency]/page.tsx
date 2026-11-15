@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel, upsellsOn } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { restate } from "@/lib/restate";
 import { getPublishedBlocks } from "@/lib/pages";
@@ -31,7 +31,7 @@ export function generateStaticParams() {
   return CURRENCIES.map((currency) => ({ currency }));
 }
 
-const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
+const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US", gbp: "GB", chf: "CH" };
 
 export const metadata: Metadata = {
   title: "Order · Jazz MIDI Pack · GRIND STUDIO",
@@ -51,7 +51,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   if (!CURRENCIES.includes(currency)) notFound();
   // Its price and its add-ons (TOP HITS, MIDI Drum Kit, HUSTLE) as dashboard → Products has them.
   const f = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
-  const amount = f.price[currency];
+  const amount = priceIn(f.price, currency);
   const sections = await getPublishedBlocks(funnel.slug, DEFAULT_SECTIONS, valid, { strict: true });
   const ctx: Ctx = {
     price: money(amount, currency),
@@ -59,14 +59,14 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     currency,
     country: FALLBACK_COUNTRY[currency],
     publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null,
-    bump: f.bump ? { name: f.bump.name, price: f.bump.price[currency], pitch: f.bump.pitch, cover: splitName(f.bump.name) } : null,
+    bump: f.bump ? { name: f.bump.name, price: priceIn(f.bump.price, currency), pitch: f.bump.pitch, cover: splitName(f.bump.name) } : null,
     // Their words say the code's price ("just {c}27"): said again at Products' (lib/restate.ts).
     // Jazz Record Samples hidden since 2026-11-08 ("lasciamo solo drunk swing grooves"), though Products still lists it.
     bumps: (f.bumps ?? []).filter((b) => b.id !== "record-samples").map((b) => {
-      const was = getFunnel(funnel.slug)?.bumps?.find((c) => c.id === b.id)?.price[currency] ?? b.price[currency];
+      const was = priceIn(getFunnel(funnel.slug)?.bumps?.find((c) => c.id === b.id)?.price, currency) ?? priceIn(b.price, currency);
       const copy = bumpCopy[b.id];
-      const said = copy ? { ...copy, body: copy.body.map((p) => restate(p, was, b.price[currency])) } : {};
-      return { id: b.id, name: b.name, price: b.price[currency], pitch: b.pitch, image: b.image, ...said };
+      const said = copy ? { ...copy, body: copy.body.map((p) => restate(p, was, priceIn(b.price, currency))) } : {};
+      return { id: b.id, name: b.name, price: priceIn(b.price, currency), pitch: b.pitch, image: b.image, ...said };
     }),
     // After paying: the Famous Beats upsell (./offer), then the thank-you page.
     afterOrder: nextStep(f, "en", null),
@@ -74,7 +74,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   };
   // The add-on the 5-minute bonus gives (none if it's gone from Products).
   const rs = FIVE_MIN_BONUS_ON ? f.bumps?.find((b) => b.id === JAZZ_BONUS.item) : undefined;
-  if (rs) ctx.fiveMinBonus = { price: rs.price[currency] };
+  if (rs) ctx.fiveMinBonus = { price: priceIn(rs.price, currency) };
   const offer = pick(sections, "s_offer");
   const guarantee = pick(sections, "s_guarantee");
   const reviews = pick(sections, "s_reviews");
@@ -111,7 +111,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
               extra={
                 rs && (
                   <div className={c.slot}>
-                    <JazzBonusItem w={JAZZ_BONUS_WORDS} price={money(rs.price[currency], currency)} />
+                    <JazzBonusItem w={JAZZ_BONUS_WORDS} price={money(priceIn(rs.price, currency), currency)} />
                     <script dangerouslySetInnerHTML={{ __html: JAZZ_BONUS_TIME_SCRIPT }} />
                   </div>
                 )

@@ -1,3 +1,4 @@
+import { roughEuros } from "@/lib/geo";
 import { DEFAULT_KIT_SECTIONS } from "@/app/(funnels)/_kit/content";
 import { dayIn } from "@/lib/tz";
 import { pageId } from "@/lib/blocks";
@@ -512,8 +513,8 @@ export async function salesByDay(slug: string): Promise<{ days: DaySales[]; sour
       const day = dayIn(pi.created * 1000);
       const d = byDay.get(day) ?? { day, orders: 0, eur: 0, usd: 0 };
       d.orders += 1;
-      if (pi.currency === "eur") d.eur += pi.amount / 100;
       if (pi.currency === "usd") d.usd += pi.amount / 100;
+      else d.eur += roughEuros(pi.amount / 100, pi.currency);
       byDay.set(day, d);
     }
     if (!res.has_more || !res.next_page) break;

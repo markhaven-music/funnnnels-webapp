@@ -1,3 +1,4 @@
+import { roughEuros } from "@/lib/geo";
 import { usdToEur } from "@/lib/analytics";
 import { ASTRO_FUNNEL } from "@/lib/beacon";
 import { codeFunnels, funnelLabel, getFunnel } from "@/lib/funnels";
@@ -351,7 +352,7 @@ export async function getLive(day: string | null): Promise<Live> {
     today: {
       checkouts: checkouts.filter((c) => Date.parse(c.started_at) >= dayMs).length,
       orders: today.filter((o) => !o.parent).length,
-      revenue: today.reduce((sum, o) => sum + (o.amount_cents / 100) * (o.currency === "usd" ? rate : 1), 0),
+      revenue: today.reduce((sum, o) => sum + (o.currency === "usd" ? (o.amount_cents / 100) * rate : roughEuros(o.amount_cents / 100, o.currency)), 0),
     },
     since: first[0]?.at ?? null,
     errors,

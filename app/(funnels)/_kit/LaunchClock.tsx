@@ -1,5 +1,6 @@
 "use client";
 
+import { priceIn } from "@/lib/geo";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Currency } from "@/lib/geo";
 import { money, nextBoundary, phaseAt, type Launch, type Money, type Phase } from "@/lib/launch";
@@ -83,14 +84,14 @@ export function Phased({ show, children }: { show: Phase[]; children: ReactNode 
 export function Price({ kind = "now" }: { kind?: "now" | "early" | "full" }) {
   const { launch, price, currency } = useClock();
   const now = useUnitPrice();
-  const amount = kind === "now" ? now : kind === "early" && launch ? launch.early[currency] : price[currency];
+  const amount = kind === "now" ? now : kind === "early" && launch ? priceIn(launch.early, currency) : priceIn(price, currency);
   return <>{money(amount, currency)}</>;
 }
 
 /** The price in force now, as a number (for the checkout). Same rule as the server's. */
 export function useUnitPrice(): number {
   const { phase, launch, price, currency } = useClock();
-  return phase === "early" && launch ? launch.early[currency] : price[currency];
+  return phase === "early" && launch ? priceIn(launch.early, currency) : priceIn(price, currency);
 }
 
 /**

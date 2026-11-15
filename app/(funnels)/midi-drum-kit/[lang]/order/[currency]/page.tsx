@@ -51,7 +51,7 @@ export function generateStaticParams() {
 }
 
 // The country the checkout reports when the cookie is missing, per currency.
-const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "FR", usd: "US" };
+const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "FR", usd: "US", gbp: "GB", chf: "CH" };
 const IMG = "/funnels/midi-drum-kit";
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {

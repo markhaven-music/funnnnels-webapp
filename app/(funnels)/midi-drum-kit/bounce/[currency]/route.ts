@@ -1,5 +1,5 @@
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { astroHtml } from "../../../astroLanding";
 import { TEMPLATE } from "../../astro/bounce";
 import { funnel } from "../../funnel";
@@ -22,7 +22,7 @@ export function generateStaticParams() {
 export async function GET(_req: Request, { params }: { params: Promise<{ currency: string }> }) {
   const { currency } = await params;
   if (!CURRENCIES.includes(currency as Currency)) return new Response("Not found", { status: 404 });
-  const price = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency as Currency];
+  const price = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency as Currency);
   const html = astroHtml(TEMPLATE, { funnel: funnel.slug, orderPage: funnel.checkout.orderPage, currency: currency as Currency, price });
   return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
 }

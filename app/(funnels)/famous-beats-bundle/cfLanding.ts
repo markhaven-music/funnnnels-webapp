@@ -1,4 +1,5 @@
 import type { Currency } from "@/lib/geo";
+import { fromEuro } from "@/lib/geo";
 import { AVAILABILITY_JS } from "@/lib/availability";
 import { beaconScript } from "@/lib/beacon";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
@@ -48,7 +49,7 @@ export function cfLandingHtml(currency: Currency, price: number): string {
   const strings = { ...(en as Record<string, unknown>), ...WORDS } as Record<string, string>;
   const money = (t: string) => {
     let out = t.replace(/€27\b/g, `€${price}`).replace(/€0\.08\b/g, `€${(price / 320).toFixed(2)}`);
-    if (currency === "usd") out = out.replaceAll("€", "$");
+    out = fromEuro(out, currency);
     return out;
   };
   const text = (key: string) => (key.startsWith("s") ? money(strings[key] ?? "") : mapText(strings[key] ?? "", money));

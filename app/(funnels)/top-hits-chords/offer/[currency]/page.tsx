@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
 import { fill } from "@/lib/words";
@@ -54,9 +54,9 @@ export default async function JazzUpsell({ params }: { params: Promise<{ currenc
   const product = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
   const offer = product.offers?.find((o) => o.id === OFFER);
   if (!offer) notFound();
-  const amount = offer.price[currency];
+  const amount = priceIn(offer.price, currency);
   const price = money(amount, currency);
-  const ctx: Ctx = { price, amount, currency, country: currency === "usd" ? "US" : "FR", publishableKey: null, upsell: true };
+  const ctx: Ctx = { price, amount, currency, country: ({ eur: "FR", usd: "US", gbp: "GB", chf: "CH" } as const)[currency], publishableKey: null, upsell: true };
   const blocks = await getPublishedBlocks(jazz.slug, DEFAULT_SECTIONS, valid, { strict: true });
   const shown = blocks
     .filter((x) => !SKIP.has(x.type))

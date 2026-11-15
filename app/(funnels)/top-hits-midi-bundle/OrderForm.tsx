@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 // "pure": Stripe.js loads when loadStripe is called, not as soon as this file does.
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
-import { cookieCountry, type Currency } from "@/lib/geo";
+import { cookieCountry, type Currency, SIGN } from "@/lib/geo";
 import { isPreview, track } from "@/lib/beacon";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { CardFields, cardElements, INTER, payWithCard, payWithWallet, Wallet, useFirstTouch } from "../CardFields";
@@ -68,7 +68,7 @@ function stripeFor(key: string) {
   return stripeCache.get(key)!;
 }
 
-const money = (n: number, c: Currency) => `${c === "eur" ? "€" : "$"}${n.toFixed(2)}`;
+const money = (n: number, c: Currency) => `${SIGN[c]}${n.toFixed(2)}`;
 
 export function OrderForm({ currency, country, publishableKey, afterOrder, upsell, offer, sells = TOP_HITS, skin, buttons, words = FORM }: Props) {
   const w = words;

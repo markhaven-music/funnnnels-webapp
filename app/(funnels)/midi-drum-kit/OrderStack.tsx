@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import type { Currency } from "@/lib/geo";
+import { fillSign } from "@/lib/geo";
 import { Rich } from "../top-hits-midi-bundle/Rich";
 import j from "../jazz-midi-pack/jazz.module.css";
 import type { Copy } from "./copy";
@@ -81,13 +82,11 @@ export function OrderStack({ w, price, currency, lang }: { w: Copy["order"]["sta
 
 /** Under the form: three real numbers (the Jazz order page's Proof); a line's **number** is the big one. */
 export function OrderProof({ w, currency }: { w: Copy["order"]["stack"]; currency: Currency }) {
-  const sign = currency === "eur" ? "€" : "$";
   return (
     <ul className={j.proof} style={{ "--n": w.proof.length } as CSSProperties}>
       {w.proof.map((line) => (
         <li key={line}>
-          {line
-            .replaceAll("{c}", sign)
+          {fillSign(line, currency)
             .split(/\*\*(.+?)\*\*/)
             .map((part, i) => (i % 2 ? <b key={i}>{part}</b> : part))}
         </li>

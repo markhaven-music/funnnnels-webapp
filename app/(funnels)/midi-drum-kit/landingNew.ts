@@ -1,4 +1,5 @@
 import type { Currency } from "@/lib/geo";
+import { SIGN } from "@/lib/geo";
 import clips from "@/public/funnels/midi-drum-kit/player/v6/clips.json";
 import tree from "@/public/funnels/midi-drum-kit/player/v6/tree.json";
 import type { Copy } from "./copy";
@@ -643,7 +644,8 @@ function bounce(c: Ctx): string {
 `;
 }
 
-const money = (v: number, c: Ctx) => (c.currency === "usd" ? `$${v}` : c.lang === "it" ? `${v}\u00a0€` : `€${v}`);
+const money = (v: number, c: Ctx) =>
+  c.currency === "eur" ? (c.lang === "it" ? `${v}\u00a0€` : `€${v}`) : c.currency === "chf" && c.lang === "it" ? `${v}\u00a0CHF` : `${SIGN[c.currency]}${v}`;
 
 type Clip = { name: string; file: string; bpm: number; key?: string; peaks: number[] };
 function clipList(kind: "starter" | "hook", list: Clip[]): string {

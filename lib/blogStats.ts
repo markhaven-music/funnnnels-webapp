@@ -1,3 +1,4 @@
+import { roughEuros } from "@/lib/geo";
 import { POSTS, SITE } from "@/app/blog/posts";
 import { isLive } from "@/app/blog/schedule";
 import { rangeDays, rangeSpan, type Range } from "@/lib/range";
@@ -178,8 +179,8 @@ export async function blogStats(range: Range): Promise<BlogStats> {
       const currency = String(c.currency ?? "").toLowerCase();
       const cents = Number(c.amount_cents) || 0;
       p.orders += 1;
-      if (currency === "eur") p.revenue.eur += cents;
-      else p.revenue.usd += cents;
+      if (currency === "usd") p.revenue.usd += cents;
+      else p.revenue.eur += Math.round(roughEuros(cents, currency));
       sales.push({
         at: c.occurred_at,
         slug: via.slug,

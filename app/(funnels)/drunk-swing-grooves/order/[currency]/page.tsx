@@ -31,7 +31,7 @@ export function generateStaticParams() {
   return CURRENCIES.map((currency) => ({ currency }));
 }
 
-const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
+const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US", gbp: "GB", chf: "CH" };
 const IMG = "/funnels/top-hits-midi-bundle";
 const OWN = `/funnels/${funnel.slug}`;
 const FB = "/funnels/famous-beats-bundle";

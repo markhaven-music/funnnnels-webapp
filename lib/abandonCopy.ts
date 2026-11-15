@@ -1,5 +1,5 @@
 import { frenchSpaces } from "@/app/(funnels)/midi-drum-kit/landing";
-import type { Currency } from "@/lib/geo";
+import { SIGN, type Currency } from "@/lib/geo";
 
 // The MIDI Drum Kit's abandoned-checkout series, copied from ClickFunnels'
 // "Abandoned Checkout (Meta Ads Funnel)" workflow (2026-10-29): 15 minutes
@@ -415,6 +415,6 @@ export function abandonSeries(lang: string | null | undefined): AbandonEmail[] {
 /** The price as the language writes it: "€27" in English, "27 €" in French, "$27" for Spanish dollars (landing.ts). */
 export function statedPrice(amount: number, currency: Currency, lang: string | null | undefined): string {
   const n = Number.isInteger(amount) ? String(amount) : amount.toFixed(2).replace(".", lang === "en" ? "." : ",");
-  if (lang === "en" || !lang || (lang === "es" && currency === "usd")) return currency === "eur" ? `€${n}` : `$${n}`;
-  return `${n} ${currency === "eur" ? "€" : "$"}`;
+  if (lang === "en" || !lang || (lang === "es" && currency === "usd")) return `${SIGN[currency]}${n}`;
+  return `${n} ${SIGN[currency].trim()}`;
 }

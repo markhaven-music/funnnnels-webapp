@@ -1,3 +1,4 @@
+import { priceIn, type Currency } from "@/lib/geo";
 // TOP HITS MIDI Bundle, the new funnel (2026-11-10, "crea nuovo funnel per TOP HITS MIDI Bundle
 // con TUTTO", then "crea un funnel a parte"): the same product as ../top-hits-midi-bundle (the
 // 1:1 ClickFunnels copy, still live and untouched), sold by its own funnel at
@@ -129,7 +130,7 @@ export const launch = {
 } as const;
 
 /** Is the launch price the one in force? `amount` is the price dashboard → Products has now. */
-export const launchOn = (amount: number, currency: "eur" | "usd", now = Date.now()) => now < launch.ends && amount === launch.price[currency];
+export const launchOn = (amount: number, currency: Currency, now = Date.now()) => now < launch.ends && amount === priceIn(launch.price, currency);
 
 // The bundle's four folders (BRIEF.md): the pack's own names and counts, the files each has in the
 // 12 keys, the artists with the most songs in it (counted from the file names), its box

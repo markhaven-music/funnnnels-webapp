@@ -1,3 +1,4 @@
+import { euroColumn, roughEuros } from "@/lib/geo";
 import { type MetaSpend, spendByPack } from "@/lib/metaSpend";
 import { dayIn } from "@/lib/tz";
 import { rangeSpan, type Range } from "@/lib/range";
@@ -138,7 +139,7 @@ export async function freePackStats(range: Range | number = "90d"): Promise<Free
       before,
       checkoutAt: first((startsBy.get(o.email) ?? []).map((s) => Date.parse(s.started_at)).filter((t) => t >= at)),
       buyAt: first(after.map((x) => Date.parse(x.created_at))),
-      eur: after.filter((x) => x.currency === "eur").reduce((n, x) => n + x.amount_cents, 0),
+      eur: after.filter((x) => euroColumn(x.currency)).reduce((n, x) => n + Math.round(roughEuros(x.amount_cents, x.currency)), 0),
       usd: after.filter((x) => x.currency === "usd").reduce((n, x) => n + x.amount_cents, 0),
     };
   });

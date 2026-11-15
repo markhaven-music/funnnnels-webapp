@@ -1,3 +1,4 @@
+import { priceIn, fillSign } from "@/lib/geo";
 import type { Currency } from "@/lib/geo";
 import { restate, restateEach } from "@/lib/restate";
 import { fill } from "@/lib/words";
@@ -13,8 +14,7 @@ import s from "./landing.module.css";
 // with the dashboard's edits when the page hands them in.
 
 export function ValueStack({ currency, price, w = LANDING.stack }: { currency: Currency; price: number; w?: StackWords }) {
-  const c = sign(currency);
-  const t = (text: string) => fill(text, { price }).replaceAll("{c}", c);
+  const t = (text: string) => fillSign(fill(text, { price }), currency);
   return (
     <div className={s.stack}>
       <div className={s.stackHead}>{w.head}</div>
@@ -38,7 +38,7 @@ export function ValueStack({ currency, price, w = LANDING.stack }: { currency: C
       </div>
       <div className={s.stackFinal}>{t(w.final)}</div>
       <div className={s.stackPer}>
-        <Rich text={restateEach(fill(w.per, { price }), funnel.price[currency], price, 1000)} currency={currency} />
+        <Rich text={restateEach(fill(w.per, { price }), priceIn(funnel.price, currency), price, 1000)} currency={currency} />
       </div>
       <div className={s.stackScarcity}>
         <span className={s.pulse} />
@@ -120,7 +120,7 @@ export function Compare({ currency, price, w = LANDING.compare }: { currency: Cu
   }));
   // A price cell (and "{c}0.03" per progression) at dashboard → Products' price, in the table and the phone cards alike.
   const cell = (v: (typeof rows)[number]["values"][number]) =>
-    typeof v === "string" ? restateEach(restate(v, funnel.price[currency], price), funnel.price[currency], price, 1000) : v;
+    typeof v === "string" ? restateEach(restate(v, priceIn(funnel.price, currency), price), priceIn(funnel.price, currency), price, 1000) : v;
   return (
     <div className={s.cmp}>
       <p className={s.eyebrow}>{w.eyebrow}</p>

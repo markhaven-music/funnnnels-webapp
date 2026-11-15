@@ -1,3 +1,4 @@
+import { priceIn, fromEuro } from "@/lib/geo";
 import { checkoutPages, getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS, type Step } from "@/lib/beacon";
@@ -143,7 +144,7 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
   const page = PAGES[offerId];
   const product = (await resolveFunnel(slug)) ?? getFunnel(slug);
   const offer = product?.offers?.find((o) => o.id === offerId);
-  const was = getFunnel(slug)?.offers?.find((o) => o.id === offerId)?.price[currency];
+  const was = priceIn(getFunnel(slug)?.offers?.find((o) => o.id === offerId)?.price, currency);
   if (!page || !offer || !product) return null;
 
   // With the texts and the layout (sections hidden or moved, pictures replaced) changed in the
@@ -154,11 +155,11 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
   const strings: Copy = { ...page.copy.en, ...page.copy[lang], ...edits };
   // "€0.08 per hit transcription" (Famous Beats, ÷ 320) and "€0.03 per chord progression" (TOP HITS, ÷ 1000) follow the price.
   const units = ({ "famous-beats": 320, "top-hits": 1000 } as Record<string, number>)[offerId];
-  const base = was ?? offer.price[currency];
-  const per = (t: string) => (units ? restateEach(t, base, offer.price[currency], units, lang) : t);
+  const base = was ?? priceIn(offer.price, currency);
+  const per = (t: string) => (units ? restateEach(t, base, priceIn(offer.price, currency), units, lang) : t);
   const said = (key: string) =>
-    typeof strings[key] === "string" ? per(restate(strings[key] as string, was ?? offer.price[currency], offer.price[currency], lang)) : "";
-  const dollars = (t: string) => (currency === "usd" ? t.replaceAll("€", "$") : t);
+    typeof strings[key] === "string" ? per(restate(strings[key] as string, was ?? priceIn(offer.price, currency), priceIn(offer.price, currency), lang)) : "";
+  const dollars = (t: string) => fromEuro(t, currency);
   const text = (key: string) => {
     let html = said(key);
     // Spanish writes "27 €"; its dollar visitors (Latin America) read "$27".
@@ -188,7 +189,7 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     for (const [from, to] of Object.entries(extra)) html = html.replaceAll(`placeholder="${from}"`, `placeholder="${to}"`).replaceAll(`aria-label="${from}"`, `aria-label="${to}"`);
   }
   html = html.replace(/<body[^>]*>/, (tag) => `${tag}<style>${HIDE_CF_BAR}</style>${stepsBar(product, offerId, lang)}`);
-  if (page.quickNo) html = quickChoice(html, UI[lang], priceTag(offer.price[currency], currency, lang), marks ? `<!--fx:${page.quickNo}-->${text(page.quickNo)}<!--/fx-->` : text(page.quickNo));
+  if (page.quickNo) html = quickChoice(html, UI[lang], priceTag(priceIn(offer.price, currency), currency, lang), marks ? `<!--fx:${page.quickNo}-->${text(page.quickNo)}<!--/fx-->` : text(page.quickNo));
   const video = page.videos[lang];
   if (video) html = html.replaceAll(page.wistia, video.id);
   const images = layout.images ?? {};
@@ -227,6 +228,8 @@ function quickChoice(html: string, ui: (typeof UI)[Lang], price: string, no: str
 function priceTag(amount: number, currency: Currency, lang: Lang): string {
   const n = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
   if (currency === "usd") return `$${n}`;
+  if (currency === "gbp") return `£${n}`;
+  if (currency === "chf") return lang === "en" ? `CHF\u00a0${n}` : `${n}\u00a0CHF`;
   return lang === "en" ? `€${n}` : `${n}\u00a0€`;
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { priceIn } from "@/lib/geo";
 import { CheckoutWidget } from "../jazz-midi-pack/CheckoutWidget";
 import type { Bump } from "@/lib/funnels";
 import { useClock, useUnitPrice } from "./LaunchClock";
@@ -32,7 +33,7 @@ export function KitCheckout({
       currency={currency}
       country={country}
       price={price}
-      bump={bump && { name: bump.name, price: bump.price[currency], pitch: bump.pitch, cover: splitName(bump.name) }}
+      bump={bump && { name: bump.name, price: priceIn(bump.price, currency), pitch: bump.pitch, cover: splitName(bump.name) }}
       thankYou={`/${slug}/thank-you`}
       publishableKey={publishableKey}
       deferStripe

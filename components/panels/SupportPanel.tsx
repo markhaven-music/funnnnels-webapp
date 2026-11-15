@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { SIGN, type Currency } from "@/lib/geo";
 import type { Conversation, SupportMessage, Thread } from "@/lib/support";
 import type { Overview } from "@/lib/supportOverview";
 import { I } from "@/components/icons";
@@ -24,7 +25,7 @@ function ago(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
-const money = (cents: number, currency: string) => `${currency === "eur" ? "€" : "$"}${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
+const money = (cents: number, currency: string) => `${SIGN[currency as Currency] ?? "$"}${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
 
 // The new part of an email, and the quoted history under it.
 function split(text: string): [string, string] {

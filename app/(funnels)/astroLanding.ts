@@ -1,4 +1,5 @@
 import type { Currency } from "@/lib/geo";
+import { fromEuro } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS } from "@/lib/beacon";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { AVAILABILITY_JS } from "@/lib/availability";
@@ -30,7 +31,8 @@ export function astroHtml(template: string, o: { funnel: string; orderPage: stri
   // A price changed in dashboard → Products: the new one, without the dollar
   // estimate made for €27 (list prices and per-unit figures stay as the page has them).
   if (o.price !== 27) html = textOnly(html, (t) => t.replace(/€27\b/g, `€${o.price}`).replace(/ \(about \$\d+\)/g, "").replace(/about \$\d+ · /g, ""));
-  if (o.currency === "usd") html = textOnly(html, dollars);
+  // Outside Europe's euro: "€27 (about $30)" → "$27" / "£27" / "CHF 27", every other euro sign likewise.
+  if (o.currency !== "eur") html = textOnly(html, (t) => fromEuro(t.replace(/(€\d+) \(about \$\d+\)/g, "$1").replace(/about \$\d+ · /g, ""), o.currency));
   return html;
 }
 
@@ -41,11 +43,3 @@ const textOnly = (html: string, fn: (text: string) => string) =>
     .map((part, i) => (i % 2 ? part : fn(part)))
     .join("");
 
-// "€27 (about $30)" → "$27", "about $30 · one payment" → "one payment", every
-// other euro sign (a list price, the per-groove price) → "$". The scripts
-// carry the currency in {{CUR}}.
-const dollars = (text: string) =>
-  text
-    .replace(/€(\d+) \(about \$\d+\)/g, "$$$1")
-    .replace(/about \$\d+ · /g, "")
-    .replaceAll("€", "$");

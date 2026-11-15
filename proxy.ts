@@ -189,7 +189,7 @@ export function proxy(request: NextRequest) {
     // page or the new one at the same address, 50/50, each visitor kept on theirs by a cookie; since 2026-11-12
     // evening everyone gets the new one (LP.live).
     const lp = loc.slug === "midi-drum-kit" && !loc.page && LP.langs.includes(loc.lang) ? landingVariant(request) : null;
-    url.pathname = `/${loc.slug}/${loc.lang}${loc.page ? `/${loc.page}` : ""}${lp?.variant === "lp-new" ? "/new" : ""}/${currencyFor(country)}`;
+    url.pathname = `/${loc.slug}/${loc.lang}${loc.page ? `/${loc.page}` : ""}${lp?.variant === "lp-new" ? "/new" : ""}/${currencyFor(country, true)}`;
     const res = NextResponse.rewrite(url);
     res.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax" });
     if (lp?.assign) res.cookies.set(LP.cookie, lp.variant, { path: "/", sameSite: "lax", maxAge: 15552000 });
@@ -214,7 +214,8 @@ export function proxy(request: NextRequest) {
     // pages at the same address, evenly, each visitor kept on theirs by a cookie. The dashboard's
     // editor always gets the page that was live before the test.
     const fbb = page === "/famous-beats-bundle" && !editing ? fbbVariant(request) : null;
-    url.pathname = `${page}${fbb ? FBB_LP.route[fbb.variant] : ""}/${currencyFor(country)}`;
+    // The code funnels show pounds and francs too; a launch kit (slug) keeps euros and dollars.
+    url.pathname = `${page}${fbb ? FBB_LP.route[fbb.variant] : ""}/${currencyFor(country, CURRENCY_PAGES.has(page) && page !== "/home")}`;
     const res = NextResponse.rewrite(url);
     res.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax" });
     if (fbb?.assign) res.cookies.set(FBB_LP.cookie, fbb.variant, { path: "/", sameSite: "lax", maxAge: 15552000 });

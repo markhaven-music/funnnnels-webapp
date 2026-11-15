@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Fragment, type CSSProperties, type ReactNode } from "react";
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, SIGN, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { fill } from "@/lib/words";
 import { Beacon } from "../../Beacon";
@@ -47,7 +47,6 @@ const HERO_BEATS = [
   { id: "20-2094pologmartinandgina", artist: "Polo G", song: "Martin And Gina", bpm: 94 },
 ];
 
-const SIGN = { eur: "€", usd: "$" } as const;
 const DIR = "/funnels/jazz-midi-pack";
 // Values as the Jazz page counts them (jazz-midi-pack/funnel.ts bonuses).
 const COVERS: Record<string, [string, string]> = {
@@ -73,7 +72,7 @@ const ORDER: Record<"jazz" | "v3", SectionName[]> = {
 export async function FamousBeatsLanding({ currency, variant }: { currency: Currency; variant: "jazz" | "v3" }) {
   if (!CURRENCIES.includes(currency)) notFound();
   // The price as dashboard → Products has it.
-  const amount = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency];
+  const amount = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency);
   const price = money(amount, currency);
   const t = (text: string) => fill(text, { price, c: SIGN[currency], email: funnel.support });
   const order = funnel.checkout.orderPage;

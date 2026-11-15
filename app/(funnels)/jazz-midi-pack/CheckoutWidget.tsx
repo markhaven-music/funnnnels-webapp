@@ -11,7 +11,7 @@ import b from "./btn.module.css";
 import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
 import { isPreview, readCookie, track } from "@/lib/beacon";
-import { cookieCountry } from "@/lib/geo";
+import { cookieCountry, SIGN, type Currency, fillSign } from "@/lib/geo";
 import { endJazzBonus, JazzBonusItem, useJazzBonus, type BonusCfg } from "./BonusClock";
 import { JAZZ_BONUS, JAZZ_BONUS_WORDS, type JazzBonusWords } from "./fiveMinBonus";
 import c from "./fiveMinBonus.module.css";
@@ -37,7 +37,7 @@ type Props = {
   tagline: string;
   // A small picture of the product next to its name in step 2 (optional).
   image?: string;
-  currency: "eur" | "usd";
+  currency: Currency;
   country: string;
   price: number;
   // The add-on; `cover` is the two lines on its little box (default: the Jazz Chord Pack's).
@@ -549,7 +549,7 @@ function PayStepBody({
 
 // One tick-box offer, as ClickFunnels draws it: its picture (or a drawn cover),
 // the red arrow until ticked, headline and price, then the pitch.
-function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: "eur" | "usd"; ticked: boolean; onTick: (on: boolean) => void }) {
+function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: Currency; ticked: boolean; onTick: (on: boolean) => void }) {
   const [lead, rest] = splitPitch(offer.pitch);
   return (
     <label className={s.bump}>
@@ -576,7 +576,7 @@ function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: "
         <span className={s.bumpPitch}>
           {offer.body.map((p, i) => (
             <span key={i} className={s.bumpPara}>
-              {i === 0 && <span className={s.bumpOffer}>ADD-ON OFFER:</span>} <Rich text={p.replaceAll("{c}", currency === "eur" ? "€" : "$")} />
+              {i === 0 && <span className={s.bumpOffer}>ADD-ON OFFER:</span>} <Rich text={fillSign(p, currency)} />
             </span>
           ))}
         </span>
@@ -601,9 +601,9 @@ function splitPitch(pitch: string): [string, string] {
   return at > 0 ? [pitch.slice(0, at + 1), pitch.slice(at + 1)] : [pitch, ""];
 }
 
-function money(amount: number, currency: "eur" | "usd") {
+function money(amount: number, currency: Currency) {
   const n = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
-  return currency === "eur" ? `€${n}` : `$${n}`;
+  return `${SIGN[currency]}${n}`;
 }
 
 // The add-on as a small cover, drawn in CSS like the main product box.

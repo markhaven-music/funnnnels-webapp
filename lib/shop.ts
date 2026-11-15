@@ -1,5 +1,5 @@
 import { revalidatePath } from "next/cache";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { toCents, type Money } from "@/lib/launch";
 import { BUCKET as FILES_BUCKET, filePath } from "@/lib/products";
 import { supabase } from "@/lib/supabase";
@@ -172,7 +172,7 @@ export async function priceCart(
   if (found.size !== slugs.length) return { error: "Something in your cart isn't for sale any more. Refresh the page and check your cart." };
   // In the order the buyer added them.
   const items = slugs.map((s) => found.get(s)!);
-  return { items, amount: items.reduce((sum, it) => sum + toCents(it.price[currency]), 0) };
+  return { items, amount: items.reduce((sum, it) => sum + toCents(priceIn(it.price, currency)), 0) };
 }
 
 export type ShopLabel = { name: string; image: ShopImage | null };
@@ -282,7 +282,7 @@ export function checkShopProduct(p: ShopProductInput, current: { file: string | 
     if (SHOP_PATHS.has(p.slug)) errors.push(`"${p.slug}" is taken by the shop's own pages. Pick another URL.`);
   }
   if (!p.name) errors.push("The product needs a name.");
-  if (p.price) for (const c of CURRENCIES) if (!(p.price[c] >= 0.5)) errors.push(`Shop ${c.toUpperCase()} price: 0.50 at least.`);
+  if (p.price) for (const c of CURRENCIES) if (!(priceIn(p.price, c) >= 0.5)) errors.push(`Shop ${c.toUpperCase()} price: 0.50 at least.`);
   if (p.status === "live" && !p.price) errors.push("Give it a shop price before you put it in the shop.");
   // A live product without its zip would take money and hand over nothing.
   if (p.status === "live" && !current?.file) errors.push("Upload the product's .zip before you put it in the shop.");

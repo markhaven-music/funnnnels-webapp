@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Fragment, type CSSProperties } from "react";
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, SIGN, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { fill, wordsFor } from "@/lib/words";
 import { Beacon } from "../../Beacon";
@@ -62,7 +62,6 @@ var q=new URLSearchParams(location.search),k=${JSON.stringify(CARRY)};
 for(var i=0;i<k.length;i++){var x=q.get(k[i]);if(x&&!u.searchParams.has(k[i]))u.searchParams.set(k[i],x);}
 a.setAttribute('href',u.pathname+u.search+u.hash);}catch(e){}},true);}catch(e){}})();`;
 
-const SIGN = { eur: "€", usd: "$" } as const;
 const JAZZ = "/funnels/jazz-midi-pack";
 // The bonuses' covers, as the Jazz and Famous Beats pages have them.
 const COVERS: Record<string, [string, string]> = {
@@ -82,7 +81,7 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
   // The page's words, with the dashboard's edits (funnel map → Edit).
   const w = await wordsFor(funnel.slug, "landing", LANDING, { strict: true });
   // The price as dashboard → Products has it.
-  const amount = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency];
+  const amount = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency);
   const price = money(amount, currency);
   // What one progression costs at that price (1,000 files).
   const per = `${SIGN[currency]}${(amount / funnel.counts.progressions).toFixed(2)}`;
@@ -92,12 +91,12 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
   // The launch (funnel.ts `launch`): while its price is the one in force the page says so, with
   // the clock to its end, and the bundle is worth its regular price in the value stack.
   const live = launchOn(amount, currency);
-  const regular = worth(launch.after[currency]);
+  const regular = worth(priceIn(launch.after, currency));
   const inner = live ? `${price} instead of ${regular} · instant download` : `${price} · instant download`;
   const bonusValue = w.bonuses.items.reduce((sum, b) => sum + b.value, 0);
   // What the bundle is worth before any discount: its regular price (2026-11-15, "27 value? should
   // be more... the sum of everything before any discount").
-  const bundleValue = live ? launch.after[currency] : amount;
+  const bundleValue = live ? priceIn(launch.after, currency) : amount;
   const total = bonusValue + bundleValue;
   const key = (className: string, label = w.cta.label, note?: string) => (
     <div className={className}>

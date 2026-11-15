@@ -3,7 +3,7 @@ import { cookies, headers } from "next/headers";
 import { BRAND } from "@/app/(funnels)/_kit/brand";
 import { isEmail } from "@/lib/contacts";
 import { isDryRun } from "@/lib/funnels";
-import { currencyFor, visitorCountry } from "@/lib/geo";
+import { currencyFor, visitorCountry, priceIn } from "@/lib/geo";
 import { money, toCents } from "@/lib/launch";
 import { cleanVisitorId } from "@/lib/neoIds";
 import { notePayPalOrder } from "@/lib/orders";
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
               sku: i.slug,
               quantity: "1",
               category: "DIGITAL_GOODS",
-              unit_amount: { currency_code: code, value: paypalValue(toCents(i.price[currency])) },
+              unit_amount: { currency_code: code, value: paypalValue(toCents(priceIn(i.price, currency))) },
             })),
           },
         ],

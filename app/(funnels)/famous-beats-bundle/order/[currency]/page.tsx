@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel, upsellsOn, type Bump } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, SIGN, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { restate } from "@/lib/restate";
 import { fill } from "@/lib/words";
@@ -31,8 +31,7 @@ export function generateStaticParams() {
   return CURRENCIES.map((currency) => ({ currency }));
 }
 
-const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
-const SIGN = { eur: "€", usd: "$" } as const;
+const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US", gbp: "GB", chf: "CH" };
 
 export const metadata: Metadata = {
   title: "Order · Famous Beats Bundle · GRIND STUDIO",
@@ -57,7 +56,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
   const f = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
-  const amount = f.price[currency];
+  const amount = priceIn(f.price, currency);
   const price = money(amount, currency);
   const t = (text: string) => fill(text, { price, c: SIGN[currency], email: funnel.support });
 
@@ -66,23 +65,23 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   const bumps = ORDER_BUMPS.flatMap((id) => {
     const b = live.find((x) => x.id === id) ?? code.find((x) => x.id === id);
     if (!b) return [];
-    const was = code.find((x) => x.id === id)?.price[currency] ?? b.price[currency];
+    const was = priceIn(code.find((x) => x.id === id)?.price, currency) ?? priceIn(b.price, currency);
     const copy = BUMP_COPY[id];
     const known = code.find((x) => x.id === id);
     return [
       {
         id: b.id,
         name: b.name,
-        price: b.price[currency],
+        price: priceIn(b.price, currency),
         pitch: b.pitch,
         image: known?.image ?? b.image,
-        ...(copy ? { headline: copy.headline, body: copy.body.map((p) => restate(p, was, b.price[currency])) } : {}),
+        ...(copy ? { headline: copy.headline, body: copy.body.map((p) => restate(p, was, priceIn(b.price, currency))) } : {}),
       },
     ];
   });
   // The add-on the 5-minute bonus gives (Products' price; the code's until it's there).
   const ex = FIVE_MIN_BONUS_ON ? (live.find((b) => b.id === FBB_BONUS.item) ?? code.find((b) => b.id === FBB_BONUS.item)) : undefined;
-  const fiveMinBonus = ex ? { price: ex.price[currency], cfg: FBB_BONUS, words: FBB_BONUS_WORDS } : undefined;
+  const fiveMinBonus = ex ? { price: priceIn(ex.price, currency), cfg: FBB_BONUS, words: FBB_BONUS_WORDS } : undefined;
 
   return (
     <main className={`${s.page} ${s.jazz} ${s.orderMain} ${display.variable}`}>

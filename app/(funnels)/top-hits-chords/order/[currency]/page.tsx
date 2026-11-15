@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel, upsellsOn, type Bump } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, SIGN, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { restate } from "@/lib/restate";
 import { fill, wordsFor } from "@/lib/words";
@@ -31,8 +31,7 @@ export function generateStaticParams() {
   return CURRENCIES.map((currency) => ({ currency }));
 }
 
-const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
-const SIGN = { eur: "€", usd: "$" } as const;
+const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US", gbp: "GB", chf: "CH" };
 const DIR = "/funnels/top-hits-midi-bundle";
 
 export const metadata: Metadata = {
@@ -63,12 +62,12 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   const w = await wordsFor(funnel.slug, "order", ORDER, { strict: true });
   const landing = await wordsFor(funnel.slug, "landing", LANDING, { strict: true });
   const f = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
-  const amount = f.price[currency];
+  const amount = priceIn(f.price, currency);
   const price = money(amount, currency);
   // The launch price in force (funnel.ts): the bar's clock, and the total before any discount
   // (the bundle at its regular price + the bonuses' values) beside today's price.
   const onLaunch = launchOn(amount, currency);
-  const totalValue = (onLaunch ? launch.after[currency] : amount) + landing.bonuses.items.reduce((sum, b) => sum + b.value, 0);
+  const totalValue = (onLaunch ? priceIn(launch.after, currency) : amount) + landing.bonuses.items.reduce((sum, b) => sum + b.value, 0);
   const t = (text: string) => fill(text, { price, c: SIGN[currency], email: funnel.support });
 
   const live = f.bumps ?? [];
@@ -77,22 +76,22 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     const b = live.find((x) => x.id === id) ?? code.find((x) => x.id === id);
     if (!b) return [];
     const known = code.find((x) => x.id === id);
-    const was = known?.price[currency] ?? b.price[currency];
+    const was = priceIn(known?.price, currency) ?? priceIn(b.price, currency);
     const copy = BUMP_COPY[id];
     return [
       {
         id: b.id,
         name: b.name,
-        price: b.price[currency],
+        price: priceIn(b.price, currency),
         pitch: b.pitch,
         image: known?.image ?? b.image,
-        ...(copy ? { headline: copy.headline, body: copy.body.map((p) => restate(p, was, b.price[currency])) } : {}),
+        ...(copy ? { headline: copy.headline, body: copy.body.map((p) => restate(p, was, priceIn(b.price, currency))) } : {}),
       },
     ];
   });
   // The add-on the 5-minute bonus gives (Products' price; the code's until it's there).
   const ex = FIVE_MIN_BONUS_ON ? (live.find((b) => b.id === TH_BONUS.item) ?? code.find((b) => b.id === TH_BONUS.item)) : undefined;
-  const fiveMinBonus = ex ? { price: ex.price[currency], cfg: TH_BONUS, words: TH_BONUS_WORDS } : undefined;
+  const fiveMinBonus = ex ? { price: priceIn(ex.price, currency), cfg: TH_BONUS, words: TH_BONUS_WORDS } : undefined;
 
   return (
     <main className={`${s.page} ${s.jazz} ${s.orderMain} ${display.variable}`}>
@@ -103,7 +102,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       <div className={s.bfbar} style={{ textWrap: "balance" } as CSSProperties}>
         {onLaunch ? (
           <>
-            <b>LAUNCH PRICE:</b> {price} instead of {money(launch.after[currency], currency)} · ends in <Clock ends={launch.ends} />
+            <b>LAUNCH PRICE:</b> {price} instead of {money(priceIn(launch.after, currency), currency)} · ends in <Clock ends={launch.ends} />
           </>
         ) : (
           <>

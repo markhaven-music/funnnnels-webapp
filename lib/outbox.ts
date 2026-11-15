@@ -1,3 +1,4 @@
+import { priceIn, isCurrency } from "@/lib/geo";
 import { ABANDON_SERIES_FUNNELS, abandonSeries, statedPrice } from "@/lib/abandonCopy";
 import { purchasesOf, shelfOf } from "@/lib/account";
 import { backupCopy } from "@/lib/backupCopy";
@@ -118,7 +119,7 @@ type OrderRow = {
   funnel: string;
   items: string[];
   amount_cents: number;
-  currency: "eur" | "usd";
+  currency: Currency;
   email: string | null;
   name: string | null;
   lang: string;
@@ -349,8 +350,8 @@ async function reminders(run: Run) {
     if (series) {
       const m = series[sent];
       // The price they saw at checkout; before the currency was saved, English is dollars, the others euros.
-      const currency: Currency = row.currency === "eur" || row.currency === "usd" ? row.currency : row.lang && row.lang !== "en" ? "eur" : "usd";
-      const price = statedPrice(f.price[currency], currency, row.lang);
+      const currency: Currency = isCurrency(row.currency) ? row.currency : row.lang && row.lang !== "en" ? "eur" : "usd";
+      const price = statedPrice(priceIn(f.price, currency), currency, row.lang);
       email = letter({ to: { email: row.email, name: row.name }, subject: m.subject(first), preheader: m.preheader, body: m.body({ name: first, url, price }), lang: row.lang, track: { kind: "reminder", ref } });
     } else {
       const c = mailCopy(row.lang).reminder;

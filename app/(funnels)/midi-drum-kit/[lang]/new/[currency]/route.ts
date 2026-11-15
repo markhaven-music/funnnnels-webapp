@@ -1,5 +1,5 @@
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { funnel } from "../../../funnel";
 import { isLang } from "../../../i18n";
 import { landingHtml } from "../../../landing";
@@ -22,7 +22,7 @@ export function generateStaticParams() {
 export async function GET(_req: Request, { params }: { params: Promise<{ lang: string; currency: string }> }) {
   const { lang, currency } = await params;
   if (!isLang(lang) || !LP.langs.includes(lang) || !CURRENCIES.includes(currency as Currency)) return new Response("Not found", { status: 404 });
-  const price = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency as Currency];
+  const price = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency as Currency);
   const [edits, layouts] = await Promise.all([pageEdits(funnel.slug, lang, true), pageLayouts(funnel.slug, lang, true)]);
   return new Response(landingHtml(lang, currency as Currency, price, edits, false, layouts.landing ?? {}, "lp-new"), {
     headers: { "content-type": "text/html; charset=utf-8" },

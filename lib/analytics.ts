@@ -1,3 +1,4 @@
+import { isCurrency } from "@/lib/geo";
 import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
 import { ORDER_STACK } from "@/app/(funnels)/midi-drum-kit/stackSwitch";
@@ -68,7 +69,7 @@ export async function recordPayPalSale(order: PayPalOrder, lang: string) {
     }
   })();
   const currency = capture.amount.currency_code.toLowerCase();
-  if (typeof meta.f !== "string" || (currency !== "eur" && currency !== "usd")) return;
+  if (typeof meta.f !== "string" || !isCurrency(currency)) return;
   const { error } = await supabase()
     .from("paypal_sales")
     .upsert(
@@ -455,14 +456,17 @@ async function stripeSales(slug: string): Promise<Sale[]> {
       ...(page ? { page } : {}),
     });
     for (const pi of res.data) {
+      // A sale in pounds or francs: Stripe's own conversion, in euros (the account's currency), when it has made it.
+      const bt = pi.latest_charge && typeof pi.latest_charge !== "string" ? pi.latest_charge.balance_transaction : null;
+      const converted = (pi.currency === "gbp" || pi.currency === "chf") && bt && typeof bt !== "string" && bt.currency === "eur";
       out.push({
         funnel: slug,
         lang: pi.metadata.lang || "?",
         variant: pi.metadata.variant || "",
         offer: pi.metadata.offer || "",
-        amount: pi.amount_received / 100,
-        fee: stripeFee(pi),
-        currency: pi.currency,
+        amount: converted ? bt.amount / 100 : pi.amount_received / 100,
+        fee: converted ? bt.fee / 100 : stripeFee(pi),
+        currency: converted ? "eur" : pi.currency,
         created: pi.created * 1000,
         bonus: !!pi.metadata.bonus,
         bonusStart: Number(pi.metadata.bonus_start) || null,
@@ -524,6 +528,25 @@ async function fillPayPalFees(rows: { order_id: string; fee_cents: number | null
       }
     }),
   );
+}
+
+/** GBP and CHF → EUR from the ECB's daily rate (cached a day); rough fixed rates if it's down. */
+export async function eurPer(): Promise<Record<"gbp" | "chf", number>> {
+  try {
+    const res = await fetch("https://api.frankfurter.app/latest?from=EUR&to=GBP,CHF", { next: { revalidate: 86400 } });
+    const rates = (await res.json())?.rates;
+    if (rates?.GBP > 0 && rates?.CHF > 0) return { gbp: 1 / rates.GBP, chf: 1 / rates.CHF };
+  } catch {
+    // fall through
+  }
+  return { gbp: 1.19, chf: 1.07 };
+}
+
+/** A sale in pounds or francs, as euros (Analytics keeps two columns, € and $). */
+export function inEuros<T extends { amount: number; fee: number | null; currency: string }>(s: T, fx: Record<"gbp" | "chf", number>): T {
+  if (s.currency !== "gbp" && s.currency !== "chf") return s;
+  const k = fx[s.currency];
+  return { ...s, amount: Math.round(s.amount * k * 100) / 100, fee: s.fee === null ? null : Math.round(s.fee * k * 100) / 100, currency: "eur" };
 }
 
 /** USD → EUR from the ECB's daily rate (free, cached a day); a rough fixed rate if it's down. */
@@ -593,7 +616,9 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
     soft("PayPal orders", paypalSales(), []),
     ...list.map((f) => (hasStripe ? soft(`Stripe orders (${f.slug})`, stripeSales(f.slug), []) : Promise.resolve([] as Sale[]))),
   ]);
-  const allSales = [...paypal, ...stripeLists.flat()];
+  // Pounds and francs (the funnels since 2026-11-16) are counted in the euro column, converted (inEuros).
+  const fx = await eurPer();
+  const allSales = [...paypal, ...stripeLists.flat()].map((s) => inEuros(s, fx));
   // The visits per day since the first test that runs on days rather than letters (TestDef.windows).
   const firstWindow = TESTS.flatMap((t) => Object.values(t.windows ?? {}).map((w) => w.days[0])).sort()[0];
   const windowDays = firstWindow ? await soft("visitors per day (tests)", viewDays(firstWindow), []) : [];
@@ -852,7 +877,7 @@ export const TESTS: TestDef[] = [
     name: "Price: 27 vs 37",
     question: "Does the Jazz MIDI Pack bring in more money per visitor at 37 than at 27? It does while it loses fewer than 27 % of the orders.",
     live: { p37: "https://m.thegrind.studio/jazz-midi-pack/order?preview=1" },
-    where: `Landing and order page, € and $ alike · 27 = six bonuses, 11-11 → 11-15 (after the 5-minute bonus ended) · 37 = the same pages with the Jazz Record Samples (122 WAV loops, until then a €7 add-on) as a seventh bonus, ${PRICE_37.afterFrom.slice(0, 10)} → today (live since 11-15 23:28 Italy) · the Black Friday bar is on both · since 11-16 00:00 Italy the order page also offers the MIDI Drum Kit Expansions as a 7 add-on (37 only) · as another funnel's upsell the pack is still 27`,
+    where: `Landing and order page, € and $ alike · 27 = six bonuses, 11-11 → 11-15 (after the 5-minute bonus ended) · 37 = the same pages with the Jazz Record Samples (122 WAV loops, until then a €7 add-on) as a seventh bonus, ${PRICE_37.afterFrom.slice(0, 10)} → today (live since 11-15 23:28 Italy) · the Black Friday bar is on both · since 11-16 00:00 Italy the order page also offers the MIDI Drum Kit Expansions as a 7 add-on (37 only) · since 11-16 ~01:00 Italy UK visitors pay £37 and Swiss CHF 37 (they paid €37 before; their sales count in euros) · as another funnel's upsell the pack is still 27`,
     variants: ["p27", "p37"],
     label: (v) => (v === "p27" ? "27 · six bonuses" : "37 · seven bonuses"),
     color: (v) => (v === "p27" ? { from: "#94a3b8", to: "#64748b" } : { from: "#34d399", to: "#059669" }),

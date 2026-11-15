@@ -10,6 +10,7 @@
 //   early     (cartOpenAt → earlyBirdEndAt)  checkout open at the early-bird price
 //   open      (earlyBirdEndAt → …)    full price, the page stays up as an evergreen funnel
 
+import { priceIn, SIGN } from "@/lib/geo";
 import type { Currency } from "@/lib/geo";
 
 export type Money = { eur: number; usd: number }; // currency units, e.g. 27 or 19.5
@@ -49,12 +50,12 @@ export function nextBoundary(launch: Launch | null | undefined, now: number): nu
 
 /** The product's price at `now`: early-bird during the early phase, full otherwise. */
 export function unitPrice(price: Money, launch: Launch | null | undefined, currency: Currency, now: number): number {
-  return phaseAt(launch, now) === "early" && launch ? launch.early[currency] : price[currency];
+  return phaseAt(launch, now) === "early" && launch ? priceIn(launch.early, currency) : priceIn(price, currency);
 }
 
 export function money(amount: number, currency: Currency): string {
   const n = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
-  return currency === "eur" ? `€${n}` : `$${n}`;
+  return `${SIGN[currency]}${n}`;
 }
 
 export const toCents = (units: number) => Math.round(units * 100);

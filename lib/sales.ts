@@ -1,3 +1,4 @@
+import type { Currency } from "@/lib/geo";
 import { productsOfOrders, ownsTags } from "@/lib/catalog";
 import { upsertContact } from "@/lib/contacts";
 import { resolveFunnel } from "@/lib/funnels";
@@ -95,7 +96,7 @@ export type OrderRow = {
   funnel: string;
   items: string[];
   amountCents: number;
-  currency: "eur" | "usd";
+  currency: Currency;
   email: string | null;
   name: string | null;
   country: string | null;

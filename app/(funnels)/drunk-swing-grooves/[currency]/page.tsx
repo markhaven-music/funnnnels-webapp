@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { fill, wordsFor } from "@/lib/words";
 import { Beacon } from "../../Beacon";
@@ -51,7 +51,7 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
   // The price as dashboard → Products has it; saving there revalidates the page.
-  const price = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency];
+  const price = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency);
   const w = await wordsFor(funnel.slug, "landing", LANDING, { strict: true });
   const note = fill(w.cta.note, { price: money(price, currency) });
   const cta = <Cta label={w.cta.label} note={note} href={funnel.checkout.orderPage} className={s.cta} />;

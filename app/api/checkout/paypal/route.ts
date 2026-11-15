@@ -41,7 +41,8 @@ export async function POST(req: Request) {
   const bonus = orderBonus(f, body, bonusName ? (await cookies()).get(bonusName)?.value : undefined, bumps);
   if (bonus.expired) return NextResponse.json({ error: bonus.expired, bonusExpired: true }, { status: 409 });
   const country = visitorCountry(await headers(), body.country);
-  const currency = currencyFor(country);
+  // The code funnels charge pounds and francs too (lib/geo.ts); a launch kit euros or dollars, as its page showed.
+  const currency = currencyFor(country, f.kind === "code");
   const origin = returnOrigin(body.origin);
   // The buyer's language, for the pages PayPal sends them back to and its own page.
   const pages = checkoutPages(f, body.lang);

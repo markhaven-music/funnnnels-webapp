@@ -42,7 +42,8 @@ export async function POST(req: Request) {
   const bonusStart = bonusName ? readStart(bonusCookie) : null;
   if (bonus.expired) return NextResponse.json({ error: bonus.expired, bonusExpired: true }, { status: 409 });
   const country = visitorCountry(await headers(), body.country);
-  const currency = currencyFor(country);
+  // The code funnels charge pounds and francs too (lib/geo.ts); a launch kit euros or dollars, as its page showed.
+  const currency = currencyFor(country, f.kind === "code");
   const name = [body.firstName, body.lastName]
     .map((v) => String(v ?? "").trim())
     .filter(Boolean)

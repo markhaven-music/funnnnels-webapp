@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { getPublishedBlocks } from "@/lib/pages";
 import { funnel } from "../funnel";
@@ -31,7 +31,7 @@ export function generateStaticParams() {
 
 // The country the checkout reports when the browser has no visitor_country
 // cookie (proxy.ts sets it): one that maps to the page's currency.
-const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
+const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US", gbp: "GB", chf: "CH" };
 
 export const metadata: Metadata = {
   title: "Jazz MIDI Pack · GRIND STUDIO",
@@ -55,7 +55,7 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
   // Its price as dashboard → Products has it.
-  const amount = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency];
+  const amount = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency);
   const price = money(amount, currency);
   // strict: a failed read keeps the last good page in the cache instead of
   // caching the coded defaults over the published copy.

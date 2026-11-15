@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Instrument_Serif } from "next/font/google";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { getPublishedBlocks } from "@/lib/pages";
 import { getKitProduct } from "@/lib/products";
 import { DEFAULT_KIT_SECTIONS, WAITLIST_ONLY, isKitSection, type KitSection } from "../../_kit/content";
@@ -39,7 +39,7 @@ export function generateStaticParams() {
   return [];
 }
 
-const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
+const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US", gbp: "GB", chf: "CH" };
 
 type Params = { slug: string; currency: string };
 
@@ -83,7 +83,7 @@ export default async function KitProductPage({ params }: { params: Promise<Param
   return (
     <main className={`${s.page} ${serif.variable}`}>
       <LaunchClock launch={product.launch} price={product.price} currency={currency} renderedAt={Date.now()}>
-        <KitTracking product={product.product} value={product.price[currency]} currency={currency} />
+        <KitTracking product={product.product} value={priceIn(product.price, currency)} currency={currency} />
         <Beacon funnel={product.slug} page="landing" />
         <EarlyBirdBar />
         {sections.map((section) => (

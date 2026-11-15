@@ -1,3 +1,4 @@
+import { roughEuros } from "@/lib/geo";
 import { usdToEur } from "@/lib/analytics";
 import { addDays, dayIn, startOfDay } from "@/lib/tz";
 import { rangeDays, type Range } from "@/lib/range";
@@ -13,7 +14,7 @@ import { supabase } from "@/lib/supabase";
 type Attribution = {
   order_id: string;
   amount_cents: number;
-  currency: "eur" | "usd";
+  currency: string;
   offer: string | null;
   created_at: string;
   kind: EmailKind | null;
@@ -30,9 +31,10 @@ function addSale(t: Tally, a: Attribution, rate: number) {
   const amount = a.amount_cents / 100;
   if (a.offer) t.upsells += 1;
   else t.orders += 1;
+  // Pounds and francs go in the euro column, roughly converted (lib/geo.ts).
   if (a.currency === "usd") t.usd += amount;
-  else t.eur += amount;
-  t.revenue += a.currency === "usd" ? amount * rate : amount;
+  else t.eur += roughEuros(amount, a.currency);
+  t.revenue += a.currency === "usd" ? amount * rate : roughEuros(amount, a.currency);
 }
 
 function merge(into: Counts, c: Counts) {

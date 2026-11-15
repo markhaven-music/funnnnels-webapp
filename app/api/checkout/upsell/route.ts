@@ -1,3 +1,4 @@
+import { isCurrency, priceIn, type Currency } from "@/lib/geo";
 import { after, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
@@ -40,8 +41,9 @@ export async function POST(req: Request) {
     if (product && owned.has(product)) return NextResponse.json({ status: "owned" });
   }
   const lang = checkoutPages(f, body.lang).lang ?? "en";
-  const currency = parent.currency as "eur" | "usd";
-  const amount = toCents(offer.price[currency]);
+  // The order's own currency (£ and CHF read the euro price list, lib/geo.ts).
+  const currency: Currency = isCurrency(parent.currency) ? parent.currency : "usd";
+  const amount = toCents(priceIn(offer.price, currency));
   const bought = (Array.isArray(body.bought) ? body.bought : []).filter((id: unknown) => typeof id === "string" && /^[A-Za-z0-9_]{6,40}$/.test(id));
 
   if (parent.provider === "stripe") {

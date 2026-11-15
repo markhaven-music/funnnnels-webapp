@@ -1,3 +1,4 @@
+import { isCurrency, priceIn } from "@/lib/geo";
 import type Stripe from "stripe";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { isPayPalOrderId, paypal, paypalConfigured, paypalValue, type PayPalOrder } from "@/lib/paypal";
@@ -98,7 +99,7 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
     if (meta.f !== funnelSlug) return null;
 
     const currency = unit.amount.currency_code.toLowerCase();
-    if (currency !== "eur" && currency !== "usd") return null;
+    if (!isCurrency(currency)) return null;
     let items: string[];
     let offer: string | null;
     if (made) {
@@ -118,7 +119,7 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
       const ids = up ? [] : String(meta.b ?? "").split(",");
       const bumps = offeredBumps(f).filter((b) => ids.includes(b.id));
       // Only hand over files the amount actually paid for (at the early-bird or the full price).
-      const paid = up ? [toCents(up.price[currency])] : possibleAmounts(f, currency, bumps);
+      const paid = up ? [toCents(priceIn(up.price, currency))] : possibleAmounts(f, currency, bumps);
       if (!paid.some((a) => paypalValue(a) === unit.amount.value)) return null;
       items = up ? [up.id] : ["pack", ...bumps.map((b) => b.id)];
       offer = up?.id ?? null;

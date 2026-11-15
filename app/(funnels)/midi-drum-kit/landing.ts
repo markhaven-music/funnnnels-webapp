@@ -1,3 +1,4 @@
+import { priceIn, fromEuro } from "@/lib/geo";
 import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS } from "@/lib/beacon";
 import { AVAILABILITY_JS } from "@/lib/availability";
@@ -147,13 +148,13 @@ const TEMPLATE6 = sixBonuses(TEMPLATE);
 // layout: the page's sections hidden or moved, its pictures replaced and its
 // button colour, as edited in the dashboard (lib/pageLayout.ts, lib/cfSections.ts).
 // variant: the landing test's page (./landingTest.ts); "lp-new" is the new one (./landingNew.ts).
-export function landingHtml(lang: Lang, currency: Currency, price: number = funnel.price[currency], edits: PageEdits = {}, marks = false, layout: Layout = {}, variant: LpVariant = "lp-old"): string {
+export function landingHtml(lang: Lang, currency: Currency, price: number = priceIn(funnel.price, currency), edits: PageEdits = {}, marks = false, layout: Layout = {}, variant: LpVariant = "lp-old"): string {
   const strings = { ...STRINGS.en, ...STRINGS[lang], ...markupEdits(edits, "landing") };
   const words = (key: string) => {
-    let html = mapText(strings[key] ?? "", (t) => restate(t, funnel.price[currency], price, lang));
+    let html = mapText(strings[key] ?? "", (t) => restate(t, priceIn(funnel.price, currency), price, lang));
     if (lang === "es" || lang === "de" || lang === "it") html = mapText(html, unitSpaces);
     if (lang === "es" && currency === "usd") html = mapText(html, dollarFirst);
-    if (currency === "usd") html = mapText(html, (t) => t.replaceAll("€", "$"));
+    if (currency !== "eur") html = mapText(html, (t) => fromEuro(t, currency));
     if (lang === "fr") html = mapText(html, frenchSpaces);
     if (lang === "de" || lang === "it") html = mapText(html, dragDropTogether);
     return html;

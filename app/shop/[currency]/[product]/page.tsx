@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { preconnect, preload } from "react-dom";
 import { BRAND } from "@/app/(funnels)/_kit/brand";
 import { Beacon } from "@/app/(funnels)/Beacon";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { SHOP_SLUG, descriptionBlocks, liveProduct, liveProducts } from "@/lib/shop";
 import { Cover, ProductCard, ShopFrame } from "../../ShopFrame";
@@ -46,7 +46,7 @@ export default async function ShopProductPage({ params }: { params: Promise<Para
     if (/^https?:/.test(p.image.lg)) preconnect(new URL(p.image.lg).origin);
     preload(p.image.lg, { as: "image", fetchPriority: "high", imageSrcSet: `${p.image.sm} 600w, ${p.image.lg} 1200w`, imageSizes: HERO_SIZES });
   }
-  const price = p.price[currency];
+  const price = priceIn(p.price, currency);
 
   return (
     <ShopFrame>

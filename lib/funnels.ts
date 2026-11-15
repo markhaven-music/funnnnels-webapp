@@ -1,3 +1,4 @@
+import { priceIn } from "@/lib/geo";
 import { funnel as jazz } from "@/app/(funnels)/jazz-midi-pack/funnel";
 import { funnel as famousBeats } from "@/app/(funnels)/famous-beats-bundle/funnel";
 import { funnel as drunkGrooves } from "@/app/(funnels)/drunk-swing-grooves/funnel";
@@ -299,7 +300,7 @@ const addOns = (f: Product, bump: boolean | readonly Bump[]): readonly Bump[] =>
   typeof bump === "boolean" ? (bump && f.bump ? [f.bump] : []) : bump;
 
 const addOnTotal = (f: Product, currency: Currency, bump: boolean | readonly Bump[]) =>
-  addOns(f, bump).reduce((sum, b) => sum + b.price[currency], 0);
+  addOns(f, bump).reduce((sum, b) => sum + priceIn(b.price, currency), 0);
 
 /** Order total in the smallest currency unit (cents), at the price in force at `now`. */
 export function orderAmount(f: Product, currency: Currency, bump: boolean | readonly Bump[], now = Date.now()): number {
@@ -309,7 +310,7 @@ export function orderAmount(f: Product, currency: Currency, bump: boolean | read
 /** Every total this product could have been sold at (early-bird and full), for checking a paid order. */
 export function possibleAmounts(f: Product, currency: Currency, bump: boolean | readonly Bump[]): number[] {
   const extra = addOnTotal(f, currency, bump);
-  const prices = [f.price[currency], ...(f.launch ? [f.launch.early[currency]] : [])];
+  const prices = [priceIn(f.price, currency), ...(f.launch ? [priceIn(f.launch.early, currency)] : [])];
   return prices.map((p) => toCents(p + extra));
 }
 

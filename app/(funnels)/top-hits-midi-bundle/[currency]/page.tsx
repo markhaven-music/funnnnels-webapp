@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFunnel, resolveFunnel } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { wordsFor } from "@/lib/words";
 import { funnel } from "../funnel";
 import { fontVars } from "../fonts";
@@ -43,7 +43,7 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
   // The bundle's price as dashboard → Products has it; saving there revalidates the page.
-  const price = ((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price[currency];
+  const price = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency);
   const w = await wordsFor(funnel.slug, "landing", LANDING, { strict: true });
 
   return (

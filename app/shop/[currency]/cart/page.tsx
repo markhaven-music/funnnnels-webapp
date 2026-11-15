@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BRAND } from "@/app/(funnels)/_kit/brand";
 import { Beacon } from "@/app/(funnels)/Beacon";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { SHOP_SLUG, liveProducts } from "@/lib/shop";
 import { ShopFrame } from "../../ShopFrame";
 import { CartView, type CartLine } from "../../CartView";
@@ -22,7 +22,7 @@ export function generateStaticParams() {
 
 export const metadata: Metadata = { title: `Your cart · ${BRAND.name}`, robots: { index: false, follow: false } };
 
-const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US" };
+const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US", gbp: "GB", chf: "CH" };
 
 export default async function CartPage({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
@@ -30,7 +30,7 @@ export default async function CartPage({ params }: { params: Promise<{ currency:
   const catalog: CartLine[] = (await liveProducts()).map((p) => ({
     slug: p.slug,
     name: p.name,
-    price: p.price[currency],
+    price: priceIn(p.price, currency),
     image: p.image?.sm ?? null,
   }));
 

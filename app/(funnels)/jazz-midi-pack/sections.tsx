@@ -10,6 +10,7 @@ import { PlayableRoll, Svg } from "./PlayableRoll";
 import rolls from "./rolls.json";
 import folderRolls from "./folder-rolls.json";
 import type { Roll } from "./piano";
+import type { Currency } from "@/lib/geo";
 import r from "./roll.module.css";
 import { SoundPicker } from "./SoundPicker";
 import rv from "./reviews.module.css";
@@ -28,7 +29,7 @@ import e from "./edit.module.css";
 export type Ctx = {
   price: string; // "€27"
   amount: number;
-  currency: "eur" | "usd";
+  currency: Currency;
   country: string;
   publishableKey: string | null;
   editing?: boolean;
