@@ -15,6 +15,7 @@ import t from "../../top-hits-midi-bundle/thank-you/thanks.module.css";
 import { Beacon } from "../../Beacon";
 import { Clarity } from "../../Clarity";
 import { funnel, unlocked } from "../funnel";
+import { FBB_LP } from "../landingTest";
 
 // TOP HITS' thank-you page (../../top-hits-midi-bundle/thank-you) for this bundle.
 
@@ -79,7 +80,7 @@ export default async function ThankYou({
 
   return (
     <main className={`${s.page} ${fontVars}`}>
-      <Beacon funnel={funnel.slug} page="thank-you" />
+      <Beacon funnel={funnel.slug} page="thank-you" abCookie={FBB_LP.cookie} />
       <Clarity purchase={paid && !!order} />
       {paid && order && <PurchasePixel orderId={order.id} value={order.amount} currency={order.currency} product={funnel.product} />}
       {upsells.map((up) => (

@@ -4,6 +4,11 @@ import { beaconScript, PREVIEW_JS, type Step } from "@/lib/beacon";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { restate, restateEach } from "@/lib/restate";
 import { LP } from "./landingTest";
+import { FBB_LP } from "../famous-beats-bundle/landingTest";
+
+// The cookie with the landing-test page of the funnel this upsell sells for: the Famous Beats
+// Bundle runs its own test (../famous-beats-bundle/landingTest.ts), the others carry the Drum Kit's.
+const abCookieOf = (slug: string) => (slug === "famous-beats-bundle" ? FBB_LP.cookie : LP.cookie);
 import { TEMPLATE as FAMOUS } from "./cf/upsell-famous";
 import { TEMPLATE as TOP_HITS } from "./cf/upsell-tophits";
 import famousDe from "./copy/upsell-famous/de.json";
@@ -172,7 +177,7 @@ export async function upsellHtml(offerId: string, lang: Lang, currency: Currency
     .replace("{{LANG}}", lang)
     .replace("{{TITLE}}", escapeAttr(page.title))
     .replace("{{DESCRIPTION}}", escapeAttr(page.title))
-    .replace("{{HEAD}}", `<script>${ORIGIN_BOUNCE_JS}</script>\n<style>${FIXES}</style>\n<script>${beaconScript({ funnel: slug, page: beaconStep(product, offerId, page.beacon), lang, abCookie: LP.cookie })}</script>\n${headScripts()}`)
+    .replace("{{HEAD}}", `<script>${ORIGIN_BOUNCE_JS}</script>\n<style>${FIXES}</style>\n<script>${beaconScript({ funnel: slug, page: beaconStep(product, offerId, page.beacon), lang, abCookie: abCookieOf(slug) })}</script>\n${headScripts()}`)
     .replace("{{BODY}}", script(slug, offerId, lang, nextStep(product, lang, offerId)));
 
   // Words outside the tagged texts: the "reserved for" timer, the progress
@@ -330,7 +335,7 @@ export function headScripts(): string {
 
 /** The buttons, the "reserved for" countdown (also on ./[lang]/jazz-offer: its links with data-oto). */
 export function script(slug: string, offerId: string, lang: Lang, next: string): string {
-  const cfg = JSON.stringify({ funnel: slug, offer: offerId, lang, next, ui: UI[lang], ab: LP.cookie });
+  const cfg = JSON.stringify({ funnel: slug, offer: offerId, lang, next, ui: UI[lang], ab: abCookieOf(slug) });
   return `<script>
 (function () {
   var C = ${cfg};

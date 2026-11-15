@@ -3,6 +3,7 @@ import { COUNTRY_COOKIE, currencyFor, visitorCountry } from "@/lib/geo";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { isLp, LP, type LpVariant } from "@/app/(funnels)/midi-drum-kit/landingTest";
+import { FBB_LP, isFbbLp, type FbbLp } from "@/app/(funnels)/famous-beats-bundle/landingTest";
 import { isLive } from "@/app/blog/schedule";
 import { CF_PATHS as FREE_PAGES, CF_REDIRECTS as FREE_REDIRECTS } from "@/app/free/packs";
 
@@ -209,9 +210,14 @@ export function proxy(request: NextRequest) {
   if (CURRENCY_PAGES.has(page) || (slug && page === `/${slug}`)) {
     const country = visitorCountry(request.headers, request.nextUrl.searchParams.get("country"));
     const url = request.nextUrl.clone();
-    url.pathname = `${page}/${currencyFor(country)}`;
+    // The Famous Beats landing test (app/(funnels)/famous-beats-bundle/landingTest.ts): one of its
+    // pages at the same address, evenly, each visitor kept on theirs by a cookie. The dashboard's
+    // editor always gets the page that was live before the test.
+    const fbb = page === "/famous-beats-bundle" && !editing ? fbbVariant(request) : null;
+    url.pathname = `${page}${fbb ? FBB_LP.route[fbb.variant] : ""}/${currencyFor(country)}`;
     const res = NextResponse.rewrite(url);
     res.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax" });
+    if (fbb?.assign) res.cookies.set(FBB_LP.cookie, fbb.variant, { path: "/", sameSite: "lax", maxAge: 15552000 });
     return res;
   }
 
@@ -236,6 +242,15 @@ function landingVariant(request: NextRequest): { variant: LpVariant; assign: boo
   if (LP.live) return { variant: LP.live, assign: kept !== LP.live };
   if (isLp(kept)) return { variant: kept, assign: false };
   return { variant: Math.random() < 0.5 ? "lp-old" : "lp-new", assign: true };
+}
+
+/** The same for the Famous Beats landing: ?lp=old|jazz|… is a look, else the cookie's page, else one at random, kept. */
+function fbbVariant(request: NextRequest): { variant: FbbLp; assign: boolean } {
+  const asked = `fbb-${request.nextUrl.searchParams.get("lp")}`;
+  if (isFbbLp(asked)) return { variant: asked, assign: false };
+  const kept = request.cookies.get(FBB_LP.cookie)?.value;
+  if (isFbbLp(kept)) return { variant: kept, assign: false };
+  return { variant: FBB_LP.variants[Math.floor(Math.random() * FBB_LP.variants.length)], assign: true };
 }
 
 const challenge = () =>

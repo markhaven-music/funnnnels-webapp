@@ -2,6 +2,7 @@ import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
 import { ORDER_STACK } from "@/app/(funnels)/midi-drum-kit/stackSwitch";
 import { LP } from "@/app/(funnels)/midi-drum-kit/landingTest";
+import { FBB_LP } from "@/app/(funnels)/famous-beats-bundle/landingTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import { ASTRO_FUNNEL, type Step } from "@/lib/beacon";
 import { codeFunnels, funnelLabel } from "@/lib/funnels";
@@ -701,6 +702,11 @@ const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 const SHOTS = "/funnels/dashboard/tests";
 /** The UTC day before a UTC midnight ("2026-11-14T00:00:00Z" → "2026-11-13"). */
 const dayBefore = (iso: string) => new Date(Date.parse(iso) - 86_400_000).toISOString().slice(0, 10);
+const FBB_LABELS: Record<string, string> = { "fbb-old": "Old · the Astro page", "fbb-jazz": "Jazz-style · the page since 11-10" };
+const FBB_COLORS: Record<string, { from: string; to: string }> = {
+  "fbb-old": { from: "#94a3b8", to: "#64748b" },
+  "fbb-jazz": { from: "#fbbf24", to: "#f59e0b" },
+};
 export const TESTS: TestDef[] = [
   {
     funnel: "midi-drum-kit",
@@ -820,6 +826,19 @@ export const TESTS: TestDef[] = [
       "lp-new": { from: "2026-11-13T00:00:00Z", until: null, days: ["2026-11-13", null] },
     },
     color: (v) => (v === "lp-old" ? { from: "#94a3b8", to: "#64748b" } : { from: "#c084fc", to: "#22d3ee" }),
+  },
+  {
+    funnel: "famous-beats-bundle",
+    // 2026-11-15, before the bundle's Meta ads restart ("test which landing converts best"): its landings
+    // at the same address, evenly, each visitor kept on theirs (famous-beats-bundle/landingTest.ts), the
+    // same order page after each. Counted by letter, to the sale, like the Drum Kit's landing test.
+    name: "Landing",
+    question: "Which Famous Beats landing sells more?",
+    live: Object.fromEntries(FBB_LP.variants.map((v) => [v, `https://m.thegrind.studio/famous-beats-bundle?lp=${v.slice(4)}&preview=1`])),
+    where: "Landing, English · the visitors split evenly at the same address, each kept on their page · the same order page after each · Old = the page cloned from the Astro site, live 11-03 → 11-10 · Jazz-style = the page built like the Jazz MIDI Pack's, the only one 11-10 → 11-15",
+    variants: FBB_LP.variants,
+    label: (v) => FBB_LABELS[v] ?? v,
+    color: (v) => FBB_COLORS[v] ?? { from: "#94a3b8", to: "#64748b" },
   },
   {
     funnel: "jazz-midi-pack",

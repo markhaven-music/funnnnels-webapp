@@ -16,11 +16,11 @@ import { AVAILABILITY_JS } from "@/lib/availability";
 
 const OFF = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/);
 
-export function astroHtml(template: string, o: { funnel: string; orderPage: string; currency: Currency; price: number }): string {
+export function astroHtml(template: string, o: { funnel: string; orderPage: string; currency: Currency; price: number; abCookie?: string }): string {
   const head =
     `${ORIGIN_BOUNCE_JS};\n` +
     `window.__fvMe = ${PREVIEW_JS} || ${OFF}.test(location.hostname);\n` +
-    beaconScript({ funnel: o.funnel, page: "landing" }) +
+    beaconScript({ funnel: o.funnel, page: "landing", abCookie: o.abCookie }) +
     `;\n${AVAILABILITY_JS}`;
   let html = template
     .replaceAll("{{ORDER}}", o.orderPage)

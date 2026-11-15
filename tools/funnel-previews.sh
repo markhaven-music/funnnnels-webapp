@@ -48,7 +48,7 @@ shot top-hits-midi-bundle preview "https://funnnnels.vercel.app/top-hits-midi-bu
 shot top-hits-midi-bundle order "https://funnnnels.vercel.app/top-hits-midi-bundle/order?country=US&origin=1"
 shot top-hits-chords preview "https://funnnnels.vercel.app/top-hits-chords?country=US&origin=1"
 shot top-hits-chords order "https://funnnnels.vercel.app/top-hits-chords/order?country=US&origin=1"
-shot famous-beats-bundle preview "https://funnnnels.vercel.app/famous-beats-bundle?country=US&origin=1"
+shot famous-beats-bundle preview "https://funnnnels.vercel.app/famous-beats-bundle?country=US&origin=1&lp=jazz"
 shot famous-beats-bundle order "https://funnnnels.vercel.app/famous-beats-bundle/order?country=US&origin=1"
 shot drunk-swing-grooves preview "https://funnnnels.vercel.app/drunk-swing-grooves?country=US&origin=1"
 shot drunk-swing-grooves order "https://funnnnels.vercel.app/drunk-swing-grooves/order?country=US&origin=1"

@@ -10,6 +10,7 @@ import { Cta } from "../../jazz-midi-pack/Cta";
 import { display } from "../../jazz-midi-pack/fonts";
 import { Tracking } from "../../top-hits-midi-bundle/Tracking";
 import { funnel } from "../funnel";
+import { FBB_LP } from "../landingTest";
 import { BeatClip } from "../_v2/Beats";
 import { PatternPlayer } from "../_v2/PatternPlayer";
 import { LANDING as w } from "../_v2/words";
@@ -93,7 +94,7 @@ export default async function FamousBeatsV2({ params }: { params: Promise<{ curr
   return (
     <main className={`${s.page} ${s.jazz} ${display.variable}`}>
       <Tracking value={amount} currency={currency} product={funnel.product} />
-      <Beacon funnel={funnel.slug} page="landing" />
+      <Beacon funnel={funnel.slug} page="landing" abCookie={FBB_LP.cookie} />
       <script dangerouslySetInnerHTML={{ __html: CARRY_SCRIPT }} />
       {/* Red, on top, like the Jazz page's. */}
       <div className={s.bfbar}>

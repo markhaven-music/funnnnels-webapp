@@ -16,6 +16,7 @@ import { display } from "../../../jazz-midi-pack/fonts";
 import c from "../../../jazz-midi-pack/fiveMinBonus.module.css";
 import s from "../../../jazz-midi-pack/jazz.module.css";
 import { funnel } from "../../funnel";
+import { FBB_LP } from "../../landingTest";
 import { FBB_BONUS, FBB_BONUS_WORDS } from "../../fiveMinBonus";
 import { BUMP_COPY, LANDING, ORDER as w } from "../../_v2/words";
 
@@ -86,7 +87,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   return (
     <main className={`${s.page} ${s.jazz} ${s.orderMain} ${display.variable}`}>
       <Tracking value={amount} currency={currency} event={null} product={funnel.product} />
-      <Beacon funnel={funnel.slug} page="order" />
+      <Beacon funnel={funnel.slug} page="order" abCookie={FBB_LP.cookie} />
       {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
       {ex && <script dangerouslySetInnerHTML={{ __html: bonusScript(FBB_BONUS.endKey) }} />}
       <div className={s.bfbar}>
@@ -169,6 +170,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
             <div className={s.orderForm}>
               <CheckoutWidget
                 funnel={funnel.slug}
+                abCookie={FBB_LP.cookie}
                 product={funnel.product}
                 tagline="320 drum transcriptions in 2,067 MIDI files + 6 bonuses"
                 image="/funnels/famous-beats-bundle/box3d-160.webp"

@@ -75,3 +75,17 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 - Lighthouse mobile on the live URL (PageSpeed API quota out): landing 97, order 91.
 
 - 2026-11-10: the order page's 5-minute bonus is off ("direi di toglierlo", "ok quindi torniamo a B"; all four checkouts). On the Drum Kit nobody paid for an add-on with it (0 of 6 orders, 6 of 9 before) and every order was 27. The switch: Drum Kit `bonusTest.ts` (BONUS_SCRIPT default), the others `jazz-midi-pack/fiveMinBonus.ts` FIVE_MIN_BONUS_ON.
+
+## Landing test (2026-11-15, before the Meta ads restart: "test which landing converts best")
+- /famous-beats-bundle gives each new visitor one landing at random, evenly, and keeps them on it (cookie `ab_fbb`,
+  180 days): `fbb-old` = the Astro clone (./landing.ts, route ./old), `fbb-jazz` = the Jazz-style page (./[currency]).
+  Same order page, upsell and thank-you after both. ./landingTest.ts, proxy.ts; built like the Drum Kit's landing test.
+- The letter goes with every page view, checkout and order (Stripe metadata.variant, PayPal custom_id), the TOP HITS
+  upsell included: dashboard → Analytics → Famous Beats Bundle → "Landing" (lib/analytics.ts TESTS).
+- A look at one page without being counted or assigned: /famous-beats-bundle?lp=old&preview=1, ?lp=jazz&preview=1.
+- Both pages hand utm_source, utm_medium, utm_campaign, utm_term, utm_content, campaign_id, adset_id, ad_id (and
+  fbclid, gclid) to the order page; the Astro page's own script only took fbclid and utm_*, the ids were added.
+- The old page is back with one change of words: "hats and 808 on separate tracks" → "hats and percussion" (808 is a
+  track in 3 files, see above). Its pictures, its offer text (no bonuses named) and the rest are as they were.
+- A third page "more like the Jazz one" was asked for; the page live since 11-10 already is the Jazz-style one (/v2
+  only redirects to it), so the third waits for what should differ.
