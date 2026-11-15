@@ -99,7 +99,7 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
       <Beacon funnel={funnel.slug} page="landing" />
       <script dangerouslySetInnerHTML={{ __html: CARRY_SCRIPT }} />
       {/* Red, on top, like the Jazz page's. */}
-      <div className={s.bfbar}>
+      <div className={s.bfbar} style={{ textWrap: "balance" } as CSSProperties}>
         {launchOn(amount, currency) ? (
           <>
             <b>LAUNCH PRICE:</b> {price} until Sunday midnight PT, then {money(launch.after[currency], currency)}

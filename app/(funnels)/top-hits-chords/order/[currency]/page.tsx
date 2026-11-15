@@ -95,7 +95,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       <Beacon funnel={funnel.slug} page="order" />
       {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
       {ex && <script dangerouslySetInnerHTML={{ __html: bonusScript(TH_BONUS.endKey) }} />}
-      <div className={s.bfbar}>
+      <div className={s.bfbar} style={{ textWrap: "balance" } as CSSProperties}>
         {launchOn(amount, currency) ? (
           <>
             <b>LAUNCH PRICE:</b> {price} until Sunday midnight PT, then {money(launch.after[currency], currency)}
