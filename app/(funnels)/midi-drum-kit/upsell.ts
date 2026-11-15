@@ -64,10 +64,17 @@ export const beaconStep = (product: { offers?: readonly { id: string }[] }, offe
 // 1 in 4 buyers closed this page; "dire order complete non chiude il loop
 // mentale?": no mention of the email, which told them they could leave).
 // yes / yesSub: the Yes button put under the video with the No (quickChoice).
-const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: string; doneLater: string; yes: string; yesSub: string }> = {
+// yesSubPayPal: what it says to a PayPal buyer instead. Only a card is charged in one tap:
+// PayPal asks them to confirm again on its own page (no saved payment method: that needs
+// PayPal's approval of the account for reference transactions). 2026-11-15: of 4 PayPal
+// buyers who pressed Yes under "one tap, paid the way you just paid", 3 left on PayPal's page.
+// unpaid: said under the button to a buyer PayPal sent back without paying (the upsell's cancel_url).
+const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: string; doneLater: string; yes: string; yesSub: string; yesSubPayPal: string; unpaid: string }> = {
   en: {
     yes: "Yes, add it to my order",
     yesSub: "{price} · one tap, paid the way you just paid",
+    yesSubPayPal: "{price} · you confirm on PayPal, then come straight back",
+    unpaid: "Nothing was charged: the PayPal payment wasn't completed. Tap again to finish it, or skip this offer: your order is safe.",
     done: "Payment received. Your downloads are on the next page.",
     doneLater: "Payment received. Your downloads are waiting right after these offers.",
     busy: "Adding it to your order…",
@@ -77,6 +84,8 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: st
   fr: {
     yes: "Oui, ajoute-le à ma commande",
     yesSub: "{price} · un clic, payé comme tu viens de payer",
+    yesSubPayPal: "{price} · tu confirmes sur PayPal et tu reviens ici",
+    unpaid: "Rien n'a été débité : le paiement PayPal n'a pas été terminé. Réessaie pour le finir, ou passe cette offre : ta commande est en sécurité.",
     done: "Paiement reçu. Tes téléchargements sont sur la page suivante.",
     doneLater: "Paiement reçu. Tes téléchargements t'attendent juste après ces offres.",
     busy: "Ajout à ta commande…",
@@ -86,6 +95,8 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: st
   es: {
     yes: "Sí, añádelo a mi pedido",
     yesSub: "{price} · un toque, pagado como acabas de pagar",
+    yesSubPayPal: "{price} · lo confirmas en PayPal y vuelves aquí",
+    unpaid: "No se ha cobrado nada: el pago con PayPal no se completó. Toca de nuevo para terminarlo o salta esta oferta: tu pedido está a salvo.",
     done: "Pago recibido. Tus descargas están en la página siguiente.",
     doneLater: "Pago recibido. Tus descargas te esperan justo después de estas ofertas.",
     busy: "Añadiéndolo a tu pedido…",
@@ -95,6 +106,8 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: st
   de: {
     yes: "Ja, zu meiner Bestellung hinzufügen",
     yesSub: "{price} · ein Klick, bezahlt wie eben",
+    yesSubPayPal: "{price} · du bestätigst bei PayPal und bist gleich zurück",
+    unpaid: "Es wurde nichts abgebucht: Die PayPal-Zahlung wurde nicht abgeschlossen. Tipp noch einmal, um sie abzuschließen, oder überspring dieses Angebot: Deine Bestellung ist sicher.",
     done: "Zahlung erhalten. Deine Downloads sind auf der nächsten Seite.",
     doneLater: "Zahlung erhalten. Deine Downloads warten direkt nach diesen Angeboten.",
     busy: "Wird zu deiner Bestellung hinzugefügt…",
@@ -104,6 +117,8 @@ const UI: Record<Lang, { busy: string; failed: string; noOrder: string; done: st
   it: {
     yes: "Sì, aggiungilo al mio ordine",
     yesSub: "{price} · un tocco, pagato come hai appena pagato",
+    yesSubPayPal: "{price} · confermi su PayPal e torni subito qui",
+    unpaid: "Non è stato addebitato nulla: il pagamento PayPal non è stato completato. Tocca di nuovo per concluderlo, oppure salta questa offerta: il tuo ordine è al sicuro.",
     done: "Pagamento ricevuto. I tuoi download sono nella pagina successiva.",
     doneLater: "Pagamento ricevuto. I tuoi download ti aspettano subito dopo queste offerte.",
     busy: "Lo aggiungo al tuo ordine…",
@@ -197,7 +212,9 @@ function quickChoice(html: string, ui: (typeof UI)[Lang], price: string, no: str
   }
   if (cut < 0) return html;
   const sub = ui.yesSub.replace("{price}", price);
-  const block = `<div id="oto-choice"><a href="#yes" data-oto="yes" class="elButton"><span class="elButtonMain"><span class="elButtonMainText">${ui.yes}<i class="oto-arrow" aria-hidden="true"></i></span></span><span class="oto-sub">${sub}</span></a><a href="#no" data-oto="no" class="elButton"><span class="elButtonMain"><span class="elButtonMainText elButtonText">${no}</span></span></a></div>`;
+  // The PayPal buyer's line: the page is one static document, so the script swaps it in (script()).
+  const subPayPal = escapeAttr(ui.yesSubPayPal.replace("{price}", price));
+  const block = `<div id="oto-choice"><a href="#yes" data-oto="yes" class="elButton"><span class="elButtonMain"><span class="elButtonMainText">${ui.yes}<i class="oto-arrow" aria-hidden="true"></i></span></span><span class="oto-sub" data-paypal="${subPayPal}">${sub}</span></a><a href="#no" data-oto="no" class="elButton"><span class="elButtonMain"><span class="elButtonMainText elButtonText">${no}</span></span></a></div>`;
   return html.slice(0, cut) + block + html.slice(cut);
 }
 
@@ -269,7 +286,7 @@ a.elButton[href="#yes"]:hover .elButtonText,a.elButton[href="#yes"]:hover .elBut
 a.elButton[href="#yes"]:active{translate:0 6px;animation-play-state:paused;box-shadow:inset 0 2px 0 rgba(255,255,255,.45),inset 0 -2px 0 rgba(0,0,0,.12),0 2px 0 #8a6400,0 8px 22px -10px rgba(245,184,0,.6)!important}
 a.elButton[href="#yes"] i.fa-arrow-right,a.elButton[href="#yes"] .oto-arrow{display:inline-block!important;width:.9em!important;height:.9em;margin-left:.35em;margin-right:-.2em;vertical-align:-.08em;background:currentColor;-webkit-mask:${ARROW} center/contain no-repeat;mask:${ARROW} center/contain no-repeat;animation:oto-nudge 1.4s ease-in-out infinite}
 a.elButton[href="#yes"] i.fa-arrow-right::before{content:none!important;display:none!important}
-a.elButton[href="#yes"] .elButtonSub,a.elButton[href="#yes"] .oto-sub{display:block;margin-top:6px;color:rgba(20,15,0,.78)!important;font:700 14px/1.3 Inter,system-ui,sans-serif!important;text-transform:none!important}
+a.elButton[href="#yes"] .elButtonSub,a.elButton[href="#yes"] .oto-sub{display:block;margin-top:6px;text-align:center;text-wrap:balance;color:rgba(20,15,0,.78)!important;font:700 14px/1.3 Inter,system-ui,sans-serif!important;text-transform:none!important}
 a.elButton[href="#no"]{display:flex!important;align-items:center;justify-content:center;width:100%!important;max-width:480px!important;min-height:54px;box-sizing:border-box;margin:0 auto!important;padding:12px 18px!important;border:0!important;border-radius:14px!important;background:rgba(0,0,0,.55)!important;box-shadow:none!important;text-decoration:none!important}
 a.elButton[href="#no"] .elButtonMainText,a.elButton[href="#no"] .elButtonMainText *{color:#fff!important;font-family:Inter,system-ui,sans-serif!important;font-size:15px!important;font-weight:600!important;line-height:1.35!important;text-decoration:none!important;text-transform:none!important;letter-spacing:0!important}
 a.elButton[href="#no"]:hover{background:rgba(0,0,0,.75)!important}
@@ -337,11 +354,18 @@ export function script(slug: string, offerId: string, lang: Lang, next: string):
   function say(btn, t) {
     var box = btn.closest('[data-page-element="Button/V1"]') || btn.parentElement;
     var n = box.querySelector('.oto-note');
-    if (!n) { n = document.createElement('p'); n.className = 'oto-note'; n.style.cssText = 'margin:10px auto 0;max-width:420px;font:500 14px/1.4 Inter,sans-serif;color:#fff;text-align:center'; box.appendChild(n); }
+    if (!n) { n = document.createElement('p'); n.className = 'oto-note'; n.style.cssText = 'margin:10px auto 0;max-width:420px;font:500 14px/1.4 Inter,sans-serif;color:#fff;text-align:center'; if (box.id === 'oto-choice') btn.insertAdjacentElement('afterend', n); else box.appendChild(n); }
     n.textContent = t;
   }
   function label(btn, t) { var m = btn.querySelector('.elButtonMainText'); if (m) { if (!m.dataset.orig) m.dataset.orig = m.innerHTML; m.textContent = t; } }
   function reset(btn) { var m = btn.querySelector('.elButtonMainText'); if (m && m.dataset.orig) m.innerHTML = m.dataset.orig; busy = false; }
+  // A PayPal buyer confirms on PayPal's page: the Yes button says so instead of "one tap".
+  if (main && main[0] === 'paypal_order') {
+    var subs = document.querySelectorAll('.oto-sub[data-paypal]');
+    for (var i = 0; i < subs.length; i++) subs[i].textContent = subs[i].getAttribute('data-paypal');
+  }
+  // Back from PayPal without paying (the upsell's cancel_url, ?unpaid=1): said under the first Yes.
+  if (q.get('unpaid') === '1') { var first = document.querySelector('a[data-oto="yes"]'); if (first) say(first, C.ui.unpaid); }
   function stripeAction(r, btn) {
     var s = document.createElement('script'); s.src = 'https://js.stripe.com/v3';
     s.onload = function () {

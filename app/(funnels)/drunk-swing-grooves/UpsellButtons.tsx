@@ -11,8 +11,12 @@ import s from "./landing.module.css";
 // then the next step; No → the next step. The order travels in the address:
 // ?payment_intent=pi_… or ?paypal_order=…, plus u=<the upsells bought so far>.
 
-type Ui = { busy: string; failed: string; noOrder: string };
+// paypalSub: the line under Yes for a PayPal buyer, who confirms on PayPal's page (only a
+// card is charged in one click). unpaid: back from PayPal without paying (?unpaid=1).
+type Ui = { busy: string; failed: string; noOrder: string; paypalSub: string; unpaid: string };
 const UI: Ui = {
+  paypalSub: "You confirm on PayPal, then come straight back",
+  unpaid: "Nothing was charged: the PayPal payment wasn't completed. Tap again to finish it, or skip this offer: your order is safe.",
   busy: "Adding it to your order…",
   failed: "The payment didn't go through. Try again, or skip this offer: your order is safe.",
   noOrder: "We couldn't find your order on this page. Your purchase is safe: continue to get your downloads.",
@@ -28,6 +32,7 @@ const cookie = (n: string) => {
 export function UpsellButtons({ funnel, offer, next, yes, yesSub, no }: { funnel: string; offer: string; next: string; yes: string; yesSub: string; no: string }) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
+  const [paypal, setPaypal] = useState(false);
 
   const state = () => {
     const q = new URLSearchParams(location.search);
@@ -51,6 +56,8 @@ export function UpsellButtons({ funnel, offer, next, yes, yesSub, no }: { funnel
     if (cookie("fv_owned").split(",").includes(offer)) return go(null);
     const { main } = state();
     if (!main) return;
+    if (main[0] === "paypal_order") setPaypal(true);
+    if (new URLSearchParams(location.search).get("unpaid") === "1") setNote(UI.unpaid);
     ownedCheck ??= fetch("/api/checkout/owned", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -113,7 +120,7 @@ export function UpsellButtons({ funnel, offer, next, yes, yesSub, no }: { funnel
           <span>{busy ? UI.busy : yes}</span>
           {!busy && <Arrow className={b.arrow} />}
         </span>
-        <span className={b.inner}>{yesSub}</span>
+        <span className={b.inner}>{paypal ? UI.paypalSub : yesSub}</span>
       </button>
       {note && <p className={s.upNote}>{note}</p>}
       <button type="button" className={s.noThanks} onClick={() => go(null)}>

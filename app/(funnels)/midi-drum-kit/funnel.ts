@@ -106,6 +106,10 @@ export const funnel = {
   // 2026-11-08 ("metti MIDI Jazz Pack come oto upsell in MIDI Drum Kit", first,
   // €27): the Jazz MIDI Pack with its five bonus zips, on its own page in the Jazz
   // look ([lang]/jazz-offer), before Famous Beats.
+  // 2026-11-15 ("fai tutto", after a week of numbers): the Jazz MIDI Pack is out of the kit's
+  // upsells in funnel_items (0 of 16 buyers took it, 13 seconds on its page, 3 closed the funnel
+  // there before reaching Famous Beats, the one that sells): Famous Beats, then TOP HITS. Its
+  // entry and page stay here, so dashboard → Products can put it back.
   offers: [
     { id: "jazz", path: "jazz-offer", name: "Jazz MIDI Pack", price: { eur: 27, usd: 27 } },
     { id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } },

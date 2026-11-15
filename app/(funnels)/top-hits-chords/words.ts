@@ -252,7 +252,7 @@ export const UPSELL = {
     "Chord names written into every file",
   ],
   yes: "Yes, add the Jazz MIDI Pack for {price}",
-  yesSub: "One click: charged to the card or PayPal you just used",
+  yesSub: "One click: charged to the card you just used",
   no: "No thanks, I'll skip the jazz chords",
   end: "The pack goes on the same download page as your TOP HITS MIDI Bundle.",
 };

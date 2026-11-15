@@ -20,7 +20,8 @@ export const runtime = "nodejs";
 //     wants the buyer to confirm, → { status: "action", clientSecret, … } and
 //     the page shows the bank's check.
 //   PayPal: an order for the upsell, → { status: "paypal", url } to confirm on
-//     PayPal; /api/checkout/paypal/return takes the money and moves on.
+//     PayPal; /api/checkout/paypal/return takes the money and moves on (or the
+//     buyer cancels there: back on the offer page with ?unpaid=1).
 // The price comes from the funnel (funnel.offers), never from the browser.
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
@@ -104,7 +105,10 @@ export async function POST(req: Request) {
     }
   }
 
-  // PayPal: an order for the upsell, approved on PayPal (one tap: the buyer is still logged in).
+  // PayPal: an order for the upsell, approved on PayPal's page (not one tap: there is no saved
+  // payment method to charge, which needs PayPal's approval for reference transactions; the
+  // pages say "you confirm on PayPal"). A buyer who comes back without paying lands on the
+  // offer again with ?unpaid=1, which says nothing was charged.
   if (!paypalConfigured() || !isPayPalOrderId(parent.id)) return NextResponse.json({ error: "PayPal is not connected." }, { status: 503 });
   const origin = returnOrigin(req.headers.get("origin") ?? req.headers.get("referer"));
   const page = `${lang === "en" ? "" : `/${lang}`}/${f.slug}/${offer.path}`;
@@ -136,7 +140,7 @@ export async function POST(req: Request) {
               user_action: "PAY_NOW",
               ...(lang !== "en" ? { locale: PAYPAL_LOCALE[lang] } : {}),
               return_url: `${origin}/api/checkout/paypal/return?funnel=${f.slug}&offer=${offer.id}&${back}${lang !== "en" ? `&lang=${lang}` : ""}`,
-              cancel_url: `${origin}${page}?${back}`,
+              cancel_url: `${origin}${page}?${back}&unpaid=1`,
             },
           },
         },

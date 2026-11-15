@@ -32,7 +32,11 @@ export async function GET(req: Request) {
     captured = true;
   } catch (err) {
     // The buyer's card or bank said no: back to PayPal to pick another source.
-    if (err instanceof PayPalError && err.issue === "INSTRUMENT_DECLINED") return redirect(paypalCheckoutUrl(orderId));
+    // Logged: it was the one way an approved upsell could go unpaid without a trace.
+    if (err instanceof PayPalError && err.issue === "INSTRUMENT_DECLINED") {
+      console.warn(`paypal capture declined (INSTRUMENT_DECLINED): order ${orderId}, funnel ${f.slug}${offer ? `, upsell ${offer.id}` : ""}`);
+      return redirect(paypalCheckoutUrl(orderId));
+    }
     // A reload or a double redirect: the money is already in. Anything else,
     // the thank-you page shows "not completed" with a way back to checkout.
     if (!(err instanceof PayPalError && err.issue === "ORDER_ALREADY_CAPTURED")) {

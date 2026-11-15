@@ -237,7 +237,7 @@ export const UPSELL = {
   ],
   listen: "The pack's Royal Road, keys and bass, over a Drunk Swing groove:",
   yes: "Yes, add the Jazz MIDI Pack for {price}",
-  yesSub: "One click: charged to the card or PayPal you just used",
+  yesSub: "One click: charged to the card you just used",
   no: "No thanks, I'll skip the chords",
 };
 export type UpsellWords = typeof UPSELL;
