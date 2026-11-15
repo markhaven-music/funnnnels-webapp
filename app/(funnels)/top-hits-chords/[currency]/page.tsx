@@ -9,7 +9,8 @@ import { Beacon } from "../../Beacon";
 import { Cta } from "../../jazz-midi-pack/Cta";
 import { display } from "../../jazz-midi-pack/fonts";
 import { Tracking } from "../../top-hits-midi-bundle/Tracking";
-import { funnel, launch, launchOn } from "../funnel";
+import { BigClock, Clock } from "../Countdown";
+import { folders, funnel, launch, launchOn } from "../funnel";
 import { BigRoll, HeroRolls } from "../Rolls";
 import { SongPlayer } from "../SongPlayer";
 import { LANDING } from "../words";
@@ -41,10 +42,10 @@ const DIR = "/funnels/top-hits-midi-bundle";
 
 export const metadata: Metadata = {
   title: "TOP HITS MIDI Bundle · GRIND STUDIO",
-  description: "The chords behind 1,000 hits, transcribed note for note into MIDI. The Weeknd, Taylor Swift, SZA, Drake, Bad Bunny and more. Any DAW.",
+  description: "The chord progressions of 1,000 hit songs, transcribed note for note into MIDI, in all 12 keys. The Weeknd, Taylor Swift, SZA, Drake, Bad Bunny and more. Any DAW.",
   openGraph: {
-    title: "The chords behind 1,000 hits. Note for note, in MIDI.",
-    description: "1,000 chord progressions from hit songs + 6 bonuses, by GRIND STUDIO. Drag into your DAW.",
+    title: "We Copied The Chord Progressions Of Top Hits So You Can Use Them.",
+    description: "1,000 hit chord progressions in all 12 keys (11,976 MIDI files) + 6 bonuses, by GRIND STUDIO. Drag into your DAW.",
     type: "website",
     url: "https://m.thegrind.studio/top-hits-chords",
     images: [{ url: `https://m.thegrind.studio${DIR}/hero-880.webp`, width: 880, height: 663 }],
@@ -87,11 +88,27 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
   const per = `${SIGN[currency]}${(amount / funnel.counts.progressions).toFixed(2)}`;
   const tx = (text: string) => fill(text, { price, per, c: SIGN[currency], email: funnel.support });
   const order = `/${funnel.slug}/order`;
-  const inner = `${price} · instant download`;
-  const bonusValue = w.bonuses.items.reduce((sum, b) => sum + b.value, 0);
-  const total = bonusValue + amount;
   const worth = (n: number) => money(n, currency);
-  const key = (className: string, label = w.cta.label, note?: string) => <Cta label={label} inner={inner} href={order} className={className} note={note} />;
+  // The launch (funnel.ts `launch`): while its price is the one in force the page says so, with
+  // the clock to its end, and the bundle is worth its regular price in the value stack.
+  const live = launchOn(amount, currency);
+  const regular = worth(launch.after[currency]);
+  const inner = live ? `${price} instead of ${regular} · instant download` : `${price} · instant download`;
+  const bonusValue = w.bonuses.items.reduce((sum, b) => sum + b.value, 0);
+  // What the bundle is worth before any discount: its regular price (2026-11-15, "27 value? should
+  // be more... the sum of everything before any discount").
+  const bundleValue = live ? launch.after[currency] : amount;
+  const total = bonusValue + bundleValue;
+  const key = (className: string, label = w.cta.label, note?: string) => (
+    <div className={className}>
+      {live && (
+        <p className={t.launchLine}>
+          Launch price <b>{price}</b> · ends in <Clock ends={launch.ends} /> · then {regular}
+        </p>
+      )}
+      <Cta label={label} inner={inner} href={order} note={note} />
+    </div>
+  );
 
   return (
     <main className={`${s.page} ${s.jazz} ${display.variable}`}>
@@ -100,9 +117,9 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
       <script dangerouslySetInnerHTML={{ __html: CARRY_SCRIPT }} />
       {/* Red, on top, like the Jazz page's. */}
       <div className={s.bfbar} style={{ textWrap: "balance" } as CSSProperties}>
-        {launchOn(amount, currency) ? (
+        {live ? (
           <>
-            <b>LAUNCH PRICE:</b> {price} until Sunday midnight PT, then {money(launch.after[currency], currency)}
+            <b>LAUNCH PRICE:</b> {price} instead of {regular} · ends in <Clock ends={launch.ends} />
           </>
         ) : (
           <>
@@ -121,16 +138,27 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
             </span>
             <span className={s.tag}>
               <span className={s.dot} aria-hidden />
-              1,000 MIDI files
+              {funnel.counts.files.toLocaleString("en-US")} MIDI files
             </span>
           </header>
         </div>
         <div className={`${s.wrap} ${s.heroCenter}`}>
-          <p className={s.heroPre}>{w.hero.pre}</p>
+          <p className={s.heroPre}>{live ? w.hero.launchPre : w.hero.pre}</p>
           <h1 className={s.heroHead}>
             <Marked text={w.hero.title} />
           </h1>
           <p className={s.heroSub}>{w.hero.sub}</p>
+          {live && (
+            <BigClock
+              ends={launch.ends}
+              title={w.hero.launchTitle}
+              note={
+                <>
+                  <b>{price}</b> instead of <s>{regular}</s> for the first 100 copies, or until Sunday at midnight PT.
+                </>
+              }
+            />
+          )}
           {/* The hero video, as on the Jazz page (../vsl/script-en.md), in Wistia's own player. */}
           {funnel.vsl.wistiaId && (
             <div className={s.vsl}>
@@ -255,6 +283,46 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
           </div>
         </section>
       </div>
+
+      <section className={s.sec}>
+        <div className={s.wrap}>
+          <h2 className={s.h2}>
+            <Marked text={w.folders.title} />
+          </h2>
+          <p className={s.sub}>{w.folders.sub}</p>
+          <ol className={t.folders}>
+            {folders.map((f, i) => (
+              <li key={f.box} className={t.folder}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`${DIR}/folder-${f.box}-360.webp`}
+                  srcSet={`${DIR}/folder-${f.box}-360.webp 360w, ${DIR}/folder-${f.box}-640.webp 640w`}
+                  sizes="(min-width: 760px) 190px, 132px"
+                  width={360}
+                  height={474}
+                  alt={`The box of the folder ${f.name}`}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div>
+                  <p className={t.folderN}>Folder {i + 1}</p>
+                  <h3>{f.name}</h3>
+                  <p className={t.folderCount}>
+                    <b>{f.songs}</b> {w.folders.songs}
+                    <br />
+                    <b>{f.files.toLocaleString("en-US")}</b> {w.folders.files}
+                  </p>
+                  <p className={t.folderArtists}>{f.artists} and more.</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p className={t.foldersSum}>
+            <b>1,000</b> hit songs in 4 folders. <b>{funnel.counts.files.toLocaleString("en-US")}</b> MIDI files with every key. One download.
+          </p>
+          {key(s.ctaBlock)}
+        </div>
+      </section>
 
       <section className={s.sec}>
         <div className={s.wrap}>
@@ -418,7 +486,7 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
           <div className={vs.stack}>
             <div className={vs.main}>
               <div className={vs.mainBox}>
-                <span className={vs.ribbon}>{price} value</span>
+                <span className={vs.ribbon}>{worth(bundleValue)} value</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={`${DIR}/box3d-520.webp`} width={520} height={684} alt="The TOP HITS MIDI Bundle box" loading="lazy" decoding="async" />
               </div>
@@ -459,7 +527,7 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
                 <s className={vs.old}>{worth(total)}</s>
                 <span className={vs.now}>{price}</span>
               </p>
-              <p className={vs.save}>You save {worth(bonusValue)}</p>
+              <p className={vs.save}>You save {worth(total - amount)}</p>
             </div>
           </div>
           {key(s.ctaBlock)}
@@ -505,7 +573,7 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
               <div className={s.illus} aria-hidden>
                 <p className={s.illusTitle}>Your files are ready</p>
                 <ul className={s.dl}>
-                  {[[funnel.product, "1,000 MIDI files · 4 folders · .zip"], ...w.bonuses.items.map((b) => [b.name, b.inside[0]])].map(([name, meta]) => (
+                  {[[funnel.product, "1,000 progressions in all 12 keys · 11,976 MIDI files · .zip"], ...w.bonuses.items.map((b) => [b.name, b.inside[0]])].map(([name, meta]) => (
                     <li key={name}>
                       <span className={s.dlIco}>↓</span>
                       <span>

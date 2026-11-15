@@ -15,6 +15,7 @@ import { Beacon } from "../../../Beacon";
 import { display } from "../../../jazz-midi-pack/fonts";
 import c from "../../../jazz-midi-pack/fiveMinBonus.module.css";
 import s from "../../../jazz-midi-pack/jazz.module.css";
+import { Clock } from "../../Countdown";
 import { funnel, launch, launchOn } from "../../funnel";
 import { TH_BONUS, TH_BONUS_WORDS } from "../../fiveMinBonus";
 import { BUMP_COPY, LANDING, ORDER } from "../../words";
@@ -64,6 +65,10 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   const f = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
   const amount = f.price[currency];
   const price = money(amount, currency);
+  // The launch price in force (funnel.ts): the bar's clock, and the total before any discount
+  // (the bundle at its regular price + the bonuses' values) beside today's price.
+  const onLaunch = launchOn(amount, currency);
+  const totalValue = (onLaunch ? launch.after[currency] : amount) + landing.bonuses.items.reduce((sum, b) => sum + b.value, 0);
   const t = (text: string) => fill(text, { price, c: SIGN[currency], email: funnel.support });
 
   const live = f.bumps ?? [];
@@ -96,9 +101,9 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
       {ex && <script dangerouslySetInnerHTML={{ __html: bonusScript(TH_BONUS.endKey) }} />}
       <div className={s.bfbar} style={{ textWrap: "balance" } as CSSProperties}>
-        {launchOn(amount, currency) ? (
+        {onLaunch ? (
           <>
-            <b>LAUNCH PRICE:</b> {price} until Sunday midnight PT, then {money(launch.after[currency], currency)}
+            <b>LAUNCH PRICE:</b> {price} instead of {money(launch.after[currency], currency)} · ends in <Clock ends={launch.ends} />
           </>
         ) : (
           <>
@@ -166,7 +171,9 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
                 </ul>
               </div>
               <p className={s.totalMini}>
-                <span />
+                <span>
+                  {w.totalValue} <s>{money(totalValue, currency)}</s>
+                </span>
                 <span>
                   {w.today} <b>{price}</b>
                 </span>

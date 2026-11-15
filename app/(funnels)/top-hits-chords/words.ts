@@ -6,14 +6,18 @@
 export const LANDING = {
   hero: {
     pre: "MIDI · any DAW · transcribed, not sampled",
-    title: "The chords behind *1,000 hits*. Note for note, in MIDI.",
-    sub: "The Weeknd, Taylor Swift, SZA, Drake, Bad Bunny, Billie Eilish and more: 470+ artists. Drag a file in, change the key, load your sound and start on chords that already worked.",
+    // While the launch price is the one in force (funnel.ts `launchOn`), in place of `pre`.
+    launchPre: "NEW RELEASE · LAUNCH WEEK",
+    // 2026-11-15, "i dont like the headline": the ClickFunnels page's own, picked from four.
+    title: "We Copied The *Chord Progressions Of Top Hits* So You Can Use Them.",
+    sub: "The Weeknd, Taylor Swift, SZA, Drake, Bad Bunny, Billie Eilish and more: 470+ artists. 1,000 hit songs transcribed note for note into MIDI, now in all 12 keys: 11,976 files. Drag one in, load your sound, write on top.",
+    launchTitle: "Launch price ends in",
     listen: "Press play. Four of the 1,000 files, played from the MIDI.",
     bullets: [
       "1,000 Chord Progressions From Hit Songs, In MIDI",
+      "Now In All 12 Keys: 11,976 MIDI Files",
       "Transcribed By Ear: Every Chord, Voicing And Inversion",
       "Artist, Song, Key And BPM In The File Name",
-      "Change The Key In One Click, Load Any Sound",
       "Any DAW, Mac Or PC. Commercial License",
       "6 Free Bonuses Included",
     ],
@@ -41,10 +45,10 @@ export const LANDING = {
     titleEm: "chords that already worked.",
     lead: "1,000 chord progressions from hit songs, transcribed by hand and by ear into MIDI. Every chord, voicing and inversion where the record has it.",
     ticks: [
-      "1,000 MIDI files in 4 folders, sorted by genre",
+      "1,000 progressions in 4 folders, sorted by genre",
+      "Each one in all 12 keys: 11,976 MIDI files",
       "Pop, trap, R&B, country, EDM, afrobeats, K-pop, Latin",
       "Artist, song, key and BPM in the file name",
-      "Change the key in one click, load any sound",
       "Any DAW, Mac or PC. Commercial license",
     ],
   },
@@ -56,7 +60,15 @@ export const LANDING = {
       ["Saved as a MIDI file.", "Named with the artist, the song, the key and the BPM. It opens in any DAW."],
       ["Played by your sounds.", "Your piano, your pads, your synth. Change the key in one click and write on top."],
     ] as [string, string][],
-    total: "*That's the TOP HITS MIDI Bundle.* 1,000 of those progressions. One download.",
+    total: "*That's the TOP HITS MIDI Bundle.* 1,000 of those progressions, in all 12 keys. One download.",
+  },
+  // The bundle's four folders, a box each (2026-11-15, "there should be a box for every folder
+  // inside the bundle otherwise what bundle is it"). Names, counts and artists: funnel.ts `folders`.
+  folders: {
+    title: "One bundle. *Four folders of hits.*",
+    sub: "Each folder has its songs as they were transcribed, and every song again in all 12 keys.",
+    songs: "hit progressions",
+    files: "MIDI files in all 12 keys",
   },
   browse: {
     title: "Every progression in the bundle. Press play on any of them.",
@@ -66,6 +78,7 @@ export const LANDING = {
     title: "What you get when you open the folder.",
     items: [
       ["1,000 chord progressions", "From hit songs by The Weeknd, Taylor Swift, SZA, Drake, Ariana Grande, Dua Lipa, Bad Bunny and 470+ artists in all."],
+      ["All 12 keys", "A second folder has each song in every key: same notes, same rhythm, moved to the key of your beat. 11,976 MIDI files."],
       ["Four folders by genre", "Modern Pop & Ballads (556 files), Hiphop, Trap & Urban (190), Dance & Electronic (146), Vintage Classics, Rock & Country (108)."],
       ["Transcribed by ear", "Written by hand, note for note: the chords, the voicings, the inversions, the passing changes. Our own transcriptions, not files pulled from the masters. No audio, no samples."],
       ["Find a song in seconds", "The artist, the song, the key and the BPM are in the file name. About half the files are in a major key, half in a minor one, from 57 to 188 BPM."],
@@ -89,7 +102,7 @@ export const LANDING = {
       ["Cost", [null, "Free, one song a night"], [false, "{c}10–30 per song"], [true, "{per} per progression"]],
       ["Voicings and inversions", [false, "What you manage to hear"], [true, "Yes"], [true, "Where the record has them"]],
       ["Key and BPM", [null, "You work them out"], [null, "If you ask for them"], [true, "In the file name"]],
-      ["Change the key", [null, "Once it's written"], [true, "Yes"], [true, "One click: it's MIDI"]],
+      ["Change the key", [null, "Once it's written"], [true, "Yes"], [true, "Already in all 12 keys"]],
     ] as [string, [boolean | null, string], [boolean | null, string], [boolean | null, string]][],
   },
   bonuses: {
@@ -146,6 +159,7 @@ export const LANDING = {
     sub: "A transcriber charges {c}10–30 for a single song. This is the whole bundle, one payment.",
     items: [
       "1,000 chord progressions from hit songs, in MIDI",
+      "All 12 keys: 11,976 MIDI files",
       "4 folders by genre, 470+ artists",
       "Transcribed by ear, note for note",
       "Artist, song, key and BPM in the file name",
@@ -167,7 +181,7 @@ export const LANDING = {
     items: [
       ["Pay", "by card, Apple Pay, Google Pay or PayPal."],
       ["Download", "from the buttons on the next page. The same links come by email."],
-      ["Unzip", "four folders by genre, 1,000 .mid files named with artist, song, key and BPM. Plus the 6 bonuses."],
+      ["Unzip", "four folders by genre, 1,000 .mid files named with artist, song, key and BPM, and the All 12 Keys folder. Plus the 6 bonuses."],
       ["Drag a .mid", "onto a track, change the key, load your sound. You can be writing in 5 minutes."],
     ] as [string, string][],
   },
@@ -179,6 +193,7 @@ export const LANDING = {
       ["Can I sell beats made with them?", "Yes. Full commercial license: sell on BeatStars, Airbit, Traktrain, lease to artists, release on Spotify and Apple Music, keep the money. You just can't resell or share the MIDI files themselves."],
       ["Will it work in my DAW?", "Yes. Standard .mid files: FL Studio, Ableton Live, Logic Pro, Pro Tools, Studio One, Cubase, Reaper, Bitwig, GarageBand. Mac and Windows, plus mobile DAWs that read MIDI."],
       ["How do I find the right progression out of 1,000?", "The files are in four folders by genre, and the name has the artist, the song, the key and the BPM. Search the folder for an artist, a key or a tempo, drag the file in and transpose it to your track."],
+      ["What are the 11,976 files?", "The 1,000 transcriptions as they were written, in four folders by genre, plus a folder called All 12 Keys: every song has its own folder there, with the same file in each of the 12 keys. Same notes, same rhythm, moved up or down. 998 of the 1,000 are in it (one song is in the pack twice and one file is still being fixed): 998 × 12 = 11,976 MIDI files."],
       ["How long is each file?", "Half of them run 16 bars or more: the progression as the song plays it. The shortest are 4-bar loops."],
       ["I don't know music theory. Can I use it?", "Yes. Drag a file onto a track, pick a sound, press play. The chords are already written. Change the key in one click to fit your beat."],
       ["How fast do I get it?", "Right after payment: the download buttons are on the next page and the links come by email."],
@@ -201,19 +216,21 @@ export const ORDER = {
   bfbar: "90% Sale Is Ending Soon",
   secure: "Secure checkout",
   srTitle: "Complete your TOP HITS MIDI Bundle order",
-  tagline: "1,000 chord progressions from hit songs + 6 bonuses",
+  tagline: "1,000 hit chord progressions in all 12 keys + 6 bonuses",
   stack: [
     "1,000 chord progressions from hit songs, in MIDI",
+    "All 12 keys: 11,976 MIDI files",
     "4 folders by genre, 470+ artists",
     "Artist, song, key and BPM in the file name",
     "Transcribed by ear, note for note",
     "Any DAW, Mac and PC · commercial license",
   ],
   bonusHead: "Plus 6 free bonuses",
+  totalValue: "Total value",
   today: "Today",
   guarantee: "14-day quality guarantee. A file doesn't work? We fix it.",
   proof: [
-    "**1,000** chord progressions from hit songs",
+    "**11,976** MIDI files: 1,000 hit progressions in all 12 keys",
     "**14 days** quality guarantee on every file",
     "Card, Apple Pay, Google Pay or **PayPal**",
   ],

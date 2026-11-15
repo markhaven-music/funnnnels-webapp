@@ -51,6 +51,33 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
     cached voice files were gone, so the voice is a new ElevenLabs take (same voice, model and
     script; all 20 parts checked with speech-to-text). Wistia x8jj158ddq, still = the frame at
     117.3 s (media 3exn59wcek). The 2026-11-10 render (47ic5iver0) is still in Wistia, not on the page.
+- 2026-11-15 evening, the page as a launch page (the user's words, in order):
+  - "i dont like the headline": of four offered he picked the ClickFunnels page's own, "We Copied The
+    Chord Progressions Of Top Hits So You Can Use Them." (words.ts hero.title, the share title too).
+  - "it doesnt look like a launch page... there's no countdown", "THE PAGE...IT HAS TO LOOK AND
+    SOUND LIKE A BIG DEAL": while the launch price is in force (`launchOn`) the red bar has the
+    clock to its end, the pre-title says "NEW RELEASE · LAUNCH WEEK", four big numbers (days, hours,
+    min, sec) sit under the sub with "€27 instead of €97 for the first 100 copies, or until Sunday
+    at midnight PT", every button has "Launch price €27 · ends in … · then €97" over it and
+    "€27 instead of €97" inside it (Countdown.tsx; the clock is the browser's, the end is real:
+    funnel.ts `launch.ends`). After the end all of it goes and the page is as before.
+  - "27 value? should be more... the sum of everything before any discount": in the value stack the
+    bundle is worth its regular price (97) while the launch price runs, so Total value €289,
+    Today €27, You save €262; the order page shows "Total value €289" beside "Today €27".
+  - "there should be a box for every folder inside the bundle otherwise what bundle is it": a
+    section "One bundle. Four folders of hits." before the player, a box per folder (GPT Image 2.6
+    from the bundle's box, his short prompt; names and counts checked on the pictures:
+    folder-pop / -hiphop / -dance / -vintage), with its count, its files in 12 keys and the
+    artists with the most songs in it (funnel.ts `folders`).
+  - "trascribe them in any key so they become 12000 MIDI Files": tools/top_hits_keys.py writes every
+    file of the pack that has notes in all 12 keys (the notes moved -5 to +6 semitones, the rest
+    byte for byte; 150 songs checked note by note). 998 of the 1,000 files: "LE SSERAFIM - Perfect
+    Night" has no notes and "Ed Sheeran - I Don't Care … copy" is the same file twice. 998 × 12 =
+    **11,976 MIDI files**, the number the pages say (not 12,000: two more real transcriptions would
+    make it). They are the folder "3. All 12 Keys" (genre / song / 12 files) of the buyers' zip
+    since 16:20 CET, beside the pack as it was; on the T7 "5. All 12 Keys (11,976 MIDI)". The zip
+    before it is in R2 `top-hits-midi-bundle/backup/`. The launch emails still say "1,000 chord
+    progressions" (true) and don't mention the keys.
   - Not done: no proof email (no reviews); no paid test order.
 - 2026-11-10: "crea nuovo funnel per TOP HITS MIDI Bundle con TUTTO." Built as Famous Beats v2 was
   (../famous-beats-bundle/BRIEF.md), with everything that funnel got in several rounds done at once:
@@ -87,6 +114,9 @@ Source: `…/02. All products/11. TOP HITS MIDI Bundle/1. Hitmaker MIDI Pack`, r
 - Genres as the live page names them: Pop, Trap, R&B, Country, EDM, Afrobeats, K-pop, Latin.
 - The zip (R2 `top-hits-midi-bundle/TOP HITS MIDI Bundle.zip`) also holds The Chord Progressions Bible
   (150 MIDI + 258 WAV), which is bonus 1 on the page.
+- Since 2026-11-15 also in all 12 keys: folder "3. All 12 Keys" of the zip, 998 songs × 12 = 11,976
+  MIDI files (Modern Pop & Ballads 6,648, Hiphop, Trap & Urban 2,280, Dance & Electronic 1,752,
+  Vintage Classics, Rock & Country 1,296); the original key is one of the twelve.
 - Any DAW (FL Studio, Ableton Live, Logic Pro, Pro Tools, Studio One, Cubase, Reaper, Bitwig, GarageBand),
   Mac and Windows, mobile DAWs that read MIDI. Commercial license; the MIDI files can't be resold or shared.
 - A transcriber charges €10–30 per song and takes 3–7 days (the live page's comparison). Price per

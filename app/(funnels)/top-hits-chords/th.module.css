@@ -129,3 +129,167 @@
     justify-content: flex-start;
   }
 }
+
+/* ─── the launch (2026-11-16 → 22): the clock, the line over the buttons ───────── */
+.clockText {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.launch {
+  margin: 22px auto 0;
+  max-width: 560px;
+  text-align: center;
+}
+.launchTitle {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f5b800;
+}
+.clock {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+.clock span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 4px 10px;
+  border-radius: 4px;
+  background: #0d0c10;
+}
+.clock b {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(38px, 11vw, 64px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #f5b800;
+}
+.clock i {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.62);
+}
+.launchNote {
+  margin-top: 12px;
+  font-size: clamp(15px, 2vw, 17px);
+  font-weight: 700;
+  line-height: 1.4;
+  color: #fff;
+  text-wrap: balance;
+}
+.launchNote b {
+  color: #f5b800;
+}
+.launchNote s {
+  color: rgb(255 255 255 / 0.62);
+  font-weight: 600;
+}
+.launchLine {
+  margin: 0 auto 12px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  text-wrap: balance;
+}
+.launchLine b {
+  color: #f5b800;
+}
+
+/* ─── the bundle's four folders, a box each ───────────────────────────────────── */
+.folders {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 28px;
+  list-style: none;
+  padding: 0;
+}
+.folder {
+  display: grid;
+  grid-template-columns: 118px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 18px 18px 20px;
+  border-radius: 12px;
+  background: #0d0c10;
+}
+.folder img {
+  display: block;
+  width: 100%;
+  height: auto;
+  mix-blend-mode: lighten; /* the box comes on black: the panel shows through it */
+}
+.folderN {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f5b800;
+}
+.folder h3 {
+  margin-top: 4px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+.folderCount {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #fff;
+}
+.folderCount b {
+  color: #f5b800;
+}
+.folderArtists {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.62);
+}
+.foldersSum {
+  margin-top: 22px;
+  text-align: center;
+  font-size: clamp(17px, 2.4vw, 21px);
+  font-weight: 700;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+.foldersSum b {
+  color: #f5b800;
+}
+@media (min-width: 760px) {
+  .folders {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .folder {
+    grid-template-columns: 190px 1fr;
+    gap: 22px;
+    padding: 24px 26px;
+  }
+  .folderCount {
+    font-size: 16px;
+  }
+  .folderArtists {
+    font-size: 14px;
+  }
+}
