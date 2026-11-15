@@ -15,7 +15,7 @@ import { Beacon } from "../../../Beacon";
 import { display } from "../../../jazz-midi-pack/fonts";
 import c from "../../../jazz-midi-pack/fiveMinBonus.module.css";
 import s from "../../../jazz-midi-pack/jazz.module.css";
-import { funnel } from "../../funnel";
+import { funnel, launch, launchOn } from "../../funnel";
 import { TH_BONUS, TH_BONUS_WORDS } from "../../fiveMinBonus";
 import { BUMP_COPY, LANDING, ORDER } from "../../words";
 
@@ -96,7 +96,15 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
       {ex && <script dangerouslySetInnerHTML={{ __html: bonusScript(TH_BONUS.endKey) }} />}
       <div className={s.bfbar}>
-        <b>BLACK FRIDAY:</b> {w.bfbar}
+        {launchOn(amount, currency) ? (
+          <>
+            <b>LAUNCH PRICE:</b> {price} until Sunday midnight PT, then {money(launch.after[currency], currency)}
+          </>
+        ) : (
+          <>
+            <b>BLACK FRIDAY:</b> {w.bfbar}
+          </>
+        )}
       </div>
       <div className={s.topband}>
         <header className={`${s.wrap} ${s.topbar}`}>

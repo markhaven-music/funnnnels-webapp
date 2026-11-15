@@ -9,7 +9,7 @@ import { Beacon } from "../../Beacon";
 import { Cta } from "../../jazz-midi-pack/Cta";
 import { display } from "../../jazz-midi-pack/fonts";
 import { Tracking } from "../../top-hits-midi-bundle/Tracking";
-import { funnel } from "../funnel";
+import { funnel, launch, launchOn } from "../funnel";
 import { BigRoll, HeroRolls } from "../Rolls";
 import { SongPlayer } from "../SongPlayer";
 import { LANDING } from "../words";
@@ -100,7 +100,15 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
       <script dangerouslySetInnerHTML={{ __html: CARRY_SCRIPT }} />
       {/* Red, on top, like the Jazz page's. */}
       <div className={s.bfbar}>
-        <b>BLACK FRIDAY:</b> 90% Sale Ends Soon
+        {launchOn(amount, currency) ? (
+          <>
+            <b>LAUNCH PRICE:</b> {price} until Sunday midnight PT, then {money(launch.after[currency], currency)}
+          </>
+        ) : (
+          <>
+            <b>BLACK FRIDAY:</b> 90% Sale Ends Soon
+          </>
+        )}
       </div>
 
       <section id="hero" className={s.hero}>

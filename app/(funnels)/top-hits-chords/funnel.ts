@@ -116,5 +116,17 @@ export const funnel = {
   counts: { progressions: 1000, artists: 478 },
 } as const;
 
+// The launch (BRIEF.md, 2026-11-15, "Sun 22 Nov, midnight"): €27 / $27 until Sunday 22 Nov at
+// midnight Pacific time, or the first 100 copies; then 97 again. The database ends it
+// (db/top-hits-launch-close.sql); the pages only say it, in the red bar, while it's true.
+export const launch = {
+  price: { eur: 27, usd: 27 },
+  after: { eur: 97, usd: 97 },
+  ends: Date.parse("2026-11-23T08:00:00Z"),
+} as const;
+
+/** Is the launch price the one in force? `amount` is the price dashboard → Products has now. */
+export const launchOn = (amount: number, currency: "eur" | "usd", now = Date.now()) => now < launch.ends && amount === launch.price[currency];
+
 /** An order's files: what it bought, plus what those bring along (`includes`). */
 export const unlocked = (items: readonly string[]) => [...new Set(items.flatMap((i) => [i, ...(funnel.includes[i] ?? [])]))];

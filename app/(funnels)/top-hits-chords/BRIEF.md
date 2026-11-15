@@ -39,8 +39,11 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
     Drum Kit and Famous Beats emails moved after the close (24 to 30) with the kit's present numbers
     (10,296 MIDI files, 6 bonuses); "Try a genre you never make" and "Last note on TOP HITS" are
     drafts again.
-  - Not done: no deadline on the page itself (the red bar still says "BLACK FRIDAY: 90% Sale Ends
-    Soon"); no proof email (no reviews); no paid test order.
+  - "si fai tutto e poi mostrami la pagina" (2026-11-15): the three closing emails and "closed" are
+    scheduled as written; the red bar of the landing and the order page says "LAUNCH PRICE: €27
+    until Sunday midnight PT, then €97" while the launch price is the one in force (`launchOn` in
+    funnel.ts: before the end and the Products price still 27), and "BLACK FRIDAY: …" again after.
+  - Not done: no proof email (no reviews); no paid test order.
 - 2026-11-10: "crea nuovo funnel per TOP HITS MIDI Bundle con TUTTO." Built as Famous Beats v2 was
   (../famous-beats-bundle/BRIEF.md), with everything that funnel got in several rounds done at once:
   the Jazz page's CSS and section order, a player of every file, renders from the real box, six
