@@ -702,11 +702,12 @@ const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 const SHOTS = "/funnels/dashboard/tests";
 /** The UTC day before a UTC midnight ("2026-11-14T00:00:00Z" → "2026-11-13"). */
 const dayBefore = (iso: string) => new Date(Date.parse(iso) - 86_400_000).toISOString().slice(0, 10);
-const FBB_LABELS: Record<string, string> = { "fbb-old": "Old · the Astro page", "fbb-jazz": "Jazz-style · the page since 11-10", "fbb-v3": "v3 · Jazz-style, in the Drum Kit landing's order" };
+const FBB_LABELS: Record<string, string> = { "fbb-old": "Old · the Astro page", "fbb-jazz": "Jazz-style · the page since 11-10", "fbb-v3": "v3 · Jazz-style, in the Drum Kit landing's order", "fbb-cf": "ClickFunnels · the red page" };
 const FBB_COLORS: Record<string, { from: string; to: string }> = {
   "fbb-old": { from: "#94a3b8", to: "#64748b" },
   "fbb-jazz": { from: "#fbbf24", to: "#f59e0b" },
   "fbb-v3": { from: "#c084fc", to: "#22d3ee" },
+  "fbb-cf": { from: "#f87171", to: "#dc2626" },
 };
 export const TESTS: TestDef[] = [
   {
@@ -836,7 +837,7 @@ export const TESTS: TestDef[] = [
     name: "Landing",
     question: "Which Famous Beats landing sells more?",
     live: Object.fromEntries(FBB_LP.variants.map((v) => [v, `https://m.thegrind.studio/famous-beats-bundle?lp=${v.slice(4)}&preview=1`])),
-    where: "Landing, English · the visitors split evenly at the same address, each kept on their page · the same order page after each · Old = the page cloned from the Astro site, live 11-03 → 11-10 · Jazz-style = the page built like the Jazz MIDI Pack's, the only one 11-10 → 11-15 · v3 = the Jazz-style page's sections in the new MIDI Drum Kit landing's order: the player right after the hero, the producers' quotes after the product, the bonuses and the offer before the steps and the chart (in the split since 11-15 evening, ~2 hours after the other two)",
+    where: "Landing, English · the visitors split evenly at the same address, each kept on their page · the same order page after each · Old = the page cloned from the Astro site, live 11-03 → 11-10 · Jazz-style = the page built like the Jazz MIDI Pack's, the only one 11-10 → 11-15 · v3 = the Jazz-style page's sections in the new MIDI Drum Kit landing's order: the player right after the hero, the producers' quotes after the product, the bonuses and the offer before the steps and the chart (in the split since 11-15 evening, ~2 hours after the other two) · ClickFunnels = its red Famous Beats page as a landing (the Drum Kit's upsell page, upsell words and No links out), in the split since 11-15 ~18:00 UTC; from then on new visitors draw Jazz-style, v3 or ClickFunnels, Old keeps only those who had it",
     variants: FBB_LP.variants,
     label: (v) => FBB_LABELS[v] ?? v,
     color: (v) => FBB_COLORS[v] ?? { from: "#94a3b8", to: "#64748b" },

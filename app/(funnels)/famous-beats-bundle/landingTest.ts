@@ -19,10 +19,17 @@ export const FBB_LP = {
    * fbb-jazz: the Jazz-style page, the only one since 11-10 (./[currency]/page.tsx).
    * fbb-v3: the same page in the new MIDI Drum Kit landing's order, the player right after the hero
    *   (./v3, added 2026-11-15 ~2 hours into the test: "just model it after jazz and midi drum kit").
+   * fbb-cf: ClickFunnels' red Famous Beats page as a landing (./cfLanding.ts, ./cf), added the same evening
+   *   ("i meant 3 version like, one of them should be the clickfunnel one with the red background").
    */
-  variants: ["fbb-old", "fbb-jazz", "fbb-v3"] as const,
+  variants: ["fbb-old", "fbb-jazz", "fbb-v3", "fbb-cf"] as const,
+  /**
+   * The pages a new visitor can draw, evenly. fbb-old left the draw when fbb-cf came in (the three the user
+   * meant: ClickFunnels', Jazz-style, Jazz + Drum Kit); whoever already has it keeps it, and it stays counted.
+   */
+  split: ["fbb-jazz", "fbb-v3", "fbb-cf"] as readonly string[],
   /** Each page's route under /famous-beats-bundle, before the currency. */
-  route: { "fbb-old": "/old", "fbb-jazz": "", "fbb-v3": "/v3" } as Record<string, string>,
+  route: { "fbb-old": "/old", "fbb-jazz": "", "fbb-v3": "/v3", "fbb-cf": "/cf" } as Record<string, string>,
   /** When the test went live (its deploy). */
   from: "2026-11-15T15:07:00Z",
 };

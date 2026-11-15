@@ -233,7 +233,7 @@ function priceTag(amount: number, currency: Currency, lang: Lang): string {
 // ClickFunnels' own bar on top ("ONE TIME OFFER...", a fixed 73 % / 90 %): its section, replaced by stepsBar.
 // And the GRIND STUDIO logo above the headline keeps its place while it loads (it had no
 // aspect ratio, so the video and everything under it jumped: CLS 0.18 on PageSpeed).
-const HIDE_CF_BAR = '.id-6Z-8MQNDX-8{display:none!important}img[src^="/funnels/midi-drum-kit/up-19479683"]{aspect-ratio:2118/242;height:auto!important}';
+export const HIDE_CF_BAR = '.id-6Z-8MQNDX-8{display:none!important}img[src^="/funnels/midi-drum-kit/up-19479683"]{aspect-ratio:2118/242;height:auto!important}';
 
 // Where the buyer is (2026-11-08, "metti una barra progress in linea con lo step in
 // cui siamo. fai capire che ci sono altri steps"): on top of every upsell page,
@@ -306,7 +306,7 @@ a.elButton[href="#no"]:hover{background:rgba(0,0,0,.75)!important}
 // without it they'd stay invisible, so they're simply shown.
 // Its buttons are white with dark words and turn black on hover, words still dark
 // (unreadable): on hover the words turn white.
-const FIXES = `[data-animation-type]{opacity:1!important;visibility:visible!important}
+export const FIXES = `[data-animation-type]{opacity:1!important;visibility:visible!important}
 .elButton:hover .elButtonText,.elButton.elButtonHovered .elButtonText{color:#fff!important}
 ${CHOICE_CSS}`;
 

@@ -94,3 +94,12 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
   (no reviews: still the user's call). One component draws both orders (./_v2/Landing.tsx ORDER). In the split from
   ~17:00 UTC, about two hours after the other two: three pages, a third of the new visitors each; visitors who
   already drew a page keep it. Look: ?lp=v3&preview=1.
+- 2026-11-15 evening: "i meant 3 version like, one of them should be the clickfunnel one with the red background",
+  "we have run it already on funnels". `fbb-cf` (route ./cf, ./cfLanding.ts): ClickFunnels' own red Famous Beats page,
+  in the code as the Drum Kit's upsell (midi-drum-kit/cf/upsell-famous.ts + copy/upsell-famous/en.json), as a landing.
+  Changed only what belongs to an upsell: the "WAIT! … ONE-TIME OFFER" line → the Black Friday line, "ADD TO MY ORDER"
+  → "GET THE BUNDLE" (links to the order page), the No links, the CF offer bar and the 5:00 "reserved" popup out, and
+  the upsell's video ("Wait. Before you go…", "Add it to your order") → the bundle's own (22n1sjknnn). Its other claims
+  are ClickFunnels' as they ran ("platinum-certified producers", "multi-platinum plaques", "Limited To The First 100
+  Copies", €20 per transcription = €6,400). New visitors now draw fbb-jazz, fbb-v3 or fbb-cf (FBB_LP.split); fbb-old
+  left the draw (those who have it keep it, still counted). Look: ?lp=cf&preview=1.

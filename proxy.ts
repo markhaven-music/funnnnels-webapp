@@ -250,7 +250,7 @@ function fbbVariant(request: NextRequest): { variant: FbbLp; assign: boolean } {
   if (isFbbLp(asked)) return { variant: asked, assign: false };
   const kept = request.cookies.get(FBB_LP.cookie)?.value;
   if (isFbbLp(kept)) return { variant: kept, assign: false };
-  return { variant: FBB_LP.variants[Math.floor(Math.random() * FBB_LP.variants.length)], assign: true };
+  return { variant: FBB_LP.split[Math.floor(Math.random() * FBB_LP.split.length)] as FbbLp, assign: true };
 }
 
 const challenge = () =>
