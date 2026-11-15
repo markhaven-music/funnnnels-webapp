@@ -185,12 +185,14 @@ export const funnel = {
   // this funnel, as after the TOP HITS order. Not a tick-box offer here, so
   // nobody sees it twice. Price and name: dashboard → Products (funnel_items).
   // 2026-11-15 ("Sì, parti"): a ladder. First Vol. 2 (./vol2, 82 more progressions through the same engine,
-  // sold only on that page, 27), an upgrade of what was just bought; Famous Beats stays second until the
+  // sold only on that page), an upgrade of what was just bought; Famous Beats stays second until the
   // Complete Collection page replaces it. Vol. 2 is on sale only once funnel_items has its row (lib/funnels.ts
   // withItems keeps the upsells the database lists): until then its page is a preview and Yes answers
   // "This offer isn't available".
   offers: [
-    { id: "vol2", path: "vol2", name: "Jazz MIDI Pack Vol. 2", price: { eur: 27, usd: 27 } },
+    // Vol. 2 costs what the pack costs here ("il prezzo dell'upsell facciamo lo stesso prezzo del volume 1?
+    // 27 o 37 quello che sia", 2026-11-15): 37 today. Change the two together, here and in funnel_items.
+    { id: "vol2", path: "vol2", name: "Jazz MIDI Pack Vol. 2", price: { eur: 37, usd: 37 } },
     { id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } },
   ],
   checkout: {
