@@ -61,6 +61,16 @@ export const funnel = {
       image: "/funnels/jazz-midi-pack/bump-grooves.webp",
       pitch: "The drunk, J Dilla-style swing of lofi and neo soul: 80 MIDI drum grooves (snare on 2 and 4 and half-time, 4 feels incl. quintuplet swing, drum rack and multitrack) and 31 groove templates for any MIDI. Snare on the beat, everything else laid back.",
     },
+    // The MIDI Drum Kit's €7 add-on, here since 2026-11-15 ("mi piacciono le tue idee per i prodotti 1,2
+    // falle": 2 = this one): on the Drum Kit's order page 14 of 32 buyers took it, and lofi and house are
+    // genres this page sells. The same zip (R2), the picture the Drum Kit's order page shows.
+    {
+      id: "expansions",
+      name: "MIDI Drum Kit Expansions (House, Lo-Fi, Afrobeat)",
+      price: { eur: 7, usd: 7 },
+      image: "/funnels/midi-drum-kit/bump-expansions.webp",
+      pitch: "172 MIDI drum files: complete beats for Lo-Fi, House and Afrobeat, to put under your jazz chords.",
+    },
     {
       id: "top-hits",
       name: "TOP HITS MIDI Bundle",
@@ -163,6 +173,7 @@ export const funnel = {
     "emotional-keys": "jazz-midi-pack/Emotional Keys MIDI Bundle.zip",
     "drum-loops": "jazz-midi-pack/Drum Loops for Songwriting.zip",
     "record-samples": "jazz-midi-pack/Jazz Record Samples.zip",
+    expansions: "midi-drum-kit/EXPLORER Expansions (House, Lofi, Afrobeat).zip",
     // The one-click upsell's zip (offers below), the one the other funnels sell.
     "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
   } as Record<string, string>,
@@ -248,6 +259,12 @@ export const bumpCopy: Record<string, { headline: string; body: string[] }> = {
     body: [
       "1000 chord progressions from the biggest hits (Drake, Kendrick Lamar, Travis Scott, Lil Baby, The Weeknd and more) as **drag-and-drop MIDI files**. Put one under your drums and your beat has a hit's harmony. Add it now for just {c}27.",
       "Once you complete your order this box is gone: tick it now and the bundle lands in the same download.",
+    ],
+  },
+  expansions: {
+    headline: "YES! Add the MIDI Drum Kit Expansions!",
+    body: [
+      "172 MIDI drum files: **complete beats for Lo-Fi, House and Afrobeat**. Drag one under your jazz chords and the drums are done. Add them now for just {c}7.",
     ],
   },
   "drum-kit": {

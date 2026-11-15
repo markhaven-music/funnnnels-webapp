@@ -290,3 +290,7 @@ as an endorsement). No customer reviews: none exist for this pack (see Brand pro
   square art on a flat black front, not a box render like the other six.
 - The VSL still says six bonuses.
 - Read in Analytics → "Price: 27 vs 37" (priceTest.ts): 37 wins while it loses fewer than 27 % of the orders.
+- Same evening, "mi piacciono le tue idee per i prodotti 1,2 falle": (2) the MIDI Drum Kit Expansions (172 MIDI drum
+  files: Lo-Fi, House, Afrobeat) are a 7 add-on on the order page, second after Drunk Swing Grooves. (1) a new
+  "Jazz Expansion" add-on was not built: another session made Jazz MIDI Pack Vol. 2 that evening (82 more
+  progressions: neo soul and R&B, gospel, blues and funk, bossa) as the one-click upsell, the same idea.
