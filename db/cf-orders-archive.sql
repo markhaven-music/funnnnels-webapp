@@ -9,8 +9,9 @@
 --
 -- cf_exports holds the file as downloaded (byte for byte, with its sha256);
 -- cf_orders one row per order: a few columns to query by, and `raw` with
--- every column of the file as ClickFunnels wrote it. Nothing reads these in
--- the app; they're an archive. Holds names, emails and addresses:
+-- every column of the file as ClickFunnels wrote it. An archive: nothing
+-- writes to these; dashboard → ClickFunnels reads cf_orders (lib/cfOrders.ts,
+-- since 2026-11-15). Holds names, emails and addresses:
 -- RLS on, no policies, so only the service role reads them.
 
 create table public.cf_exports (
