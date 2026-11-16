@@ -32,6 +32,14 @@ a request conflict, the request wins; say which rule you are breaking.
   points. See `docs/copy-style.md` where it exists.
 - Headlines say the problem or the promise at once. No eyebrow lines above the
   headlines (the small uppercase labels): removed on 2026-11-02.
+- Headlines break where the sense breaks (the user, 2026-11-16: "sono spezzate
+  non hanno estetica"). One sentence or phrase per line, never a line that
+  starts mid-phrase ("Now the / part where…") or ends on a lone word. Two
+  sentences = two lines: "The drums are done." / "Now the part where most beats
+  die." Set the breaks by hand (`<br className="hidden sm:block" />` or one
+  `<span className="block">` per phrase) plus `text-wrap: balance` on every
+  h1/h2, and keep a highlight inside one line. Check at desktop AND 375px; if
+  a phrase won't fit one desktop line, shorten it or lower the size a step.
 - The guarantee is a **14-day quality guarantee**. Never "money back" (or "Geld zurück", "rimborsati"…) anywhere on the site, in any language (the user, 2026-11-08). If we can't fix a file: "you get a refund".
 - Numbers are real and consistent across the page (the pack's count, the
   bonuses' count, the total only as "in total").
