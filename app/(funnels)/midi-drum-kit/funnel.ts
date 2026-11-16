@@ -94,6 +94,9 @@ export const funnel = {
     bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
     // The Jazz MIDI Pack's seventh bonus since 2026-11-15, part of All Access.
     "record-samples": "jazz-midi-pack/Jazz Record Samples.zip",
+    // Jazz MIDI Pack Vol. 2, part of All Access since 2026-11-16 evening ("Metti anche Jazz MIDI Pack Vol.2"):
+    // the Jazz funnel's own zip (jazz-midi-pack/funnel.ts files.vol2).
+    "jazz-vol2": "jazz-midi-pack/Jazz MIDI Pack Vol. 2.zip",
     // Three more bonuses with the kit since 2026-11-12 ("rendiamola come jazz, aggiungi i bonus":
     // the MYSTERY Hooks Pack, Drunk Swing Grooves, and a PDF guide like the Jazz pack's), each its
     // own download beside the bundle's zip (`includes.pack`). The guide: tools/drum_kit_guide.py.
@@ -127,7 +130,7 @@ export const funnel = {
   // all-access: every pack sold on its own (the Jazz MIDI Pack with its bonuses, Famous Beats, TOP HITS,
   // HUSTLE, the Expansions), each its own download; one level only, so every file is named here.
   includes: {
-    "all-access": ["jazz", "jazz-chords", "bible", "anime-pack", "emotional-keys", "drum-loops", "record-samples", "famous-beats", "top-hits", "hustle", "expansions"],
+    "all-access": ["jazz", "jazz-vol2", "jazz-chords", "bible", "anime-pack", "emotional-keys", "drum-loops", "record-samples", "famous-beats", "top-hits", "hustle", "expansions"],
     pack: ["swing-grooves", "hooks", "guide"], chords: ["drum-loops", "emotional-keys"], jazz: ["jazz-chords", "bible", "anime-pack", "emotional-keys", "drum-loops"] } as Record<string, readonly string[]>,
   // Download labels for the files that aren't the pack or an add-on.
   fileNames: {
@@ -140,6 +143,7 @@ export const funnel = {
     hooks: "Bonus: MYSTERY Hooks Pack (17 WAV Hooks)",
     guide: "Bonus: MIDI Drum Kit Guide (PDF)",
     "record-samples": "Jazz Record Samples (122 WAV Loops)",
+    "jazz-vol2": "Jazz MIDI Pack Vol. 2",
   } as Record<string, string>,
   checkout: {
     leadTags: ["checkout-started"],

@@ -392,3 +392,7 @@
   max-width: 900px;
   margin: 0 auto;
 }
+.beatSub {
+  color: rgb(255 255 255 / 0.62);
+  font-weight: 400;
+}

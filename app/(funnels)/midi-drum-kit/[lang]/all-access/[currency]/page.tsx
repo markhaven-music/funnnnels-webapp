@@ -62,6 +62,21 @@ const PACKS = [
     h: 741,
   },
   {
+    name: "Jazz MIDI Pack Vol. 2",
+    feel: "For when you’ve played Vol. 1 to death and want more.",
+    head: "82 new progressions. New moods, same engine.",
+    body: "Late-night neo soul, Sunday-morning gospel, gritty blues, bossa, city pop sunsets and the chords from the last scene of a film. Everything you love about Vol. 1, in progressions you haven’t heard yet, with colours Vol. 1 doesn’t use.",
+    inside: [
+      "10,496 MIDI files: 82 new progressions × 12 voicings × 8 rhythms",
+      "Every progression in every key, bass lines, combo loops",
+      "Lofi, neo soul, trap soul and deep house loops with chords, bass and drums split",
+    ],
+    full: { eur: 37, usd: 37 },
+    image: "/funnels/jazz-midi-pack/box-vol2-520.webp",
+    w: 520,
+    h: 768,
+  },
+  {
     name: "Famous Beats Bundle",
     feel: "For the groove you heard on a record and can’t get out of your head.",
     head: "The drums from the songs you grew up on.",
@@ -142,21 +157,21 @@ export default async function AllAccess({ params }: { params: Params }) {
             <em className={`${j.hl} ${u.line}`}>Now the part where most beats die.</em>
           </h1>
           <p className={u.sub}>
-            The chords, the melody, the groove that makes a loop feel like a song. All Access is five of our packs in one download, for
+            The chords, the melody, the groove that makes a loop feel like a song. All Access is six of our packs in one download, for
             every night you sit down and want the beat to finally sound like the music in your head.
           </p>
           <img
             className={u.hero}
-            src="/funnels/midi-drum-kit/all-access-1024.webp"
-            srcSet="/funnels/midi-drum-kit/all-access-640.webp 640w, /funnels/midi-drum-kit/all-access-1024.webp 1024w"
+            src="/funnels/midi-drum-kit/all-access6-1280.webp"
+            srcSet="/funnels/midi-drum-kit/all-access6-720.webp 720w, /funnels/midi-drum-kit/all-access6-1280.webp 1280w"
             sizes="(max-width: 760px) 100vw, 760px"
-            width={1024}
-            height={688}
-            alt="GRIND STUDIO All Access: the Jazz MIDI Pack, Famous Beats Bundle, TOP HITS MIDI Bundle, HUSTLE Bundle and Drum Kit Expansions"
+            width={1280}
+            height={658}
+            alt="GRIND STUDIO All Access: the Jazz MIDI Pack, Jazz MIDI Pack Vol. 2, Famous Beats Bundle, TOP HITS MIDI Bundle, HUSTLE Bundle and Drum Kit Expansions"
             fetchPriority="high"
           />
           <p className={u.sum}>
-            Five packs. <s>{full}</s> at full price. Yours today for <em className={j.hl}>{price}</em>.
+            Six packs. <s>{full}</s> at full price. Yours today for <em className={j.hl}>{price}</em>.
           </p>
           <Buttons price={price} />
         </div>
@@ -180,7 +195,7 @@ export default async function AllAccess({ params }: { params: Params }) {
               records they’ve taken apart. That’s what makes them fast. That’s what makes it sound finished.
             </p>
             <p>
-              All Access hands you that library. Warm jazz chords for the late nights, the drums from the records you love, the progressions
+              All Access hands you that library. Two volumes of warm jazz chords for the late nights, the drums from the records you love, the progressions
               under the biggest hits, 31 packs for the days nothing comes, and your Drum Kit in three new styles. Whatever the beat asks for,
               it’s already in your folder.
             </p>
@@ -193,7 +208,7 @@ export default async function AllAccess({ params }: { params: Params }) {
           <h2 className={u.h2}>
             <span className={u.line}>Don’t take our word for it.</span> <em className={`${j.hl} ${u.line}`}>Press play.</em>
           </h2>
-          <p className={u.lead}>Real files from the packs. Put your headphones on.</p>
+          <p className={u.lead}>Real files from the packs. Press play and turn it up.</p>
           <Listen />
         </div>
       </section>
@@ -201,7 +216,7 @@ export default async function AllAccess({ params }: { params: Params }) {
       <section className={`${j.sec} ${u.sec}`}>
         <div className={j.wrap}>
           <h2 className={`${u.h2} ${u.center}`}>
-            <span className={u.line}>Five packs.</span> <em className={`${j.hl} ${u.line}`}>One for every mood a beat can have.</em>
+            <span className={u.line}>Six packs.</span> <em className={`${j.hl} ${u.line}`}>One for every mood a beat can have.</em>
           </h2>
           <div className={u.panels}>
             {PACKS.map((p) => (
@@ -232,7 +247,7 @@ export default async function AllAccess({ params }: { params: Params }) {
       <section className={`${j.sec} ${u.sec} ${u.dark}`}>
         <div className={u.col}>
           <h2 className={`${u.h2} ${u.center}`}>
-            <span className={u.line}>Five packs.</span> <em className={`${j.hl} ${u.line}`}>For the price of one.</em>
+            <span className={u.line}>Six packs.</span> <em className={`${j.hl} ${u.line}`}>For the price of one.</em>
           </h2>
           <ul className={u.stack}>
             {PACKS.map((p) => (
@@ -328,9 +343,9 @@ export default async function AllAccess({ params }: { params: Params }) {
           </h2>
           <img
             className={u.heroSm}
-            src="/funnels/midi-drum-kit/all-access-640.webp"
-            width={640}
-            height={430}
+            src="/funnels/midi-drum-kit/all-access6-720.webp"
+            width={720}
+            height={370}
             alt=""
             loading="lazy"
             decoding="async"
@@ -362,7 +377,7 @@ function Buttons({ price }: { price: string }) {
       <a href="#yes" data-oto="yes" className={b.btn}>
         <span className={b.shine} aria-hidden />
         <span className={b.label}>
-          <span className="elButtonMainText">Yes, I want all five</span>
+          <span className="elButtonMainText">Yes, I want all six</span>
           <Arrow className={b.arrow} />
         </span>
         <span className={b.inner}>{price} · instant download</span>
