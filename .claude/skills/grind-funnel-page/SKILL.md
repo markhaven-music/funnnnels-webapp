@@ -30,6 +30,15 @@ a request conflict, the request wins; say which rule you are breaking.
   empty adjectives (premium, professional, unlock, next level), no fake
   urgency, no "worth $X" stacks, no success promises. Specs are the selling
   points. See `docs/copy-style.md` where it exists.
+- Sales pages speak to feelings and desires (the user, 2026-11-16: "linguaggio
+  emotivo, cater to client feelings and desires"): the night the loop won't
+  become a song, the wish to finish beats and sound like the records they love.
+  Still no exclamation marks or empty adjectives, every fact from the BRIEF.
+  An offer from ~€47 up gets a long page to scroll, listen to and be convinced
+  by ("non puoi aspettarti di vendere 97 euro senza una pagina da scrollare"):
+  letter, real files to play, product by product, value, before/after,
+  guarantee, FAQ, CTA repeated. Producers love software boxes: show every
+  product as its 3D box (generate one when it has none).
 - Headlines say the problem or the promise at once. No eyebrow lines above the
   headlines (the small uppercase labels): removed on 2026-11-02.
 - Headlines break where the sense breaks (the user, 2026-11-16: "sono spezzate
