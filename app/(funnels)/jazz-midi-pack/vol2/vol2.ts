@@ -1,7 +1,7 @@
 // Jazz MIDI Pack Vol. 2: what the upsell page may say about it. Counted from ~/Desktop/Jazz MIDI Pack Vol. 2
-// on 2026-11-15 (make_pack_vol2.py: 10,496 files parsed back, no empty file, no hanging note; its check()
-// compares every progression with Vol. 1's in every key and rotation). groups.json and rolls.json beside
-// this file come from the same run.
+// (make_pack_vol2.py: 10,496 files parsed back, no empty file, no hanging note; its check() compares every
+// progression with Vol. 1's in every key and rotation). groups.json beside this file and the previews in
+// public/funnels/jazz-midi-pack/vol2-v1 come from the same build (vol2_page_data.py).
 export const vol2 = {
   id: "vol2",
   name: "Jazz MIDI Pack Vol. 2",
@@ -18,4 +18,13 @@ export const vol2 = {
   ],
   // Qualities make_pack_vol2.py adds to the voicings (mp.Q.update): none of them is in a Vol. 1 file.
   colours: ["6/9", "9sus4", "13sus4", "maj7(#11)", "9(#11)", "minor-major 9"],
+  // The four groups as the page says them (2026-11-16, "frame this Vol.2 emotionally … cater to the feelings of
+  // the customer and their desires"): how each one feels, in groups.json's order. The pack's own README keeps
+  // make_pack_vol2.py's plain descriptions.
+  moods: [
+    "The Rhodes at 2 a.m. Warm, a little sad, and you can’t stop nodding to it.",
+    "Chords that lift you off your chair. Walk-ups, church endings, the moment a room goes quiet.",
+    "Grit and swagger. Dominant chords that strut, and vamps you can ride for five minutes.",
+    "Summer evenings and cities after dark. Every one of these puts you somewhere.",
+  ],
 } as const;

@@ -1,108 +1,550 @@
-[
- {
-  "title": "Neo soul and R&B",
-  "blurb": "Ninths, thirteenths and suspended dominants: the chords under every Rhodes loop.",
-  "names": [
-   "Neo Soul ii-V-I (sus to 13)",
-   "Rhodes Ballad (8 bars)",
-   "R&B Loop IV-iii-vi (8 bars)",
-   "Late Night I-iii-IV-iv (8 bars)",
-   "ii-V to the IV and Back (8 bars)",
-   "Slow Jam ii-V-iii-VI (8 bars)",
-   "Chromatic ii-V into the Cadence",
-   "Deceptive V to bVI (8 bars)",
-   "Major Line Cliche (8 bars)",
-   "Backdoor Lift (bVI-bVII-I)",
-   "Falling Major Sevenths (I-bIII-ii-bII)",
-   "ii-bII-I (soft tritone sub)",
-   "Three-Six-Two-Five with Ninths",
-   "Minor Ninths Falling (8 bars)",
-   "i-iv Minor Vamp with a Tritone Sub",
-   "Minor Soul i-bIII-iv-V",
-   "Minor Eleven Side-Slip",
-   "Suspended Plane (four sus chords)",
-   "vi-ii-V to a Lydian Tonic",
-   "Major Ninths Down Minor Thirds",
-   "Minor Ballad with a Lydian bII (8 bars)",
-   "ii-V Up Minor Thirds"
-  ]
- },
- {
-  "title": "Gospel and soul",
-  "blurb": "Six-nine tonics, walk-ups, passing diminished chords and endings that take their time.",
-  "names": [
-   "Gospel 7-3-6-2-5-1",
-   "Sunday Ballad (16 bars)",
-   "Descending Bass Soul Ballad (8 bars)",
-   "I-III7-vi Soul Climb (8 bars)",
-   "Gospel IV-#IVdim Lift (8 bars)",
-   "Doo-Wop with Ninths (I-vi-IV-V)",
-   "Double Plagal (bVII-IV-I)",
-   "Stepwise Soul Vamp (I-ii-iii-ii)",
-   "Diminished Passing Down (I-bIIIdim-ii-V)",
-   "Gospel Ending (bII Lydian to I)",
-   "Soul Dominant Vamp (I7-IV7)",
-   "All-Dominant Turnaround (I-VI-II-V)",
-   "Key Lift (up a minor third)",
-   "Minor Gospel (8 bars)",
-   "Rising Ballad (stepwise up, 8 bars)",
-   "Soul Bridge IV-iv-iii-VI (8 bars)",
-   "Two-Five-One in Two Keys (8 bars)",
-   "Churchy Suspensions (8 bars)",
-   "Soul Minor Line (i-bVII-bVI-bVII)",
-   "Amen with a Blue Note (I-bVII7-IV-I)"
-  ]
- },
- {
-  "title": "Blues, funk and grooves",
-  "blurb": "Dominant chords with ninths and thirteenths, vamps to loop for minutes, and the blues forms Vol. 1 left out.",
-  "names": [
-   "12-Bar Blues with Ninths",
-   "16-Bar Funk Blues",
-   "8-Bar Blues",
-   "Soul Blues with II7-V7 (12 bars)",
-   "Two-Dominant Vamp (I7-bVII7)",
-   "Funk Dominant with a Half-Step Slip (8 bars)",
-   "Mixolydian Loop (I7-bVII-IV)",
-   "Dorian Climb (i-bIII-IV-bVI)",
-   "Acid Jazz Minor Plane (i-ii-bIII-ii)",
-   "Minor Vamp (i-bVII major)",
-   "Minor Vamp with a bII Dominant",
-   "Lydian Vamp (I-II)",
-   "Spanish Phrygian Vamp",
-   "Dominant Minor-Third Cycle",
-   "Bluesy Turnaround (I-IV7-iii-VI-ii-V)",
-   "Shuffle Turnaround (I-I7-IV-iv)",
-   "Blues Ending Tag",
-   "16-Bar Minor Groove"
-  ]
- },
- {
-  "title": "Bossa, latin, city pop and film",
-  "blurb": "Quiet bossa moves, montunos, the city pop sunset and the chords of a film at night.",
-  "names": [
-   "City Pop Sunset (8 bars)",
-   "City Pop Descent (IV down to I, 8 bars)",
-   "Quiet Bossa (falling chromatic bass, 8 bars)",
-   "Bossa Diminished Passing (I-bIIdim-ii-V)",
-   "Bossa ii-V with a bVI Turn (8 bars)",
-   "Movie Love Theme (16 bars)",
-   "Minor Movie Theme (16 bars)",
-   "Closing Credits (8 bars)",
-   "Film Noir Minor",
-   "Noir Cadence (i-bVI7-V7)",
-   "Spy Vamp (i mMaj9-iv)",
-   "Minor Chromatic Mediants",
-   "Lydian Plane (falling whole steps)",
-   "Half-Step Major Vamp (I-bII)",
-   "Major Seventh Vamp (I-IV)",
-   "Minor-Major Switch (same tonic, 8 bars)",
-   "Picardy Ending",
-   "Sus to Altered Minor Cadence",
-   "Bolero Minor (i-II7-V)",
-   "Montuno Minor (i-iv-V-iv)",
-   "Montuno Major (I-IV-V-IV)",
-   "Tango Minor (i-V)"
-  ]
- }
-]
+{
+ "styles": [
+  {
+   "id": "lofihiphop",
+   "label": "Lofi"
+  },
+  {
+   "id": "neosoul",
+   "label": "Neo Soul"
+  },
+  {
+   "id": "trapsoul",
+   "label": "Trap Soul"
+  },
+  {
+   "id": "deephouse",
+   "label": "Deep House"
+  },
+  {
+   "id": "swing",
+   "label": "Swing trio"
+  },
+  {
+   "id": "bossa",
+   "label": "Bossa"
+  },
+  {
+   "id": "pad",
+   "label": "Pads"
+  },
+  {
+   "id": "arp",
+   "label": "Ballad"
+  }
+ ],
+ "groups": [
+  {
+   "title": "Neo soul and R&B",
+   "progs": [
+    {
+     "n": 1,
+     "name": "Neo Soul ii-V-I (sus to 13)",
+     "key": "Eb",
+     "bars": 4
+    },
+    {
+     "n": 2,
+     "name": "Rhodes Ballad (8 bars)",
+     "key": "F",
+     "bars": 8
+    },
+    {
+     "n": 3,
+     "name": "R&B Loop IV-iii-vi (8 bars)",
+     "key": "C",
+     "bars": 8
+    },
+    {
+     "n": 4,
+     "name": "Late Night I-iii-IV-iv (8 bars)",
+     "key": "Ab",
+     "bars": 8
+    },
+    {
+     "n": 5,
+     "name": "ii-V to the IV and Back (8 bars)",
+     "key": "Bb",
+     "bars": 8
+    },
+    {
+     "n": 6,
+     "name": "Slow Jam ii-V-iii-VI (8 bars)",
+     "key": "E",
+     "bars": 8
+    },
+    {
+     "n": 7,
+     "name": "Chromatic ii-V into the Cadence",
+     "key": "Db",
+     "bars": 4
+    },
+    {
+     "n": 8,
+     "name": "Deceptive V to bVI (8 bars)",
+     "key": "D",
+     "bars": 8
+    },
+    {
+     "n": 9,
+     "name": "Major Line Cliche (8 bars)",
+     "key": "C",
+     "bars": 8
+    },
+    {
+     "n": 10,
+     "name": "Backdoor Lift (bVI-bVII-I)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 11,
+     "name": "Falling Major Sevenths (I-bIII-ii-bII)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 12,
+     "name": "ii-bII-I (soft tritone sub)",
+     "key": "G",
+     "bars": 4
+    },
+    {
+     "n": 13,
+     "name": "Three-Six-Two-Five with Ninths",
+     "key": "F",
+     "bars": 4
+    },
+    {
+     "n": 14,
+     "name": "Minor Ninths Falling (8 bars)",
+     "key": "Fm",
+     "bars": 8
+    },
+    {
+     "n": 15,
+     "name": "i-iv Minor Vamp with a Tritone Sub",
+     "key": "Am",
+     "bars": 4
+    },
+    {
+     "n": 16,
+     "name": "Minor Soul i-bIII-iv-V",
+     "key": "Gm",
+     "bars": 4
+    },
+    {
+     "n": 17,
+     "name": "Minor Eleven Side-Slip",
+     "key": "Ebm",
+     "bars": 4
+    },
+    {
+     "n": 18,
+     "name": "Suspended Plane (four sus chords)",
+     "key": "G",
+     "bars": 4
+    },
+    {
+     "n": 19,
+     "name": "vi-ii-V to a Lydian Tonic",
+     "key": "A",
+     "bars": 4
+    },
+    {
+     "n": 20,
+     "name": "Major Ninths Down Minor Thirds",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 21,
+     "name": "Minor Ballad with a Lydian bII (8 bars)",
+     "key": "Cm",
+     "bars": 8
+    },
+    {
+     "n": 22,
+     "name": "ii-V Up Minor Thirds",
+     "key": "C",
+     "bars": 4
+    }
+   ]
+  },
+  {
+   "title": "Gospel and soul",
+   "progs": [
+    {
+     "n": 23,
+     "name": "Gospel 7-3-6-2-5-1",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 24,
+     "name": "Sunday Ballad (16 bars)",
+     "key": "Eb",
+     "bars": 16
+    },
+    {
+     "n": 25,
+     "name": "Descending Bass Soul Ballad (8 bars)",
+     "key": "C",
+     "bars": 8
+    },
+    {
+     "n": 26,
+     "name": "I-III7-vi Soul Climb (8 bars)",
+     "key": "G",
+     "bars": 8
+    },
+    {
+     "n": 27,
+     "name": "Gospel IV-#IVdim Lift (8 bars)",
+     "key": "Bb",
+     "bars": 8
+    },
+    {
+     "n": 28,
+     "name": "Doo-Wop with Ninths (I-vi-IV-V)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 29,
+     "name": "Double Plagal (bVII-IV-I)",
+     "key": "D",
+     "bars": 4
+    },
+    {
+     "n": 30,
+     "name": "Stepwise Soul Vamp (I-ii-iii-ii)",
+     "key": "F",
+     "bars": 4
+    },
+    {
+     "n": 31,
+     "name": "Diminished Passing Down (I-bIIIdim-ii-V)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 32,
+     "name": "Gospel Ending (bII Lydian to I)",
+     "key": "F",
+     "bars": 4
+    },
+    {
+     "n": 33,
+     "name": "Soul Dominant Vamp (I7-IV7)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 34,
+     "name": "All-Dominant Turnaround (I-VI-II-V)",
+     "key": "Bb",
+     "bars": 4
+    },
+    {
+     "n": 35,
+     "name": "Key Lift (up a minor third)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 36,
+     "name": "Minor Gospel (8 bars)",
+     "key": "Fm",
+     "bars": 8
+    },
+    {
+     "n": 37,
+     "name": "Rising Ballad (stepwise up, 8 bars)",
+     "key": "C",
+     "bars": 8
+    },
+    {
+     "n": 38,
+     "name": "Soul Bridge IV-iv-iii-VI (8 bars)",
+     "key": "A",
+     "bars": 8
+    },
+    {
+     "n": 39,
+     "name": "Two-Five-One in Two Keys (8 bars)",
+     "key": "G",
+     "bars": 8
+    },
+    {
+     "n": 40,
+     "name": "Churchy Suspensions (8 bars)",
+     "key": "Db",
+     "bars": 8
+    },
+    {
+     "n": 41,
+     "name": "Soul Minor Line (i-bVII-bVI-bVII)",
+     "key": "Em",
+     "bars": 4
+    },
+    {
+     "n": 42,
+     "name": "Amen with a Blue Note (I-bVII7-IV-I)",
+     "key": "E",
+     "bars": 4
+    }
+   ]
+  },
+  {
+   "title": "Blues, funk and grooves",
+   "progs": [
+    {
+     "n": 43,
+     "name": "12-Bar Blues with Ninths",
+     "key": "A",
+     "bars": 12
+    },
+    {
+     "n": 44,
+     "name": "16-Bar Funk Blues",
+     "key": "F",
+     "bars": 16
+    },
+    {
+     "n": 45,
+     "name": "8-Bar Blues",
+     "key": "C",
+     "bars": 8
+    },
+    {
+     "n": 46,
+     "name": "Soul Blues with II7-V7 (12 bars)",
+     "key": "G",
+     "bars": 12
+    },
+    {
+     "n": 47,
+     "name": "Two-Dominant Vamp (I7-bVII7)",
+     "key": "G",
+     "bars": 4
+    },
+    {
+     "n": 48,
+     "name": "Funk Dominant with a Half-Step Slip (8 bars)",
+     "key": "E",
+     "bars": 8
+    },
+    {
+     "n": 49,
+     "name": "Mixolydian Loop (I7-bVII-IV)",
+     "key": "D",
+     "bars": 4
+    },
+    {
+     "n": 50,
+     "name": "Dorian Climb (i-bIII-IV-bVI)",
+     "key": "Dm",
+     "bars": 4
+    },
+    {
+     "n": 51,
+     "name": "Acid Jazz Minor Plane (i-ii-bIII-ii)",
+     "key": "Em",
+     "bars": 4
+    },
+    {
+     "n": 52,
+     "name": "Minor Vamp (i-bVII major)",
+     "key": "Am",
+     "bars": 4
+    },
+    {
+     "n": 53,
+     "name": "Minor Vamp with a bII Dominant",
+     "key": "Cm",
+     "bars": 4
+    },
+    {
+     "n": 54,
+     "name": "Lydian Vamp (I-II)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 55,
+     "name": "Spanish Phrygian Vamp",
+     "key": "E",
+     "bars": 4
+    },
+    {
+     "n": 56,
+     "name": "Dominant Minor-Third Cycle",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 57,
+     "name": "Bluesy Turnaround (I-IV7-iii-VI-ii-V)",
+     "key": "F",
+     "bars": 4
+    },
+    {
+     "n": 58,
+     "name": "Shuffle Turnaround (I-I7-IV-iv)",
+     "key": "G",
+     "bars": 4
+    },
+    {
+     "n": 59,
+     "name": "Blues Ending Tag",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 60,
+     "name": "16-Bar Minor Groove",
+     "key": "Dm",
+     "bars": 16
+    }
+   ]
+  },
+  {
+   "title": "Bossa, latin, city pop and film",
+   "progs": [
+    {
+     "n": 61,
+     "name": "City Pop Sunset (8 bars)",
+     "key": "D",
+     "bars": 8
+    },
+    {
+     "n": 62,
+     "name": "City Pop Descent (IV down to I, 8 bars)",
+     "key": "C",
+     "bars": 8
+    },
+    {
+     "n": 63,
+     "name": "Quiet Bossa (falling chromatic bass, 8 bars)",
+     "key": "Am",
+     "bars": 8
+    },
+    {
+     "n": 64,
+     "name": "Bossa Diminished Passing (I-bIIdim-ii-V)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 65,
+     "name": "Bossa ii-V with a bVI Turn (8 bars)",
+     "key": "C",
+     "bars": 8
+    },
+    {
+     "n": 66,
+     "name": "Movie Love Theme (16 bars)",
+     "key": "Ab",
+     "bars": 16
+    },
+    {
+     "n": 67,
+     "name": "Minor Movie Theme (16 bars)",
+     "key": "Em",
+     "bars": 16
+    },
+    {
+     "n": 68,
+     "name": "Closing Credits (8 bars)",
+     "key": "G",
+     "bars": 8
+    },
+    {
+     "n": 69,
+     "name": "Film Noir Minor",
+     "key": "Cm",
+     "bars": 4
+    },
+    {
+     "n": 70,
+     "name": "Noir Cadence (i-bVI7-V7)",
+     "key": "Dm",
+     "bars": 4
+    },
+    {
+     "n": 71,
+     "name": "Spy Vamp (i mMaj9-iv)",
+     "key": "Em",
+     "bars": 4
+    },
+    {
+     "n": 72,
+     "name": "Minor Chromatic Mediants",
+     "key": "Cm",
+     "bars": 4
+    },
+    {
+     "n": 73,
+     "name": "Lydian Plane (falling whole steps)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 74,
+     "name": "Half-Step Major Vamp (I-bII)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 75,
+     "name": "Major Seventh Vamp (I-IV)",
+     "key": "E",
+     "bars": 4
+    },
+    {
+     "n": 76,
+     "name": "Minor-Major Switch (same tonic, 8 bars)",
+     "key": "C",
+     "bars": 8
+    },
+    {
+     "n": 77,
+     "name": "Picardy Ending",
+     "key": "Dm",
+     "bars": 4
+    },
+    {
+     "n": 78,
+     "name": "Sus to Altered Minor Cadence",
+     "key": "Cm",
+     "bars": 4
+    },
+    {
+     "n": 79,
+     "name": "Bolero Minor (i-II7-V)",
+     "key": "Am",
+     "bars": 4
+    },
+    {
+     "n": 80,
+     "name": "Montuno Minor (i-iv-V-iv)",
+     "key": "Gm",
+     "bars": 4
+    },
+    {
+     "n": 81,
+     "name": "Montuno Major (I-IV-V-IV)",
+     "key": "C",
+     "bars": 4
+    },
+    {
+     "n": 82,
+     "name": "Tango Minor (i-V)",
+     "key": "Dm",
+     "bars": 4
+    }
+   ]
+  }
+ ]
+}

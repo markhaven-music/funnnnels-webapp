@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel } from "@/lib/funnels";
-import { CURRENCIES, type Currency } from "@/lib/geo";
+import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { Beacon } from "../../../Beacon";
@@ -11,12 +11,9 @@ import u from "../../../midi-drum-kit/[lang]/jazz-offer/[currency]/jazzOffer.mod
 import { display } from "../../fonts";
 import { funnel } from "../../funnel";
 import j from "../../jazz.module.css";
-import type { Roll } from "../../piano";
-import { PlayableRoll } from "../../PlayableRoll";
 import shot from "../../shot.module.css";
-import groups from "../groups.json";
-import rolls from "../rolls.json";
 import { vol2 } from "../vol2";
+import { Vol2Player } from "../Vol2Player";
 import v from "../vol2.module.css";
 
 // Jazz MIDI Pack Vol. 2, the first one-click upsell after the Jazz MIDI Pack order (2026-11-15, "Sì, parti":
@@ -43,15 +40,6 @@ const OFFER = vol2.id;
 const js = (tag: string) => tag.replace(/^\s*<script>/, "").replace(/<\/script>\s*$/, "");
 const num = (n: number) => n.toLocaleString("en-US");
 
-const DEMOS: { id: keyof typeof rolls; title: string }[] = [
-  { id: "neosoul", title: "Neo soul: Rhodes Ballad, with bass" },
-  { id: "gospel", title: "Gospel: 7-3-6-2-5-1" },
-  { id: "bossa", title: "Bossa: Quiet Bossa" },
-  { id: "citypop", title: "City pop: Sunset, lofi loop" },
-  { id: "blues", title: "Blues: 12 bars with ninths" },
-  { id: "film", title: "Film: Noir Minor" },
-];
-
 export default async function Vol2Offer({ params }: { params: Params }) {
   const { currency: cur } = await params;
   if (!CURRENCIES.includes(cur as Currency)) notFound();
@@ -60,7 +48,7 @@ export default async function Vol2Offer({ params }: { params: Params }) {
   // Dashboard → Products decides whether it's on sale and at what price; before that, the code's entry (a preview).
   const offer = product.offers?.find((o) => o.id === OFFER) ?? funnel.offers.find((o) => o.id === OFFER);
   if (!offer) notFound();
-  const price = money(offer.price[currency], currency);
+  const price = money(priceIn(offer.price, currency), currency);
   const next = nextStep(product, "en", OFFER);
   const buttons = (
     <div className={v.buttons}>
@@ -70,7 +58,7 @@ export default async function Vol2Offer({ params }: { params: Params }) {
         next={next}
         yes="Yes, add Vol. 2 to my order"
         yesSub={`${price} · one tap, instant download`}
-        no={`No thanks, ${vol2.progressions} progressions are enough for me`}
+        no={`No thanks, I’ll stay with the ${vol2.progressions} I have`}
       />
     </div>
   );
@@ -85,12 +73,14 @@ export default async function Vol2Offer({ params }: { params: Params }) {
       <section className={u.top}>
         <div className={`${j.wrap} ${v.hero}`}>
           <div className={v.pitch}>
-            <p className={u.pre}>One offer for Jazz MIDI Pack buyers, before your downloads</p>
+            {/* 2026-11-16, "frame this Vol.2 emotionally … cater to the feelings of the customer and their desires":
+                the feeling a chord gives, then what Vol. 2 is, then the price. Facts: ../vol2.ts. */}
+            <p className={u.pre}>Before your downloads: one offer, made for Jazz MIDI Pack buyers</p>
             <h1 className={u.head}>
-              You have {vol2.progressions} progressions. <em className={j.hl}>Here are {vol2.progressions} more.</em>
+              You know that feeling when a chord gives you chills? <em className={j.hl}>Here are {vol2.progressions} more of them.</em>
             </h1>
             <p className={u.sub}>
-              {`Jazz MIDI Pack Vol. 2: ${num(vol2.files)} new MIDI files in neo soul and R&B, gospel, blues and funk, bossa, city pop and film. Same ${vol2.voicings} voicings, ${vol2.rhythms} rhythms and folders as the pack you just bought. ${price}, added to the order you just paid.`}
+              {`Vol. 2 is for the nights you want your beat to make someone feel something. Late-night neo soul, Sunday-morning gospel, gritty blues, bossa, city pop sunsets and the chords from the last scene of a film. ${num(vol2.files)} MIDI files, ready to drag into your DAW. ${price}, added to the order you just paid.`}
             </p>
             {buttons}
           </div>
@@ -118,41 +108,13 @@ export default async function Vol2Offer({ params }: { params: Params }) {
         <div className={j.wrap}>
           <div className={j.secHead}>
             <h2 className={j.h2}>
-              Six files from Vol. 2. <em className={j.hl}>Press play.</em>
+              Put your headphones on. <em className={j.hl}>Then press play.</em>
             </h2>
-            <p className={j.sub}>Real files from the pack, played on a plain synth. In your DAW they play whatever instrument you load.</p>
+            <p className={j.sub}>
+              All {vol2.progressions} progressions, each with drums. Tap a style and let it loop. In your DAW they play through whatever sound you love.
+            </p>
           </div>
-          <div className={v.demos}>
-            {DEMOS.map((d, i) => (
-              <PlayableRoll key={d.id} roll={rolls[d.id] as Roll} title={d.title} variant="short" lazy={i > 1} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className={`${j.sec} ${j.band}`}>
-        <div className={j.wrap}>
-          <div className={j.secHead}>
-            <h2 className={j.h2}>
-              {vol2.progressions} new progressions, <em className={j.hl}>none of them in Vol. 1.</em>
-            </h2>
-            <p className={j.sub}>Checked one by one against the pack you just bought, in every key.</p>
-          </div>
-          <div className={v.groups}>
-            {groups.map((g) => (
-              <div key={g.title} className={v.group}>
-                <h3 className={v.groupTitle}>
-                  {g.title} <span className={v.count}>{g.names.length}</span>
-                </h3>
-                <p className={v.blurb}>{g.blurb}</p>
-                <ul className={v.names}>
-                  {g.names.map((name) => (
-                    <li key={name}>{name}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          <Vol2Player blurbs={[...vol2.moods]} />
         </div>
       </section>
 
@@ -160,7 +122,7 @@ export default async function Vol2Offer({ params }: { params: Params }) {
         <div className={`${j.wrap} ${v.inside}`}>
           <div>
             <h2 className={j.h2}>
-              The same five folders, <em className={j.hl}>filled again.</em>
+              Everything you liked in Vol. 1, <em className={j.hl}>in {vol2.progressions} new moods.</em>
             </h2>
             <ul className={j.ticks}>
               {vol2.folders.map((f) => (
@@ -184,10 +146,10 @@ export default async function Vol2Offer({ params }: { params: Params }) {
             </ul>
           </div>
           <div className={v.only}>
-            <h3 className={v.groupTitle}>Where Vol. 2 is sold</h3>
+            <h3 className={v.groupTitle}>Only on this page</h3>
             <p>
-              On this page. Vol. 2 isn’t on the site or in the shop: it’s made for people who just bought the Jazz MIDI Pack, and this is where they
-              get it.
+              Vol. 2 isn’t on the site or in the shop. It was made for people who just bought the Jazz MIDI Pack, and this page is the only place it’s
+              sold.
             </p>
             <p>
               Same {funnel.guaranteeDays}-day satisfaction guarantee as your order: if a file doesn’t work, write to{" "}
@@ -200,9 +162,9 @@ export default async function Vol2Offer({ params }: { params: Params }) {
       <section className={u.end}>
         <div className={j.wrap}>
           <h2 className={j.h2}>
-            Add Vol. 2 for <em className={j.hl}>{price}</em>.
+            Your next beat could start <em className={j.hl}>with one of these.</em>
           </h2>
-          <p className={u.sub}>It goes on the same download page as your Jazz MIDI Pack.</p>
+          <p className={u.sub}>Add Vol. 2 for {price}. It lands on the same download page as your Jazz MIDI Pack.</p>
           {buttons}
         </div>
       </section>
