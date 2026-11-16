@@ -358,7 +358,14 @@ export function script(slug: string, offerId: string, lang: Lang, next: string, 
   if (cookie('fv_owned').split(',').indexOf(C.offer) >= 0) { go(); return; }
   // Bought before (any order of this email, or ClickFunnels): skipped too (/api/checkout/owned).
   if (main) fetch('/api/checkout/owned', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ funnel: C.funnel, offer: C.offer, order: main[1] }) })
-    .then(function (r) { return r.json(); }).then(function (r) { if (r && r.owned) go(); }).catch(function () {});
+    .then(function (r) { return r.json(); }).then(function (r) {
+      if (r && r.owned) return go();
+      // A PayPal buyer confirms on PayPal's page unless their PayPal was saved (one tap): the Yes button says so.
+      if (main[0] === 'paypal_order' && !(r && r.oneTap)) {
+        var subs = document.querySelectorAll('.oto-sub[data-paypal]');
+        for (var i = 0; i < subs.length; i++) subs[i].textContent = subs[i].getAttribute('data-paypal');
+      }
+    }).catch(function () {});
   var busy = false;
   function say(btn, t) {
     var box = btn.closest('[data-page-element="Button/V1"]') || btn.parentElement;
@@ -368,11 +375,6 @@ export function script(slug: string, offerId: string, lang: Lang, next: string, 
   }
   function label(btn, t) { var m = btn.querySelector('.elButtonMainText'); if (m) { if (!m.dataset.orig) m.dataset.orig = m.innerHTML; m.textContent = t; } }
   function reset(btn) { var m = btn.querySelector('.elButtonMainText'); if (m && m.dataset.orig) m.innerHTML = m.dataset.orig; busy = false; }
-  // A PayPal buyer confirms on PayPal's page: the Yes button says so instead of "one tap".
-  if (main && main[0] === 'paypal_order') {
-    var subs = document.querySelectorAll('.oto-sub[data-paypal]');
-    for (var i = 0; i < subs.length; i++) subs[i].textContent = subs[i].getAttribute('data-paypal');
-  }
   // Back from PayPal without paying (the upsell's cancel_url, ?unpaid=1): said under the first Yes.
   if (q.get('unpaid') === '1') { var first = document.querySelector('a[data-oto="yes"]'); if (first) say(first, C.ui.unpaid); }
   function stripeAction(r, btn) {

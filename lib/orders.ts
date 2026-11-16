@@ -82,11 +82,25 @@ export function orderFromIntent(intent: Stripe.PaymentIntent): Order {
 // nothing: anyone can create an order to our account in a browser with the
 // public client id, with any amount and custom_id. The record also outlives
 // a price changed in dashboard → Products.
-export async function notePayPalOrder(o: { id: string; funnel: string; amountCents: number; currency: string; items: string[]; offer?: string | null; ip?: string; ua?: string }) {
+export async function notePayPalOrder(o: { id: string; funnel: string; amountCents: number; currency: string; items: string[]; offer?: string | null; ip?: string; ua?: string; vaultAsked?: boolean }) {
   const { error } = await supabase()
     .from("paypal_orders")
-    .insert({ id: o.id, funnel: o.funnel, amount_cents: o.amountCents, currency: o.currency, items: o.items, offer: o.offer ?? null, ip: o.ip || null, ua: o.ua || null });
+    .insert({ id: o.id, funnel: o.funnel, amount_cents: o.amountCents, currency: o.currency, items: o.items, offer: o.offer ?? null, ip: o.ip || null, ua: o.ua || null, vault_asked: o.vaultAsked ?? false });
   if (error) throw error;
+}
+
+/** The buyer's saved PayPal, once their order is paid (app/api/checkout/paypal/return). */
+export async function notePayPalVault(id: string, v: { vaultId: string | null; customer: string | null }) {
+  if (!v.vaultId && !v.customer) return;
+  const { error } = await supabase().from("paypal_orders").update({ vault_id: v.vaultId, paypal_customer: v.customer }).eq("id", id);
+  if (error) throw error;
+}
+
+/** What an order saved of the buyer's PayPal, for a one-tap upsell. */
+export async function payPalVaultOf(id: string): Promise<{ vaultId: string | null; customer: string | null }> {
+  const { data, error } = await supabase().from("paypal_orders").select("vault_id, paypal_customer").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return { vaultId: data?.vault_id ?? null, customer: data?.paypal_customer ?? null };
 }
 
 type MadeRow = { funnel: string; amount_cents: number; currency: string; items: string[]; offer: string | null; ip: string | null; ua: string | null };

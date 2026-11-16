@@ -47,6 +47,8 @@ export type PayPalOrder = {
   id: string;
   status: string; // "CREATED" | "APPROVED" | "COMPLETED" | …
   payer?: { email_address?: string; name?: { given_name?: string; surname?: string } };
+  // With a vault request (vaultAttributes): the saved PayPal, once the buyer approved and paid.
+  payment_source?: { paypal?: { attributes?: { vault?: { id?: string; status?: string; customer?: { id?: string } } } } };
   links?: { rel: string; href: string }[];
   purchase_units: {
     custom_id?: string;
@@ -98,13 +100,15 @@ async function accessToken(): Promise<string> {
   return token.value;
 }
 
-export async function paypal<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
+export async function paypal<T>(path: string, init: { method?: string; body?: unknown; requestId?: string } = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     method: init.method ?? "GET",
     headers: {
       authorization: `Bearer ${await accessToken()}`,
       "content-type": "application/json",
       prefer: "return=representation",
+      // Idempotency: the same id within PayPal's window returns the first answer, not a second charge.
+      ...(init.requestId ? { "paypal-request-id": init.requestId } : {}),
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
     cache: "no-store",
@@ -112,4 +116,26 @@ export async function paypal<T>(path: string, init: { method?: string; body?: un
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new PayPalError(res.status, json.details?.[0]?.issue ?? json.name, json);
   return json as T;
+}
+
+// One-tap PayPal upsells (2026-11-16, vault switched on on the account): the main
+// order asks PayPal to save the buyer's PayPal for this merchant; the buyer agrees
+// on PayPal's page and the capture hands back a payment token (vault id) that the
+// upsells charge with no PayPal page (app/api/checkout/upsell).
+export const vaultAttributes = {
+  vault: { store_in_vault: "ON_SUCCESS", usage_type: "MERCHANT", customer_type: "CONSUMER", permit_multiple_payment_tokens: false },
+};
+
+/** The saved PayPal of a paid order, from its capture or the order itself. */
+export function vaultOf(order: PayPalOrder | null | undefined): { vaultId: string | null; customer: string | null } {
+  const v = order?.payment_source?.paypal?.attributes?.vault;
+  return { vaultId: v?.status === "VAULTED" && v.id ? v.id : null, customer: v?.customer?.id ?? null };
+}
+
+/** A token not handed back with the capture (status APPROVED, made a moment later): asked by customer. */
+export async function vaultIdOfCustomer(customer: string): Promise<string | null> {
+  const r = await paypal<{ payment_tokens?: { id: string; payment_source?: { paypal?: unknown } }[] }>(
+    `/v3/vault/payment-tokens?customer_id=${encodeURIComponent(customer)}`,
+  );
+  return r.payment_tokens?.find((t) => t.payment_source?.paypal)?.id ?? null;
 }

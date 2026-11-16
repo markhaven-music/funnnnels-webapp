@@ -123,3 +123,10 @@ insert into public.funnel_items (funnel, role, key, product, name, price_eur_cen
   ('top-hits-chords',      'bump',   'expansions',     'expansions',          'MIDI Drum Kit Expansions (House, Lo-Fi, Afrobeat)',  700,  700, 2),
   ('top-hits-chords',      'upsell', 'jazz-pack',      'jazz-midi-pack',      'Jazz MIDI Pack',                                    2700, 2700, 0),
   ('top-hits-chords',      'upsell', 'famous-beats',   'famous-beats',        'Famous Beats Bundle (320 MIDI Beats)',              2700, 2700, 1);
+
+-- One-tap PayPal upsells (2026-11-16): the main order asks PayPal to save the
+-- buyer's PayPal (vault, store_in_vault ON_SUCCESS); the capture hands back a
+-- payment token, kept here, which the upsells charge with no PayPal page.
+alter table public.paypal_orders add column if not exists vault_id text;
+alter table public.paypal_orders add column if not exists paypal_customer text;
+alter table public.paypal_orders add column if not exists vault_asked boolean not null default false;

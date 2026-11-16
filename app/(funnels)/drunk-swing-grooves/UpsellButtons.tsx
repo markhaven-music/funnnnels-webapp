@@ -22,7 +22,7 @@ const UI: Ui = {
   noOrder: "We couldn't find your order on this page. Your purchase is safe: continue to get your downloads.",
 };
 
-let ownedCheck: Promise<boolean> | undefined;
+let ownedCheck: Promise<{ owned: boolean; oneTap: boolean }> | undefined;
 
 const cookie = (n: string) => {
   const m = document.cookie.match(new RegExp("(?:^|; )" + n + "=([^;]*)"));
@@ -56,7 +56,6 @@ export function UpsellButtons({ funnel, offer, next, yes, yesSub, no }: { funnel
     if (cookie("fv_owned").split(",").includes(offer)) return go(null);
     const { main } = state();
     if (!main) return;
-    if (main[0] === "paypal_order") setPaypal(true);
     if (new URLSearchParams(location.search).get("unpaid") === "1") setNote(UI.unpaid);
     ownedCheck ??= fetch("/api/checkout/owned", {
       method: "POST",
@@ -64,9 +63,10 @@ export function UpsellButtons({ funnel, offer, next, yes, yesSub, no }: { funnel
       body: JSON.stringify({ funnel, offer, order: main[1] }),
     })
       .then((r) => r.json())
-      .then((r) => Boolean(r?.owned))
-      .catch(() => false);
-    ownedCheck.then((owned) => owned && go(null));
+      .then((r) => ({ owned: Boolean(r?.owned), oneTap: Boolean(r?.oneTap) }))
+      .catch(() => ({ owned: false, oneTap: false }));
+    // A PayPal buyer whose PayPal wasn't saved (no one-tap) confirms on PayPal: the line says so.
+    ownedCheck.then((r) => (r.owned ? go(null) : main[0] === "paypal_order" && !r.oneTap && setPaypal(true)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

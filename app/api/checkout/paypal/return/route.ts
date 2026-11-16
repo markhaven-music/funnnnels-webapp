@@ -1,11 +1,11 @@
 import { checkoutPages, nextStep, offerOf, resolveFunnel } from "@/lib/funnels";
 import { after } from "next/server";
 import { recordPayPalSale } from "@/lib/analytics";
-import { getOrder } from "@/lib/orders";
+import { getOrder, notePayPalVault } from "@/lib/orders";
 import { sendSaleToNeo } from "@/lib/neo";
 import { noteSale } from "@/lib/sales";
 import { saleName } from "@/lib/stripeSales";
-import { isPayPalOrderId, paypal, paypalCheckoutUrl, paypalConfigured, PayPalError, type PayPalOrder } from "@/lib/paypal";
+import { isPayPalOrderId, paypal, paypalCheckoutUrl, paypalConfigured, PayPalError, vaultOf, type PayPalOrder } from "@/lib/paypal";
 
 export const runtime = "nodejs";
 
@@ -27,8 +27,9 @@ export async function GET(req: Request) {
   const parent = url.searchParams.get("paypal_order");
 
   let captured = false;
+  let capture: PayPalOrder | null = null;
   try {
-    await paypal(`/v2/checkout/orders/${orderId}/capture`, { method: "POST", body: {} });
+    capture = await paypal<PayPalOrder>(`/v2/checkout/orders/${orderId}/capture`, { method: "POST", body: {} });
     captured = true;
   } catch (err) {
     // The buyer's card or bank said no: back to PayPal to pick another source.
@@ -48,7 +49,13 @@ export async function GET(req: Request) {
   // PayPal can't list our orders, so dashboard → Analytics counts them from here.
   if (captured) {
     try {
-      await recordPayPalSale(await paypal<PayPalOrder>(`/v2/checkout/orders/${orderId}`), pages.lang ?? "en");
+      const paid = await paypal<PayPalOrder>(`/v2/checkout/orders/${orderId}`);
+      await recordPayPalSale(paid, pages.lang ?? "en");
+      // The buyer's saved PayPal (main orders ask for it), for one-tap upsells.
+      if (!offer) {
+        const v = vaultOf(capture);
+        await notePayPalVault(orderId, v.vaultId || v.customer ? v : vaultOf(paid)).catch((err) => console.error("paypal vault not noted", err));
+      }
     } catch (err) {
       console.error("paypal sale not recorded", err);
     }

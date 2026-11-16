@@ -7,10 +7,13 @@ import { checkoutPages, offerOf, resolveFunnel, upsellsOn } from "@/lib/funnels"
 import { toCents } from "@/lib/launch";
 import { cleanVisitorId } from "@/lib/neoIds";
 import { buyerDevice } from "@/lib/buyerDevice";
-import { getOrder, notePayPalOrder } from "@/lib/orders";
-import { PAYPAL_LOCALE, isPayPalOrderId, paypal, paypalConfigured, paypalValue, returnOrigin, type PayPalOrder } from "@/lib/paypal";
+import { getOrder, notePayPalOrder, payPalVaultOf } from "@/lib/orders";
+import { recordPayPalSale } from "@/lib/analytics";
+import { sendSaleToNeo } from "@/lib/neo";
+import { noteSale } from "@/lib/sales";
+import { PAYPAL_LOCALE, isPayPalOrderId, paypal, paypalConfigured, paypalValue, returnOrigin, vaultIdOfCustomer, type PayPalOrder } from "@/lib/paypal";
 import { stripe, stripeConfigured } from "@/lib/stripe";
-import { recordStripePayment } from "@/lib/stripeSales";
+import { recordStripePayment, saleName } from "@/lib/stripeSales";
 
 export const runtime = "nodejs";
 
@@ -110,19 +113,27 @@ export async function POST(req: Request) {
     }
   }
 
-  // PayPal: an order for the upsell, approved on PayPal's page (not one tap: there is no saved
-  // payment method to charge, which needs PayPal's approval for reference transactions; the
-  // pages say "you confirm on PayPal"). A buyer who comes back without paying lands on the
-  // offer again with ?unpaid=1, which says nothing was charged.
+  // PayPal. One tap when the main order saved the buyer's PayPal (vault, since 2026-11-16):
+  // the upsell is charged to it at once, no PayPal page. Otherwise (an order from before,
+  // a buyer PayPal didn't save, a charge PayPal wants confirmed) an order approved on
+  // PayPal's page; a buyer who comes back without paying lands on the offer again with
+  // ?unpaid=1, which says nothing was charged.
   if (!paypalConfigured() || !isPayPalOrderId(parent.id)) return NextResponse.json({ error: "PayPal is not connected." }, { status: 503 });
-  const origin = returnOrigin(req.headers.get("origin") ?? req.headers.get("referer"));
-  const page = `${lang === "en" ? "" : `/${lang}`}/${f.slug}/${offer.path}`;
-  const back = `paypal_order=${parent.id}${bought.length ? `&u=${bought.join(",")}` : ""}`;
   // custom_id (127 characters): f = funnel, u = this upsell, p = the order it
   // follows, e = the buyer's email when it fits (the customer login finds it).
   const base = { f: f.slug, u: offer.id, p: parent.id, v: cleanVariant(body.variant) };
   const withEmail = JSON.stringify({ ...base, e: parent.email ?? "" });
   const customId = withEmail.length <= 127 ? withEmail : JSON.stringify(base);
+
+  const oneTap = await payPalOneTap({ parentId: parent.id, slug: f.slug, product: f.product, offer, amount, currency, customId, lang, headers: req.headers }).catch((err) => {
+    console.error("paypal one-tap upsell failed, PayPal page instead", err);
+    return null;
+  });
+  if (oneTap) return NextResponse.json({ status: "paid", id: oneTap });
+
+  const origin = returnOrigin(req.headers.get("origin") ?? req.headers.get("referer"));
+  const page = `${lang === "en" ? "" : `/${lang}`}/${f.slug}/${offer.path}`;
+  const back = `paypal_order=${parent.id}${bought.length ? `&u=${bought.join(",")}` : ""}`;
   try {
     const order = await paypal<PayPalOrder>("/v2/checkout/orders", {
       method: "POST",
@@ -159,4 +170,57 @@ export async function POST(req: Request) {
     console.error("upsell paypal order failed", err);
     return NextResponse.json({ error: "We couldn't start the PayPal payment. Try again, or skip this offer: your order is safe." }, { status: 502 });
   }
+}
+
+// The upsell charged to the buyer's saved PayPal → the new order's id, or null when
+// there's nothing saved or PayPal didn't complete it (the caller sends them to PayPal).
+async function payPalOneTap(o: {
+  parentId: string;
+  slug: string;
+  product: string;
+  offer: { id: string; name: string; last?: boolean };
+  amount: number;
+  currency: string;
+  customId: string;
+  lang: string;
+  headers: Headers;
+}): Promise<string | null> {
+  const saved = await payPalVaultOf(o.parentId);
+  const vaultId = saved.vaultId ?? (saved.customer ? await vaultIdOfCustomer(saved.customer) : null);
+  if (!vaultId) return null;
+  const order = await paypal<PayPalOrder>("/v2/checkout/orders", {
+    method: "POST",
+    // Two taps within the same minute make one charge (as the card's idempotency key).
+    requestId: `upsell-${o.parentId}-${o.offer.id}-${Math.floor(Date.now() / 60_000)}`,
+    body: {
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          reference_id: `${o.slug}-${o.offer.id}`,
+          custom_id: o.customId,
+          description: `${o.product}: ${o.offer.name}`.slice(0, 127),
+          amount: { currency_code: o.currency.toUpperCase(), value: paypalValue(o.amount) },
+        },
+      ],
+      payment_source: { paypal: { vault_id: vaultId } },
+    },
+  });
+  // A repeat of the same request id comes back with the same order: noted once.
+  await notePayPalOrder({ id: order.id, funnel: o.slug, amountCents: o.amount, currency: o.currency, items: [o.offer.id], offer: o.offer.id, ...buyerDevice(o.headers) }).catch((err) => {
+    if (err?.code !== "23505") throw err;
+  });
+  const capture = order.purchase_units[0]?.payments?.captures?.[0];
+  if (order.status !== "COMPLETED" || !capture || (capture.status !== "COMPLETED" && capture.status !== "PENDING")) {
+    console.warn(`paypal one-tap upsell not completed: order ${order.id} ${order.status} ${capture?.status ?? ""}`);
+    return null;
+  }
+  // Counted and told now, as /api/checkout/paypal/return does for a PayPal-page payment.
+  after(async () => {
+    await recordPayPalSale(order, o.lang).catch((err) => console.error("paypal sale not recorded", err));
+    const f = await resolveFunnel(o.slug);
+    const sale = await getOrder(order.id, o.slug);
+    await noteSale(sale, o.slug, o.lang);
+    if (sale && f) await sendSaleToNeo(sale, saleName(f, sale));
+  });
+  return order.id;
 }

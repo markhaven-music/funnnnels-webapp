@@ -4,7 +4,7 @@ import { isEmail } from "@/lib/contacts";
 import { checkoutPages, checkoutPhase, isDryRun, orderAmount, orderDescription, pickedBumps, requestNow, resolveFunnel } from "@/lib/funnels";
 import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
-import { PAYPAL_LOCALE, paypal, paypalConfigured, paypalValue, returnOrigin, type PayPalOrder } from "@/lib/paypal";
+import { PAYPAL_LOCALE, PayPalError, paypal, paypalConfigured, paypalValue, returnOrigin, vaultAttributes, type PayPalOrder } from "@/lib/paypal";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { cleanVisitorId } from "@/lib/neoIds";
 import { buyerDevice } from "@/lib/buyerDevice";
@@ -68,8 +68,10 @@ export async function POST(req: Request) {
   const customId =
     fits({ ...meta, ...(vid ? { n: vid } : {}), e: email }) ?? fits({ ...meta, ...(vid ? { n: vid } : {}) }) ?? fits({ ...meta, e: email }) ?? JSON.stringify(meta);
 
-  try {
-    const order = await paypal<PayPalOrder>("/v2/checkout/orders", {
+  // The order, asking PayPal to save the buyer's PayPal so the upsells are one tap
+  // (vaultAttributes); if PayPal refuses the vault part, the same order without it.
+  const create = (vault: boolean) =>
+    paypal<PayPalOrder>("/v2/checkout/orders", {
       method: "POST",
       body: {
         intent: "CAPTURE",
@@ -84,6 +86,7 @@ export async function POST(req: Request) {
         payment_source: {
           paypal: {
             email_address: email,
+            ...(vault ? { attributes: vaultAttributes } : {}),
             experience_context: {
               brand_name: f.brand,
               shipping_preference: "NO_SHIPPING",
@@ -97,10 +100,21 @@ export async function POST(req: Request) {
         },
       },
     });
+  try {
+    let vaultAsked = true;
+    let order: PayPalOrder;
+    try {
+      order = await create(true);
+    } catch (err) {
+      if (!(err instanceof PayPalError) || err.status >= 500) throw err;
+      console.warn("paypal vault refused, order without it", err.message);
+      vaultAsked = false;
+      order = await create(false);
+    }
     const approve = order.links?.find((l) => l.rel === "payer-action" || l.rel === "approve");
     if (!approve) throw new Error(`PayPal order ${order.id} came back without an approval link`);
     // What it sells, for the download and the thank-you page (lib/orders.ts).
-    await notePayPalOrder({ id: order.id, funnel: f.slug, amountCents: amount, currency, items: ["pack", ...bumps.map((b) => b.id), ...(bonus.item ? [bonus.item.id] : [])], ...buyerDevice(req.headers) });
+    await notePayPalOrder({ id: order.id, funnel: f.slug, amountCents: amount, currency, items: ["pack", ...bumps.map((b) => b.id), ...(bonus.item ? [bonus.item.id] : [])], vaultAsked, ...buyerDevice(req.headers) });
     return NextResponse.json({ orderId: order.id, approveUrl: approve.href });
   } catch (err) {
     console.error("paypal order failed", err);

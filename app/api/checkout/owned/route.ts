@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { offerProduct, ownedProducts } from "@/lib/catalog";
 import { offerOf, resolveFunnel } from "@/lib/funnels";
-import { getOrder } from "@/lib/orders";
+import { getOrder, payPalVaultOf } from "@/lib/orders";
 
 export const runtime = "nodejs";
 
 // Does the buyer of this order already have what this upsell sells?
-//   { funnel, offer, order: <the order the upsell follows> } → { owned: boolean }
+//   { funnel, offer, order: <the order the upsell follows> } → { owned: boolean, oneTap: boolean }
+// oneTap: a PayPal order whose buyer's PayPal was saved, so Yes charges it with no PayPal
+// page (app/api/checkout/upsell); a card order always is.
 // Asked by every upsell page as it opens (midi-drum-kit/upsell.ts script,
 // drunk-swing-grooves/UpsellButtons.tsx): owned → the page skips itself
 // (2026-11-08, "se lo ha preso non deve vederlo come upsell. Questo in generale in
@@ -22,8 +24,13 @@ export async function POST(req: Request) {
     const parent = await getOrder(body.order, f.slug);
     const email = parent?.status === "succeeded" ? parent.email : null;
     if (!email) return NextResponse.json({ owned: false });
-    const [product, owned] = await Promise.all([offerProduct(f.slug, offer.id), ownedProducts(email, { parent: parent!.id, offer: offer.id })]);
-    return NextResponse.json({ owned: Boolean(product && owned.has(product)) });
+    const [product, owned, saved] = await Promise.all([
+      offerProduct(f.slug, offer.id),
+      ownedProducts(email, { parent: parent!.id, offer: offer.id }),
+      parent!.provider === "paypal" ? payPalVaultOf(parent!.id) : null,
+    ]);
+    const oneTap = parent!.provider === "stripe" || Boolean(saved?.vaultId || saved?.customer);
+    return NextResponse.json({ owned: Boolean(product && owned.has(product)), oneTap });
   } catch (err) {
     console.error("owned check failed", err);
     return NextResponse.json({ owned: false });
