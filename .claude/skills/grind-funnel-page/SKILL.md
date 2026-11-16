@@ -40,6 +40,10 @@ a request conflict, the request wins; say which rule you are breaking.
   letter, real files to play, product by product, value, before/after,
   guarantee, FAQ, CTA repeated. Producers love software boxes: show every
   product as its 3D box (generate one when it has none).
+- Never sound like a polite nice guy when selling (the user, 2026-11-16, on
+  "Before your downloads, one thing": "Che frase orrenda. Mai sembrare nice
+  guys quando si vende"). No soft, asking-permission lines; state the offer
+  with confidence.
 - Headlines say the problem or the promise at once. No eyebrow lines above the
   headlines (the small uppercase labels): removed on 2026-11-02.
 - Headlines break where the sense breaks (the user, 2026-11-16: "sono spezzate

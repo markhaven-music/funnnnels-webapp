@@ -136,7 +136,7 @@ export default async function AllAccess({ params }: { params: Params }) {
 
       <section className={u.top}>
         <div className={j.wrap}>
-          <p className={u.pre}>Before your downloads, one thing</p>
+          <p className={u.pre}>This offer exists on this page only.</p>
           <h1 className={u.head}>
             <span className={u.line}>The drums are done.</span>{" "}
             <em className={`${j.hl} ${u.line}`}>Now the part where most beats die.</em>
