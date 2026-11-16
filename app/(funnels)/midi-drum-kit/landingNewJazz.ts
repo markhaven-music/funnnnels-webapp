@@ -49,7 +49,7 @@ const WORDS: Record<L, Record<string, string>> = {
     stars: "5 stars",
     sealRing: "QUALITY GUARANTEE · QUALITY GUARANTEE · ",
     sealDays: "DAYS",
-    sealAlt: "14-day quality guarantee",
+    sealAlt: "60-day quality guarantee",
   },
   it: {
     heroPre: "Per i producer che vogliono una batteria con il bounce",
@@ -78,12 +78,12 @@ const WORDS: Record<L, Record<string, string>> = {
     stars: "5 stelle",
     sealRing: "GARANZIA DI QUALITÀ · GARANZIA DI QUALITÀ · ",
     sealDays: "GIORNI",
-    sealAlt: "Garanzia di qualità di 14 giorni",
+    sealAlt: "Garanzia di qualità di 60 giorni",
   },
 };
 const TICKS: Record<L, string[]> = {
-  en: ["Any DAW", "Drag & drop", "14-day quality guarantee"],
-  it: ["Qualsiasi DAW", "Drag & drop", "Garanzia di qualità di 14 giorni"],
+  en: ["Any DAW", "Drag & drop", "60-day quality guarantee"],
+  it: ["Qualsiasi DAW", "Drag & drop", "Garanzia di qualità di 60 giorni"],
 };
 
 // The comparison chart: the kit first, then three other ways to get drums into a beat. Rows are what a
@@ -140,7 +140,7 @@ const FAQ: Record<L, { at: number; q: string; a: string }[]> = {
     { at: 4, q: "Do I get drum sounds too?", a: "Yes. The Hit-Maker Drums bonus is 281 WAV one-shots: kicks, snares, claps, hi-hats, rims and percs. They are the sounds you hear in the player on this page." },
     { at: 4, q: "How do I get the files?", a: "The download buttons are on the page you land on right after you pay, and the link comes by email too." },
     { at: 4, q: "Is it a subscription?", a: "No. {price} once, and the files are yours." },
-    { at: 4, q: "What if something is wrong with my files?", a: "Email support@thegrind.studio within 14 days. We send a fresh download or a replacement, and if we can’t fix it you get a refund." },
+    { at: 4, q: "What if something is wrong with my files?", a: "Email support@thegrind.studio within 60 days. We send a fresh download or a replacement, and if we can’t fix it you get a refund." },
   ],
   it: [
     { at: 1, q: "Cosa sono i 10.296 file?", a: "1.040 sono pattern e frammenti scritti a mano, uno per uno. Gli altri 9.256 sono gli stessi pattern già pronti in più modi, così non devi costruirli tu: ogni 808 in tutte le 12 tonalità, ogni pattern di kick con ogni pattern di snare, i beat di kick e 808 con le snare, i beat di kick e snare con gli hi-hat." },
@@ -152,13 +152,13 @@ const FAQ: Record<L, { at: number; q: string; a: string }[]> = {
     { at: 4, q: "Ci sono anche i suoni di batteria?", a: "Sì. Il bonus Hit-Maker Drums sono 281 one-shot WAV: kick, snare, clap, hi-hat, rim e percussioni. Sono i suoni che senti nel player di questa pagina." },
     { at: 4, q: "Come ricevo i file?", a: "I pulsanti di download sono nella pagina su cui arrivi subito dopo il pagamento, e il link ti arriva anche via email." },
     { at: 4, q: "È un abbonamento?", a: "No. {price} una volta sola, e i file sono tuoi." },
-    { at: 4, q: "E se c’è qualcosa che non va nei miei file?", a: "Scrivi a support@thegrind.studio entro 14 giorni. Ti mandiamo un nuovo download o un file sostitutivo e, se non riusciamo a risolvere, ti rimborsiamo." },
+    { at: 4, q: "E se c’è qualcosa che non va nei miei file?", a: "Scrivi a support@thegrind.studio entro 60 giorni. Ti mandiamo un nuovo download o un file sostitutivo e, se non riusciamo a risolvere, ti rimborsiamo." },
   ],
 };
 // The guarantee, as three steps: the old page's promise (t255) said as what happens.
 const STEPS: Record<L, string[]> = {
-  en: ["Email support@thegrind.studio within 14 days", "We send a fresh download or a replacement", "If we can’t fix it, you get a refund"],
-  it: ["Scrivi a support@thegrind.studio entro 14 giorni", "Ti mandiamo un nuovo download o un file sostitutivo", "Se non riusciamo a risolvere, ti rimborsiamo"],
+  en: ["Email support@thegrind.studio within 60 days", "We send a fresh download or a replacement", "If we can’t fix it, you get a refund"],
+  it: ["Scrivi a support@thegrind.studio entro 60 giorni", "Ti mandiamo un nuovo download o un file sostitutivo", "Se non riusciamo a risolvere, ti rimborsiamo"],
 };
 
 // What each bonus holds, in the summary's list (counted from the files buyers download).

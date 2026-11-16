@@ -93,7 +93,7 @@ export const compare = {
     { label: "Note-for-note accuracy", values: ["yes", "partial", "no"] },
     { label: "Commercial license to sell beats", values: ["yes", "partial", "yes"] },
     { label: "Free Updates", values: ["yes", "no", "no"] },
-    { label: "14-day quality guarantee", values: ["yes", "no", "no"] },
+    { label: "60-day quality guarantee", values: ["yes", "no", "no"] },
     { label: "Total cost for 1,000 progressions", values: ["{c}27", "{c}10,000+", "100s of hours"] },
   ] as { label: string; values: Cell[] }[],
 };
@@ -146,7 +146,7 @@ export const faq: { q: string; a: string[] }[] = [
   {
     q: "What if I don't like it?",
     a: [
-      "If the pack isn't what you expected, just reply to your order email within **14 days** and we'll refund you in full. No forms, no questions, no hassle.",
+      "If the pack isn't what you expected, just reply to your order email within **60 days** and we'll refund you in full. No forms, no questions, no hassle.",
     ],
   },
   {

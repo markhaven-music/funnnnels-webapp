@@ -10,11 +10,11 @@ const OUT = process.argv[3];
 
 // top arc, bottom arc
 const WORDS = {
-  en: ["14-DAY QUALITY", "GUARANTEE"],
-  fr: ["GARANTIE QUALITÉ", "14 JOURS"],
-  es: ["GARANTÍA DE CALIDAD", "14 DÍAS"],
-  de: ["QUALITÄTSGARANTIE", "14 TAGE"],
-  it: ["GARANZIA DI QUALITÀ", "14 GIORNI"],
+  en: ["60-DAY QUALITY", "GUARANTEE"],
+  fr: ["GARANTIE QUALITÉ", "60 JOURS"],
+  es: ["GARANTÍA DE CALIDAD", "60 DÍAS"],
+  de: ["QUALITÄTSGARANTIE", "60 TAGE"],
+  it: ["GARANZIA DI QUALITÀ", "60 GIORNI"],
 };
 
 // The two pictures: the landing's (green square) and the order page's (transparent).
@@ -24,7 +24,7 @@ const BADGES = [
 ];
 
 // Arial Black's advances per 100px (measured with canvas measureText in Chromium).
-const ADV = {"1":66.7,"4":66.7,"-":33.3,"D":77.8,"A":77.8,"Y":77.8," ":33.3,"Q":83.3,"U":83.3,"L":66.7,"I":38.9,"T":72.2,"G":83.3,"R":77.8,"N":83.3,"E":72.2,"É":72.2,"J":66.7,"O":83.3,"S":72.2,"Í":38.9,"C":77.8,"Ä":77.8,"Z":72.2,"À":77.8};
+const ADV = {"0":66.7,"1":66.7,"4":66.7,"6":66.7,"-":33.3,"D":77.8,"A":77.8,"Y":77.8," ":33.3,"Q":83.3,"U":83.3,"L":66.7,"I":38.9,"T":72.2,"G":83.3,"R":77.8,"N":83.3,"E":72.2,"É":72.2,"J":66.7,"O":83.3,"S":72.2,"Í":38.9,"C":77.8,"Ä":77.8,"Z":72.2,"À":77.8};
 const adv = (ch, size) => ((ADV[ch] ?? 75) * size) / 100;
 const width = (text, size, track) => [...text].reduce((n, ch) => n + adv(ch, size), 0) + ([...text].length - 1) * track;
 const esc = (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[ch] ?? ch;

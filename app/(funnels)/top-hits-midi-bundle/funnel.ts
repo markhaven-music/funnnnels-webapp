@@ -18,7 +18,7 @@ export const funnel = {
   // The ClickFunnels page's Wistia video (hero).
   wistiaId: "8s55snt7vw",
   support: "support@thegrind.studio",
-  guaranteeDays: 14,
+  guaranteeDays: 60,
   legal: {
     terms: "/terms-and-conditions",
     privacy: "/privacy-policy",

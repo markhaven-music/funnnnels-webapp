@@ -252,7 +252,7 @@ export default async function DrunkSwingGrooves({ params }: { params: Promise<{ 
           <div className={s.promise}>
             <div className={s.sealRow}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="14-day quality guarantee" width={172} height={172} loading="lazy" decoding="async" />
+              <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="60-day quality guarantee" width={172} height={172} loading="lazy" decoding="async" />
               <div>
               <h2 className={s.h3}>{w.guarantee.title}</h2>
               <p>{fill(w.guarantee.text, { email: funnel.support })}</p>

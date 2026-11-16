@@ -549,7 +549,7 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
           <div className={`${s.guarantee} ${s.panel} ${s.two}`}>
             <div className={`${s.sealWrap} ${s.twoBody}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="14-day quality guarantee" width={172} height={172} loading="lazy" decoding="async" />
+              <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="60-day quality guarantee" width={172} height={172} loading="lazy" decoding="async" />
             </div>
             <div className={s.twoHead}>
               <h2 className={s.h2}>{w.guarantee.title}</h2>

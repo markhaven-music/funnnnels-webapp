@@ -26,7 +26,7 @@ export const funnel = {
   // voice take, for Blinding Lights' corrected last chord; 47ic5iver0 was the 2026-11-10 render.
   vsl: { wistiaId: "x8jj158ddq" as string },
   support: "support@thegrind.studio",
-  guaranteeDays: 14,
+  guaranteeDays: 60,
   legal: {
     terms: "/terms-and-conditions",
     privacy: "/privacy-policy",

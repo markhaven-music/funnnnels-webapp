@@ -64,7 +64,7 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
 - Tick boxes: Drunk Swing Grooves €7, Emotional Keys €7, HUSTLE €27. The MIDI Drum Kit add-on (€27) leaves the
   order page (it's the upsell candidate, "poi vediamo gli oto").
 - Upsell: TOP HITS as now.
-- Guarantee: 14-day quality guarantee; "we fix it or replace it. If we can't, you get a refund". Never "money back".
+- Guarantee: 60-day quality guarantee; "we fix it or replace it. If we can't, you get a refund". Never "money back".
 
 ## Switch (done 2026-11-10, "Sì, passa alla v2" → "Yes, change and switch")
 - Live at /famous-beats-bundle (+ /order) since 2026-11-10 (3430584); /v2 and /v2/order redirect there (next.config.ts).

@@ -54,7 +54,7 @@ a request conflict, the request wins; say which rule you are breaking.
   `<span className="block">` per phrase) plus `text-wrap: balance` on every
   h1/h2, and keep a highlight inside one line. Check at desktop AND 375px; if
   a phrase won't fit one desktop line, shorten it or lower the size a step.
-- The guarantee is a **14-day quality guarantee**. Never "money back" (or "Geld zurück", "rimborsati"…) anywhere on the site, in any language (the user, 2026-11-08). If we can't fix a file: "you get a refund".
+- The guarantee is a **60-day quality guarantee**. Never "money back" (or "Geld zurück", "rimborsati"…) anywhere on the site, in any language (the user, 2026-11-08). If we can't fix a file: "you get a refund".
 - Numbers are real and consistent across the page (the pack's count, the
   bonuses' count, the total only as "in total").
 - Angles that sell: the Jazz page sells "the progressions everyone wants and

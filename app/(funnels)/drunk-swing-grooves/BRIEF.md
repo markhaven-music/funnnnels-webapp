@@ -54,7 +54,7 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
   MIDI Chord Pack (Jazz Edition), The Chord Progressions Bible, Anime & Video Games MIDI Pack, Emotional Keys MIDI
   Bundle, Drum Loops for Songwriting (the PDF guide is inside the pack's zip). funnel.ts `includes`.
 - Upsell 2: Famous Beats Bundle €27 / $27 (the MIDI Drum Kit's page, midi-drum-kit/upsell.ts).
-- Guarantee: 14-day quality guarantee ("A file doesn't work ... we fix it. If we can't, you get a refund"; never "money back"). Royalty-free license
+- Guarantee: 60-day quality guarantee ("A file doesn't work ... we fix it. If we can't, you get a refund"; never "money back"). Royalty-free license
   (own music and commercial releases, no credit; no resale or sharing of the files).
 - Proof: "2,847 producers have the GRIND STUDIO MIDI Drum Kit" (the Jazz order page's line). No reviews.
 

@@ -57,8 +57,8 @@ export const es: Copy = {
       free: "Gratis",
       totalValue: "Valor total",
       today: "Hoy",
-      guarantee: "Garantía de calidad de 14 días. ¿Un archivo no funciona? Lo arreglamos.",
-      proof: ["**2.847** productores tienen el MIDI Drum Kit en sus sesiones", "**4.700+** productores en la lista de email de GRIND STUDIO", "**14 días** de garantía de calidad en cada archivo"],
+      guarantee: "Garantía de calidad de 60 días. ¿Un archivo no funciona? Lo arreglamos.",
+      proof: ["**2.847** productores tienen el MIDI Drum Kit en sus sesiones", "**4.700+** productores en la lista de email de GRIND STUDIO", "**60 días** de garantía de calidad en cada archivo"],
     },
     completeTitle: "Completa tu pedido:",
     paylogosAlt: "PayPal, Visa, Mastercard, American Express, Discover",
@@ -73,9 +73,9 @@ export const es: Copy = {
       { quote: "“Estos patrones pegan más fuerte que todo lo que había encontrado. Herramientas imprescindibles para los productores de hoy.”", name: "Ravi Lomax", role: "Productor de trap, más de 100 M de streams", avatar: "avatar-a" },
     ],
     starsAlt: "5 estrellas",
-    guaranteeTitle: "Garantía de calidad de 14 días",
+    guaranteeTitle: "Garantía de calidad de 60 días",
     guaranteeText:
-      "Cada patrón de este kit se prueba antes de salir. Si algo falla con tus archivos, escribe a support@thegrind.studio dentro de los 14 días y lo solucionamos: una nueva descarga, un reemplazo o un reembolso si no conseguimos arreglarlo.",
+      "Cada patrón de este kit se prueba antes de salir. Si algo falla con tus archivos, escribe a support@thegrind.studio dentro de los 60 días y lo solucionamos: una nueva descarga, un reemplazo o un reembolso si no conseguimos arreglarlo.",
     secureTitle: "Pagos seguros",
     secureText:
       "Tu pago lo procesa Stripe, la plataforma de pagos en la que confían millones de empresas, entre ellas Amazon, Google y Shopify, o PayPal. Los datos de tu tarjeta van directamente a Stripe con cifrado SSL de 256 bits y nunca pasan por nuestros servidores.",

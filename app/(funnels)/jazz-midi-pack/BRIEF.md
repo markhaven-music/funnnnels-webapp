@@ -105,8 +105,8 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
 - Delivery: download buttons on the thank-you page right after payment; Stripe emails the receipt.
 
 ## Guarantee and legal (same as the Grind Studio store)
-- 14-Day Satisfaction Guarantee, never "money-back": if anything's wrong with your files, email
-  support@thegrind.studio within 14 days and we make it right: a fresh download, a replacement, or a refund
+- 60-Day Satisfaction Guarantee, never "money-back": if anything's wrong with your files, email
+  support@thegrind.studio within 60 days and we make it right: a fresh download, a replacement, or a refund
   if we can't fix it.
 - License: use them in your own music, commercial releases included, no royalties. Don't resell or share
   the files themselves.

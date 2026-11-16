@@ -18,11 +18,11 @@ export const LANDING = {
       "Any DAW, Mac Or PC. Commercial License",
       "6 Free Bonuses Included",
     ],
-    ticks: ["Any DAW", "BPM and artist in every file name", "14-day guarantee"],
+    ticks: ["Any DAW", "BPM and artist in every file name", "60-day guarantee"],
     proof: [
       ["2,847", "producers have the GRIND STUDIO MIDI Drum Kit in their sessions"],
       ["4,700+", "producers on the GRIND STUDIO email list"],
-      ["14 days", "quality guarantee on every file"],
+      ["60 days", "quality guarantee on every file"],
     ] as [string, string][],
   },
   cta: { label: "Get the bundle", note: "{price} · one payment · instant download" },
@@ -170,8 +170,8 @@ export const LANDING = {
     perGroove: "That's {c}0.08 per groove.",
   },
   guarantee: {
-    title: "14-day quality guarantee.",
-    text: "If a file is broken, missing or not what this page says, email {email} within 14 days. We fix it or replace it. If we can't, you get a refund.",
+    title: "60-day quality guarantee.",
+    text: "If a file is broken, missing or not what this page says, email {email} within 60 days. We fix it or replace it. If we can't, you get a refund.",
   },
   after: {
     title: "What happens after you pay.",
@@ -192,7 +192,7 @@ export const LANDING = {
       ["How do I find the right groove out of 320?", "Every pack has a folder of audio previews. Scroll and listen, no need to load each MIDI. File names carry the BPM, artist and song, so you can search the folder."],
       ["I don't know music theory. Can I use it?", "Yes. Drag a file onto a drum track, pick your sounds, press play. The groove is already written."],
       ["How fast do I get it?", "Right after payment: the download buttons are on the next page and the links come by email."],
-      ["What if a file doesn't work?", "14-day quality guarantee. If a file is broken, missing or not what this page says, email {email}. We fix it or replace it, and if we can't, you get a refund."],
+      ["What if a file doesn't work?", "60-day quality guarantee. If a file is broken, missing or not what this page says, email {email}. We fix it or replace it, and if we can't, you get a refund."],
     ] as [string, string][],
   },
   final: {
@@ -220,10 +220,10 @@ export const ORDER = {
   ],
   bonusHead: "Plus 6 free bonuses",
   today: "Today",
-  guarantee: "14-day quality guarantee. A file doesn't work? We fix it.",
+  guarantee: "60-day quality guarantee. A file doesn't work? We fix it.",
   proof: [
     "**320** drum transcriptions from hit records",
-    "**14 days** quality guarantee on every file",
+    "**60 days** quality guarantee on every file",
     "Card, Apple Pay, Google Pay or **PayPal**",
   ],
 };

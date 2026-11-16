@@ -24,7 +24,7 @@ export const funnel = {
   // languages swap it in landing.ts (VIDEOS).
   wistiaId: "xeyd5v0tsm",
   support: "support@thegrind.studio",
-  guaranteeDays: 14,
+  guaranteeDays: 60,
   legal: {
     terms: "/terms-and-conditions",
     privacy: "/privacy-policy",

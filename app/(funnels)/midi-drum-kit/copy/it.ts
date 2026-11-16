@@ -57,8 +57,8 @@ export const it: Copy = {
       free: "Gratis",
       totalValue: "Valore totale",
       today: "Oggi",
-      guarantee: "Garanzia di qualità di 14 giorni. Un file non funziona? Lo sistemiamo.",
-      proof: ["**2.847** producer hanno il MIDI Drum Kit nelle loro sessioni", "**4.700+** producer nella lista email di GRIND STUDIO", "**14 giorni** di garanzia di qualità su ogni file"],
+      guarantee: "Garanzia di qualità di 60 giorni. Un file non funziona? Lo sistemiamo.",
+      proof: ["**2.847** producer hanno il MIDI Drum Kit nelle loro sessioni", "**4.700+** producer nella lista email di GRIND STUDIO", "**60 giorni** di garanzia di qualità su ogni file"],
     },
     completeTitle: "Completa l'ordine:",
     paylogosAlt: "PayPal, Visa, Mastercard, American Express, Discover",
@@ -73,9 +73,9 @@ export const it: Copy = {
       { quote: "“Questi pattern picchiano più duro di tutto quello che ho trovato. Strumenti indispensabili per i producer di oggi.”", name: "Ravi Lomax", role: "Producer trap, oltre 100 milioni di stream", avatar: "avatar-a" },
     ],
     starsAlt: "5 stelle",
-    guaranteeTitle: "Garanzia di qualità di 14 giorni",
+    guaranteeTitle: "Garanzia di qualità di 60 giorni",
     guaranteeText:
-      "Ogni pattern di questo kit viene testato prima dell'uscita. Se qualcosa non va con i tuoi file, scrivi a support@thegrind.studio entro 14 giorni e lo sistemiamo: un nuovo download, una sostituzione o un rimborso se non riusciamo a risolvere il problema.",
+      "Ogni pattern di questo kit viene testato prima dell'uscita. Se qualcosa non va con i tuoi file, scrivi a support@thegrind.studio entro 60 giorni e lo sistemiamo: un nuovo download, una sostituzione o un rimborso se non riusciamo a risolvere il problema.",
     secureTitle: "Pagamenti sicuri",
     secureText:
       "Il tuo pagamento è gestito da Stripe, la piattaforma di pagamento usata da milioni di aziende tra cui Amazon, Google e Shopify, oppure da PayPal. I dati della tua carta vanno direttamente a Stripe con crittografia SSL a 256 bit e non passano mai dai nostri server.",

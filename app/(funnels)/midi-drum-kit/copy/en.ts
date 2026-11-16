@@ -61,8 +61,8 @@ export const en = {
       totalValue: "Total value",
       today: "Today",
       // Under the bonuses and under the form, as on the Jazz order page (2026-11-12).
-      guarantee: "14-day quality guarantee. A file doesn't work? We fix it.",
-      proof: ["**2,847** producers have the MIDI Drum Kit in their sessions", "**4,700+** producers on the GRIND STUDIO email list", "**14 days** quality guarantee on every file"],
+      guarantee: "60-day quality guarantee. A file doesn't work? We fix it.",
+      proof: ["**2,847** producers have the MIDI Drum Kit in their sessions", "**4,700+** producers on the GRIND STUDIO email list", "**60 days** quality guarantee on every file"],
     },
     completeTitle: "Complete Order:",
     paylogosAlt: "PayPal, Visa, Mastercard, American Express, Discover",
@@ -77,9 +77,9 @@ export const en = {
       { quote: "\"These patterns hit harder than anything I've found. Essential tools for modern producers.\"", name: "Ravi Lomax", role: "Trap Producer, 100M+ streams", avatar: "avatar-a" },
     ],
     starsAlt: "5 stars",
-    guaranteeTitle: "14-Day Quality Guarantee",
+    guaranteeTitle: "60-Day Quality Guarantee",
     guaranteeText:
-      "Every pattern in this kit is tested before release. If anything's wrong with your files, email support@thegrind.studio within 14 days and we'll make it right — a fresh download, a replacement, or a refund if we can't fix it.",
+      "Every pattern in this kit is tested before release. If anything's wrong with your files, email support@thegrind.studio within 60 days and we'll make it right — a fresh download, a replacement, or a refund if we can't fix it.",
     secureTitle: "Secure Payments",
     secureText:
       "Your payment is processed by Stripe, the payment platform trusted by millions of businesses including Amazon, Google and Shopify, or by PayPal. Your card details go straight to Stripe over 256-bit SSL encryption and never touch our servers.",

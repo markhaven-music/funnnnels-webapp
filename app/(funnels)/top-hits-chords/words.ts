@@ -21,11 +21,11 @@ export const LANDING = {
       "Any DAW, Mac Or PC. Commercial License",
       "6 Free Bonuses Included",
     ],
-    ticks: ["Any DAW", "Key and BPM in the file name", "14-day guarantee"],
+    ticks: ["Any DAW", "Key and BPM in the file name", "60-day guarantee"],
     proof: [
       ["2,847", "producers have the GRIND STUDIO MIDI Drum Kit in their sessions"],
       ["4,700+", "producers on the GRIND STUDIO email list"],
-      ["14 days", "quality guarantee on every file"],
+      ["60 days", "quality guarantee on every file"],
     ] as [string, string][],
   },
   cta: { label: "Get the bundle", note: "{price} · one payment · instant download" },
@@ -169,8 +169,8 @@ export const LANDING = {
     today: "Today",
   },
   guarantee: {
-    title: "14-day quality guarantee.",
-    text: "If a file is broken, missing or not what this page says, email {email} within 14 days. We fix it or replace it. If we can't, you get a refund.",
+    title: "60-day quality guarantee.",
+    text: "If a file is broken, missing or not what this page says, email {email} within 60 days. We fix it or replace it. If we can't, you get a refund.",
   },
   license: {
     title: "Commercial license.",
@@ -197,7 +197,7 @@ export const LANDING = {
       ["How long is each file?", "Half of them run 16 bars or more: the progression as the song plays it. The shortest are 4-bar loops."],
       ["I don't know music theory. Can I use it?", "Yes. Drag a file onto a track, pick a sound, press play. The chords are already written. Change the key in one click to fit your beat."],
       ["How fast do I get it?", "Right after payment: the download buttons are on the next page and the links come by email."],
-      ["What if a file doesn't work?", "14-day quality guarantee. If a file is broken, missing or not what this page says, email {email}. We fix it or replace it, and if we can't, you get a refund."],
+      ["What if a file doesn't work?", "60-day quality guarantee. If a file is broken, missing or not what this page says, email {email}. We fix it or replace it, and if we can't, you get a refund."],
     ] as [string, string][],
   },
   final: {
@@ -228,10 +228,10 @@ export const ORDER = {
   bonusHead: "Plus 6 free bonuses",
   totalValue: "Total value",
   today: "Today",
-  guarantee: "14-day quality guarantee. A file doesn't work? We fix it.",
+  guarantee: "60-day quality guarantee. A file doesn't work? We fix it.",
   proof: [
     "**12,000** MIDI files: 1,000 hit progressions in all 12 keys",
-    "**14 days** quality guarantee on every file",
+    "**60 days** quality guarantee on every file",
     "Card, Apple Pay, Google Pay or **PayPal**",
   ],
 };

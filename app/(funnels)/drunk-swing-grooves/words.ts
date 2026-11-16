@@ -45,7 +45,7 @@ export const LANDING = {
   cta: { label: "Get the grooves", note: "{price} · instant download" },
   proof: [
     ["2,847", "producers have the GRIND STUDIO MIDI Drum Kit in their sessions"],
-    ["14 days", "quality guarantee on every file"],
+    ["60 days", "quality guarantee on every file"],
   ],
   why: {
     title: "Why your drums sound stiff",
@@ -105,8 +105,8 @@ export const LANDING = {
     ],
   },
   guarantee: {
-    title: "14-day quality guarantee",
-    text: "A file doesn't work, or the pack isn't what this page says? Email {email} within 14 days and we fix it. If we can't, you get a refund.",
+    title: "60-day quality guarantee",
+    text: "A file doesn't work, or the pack isn't what this page says? Email {email} within 60 days and we fix it. If we can't, you get a refund.",
   },
   license: {
     title: "Royalty-free",
@@ -191,12 +191,12 @@ export const ORDER = {
     "Bonus: neo soul keys in quintuplet swing",
     "Any DAW, Mac and PC",
     "Royalty-free",
-    "14-day quality guarantee",
+    "60-day quality guarantee",
   ],
   // The MIDI Drum Kit's reviews (2026-11-08, the user chose "Drum Kit reviews" for this pack).
   reviews: DRUM_KIT_REVIEWS as { quote: string; name: string; role: string }[],
   guarantee: {
-    title: "14-Day Quality Guarantee",
+    title: "60-Day Quality Guarantee",
     text: "A file doesn't work, or the pack isn't what the page says? Email {email} within {days} days and we fix it. If we can't, you get a refund.",
   },
   form: { ...TOP_HITS_ORDER.form, pay: "GET THE GROOVES!", paypalNote: "After you click **GET THE GROOVES!** below, you finish paying on PayPal's secure page, then come straight back to your download." },

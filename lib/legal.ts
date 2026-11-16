@@ -24,7 +24,7 @@ export const LEGAL_PAGES: LegalPage[] = [
   {
     slug: "terms-and-conditions",
     title: "Terms & Conditions",
-    updated: "November 6, 2026",
+    updated: "November 16, 2026",
     blocks: [
       {
         h: "1. BUSINESS INFORMATION",
@@ -50,7 +50,7 @@ export const LEGAL_PAGES: LegalPage[] = [
       {
         // 2026-11-06: was a "Money-Back Satisfaction Guarantee" (refund if not the right
         // fit), against the Refund Policy and every product page ("Yes, align it").
-        p: "We offer a 14-Day Quality Guarantee. If your files are defective, not as described, or you are unable to download your purchase, email support@thegrind.studio within 14 days of your purchase date: we will first repair or replace the files, and if we are unable to resolve the issue, we will issue a full refund. Duplicate purchases are also refunded. The full terms are in our Refund Policy. To prevent fraud and system abuse, we strictly enforce a lifetime limit of one refund per customer.",
+        p: "We offer a 60-Day Quality Guarantee. If your files are defective, not as described, or you are unable to download your purchase, email support@thegrind.studio within 60 days of your purchase date: we will first repair or replace the files, and if we are unable to resolve the issue, we will issue a full refund. Duplicate purchases are also refunded. The full terms are in our Refund Policy. To prevent fraud and system abuse, we strictly enforce a lifetime limit of one refund per customer.",
       },
       {
         h: "5. CHARGEBACKS AND DISPUTES",
@@ -171,7 +171,7 @@ export const LEGAL_PAGES: LegalPage[] = [
   {
     slug: "refund-policy",
     title: "Refund Policy",
-    updated: "June 9, 2026",
+    updated: "November 16, 2026",
     blocks: [
       {
         p: 'This Refund Policy is an agreement between you and FFUNK Media LLC (doing business as "Grind Studio"), a Wyoming Limited Liability Company.',
@@ -183,10 +183,10 @@ export const LEGAL_PAGES: LegalPage[] = [
         p: "By purchasing from our website, you agree to the following Refund Policy.",
       },
       {
-        h: "1. Refund Eligibility (14 Days)",
+        h: "1. Refund Eligibility (60 Days)",
       },
       {
-        p: "We offer refunds within 14 days of purchase in the following situations:",
+        p: "We offer refunds within 60 days of purchase in the following situations:",
       },
       {
         ul: [
@@ -265,7 +265,7 @@ export const LEGAL_PAGES: LegalPage[] = [
       },
       {
         ul: [
-          "The request is made more than 14 days after purchase.",
+          "The request is made more than 60 days after purchase.",
           "You changed your mind after downloading or accessing the files (see Section 1).",
           "The request is based on not having time to use the product.",
           "The request is based on the product requiring effort or learning to use, where the product functions as described.",

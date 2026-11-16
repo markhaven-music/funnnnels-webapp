@@ -164,7 +164,7 @@ export default async function OrderPage({ params }: { params: Params }) {
         </div>
       </section>
 
-      {/* The guarantee with the Jazz page's seal (14 days, in the page's language). "Secure Payments" under it went on
+      {/* The guarantee with the Jazz page's seal (60 days, in the page's language). "Secure Payments" under it went on
           2026-11-12 ("remove the Secure Payments part from the order page footer"). */}
       <section className={`${j.sec} ${j.band}`}>
         <div className={`${j.wrap} ${d.pledges}`}>

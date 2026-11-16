@@ -57,8 +57,8 @@ export const fr: Copy = {
       free: "Offert",
       totalValue: "Valeur totale",
       today: "Aujourd'hui",
-      guarantee: "Garantie qualité de 14 jours. Un fichier ne marche pas ? On le répare.",
-      proof: ["**2 847** producteurs ont le MIDI Drum Kit dans leurs sessions", "**4 700+** producteurs sur la liste email de GRIND STUDIO", "**14 jours** de garantie qualité sur chaque fichier"],
+      guarantee: "Garantie qualité de 60 jours. Un fichier ne marche pas ? On le répare.",
+      proof: ["**2 847** producteurs ont le MIDI Drum Kit dans leurs sessions", "**4 700+** producteurs sur la liste email de GRIND STUDIO", "**60 jours** de garantie qualité sur chaque fichier"],
     },
     completeTitle: "Finalise ta commande :",
     paylogosAlt: "PayPal, Visa, Mastercard, American Express, Discover",
@@ -73,9 +73,9 @@ export const fr: Copy = {
       { quote: "« Ces patterns tapent plus fort que tout ce que j'ai trouvé. Des outils indispensables pour les producteurs d'aujourd'hui. »", name: "Ravi Lomax", role: "Producteur trap, plus de 100 M de streams", avatar: "avatar-a" },
     ],
     starsAlt: "5 étoiles",
-    guaranteeTitle: "Garantie qualité de 14 jours",
+    guaranteeTitle: "Garantie qualité de 60 jours",
     guaranteeText:
-      "Chaque pattern de ce kit est testé avant sa sortie. Si quelque chose ne va pas avec tes fichiers, écris à support@thegrind.studio dans les 14 jours et on règle ça : un nouveau téléchargement, un remplacement, ou un remboursement si on n'arrive pas à corriger le problème.",
+      "Chaque pattern de ce kit est testé avant sa sortie. Si quelque chose ne va pas avec tes fichiers, écris à support@thegrind.studio dans les 60 jours et on règle ça : un nouveau téléchargement, un remplacement, ou un remboursement si on n'arrive pas à corriger le problème.",
     secureTitle: "Paiements sécurisés",
     secureText:
       "Ton paiement est traité par Stripe, la plateforme de paiement utilisée par des millions d'entreprises, dont Amazon, Google et Shopify, ou par PayPal. Les données de ta carte vont directement à Stripe avec un chiffrement SSL 256 bits et ne passent jamais par nos serveurs.",

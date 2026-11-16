@@ -303,9 +303,9 @@ export default async function AllAccess({ params }: { params: Params }) {
 
       <section className={`${j.sec} ${u.sec} ${u.dark}`}>
         <div className={`${u.col} ${u.center}`}>
-          <img className={u.seal} src="/funnels/midi-drum-kit/badge-quality.webp" width={200} height={200} alt="14-day quality guarantee" loading="lazy" decoding="async" />
+          <img className={u.seal} src="/funnels/midi-drum-kit/badge-quality.webp" width={200} height={200} alt="60-day quality guarantee" loading="lazy" decoding="async" />
           <h2 className={u.h2}>
-            <span className={u.line}>14-day quality guarantee.</span>
+            <span className={u.line}>60-day quality guarantee.</span>
           </h2>
           <p className={u.lead}>
             Open every pack, use the files in your sessions. If a file doesn’t work in your DAW, write to us and we fix it. If we can’t, you get a

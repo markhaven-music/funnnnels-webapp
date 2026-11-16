@@ -153,7 +153,7 @@ one title word for word; reviews are the user's call).
 
 ## The pages
 - Landing `./[currency]` (words `./words.ts`): red bar, hero (video when there is one, four
-  playable files, bullets, key, proof: 2,847 Drum Kit producers, 4,700+ list, 14 days), letter, product
+  playable files, bullets, key, proof: 2,847 Drum Kit producers, 4,700+ list, 60 days), letter, product
   panel, what you get beside a playable roll, the player, how it works beside the folder path, what's
   inside, ✓/✗ chart, six bonuses, value stack, seal + license, after you pay, FAQ, final key.
 - The player (`./SongPlayer.tsx`): the four folders, Prev / menu / Next, search by artist, song, key
@@ -195,7 +195,7 @@ one title word for word; reviews are the user's call).
   and Famous Beats sell it at €27). Emotional Keys is a bonus here; Famous Beats is the second upsell,
   not a tick box.
 - Upsells: Jazz MIDI Pack €27, then Famous Beats Bundle €27.
-- Guarantee: 14-day quality guarantee; "we fix it or replace it. If we can't, you get a refund". Never "money back".
+- Guarantee: 60-day quality guarantee; "we fix it or replace it. If we can't, you get a refund". Never "money back".
 
 ## Where it's registered (a code funnel, like Drunk Swing Grooves)
 - `funnel_items` (dashboard → Products), funnel `top-hits-chords`, added 2026-11-10: main `pack`

@@ -203,7 +203,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
         <div className={s.wrap}>
           <div className={s.guarantee}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="14-day quality guarantee" width={150} height={150} loading="lazy" decoding="async" />
+            <img src="/funnels/midi-drum-kit/badge-quality-sm.webp" alt="60-day quality guarantee" width={150} height={150} loading="lazy" decoding="async" />
             <div>
               <h2 className={s.h2}>{LANDING.guarantee.title}</h2>
               <p className={s.sub}>{t(LANDING.guarantee.text)}</p>

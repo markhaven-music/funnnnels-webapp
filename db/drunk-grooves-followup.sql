@@ -58,7 +58,7 @@ Do you need to know jazz theory? No. The voicings are done. You pick a progressi
 
 Does it work in my DAW? Any DAW that opens .mid: Ableton, Logic, FL Studio, Cubase, Studio One, Reaper, GarageBand.
 
-If a file doesn't load, reply to this email and we fix it. It's covered by the 14-day guarantee.
+If a file doesn't load, reply to this email and we fix it. It's covered by the 60-day guarantee.
 
 [Get the Jazz MIDI Pack](https://m.thegrind.studio/jazz-midi-pack?utm_source=email&utm_medium=sequence&utm_campaign=drunk-grooves-jazz&utm_content=day6)
 

@@ -57,8 +57,8 @@ export const de: Copy = {
       free: "Gratis",
       totalValue: "Gesamtwert",
       today: "Heute",
-      guarantee: "14 Tage Qualitätsgarantie. Eine Datei funktioniert nicht? Wir reparieren sie.",
-      proof: ["**2.847** Producer haben das MIDI Drum Kit in ihren Sessions", "**4.700+** Producer auf der GRIND STUDIO E-Mail-Liste", "**14 Tage** Qualitätsgarantie auf jede Datei"],
+      guarantee: "60 Tage Qualitätsgarantie. Eine Datei funktioniert nicht? Wir reparieren sie.",
+      proof: ["**2.847** Producer haben das MIDI Drum Kit in ihren Sessions", "**4.700+** Producer auf der GRIND STUDIO E-Mail-Liste", "**60 Tage** Qualitätsgarantie auf jede Datei"],
     },
     completeTitle: "Bestellung abschließen:",
     paylogosAlt: "PayPal, Visa, Mastercard, American Express, Discover",
@@ -73,9 +73,9 @@ export const de: Copy = {
       { quote: "„Diese Patterns hauen härter rein als alles, was ich bisher gefunden habe. Pflicht-Tools für Producer von heute.“", name: "Ravi Lomax", role: "Trap-Producer, über 100 Mio. Streams", avatar: "avatar-a" },
     ],
     starsAlt: "5 Sterne",
-    guaranteeTitle: "14 Tage Qualitätsgarantie",
+    guaranteeTitle: "60 Tage Qualitätsgarantie",
     guaranteeText:
-      "Jedes Pattern in diesem Kit wird vor dem Release getestet. Wenn mit deinen Dateien etwas nicht stimmt, schreib innerhalb von 14 Tagen an support@thegrind.studio und wir kümmern uns darum: ein neuer Download, ein Ersatz oder eine Rückerstattung, falls wir das Problem nicht lösen können.",
+      "Jedes Pattern in diesem Kit wird vor dem Release getestet. Wenn mit deinen Dateien etwas nicht stimmt, schreib innerhalb von 60 Tagen an support@thegrind.studio und wir kümmern uns darum: ein neuer Download, ein Ersatz oder eine Rückerstattung, falls wir das Problem nicht lösen können.",
     secureTitle: "Sichere Zahlungen",
     secureText:
       "Deine Zahlung läuft über Stripe, die Zahlungsplattform, der Millionen Unternehmen vertrauen, darunter Amazon, Google und Shopify, oder über PayPal. Deine Kartendaten gehen mit 256-Bit-SSL-Verschlüsselung direkt an Stripe und berühren nie unsere Server.",

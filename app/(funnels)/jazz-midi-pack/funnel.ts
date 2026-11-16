@@ -12,7 +12,7 @@ export const funnel = {
     neoSnippet: "https://t.thegrind.studio/api/s/3d5ba6a05e6bcaea",
   },
   support: "support@thegrind.studio",
-  guaranteeDays: 14,
+  guaranteeDays: 60,
   legal: {
     terms: "/terms-and-conditions",
     privacy: "/privacy-policy",
