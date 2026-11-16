@@ -162,11 +162,11 @@ export default async function AllAccess({ params }: { params: Params }) {
           </p>
           <img
             className={u.hero}
-            src="/funnels/midi-drum-kit/all-access6-1280.webp"
-            srcSet="/funnels/midi-drum-kit/all-access6-720.webp 720w, /funnels/midi-drum-kit/all-access6-1280.webp 1280w"
+            src="/funnels/midi-drum-kit/all-access6-1100.webp"
+            srcSet="/funnels/midi-drum-kit/all-access6-760.webp 760w, /funnels/midi-drum-kit/all-access6-1100.webp 1100w"
             sizes="(max-width: 760px) 100vw, 760px"
-            width={1280}
-            height={658}
+            width={1100}
+            height={566}
             alt="GRIND STUDIO All Access: the Jazz MIDI Pack, Jazz MIDI Pack Vol. 2, Famous Beats Bundle, TOP HITS MIDI Bundle, HUSTLE Bundle and Drum Kit Expansions"
             fetchPriority="high"
           />
@@ -343,9 +343,9 @@ export default async function AllAccess({ params }: { params: Params }) {
           </h2>
           <img
             className={u.heroSm}
-            src="/funnels/midi-drum-kit/all-access6-720.webp"
-            width={720}
-            height={370}
+            src="/funnels/midi-drum-kit/all-access6-760.webp"
+            width={760}
+            height={391}
             alt=""
             loading="lazy"
             decoding="async"
