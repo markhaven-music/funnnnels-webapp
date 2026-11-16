@@ -360,6 +360,25 @@
   stroke-linejoin: round;
   stroke-linecap: round;
 }
+.mark {
+  stroke: var(--fg-1);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 0.55;
+}
+.markLabel {
+  position: absolute;
+  top: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-1);
+  pointer-events: none;
+}
+.tipMark {
+  font-size: 12px;
+  color: var(--fg-1);
+  margin-top: 4px;
+}
 .cross {
   stroke: var(--fg-1);
   stroke-width: 1;

@@ -65,6 +65,12 @@ const count = (n: number) => n.toLocaleString("en-US");
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 const SINCE_LABEL = shortDay(SPEND_SINCE);
 
+// Days when a lot shipped at once, drawn as a dashed line on the big chart so a
+// before/after reads at a glance ("metti un marker 16/11 sul grafico", 2026-11-16).
+const MARKS: { day: string; label: string }[] = [
+  { day: "2026-11-16", label: "Many changes: 60-day guarantee, All Access, Apple/Google Pay, £/CHF" },
+];
+
 // ─── what the Meta ads cost, day by day (/api/analytics/spend) ────────────────
 
 // Meta's answer per "since..until", so switching back and forth doesn't ask
@@ -588,6 +594,10 @@ export function Performance({ a, cur, periodName, onRefresh, refreshing, updated
   const splitLines = series.filter((x) => x.on).map((x) => ({ key: x.key, color: x.color, lines: lineOf(x.vals) }));
   const fills = show.net && show.spend && spendS.every((v) => v !== null) && n > 1 ? bands(netLines[0] ?? [], spendLines[0] ?? []) : [];
   const dots = n <= 40;
+  const marks = MARKS.flatMap((mk) => {
+    const i = rows.findIndex((r) => r.from <= mk.day && mk.day <= r.to);
+    return i < 0 || n < 2 ? [] : [{ ...mk, i }];
+  });
   const hv = hover !== null && hover < n ? hover : null;
   const hr = hv === null ? null : rows[hv];
   const empty = !visible.some((v) => v !== 0);
@@ -873,6 +883,9 @@ export function Performance({ a, cur, periodName, onRefresh, refreshing, updated
                       ...(show.cur ? curS.map((v, i) => ({ v, i, c: m.color, k: "c" })) : []),
                       ...series.filter((x) => x.on).flatMap((x) => x.vals.map((v, i) => ({ v, i, c: x.color, k: `f${x.key}` }))),
                     ].map((p) => (p.v === null ? null : <circle key={`${p.k}${p.i}`} cx={xOf(p.i)} cy={yOf(p.v)} r={3.5} fill={p.c} className={s.dot} />))}
+                  {marks.map((mk) => (
+                    <line key={mk.day} className={s.mark} x1={Math.round(xOf(mk.i)) + 0.5} x2={Math.round(xOf(mk.i)) + 0.5} y1={0} y2={H} />
+                  ))}
                   {hv !== null && (
                     <g>
                       <line className={s.cross} x1={Math.round(xOf(hv)) + 0.5} x2={Math.round(xOf(hv)) + 0.5} y1={0} y2={H} />
@@ -890,9 +903,17 @@ export function Performance({ a, cur, periodName, onRefresh, refreshing, updated
               ) : (
                 empty && <div className={s.none}>{m.ads && spend && !spend.connected ? spend.reason : "Nothing to show in this range yet."}</div>
               )}
+              {marks.map((mk) => (
+                <span key={mk.day} className={s.markLabel} style={xOf(mk.i) < W / 2 ? { left: xOf(mk.i) + 6 } : { right: W - xOf(mk.i) + 6 }} title={mk.label}>
+                  {shortDay(mk.day)}
+                </span>
+              ))}
               {hr && hv !== null && (
                 <div className={s.tip} style={xOf(hv) < W / 2 ? { left: xOf(hv) + 18 } : { right: W - xOf(hv) + 18 }}>
                   <div className={s.tipHead}>{iv === "total" ? `${span(hr.from, hr.to)} · running total` : span(hr.from, hr.to)}</div>
+                  {marks.filter((mk) => mk.i === hv).map((mk) => (
+                    <div key={mk.day} className={s.tipMark}>{mk.label}</div>
+                  ))}
                   {split ? (
                     <div className={s.tipRows}>
                       {series
