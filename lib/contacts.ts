@@ -162,8 +162,8 @@ export async function contactTags(): Promise<{ tag: string; contacts: number }[]
 }
 
 /** How many subscribed contacts a send to this tag (null: everyone) would reach. */
-export async function audienceSize(tag: string | null, exclude: string | null): Promise<number> {
-  const { data, error } = await supabase().rpc("audience_size", { p_tag: tag, p_exclude: exclude });
+export async function audienceSize(tag: string | null, exclude: string | null, engaged = false): Promise<number> {
+  const { data, error } = await supabase().rpc("audience_size", { p_tag: tag, p_exclude: exclude, p_engaged: engaged });
   if (error) throw error;
   return Number(data ?? 0);
 }

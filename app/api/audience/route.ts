@@ -4,11 +4,12 @@ import { audienceSize, contactTags } from "@/lib/contacts";
 export const runtime = "nodejs";
 
 // The editors' audience pickers: every tag with its count, and ?tag=&exclude=
-// → how many subscribed contacts a send would reach.
+// (&engaged=1: engaged contacts only) → how many subscribed contacts a send would reach.
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const tag = url.searchParams.get("tag") || null;
   const exclude = url.searchParams.get("exclude") || null;
-  const [tags, size] = await Promise.all([contactTags(), audienceSize(tag, exclude)]);
+  const engaged = url.searchParams.get("engaged") === "1";
+  const [tags, size] = await Promise.all([contactTags(), audienceSize(tag, exclude, engaged)]);
   return NextResponse.json({ tags, size });
 }

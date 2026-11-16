@@ -41,9 +41,6 @@ export async function sendEmail(email: Email): Promise<Sent> {
     to = test;
   }
 
-  const region = process.env.SES_REGION!;
-  const host = `email.${region}.amazonaws.com`;
-  const path = "/v2/email/outbound-emails";
   const body = JSON.stringify({
     FromEmailAddress: process.env.EMAIL_FROM,
     Destination: { ToAddresses: [to] },
@@ -56,30 +53,66 @@ export async function sendEmail(email: Email): Promise<Sent> {
       },
     },
   });
+  const json = await sesRequest("POST", "/v2/email/outbound-emails", "", body);
+  return { id: json.MessageId, to };
+}
 
+/**
+ * One signed call to the SES v2 API (SigV4, no SDK). `query` must already be
+ * in canonical form: keys sorted, values URI-encoded.
+ */
+async function sesRequest(method: "GET" | "POST", path: string, query: string, body: string): Promise<Record<string, any>> {
+  const region = process.env.SES_REGION!;
+  const host = `email.${region}.amazonaws.com`;
   const amzDate = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, ""); // 20261021T120000Z
   const day = amzDate.slice(0, 8);
   const scope = `${day}/${region}/ses/aws4_request`;
   const headers = `content-type:application/json\nhost:${host}\nx-amz-date:${amzDate}\n`;
   const signed = "content-type;host;x-amz-date";
-  const request = ["POST", path, "", headers, signed, sha256(body)].join("\n");
+  const request = [method, path, query, headers, signed, sha256(body)].join("\n");
   const toSign = ["AWS4-HMAC-SHA256", amzDate, scope, sha256(request)].join("\n");
   const key = [region, "ses", "aws4_request"].reduce<Buffer>((k, part) => hmac(k, part), hmac(`AWS4${process.env.SES_SECRET_ACCESS_KEY}`, day));
   const signature = createHmac("sha256", key).update(toSign).digest("hex");
 
-  const res = await fetch(`https://${host}${path}`, {
-    method: "POST",
+  const res = await fetch(`https://${host}${path}${query ? `?${query}` : ""}`, {
+    method,
     headers: {
       "content-type": "application/json",
       "x-amz-date": amzDate,
       authorization: `AWS4-HMAC-SHA256 Credential=${process.env.SES_ACCESS_KEY_ID}/${scope}, SignedHeaders=${signed}, Signature=${signature}`,
     },
-    body,
+    ...(method === "POST" ? { body } : {}),
     cache: "no-store",
   });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new SesError(res.status, String(json.__type ?? json.code ?? ""), `SES ${res.status}: ${JSON.stringify(json).slice(0, 300)}`);
-  return { id: json.MessageId, to };
+  return json;
+}
+
+export type Suppressed = { email: string; reason: "BOUNCE" | "COMPLAINT"; at: string };
+
+/**
+ * Addresses SES put on the account's suppression list since `since` (hard
+ * bounces and complaints): SES already refuses to send to them, this tells
+ * the contacts table. Needs ses:ListSuppressedDestinations on the IAM user.
+ */
+export async function listSuppressed(since: Date): Promise<Suppressed[]> {
+  const out: Suppressed[] = [];
+  let token: string | undefined;
+  do {
+    const params: Record<string, string> = { PageSize: "1000", StartDate: since.toISOString() };
+    if (token) params.NextToken = token;
+    const query = Object.keys(params)
+      .sort()
+      .map((k) => `${k}=${encodeURIComponent(params[k]).replace(/[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)}`)
+      .join("&");
+    const json = await sesRequest("GET", "/v2/email/suppression/addresses", query, "");
+    for (const d of json.SuppressedDestinationSummaries ?? []) {
+      out.push({ email: String(d.EmailAddress).toLowerCase(), reason: d.Reason, at: d.LastUpdateTime });
+    }
+    token = json.NextToken;
+  } while (token);
+  return out;
 }
 
 export class SesError extends Error {

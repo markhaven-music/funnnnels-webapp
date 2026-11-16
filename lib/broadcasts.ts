@@ -12,6 +12,8 @@ export type Broadcast = {
   body: string;
   audienceTag: string | null;
   excludeTag: string | null;
+  /** Only engaged contacts (db/email-engaged.sql): on by default, for deliverability. */
+  engagedOnly: boolean;
   sendAt: string | null;
   status: BroadcastStatus;
   sentCount: number;
@@ -29,6 +31,7 @@ type Row = {
   body: string;
   audience_tag: string | null;
   exclude_tag: string | null;
+  engaged_only: boolean;
   send_at: string | null;
   status: BroadcastStatus;
   sent_count: number;
@@ -46,6 +49,7 @@ const fromRow = (r: Row): Broadcast => ({
   body: r.body,
   audienceTag: r.audience_tag,
   excludeTag: r.exclude_tag,
+  engagedOnly: r.engaged_only ?? true,
   sendAt: r.send_at,
   status: r.status,
   sentCount: r.sent_count,
@@ -71,14 +75,14 @@ export async function getBroadcast(id: string): Promise<Broadcast | null> {
 export async function createBroadcast(copyOf?: Broadcast | null): Promise<Broadcast> {
   const { data, error } = await supabase()
     .from("broadcasts")
-    .insert(copyOf ? { subject: copyOf.subject, preheader: copyOf.preheader, body: copyOf.body, audience_tag: copyOf.audienceTag, exclude_tag: copyOf.excludeTag } : {})
+    .insert(copyOf ? { subject: copyOf.subject, preheader: copyOf.preheader, body: copyOf.body, audience_tag: copyOf.audienceTag, exclude_tag: copyOf.excludeTag, engaged_only: copyOf.engagedOnly } : {})
     .select("*")
     .single();
   if (error) throw error;
   return fromRow(data as Row);
 }
 
-export type BroadcastPatch = Partial<Pick<Broadcast, "subject" | "preheader" | "body" | "audienceTag" | "excludeTag" | "sendAt" | "status">>;
+export type BroadcastPatch = Partial<Pick<Broadcast, "subject" | "preheader" | "body" | "audienceTag" | "excludeTag" | "engagedOnly" | "sendAt" | "status">>;
 
 /** Edit a draft or a scheduled one; once it's sending only "cancelled" is allowed (stops what's left). */
 export async function updateBroadcast(id: string, p: BroadcastPatch): Promise<Broadcast | { error: string }> {
@@ -99,6 +103,7 @@ export async function updateBroadcast(id: string, p: BroadcastPatch): Promise<Br
   if (p.body !== undefined) update.body = p.body.slice(0, 50_000);
   if (p.audienceTag !== undefined) update.audience_tag = p.audienceTag?.trim() || null;
   if (p.excludeTag !== undefined) update.exclude_tag = p.excludeTag?.trim() || null;
+  if (p.engagedOnly !== undefined) update.engaged_only = p.engagedOnly;
   if (p.sendAt !== undefined) update.send_at = p.sendAt;
   if (p.status !== undefined) {
     update.status = p.status;

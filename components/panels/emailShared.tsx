@@ -10,7 +10,7 @@ import e from "./email.module.css";
 export type TagCount = { tag: string; contacts: number };
 
 /** Every tag with its count, and how many subscribed contacts tag/exclude would reach. */
-export function useAudience(tag: string | null, exclude: string | null) {
+export function useAudience(tag: string | null, exclude: string | null, engaged = false) {
   const [tags, setTags] = useState<TagCount[]>([]);
   const [size, setSize] = useState<number | null>(null);
   useEffect(() => {
@@ -18,6 +18,7 @@ export function useAudience(tag: string | null, exclude: string | null) {
     const q = new URLSearchParams();
     if (tag) q.set("tag", tag);
     if (exclude) q.set("exclude", exclude);
+    if (engaged) q.set("engaged", "1");
     fetch(`/api/audience?${q}`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
@@ -29,7 +30,7 @@ export function useAudience(tag: string | null, exclude: string | null) {
     return () => {
       live = false;
     };
-  }, [tag, exclude]);
+  }, [tag, exclude, engaged]);
   return { tags, size };
 }
 

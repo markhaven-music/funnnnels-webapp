@@ -110,6 +110,7 @@ export function BroadcastsPanel() {
               <span className={`${e.cell} ${e.strong}`}>{b.subject || <span className={e.dim}>Untitled</span>}</span>
               <span className={`${e.cell} ${e.dim}`}>
                 {b.audienceTag ?? "Everyone"}
+                {b.engagedOnly ? " · engaged" : ""}
                 {b.excludeTag ? ` · not ${b.excludeTag}` : ""}
               </span>
               <span className={`${e.chip} ${e[`chip_${b.status}`] ?? ""}`}>{b.status}</span>
@@ -145,13 +146,13 @@ function Editor({
   onDuplicate: () => void;
   onDeleted: () => void;
 }) {
-  const [f, setF] = useState({ subject: b.subject, preheader: b.preheader, body: b.body, audienceTag: b.audienceTag, excludeTag: b.excludeTag });
+  const [f, setF] = useState({ subject: b.subject, preheader: b.preheader, body: b.body, audienceTag: b.audienceTag, excludeTag: b.excludeTag, engagedOnly: b.engagedOnly });
   const [sendAt, setSendAt] = useState(toLocal(b.sendAt));
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok?: string; error?: string }>({});
   const [testTo, setTestTo] = useTestAddress();
-  const { tags, size } = useAudience(f.audienceTag, f.excludeTag);
+  const { tags, size } = useAudience(f.audienceTag, f.excludeTag, f.engagedOnly);
   const locked = b.status !== "draft" && b.status !== "scheduled";
   const set = (patch: Partial<typeof f>) => {
     setF((x) => ({ ...x, ...patch }));
@@ -263,6 +264,10 @@ function Editor({
               <TagSelect value={f.excludeTag} onChange={(v) => set({ excludeTag: v })} tags={tags} none="Nobody left out" disabled={locked} />
             </label>
           </div>
+          <label className={e.label} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <input type="checkbox" checked={f.engagedOnly} disabled={locked} onChange={(ev) => set({ engagedOnly: ev.target.checked })} />
+            Only engaged contacts: buyers, anyone who opened or clicked in the last 90 days, and sign-ups of the last 30 days (keeps us out of spam)
+          </label>
           <p className={e.mono} style={{ margin: "0 0 12px" }}>
             Reaches {size === null ? "…" : size.toLocaleString("en-US")} subscribed contact{size === 1 ? "" : "s"} right now.
           </p>

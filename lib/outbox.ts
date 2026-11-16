@@ -489,7 +489,7 @@ async function sendOnce(
 
 // ─── 4. broadcasts and launch emails ───────────────────────────────
 
-type Audience = { tag: string | null; exclude: string | null };
+type Audience = { tag: string | null; exclude: string | null; engaged: boolean };
 
 /**
  * Send the next batches of one mass email until its audience is done or the
@@ -509,11 +509,11 @@ async function sendToAudience(
   for (;;) {
     if (run.over) return "paused";
     if (run.dryRun) {
-      const { data } = await db.rpc("audience_size", { p_tag: audience.tag, p_exclude: audience.exclude });
+      const { data } = await db.rpc("audience_size", { p_tag: audience.tag, p_exclude: audience.exclude, p_engaged: audience.engaged });
       run.report.notes.push(`${kind} ${ref}: would send to ${data} contacts`);
       return "paused";
     }
-    const { data: batch, error } = await db.rpc("claim_recipients", { p_kind: kind, p_ref: ref, p_tag: audience.tag, p_exclude: audience.exclude, lim: 25 });
+    const { data: batch, error } = await db.rpc("claim_recipients", { p_kind: kind, p_ref: ref, p_tag: audience.tag, p_exclude: audience.exclude, lim: 25, p_engaged: audience.engaged });
     if (error) throw error;
     if (!batch?.length) return "done";
     let sent = 0;
@@ -557,7 +557,7 @@ async function broadcasts(run: Run) {
       run,
       "broadcast",
       b.id,
-      { tag: b.audience_tag, exclude: b.exclude_tag },
+      { tag: b.audience_tag, exclude: b.exclude_tag, engaged: b.engaged_only ?? true },
       (r) => letter({ to: r, subject: b.subject, preheader: b.preheader, body: b.body, lang: r.lang, track: { kind: "broadcast", ref: b.id } }),
       async (sent, failed) => {
         total = { sent: total.sent + sent, failed: total.failed + failed };
@@ -597,7 +597,7 @@ async function launchEmails(run: Run) {
       run,
       "launch",
       e.id,
-      { tag: e.audience_tag, exclude: e.exclude_tag },
+      { tag: e.audience_tag, exclude: e.exclude_tag, engaged: e.engaged_only ?? true },
       (r) => letter({ to: r, subject: e.subject, body: e.body, vars, lang: r.lang, track: { kind: "launch", ref: e.id } }),
       async (sent) => {
         sentCount += sent;

@@ -1,6 +1,7 @@
 import { runOutbox } from "@/lib/outbox";
 import { sweepStripe } from "@/lib/stripeSales";
 import { syncSupport } from "@/lib/support";
+import { syncSuppressions } from "@/lib/bounces";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -32,6 +33,15 @@ export async function GET(req: Request) {
         console.error("support sync failed", err);
         return { error: String(err) };
       });
+  // SES's hard bounces and complaints onto contacts.status (lib/bounces.ts),
+  // twice an hour, before this run picks who gets what.
+  if (!dryRun && new Date().getUTCMinutes() % 30 === 0) {
+    const s = await syncSuppressions().catch((err) => {
+      console.error("suppression sync failed", err);
+      return null;
+    });
+    if (s && s.bounced + s.complained > 0) console.log("suppression sync", JSON.stringify(s));
+  }
   const report = await runOutbox({ budgetMs: 40_000, dryRun });
   const supportReport = await support;
   if (supportReport && ("error" in supportReport || ("inbox" in supportReport && supportReport.inbox + supportReport.sent > 0))) console.log("support sync", JSON.stringify(supportReport));

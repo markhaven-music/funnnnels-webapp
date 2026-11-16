@@ -16,6 +16,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const patch: BroadcastPatch = {};
   for (const k of ["subject", "preheader", "body"] as const) if (typeof body[k] === "string") patch[k] = body[k];
   for (const k of ["audienceTag", "excludeTag"] as const) if (typeof body[k] === "string" || body[k] === null) patch[k] = body[k];
+  if (typeof body.engagedOnly === "boolean") patch.engagedOnly = body.engagedOnly;
   if (body.sendAt === null) patch.sendAt = null;
   if (typeof body.sendAt === "string") {
     const t = Date.parse(body.sendAt);
