@@ -22,8 +22,9 @@ export const funnel = {
   // 37 since 2026-11-15 ("ok allora alziamo prezzo Jazz", to lift the average order: 2 buyers in 3 paid
   // the bare 27), with the Jazz Record Samples as a seventh bonus. Read in Analytics → "Price: 27 vs 37"
   // (priceTest.ts). Where the pack is another funnel's upsell (MIDI Drum Kit, TOP HITS, Drunk Swing
-  // Grooves) it stays 27. The price buyers pay is dashboard → Products' (funnel_items), set to 37 too.
-  price: { eur: 37, usd: 37 },
+  // Grooves) it stays 27. Back to 27 on 2026-11-16 ("Riportiamo a 27"); the seventh bonus stays.
+  // The price buyers pay is dashboard → Products' (funnel_items), set to 27 too; this is the fallback.
+  price: { eur: 27, usd: 27 },
   // The hero video: Wistia media, in Wistia's player (Vsl.tsx). Its thumbnail
   // is a frame of the video itself (85.3 s, "Watch the top note.", Wistia still
   // kogs5rd7zh since 2026-11-05; "no custom image", 2026-11-02), also saved as
