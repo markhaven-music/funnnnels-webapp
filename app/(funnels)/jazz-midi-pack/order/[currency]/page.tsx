@@ -4,6 +4,7 @@ import { getFunnel, nextStep, resolveFunnel, upsellsOn } from "@/lib/funnels";
 import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { restate } from "@/lib/restate";
+import { bumpWords } from "@/lib/bumpWords";
 import { getPublishedBlocks } from "@/lib/pages";
 import { bumpCopy, funnel } from "../../funnel";
 import { DEFAULT_SECTIONS, type Section, type SectionProps } from "../../content";
@@ -64,7 +65,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     // Jazz Record Samples hidden since 2026-11-08 ("lasciamo solo drunk swing grooves"), though Products still lists it.
     bumps: (f.bumps ?? []).filter((b) => b.id !== "record-samples").map((b) => {
       const was = priceIn(getFunnel(funnel.slug)?.bumps?.find((c) => c.id === b.id)?.price, currency) ?? priceIn(b.price, currency);
-      const copy = bumpCopy[b.id];
+      // The Unison-style words (lib/bumpWords.ts, 11-16) at the price sold here; else ../../funnel's.
+      const copy = bumpWords(b.id, priceIn(b.price, currency), "your new Jazz MIDI Pack") ?? bumpCopy[b.id];
       const said = copy ? { ...copy, body: copy.body.map((p) => restate(p, was, priceIn(b.price, currency))) } : {};
       return { id: b.id, name: b.name, price: priceIn(b.price, currency), pitch: b.pitch, image: b.image, ...said };
     }),

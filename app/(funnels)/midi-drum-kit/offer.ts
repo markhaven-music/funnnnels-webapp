@@ -2,6 +2,7 @@ import { priceIn } from "@/lib/geo";
 import { getFunnel, resolveFunnel, type Product } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { restate } from "@/lib/restate";
+import { bumpWords } from "@/lib/bumpWords";
 import { copyWith } from "./copy";
 import type { Texts } from "@/lib/pageTexts";
 import { funnel } from "./funnel";
@@ -26,6 +27,15 @@ const ADD: Record<Lang, (name: string) => string> = {
   it: (n) => `SÌ! Aggiungi ${n}!`,
 };
 
+// How an add-on fits the kit, in each language (lib/bumpWords.ts `use`).
+const USE: Record<Lang, string> = {
+  en: "your new MIDI Drum Kit",
+  fr: "ton nouveau MIDI Drum Kit",
+  es: "tu nuevo MIDI Drum Kit",
+  de: "dein neues MIDI Drum Kit",
+  it: "il tuo nuovo MIDI Drum Kit",
+};
+
 // texts: the copy's edits from the dashboard (./texts.ts copyEdits).
 export async function orderOffer(lang: Lang, currency: Currency, product?: Product, texts: Texts = {}): Promise<OrderOffer> {
   const code = getFunnel(funnel.slug)!;
@@ -38,7 +48,8 @@ export async function orderOffer(lang: Lang, currency: Currency, product?: Produ
     price: priceIn(f.price, currency),
     bumps: (f.bumps ?? []).map((b) => {
       const known = funnel.bumps.find((x) => x.id === b.id);
-      const w = words[b.id];
+      // The Unison-style words (lib/bumpWords.ts, 11-16) at the price sold here; else ./copy's.
+      const w = bumpWords(b.id, priceIn(b.price, currency), USE[lang], lang) ?? words[b.id];
       const was = priceIn(known?.price, currency) ?? priceIn(b.price, currency);
       return {
         id: b.id,

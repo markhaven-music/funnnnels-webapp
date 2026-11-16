@@ -5,6 +5,7 @@ import { getFunnel, nextStep, resolveFunnel, upsellsOn, type Bump } from "@/lib/
 import { CURRENCIES, SIGN, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { restate } from "@/lib/restate";
+import { bumpWords } from "@/lib/bumpWords";
 import { fill } from "@/lib/words";
 import { CheckoutWidget } from "../../../jazz-midi-pack/CheckoutWidget";
 import { JazzBonusBanner, JazzBonusItem } from "../../../jazz-midi-pack/BonusClock";
@@ -66,7 +67,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     const b = live.find((x) => x.id === id) ?? code.find((x) => x.id === id);
     if (!b) return [];
     const was = priceIn(code.find((x) => x.id === id)?.price, currency) ?? priceIn(b.price, currency);
-    const copy = BUMP_COPY[id];
+    // The Unison-style words (lib/bumpWords.ts, 11-16) at the price sold here; else ./words'.
+    const copy = bumpWords(id, priceIn(b.price, currency), "your new Famous Beats Bundle") ?? BUMP_COPY[id];
     const known = code.find((x) => x.id === id);
     return [
       {

@@ -548,3 +548,9 @@
 .light .orderTag {
   color: #d1442b;
 }
+
+/* Without the product picture (lib/bumpWords.ts BUMP_PICTURES off, 11-16): words across the whole box. */
+.bump.bumpBare {
+  grid-template-areas: "head" "text";
+  grid-template-columns: minmax(0, 1fr);
+}

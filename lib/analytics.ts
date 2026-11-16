@@ -6,6 +6,7 @@ import { LP } from "@/app/(funnels)/midi-drum-kit/landingTest";
 import { FBB_LP } from "@/app/(funnels)/famous-beats-bundle/landingTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import { PRICE_37 } from "@/app/(funnels)/jazz-midi-pack/priceTest";
+import { BUMP_COPY_FROM } from "@/lib/bumpWords";
 import { ASTRO_FUNNEL, type Step } from "@/lib/beacon";
 import { codeFunnels, funnelLabel } from "@/lib/funnels";
 import { KIT_HOME, SHOP_URL } from "@/lib/liveUrl";
@@ -735,7 +736,27 @@ const FBB_COLORS: Record<string, { from: string; to: string }> = {
   "fbb-v3": { from: "#c084fc", to: "#22d3ee" },
   "fbb-cf": { from: "#f87171", to: "#dc2626" },
 };
+// 2026-11-16, "mi piace lo stile di unison audio … vorrei testare SENZA immagini": every order page's add-ons
+// get Unison Audio-style words (lib/bumpWords.ts) and lose their picture, at once. Judged by days like the
+// order page: Old = the week before, New = from its first whole day. Look at money per order (and the share
+// of orders with an add-on, in the orders table): words and pictures changed together, so it says whether
+// the pair works, not which of the two did it.
+const bumpTest = (funnel: string, before: string): TestDef => ({
+  funnel,
+  name: "Order bumps: Unison words, no pictures",
+  question: "Do the add-ons in Unison Audio's words and without pictures bring in more money per order than the old boxes?",
+  where: `Order page, the tick-box add-ons · Old = our words ("YES! Add …") with the product picture, ${before} → ${BUMP_COPY_FROM.slice(0, 10)} · New = "Yes, I want the …", ONE-TIME OFFER, the usual price against today's, "Producers who get the best results take this option.", 60-day quality guarantee, no picture, ${addDays(BUMP_COPY_FROM.slice(0, 10), 1)} → today (live 11-16 ~23:45 Italy)`,
+  variants: ["before", "after"],
+  label: (v) => (v === "before" ? "Old · our words + picture" : "New · Unison words, no picture"),
+  color: (v) => (v === "before" ? { from: "#94a3b8", to: "#64748b" } : { from: "#f472b6", to: "#db2777" }),
+  windows: {
+    before: { from: `${before}T00:00:00Z`, until: BUMP_COPY_FROM, days: [before, BUMP_COPY_FROM.slice(0, 10)] },
+    after: { from: BUMP_COPY_FROM, until: null, days: [addDays(BUMP_COPY_FROM.slice(0, 10), 1), null] },
+  },
+});
 export const TESTS: TestDef[] = [
+  bumpTest("midi-drum-kit", "2026-11-09"),
+  bumpTest("jazz-midi-pack", "2026-11-09"),
   {
     funnel: "midi-drum-kit",
     // The button colour, on the landing and order page since 10-20. Out of this
