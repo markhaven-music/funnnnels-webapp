@@ -408,7 +408,7 @@ export function script(slug: string, offerId: string, lang: Lang, next: string, 
     }).catch(function () { reset(a); say(a, C.ui.failed); });
   }, true);
 
-  // "Your copy is reserved for 05:00": short, so it's decided on impulse; counts
+  // "Your license is reserved for 05:00": short, so it's decided on impulse; counts
   // down from this order's first visit of this page (a reload doesn't restart it).
   var key = 'oto-' + C.offer + '-' + (main ? main[1] : ''), start = Date.now();
   try { start = Number(sessionStorage.getItem(key)) || start; sessionStorage.setItem(key, String(start)); } catch (e) {}
