@@ -27,8 +27,8 @@ export function ReservedTimer({ skin }: { skin?: Styles }) {
   const sec = Math.floor((left % 60000) / 1000);
   const cs = Math.floor((left % 1000) / 10);
   return (
-    <div className={s.timer} role="timer" aria-label="Your copy is reserved">
-      <div className={s.timerTitle}>YOUR COPY IS RESERVED FOR</div>
+    <div className={s.timer} role="timer" aria-label="Your license is reserved">
+      <div className={s.timerTitle}>YOUR LICENSE IS RESERVED FOR</div>
       <div className={s.timerDigits}>
         <span className={s.timerUnit}>
           <span className={s.timerNum}>{pad(min)}</span>
