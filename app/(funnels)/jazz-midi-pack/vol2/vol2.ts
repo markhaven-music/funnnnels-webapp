@@ -4,6 +4,9 @@
 // public/funnels/jazz-midi-pack/vol2-v1 come from the same build (vol2_page_data.py).
 export const vol2 = {
   id: "vol2",
+  // The page's video (tools/jazz_vol2_vsl.py, script ../vsl/script-upsell-vol2-en.md): 1:50, four Vol. 2 loops with
+  // their drums, Wistia since 2026-11-16 (poster arbtaulrp0). Work files: ~/Desktop/Jazz MIDI Pack Tools/vsl-vol2.
+  wistiaId: "g5g4tvedmi",
   name: "Jazz MIDI Pack Vol. 2",
   files: 10496,
   progressions: 82,

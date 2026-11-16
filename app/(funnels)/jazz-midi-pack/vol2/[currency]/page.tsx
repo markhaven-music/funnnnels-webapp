@@ -83,6 +83,17 @@ export default async function Vol2Offer({ params }: { params: Params }) {
               {`Vol. 2 is for the nights you want your beat to make someone feel something. Late-night neo soul, Sunday-morning gospel, gritty blues, bossa, city pop sunsets and the chords from the last scene of a film. ${num(vol2.files)} MIDI files, ready to drag into your DAW. ${price}, added to the order you just paid.`}
             </p>
             {buttons}
+            {/* The video under the buttons: the page sells without it (1 in 10 played the earlier upsell's), and on a
+                phone it stays below the first screen. Lazy, so it costs the first screen nothing. */}
+            <div className={`${j.vsl} ${v.video}`}>
+              <iframe
+                src={`https://fast.wistia.net/embed/iframe/${vol2.wistiaId}?playerColor=f5b800&videoFoam=false`}
+                title="Jazz MIDI Pack Vol. 2: 82 more chords that give you chills"
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                loading="lazy"
+              />
+            </div>
           </div>
           {/* Vol. 2's own box (2026-11-15, "needs to be similar to the one we have but slightly different to indicate a
               vol.2": the pack's box and lettering, a guitar where the piano and saxophone were). Made on Higgsfield
