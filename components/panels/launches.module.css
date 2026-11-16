@@ -427,3 +427,12 @@
 .trOrder .subject {
   white-space: normal;
 }
+.trGroup {
+  grid-template-columns: 1fr;
+  padding-top: 18px;
+}
+@media (max-width: 720px) {
+  .trGroup {
+    display: grid;
+  }
+}

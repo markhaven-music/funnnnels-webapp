@@ -28,6 +28,8 @@ export type LaunchEmailStat = {
   clickers: number;
   orders: number; // orders credited to a click on it (Email → Insights' rule)
   revenue: number; // € (dollars at today's rate)
+  /** Sent after the launch price ended: a later newsletter with a link to the funnel (a P.S.), not a launch email. */
+  after: boolean;
 };
 
 export type LaunchOrder = {
@@ -164,6 +166,8 @@ export async function getFunnelLaunch(id: string, now = Date.now()): Promise<Fun
       clickers: Number(s?.clickers ?? 0),
       orders: e?.orders ?? 0,
       revenue: e?.revenue ?? 0,
+      // The "launch is closed" note goes out within hours of the end: still the launch's.
+      after: Date.parse(b.sent_at ?? b.send_at) > Date.parse(def.ends) + 12 * 3600_000,
     };
   });
 
@@ -223,7 +227,8 @@ export async function getFunnelLaunch(id: string, now = Date.now()): Promise<Fun
   }
   list.reverse();
 
-  const sent = emails.reduce((n, e) => n + e.sent, 0);
+  const launchEmails = emails.filter((e) => !e.after);
+  const sent = launchEmails.reduce((n, e) => n + e.sent, 0);
   const phase = now < Date.parse(def.start) ? "upcoming" : now < Date.parse(def.ends) ? "live" : "ended";
   return {
     def,
@@ -240,8 +245,8 @@ export async function getFunnelLaunch(id: string, now = Date.now()): Promise<Fun
     emails,
     emailTotals: {
       sent,
-      clickers: emails.reduce((n, e) => n + e.clickers, 0),
-      scheduled: emails.filter((e) => e.status !== "sent").length,
+      clickers: launchEmails.reduce((n, e) => n + e.clickers, 0),
+      scheduled: launchEmails.filter((e) => e.status !== "sent").length,
     },
     days,
     list,

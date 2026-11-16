@@ -54,7 +54,7 @@ export function FunnelLaunchDetail({ id }: { id: string }) {
   const landing = d.steps.find((s) => s.page === "landing")?.browsers ?? 0;
   const maxDay = Math.max(1, ...d.days.map((x) => x.revenue));
   const maxStep = Math.max(1, ...d.steps.map((s) => s.browsers));
-  const sentOut = d.emails.filter((e) => e.status === "sent");
+  const sentOut = d.emails.filter((e) => !e.after && e.status === "sent");
   const emailVisitors = d.sources.filter((s) => s.source === "Email").reduce((n, s) => n + s.visitors, 0);
   const allVisitors = d.sources.reduce((n, s) => n + s.visitors, 0);
 
@@ -151,7 +151,7 @@ export function FunnelLaunchDetail({ id }: { id: string }) {
 
       <div className={c.panel}>
         <p className={c.h2}>Launch emails</p>
-        <p className={c.sub}>Every broadcast that links to the funnel. Orders: buyers who clicked it, same address, in the 5 days before paying.</p>
+        <p className={c.sub}>The broadcasts of the launch, up to the "closed" note. Orders: buyers who clicked it, same address, in the 5 days before paying.</p>
         <div className={c.table} style={{ marginTop: 12 }}>
           <div className={`${c.tr} ${c.th}`}>
             <span>Sent</span>
@@ -160,7 +160,21 @@ export function FunnelLaunchDetail({ id }: { id: string }) {
             <span className={c.num}>Clicked</span>
             <span className={c.num}>Orders</span>
           </div>
-          {d.emails.map((e) => (
+          {d.emails.filter((e) => !e.after).map((e) => (
+            <div key={e.id} className={`${c.tr} ${e.status === "sent" ? "" : c.trLater}`}>
+              <span className={c.mono}>{e.at ? when(e.at) : "—"}</span>
+              <span className={c.subject}>{e.subject}</span>
+              <span className={`${c.num} ${c.mono}`}>{e.status === "sent" ? e.sent.toLocaleString("en-US") : e.status}</span>
+              <span className={`${c.num} ${c.mono}`}>{e.status === "sent" ? `${e.clickers} · ${pct(e.clickers, e.sent)}` : ""}</span>
+              <span className={`${c.num} ${c.mono}`}>{e.status === "sent" ? (e.orders ? `${e.orders} · ${eur(e.revenue)}` : "0") : ""}</span>
+            </div>
+          ))}
+          {d.emails.some((e) => e.after) && (
+            <div className={`${c.tr} ${c.th} ${c.trGroup}`}>
+              <span>After the launch: other newsletters with a P.S. link to TOP HITS</span>
+            </div>
+          )}
+          {d.emails.filter((e) => e.after).map((e) => (
             <div key={e.id} className={`${c.tr} ${e.status === "sent" ? "" : c.trLater}`}>
               <span className={c.mono}>{e.at ? when(e.at) : "—"}</span>
               <span className={c.subject}>{e.subject}</span>
