@@ -3,6 +3,7 @@ import { fromEuro } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS } from "@/lib/beacon";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { AVAILABILITY_JS } from "@/lib/availability";
+import { salesPopJs } from "@/lib/salesPop";
 
 // A sales page of the Astro site, copied 1:1 by tools/astro_clone.mjs
 // (<slug>/astro/<name>.ts), as a funnel serves it: our order page behind every
@@ -22,7 +23,7 @@ export function astroHtml(template: string, o: { funnel: string; orderPage: stri
     `${ORIGIN_BOUNCE_JS};\n` +
     `window.__fvMe = ${PREVIEW_JS} || ${OFF}.test(location.hostname);\n` +
     beaconScript({ funnel: o.funnel, page: "landing", abCookie: o.abCookie }) +
-    `;\n${AVAILABILITY_JS}`;
+    `;\n${AVAILABILITY_JS};\n${salesPopJs(o.funnel)}`;
   let html = template
     .replaceAll("{{ORDER}}", o.orderPage)
     .replace("{{HEAD}}", head)

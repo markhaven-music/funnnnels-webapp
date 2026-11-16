@@ -2,6 +2,7 @@ import { priceIn, fromEuro } from "@/lib/geo";
 import type { Currency } from "@/lib/geo";
 import { beaconScript, PREVIEW_JS } from "@/lib/beacon";
 import { AVAILABILITY_JS } from "@/lib/availability";
+import { salesPopJs } from "@/lib/salesPop";
 import { ORIGIN_BOUNCE_JS } from "@/lib/originBounce";
 import { restate } from "@/lib/restate";
 import { applySections, imageOrigins, swapImages } from "@/lib/cfSections";
@@ -174,7 +175,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = pric
     .replace("{{DESCRIPTION}}", escapeAttr(meta.description))
     .replace(
       "{{HEAD}}",
-      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${ab}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: LP.cookie })}</script>\n<script>${popup ? popupLandingJs(lang, money(popup.price, currency, lang, !Number.isInteger(popup.price)), popup.image) : AVAILABILITY_JS}</script>\n${headScripts(currency, price)}`,
+      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${ab}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: LP.cookie })}</script>\n<script>${popup ? popupLandingJs(lang, money(popup.price, currency, lang, !Number.isInteger(popup.price)), popup.image) : AVAILABILITY_JS}</script>\n<script>${salesPopJs(funnel.slug, lang)}</script>\n${headScripts(currency, price)}`,
     )
     .replace("{{BODY}}", BODY_SCRIPT);
   if (lang === "en") html = html.replace(FREE_BAR_AT, (at) => FREE_BAR + at);

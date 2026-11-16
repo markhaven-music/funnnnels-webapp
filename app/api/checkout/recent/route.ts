@@ -8,10 +8,10 @@ export const runtime = "nodejs";
 // The recent-buyer pop-up's list (lib/salesPop.ts): the last paid orders of this funnel's own
 // product in 14 days, upsells left out. Only a first name, a country and how long ago leave
 // the server: no email, no surname, no amount. Real orders only, nothing made up.
-//   GET ?f=<funnel slug> → { buyers: [{ name, country, ago }] }
+//   GET ?f=<funnel slug>&l=<page language> → { buyers: [{ name, country, ago }] }, the country in that language
 // Cached 5 minutes at the edge so a busy landing doesn't query the DB on every visit.
 
-const COUNTRY = new Intl.DisplayNames(["en"], { type: "region" });
+const LANGS = ["en", "it", "fr", "es", "de"];
 const DAYS = 14;
 
 function firstName(full: string | null): string | null {
@@ -21,7 +21,9 @@ function firstName(full: string | null): string | null {
 }
 
 export async function GET(req: Request) {
-  const f = await resolveFunnel(new URL(req.url).searchParams.get("f")).catch(() => undefined);
+  const q = new URL(req.url).searchParams;
+  const f = await resolveFunnel(q.get("f")).catch(() => undefined);
+  const COUNTRY = new Intl.DisplayNames([LANGS.includes(q.get("l") ?? "") ? q.get("l")! : "en"], { type: "region" });
   if (!f) return NextResponse.json({ buyers: [] });
   try {
     const since = new Date(Date.now() - DAYS * 864e5).toISOString();
