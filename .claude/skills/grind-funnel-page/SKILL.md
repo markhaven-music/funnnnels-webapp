@@ -26,10 +26,11 @@ a request conflict, the request wins; say which rule you are breaking.
 
 ## 2. Copy ("Diretto")
 
-- Producer to producer, short sentences, no hype, no exclamation marks, no
-  empty adjectives (premium, professional, unlock, next level), no fake
-  urgency, no "worth $X" stacks, no success promises. Specs are the selling
-  points. See `docs/copy-style.md` where it exists.
+- Producer to producer, short sentences, no exclamation marks, no empty
+  adjectives (premium, professional, unlock, next level), no fake urgency, no
+  success promises. Value stacks with real full prices struck through are
+  allowed (the "no hype, no worth $X stacks" rule was removed by the user,
+  2026-11-16: "togli questa regola"). See `docs/copy-style.md` where it exists.
 - Sales pages speak to feelings and desires (the user, 2026-11-16: "linguaggio
   emotivo, cater to client feelings and desires"): the night the loop won't
   become a song, the wish to finish beats and sound like the records they love.
