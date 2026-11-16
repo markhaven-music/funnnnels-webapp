@@ -6,6 +6,8 @@ import { I } from "@/components/icons";
 import { KIT_HOME } from "@/lib/liveUrl";
 import { PHASE_LABELS, STEP_LABELS, money, phaseAt, type Money, type Phase } from "@/lib/launch";
 import type { DaySales, LaunchEmail, LaunchSummary } from "@/lib/products";
+import { FUNNEL_LAUNCHES } from "@/lib/funnelLaunchDefs";
+import { FunnelLaunchDetail } from "./FunnelLaunchStats";
 import c from "./launches.module.css";
 
 // Dashboard → Launches: the launch playbook in one place.
@@ -63,7 +65,11 @@ async function send<T>(url: string, method: string, body?: unknown): Promise<T> 
 
 export function LaunchesPanel() {
   const [rows, setRows] = useState<Row[] | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
+  // A code funnel's launch is "funnel:<id>"; the live one opens by itself.
+  const [selected, setSelected] = useState<string | null>(() => {
+    const live = FUNNEL_LAUNCHES.find((l) => Date.now() >= Date.parse(l.start) && Date.now() < Date.parse(l.ends) + 7 * 86_400_000);
+    return live ? `funnel:${live.id}` : null;
+  });
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -111,9 +117,33 @@ export function LaunchesPanel() {
         />
       )}
 
+      {FUNNEL_LAUNCHES.length > 0 && (
+        <div className={c.grid}>
+          {FUNNEL_LAUNCHES.map((l) => {
+            const key = `funnel:${l.id}`;
+            const phase = now < Date.parse(l.start) ? "Upcoming" : now < Date.parse(l.ends) ? "Live" : "Ended";
+            return (
+              <button
+                key={key}
+                type="button"
+                className={`${c.card} ${selected === key ? c.cardOn : ""}`}
+                onClick={() => setSelected(selected === key ? null : key)}
+              >
+                <span className={c.cardName}>{l.name}</span>
+                <span className={c.mono}>/{l.funnel}</span>
+                <span className={`${c.chip} ${phase === "Live" ? c.chip_open : ""}`}>{phase}</span>
+                <span className={c.mono}>{l.priceNote}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {selected?.startsWith("funnel:") && <FunnelLaunchDetail key={selected} id={selected.slice(7)} />}
+
       {rows === null ? (
         <p className="page-sub">Loading…</p>
-      ) : rows.length === 0 && !creating ? (
+      ) : rows.length === 0 && FUNNEL_LAUNCHES.length > 0 ? null : rows.length === 0 && !creating ? (
         <div className={`${c.panel} ${c.empty}`}>
           <img className={c.emptyArt} src="/funnels/dashboard/launches.webp" width={112} height={112} alt="" />
           <p className={c.h2}>No launches yet</p>
@@ -142,7 +172,7 @@ export function LaunchesPanel() {
         </div>
       )}
 
-      {selected && (
+      {selected && !selected.startsWith("funnel:") && (
         <LaunchDetail
           key={selected}
           id={selected}
