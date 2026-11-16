@@ -337,8 +337,9 @@ export function headScripts(): string {
 }
 
 /** The buttons, the "reserved for" countdown (also on ./[lang]/jazz-offer: its links with data-oto). */
-export function script(slug: string, offerId: string, lang: Lang, next: string): string {
-  const cfg = JSON.stringify({ funnel: slug, offer: offerId, lang, next, ui: UI[lang], ab: abCookieOf(slug) });
+// yesNext: where a Yes goes when it isn't `next` (an offer that ends the funnel: the downloads).
+export function script(slug: string, offerId: string, lang: Lang, next: string, yesNext?: string): string {
+  const cfg = JSON.stringify({ funnel: slug, offer: offerId, lang, next, yesNext: yesNext ?? next, ui: UI[lang], ab: abCookieOf(slug) });
   return `<script>
 (function () {
   var C = ${cfg};
@@ -350,7 +351,7 @@ export function script(slug: string, offerId: string, lang: Lang, next: string):
     if (main) p.set(main[0], main[1]);
     var u = bought.concat(extra ? [extra] : []);
     if (u.length) p.set('u', u.join(','));
-    location.href = C.next + (p.toString() ? '?' + p.toString() : '');
+    location.href = (extra ? C.yesNext : C.next) + (p.toString() ? '?' + p.toString() : '');
   }
   function cookie(n) { var m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : ''; }
   // Already ticked on the order form (OrderForm.tsx sets fv_owned): this offer is skipped.

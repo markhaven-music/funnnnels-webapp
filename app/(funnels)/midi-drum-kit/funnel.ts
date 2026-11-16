@@ -92,6 +92,8 @@ export const funnel = {
     "jazz-chords": "jazz-midi-pack/Jazz MIDI Chord Pack.zip",
     "anime-pack": "jazz-midi-pack/Anime & Video Game MIDI Chord Pack.zip",
     bible: "jazz-midi-pack/The Chord Progressions Bible.zip",
+    // The Jazz MIDI Pack's seventh bonus since 2026-11-15, part of All Access.
+    "record-samples": "jazz-midi-pack/Jazz Record Samples.zip",
     // Three more bonuses with the kit since 2026-11-12 ("rendiamola come jazz, aggiungi i bonus":
     // the MYSTERY Hooks Pack, Drunk Swing Grooves, and a PDF guide like the Jazz pack's), each its
     // own download beside the bundle's zip (`includes.pack`). The guide: tools/drum_kit_guide.py.
@@ -110,14 +112,23 @@ export const funnel = {
   // upsells in funnel_items (0 of 16 buyers took it, 13 seconds on its page, 3 closed the funnel
   // there before reaching Famous Beats, the one that sells): Famous Beats, then TOP HITS. Its
   // entry and page stay here, so dashboard → Products can put it back.
+  // 2026-11-16 ("vai avanti", the €97 "everything" offer agreed on 11-15 to lift the average order to
+  // €45): GRIND STUDIO All Access first, every pack we sell on its own in one download (`includes`
+  // below), on its own page ([lang]/all-access). Bought, the funnel ends there (`last`): its packs
+  // include Famous Beats and TOP HITS. Declined, Famous Beats then TOP HITS as before.
   offers: [
+    { id: "all-access", path: "all-access", name: "GRIND STUDIO All Access", price: { eur: 97, usd: 97 }, last: true },
     { id: "jazz", path: "jazz-offer", name: "Jazz MIDI Pack", price: { eur: 27, usd: 27 } },
     { id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } },
     { id: "top-hits", path: "last-offer", name: "TOP HITS MIDI Bundle (1000 Chord Progressions)", price: { eur: 27, usd: 27 } },
   ],
   // Files an add-on brings beyond its own (its key in `files`).
   // `pack`: every buyer of the kit, those before 2026-11-12 too (their /account shelf shows them).
-  includes: { pack: ["swing-grooves", "hooks", "guide"], chords: ["drum-loops", "emotional-keys"], jazz: ["jazz-chords", "bible", "anime-pack", "emotional-keys", "drum-loops"] } as Record<string, readonly string[]>,
+  // all-access: every pack sold on its own (the Jazz MIDI Pack with its bonuses, Famous Beats, TOP HITS,
+  // HUSTLE, the Expansions), each its own download; one level only, so every file is named here.
+  includes: {
+    "all-access": ["jazz", "jazz-chords", "bible", "anime-pack", "emotional-keys", "drum-loops", "record-samples", "famous-beats", "top-hits", "hustle", "expansions"],
+    pack: ["swing-grooves", "hooks", "guide"], chords: ["drum-loops", "emotional-keys"], jazz: ["jazz-chords", "bible", "anime-pack", "emotional-keys", "drum-loops"] } as Record<string, readonly string[]>,
   // Download labels for the files that aren't the pack or an add-on.
   fileNames: {
     "drum-loops": "Drum Loops for Songwriting",
@@ -128,6 +139,7 @@ export const funnel = {
     "swing-grooves": "Bonus: Drunk Swing Grooves (211 MIDI Files)",
     hooks: "Bonus: MYSTERY Hooks Pack (17 WAV Hooks)",
     guide: "Bonus: MIDI Drum Kit Guide (PDF)",
+    "record-samples": "Jazz Record Samples (122 WAV Loops)",
   } as Record<string, string>,
   checkout: {
     leadTags: ["checkout-started"],
@@ -142,4 +154,6 @@ export const funnel = {
 } as const;
 
 /** Everything an order's items unlock: each item and the files it includes. */
-export const unlocked = (items: readonly string[]) => [...new Set(items.flatMap((i) => [i, ...(funnel.includes[i] ?? [])]))];
+// Keys with no file of their own (All Access is only its packs) are left out.
+export const unlocked = (items: readonly string[]) =>
+  [...new Set(items.flatMap((i) => [i, ...(funnel.includes[i] ?? [])]))].filter((k) => k in funnel.files);

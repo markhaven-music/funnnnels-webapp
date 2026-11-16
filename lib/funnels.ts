@@ -38,7 +38,8 @@ import { SHOP_SLUG } from "@/lib/shop";
 export type Bump = { id: string; name: string; price: Money; pitch: string; image?: string };
 
 /** A one-click upsell: its own page after the order (`path` after /<slug>/), charged to the card just used. */
-export type Offer = { id: string; path: string; name: string; price: Money };
+/** last: bought, the funnel ends there (the downloads next, no further offer): an "everything" bundle. */
+export type Offer = { id: string; path: string; name: string; price: Money; last?: boolean };
 
 export type Product = {
   kind: "code" | "kit" | "shop";

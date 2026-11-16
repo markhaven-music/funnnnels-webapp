@@ -66,7 +66,9 @@ export async function GET(req: Request) {
   if (offer && isPayPalOrderId(parent)) {
     const u = (url.searchParams.get("u") ?? "").split(",").filter((id) => isPayPalOrderId(id));
     if (captured) u.push(orderId);
-    return redirect(`${nextStep(f, url.searchParams.get("lang"), offer.id)}?paypal_order=${parent}${u.length ? `&u=${u.join(",")}` : ""}`);
+    // An offer that ends the funnel (All Access) goes straight to the downloads.
+    const next = captured && offer.last ? checkoutPages(f, url.searchParams.get("lang")).thankYou : nextStep(f, url.searchParams.get("lang"), offer.id);
+    return redirect(`${next}?paypal_order=${parent}${u.length ? `&u=${u.join(",")}` : ""}`);
   }
   // An upsell the buyer already ticked as an add-on is skipped.
   const owned = captured && f.offers?.length ? ((await getOrder(orderId, f.slug))?.items ?? []) : [];
