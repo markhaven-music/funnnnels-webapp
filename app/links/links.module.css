@@ -1,0 +1,94 @@
+/* The link in bio (app/links): the store's look (app/shop/shop.module.css),
+   white on black, Poppins, one column the width of a phone. */
+.page {
+  min-height: 100vh;
+  background: #070707;
+  color: rgb(255 255 255 / 0.8);
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 17px;
+  line-height: 1.45;
+  padding: 28px 16px 40px;
+}
+.page :where(p, ul) {
+  margin: 0;
+}
+.head {
+  max-width: 480px;
+  margin: 0 auto 22px;
+  text-align: center;
+}
+.logo {
+  display: block;
+  height: 30px;
+  width: auto;
+  margin: 0 auto 12px;
+}
+.lead {
+  color: rgb(255 255 255 / 0.62);
+  font-size: 15px;
+}
+.list {
+  list-style: none;
+  padding: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  display: grid;
+  gap: 10px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px 10px 10px;
+  border-radius: 6px;
+  background: #141414;
+  color: #fff;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.row:hover,
+.row:focus-visible {
+  background: #1d1d1d;
+}
+.pic {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #000;
+}
+.fade {
+  object-fit: cover;
+}
+.text {
+  display: grid;
+  min-width: 0;
+}
+.name {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.25;
+}
+.line {
+  color: rgb(255 255 255 / 0.62);
+  font-size: 14px;
+  line-height: 1.35;
+  margin-top: 2px;
+}
+.price {
+  font-weight: 700;
+  font-size: 16px;
+  white-space: nowrap;
+}
+.more {
+  max-width: 480px;
+  margin: 26px auto 0;
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  font-size: 15px;
+}
+.more a {
+  color: rgb(255 255 255 / 0.62);
+}
