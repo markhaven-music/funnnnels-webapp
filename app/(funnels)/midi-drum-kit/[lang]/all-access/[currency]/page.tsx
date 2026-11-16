@@ -38,7 +38,7 @@ const OFFER = "all-access";
 // prezzi non scontati dei packs"): the Jazz MIDI Pack's value stack (97, jazz-midi-pack/funnel.ts
 // value.pack), TOP HITS' regular price after its launch (97, top-hits-chords/funnel.ts launch.after),
 // HUSTLE's "31 MIDI packs at 29, total 899" and the Expansions' "Usually 147" (the Drum Kit's order-form
-// add-on words). Famous Beats has no other price on our pages than 27. Pounds and francs take the euro number.
+// add-on words), and Famous Beats' "€97 Value" (the Astro MIDI Drum Kit page's offer list). Pounds and francs take the euro number.
 // feel: the moment each pack is for (the copy is feeling-based, "make the copy of the page emotion based").
 const PACKS = [
   {
@@ -52,7 +52,7 @@ const PACKS = [
     name: "Famous Beats Bundle",
     feel: "For the groove you heard on a record and can’t get out of your head.",
     what: "320 famous drum beats, as MIDI.",
-    full: { eur: 27, usd: 27 },
+    full: { eur: 97, usd: 97 },
     image: "/funnels/home/famous-beats-box.webp",
   },
   {
