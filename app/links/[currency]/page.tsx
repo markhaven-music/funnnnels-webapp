@@ -4,16 +4,16 @@ import { BRAND } from "@/app/(funnels)/_kit/brand";
 import { poppins } from "@/app/shop/fonts";
 import { resolveFunnel } from "@/lib/funnels";
 import { CURRENCIES, type Currency } from "@/lib/geo";
-import { money } from "@/lib/launch";
 import { storeItems, type StoreItem } from "@/lib/storefront";
 import l from "../links.module.css";
 
 // Grind Studio's link in bio (Instagram): one page, a row per pack that opens
 // its sales page. m.thegrind.studio/links forwards here (a rewrite in
-// grind-studio-landing-pages/vercel.json, like /shop). The packs and prices
+// grind-studio-landing-pages/vercel.json, like /shop). The packs
 // are the store's (lib/storefront.ts), plus the funnels it doesn't list.
 // Every link carries utm_source=instagram&utm_medium=bio and the pack's slug
 // as utm_content, so dashboard → Analytics tells the bio's clicks apart.
+// No prices on the page (Marco, 2026-11-16): each pack's own page shows its price.
 // One cached page per currency, like the home (proxy.ts, docs/page-speed.md rule 9).
 
 export const revalidate = 3600;
@@ -49,7 +49,7 @@ export default async function Links({ params }: { params: Promise<{ currency: st
   const extra = await Promise.all(
     EXTRA.map(async (p) => {
       const f = await resolveFunnel(p.funnel);
-      return f ? { ...p, name: f.product, price: f.price[currency] } : null;
+      return f ? { ...p, name: f.product } : null;
     }),
   );
   const items = [...store, ...extra.filter((x) => x !== null)];
@@ -81,7 +81,6 @@ export default async function Links({ params }: { params: Promise<{ currency: st
                 <span className={l.name}>{p.name}</span>
                 {p.line && <span className={l.line}>{p.line}</span>}
               </span>
-              <span className={l.price}>{money(p.price, currency)}</span>
             </a>
           </li>
         ))}
