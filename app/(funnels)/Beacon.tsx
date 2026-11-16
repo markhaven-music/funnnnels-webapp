@@ -3,10 +3,12 @@
 import { useEffect } from "react";
 import { track, type BeaconOptions } from "@/lib/beacon";
 import { AVAILABILITY_JS } from "@/lib/availability";
+import { SalesPop } from "./SalesPop";
 
 /** Counts this page's visitor for dashboard → Analytics (see lib/beacon.ts).
  *  On a landing it also puts the "Checking availability…" popup in front of
- *  the order page's links (lib/availability.ts). */
+ *  the order page's links (lib/availability.ts). Landings and order pages also
+ *  carry the recent-buyer pop-up, off for now (lib/salesPop.ts). */
 export function Beacon({ funnel, page, lang, abCookie }: BeaconOptions) {
   useEffect(() => {
     if (page === "landing") new Function(AVAILABILITY_JS)();
@@ -14,5 +16,7 @@ export function Beacon({ funnel, page, lang, abCookie }: BeaconOptions) {
   useEffect(() => {
     track({ funnel, page, lang, abCookie });
   }, [funnel, page, lang, abCookie]);
+  // Order pages: above the phone's docked pay bar.
+  if (page === "landing" || page === "order") return <SalesPop funnel={funnel} lang={lang} lift={page === "order" ? 76 : 0} />;
   return null;
 }
