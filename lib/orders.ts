@@ -16,6 +16,9 @@ export type Order = {
   currency: string; // "eur" | "usd"
   items: string[]; // file keys this order unlocks, e.g. ["pack", "chord-pack"]
   visitorId: string | null; // neo's ft_vid from the checkout, for lib/neo.ts
+  // The buyer's IP and browser at checkout (lib/buyerDevice.ts): neo's match when the cookie was lost.
+  buyerIp?: string | null;
+  buyerUa?: string | null;
   // A one-click upsell (funnel.offers): its id and the order it followed.
   offer: string | null;
   parent: string | null;
@@ -63,6 +66,8 @@ export function orderFromIntent(intent: Stripe.PaymentIntent): Order {
     currency: intent.currency,
     items,
     visitorId: intent.metadata.ft_vid || null,
+    buyerIp: intent.metadata.ip || null,
+    buyerUa: intent.metadata.ua || null,
     offer,
     parent: intent.metadata.parent || null,
     name: intent.metadata.name || null,
@@ -77,21 +82,21 @@ export function orderFromIntent(intent: Stripe.PaymentIntent): Order {
 // nothing: anyone can create an order to our account in a browser with the
 // public client id, with any amount and custom_id. The record also outlives
 // a price changed in dashboard → Products.
-export async function notePayPalOrder(o: { id: string; funnel: string; amountCents: number; currency: string; items: string[]; offer?: string | null }) {
+export async function notePayPalOrder(o: { id: string; funnel: string; amountCents: number; currency: string; items: string[]; offer?: string | null; ip?: string; ua?: string }) {
   const { error } = await supabase()
     .from("paypal_orders")
-    .insert({ id: o.id, funnel: o.funnel, amount_cents: o.amountCents, currency: o.currency, items: o.items, offer: o.offer ?? null });
+    .insert({ id: o.id, funnel: o.funnel, amount_cents: o.amountCents, currency: o.currency, items: o.items, offer: o.offer ?? null, ip: o.ip || null, ua: o.ua || null });
   if (error) throw error;
 }
 
-type MadeRow = { funnel: string; amount_cents: number; currency: string; items: string[]; offer: string | null };
+type MadeRow = { funnel: string; amount_cents: number; currency: string; items: string[]; offer: string | null; ip: string | null; ua: string | null };
 
 async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | null> {
   if (!paypalConfigured()) return null;
   try {
     const [order, { data: made, error: madeErr }] = await Promise.all([
       paypal<PayPalOrder>(`/v2/checkout/orders/${id}`),
-      supabase().from("paypal_orders").select("funnel, amount_cents, currency, items, offer").eq("id", id).maybeSingle(),
+      supabase().from("paypal_orders").select("funnel, amount_cents, currency, items, offer, ip, ua").eq("id", id).maybeSingle(),
     ]);
     if (madeErr) throw madeErr;
     const unit = order.purchase_units[0];
@@ -140,6 +145,8 @@ async function getPayPalOrder(id: string, funnelSlug: string): Promise<Order | n
       currency,
       items,
       visitorId: typeof meta.n === "string" ? meta.n : null,
+      buyerIp: (made as MadeRow | null)?.ip ?? null,
+      buyerUa: (made as MadeRow | null)?.ua ?? null,
       offer,
       parent: typeof meta.p === "string" ? meta.p : null,
       name: [order.payer?.name?.given_name, order.payer?.name?.surname].filter(Boolean).join(" ") || null,

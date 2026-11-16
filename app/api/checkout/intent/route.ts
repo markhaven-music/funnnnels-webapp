@@ -7,6 +7,7 @@ import { currencyFor, visitorCountry } from "@/lib/geo";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { cleanVisitorId } from "@/lib/neoIds";
+import { buyerDevice } from "@/lib/buyerDevice";
 import { bonusCookieFor, orderBonus, readStart } from "@/lib/bonusClock";
 
 export const runtime = "nodejs";
@@ -91,6 +92,8 @@ export async function POST(req: Request) {
         lang: typeof body.lang === "string" && f.langs?.includes(body.lang) ? body.lang : "en",
         // neo's visitor id (its snippet adds it to the form, and sets the cookie), for lib/neo.ts.
         ft_vid: cleanVisitorId(body.ft_vid) || cleanVisitorId((await cookies()).get("ft_vid")?.value),
+        // The buyer's IP and browser: neo's fallback when the cookie was lost (lib/buyerDevice.ts).
+        ...buyerDevice(req.headers),
       },
     });
     return NextResponse.json({ clientSecret: intent.client_secret });

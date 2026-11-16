@@ -6,6 +6,7 @@ import { offerProduct, ownedProducts } from "@/lib/catalog";
 import { checkoutPages, offerOf, resolveFunnel, upsellsOn } from "@/lib/funnels";
 import { toCents } from "@/lib/launch";
 import { cleanVisitorId } from "@/lib/neoIds";
+import { buyerDevice } from "@/lib/buyerDevice";
 import { getOrder, notePayPalOrder } from "@/lib/orders";
 import { PAYPAL_LOCALE, isPayPalOrderId, paypal, paypalConfigured, paypalValue, returnOrigin, type PayPalOrder } from "@/lib/paypal";
 import { stripe, stripeConfigured } from "@/lib/stripe";
@@ -80,6 +81,8 @@ export async function POST(req: Request) {
             ft_vid: cleanVisitorId(body.ft_vid) || parent.visitorId || "",
             email: parent.email?.toLowerCase() ?? "",
             country: intent.metadata.country ?? "",
+            // The buyer's IP and browser: neo's fallback when the cookie was lost (lib/buyerDevice.ts).
+            ...buyerDevice(req.headers),
           },
         },
         // Two taps within the same minute make one charge.
@@ -150,7 +153,7 @@ export async function POST(req: Request) {
     });
     const approve = order.links?.find((l) => l.rel === "payer-action" || l.rel === "approve");
     if (!approve) throw new Error(`PayPal order ${order.id} came back without an approval link`);
-    await notePayPalOrder({ id: order.id, funnel: f.slug, amountCents: amount, currency, items: [offer.id], offer: offer.id });
+    await notePayPalOrder({ id: order.id, funnel: f.slug, amountCents: amount, currency, items: [offer.id], offer: offer.id, ...buyerDevice(req.headers) });
     return NextResponse.json({ status: "paypal", url: approve.href });
   } catch (err) {
     console.error("upsell paypal order failed", err);

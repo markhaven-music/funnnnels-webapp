@@ -7,6 +7,7 @@ import { currencyFor, visitorCountry, priceIn } from "@/lib/geo";
 import { money, toCents } from "@/lib/launch";
 import { cleanVisitorId } from "@/lib/neoIds";
 import { notePayPalOrder } from "@/lib/orders";
+import { buyerDevice } from "@/lib/buyerDevice";
 import { paypal, paypalConfigured, paypalValue, returnOrigin, type PayPalOrder } from "@/lib/paypal";
 import { SHOP_SLUG, priceCart } from "@/lib/shop";
 
@@ -96,7 +97,7 @@ export async function POST(req: Request) {
     });
     const approve = order.links?.find((l) => l.rel === "payer-action" || l.rel === "approve");
     if (!approve) throw new Error(`PayPal order ${order.id} came back without an approval link`);
-    await notePayPalOrder({ id: order.id, funnel: SHOP_SLUG, amountCents: cart.amount, currency, items: cart.items.map((i) => i.slug) });
+    await notePayPalOrder({ id: order.id, funnel: SHOP_SLUG, amountCents: cart.amount, currency, items: cart.items.map((i) => i.slug), ...buyerDevice(req.headers) });
     return NextResponse.json({ orderId: order.id, approveUrl: approve.href });
   } catch (err) {
     console.error("shop paypal order failed", err);

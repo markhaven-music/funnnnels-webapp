@@ -5,6 +5,7 @@ import { isDryRun } from "@/lib/funnels";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { money } from "@/lib/launch";
 import { cleanVisitorId } from "@/lib/neoIds";
+import { buyerDevice } from "@/lib/buyerDevice";
 import { SHOP_SLUG, priceCart } from "@/lib/shop";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 
@@ -69,6 +70,8 @@ export async function POST(req: Request) {
         withdrawal_waiver: body.waiver === true ? "accepted" : "",
         lang: "en",
         ft_vid: cleanVisitorId(body.ft_vid) || cleanVisitorId((await cookies()).get("ft_vid")?.value),
+        // The buyer's IP and browser: neo's fallback when the cookie was lost (lib/buyerDevice.ts).
+        ...buyerDevice(req.headers),
       },
     });
     return NextResponse.json({ clientSecret: intent.client_secret });

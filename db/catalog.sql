@@ -62,6 +62,9 @@ create table public.paypal_orders (
   -- What it unlocks: ["pack", "<add-on key>"…], the upsell's key, or the shop's slugs.
   items jsonb not null,
   offer text,
+  -- The buyer's IP and browser at checkout (lib/buyerDevice.ts), for neo.
+  ip text,
+  ua text,
   created_at timestamptz not null default now()
 );
 alter table public.paypal_orders enable row level security;

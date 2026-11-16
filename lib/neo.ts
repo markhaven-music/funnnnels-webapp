@@ -32,6 +32,9 @@ export async function sendSaleToNeo(order: Order, product: string): Promise<void
         currency: order.currency.toUpperCase(),
         product_name: product,
         ...(order.visitorId ? { ft_vid: order.visitorId } : {}),
+        // Same device, when the cookie did not survive (lib/buyerDevice.ts).
+        ...(order.buyerIp ? { buyer_ip: order.buyerIp } : {}),
+        ...(order.buyerUa ? { buyer_user_agent: order.buyerUa } : {}),
         platform: "funnnnels",
       }),
       signal: AbortSignal.timeout(15_000),

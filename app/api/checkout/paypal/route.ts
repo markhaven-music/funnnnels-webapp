@@ -7,6 +7,7 @@ import { currencyFor, visitorCountry } from "@/lib/geo";
 import { PAYPAL_LOCALE, paypal, paypalConfigured, paypalValue, returnOrigin, type PayPalOrder } from "@/lib/paypal";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { cleanVisitorId } from "@/lib/neoIds";
+import { buyerDevice } from "@/lib/buyerDevice";
 import { notePayPalOrder } from "@/lib/orders";
 import { bonusCookieFor, orderBonus } from "@/lib/bonusClock";
 
@@ -99,7 +100,7 @@ export async function POST(req: Request) {
     const approve = order.links?.find((l) => l.rel === "payer-action" || l.rel === "approve");
     if (!approve) throw new Error(`PayPal order ${order.id} came back without an approval link`);
     // What it sells, for the download and the thank-you page (lib/orders.ts).
-    await notePayPalOrder({ id: order.id, funnel: f.slug, amountCents: amount, currency, items: ["pack", ...bumps.map((b) => b.id), ...(bonus.item ? [bonus.item.id] : [])] });
+    await notePayPalOrder({ id: order.id, funnel: f.slug, amountCents: amount, currency, items: ["pack", ...bumps.map((b) => b.id), ...(bonus.item ? [bonus.item.id] : [])], ...buyerDevice(req.headers) });
     return NextResponse.json({ orderId: order.id, approveUrl: approve.href });
   } catch (err) {
     console.error("paypal order failed", err);
