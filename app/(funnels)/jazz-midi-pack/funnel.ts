@@ -177,7 +177,7 @@ export const funnel = {
     // The one-click upsell's zip (offers below), the one the other funnels sell.
     "famous-beats": "shared/Famous Beats Bundle (320 MIDI Beats).zip",
     // Jazz MIDI Pack Vol. 2 (offers below), built by ~/Desktop/Jazz MIDI Pack Tools/make_pack_vol2.py.
-    // NOT in R2 yet (2026-11-15): upload the zip under this key before funnel_items sells "vol2".
+    // In R2 since 2026-11-16 (also the catalog product jazz-midi-pack-vol2, which the download reads first).
     vol2: "jazz-midi-pack/Jazz MIDI Pack Vol. 2.zip",
   } as Record<string, string>,
   // One-click upsell after the order (2026-11-07, "Solo Famous Beats"): the
@@ -186,12 +186,13 @@ export const funnel = {
   // nobody sees it twice. Price and name: dashboard → Products (funnel_items).
   // 2026-11-15 ("Sì, parti"): a ladder. First Vol. 2 (./vol2, 82 more progressions through the same engine,
   // sold only on that page), an upgrade of what was just bought; Famous Beats stays second until the
-  // Complete Collection page replaces it. Vol. 2 is on sale only once funnel_items has its row (lib/funnels.ts
-  // withItems keeps the upsells the database lists): until then its page is a preview and Yes answers
+  // Complete Collection page replaces it. Vol. 2 is on sale while funnel_items lists it (lib/funnels.ts
+  // withItems keeps the upsells the database lists): without its row the page is a preview and Yes answers
   // "This offer isn't available".
   offers: [
     // Vol. 2 costs what the pack costs here ("il prezzo dell'upsell facciamo lo stesso prezzo del volume 1?
-    // 27 o 37 quello che sia", 2026-11-15): 37 today. Change the two together, here and in funnel_items.
+    // 27 o 37 quello che sia", 2026-11-15). The price buyers pay is funnel_items': on sale since 2026-11-16 at
+// the pack's price there (27 that day; the pack's row went back to 27 at 16:49 UTC). Change the two together.
     { id: "vol2", path: "vol2", name: "Jazz MIDI Pack Vol. 2", price: { eur: 37, usd: 37 } },
     { id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } },
   ],
