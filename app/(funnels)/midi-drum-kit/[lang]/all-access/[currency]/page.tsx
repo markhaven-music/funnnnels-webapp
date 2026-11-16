@@ -34,38 +34,46 @@ export const metadata: Metadata = { title: "GRIND STUDIO All Access", robots: { 
 
 const OFFER = "all-access";
 
-// Each pack at the price our pages sell it for on its own (2026-11-16): the Jazz MIDI Pack's
-// own funnel (37), Famous Beats' and TOP HITS' own funnels (27), the HUSTLE Bundle and the
-// Expansions as order-form add-ons (27, 7). Pounds and francs take the euro number (lib/geo.ts).
+// Each pack at its full price, as our own pages state it (2026-11-16, "devi fare confronto prezzo con
+// prezzi non scontati dei packs"): the Jazz MIDI Pack's value stack (97, jazz-midi-pack/funnel.ts
+// value.pack), TOP HITS' regular price after its launch (97, top-hits-chords/funnel.ts launch.after),
+// HUSTLE's "31 MIDI packs at 29, total 899" and the Expansions' "Usually 147" (the Drum Kit's order-form
+// add-on words). Famous Beats has no other price on our pages than 27. Pounds and francs take the euro number.
+// feel: the moment each pack is for (the copy is feeling-based, "make the copy of the page emotion based").
 const PACKS = [
   {
     name: "Jazz MIDI Pack",
-    what: "10,496 jazz MIDI files: the chords under lofi, neo soul and trap soul, voiced like a pianist, with its seven bonuses.",
-    price: { eur: 37, usd: 37 },
+    feel: "For the nights you want it warm.",
+    what: "10,496 jazz MIDI files, voiced the way a pianist plays, with its seven bonuses.",
+    full: { eur: 97, usd: 97 },
     image: "/funnels/jazz-midi-pack/box-520.webp",
   },
   {
     name: "Famous Beats Bundle",
-    what: "320 drum beats from famous records, transcribed as MIDI.",
-    price: { eur: 27, usd: 27 },
+    feel: "For the groove you heard on a record and can’t get out of your head.",
+    what: "320 famous drum beats, as MIDI.",
+    full: { eur: 27, usd: 27 },
     image: "/funnels/home/famous-beats-box.webp",
   },
   {
     name: "TOP HITS MIDI Bundle",
-    what: "1000 chord progressions from the biggest hits, as drag-and-drop MIDI files.",
-    price: { eur: 27, usd: 27 },
+    feel: "For when a beat needs to feel familiar.",
+    what: "1000 chord progressions from the biggest hits.",
+    full: { eur: 97, usd: 97 },
     image: "/funnels/home/top-hits-box.webp",
   },
   {
     name: "HUSTLE Bundle",
-    what: "31 MIDI packs: jazz, trap, hip-hop, lofi, pop and more.",
-    price: { eur: 27, usd: 27 },
+    feel: "For when nothing comes.",
+    what: "31 MIDI packs of chords and melodies: jazz, trap, hip-hop, lofi, pop.",
+    full: { eur: 899, usd: 899 },
     image: "/funnels/midi-drum-kit/bump-hustle.webp",
   },
   {
     name: "MIDI Drum Kit Expansions",
-    what: "172 MIDI drum files: complete beats for Lo-Fi, House and Afrobeat.",
-    price: { eur: 7, usd: 7 },
+    feel: "For when the session wants a different floor.",
+    what: "172 MIDI drum files: Lo-Fi, House and Afrobeat.",
+    full: { eur: 147, usd: 147 },
     image: "/funnels/midi-drum-kit/bump-expansions.webp",
   },
 ];
@@ -80,10 +88,10 @@ export default async function AllAccess({ params }: { params: Params }) {
   const offer = product.offers?.find((o) => o.id === OFFER);
   if (!offer) notFound();
   const price = money(priceIn(offer.price, currency), currency);
-  const sum = money(
-    PACKS.reduce((n, p) => n + priceIn(p.price, currency), 0),
+  const full = money(
+    PACKS.reduce((n, p) => n + priceIn(p.full, currency), 0),
     currency,
-  );
+  ).replace(/(\d)(\d{3})$/, "$1,$2");
 
   return (
     <main className={`${j.page} ${j.jazz} ${display.variable}`} lang={lang}>
@@ -96,13 +104,13 @@ export default async function AllAccess({ params }: { params: Params }) {
 
       <section className={u.top}>
         <div className={j.wrap}>
-          <p className={u.pre}>One offer before your downloads</p>
+          <p className={u.pre}>Before your downloads</p>
           <h1 className={u.head}>
-            Five more of our packs, in one download. <em className={j.hl}>{price} for all five.</em>
+            The drums are done. <em className={j.hl}>Now the part where most beats die.</em>
           </h1>
           <p className={u.sub}>
-            You have the drums. These are the chords, the beats and the loops to go with them: five of our packs, {sum} one by one on our pages.
-            Add all of them to your order for {price}.
+            You know that night: the drums knock, the loop plays for the twentieth time, and you can’t find the chords that make it feel like something.
+            So you close the laptop. All Access is five packs for that moment. Drag one in, and the loop turns into a song you want to finish.
           </p>
 
           <ul className={u.packs}>
@@ -111,19 +119,22 @@ export default async function AllAccess({ params }: { params: Params }) {
                 <img src={p.image} width={96} height={96} alt="" loading={i < 2 ? "eager" : "lazy"} decoding="async" />
                 <div>
                   <p className={u.name}>{p.name}</p>
+                  <p className={u.feel}>{p.feel}</p>
                   <p className={u.what}>{p.what}</p>
                 </div>
-                <span className={u.alone}>{money(priceIn(p.price, currency), currency)} alone</span>
+                <span className={u.alone}>{money(priceIn(p.full, currency), currency)} full price</span>
               </li>
             ))}
           </ul>
 
           <p className={u.sum}>
-            Bought one by one: <s>{sum}</s>. With your order: <em className={j.hl}>{price}</em>.
+            At full price: <s>{full}</s>. With your order today: <em className={j.hl}>{price}</em>.
           </p>
           <Buttons price={price} />
           <p className={u.note}>
-            All five land on the same download page as your MIDI Drum Kit. 14-day quality guarantee: a file doesn’t work, we fix it, or you get a refund.
+            One download page, next to your Drum Kit. The next time you open an empty session, you start with something.
+            <br />
+            14-day quality guarantee: a file doesn’t work, we fix it, or you get a refund.
           </p>
         </div>
       </section>
@@ -148,7 +159,7 @@ function Buttons({ price }: { price: string }) {
       <a href="#yes" data-oto="yes" className={b.btn}>
         <span className={b.shine} aria-hidden />
         <span className={b.label}>
-          <span className="elButtonMainText">Yes, add All Access to my order</span>
+          <span className="elButtonMainText">Yes, I want all five</span>
           <Arrow className={b.arrow} />
         </span>
         <span className={b.inner}>{price} · instant download</span>
