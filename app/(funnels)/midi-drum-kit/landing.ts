@@ -19,7 +19,8 @@ import { copyWith } from "./copy";
 import type { PageEdits } from "@/lib/pageTexts";
 import { copyEdits, markupEdits } from "./texts";
 import { funnel } from "./funnel";
-import { paths, type Lang } from "./i18n";
+import { money, paths, type Lang } from "./i18n";
+import { popupLandingJs } from "./popupBump";
 
 // The sales page: ClickFunnels' own HTML and CSS (./cf/template.ts, made by
 // tools/cf_clone.mjs), so it looks exactly like the ClickFunnels page on every
@@ -148,7 +149,9 @@ const TEMPLATE6 = sixBonuses(TEMPLATE);
 // layout: the page's sections hidden or moved, its pictures replaced and its
 // button colour, as edited in the dashboard (lib/pageLayout.ts, lib/cfSections.ts).
 // variant: the landing test's page (./landingTest.ts); "lp-new" is the new one (./landingNew.ts).
-export function landingHtml(lang: Lang, currency: Currency, price: number = priceIn(funnel.price, currency), edits: PageEdits = {}, marks = false, layout: Layout = {}, variant: LpVariant = "lp-old"): string {
+// popup: the pop-up add-on (./popupBump.ts) while Products sells it, in this currency; it takes the
+// place of "Checking availability…".
+export function landingHtml(lang: Lang, currency: Currency, price: number = priceIn(funnel.price, currency), edits: PageEdits = {}, marks = false, layout: Layout = {}, variant: LpVariant = "lp-old", popup?: { price: number; image: string }): string {
   const strings = { ...STRINGS.en, ...STRINGS[lang], ...markupEdits(edits, "landing") };
   const words = (key: string) => {
     let html = mapText(strings[key] ?? "", (t) => restate(t, priceIn(funnel.price, currency), price, lang));
@@ -171,7 +174,7 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = pric
     .replace("{{DESCRIPTION}}", escapeAttr(meta.description))
     .replace(
       "{{HEAD}}",
-      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${ab}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: LP.cookie })}</script>\n<script>${AVAILABILITY_JS}</script>\n${headScripts(currency, price)}`,
+      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${ab}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: LP.cookie })}</script>\n<script>${popup ? popupLandingJs(lang, money(popup.price, currency, lang, !Number.isInteger(popup.price)), popup.image) : AVAILABILITY_JS}</script>\n${headScripts(currency, price)}`,
     )
     .replace("{{BODY}}", BODY_SCRIPT);
   if (lang === "en") html = html.replace(FREE_BAR_AT, (at) => FREE_BAR + at);

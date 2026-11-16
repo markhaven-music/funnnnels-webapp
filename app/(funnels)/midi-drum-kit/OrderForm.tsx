@@ -11,7 +11,7 @@ import { LP } from "./landingTest";
 import { readPay, type PayVariant } from "./payTest";
 import { BONUS, BONUS_WORDS } from "./bonusTest";
 import { BonusItem, endBonus, useBonus } from "./BonusClock";
-import { POPUP_BUMP, POPUP_WORDS } from "./popupBump";
+import { POPUP_BUMP, POPUP_WORDS, popupChoice } from "./popupBump";
 import { pixel } from "../jazz-midi-pack/Tracking";
 import { CardFields, cardElements, payWithCard, payWithWallet, Wallet, useFirstTouch, type CardLook } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
@@ -118,6 +118,20 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
     document.documentElement.setAttribute("data-order-step", String(step));
   }, [step]);
   const [picked, setPicked] = useState<string[]>([]);
+  // The landing pop-up's Yes (./popupBump.ts): the WAVs arrive in the order. Read once the page is
+  // shown, not while it's prerendered behind the pop-up, before the buyer answered.
+  useEffect(() => {
+    if (!offer.bumps.some((b) => b.id === POPUP_BUMP)) return;
+    const apply = () => {
+      if (popupChoice()) setPicked((p) => (p.includes(POPUP_BUMP) ? p : [...p, POPUP_BUMP]));
+    };
+    const doc = document as Document & { prerendering?: boolean };
+    if (doc.prerendering) {
+      doc.addEventListener("prerenderingchange", apply, { once: true });
+      return () => doc.removeEventListener("prerenderingchange", apply);
+    }
+    apply();
+  }, [offer.bumps]);
   // The add-ons ticked, for the upsell pages: one already bought here is skipped (./upsell.ts).
   useEffect(() => {
     document.cookie = `fv_owned=${picked.join(",")}; path=/; max-age=7200; samesite=lax`;
@@ -478,36 +492,6 @@ function PayBody({
   // The pop-up's add-on (./popupBump.ts) is asked on paying, not as a tick-box.
   const offered = offer.bumps.filter((b) => b.id !== POPUP_BUMP && !(bonusLive && b.id === BONUS.item));
 
-  // The pop-up add-on: asked once, when pay is pressed; then the payment goes on with the answer.
-  const popup = offer.bumps.find((b) => b.id === POPUP_BUMP);
-  const [asking, setAsking] = useState<null | "card" | "paypal">(null);
-  const [asked, setAsked] = useState(false);
-  const [goOn, setGoOn] = useState<null | "card" | "paypal">(null);
-  const payNow = (how: "card" | "paypal") => (how === "paypal" ? payWithPayPal() : onCard?.());
-  function pressPay() {
-    const how = paypal ? "paypal" : "card";
-    if (popup && !asked && !picked.includes(popup.id)) {
-      setAsking(how);
-      return;
-    }
-    payNow(how);
-  }
-  // yes / no pay on; null (Escape, a tap outside) only closes it: the next press pays without asking.
-  function answer(yes: boolean | null) {
-    const how = asking;
-    setAsking(null);
-    setAsked(true);
-    if (!how || yes === null) return;
-    if (yes && popup) setPicked([...picked, popup.id]);
-    // After the next render, so the payment reads the order with the answer in it.
-    setGoOn(how);
-  }
-  useEffect(() => {
-    if (!goOn) return;
-    setGoOn(null);
-    payNow(goOn);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [goOn]);
   const bonusBump = offer.bumps.find((b) => b.id === BONUS.item);
   const w = BONUS_WORDS[lang];
 
@@ -535,7 +519,18 @@ function PayBody({
         </div>
         {chosen.map((o) => (
           <div key={o.id} className={j.sumRow}>
-            <span>{o.name}</span>
+            <span>
+              {o.name}
+              {/* The landing pop-up's add-on has no tick-box here: this takes it out. */}
+              {o.id === POPUP_BUMP && (
+                <>
+                  {" "}
+                  <button type="button" className={d.popRemove} onClick={() => toggle(o.id, false)}>
+                    {POPUP_WORDS[lang].remove}
+                  </button>
+                </>
+              )}
+            </span>
             <span>{cash(o.price)}</span>
           </div>
         ))}
@@ -555,7 +550,7 @@ function PayBody({
         </div>
       </div>
 
-      <button ref={payRef} type="button" className={`${k.btn} ${k.full}`} disabled={blocked} onClick={pressPay}>
+      <button ref={payRef} type="button" className={`${k.btn} ${k.full}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
         <span className={k.shine} aria-hidden />
         <span className={k.label}>
           <span>{busy && !cardOff ? (paypal ? t.openingPaypal : t.processing) : t.pay}</span>
@@ -600,45 +595,7 @@ function PayBody({
           </button>
         </div>
       )}
-      {asking && popup && <PopupBump o={popup} lang={lang} price={cash(popup.price)} answer={answer} />}
     </>
-  );
-}
-
-// The pop-up add-on (./popupBump.ts): its picture, the question, Yes (the orange key) and No thanks.
-function PopupBump({ o, lang, price, answer }: { o: OrderOffer["bumps"][number]; lang: Lang; price: string; answer: (yes: boolean | null) => void }) {
-  const w = POPUP_WORDS[lang];
-  const yesRef = useRef<HTMLButtonElement>(null);
-  const answerRef = useRef(answer);
-  answerRef.current = answer;
-  useEffect(() => {
-    yesRef.current?.focus();
-    const esc = (e: KeyboardEvent) => e.key === "Escape" && answerRef.current(null);
-    window.addEventListener("keydown", esc);
-    return () => window.removeEventListener("keydown", esc);
-  }, []);
-  return (
-    <div className={d.popWrap} role="dialog" aria-modal="true" aria-labelledby="popup-bump-title" onClick={(e) => e.target === e.currentTarget && answer(null)}>
-      <div className={d.pop}>
-        {o.image && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img className={d.popPic} src={o.image} alt="" width={120} height={120} decoding="async" />
-        )}
-        <h2 id="popup-bump-title" className={d.popTitle}>
-          {w.title}
-        </h2>
-        <p className={d.popBody}>{w.body}</p>
-        <button ref={yesRef} type="button" className={`${k.btn} ${k.full}`} onClick={() => answer(true)}>
-          <span className={k.shine} aria-hidden />
-          <span className={k.label}>
-            <span>{w.yes(price)}</span>
-          </span>
-        </button>
-        <button type="button" className={d.popNo} onClick={() => answer(false)}>
-          {w.no}
-        </button>
-      </div>
-    </div>
   );
 }
 

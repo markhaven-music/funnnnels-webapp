@@ -3,6 +3,7 @@ import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { funnel } from "../../funnel";
 import { isLang, LANGS } from "../../i18n";
 import { landingHtml } from "../../landing";
+import { POPUP_BUMP, POPUP_IMAGE } from "../../popupBump";
 import { pageLayouts } from "@/lib/pageLayout";
 import { pageEdits } from "@/lib/pageTexts";
 
@@ -24,9 +25,13 @@ export function generateStaticParams() {
 export async function GET(_req: Request, { params }: { params: Promise<{ lang: string; currency: string }> }) {
   const { lang, currency } = await params;
   if (!isLang(lang) || !CURRENCIES.includes(currency as Currency)) return new Response("Not found", { status: 404 });
-  const price = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency as Currency);
+  const f = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
+  const price = priceIn(f.price, currency as Currency);
+  // The pop-up add-on (../../popupBump.ts), only while dashboard → Products sells it.
+  const wav = f.bumps?.find((b) => b.id === POPUP_BUMP);
+  const popup = wav ? { price: priceIn(wav.price, currency as Currency), image: wav.image || POPUP_IMAGE } : undefined;
   const [edits, layouts] = await Promise.all([pageEdits(funnel.slug, lang, true), pageLayouts(funnel.slug, lang, true)]);
-  return new Response(landingHtml(lang, currency as Currency, price, edits, false, layouts.landing ?? {}), {
+  return new Response(landingHtml(lang, currency as Currency, price, edits, false, layouts.landing ?? {}, undefined, popup), {
     headers: { "content-type": "text/html; charset=utf-8" },
   });
 }
