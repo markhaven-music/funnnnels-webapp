@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     const intent = await stripe().paymentIntents.create({
       amount: cart.amount,
       currency,
-      allowed_payment_method_types: ["card"],
+      allowed_payment_method_types: ["card", "link"],
       receipt_email: email,
       description: cart.items.map((i) => i.name).join(" + ").slice(0, 500),
       metadata: {

@@ -44,7 +44,10 @@ export const cardElements = (look: CardLook, locale: StripeElementLocale | undef
   mode: "payment",
   amount: Math.max(50, Math.round(pay.total * 100)),
   currency: pay.currency.toLowerCase(),
-  allowedPaymentMethodTypes: ["card"],
+  // Link (Stripe's saved cards) as the small green button inside the card number
+  // field, as on Unison's checkout ("non è meglio se bottone piccolo link sta dentro
+  // il field?", 11-16): it opens only when tapped. Off since 11-02 to copy ClickFunnels.
+  allowedPaymentMethodTypes: ["card", "link"],
   // payWithCard makes the card a PaymentMethod first (stripe.createPaymentMethod),
   // which the Payment Element only allows with this. Without it every card
   // payment failed before reaching the server, from 11-06 17:21 to 11-07 17:30.
@@ -141,8 +144,8 @@ export function CardFields(_: { words?: CardWords; look?: CardLook }) {
             layout: "tabs",
             // Step 1 has them; the country is the visit's (Stripe gets it at payWithCard).
             fields: { billingDetails: { name: "never", email: "never", address: { country: "never" } } },
-            // Apple / Google Pay have their own buttons above (<Wallet>); no Link.
-            wallets: { applePay: "never", googlePay: "never", link: "never" },
+            // Apple / Google Pay have their own buttons above (<Wallet>); Link sits inside the card field.
+            wallets: { applePay: "never", googlePay: "never", link: "auto" },
             terms: { card: "never" },
           }}
         />
@@ -167,7 +170,14 @@ export async function payWithCard(stripe: Stripe, elements: StripeElements, bill
   const { error, paymentMethod } = await stripe.createPaymentMethod({ elements, params: { billing_details: billing } });
   if (error) throw new Error(error.message);
   const clientSecret = await intent();
-  const { error: payError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, { payment_method: paymentMethod.id });
+  // confirmPayment, not confirmCardPayment: the PaymentMethod is a card or, from the
+  // Link button in the field, a Link one. It stays on the page (3D Secure in Stripe's
+  // window) unless the method needs a redirect, which cards and Link don't.
+  const { error: payError, paymentIntent } = await stripe.confirmPayment({
+    clientSecret,
+    confirmParams: { payment_method: paymentMethod.id, return_url: new URL(next, window.location.origin).toString() },
+    redirect: "if_required",
+  });
   if (payError) throw new Error(payError.message);
   const url = new URL(next, window.location.origin);
   url.searchParams.set("payment_intent", paymentIntent.id);

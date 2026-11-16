@@ -70,8 +70,8 @@ export async function POST(req: Request) {
       amount,
       currency,
       ...(customer ? { customer: customer.id, setup_future_usage: "off_session" as const } : {}),
-      // Cards only, matching the checkout's card fields (Apple Pay / Google Pay are cards).
-      allowed_payment_method_types: ["card"],
+      // Cards and Link, matching the checkout's card fields (Apple Pay / Google Pay are cards; Link is the button inside the card field).
+      allowed_payment_method_types: ["card", "link"],
       receipt_email: email,
       description: orderDescription(f, bonus.item ? [...bumps, bonus.item] : bumps),
       metadata: {

@@ -76,7 +76,7 @@ export function UpsellButtons({ funnel, offer, next, yes, yesSub, no }: { funnel
     el.onload = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const stripe = (window as any).Stripe(r.publishableKey);
-      stripe.confirmCardPayment(r.clientSecret, { payment_method: r.paymentMethod }).then((x: { paymentIntent?: { id: string; status: string } }) => {
+      stripe.confirmPayment({ clientSecret: r.clientSecret, confirmParams: { payment_method: r.paymentMethod, return_url: location.href }, redirect: "if_required" }).then((x: { paymentIntent?: { id: string; status: string } }) => {
         if (x.paymentIntent?.status === "succeeded") go(x.paymentIntent.id);
         else {
           setBusy(false);

@@ -380,7 +380,7 @@ export function script(slug: string, offerId: string, lang: Lang, next: string, 
   function stripeAction(r, btn) {
     var s = document.createElement('script'); s.src = 'https://js.stripe.com/v3';
     s.onload = function () {
-      Stripe(r.publishableKey).confirmCardPayment(r.clientSecret, { payment_method: r.paymentMethod }).then(function (x) {
+      Stripe(r.publishableKey).confirmPayment({ clientSecret: r.clientSecret, confirmParams: { payment_method: r.paymentMethod, return_url: location.href }, redirect: 'if_required' }).then(function (x) {
         if (x.paymentIntent && x.paymentIntent.status === 'succeeded') go(x.paymentIntent.id);
         else { reset(btn); say(btn, C.ui.failed); }
       });
