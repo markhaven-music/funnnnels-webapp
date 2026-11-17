@@ -45,7 +45,7 @@ export const it: Copy = {
     stack: {
       title: "**10.296 File MIDI Di Batteria Che Danno Bounce Ai Tuoi Beat**",
       items: [
-        "**500+ Pattern Di Batteria Da Grammy, Pronti Per La Radio**",
+        "**1.040 Pattern Di Batteria Da Grammy, Pronti Per La Radio**",
         "**Pattern Di Batteria Usati Nelle Hit**",
         "**Oltre 6.000 Combinazioni Pronte, Per Non Avere Mai Più Il Blocco Creativo**",
         "**Ogni 808 In Tutte Le 12 Tonalità, Sempre In Tono Con Il Tuo Pezzo**",
