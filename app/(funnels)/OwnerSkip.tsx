@@ -17,6 +17,7 @@ export function OwnerSkip({ onSkip }: { onSkip: () => void }) {
   return (
     <button
       type="button"
+      data-owner-skip
       onClick={onSkip}
       style={{
         display: "block",

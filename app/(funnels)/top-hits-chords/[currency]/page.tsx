@@ -408,7 +408,7 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
                 <span key={c} role="columnheader" className={i === 2 ? `${s.chHead} ${s.chWin}` : s.chHead}>
                   {i === 2 && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img className={s.chBox} src={`${DIR}/box3d-160.webp`} width={160} height={210} alt="" loading="lazy" decoding="async" />
+                    <img className={s.chBox} src={`${DIR}/box3d-160.webp?v=2`} width={160} height={210} alt="" loading="lazy" decoding="async" />
                   )}
                   {c}
                 </span>
@@ -487,7 +487,7 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
               <div className={vs.mainBox}>
                 <span className={vs.ribbon}>{worth(bundleValue)} value</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`${DIR}/box3d-520.webp`} width={520} height={684} alt="The TOP HITS MIDI Bundle box" loading="lazy" decoding="async" />
+                <img src={`${DIR}/box3d-520.webp?v=2`} width={520} height={684} alt="The TOP HITS MIDI Bundle box" loading="lazy" decoding="async" />
               </div>
               <div>
                 <p className={vs.kicker}>The bundle</p>

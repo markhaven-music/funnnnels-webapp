@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { sayBumps } from "@/lib/bumpText";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel, upsellsOn, type Bump } from "@/lib/funnels";
@@ -72,7 +73,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
 
   const live = f.bumps ?? [];
   const code = funnel.bumps as readonly (Bump & { headline: string })[];
-  const bumps = ORDER_BUMPS.flatMap((id) => {
+  const ownBumps = ORDER_BUMPS.flatMap((id) => {
     const b = live.find((x) => x.id === id) ?? code.find((x) => x.id === id);
     if (!b) return [];
     const known = code.find((x) => x.id === id);
@@ -89,6 +90,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       },
     ];
   });
+  // The product's own words where dashboard → Products has some (lib/bumpText.ts).
+  const bumps = await sayBumps(funnel.slug, ownBumps);
   // The add-on the 5-minute bonus gives (Products' price; the code's until it's there).
   const ex = FIVE_MIN_BONUS_ON ? (live.find((b) => b.id === TH_BONUS.item) ?? code.find((b) => b.id === TH_BONUS.item)) : undefined;
   const fiveMinBonus = ex ? { price: priceIn(ex.price, currency), cfg: TH_BONUS, words: TH_BONUS_WORDS } : undefined;
@@ -130,8 +133,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
             <div className={s.orderSummary}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`${DIR}/box3d-520.webp`}
-                srcSet={`${DIR}/box3d-520.webp 520w, ${DIR}/box3d-853.webp 853w`}
+                src={`${DIR}/box3d-520.webp?v=2`}
+                srcSet={`${DIR}/box3d-520.webp?v=2 520w, ${DIR}/box3d-853.webp?v=2 853w`}
                 // 200px: a phone then takes the 520 px file (38 KB), not the 853 px one (80 KB); it's the page's largest paint
                 sizes="(min-width: 1000px) 300px, 200px"
                 width={853}
@@ -186,7 +189,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
                 funnel={funnel.slug}
                 product={funnel.product}
                 tagline={w.tagline}
-                image={`${DIR}/box3d-160.webp`}
+                image={`${DIR}/box3d-160.webp?v=2`}
                 currency={currency}
                 country={FALLBACK_COUNTRY[currency]}
                 price={amount}

@@ -17,6 +17,7 @@ import { B } from "./Lines";
 import { Rich } from "./Rich";
 import base from "./order.module.css";
 import { bumpFull } from "@/lib/bumpFull";
+import "../bumpDraft";
 
 // The ClickFunnels order form of /order-top-hits-midi-bundle, step for step:
 //   1 · Your Info → first, last, email (saved as a lead), "GO TO STEP 2"
@@ -388,23 +389,23 @@ function PayBody({
         const on = picked.includes(b.id);
         const full = bumpFull(b.id, b.price);
         return (
-          <label key={b.id} className={b.id === "hustle" ? `${s.bump} ${s.bumpPremium}` : s.bump}>
+          <label key={b.id} className={b.id === "hustle" ? `${s.bump} ${s.bumpPremium}` : s.bump} data-bump={b.id}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
             <span className={s.bumpHead}>
               {/* Gone once ticked, as on ClickFunnels. */}
               {!on && <BumpArrow />}
               <input type="checkbox" checked={on} onChange={(e) => toggle(b.id, e.target.checked)} className={s.bumpCheck} />
-              <span className={s.bumpTitle}>{b.headline}</span>
+              <span className={s.bumpTitle} data-bump-h>{b.headline}</span>
               <span className={s.bumpPrice}>
                 {full && <s className={s.bumpWas}>{money(full, currency)}</s>}
                 <b className={s.bumpNow}>{money(b.price, currency)}</b>
               </span>
             </span>
-            <span className={s.bumpText}>
+            <span className={s.bumpText} data-bump-b>
               {b.body.map((p, i) => (
                 <span key={i} className={s.bumpPara}>
-                  {i === 0 && <span className={s.oto}>{w.oto}</span>} <Rich text={p} currency={currency} />
+                  {i === 0 && <span className={s.oto} data-bump-oto>{w.oto}</span>} <Rich text={p} currency={currency} />
                 </span>
               ))}
             </span>

@@ -97,7 +97,7 @@ const PACKS = [
     body: "There’s a reason some songs feel like home the first time you hear them. It’s often the chords. Start from the progression under a hit you love, make it yours, and your beat carries that same pull.",
     inside: ["1,000 chord progressions from the biggest hits", "Four folders: Modern Pop & Ballads; Hiphop, Trap & Urban; Dance & Electronic; Vintage Classics, Rock & Country"],
     full: { eur: 97, usd: 97 },
-    image: "/funnels/top-hits-midi-bundle/box3d-520.webp",
+    image: "/funnels/top-hits-midi-bundle/box3d-520.webp?v=2",
     w: 520,
     h: 684,
   },

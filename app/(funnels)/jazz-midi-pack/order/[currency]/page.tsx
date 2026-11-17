@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { sayBumps } from "@/lib/bumpText";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel, upsellsOn } from "@/lib/funnels";
 import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
@@ -75,6 +76,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     afterOrder: nextStep(f, "en", null),
     keepCard: upsellsOn(f),
   };
+  // The product's own words where dashboard → Products has some (lib/bumpText.ts).
+  ctx.bumps = await sayBumps(funnel.slug, ctx.bumps ?? []);
   // The add-on the 5-minute bonus gives (none if it's gone from Products).
   const rs = FIVE_MIN_BONUS_ON ? f.bumps?.find((b) => b.id === JAZZ_BONUS.item) : undefined;
   if (rs) ctx.fiveMinBonus = { price: priceIn(rs.price, currency) };

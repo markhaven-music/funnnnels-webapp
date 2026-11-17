@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { sayBumps } from "@/lib/bumpText";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel, upsellsOn, type Bump } from "@/lib/funnels";
@@ -62,7 +63,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
 
   const live = f.bumps ?? [];
   const code = funnel.bumps as readonly (Bump & { headline: string })[];
-  const bumps = ORDER_BUMPS.flatMap((id) => {
+  const ownBumps = ORDER_BUMPS.flatMap((id) => {
     const b = live.find((x) => x.id === id) ?? code.find((x) => x.id === id);
     if (!b) return [];
     const was = priceIn(code.find((x) => x.id === id)?.price, currency) ?? priceIn(b.price, currency);
@@ -79,6 +80,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       },
     ];
   });
+  // The product's own words where dashboard → Products has some (lib/bumpText.ts).
+  const bumps = await sayBumps(funnel.slug, ownBumps);
   // The add-on the 5-minute bonus gives (Products' price; the code's until it's there).
   const ex = FIVE_MIN_BONUS_ON ? (live.find((b) => b.id === FBB_BONUS.item) ?? code.find((b) => b.id === FBB_BONUS.item)) : undefined;
   const fiveMinBonus = ex ? { price: priceIn(ex.price, currency), cfg: FBB_BONUS, words: FBB_BONUS_WORDS } : undefined;

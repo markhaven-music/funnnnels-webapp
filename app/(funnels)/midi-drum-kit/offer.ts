@@ -1,3 +1,4 @@
+import { sayBumps } from "@/lib/bumpText";
 import { priceIn } from "@/lib/geo";
 import { getFunnel, resolveFunnel, type Product } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
@@ -34,7 +35,7 @@ export async function orderOffer(lang: Lang, currency: Currency, product?: Produ
   const code = getFunnel(funnel.slug)!;
   const f = product ?? (await resolveFunnel(funnel.slug)) ?? code;
   const words = copyWith(lang, currency, texts).form.bumps as Record<string, { headline: string; body: string[] } | undefined>;
-  return {
+  const offer = {
     product: f.product,
     // The form's own name for the kit, until the product is renamed.
     name: f.product === code.product ? funnel.orderName : f.product,
@@ -54,4 +55,6 @@ export async function orderOffer(lang: Lang, currency: Currency, product?: Produ
       };
     }),
   };
+  // The product's own words where dashboard → Products has some (lib/bumpText.ts).
+  return { ...offer, bumps: await sayBumps(funnel.slug, offer.bumps, lang) };
 }

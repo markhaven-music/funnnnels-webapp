@@ -18,8 +18,8 @@ export const POP_ICON: Record<string, string> = {
   "midi-drum-kit": "/funnels/midi-drum-kit/kit-box-v3-160.webp",
   "jazz-midi-pack": "/funnels/jazz-midi-pack/box-160.webp",
   "famous-beats-bundle": "/funnels/famous-beats-bundle/box3d-160.webp",
-  "top-hits-midi-bundle": "/funnels/top-hits-midi-bundle/box3d-160.webp",
-  "top-hits-chords": "/funnels/top-hits-midi-bundle/box3d-160.webp",
+  "top-hits-midi-bundle": "/funnels/top-hits-midi-bundle/box3d-160.webp?v=2",
+  "top-hits-chords": "/funnels/top-hits-midi-bundle/box3d-160.webp?v=2",
   "drunk-swing-grooves": "/funnels/drunk-swing-grooves/pack-160.webp",
 };
 

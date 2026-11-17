@@ -8,6 +8,7 @@ import { CardFields, cardElements, payWithCard, payWithWallet, Wallet, type Card
 import { OwnerSkip } from "../OwnerSkip";
 import s from "./checkout.module.css";
 import { bumpFull } from "@/lib/bumpFull";
+import "../bumpDraft";
 import b from "./btn.module.css";
 import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
@@ -597,7 +598,7 @@ function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: C
   const [lead, rest] = splitPitch(offer.pitch);
   const full = bumpFull(offer.id, offer.price);
   return (
-    <label className={offer.id === "hustle" ? `${s.bump} ${s.bumpPremium}` : s.bump}>
+    <label className={offer.id === "hustle" ? `${s.bump} ${s.bumpPremium}` : s.bump} data-bump={offer.id}>
       {offer.image ? (
         <img className={s.bumpPic} src={offer.image} alt="" width={84} height={84} loading="lazy" decoding="async" />
       ) : (
@@ -614,17 +615,17 @@ function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: C
           </svg>
         )}
         <input type="checkbox" checked={ticked} onChange={(e) => onTick(e.target.checked)} className={s.bumpCheck} />
-        <span className={s.bumpTitle}>{offer.headline ?? `YES! Add the ${offer.name}!`}</span>
+        <span className={s.bumpTitle} data-bump-h>{offer.headline ?? `YES! Add the ${offer.name}!`}</span>
         <span className={s.bumpPrice}>
           {full && <s className={s.bumpWas}>{money(full, currency)}</s>}
           <b className={s.bumpNow}>{money(offer.price, currency)}</b>
         </span>
       </span>
       {offer.body ? (
-        <span className={s.bumpPitch}>
+        <span className={s.bumpPitch} data-bump-b>
           {offer.body.map((p, i) => (
             <span key={i} className={s.bumpPara}>
-              {i === 0 && <span className={s.bumpOffer}>ADD-ON OFFER:</span>} <Rich text={fillSign(p, currency)} />
+              {i === 0 && <span className={s.bumpOffer} data-bump-oto>ADD-ON OFFER:</span>} <Rich text={fillSign(p, currency)} />
             </span>
           ))}
         </span>
@@ -640,7 +641,22 @@ function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: C
 
 // "**bold**" → bold.
 function Rich({ text }: { text: string }) {
-  return <>{text.split(/\*\*(.+?)\*\*/g).map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part))}</>;
+  // and, since the product's own words can carry them (lib/bumpText.ts), "__underline__" and "_italic_".
+  return (
+    <>
+      {text.split(/(\*\*.+?\*\*|__.+?__|(?<![\w])_[^_]+?_(?![\w]))/g).map((p, i) =>
+        p.startsWith("**") && p.length > 4 ? (
+          <strong key={i}>{p.slice(2, -2)}</strong>
+        ) : p.startsWith("__") && p.length > 4 ? (
+          <u key={i}>{p.slice(2, -2)}</u>
+        ) : p.startsWith("_") && p.endsWith("_") && p.length > 2 ? (
+          <em key={i}>{p.slice(1, -1)}</em>
+        ) : (
+          p
+        ),
+      )}
+    </>
+  );
 }
 
 // "Lead sentence: the rest." → the lead goes bold, like the ClickFunnels bump.

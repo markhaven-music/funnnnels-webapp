@@ -10,6 +10,7 @@ import { readVariant } from "./abtest";
 import { LP } from "./landingTest";
 import { readPay, type PayVariant } from "./payTest";
 import { bumpFull } from "@/lib/bumpFull";
+import "../bumpDraft";
 import { BONUS, BONUS_WORDS } from "./bonusTest";
 import { BonusItem, endBonus, useBonus } from "./BonusClock";
 import { POPUP_BUMP, POPUP_WORDS, popupChoice } from "./popupBump";
@@ -585,14 +586,14 @@ function BumpBox({
   was: string | null;
 }) {
   return (
-    <label className={o.id === "hustle" ? `${j.bump} ${j.bumpPremium}` : j.bump}>
+    <label className={o.id === "hustle" ? `${j.bump} ${j.bumpPremium}` : j.bump} data-bump={o.id}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className={j.bumpPic} src={o.image} alt="" width={84} height={84} loading="lazy" decoding="async" />
       <span className={j.bumpHead}>
         {/* Gone once ticked, as on ClickFunnels. */}
         {!on && <BumpArrow />}
         <input type="checkbox" checked={on} onChange={(e) => toggle(o.id, e.target.checked)} className={j.bumpCheck} />
-        <span className={j.bumpTitle} data-fxk={o.words && `${o.words}.headline`}>
+        <span className={j.bumpTitle} data-bump-h data-fxk={o.words && `${o.words}.headline`}>
           {o.headline}
         </span>
         <span className={j.bumpPrice}>
@@ -600,10 +601,10 @@ function BumpBox({
           <b className={j.bumpNow}>{price}</b>
         </span>
       </span>
-      <span className={j.bumpPitch}>
+      <span className={j.bumpPitch} data-bump-b>
         {o.body.map((p, i) => (
           <span key={i} className={j.bumpPara}>
-            {i === 0 && <span className={j.bumpOffer}>{t.oto}</span>}{" "}
+            {i === 0 && <span className={j.bumpOffer} data-bump-oto>{t.oto}</span>}{" "}
             <span data-fxk={o.words && `${o.words}.body.${i}`}>
               <Rich text={p} currency={currency} />
             </span>

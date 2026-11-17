@@ -62,7 +62,7 @@ export const funnel = {
       id: "top-hits",
       name: "TOP HITS MIDI Bundle (1000 Chord Progressions)",
       price: { eur: 97, usd: 97 },
-      image: "/funnels/midi-drum-kit/bump-top-hits.webp",
+      image: "/funnels/midi-drum-kit/bump-top-hits.webp?v=2",
       pitch: "1000 chord progressions from the biggest hits, as drag-and-drop MIDI files.",
     },
     {

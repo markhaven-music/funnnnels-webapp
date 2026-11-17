@@ -1,3 +1,4 @@
+import { sayBumps } from "@/lib/bumpText";
 import { priceIn } from "@/lib/geo";
 import { getFunnel, resolveFunnel, type Product } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
@@ -15,7 +16,7 @@ import { ORDER } from "./words";
 export async function orderOffer(currency: Currency, product?: Product, words: Record<string, string[]> = ORDER.bumps): Promise<OrderOffer> {
   const code = getFunnel(funnel.slug)!;
   const f = product ?? (await resolveFunnel(funnel.slug)) ?? code;
-  return {
+  const offer = {
     product: f.product,
     name: f.product === code.product ? funnel.orderName : f.product,
     price: priceIn(f.price, currency),
@@ -32,4 +33,6 @@ export async function orderOffer(currency: Currency, product?: Product, words: R
       };
     }),
   };
+  // The product's own words where dashboard → Products has some (lib/bumpText.ts).
+  return { ...offer, bumps: await sayBumps(funnel.slug, offer.bumps, "en") };
 }
