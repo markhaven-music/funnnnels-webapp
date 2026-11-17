@@ -16,6 +16,16 @@ export const BUMP_LANGS = ["en", "it"] as const;
 export type BumpLang = (typeof BUMP_LANGS)[number];
 export type BumpText = { headline: string; body: string };
 
+// One picture per product too, the newest box, on every order form ("pensavo che gli order bump
+// si aggiornassero ovunque", 2026-11-17: the Jazz order page still drew the old covers). A product
+// not listed keeps the picture each funnel gives it. A new box: change it here, once.
+export const BUMP_IMAGE: Record<string, string> = {
+  expansions: "/funnels/midi-drum-kit/bump-expansions-3box.webp",
+  hustle: "/funnels/midi-drum-kit/bump-hustle-box.webp",
+  "top-hits": "/funnels/midi-drum-kit/bump-top-hits.webp?v=2",
+  "famous-beats": "/funnels/famous-beats-bundle/box3d-160.webp",
+};
+
 type Row = { product: string; lang: string; headline: string; body: string };
 
 /** Every product's saved words, by product then language. Empty when the table can't be read. */
@@ -46,7 +56,7 @@ export function fillBump(body: string, id: string, price: number, lang: string):
 
 /**
  * A funnel's add-ons with their product's saved words (the language's, else English) in place of
- * the funnel's own. `words` (the on-page editor's key for the funnel's own line) goes with them.
+ * the funnel's own, and the product's one picture (BUMP_IMAGE). `words` (the on-page editor's key for the funnel's own line) goes with them.
  */
 export async function sayBumps<T extends { id: string; price: number }>(funnel: string, bumps: readonly T[], lang = "en"): Promise<T[]> {
   if (!bumps.length) return [...bumps];
@@ -56,7 +66,9 @@ export async function sayBumps<T extends { id: string; price: number }>(funnel: 
       supabase().from("funnel_items").select("key, product").eq("funnel", funnel).eq("role", "bump"),
     ]);
     const productOf = Object.fromEntries(((items.data ?? []) as { key: string; product: string }[]).map((i) => [i.key, i.product]));
-    return bumps.map((b) => {
+    return bumps.map((own) => {
+      const picture = BUMP_IMAGE[own.id];
+      const b = picture ? { ...own, image: picture } : own;
       const saved = texts[productOf[b.id] ?? b.id];
       const t = saved?.[lang] ?? saved?.en;
       if (!t || (!t.headline.trim() && !t.body.trim())) return b;
@@ -70,7 +82,7 @@ export async function sayBumps<T extends { id: string; price: number }>(funnel: 
     });
   } catch (err) {
     console.error("bump texts: applying failed, the funnels' own words stay", err);
-    return [...bumps];
+    return bumps.map((b) => (BUMP_IMAGE[b.id] ? { ...b, image: BUMP_IMAGE[b.id] } : b));
   }
 }
 
