@@ -41,14 +41,16 @@ export const funnel = {
       id: "expansions",
       name: "MIDI Drum Kit Expansions (House, Lo-Fi, Afrobeat)",
       price: { eur: 7, usd: 7 },
-      image: "/funnels/midi-drum-kit/bump-expansions.webp",
+      // 11-17: a transparent 3D software box like TOP HITS' (was 3 boxes on a black square: "bro im talking about the order bumps").
+      image: "/funnels/midi-drum-kit/bump-expansions-box.webp",
       pitch: "3 MIDI Drum Kit Expansions: Complete Beats for House, Lo-Fi and Afrobeat.",
     },
     {
       id: "hustle",
       name: "HUSTLE Bundle (31 MIDI Packs)",
       price: { eur: 25, usd: 25 },
-      image: "/funnels/midi-drum-kit/bump-hustle.webp",
+      // 11-17: its 3D box (hustle-box-440 cut to 200px) instead of the flat square cover.
+      image: "/funnels/midi-drum-kit/bump-hustle-box.webp",
       pitch: "31 professional MIDI packs: jazz, trap, hip-hop, lofi, pop and more.",
     },
     {
