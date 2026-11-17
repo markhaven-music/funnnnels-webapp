@@ -412,7 +412,12 @@ export const CLIENT_JS = String.raw`
   }
   if (root) {
     // unless the visitor already asked for a file (a folder's play button further down)
-    near(root, function () { if (!seq) show(0, 0, 0, false); });
+    // also on its own once the page has loaded (two small JSON files): a visitor who scrolls fast never sees it empty
+    // ("nn appaiono + ? ci hanno messo un sacco a caricare", 2026-11-17)
+    var first = function () { if (!seq) show(0, 0, 0, false); };
+    near(root, first);
+    var idle = function () { (window.requestIdleCallback || setTimeout)(first, { timeout: 1500 }); };
+    if (document.readyState === 'complete') idle(); else window.addEventListener('load', idle);
     btn.addEventListener('click', function () {
       if (state === 'loading') return;
       if (state === 'playing') return stopAll();
@@ -565,7 +570,7 @@ export const CLIENT_JS = String.raw`
 
   // ---- Hit-Maker Drums: pads. The files come when the pads are near, a tap plays at once ----
   var pads = [].slice.call(document.querySelectorAll('.dkpad')), padRaw = {}, padBuf = {};
-  near(pads[0], function () { pads.forEach(function (p) { var s = p.getAttribute('data-src'); padRaw[s] = fetchBuf(s); padRaw[s].catch(function () {}); }); });
+  near(pads[0], function () { (kitWait || Promise.resolve()).catch(function () {}).then(function () { pads.forEach(function (p) { var s = p.getAttribute('data-src'); padRaw[s] = fetchBuf(s); padRaw[s].catch(function () {}); }); }); });
   pads.forEach(function (p) {
     p.addEventListener('click', function () {
       if (!audio()) return;
