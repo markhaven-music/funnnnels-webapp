@@ -205,14 +205,6 @@ export default async function OrderPage({ params }: { params: Params }) {
         </div>
       </section>
 
-      {/* Who's behind it (11-06): people, not a faceless store. */}
-      <section className={d.about}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={`${IMG}/logo.webp`} alt="GRIND STUDIO" width={900} height={103} loading="lazy" decoding="async" />
-        <h3>{t.order.aboutTitle}</h3>
-        <p>{t.order.aboutText}</p>
-      </section>
-
       <footer className={`${j.footer} ${d.footer}`}>
         <p>
           © 2026 {funnel.brand} · <a href={funnel.legal.terms}>{t.footer.terms}</a> · <a href={funnel.legal.privacy}>{t.footer.privacy}</a> ·{" "}

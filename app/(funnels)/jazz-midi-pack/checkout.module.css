@@ -561,58 +561,69 @@
   cursor: pointer;
 }
 
-/* Ticking an add-on doesn't land at once ("subito carica sembra cheap"): the box spins
-   for a beat as if it's being added, the tick pops in, and the box flashes and settles. */
-.bumpCheck:checked {
-  animation:
-    bumpAdding 0.5s linear,
-    bumpTickPop 0.3s 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+/* Ticking an add-on doesn't land at once ("subito carica sembra cheap"): the whole box is
+   covered for a beat with a spinner, as if it's being added, then uncovered with the tick in.
+   Nothing moves or resizes ("non ci fosse movimento dell'UI"): opacity and a spin inside the cover only. */
+.bump {
+  position: relative;
 }
-@keyframes bumpAdding {
+.bump::before,
+.bump::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
+.bump::before {
+  inset: -4px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.85);
+}
+.bump::after {
+  top: 50%;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 3px solid rgb(0 0 0 / 0.12);
+  border-top-color: #2ecc40;
+  border-radius: 50%;
+}
+.bump:has(.bumpCheck:checked)::before {
+  animation: bumpCover 0.75s ease-out;
+}
+.bump:has(.bumpCheck:checked)::after {
+  animation:
+    bumpCover 0.75s ease-out,
+    bumpSpin 0.6s linear infinite;
+}
+@keyframes bumpCover {
   0%,
-  100% {
-    background-image: none;
-    border-radius: 50%;
-    border: 2px solid rgb(0 0 0 / 0.15);
-    border-top-color: #000;
-  }
-  0% {
-    rotate: 0deg;
+  75% {
+    opacity: 1;
   }
   100% {
+    opacity: 0;
+  }
+}
+@keyframes bumpSpin {
+  to {
     rotate: 360deg;
   }
 }
-@keyframes bumpTickPop {
-  0% {
-    scale: 1;
-  }
-  45% {
-    scale: 1.35;
-  }
-  100% {
-    scale: 1;
-  }
+/* The tick shows only once the cover lifts. */
+.bumpCheck:checked {
+  animation: bumpTickWait 0.6s step-end;
 }
-.bump:has(.bumpCheck:checked) {
-  animation: bumpAdded 0.7s 0.5s ease-out;
-}
-@keyframes bumpAdded {
+@keyframes bumpTickWait {
   0% {
-    scale: 1;
-    box-shadow: 0 0 0 0 rgb(46 204 64 / 0.6);
-  }
-  30% {
-    scale: 1.025;
-  }
-  100% {
-    scale: 1;
-    box-shadow: 0 0 0 14px rgb(46 204 64 / 0);
+    background-image: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .bumpCheck:checked,
-  .bump:has(.bumpCheck:checked) {
+  .bump:has(.bumpCheck:checked)::before,
+  .bump:has(.bumpCheck:checked)::after,
+  .bumpCheck:checked {
     animation: none;
   }
 }

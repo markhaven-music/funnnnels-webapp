@@ -1461,6 +1461,11 @@
     position: sticky;
     top: 24px;
   }
+  /* Step 2 (the add-ons, the card) is taller than the screen: as a sticky it grew upward when an
+     add-on was ticked and the whole checkout jumped ("come se il widget si spostasse"). It scrolls with the page. */
+  .orderForm:has(input[type="checkbox"]) {
+    position: static;
+  }
   .after {
     grid-template-columns: repeat(4, 1fr);
   }

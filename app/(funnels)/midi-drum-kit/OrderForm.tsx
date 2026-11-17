@@ -227,7 +227,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
               keep(next, 2);
               setWanted(true);
               setStep(2);
-              window.scrollTo({ top: document.getElementById("complete-order")?.offsetTop ?? 0, behavior: "smooth" });
+              // No scroll on "Go to step 2": the page stays where the buyer is ("dovrebbe rimanere normale").
               pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_lp: readVariant(), ab_pay: readPay() });
               track({ funnel: funnel.slug, page: "checkout", lang, abCookie: LP.cookie });
             }}
