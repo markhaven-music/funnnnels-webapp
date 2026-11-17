@@ -97,7 +97,7 @@ export async function recordPayPalSale(order: PayPalOrder, lang: string) {
 }
 
 /** PayPal's fee on a captured order, in cents of the sale's currency; null when PayPal doesn't say. */
-function paypalFeeCents(order: PayPalOrder): number | null {
+export function paypalFeeCents(order: PayPalOrder): number | null {
   const capture = order.purchase_units[0]?.payments?.captures?.[0];
   const fee = capture?.seller_receivable_breakdown?.paypal_fee;
   if (!capture || !fee || fee.currency_code !== capture.amount.currency_code) return null;

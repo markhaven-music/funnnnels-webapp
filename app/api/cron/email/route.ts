@@ -2,6 +2,7 @@ import { runOutbox } from "@/lib/outbox";
 import { sweepStripe } from "@/lib/stripeSales";
 import { syncSupport } from "@/lib/support";
 import { syncSuppressions } from "@/lib/bounces";
+import { fillOrderFees } from "@/lib/orderFees";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -26,6 +27,15 @@ export async function GET(req: Request) {
         return 0;
       });
   if (recovered) console.log(`stripe sweep: ${recovered} order(s) recorded`);
+  // Each sale's real Stripe / PayPal fee onto neo's row, for its aROAS
+  // (lib/orderFees.ts). Same 5-minute pace: a fee is never urgent.
+  if (!dryRun && slow) {
+    const fees = await fillOrderFees().catch((err) => {
+      console.error("order fees failed", err);
+      return 0;
+    });
+    if (fees) console.log(`order fees: ${fees} filled`);
+  }
   // The support mailbox (dashboard → Support), copied alongside the emails.
   const support = dryRun || !slow
     ? null
