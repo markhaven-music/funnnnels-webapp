@@ -43,7 +43,7 @@ export const it: Copy = {
       "Limitato a 1.250 licenze",
     ],
     stack: {
-      title: "10.296 File MIDI Di Batteria Che Danno Bounce Ai Tuoi Beat",
+      title: "**10.296 File MIDI Di Batteria Che Danno Bounce Ai Tuoi Beat**",
       items: [
         "500+ Pattern Di Batteria Da Grammy, Pronti Per La Radio",
         "Pattern Di Batteria Usati Nelle Hit",

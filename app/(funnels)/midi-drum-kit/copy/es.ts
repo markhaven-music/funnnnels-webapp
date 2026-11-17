@@ -44,7 +44,7 @@ export const es: Copy = {
       "Limitado a 1250 licencias",
     ],
     stack: {
-      title: "10.296 Archivos MIDI De Batería Que Le Dan Bounce A Tus Beats",
+      title: "**10.296 Archivos MIDI De Batería Que Le Dan Bounce A Tus Beats**",
       items: [
         "Más De 500 Patrones De Batería A Nivel Grammy, Listos Para La Radio",
         "Patrones De Batería Usados En Grandes Éxitos",

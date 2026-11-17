@@ -44,7 +44,7 @@ export const de: Copy = {
       "Begrenzt auf 1.250 Lizenzen",
     ],
     stack: {
-      title: "10.296 MIDI-Drum-Dateien, Die Deinen Beats Bounce Geben",
+      title: "**10.296 MIDI-Drum-Dateien, Die Deinen Beats Bounce Geben**",
       items: [
         "500+ Radiotaugliche Drum-Patterns Auf Grammy-Niveau",
         "Drum-Patterns Aus Echten Hits",

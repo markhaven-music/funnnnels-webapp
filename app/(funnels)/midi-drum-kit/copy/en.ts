@@ -46,7 +46,7 @@ export const en = {
     // the multi-track files, any DAW, the commercial license, 415 MIDI files in the bonuses.
     stack: {
       // 10,296 since 2026-11-12 (the zip V2: the 1,040 patterns, every 808 in all 12 keys, 6,374 combinations).
-      title: "10,296 MIDI Drum Files That Make Your Beats Bounce",
+      title: "**10,296 MIDI Drum Files That Make Your Beats Bounce**",
       items: [
         "500+ Grammy-Level, Radio-Ready Drum Patterns",
         "Drum Patterns Used In Top Hits",

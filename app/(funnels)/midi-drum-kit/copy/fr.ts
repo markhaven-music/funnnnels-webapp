@@ -44,7 +44,7 @@ export const fr: Copy = {
       "Limité à 1 250 licences",
     ],
     stack: {
-      title: "10 296 Fichiers MIDI De Batterie Qui Donnent Du Bounce À Tes Beats",
+      title: "**10 296 Fichiers MIDI De Batterie Qui Donnent Du Bounce À Tes Beats**",
       items: [
         "Plus De 500 Patterns De Batterie Dignes Des Grammy, Prêts Pour La Radio",
         "Des Patterns De Batterie Utilisés Dans Les Plus Grands Hits",
