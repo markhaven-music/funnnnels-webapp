@@ -91,7 +91,7 @@ export const fr: Copy = {
     aboutTitle: "Qui est derrière GRIND STUDIO",
     aboutText:
       "On est des beatmakers, et on est dans le game depuis des années, à faire des beats et à créer des outils pour des producteurs comme toi. Il nous a fallu 4 ans pour extraire ces patterns des morceaux qui font bouger les gens, et 2 847 producteurs les utilisent aujourd'hui. Une question ? Écris à support@thegrind.studio : l'un de nous lit chaque e-mail et y répond.",
-    timer: { title: "TA LICENCE EST RÉSERVÉE PENDANT :", min: "min", sec: "sec", ms: "ms", label: "Ta licence est réservée", ended: "TEMPS ÉCOULÉ", endedNote: "Ta licence est encore à toi, pour l'instant. Termine avant qu'elle ne parte." },
+    timer: { title: "TA LICENCE EST RÉSERVÉE PENDANT :", min: "min", sec: "sec", ms: "ms", label: "Ta licence est réservée", ended: "TEMPS ÉCOULÉ", endedNote: "On ne peut pas te garantir que ta licence sera encore disponible. Termine ta commande maintenant." },
   },
 
   form: {

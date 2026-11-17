@@ -96,7 +96,7 @@ export const en = {
     aboutTitle: "Who's Behind GRIND STUDIO",
     aboutText:
       "We're beatmakers, and we've been in this game for years, making beats and building tools for producers like you. It took us 4 years to pull these patterns out of the records that move people, and 2,847 producers use them today. Got a question? Write to support@thegrind.studio: one of us reads and answers every email.",
-    timer: { title: "YOUR LICENSE IS RESERVED FOR:", min: "min", sec: "sec", ms: "ms", label: "Your license is reserved", ended: "TIME'S UP", endedNote: "Your license is still yours, for now. Finish before it's gone." },
+    timer: { title: "YOUR LICENSE IS RESERVED FOR:", min: "min", sec: "sec", ms: "ms", label: "Your license is reserved", ended: "TIME'S UP", endedNote: "We can't guarantee your license will still be available. Finish your order now." },
   },
 
   // The order form (./OrderForm.tsx).

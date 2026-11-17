@@ -33,7 +33,7 @@ export function ReservedTimer({ skin }: { skin?: Styles }) {
       </div>
       {!left ? (
         <div className={s.timerEnded}>
-          Your license is still yours, for now. Finish before it&apos;s gone.
+          We can&apos;t guarantee your license will still be available. Finish your order now.
         </div>
       ) : (
         <div className={s.timerDigits}>
