@@ -15,6 +15,11 @@ import type { Lang } from "@/app/(funnels)/midi-drum-kit/i18n";
 
 /** Show the product picture beside each bump. Off since BUMP_COPY_FROM. */
 export const BUMP_PICTURES = false;
+/**
+ * "Producers who get the best results take this option." only on the expensive add-ons ("should only be
+ * used with expensive options", 2026-11-17): from this price up; the 7 ones go without it.
+ */
+export const BEST_FROM = 20;
 /** When the new words and the boxes without pictures went live (UTC). */
 export const BUMP_COPY_FROM = "2026-11-16T22:45:00Z";
 
@@ -214,5 +219,5 @@ export function bumpWords(id: string, price: number, use: string, lang: Lang = "
   const pitch = e.pitch.replace("{use}", use).replace(/\{c(\d+)\}/g, (_, n: string) => cash(Number(n), lang));
   const off = e.was ? Math.round((1 - price / e.was) * 100) : 0;
   const deal = e.was && off >= 10 ? l.deal(cash(e.was, lang), off, cash(price, lang)) : l.only(cash(price, lang));
-  return { headline: l.yes(e.name), body: [`${pitch} ${deal} ${l.best} ${l.guarantee}`] };
+  return { headline: l.yes(e.name), body: [[pitch, deal, price >= BEST_FROM ? l.best : null, l.guarantee].filter(Boolean).join(" ")] };
 }
