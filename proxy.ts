@@ -58,7 +58,7 @@ const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/ja
 const LOCALIZED: Record<string, readonly string[]> = { "midi-drum-kit": DRUM_KIT_LANGS };
 const LANG_PREFIXES = new Set(["fr", "it", "de", "nl", "es"]);
 
-const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "top-hits-chords", "midi-drum-kit", "famous-beats-bundle", "drunk-swing-grooves", "shop", "home", "links", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", "free", "blog", ...LANG_PREFIXES]);
+const APP_SEGMENTS = new Set(["", "api", "funnels", "p", "account", "unsubscribe", "jazz-midi-pack", "top-hits-midi-bundle", "top-hits-chords", "midi-drum-kit", "famous-beats-bundle", "drunk-swing-grooves", "shop", "home", "links", "coaching", "legal", "terms-and-conditions", "privacy-policy", "refund-policy", "free", "blog", ...LANG_PREFIXES]);
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
@@ -102,6 +102,8 @@ const PUBLIC = [
   /^\/shop(\/|$)/, // the shop's pages, its thank-you page and downloads
   /^\/home(\/|$)/, // the homepage
   /^\/links(\/|$)/, // the Instagram link in bio
+  /^\/coaching$/, // 1:1 coaching application (app/coaching)
+  /^\/api\/coaching\/apply$/,
   /^\/legal\/[a-z-]+$/, // the legal pages
   /^\/free\/[a-z-]+(\/[a-z-]+)?$/, // the free packs' pages and downloads (app/free)
   /^\/blog(\/(og\/)?[a-z0-9-]+)?\/?$/, // the blog, its posts and their share pictures (app/blog)

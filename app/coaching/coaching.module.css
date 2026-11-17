@@ -1,0 +1,159 @@
+/* 1:1 coaching application (app/coaching): the link-in-bio look, one column. */
+.page {
+  min-height: 100vh;
+  background: #070707;
+  color: rgb(255 255 255 / 0.88);
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  padding: 32px 16px 64px;
+}
+.page > * {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.logo {
+  display: block;
+  height: 28px;
+  width: auto;
+  margin-bottom: 40px;
+}
+.h1 {
+  color: #fff;
+  font-size: clamp(30px, 7vw, 46px);
+  line-height: 1.12;
+  font-weight: 800;
+  text-align: center;
+  text-wrap: balance;
+  margin-top: 0;
+  margin-bottom: 28px;
+}
+.h1 em,
+.price b {
+  font-style: normal;
+  color: #f5b800;
+}
+.h2 {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 800;
+  text-wrap: balance;
+  margin-top: 48px;
+  margin-bottom: 14px;
+}
+.lead,
+.text {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+.lead b,
+.list b {
+  color: #fff;
+}
+.list {
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+.list li::before {
+  content: "✓";
+  color: #f5b800;
+  font-weight: 800;
+  margin-right: 10px;
+}
+.price {
+  font-size: 19px;
+  text-align: center;
+  margin-top: 48px;
+  margin-bottom: 28px;
+}
+.form {
+  display: grid;
+  gap: 18px;
+  background: #111;
+  border-radius: 4px;
+  padding: 24px 18px;
+}
+.form label {
+  display: grid;
+  gap: 6px;
+  font-size: 15px;
+  color: rgb(255 255 255 / 0.62);
+}
+.form input:not([type="radio"]),
+.form textarea {
+  font: inherit;
+  font-size: 16px; /* 16px+: iPhone doesn't zoom */
+  color: #fff;
+  background: #000;
+  border: 0;
+  border-radius: 3px;
+  padding: 12px;
+}
+.form input:focus,
+.form textarea:focus {
+  outline: 2px solid #f5b800;
+}
+.ready {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.ready legend {
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.ready label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  color: rgb(255 255 255 / 0.88);
+}
+.ready input {
+  accent-color: #f5b800;
+  width: 18px;
+  height: 18px;
+}
+.hp {
+  position: absolute;
+  left: -9999px;
+}
+.error {
+  color: #ff6b5e;
+  margin: 0;
+}
+.btn {
+  font: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  color: #000;
+  background: linear-gradient(#ffe14d, #f5b800);
+  border: 0;
+  border-radius: 4px;
+  padding: 18px;
+  box-shadow: 0 5px 0 #b58700, 0 0 28px rgb(245 184 0 / 0.35);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #b58700;
+}
+.btn:disabled {
+  opacity: 0.6;
+}
+.done {
+  background: #111;
+  border-radius: 4px;
+  padding: 24px 18px;
+  font-size: 18px;
+}
+.done b {
+  color: #f5b800;
+}
