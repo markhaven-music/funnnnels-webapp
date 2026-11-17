@@ -217,7 +217,7 @@ details[open]>summary.dkt-row .c{rotate:90deg}
 .dkt-row b{font:500 11px/1 ${MONO};color:rgba(255,255,255,.5);white-space:nowrap}
 .dkt-row span{min-width:0;overflow-wrap:anywhere}
 .dkt-tree ul .dkt-row{min-height:30px;color:rgba(255,255,255,.86)}
-.dkt-files{max-height:220px;margin:0 0 6px;padding:0;list-style:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
+.dkt-files{max-height:220px;margin:0 0 6px;padding:0;list-style:none;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
 .dkt-file{padding:3px 6px 5px 41px;font-size:11.5px;color:rgba(255,255,255,.5);overflow-wrap:anywhere}
 .dkt-file i{margin-left:6px;font-style:normal;white-space:nowrap;color:rgba(255,255,255,.32)}
 .dkt-label{margin:14px 14px 4px;font:600 10.5px/1.2 ${MONO};letter-spacing:.12em;text-transform:uppercase;color:#ff9a2e}
@@ -665,7 +665,7 @@ function clipList(kind: "starter" | "hook", list: Clip[]): string {
   const items = list.map((l, i) => {
     const bars = l.peaks.map((p, k) => `<rect x="${k * 4}" y="${(20 - Math.max(2, (p / 100) * 36) / 2).toFixed(1)}" width="2.4" height="${Math.max(2, (p / 100) * 36).toFixed(1)}" rx="1"/>`).join("");
     const meta = `${l.key ? `${esc(l.key)} · ` : ""}${l.bpm} bpm`;
-    return `<li><button class="dkc" type="button" aria-pressed="false" data-src="${V2}clips/${kind}-${i + 1}.m4a"><span class="dkc-ico" aria-hidden="true"></span><span class="dkc-name">${esc(l.name)}</span><span class="dkc-bpm">${meta}</span><svg viewBox="0 0 ${l.peaks.length * 4} 40" preserveAspectRatio="none" aria-hidden="true">${bars}</svg></button></li>`;
+    return `<li><button class="dkc" type="button" aria-pressed="false" data-src="https://funnnnels.com${V2}clips/${kind}-${i + 1}.m4a"><span class="dkc-ico" aria-hidden="true"></span><span class="dkc-name">${esc(l.name)}</span><span class="dkc-bpm">${meta}</span><svg viewBox="0 0 ${l.peaks.length * 4} 40" preserveAspectRatio="none" aria-hidden="true">${bars}</svg></button></li>`;
   }).join("");
   return `<ul class="dkb-clips">${items}</ul>`;
 }
@@ -675,7 +675,7 @@ function preview(kind: Preview, c: Ctx): string {
   if (kind === "starters") return clipList("starter", clips.starters);
   if (kind === "hooks") return clipList("hook", clips.hooks);
   if (kind === "pads") {
-    const pads = clips.pads.map((p, i) => `<button class="dkpad" type="button" data-src="${V2}clips/pad-${i + 1}.m4a">${esc(p.name)}<small>${esc(p.file)}</small></button>`).join("");
+    const pads = clips.pads.map((p, i) => `<button class="dkpad" type="button" data-src="https://funnnnels.com${V2}clips/pad-${i + 1}.m4a">${esc(p.name)}<small>${esc(p.file)}</small></button>`).join("");
     return `<p class="dkb-note">${esc(c.w.pads)}</p><div class="dkpads">${pads}</div>`;
   }
   return "";

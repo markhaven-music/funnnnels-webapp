@@ -191,10 +191,10 @@ export const CLIENT_JS = String.raw`
   // these used stayed silent (2026-11-12, "le demo di beat starters bundle non caricano… drunk swing grooves… hooks
   // (sono da iphone)"). The context is woken inside the tap (audio()); the file comes after and plays then.
   // onPos(seconds, duration) every frame; onState('loading' | 'playing' | 'stopped').
-  var recCache = {};
+  var recCache = {}, recRaw = {};
   function recording(url) {
     if (!recCache[url]) {
-      recCache[url] = fetchBuf(url).then(decode);
+      recCache[url] = (recRaw[url] || fetchBuf(url)).then(function (ab) { return decode(ab.slice(0)); });
       recCache[url].catch(function () { delete recCache[url]; });
     }
     return recCache[url];
@@ -553,6 +553,8 @@ export const CLIENT_JS = String.raw`
 
   // ---- the bonuses' audio clips (Beat Starters, MYSTERY hooks): through Web Audio (playBuffer), nothing loads before a tap ----
   var clipOn = null;
+  // the clips start loading when their list comes near, so a tap plays at once (they took seconds after the tap)
+  [].forEach.call(document.querySelectorAll('.dkc'), function (b) { near(b, function () { var u = b.getAttribute('data-src'); if (!recRaw[u]) { recRaw[u] = fetchBuf(u); recRaw[u].catch(function () { delete recRaw[u]; }); } }); });
   function clipPaint(b, p) {
     var rs = b.querySelectorAll('rect');
     for (var i = 0; i < rs.length; i++) rs[i].setAttribute('class', p > 0 && i / rs.length <= p ? 'on' : '');
