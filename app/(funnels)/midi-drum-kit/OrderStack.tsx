@@ -70,7 +70,7 @@ export function OrderStack({ w, price, currency, lang }: { w: Copy["order"]["sta
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {COVERS[i] && (
                 <img
-                  src={`${IMG}/bonus3-${COVERS[i][0]}-120.webp`}
+                  src={`${IMG}/bonus3-${COVERS[i][0]}-120.webp?v=2`}
                   alt=""
                   width={120}
                   height={COVERS[i][1]}
