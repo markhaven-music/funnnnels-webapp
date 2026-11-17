@@ -888,8 +888,10 @@
 }
 
 /* Ticking an add-on doesn't land at once ("subito carica sembra cheap"): the whole box is
-   covered for a beat with a spinner, as if it's being added, then uncovered with the tick in.
-   Nothing moves or resizes ("non ci fosse movimento dell'UI"): opacity and a spin inside the cover only. */
+   covered for a beat with a spinner, as if it's being added, then the cover turns green, a big
+   white tick pops in its middle and a green ring goes out from the box, and it lifts with the
+   tick in ("alla fine esce un green check o tutta la card diventa verde... piu d'impatto").
+   Nothing moves or resizes ("non ci fosse movimento dell'UI"): only the cover and what's in it. */
 .bump {
   position: relative;
 }
@@ -905,31 +907,86 @@
   border-radius: 4px;
   background: rgb(255 255 255 / 0.85);
 }
+/* Twice the spinner's size, drawn at half scale while it spins, so the tick is sharp at full size. */
 .bump::after {
   top: 50%;
   left: 50%;
-  width: 34px;
-  height: 34px;
-  margin: -17px 0 0 -17px;
-  border: 3px solid rgb(0 0 0 / 0.12);
+  width: 68px;
+  height: 68px;
+  margin: -34px 0 0 -34px;
+  border: 6px solid rgb(0 0 0 / 0.12);
   border-top-color: #2ecc40;
   border-radius: 50%;
+  scale: 0.5;
+  background: center / 0 no-repeat
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 12.5l5 5L19.5 7'/%3E%3C/svg%3E");
 }
 .bump:has(.bumpCheck:checked)::before {
-  animation: bumpCover 0.75s ease-out;
+  animation: bumpCover 1.5s ease-out;
 }
 .bump:has(.bumpCheck:checked)::after {
   animation:
-    bumpCover 0.75s ease-out,
-    bumpSpin 0.6s linear infinite;
+    bumpDone 1.5s ease-out,
+    bumpSpin 0.55s linear;
 }
 @keyframes bumpCover {
   0%,
-  75% {
+  36% {
     opacity: 1;
+    background-color: rgb(255 255 255 / 0.85);
+    box-shadow: 0 0 0 0 rgb(46 204 64 / 0);
+  }
+  43% {
+    background-color: #25b83c;
+    box-shadow: 0 0 0 0 rgb(46 204 64 / 0.7);
+  }
+  82% {
+    opacity: 1;
+    background-color: #25b83c;
+    box-shadow: 0 0 0 20px rgb(46 204 64 / 0);
   }
   100% {
     opacity: 0;
+    background-color: #25b83c;
+    box-shadow: 0 0 0 20px rgb(46 204 64 / 0);
+  }
+}
+@keyframes bumpDone {
+  0%,
+  34% {
+    opacity: 1;
+    scale: 0.5;
+  }
+  37% {
+    opacity: 0;
+    scale: 0.5;
+    border-color: rgb(0 0 0 / 0.12);
+    border-top-color: #2ecc40;
+    background-size: 0;
+  }
+  38% {
+    opacity: 0;
+    scale: 0.2;
+    border-color: transparent;
+    background-size: 100%;
+    animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  52% {
+    opacity: 1;
+    scale: 1.25;
+  }
+  62% {
+    scale: 1;
+  }
+  82% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1;
+    border-color: transparent;
+    background-size: 100%;
   }
 }
 @keyframes bumpSpin {
@@ -937,7 +994,7 @@
     rotate: 360deg;
   }
 }
-/* The tick shows only once the cover lifts. */
+/* The tick shows only once the cover is on. */
 .bumpCheck:checked {
   animation: bumpTickWait 0.6s step-end;
 }
