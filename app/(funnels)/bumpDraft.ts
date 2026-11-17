@@ -34,14 +34,21 @@ function current(el: HTMLElement) {
   return { headline: el.querySelector("[data-bump-h]")?.textContent?.trim() ?? "", paras };
 }
 
+let looking = "";
 function show(id: string, tries = 0) {
+  if (tries === 0 && looking === id) return;
+  looking = id;
   const el = box(id);
   if (!el) {
-    if (tries > 40) return void parent.postMessage({ type: "fv-bump-current", id, found: false }, location.origin);
+    if (tries > 25) {
+      looking = "";
+      return void parent.postMessage({ type: "fv-bump-current", id, found: false }, location.origin);
+    }
     // Step 1 still: the owner's own way to step 2 (OwnerSkip.tsx).
     document.querySelector<HTMLElement>("[data-owner-skip]")?.click();
     return void setTimeout(() => show(id, tries + 1), 300);
   }
+  looking = "";
   el.scrollIntoView({ block: "center" });
   parent.postMessage({ type: "fv-bump-current", id, found: true, ...current(el) }, location.origin);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { BumpTextEditor } from "@/components/BumpTextEditor";
 import { I } from "@/components/icons";
 import type { ProductUse } from "@/lib/catalog";
 import { money, type Money } from "@/lib/launch";
@@ -310,10 +311,32 @@ function Editor({ p, funnels, onSaved, onDeleted }: { p: Entry; funnels: Data["f
           <Details p={p} onSaved={onSaved} />
           <Zip p={p} onSaved={onSaved} />
           <Uses p={p} onSaved={onSaved} />
+          <BumpWords p={p} />
           <AddToFunnel p={p} funnels={funnels} onSaved={onSaved} />
           <Danger p={p} onDeleted={onDeleted} />
         </div>
       </div>
+    </div>
+  );
+}
+
+/** One set of tick-box words for the product, said on every order form that sells it as an add-on (BumpTextEditor.tsx). */
+function BumpWords({ p }: { p: Entry }) {
+  const [open, setOpen] = useState(false);
+  const forms = p.uses.filter((u) => u.role === "Add-on").length;
+  if (!forms) return null;
+  return (
+    <div>
+      <p className={c.legend}>Order bump words</p>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0 0", flexWrap: "wrap" }}>
+        <button type="button" className="btn" onClick={() => setOpen(true)}>
+          Edit the words
+        </button>
+        <span className={c.note} style={{ margin: 0 }}>
+          One text for all {forms} order form{forms === 1 ? "" : "s"} where it&rsquo;s an add-on, with the real checkout beside it as you type.
+        </span>
+      </div>
+      {open && <BumpTextEditor product={p.slug} name={p.name} onClose={() => setOpen(false)} />}
     </div>
   );
 }
