@@ -14,7 +14,10 @@ import type { Lang } from "./i18n";
 // written in ./copy keeps its words, with its price restated if it changed;
 // one added from Products says its name and the product's tagline.
 
-export type OrderBump = { id: string; name: string; price: number; image: string; headline: string; body: string[] };
+// words: the add-on's words in ./copy ("form.bumps.<id>"), so the dashboard's
+// on-page editor knows each box's texts even with its price restated; none for
+// an add-on that speaks with the product's tagline.
+export type OrderBump = { id: string; name: string; price: number; image: string; headline: string; body: string[]; words?: string };
 export type OrderOffer = { product: string; name: string; price: number; bumps: OrderBump[] };
 
 // "YES! Add …!" for an add-on the copy has no words for, per language.
@@ -47,6 +50,7 @@ export async function orderOffer(lang: Lang, currency: Currency, product?: Produ
         image: known?.image ?? b.image ?? "",
         headline: w?.headline ?? ADD[lang](b.name),
         body: (w?.body ?? (b.pitch ? [b.pitch] : [])).map((p) => restate(p, was, priceIn(b.price, currency), lang)),
+        ...(w ? { words: `form.bumps.${b.id}` } : {}),
       };
     }),
   };

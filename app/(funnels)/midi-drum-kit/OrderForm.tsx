@@ -624,13 +624,18 @@ function BumpBox({
         {/* Gone once ticked, as on ClickFunnels. */}
         {!on && <BumpArrow />}
         <input type="checkbox" checked={on} onChange={(e) => toggle(o.id, e.target.checked)} className={j.bumpCheck} />
-        <span className={j.bumpTitle}>{o.headline}</span>
+        <span className={j.bumpTitle} data-fxk={o.words && `${o.words}.headline`}>
+          {o.headline}
+        </span>
         <span className={j.bumpPrice}>{price}</span>
       </span>
       <span className={j.bumpPitch}>
         {o.body.map((p, i) => (
           <span key={i} className={j.bumpPara}>
-            {i === 0 && <span className={j.bumpOffer}>{t.oto}</span>} <Rich text={p} currency={currency} />
+            {i === 0 && <span className={j.bumpOffer}>{t.oto}</span>}{" "}
+            <span data-fxk={o.words && `${o.words}.body.${i}`}>
+              <Rich text={p} currency={currency} />
+            </span>
           </span>
         ))}
       </span>

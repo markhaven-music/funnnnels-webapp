@@ -191,6 +191,15 @@ export function PageFrame({ src, width, texts, onEdit, onSelect, onFound, sync, 
       els.current.set(key, el);
     }
 
+    // Texts the page names itself (data-fxk="<key>"): words it rewrites, an
+    // order bump's price restated, aren't found by their code's words.
+    for (const el of doc.body.querySelectorAll<HTMLElement>("[data-fxk]")) {
+      const key = el.dataset.fxk!;
+      if (!byKey.has(key) || els.current.has(key) || el.closest("[data-fx]")) continue;
+      el.dataset.fx = key;
+      els.current.set(key, el);
+    }
+
     // The copy's texts: the innermost element whose words are the text's, page order.
     const copies = live.current.texts.filter((t) => !t.markup && !els.current.has(t.key));
     if (copies.length) {
