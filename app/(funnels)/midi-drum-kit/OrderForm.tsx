@@ -306,7 +306,7 @@ function InfoStep({ t, lang, info, onDone }: { t: Copy["form"]; lang: Lang; info
         <input name="lastName" placeholder={t.lastName} autoComplete="family-name" defaultValue={info.lastName} className={j.input} />
       </div>
       <input name="email" type="email" placeholder={t.email} autoComplete="email" inputMode="email" defaultValue={info.email} required className={j.input} />
-      <button className={`${k.btn} ${k.full}`}>
+      <button className={`${k.btn} ${k.full} ${d.bigBtn}`}>
         <span className={k.shine} aria-hidden />
         <span className={k.label}>
           <span>{t.next}</span>
@@ -541,15 +541,14 @@ function PayBody({
         </div>
       </div>
 
-      <button type="button" className={`${k.btn} ${k.full}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
+      <button type="button" className={`${k.btn} ${k.full} ${d.bigBtn}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
         <span className={k.shine} aria-hidden />
         <span className={k.label}>
           <span>{busy && !cardOff ? (paypal ? t.openingPaypal : t.processing) : t.pay}</span>
           {!busy && <Arrow className={k.arrow} />}
         </span>
-        <span className={k.inner}>
-          {cash(total)} · {t.payInner}
-        </span>
+        {/* No price on the button ("togli il prezzo anche dal bottone"): the Total line above it says it. */}
+        <span className={`${k.inner} ${d.bigInner}`}>{t.payInner}</span>
       </button>
       {error && (
         <p className={j.error} role="alert">
@@ -586,7 +585,7 @@ function BumpBox({
   was: string | null;
 }) {
   return (
-    <label className={j.bump}>
+    <label className={o.id === "hustle" ? `${j.bump} ${j.bumpPremium}` : j.bump}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className={j.bumpPic} src={o.image} alt="" width={84} height={84} loading="lazy" decoding="async" />
       <span className={j.bumpHead}>

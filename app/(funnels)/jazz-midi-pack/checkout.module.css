@@ -593,10 +593,72 @@
   }
 }
 
+/* The HUSTLE Bundle's box, the dear one among the add-ons, dressed for its price ("per HUSTLE puoi fare
+   la card piu premium", 2026-11-17): black, a gold edge and glow, a slow gold sheen across it, gold
+   label, arrow and tick box. Same size and grid as the others. */
+.bumpPremium {
+  border-color: transparent;
+  color: rgb(255 255 255 / 0.88);
+  background:
+    linear-gradient(110deg, transparent 42%, rgb(255 225 77 / 0.13) 50%, transparent 58%) padding-box 130% 0 / 260% 100% no-repeat,
+    linear-gradient(165deg, #1d1707 0%, #0b0b0b 55%, #050505 100%) padding-box,
+    linear-gradient(135deg, #ffe14d 0%, #f5b800 35%, #7a5a00 62%, #f5b800 82%, #ffe14d 100%) border-box;
+  box-shadow:
+    0 14px 34px -14px rgb(245 184 0 / 0.6),
+    inset 0 1px 0 rgb(255 225 77 / 0.22);
+  animation: bumpSheen 4.5s ease-in-out infinite;
+}
+@keyframes bumpSheen {
+  0%,
+  55% {
+    background-position:
+      130% 0,
+      0 0,
+      0 0;
+  }
+  100% {
+    background-position:
+      -30% 0,
+      0 0,
+      0 0;
+  }
+}
+.bumpPremium .bumpTitle {
+  color: #fff;
+}
+.bumpPremium strong,
+.bumpPremium b {
+  color: #fff;
+}
+.bumpPremium .bumpArrow,
+.bumpPremium .bumpOffer {
+  color: #f5b800;
+}
+.bumpPremium .bumpCheck {
+  border-color: #f5b800;
+  box-shadow: 0 0 0 3px rgb(245 184 0 / 0.22);
+}
+.bumpPremium .bumpPrice {
+  color: #fff;
+}
+.bumpPremium .bumpWas {
+  color: rgb(255 255 255 / 0.55);
+}
+.bumpPremium .bumpNow {
+  color: #35d873;
+  background-image: linear-gradient(100deg, #35d873 0%, #35d873 38%, #d9ffe6 50%, #35d873 62%, #35d873 100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bumpPremium {
+    animation: none;
+  }
+}
+
 /* Ticking an add-on doesn't land at once ("subito carica sembra cheap"): the whole box is
-   covered for a beat with a spinner, as if it's being added, then the cover turns green, a big
-   white tick pops in its middle and a green ring goes out from the box, and it lifts with the
-   tick in ("alla fine esce un green check o tutta la card diventa verde... piu d'impatto").
+   covered for a beat with a spinner, as if it's being added, then the cover turns to a light
+   green frosted glass (the box shows through, blurred: "troppo verde. falla più elegante. magari con piu
+   trasparenza"), a white tick on a green disc pops in its middle, a soft green ring goes out from the
+   box, and it lifts with the tick in ("alla fine esce un green check o tutta la card diventa verde").
    Nothing moves or resizes ("non ci fosse movimento dell'UI"): only the cover and what's in it. */
 .bump {
   position: relative;
@@ -612,6 +674,8 @@
   inset: -4px;
   border-radius: 4px;
   background: rgb(255 255 255 / 0.85);
+  -webkit-backdrop-filter: blur(5px) saturate(1.15);
+  backdrop-filter: blur(5px) saturate(1.15);
 }
 /* Twice the spinner's size, drawn at half scale while it spins, so the tick is sharp at full size. */
 .bump::after {
@@ -643,18 +707,18 @@
     box-shadow: 0 0 0 0 rgb(46 204 64 / 0);
   }
   43% {
-    background-color: #25b83c;
-    box-shadow: 0 0 0 0 rgb(46 204 64 / 0.7);
+    background-color: rgb(46 204 100 / 0.26);
+    box-shadow: 0 0 0 0 rgb(46 204 64 / 0.45);
   }
   82% {
     opacity: 1;
-    background-color: #25b83c;
-    box-shadow: 0 0 0 20px rgb(46 204 64 / 0);
+    background-color: rgb(46 204 100 / 0.26);
+    box-shadow: 0 0 0 16px rgb(46 204 64 / 0);
   }
   100% {
     opacity: 0;
-    background-color: #25b83c;
-    box-shadow: 0 0 0 20px rgb(46 204 64 / 0);
+    background-color: rgb(46 204 100 / 0.26);
+    box-shadow: 0 0 0 16px rgb(46 204 64 / 0);
   }
 }
 @keyframes bumpDone {
@@ -669,12 +733,16 @@
     border-color: rgb(0 0 0 / 0.12);
     border-top-color: #2ecc40;
     background-size: 0;
+    background-color: transparent;
+    box-shadow: 0 0 0 0 rgb(31 170 72 / 0);
   }
   38% {
     opacity: 0;
     scale: 0.2;
-    border-color: transparent;
+    border-color: #1faa48;
     background-size: 100%;
+    background-color: #1faa48;
+    box-shadow: 0 8px 22px -6px rgb(31 170 72 / 0.6);
     animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
   }
   52% {
@@ -691,8 +759,10 @@
   100% {
     opacity: 0;
     scale: 1;
-    border-color: transparent;
+    border-color: #1faa48;
     background-size: 100%;
+    background-color: #1faa48;
+    box-shadow: 0 8px 22px -6px rgb(31 170 72 / 0.6);
   }
 }
 @keyframes bumpSpin {

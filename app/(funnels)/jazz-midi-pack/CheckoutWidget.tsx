@@ -597,7 +597,7 @@ function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: C
   const [lead, rest] = splitPitch(offer.pitch);
   const full = bumpFull(offer.id, offer.price);
   return (
-    <label className={s.bump}>
+    <label className={offer.id === "hustle" ? `${s.bump} ${s.bumpPremium}` : s.bump}>
       {offer.image ? (
         <img className={s.bumpPic} src={offer.image} alt="" width={84} height={84} loading="lazy" decoding="async" />
       ) : (

@@ -838,6 +838,17 @@ main.jazzLike {
   --brass-deep: var(--y-deep);
   --inter: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
+/* The form's two buttons (Go to step 2, Get the pack) a little bigger than the Jazz key they wear
+   ("fai i bottoni un po' piu grandi", 2026-11-17). The class twice, to come after btn.module.css. */
+.bigBtn.bigBtn {
+  min-height: 100px;
+  padding: 1.15rem 1.5rem;
+  border-radius: 24px;
+  font-size: clamp(1.7rem, 7.6vw, 1.95rem);
+}
+.bigBtn.bigBtn > .bigInner {
+  font-size: clamp(0.84rem, 3.6vw, 1rem);
+}
 /* the guarantee, then how the payment is handled: two of the Jazz page's seal-and-promise rows */
 .pledges {
   display: grid;

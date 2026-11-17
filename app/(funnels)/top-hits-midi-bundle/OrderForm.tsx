@@ -388,7 +388,7 @@ function PayBody({
         const on = picked.includes(b.id);
         const full = bumpFull(b.id, b.price);
         return (
-          <label key={b.id} className={s.bump}>
+          <label key={b.id} className={b.id === "hustle" ? `${s.bump} ${s.bumpPremium}` : s.bump}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
             <span className={s.bumpHead}>
