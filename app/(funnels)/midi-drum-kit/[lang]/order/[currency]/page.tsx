@@ -21,7 +21,7 @@ import { PAY_SCRIPT } from "../../../payTest";
 import { BONUS, BONUS_SCRIPT, BONUS_TIME_SCRIPT, BONUS_WORDS } from "../../../bonusTest";
 import { BonusBanner, BonusItem } from "../../../BonusClock";
 import { Beacon } from "../../../../Beacon";
-import { isLang, LANGS, paths } from "../../../i18n";
+import { isLang, LANGS } from "../../../i18n";
 import { orderOffer } from "../../../offer";
 import { OrderForm } from "../../../OrderForm";
 import { ReservedTimer } from "../../../ReservedTimer";
@@ -93,10 +93,10 @@ export default async function OrderPage({ params }: { params: Params }) {
       </div>
       <div className={j.topband}>
         <header className={`${j.wrap} ${j.topbar}`}>
-          <a href={paths(lang).landing} className={j.logo} style={{ textDecoration: "none" }}>
+          <span className={j.logo}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`${IMG}/logo.webp`} alt="GRIND STUDIO" width={360} height={42} />
-          </a>
+          </span>
           <span className={j.tag}>
             <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
               <path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7zm2 0h4V5a2 2 0 0 0-4 0z" fill="currentColor" />

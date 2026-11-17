@@ -112,10 +112,10 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       </div>
       <div className={s.topband}>
         <header className={`${s.wrap} ${s.topbar}`}>
-          <a href={`/${funnel.slug}`} className={s.logo} style={{ textDecoration: "none" }}>
+          <span className={s.logo}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
-          </a>
+          </span>
           <span className={s.tag}>
             <LockGlyph /> {w.secure}
           </span>
