@@ -124,7 +124,7 @@ export const it: Copy = {
     instant: "Download immediato",
     orderDesc: "10.296 file MIDI di batteria + 6 bonus",
     onePayment: "un solo pagamento",
-    payInner: "download immediato · un solo pagamento",
+    payInner: "Download Immediato, Un Solo Pagamento",
     payBar: "Paga {price}",
     bumpMore: "Dettagli",
     bumpLess: "Nascondi",

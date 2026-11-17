@@ -39,11 +39,13 @@ const CSS = `.fv-av{position:fixed;inset:0;z-index:2147483646;display:flex;align
 export const AVAILABILITY_JS = `(function(){if(window.__fvAv)return;window.__fvAv=1;
 var W=${JSON.stringify(WORDS)},busy=0;
 window.addEventListener('click',function(e){
-if(busy||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+if(busy||window.__fvPb||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
 var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a||a.target==='_blank')return;
 var u;try{u=new URL(a.href,location.href)}catch(x){return}
 if(u.origin!==location.origin||!/\\/order(\\/|$)/.test(u.pathname)||/\\/order(\\/|$)/.test(location.pathname))return;
-e.preventDefault();busy=1;
+e.preventDefault();show(u);
+});
+function show(u){if(busy)return;busy=1;
 var pre=0;try{if(HTMLScriptElement.supports&&HTMLScriptElement.supports('speculationrules')){pre=1;var sr=document.createElement('script');sr.type='speculationrules';sr.textContent=JSON.stringify({prerender:[{source:'list',urls:[u.href],eagerness:'immediate'}]});document.head.appendChild(sr)}else{fetch(u.href,{credentials:'same-origin'}).catch(function(){})}}catch(x){}
 var w=W[(document.documentElement.lang||'en').slice(0,2)]||W.en;
 if(!document.getElementById('fv-av-css')){var s=document.createElement('style');s.id='fv-av-css';s.textContent=${JSON.stringify(CSS)};document.head.appendChild(s)}
@@ -53,6 +55,8 @@ d.querySelector('.fv-av-t1').textContent=w[0];d.querySelector('.fv-av-t2').textC
 document.body.appendChild(d);requestAnimationFrame(function(){d.classList.add('on')});
 setTimeout(function(){d.classList.add('done')},3000);
 setTimeout(function(){location.href=u.href},pre?3700:3100);
-});
+}
+// The Drum Kit's pop-up add-on (midi-drum-kit/popupBump.ts) owns the click and calls this after its answer.
+window.__fvAvShow=function(h){try{show(new URL(h,location.href))}catch(x){location.href=h}};
 window.addEventListener('pageshow',function(e){if(e.persisted){busy=0;var d=document.querySelector('.fv-av');if(d)d.remove()}});
 })();`;

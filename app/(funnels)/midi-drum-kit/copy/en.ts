@@ -133,7 +133,7 @@ export const en = {
     instant: "Instant download",
     orderDesc: "10,296 MIDI drum files + 6 bonuses",
     onePayment: "one payment",
-    payInner: "instant download · one payment",
+    payInner: "Instant Download, One Payment",
     // Step 2: the bar fixed at the bottom of the screen while the button is off screen, {price} = the total.
     payBar: "Pay {price}",
     // Step 2: each add-on on one line, the rest behind this link.

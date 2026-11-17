@@ -4,8 +4,9 @@ import type { Lang } from "./i18n";
 // cliccano sulla landing page non sull order page"): the kit's grooves as WAV loops, offered in a pop-up
 // when a landing button is tapped, before the order page. Yes and No are the same size and both go on to
 // the order page; Yes arrives there with the WAVs in the order (a line in the summary with a Remove link),
-// No as before. A tap outside or Escape only closes it. It takes the place of "Checking availability…"
-// (lib/availability.ts) on the Drum Kit's landings while it's sold.
+// No as before. A tap outside or Escape only closes it. "Checking availability…"
+// is shown after the answer (lib/availability.ts window.__fvAvShow; 2026-11-17 "check availability dovrebbe apparire
+// dopo qualsiasi bottone premuto e popup bump scomparsa").
 //
 // For the server it is a normal add-on (dashboard → Products, funnel_items role "bump", key below), priced
 // and checked like any other (lib/funnels.ts pickedBumps); it never shows as a tick-box on the order page.
@@ -92,7 +93,7 @@ d.querySelector('.fv-pb-t').textContent=W.t;d.querySelector('.fv-pb-p').textCont
 var y=d.querySelector('.fv-pb-y'),n=d.querySelector('.fv-pb-n');y.textContent=W.y;n.textContent=W.n;
 function close(){open=0;document.removeEventListener('keydown',esc);d.remove()}
 function esc(k){if(k.key==='Escape')close()}
-function go(add){try{localStorage.setItem(K,JSON.stringify({add:add,at:Date.now()}))}catch(x){}y.disabled=n.disabled=true;location.href=u.href}
+function go(add){try{localStorage.setItem(K,JSON.stringify({add:add,at:Date.now()}))}catch(x){}y.disabled=n.disabled=true;d.remove();document.removeEventListener('keydown',esc);if(window.__fvAvShow)window.__fvAvShow(u.href);else location.href=u.href}
 y.onclick=function(){go(true)};n.onclick=function(){go(false)};
 d.addEventListener('click',function(k){if(k.target===d)close()});document.addEventListener('keydown',esc);
 document.body.appendChild(d);requestAnimationFrame(function(){d.classList.add('on')});y.focus();
