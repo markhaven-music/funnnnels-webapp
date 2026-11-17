@@ -169,8 +169,12 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 /* one column, wider than the page's text column ("fai quella sezione piu grande (larga) e a una colonna", 2026-11-17) */
 .dkf{display:grid;gap:12px;width:100%;max-width:1100px;margin:28px auto 40px;padding:0;list-style:none;text-align:left;font-family:${BODY};color:#fff}
 .dkf>li{width:100%;box-sizing:border-box;padding:14px 14px 16px;border-radius:12px;background:#0d0c10;break-inside:avoid}
-.dkf-top{display:grid;grid-template-columns:112px minmax(0,1fr);align-items:center;gap:14px}
-.dkf-top img{display:block;width:112px;height:112px;object-fit:contain}
+/* phone: box beside the name, examples below; desktop: a big box on the left, the moving patterns beside it ("su desktop torna a box grande e gif di patterns a lato", 2026-11-17) */
+.dkf>li:not(.dkf-more){display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-areas:"box top" "subs subs";align-items:center;column-gap:14px}
+.dkf-box{grid-area:box;display:block;width:112px;height:112px;object-fit:contain}
+.dkf-top{grid-area:top;min-width:0}
+.dkf>li>.dkf-subs{grid-area:subs}
+@media (min-width:900px){.dkf>li:not(.dkf-more){grid-template-columns:240px minmax(0,1fr);grid-template-areas:"box top" "box subs";align-items:start;column-gap:28px;padding:24px 24px 24px 16px}.dkf-box{width:240px;height:240px;align-self:center}.dkf-top{align-self:end}.dkf h3{font-size:26px}.dkf-top p{font-size:15px}}
 .dkf h3{margin:0;font:700 20px/1.2 ${DISPLAY};color:#fff}
 .dkf-top p{margin:4px 0 0;font-size:14px;line-height:1.4;color:rgba(255,255,255,.72)}
 .dkf-n{display:block;margin-top:8px;font:700 18px/1 ${DISPLAY};color:#ff9a2e}
@@ -575,7 +579,7 @@ function folders(c: Ctx): string {
       }).join("");
       return `<li><div class="dkf-ex"><span class="dkf-exl">${label}</span>${pics}</div></li>`;
     }).join("");
-    return `<li><div class="dkf-top"><img src="${IMG}box3-${f.box}.webp" width="132" height="132" alt="" loading="lazy" decoding="async"><div><h3>${name}</h3><p>${text}</p></div></div>
+    return `<li><img class="dkf-box" src="${IMG}box3-${f.box}.webp" width="240" height="240" alt="" loading="lazy" decoding="async"><div class="dkf-top"><h3>${name}</h3><p>${text}</p></div>
 <ul class="dkf-subs${ex.length < 2 ? " one" : ""}">${items}</ul></li>`;
   }).join("\n");
   const more = MORE.map((m) => `<li><b>${esc(m.dir.replace(" (Multi-Track)", ""))}</b><span>${esc(m.text[c.lang])}</span><i>${thousands(m.n, c.lang)}</i></li>`).join("");
