@@ -191,7 +191,7 @@ export default async function OrderPage({ params }: { params: Params }) {
                 </textPath>
               </text>
               <text x="100" y="108" textAnchor="middle" className={j.sealDays} fill="#ffa13d">
-                14
+                60
               </text>
               <text x="100" y="134" textAnchor="middle" className={j.sealUnit} fill="#fff">
                 {t.order.sealDays}
