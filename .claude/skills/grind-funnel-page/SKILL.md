@@ -44,6 +44,9 @@ a request conflict, the request wins; say which rule you are breaking.
   "Before your downloads, one thing": "Che frase orrenda. Mai sembrare nice
   guys quando si vende"). No soft, asking-permission lines; state the offer
   with confidence.
+- No em dashes (—) anywhere in the copy, any language (the user, 2026-11-17:
+  "togli em dashes da tutte le copy"): a colon before a list, commas or
+  brackets elsewhere, or two sentences.
 - Headlines say the problem or the promise at once. No eyebrow lines above the
   headlines (the small uppercase labels): removed on 2026-11-02.
 - Headlines break where the sense breaks (the user, 2026-11-16: "sono spezzate
