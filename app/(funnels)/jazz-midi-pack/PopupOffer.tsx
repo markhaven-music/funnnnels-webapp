@@ -6,6 +6,7 @@ import b from "./btn.module.css";
 import p from "./popupOffer.module.css";
 import { Arrow } from "./Cta";
 import { POPUP_OFFER, POPUP_WORDS } from "./offerPopup";
+import type { TapStep } from "@/lib/beacon";
 
 // The popup offer on the landing (./offerPopup.ts says why and how). One listener
 // catches every link to the order page, as the availability popup did: a click
@@ -31,6 +32,7 @@ export function PopupOffer({ price }: { price: string }) {
       }
       if (u.origin !== location.origin || !/\/order(\/|$)/.test(u.pathname)) return;
       e.preventDefault();
+      tap("cta", [...document.querySelectorAll('a[href*="/order"]')].indexOf(a) + 1);
       preload(u.href);
       setHref(u.href);
     }
@@ -49,14 +51,20 @@ export function PopupOffer({ price }: { price: string }) {
   useEffect(() => {
     if (!href) return;
     yes.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setHref(null);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [href]);
 
   if (!href) return null;
 
+  function close() {
+    tap("close");
+    setHref(null);
+  }
+
   function answer(add: boolean) {
+    tap(add ? "yes" : "no");
     try {
       localStorage.setItem(POPUP_OFFER.key, JSON.stringify({ add, at: Date.now() }));
     } catch {}
@@ -66,9 +74,9 @@ export function PopupOffer({ price }: { price: string }) {
   const fill = (t: string) => t.replace("{price}", price);
   // On <body>: inside the page, its sections' own layers drew over it.
   return createPortal(
-    <div className={p.back} onClick={(e) => e.target === e.currentTarget && setHref(null)}>
+    <div className={p.back} onClick={(e) => e.target === e.currentTarget && close()}>
       <div className={p.box} role="dialog" aria-modal="true" aria-labelledby="popup-offer-title">
-        <button type="button" className={p.close} aria-label="Close" onClick={() => setHref(null)}>
+        <button type="button" className={p.close} aria-label="Close" onClick={close}>
           ×
         </button>
         <img className={p.pic} src={POPUP_OFFER.image} alt="" width={160} height={160} decoding="async" />
@@ -95,6 +103,13 @@ export function PopupOffer({ price }: { price: string }) {
     </div>,
     document.body,
   );
+}
+
+/** Counted for dashboard → Analytics → "Button taps" (lib/beacon.ts __fvTap; nothing on a preview). */
+function tap(step: TapStep, n?: number) {
+  try {
+    (window as unknown as { __fvTap?: (e: string, n?: number) => void }).__fvTap?.(step, n);
+  } catch {}
 }
 
 /** The order page, loading behind the popup: prerendered whole where speculation rules work, fetched into the cache elsewhere. */

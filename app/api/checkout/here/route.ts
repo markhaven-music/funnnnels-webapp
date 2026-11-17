@@ -1,8 +1,8 @@
-import { ASTRO_FUNNEL, STEPS, type Step } from "@/lib/beacon";
+import { ASTRO_FUNNEL, STEPS, TAP_STEPS, type Step, type TapStep } from "@/lib/beacon";
 import { botReason } from "@/lib/bots";
 import { resolveFunnel } from "@/lib/funnels";
 import { COUNTRY_COOKIE } from "@/lib/geo";
-import { deviceOf, livePing, OFF_HOST, sourceOf } from "@/lib/live";
+import { deviceOf, livePing, liveTap, OFF_HOST, sourceOf } from "@/lib/live";
 
 export const runtime = "nodejs";
 
@@ -43,6 +43,26 @@ export async function POST(req: Request) {
     // Beats and leaves only touch a visitor a view already let in.
     if (body.k === "beat" || body.k === "leave") {
       await livePing({ kind: body.k, sid });
+      return done();
+    }
+    // A tap on a landing's button, or the answer to its pop-up.
+    if (body.k === "tap") {
+      const host = String(body.h ?? "").slice(0, 100);
+      if (process.env.NODE_ENV === "production" && OFF_HOST.test(host)) return done();
+      const step = body.e as TapStep;
+      if (!TAP_STEPS.includes(step)) return done();
+      const f = await resolveFunnel(body.f).catch(() => undefined);
+      if (!f || botReason(req, {})) return done();
+      const n = Number(body.n);
+      await liveTap({
+        sid,
+        host,
+        funnel: f.slug,
+        lang: typeof body.l === "string" && f.langs?.includes(body.l) ? body.l : "en",
+        step,
+        n: Number.isInteger(n) && n > 0 && n < 100 ? n : 0,
+        variant: typeof body.t === "string" && /^[a-z0-9-]{1,24}$/.test(body.t) ? body.t : "",
+      });
       return done();
     }
     if (body.k !== "view") return done();

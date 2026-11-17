@@ -12,6 +12,9 @@ import type { Lang } from "./i18n";
 // and checked like any other (lib/funnels.ts pickedBumps); it never shows as a tick-box on the order page.
 // No such row in Products: no pop-up, the landings keep "Checking availability…".
 //
+// Counted (2026-11-17): the tap on a button, Yes, No and a close with no answer go to landing_taps
+// (lib/beacon.ts __fvTap) for dashboard → Analytics → "Button taps".
+//
 // The answer goes from the landing to the order page in localStorage (the order page is prerendered behind
 // the pop-up at the same address, so not in the URL); an answer older than CHOICE_MS is ignored.
 export const POPUP_BUMP = "wav";
@@ -78,22 +81,23 @@ export function popupLandingJs(lang: Lang, price: string, image: string): string
   const words = { t: w.title, p: w.body, y: w.yes.replace("{price}", price), n: w.no };
   return `(function(){if(window.__fvPb)return;window.__fvPb=1;
 var W=${JSON.stringify(words)},IMG=${JSON.stringify(image)},K=${JSON.stringify(POPUP_KEY)},open=0;
+function tap(e,n){try{if(window.__fvTap)window.__fvTap(e,n,(document.cookie.match(/(?:^|; )ab_lp=([a-z0-9-]+)/)||[])[1])}catch(x){}}
 function pre(h){try{if(HTMLScriptElement.supports&&HTMLScriptElement.supports('speculationrules')){var s=document.createElement('script');s.type='speculationrules';s.textContent=JSON.stringify({prerender:[{source:'list',urls:[h],eagerness:'immediate'}]});document.head.appendChild(s)}else{fetch(h,{credentials:'same-origin'}).catch(function(){})}}catch(x){}}
 window.addEventListener('click',function(e){
 if(open||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
 var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a||a.target==='_blank')return;
 var u;try{u=new URL(a.href,location.href)}catch(x){return}
 if(u.origin!==location.origin||!/\\/order(\\/|$)/.test(u.pathname)||/\\/order(\\/|$)/.test(location.pathname))return;
-e.preventDefault();open=1;pre(u.href);
+e.preventDefault();open=1;pre(u.href);tap('cta',[].indexOf.call(document.querySelectorAll('a[href*="/order"]'),a)+1);
 if(!document.getElementById('fv-pb-css')){var c=document.createElement('style');c.id='fv-pb-css';c.textContent=${JSON.stringify(CSS)};document.head.appendChild(c)}
 var d=document.createElement('div');d.className='fv-pb';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');
 d.innerHTML='<div class="fv-pb-box">'+(IMG?'<img class="fv-pb-pic" alt="" width="120" height="120">':'')+'<h2 class="fv-pb-t"></h2><p class="fv-pb-p"></p><button type="button" class="fv-pb-b fv-pb-y"></button><button type="button" class="fv-pb-b fv-pb-n"></button></div>';
 if(IMG)d.querySelector('img').src=IMG;
 d.querySelector('.fv-pb-t').textContent=W.t;d.querySelector('.fv-pb-p').textContent=W.p;
 var y=d.querySelector('.fv-pb-y'),n=d.querySelector('.fv-pb-n');y.textContent=W.y;n.textContent=W.n;
-function close(){open=0;document.removeEventListener('keydown',esc);d.remove()}
+function close(){tap('close');open=0;document.removeEventListener('keydown',esc);d.remove()}
 function esc(k){if(k.key==='Escape')close()}
-function go(add){try{localStorage.setItem(K,JSON.stringify({add:add,at:Date.now()}))}catch(x){}y.disabled=n.disabled=true;d.remove();document.removeEventListener('keydown',esc);if(window.__fvAvShow)window.__fvAvShow(u.href);else location.href=u.href}
+function go(add){tap(add?'yes':'no');try{localStorage.setItem(K,JSON.stringify({add:add,at:Date.now()}))}catch(x){}y.disabled=n.disabled=true;d.remove();document.removeEventListener('keydown',esc);if(window.__fvAvShow)window.__fvAvShow(u.href);else location.href=u.href}
 y.onclick=function(){go(true)};n.onclick=function(){go(false)};
 d.addEventListener('click',function(k){if(k.target===d)close()});document.addEventListener('keydown',esc);
 document.body.appendChild(d);requestAnimationFrame(function(){d.classList.add('on')});y.focus();

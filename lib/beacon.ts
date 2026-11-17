@@ -78,6 +78,11 @@ const BADGE_JS = `(function(){var go=function(){if(document.getElementById('fv-p
 // ("leave"). The visitor is a random id kept in localStorage, nothing more.
 // One copy for both kinds of page: the body of a function of o = {f, p, l}.
 export const LIVE_URL = "/api/checkout/here";
+// The same tab also says when a button to the order page is tapped and what the pop-up after it was
+// answered (window.__fvTap, set by LIVE_JS, so never on a preview or the owner's devices): "tap" pings,
+// kept in landing_taps (db/landing-taps.sql) for dashboard → Analytics → "Button taps".
+export const TAP_STEPS = ["cta", "yes", "no", "close"] as const;
+export type TapStep = (typeof TAP_STEPS)[number];
 // The Astro landings on the same domain (grind-studio-landing-pages, CTAs to
 // ClickFunnels) send the same pings from a copy of LIVE_JS in their
 // Tracking.astro, as this funnel, with the page told apart by its path.
@@ -96,6 +101,7 @@ if(navigator.webdriver)v.w=1;
 send(v);
 if(L)return;
 L=w.__fvLive={s:s,n:0};
+w.__fvTap=function(e,n,t){try{send({k:'tap',f:o.f,l:o.l,e:e,n:n||0,t:t||'',h:location.hostname});}catch(x){}};
 setInterval(function(){if(document.visibilityState==='visible'&&L.n++<90)send({k:'beat'});},20000);
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')send({k:'leave'});else{L.n=0;send({k:'beat'});}});
 }catch(e){}`;

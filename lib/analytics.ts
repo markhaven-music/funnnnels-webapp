@@ -286,6 +286,8 @@ export type Analytics = {
   availability: AvailabilityStats | null;
   /** Before/after the Jazz landing's popup offer (popupOfferStats), whatever the range. */
   popupOffer: PopupOfferStats | null;
+  /** Taps on the landings' buttons and the pop-up's answers (tapStats), whatever the range. */
+  taps: TapStats | null;
   /** Day by day over the range (dashboard home), oldest first. */
   days: Day[];
   /** The same number of days just before the range, for the comparisons; null for "all". */
@@ -679,6 +681,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
     bonuses: (await Promise.all(BONUS_FUNNELS.map((b) => soft(`5-minute bonus (${b.name})`, bonusStats(allSales, b), null)))).filter((b): b is BonusStats => !!b),
     availability: await soft("availability popup", availabilityStats(now), null),
     popupOffer: await soft("popup offer", popupOfferStats(now, rate), null),
+    taps: await soft("button taps", tapStats(), null),
     ...daily(range, since, last, dayRows, allSales, rate, trackingSince),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
@@ -1372,6 +1375,88 @@ async function availabilityStats(now: number): Promise<AvailabilityStats> {
 // window, see offerPopup.ts) to the start;
 // after = since. Orders from the orders table (first orders, upsells apart, dollars at today's
 // rate); the upsells paid after each order on their own line; visitors from the live tracking.
+
+// Between a landing's button and its order page there is a pop-up (the Drum Kit's WAV offer, the Jazz
+// pack's Drunk Swing Grooves, "Checking availability…" elsewhere). Since 2026-11-17 the landings say
+// when a button is tapped and what the pop-up was answered (landing_taps, db/landing-taps.sql; "com'è
+// possibile che nessuno sta andando all'order page midi drum kit"), so a low landing → order click
+// reads as "nobody taps" or "they tap and leave at the pop-up". Each browser once per line, from its
+// first tap ever recorded; owner devices, previews and bots are never in it.
+export type TapFunnel = {
+  slug: string;
+  name: string;
+  /** Browsers that opened the landing since the first tap recorded. */
+  visitors: number;
+  /** Of them, those that tapped a button to the order page. */
+  tapped: number;
+  /** The funnel's button opens a pop-up with Yes and No (else "Checking availability…" alone). */
+  popup: boolean;
+  yes: number;
+  no: number;
+  /** Closed the pop-up and never answered it. */
+  closed: number;
+  /** Tapped, then neither answered nor closed (left the page with the pop-up open). */
+  left: number;
+  /** Visitors that opened the order page. */
+  order: number;
+  /** Taps by button, in the page's order (1 = the first button), most tapped first. */
+  buttons: { n: number; taps: number }[];
+};
+export type TapStats = { since: string; funnels: TapFunnel[] };
+
+async function tapStats(): Promise<TapStats | null> {
+  const db = supabase();
+  const off = /^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/;
+  const shown = (host: string) => process.env.NODE_ENV !== "production" || !off.test(host);
+  type T = { at: string; sid: string; host: string; funnel: string; step: string; n: number };
+  const taps: T[] = [];
+  for (let at = 0; at < 100_000; at += 1000) {
+    const { data, error } = await db.from("landing_taps").select("at, sid, host, funnel, step, n").order("id").range(at, at + 999);
+    if (error) throw error;
+    taps.push(...((data ?? []) as T[]).filter((t) => shown(t.host)));
+    if (!data || data.length < 1000) break;
+  }
+  if (!taps.length) return null;
+  const since = taps[0].at;
+  const slugs = [...new Set(taps.map((t) => t.funnel))];
+
+  type E = { sid: string; at: string; host: string; funnel: string; page: string };
+  const events: E[] = [];
+  for (let at = 0; at < 100_000; at += 1000) {
+    const { data, error } = await db.from("live_events").select("sid, at, host, funnel, page").in("funnel", slugs).in("page", ["landing", "order"]).gte("at", since).order("id").range(at, at + 999);
+    if (error) throw error;
+    events.push(...((data ?? []) as E[]).filter((e) => shown(e.host)));
+    if (!data || data.length < 1000) break;
+  }
+
+  const names = new Map<string, string>(codeFunnels().map((f) => [f.slug, funnelLabel(f)]));
+  const funnels = slugs.map((slug): TapFunnel => {
+    const mine = taps.filter((t) => t.funnel === slug);
+    const who = (step: string) => new Set(mine.filter((t) => t.step === step).map((t) => t.sid));
+    const [tapped, yes, no, close] = [who("cta"), who("yes"), who("no"), who("close")];
+    // A browser that tapped is a visitor even if its landing view was before the first tap recorded.
+    const visitors = new Set([...events.filter((e) => e.funnel === slug && e.page === "landing").map((e) => e.sid), ...tapped]);
+    const order = new Set(events.filter((e) => e.funnel === slug && e.page === "order" && visitors.has(e.sid)).map((e) => e.sid));
+    const answered = (sid: string) => yes.has(sid) || no.has(sid);
+    const popup = yes.size + no.size + close.size > 0;
+    const buttons = new Map<number, number>();
+    for (const t of mine) if (t.step === "cta" && t.n > 0) buttons.set(t.n, (buttons.get(t.n) ?? 0) + 1);
+    return {
+      slug,
+      name: names.get(slug) ?? slug,
+      visitors: visitors.size,
+      tapped: tapped.size,
+      popup,
+      yes: yes.size,
+      no: [...no].filter((sid) => !yes.has(sid)).length,
+      closed: [...close].filter((sid) => !answered(sid)).length,
+      left: popup ? [...tapped].filter((sid) => !answered(sid) && !close.has(sid)).length : 0,
+      order: order.size,
+      buttons: [...buttons].map(([n, taps]) => ({ n, taps })).sort((x, y) => y.taps - x.taps || x.n - y.n),
+    };
+  });
+  return { since, funnels: funnels.sort((x, y) => y.visitors - x.visitors) };
+}
 
 export type PopupOfferSide = {
   from: string;

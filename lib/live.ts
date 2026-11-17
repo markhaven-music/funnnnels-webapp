@@ -62,6 +62,12 @@ export async function livePing(p: Ping) {
   if (error) throw error;
 }
 
+/** A tap on a landing's button, or the answer to its pop-up (lib/beacon.ts __fvTap, db/landing-taps.sql). */
+export async function liveTap(t: { sid: string; host: string; funnel: string; lang: string; step: string; n: number; variant: string }) {
+  const { error } = await supabase().from("landing_taps").insert(t);
+  if (error) throw error;
+}
+
 // Where a visitor came from, read from the first page of their tab. Meta's ads
 // carry utm_source={{site_source_name}} (fb, ig, an, msg) and
 // utm_content={{ad.name}}. An empty source means a page of the same site: the

@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { I } from "@/components/icons";
-import type { Analytics, AvailabilityStats, BonusStats, Metrics, PopupOfferStats, TestStats } from "@/lib/analytics";
+import type { Analytics, AvailabilityStats, BonusStats, Metrics, PopupOfferStats, TapStats, TestStats } from "@/lib/analytics";
 import { RangePicker, useRange } from "@/components/RangePicker";
 import s from "./analytics.module.css";
 
@@ -159,11 +159,12 @@ export function AnalyticsPanel() {
         </div>
       </div>
 
-      {(data?.availability || data?.popupOffer || (data?.bonuses?.length ?? 0) > 0) && (
+      {(data?.availability || data?.popupOffer || data?.taps || (data?.bonuses?.length ?? 0) > 0) && (
         <div className="section-head" style={{ marginTop: 28 }}>
           <div className="section-title">Other experiments</div>
         </div>
       )}
+      {data?.taps && <TapsCard t={data.taps} />}
       {data?.popupOffer && <PopupOfferCard p={data.popupOffer} />}
       {data?.availability && <AvailabilityCard a={data.availability} />}
       {data?.bonuses?.map((b) => <BonusCard key={b.funnel} b={b} />)}
@@ -244,6 +245,69 @@ const rate1 = (part: number, whole: number) => (whole > 0 ? `${((part / whole) *
 const chance = (c: number | null) => (c == null ? "—" : `${Math.round(c * 100)}%`);
 
 /** Dashboard → Analytics: the Jazz landing's popup offer, average order before and after it (lib/analytics.ts popupOfferStats). */
+/** Dashboard → Analytics: who taps a landing's button and what they answer the pop-up after it (lib/analytics.ts tapStats). */
+function TapsCard({ t }: { t: TapStats }) {
+  return (
+    <section className={s.test}>
+      <div className={s.testHead}>
+        <div>
+          <div className={s.testTitle}>
+            <I.analytics size={14} /> Button taps · landing → pop-up → order page
+          </div>
+          <div className={s.testSub}>
+            Each landing&apos;s buttons to the order page and the pop-up they open, counted since {whenText(when(t.since))} · each browser once per line · your devices, previews and bots are not in it · kept 30 days · whatever the range above
+          </div>
+        </div>
+      </div>
+
+      <div className={s.variants}>
+        {t.funnels.map((f) => (
+          <div key={f.slug} className={s.variant}>
+            <div className={s.variantHead}>{f.name}</div>
+            <div className={s.bonusBig}>
+              {rate1(f.tapped, f.visitors)} <small>tapped a button</small>
+            </div>
+            <div className={s.bonusPct}>{rate1(f.order, f.visitors)} opened the order page</div>
+            <dl className={s.kv}>
+              <dt>Visitors on the landing</dt>
+              <dd>{int(f.visitors)}</dd>
+              <dt>Tapped a button</dt>
+              <dd className={s.strong}>{int(f.tapped)}</dd>
+              {f.popup && (
+                <>
+                  <dt>Pop-up: Yes</dt>
+                  <dd>
+                    {int(f.yes)} <small>{rate1(f.yes, f.tapped)}</small>
+                  </dd>
+                  <dt>Pop-up: No</dt>
+                  <dd>
+                    {int(f.no)} <small>{rate1(f.no, f.tapped)}</small>
+                  </dd>
+                  <dt>Closed it, no answer</dt>
+                  <dd className={s.strong}>
+                    {int(f.closed)} <small>{rate1(f.closed, f.tapped)}</small>
+                  </dd>
+                  <dt>Left with it open</dt>
+                  <dd className={s.strong}>
+                    {int(f.left)} <small>{rate1(f.left, f.tapped)}</small>
+                  </dd>
+                </>
+              )}
+              <dt>Opened the order page</dt>
+              <dd className={s.strong}>{int(f.order)}</dd>
+            </dl>
+            {f.buttons.length > 0 && (
+              <div className={s.paidNote} style={{ marginTop: 10 }}>
+                Most tapped: {f.buttons.slice(0, 4).map((b) => `button ${b.n} (${int(b.taps)})`).join(", ")}. Button 1 is the first on the page.
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function PopupOfferCard({ p }: { p: PopupOfferStats }) {
   const sides = [
     { key: "before", title: `Before · ${whenText(when(p.before.from))} → ${whenText(when(p.before.to!))}`, v: p.before },
