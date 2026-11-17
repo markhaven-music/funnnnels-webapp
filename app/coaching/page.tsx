@@ -33,6 +33,18 @@ export default function Coaching() {
         You know the feeling. A folder full of 8 bars that sounded great at 2am. Nothing finished. Nothing out. And a quiet
         voice asking if you&apos;ll ever sound like the records you love.
       </p>
+      <h2 className={c.h2}>Who you&apos;d work with</h2>
+      <p className={c.lead}>
+        I&apos;m a <b>gold and platinum</b> producer from Italy. I produced <b>Fuego</b> (Neve17, Geolier, Lele Blade) and{" "}
+        <b>Sui Muri</b> by Psicologi, plus other records with millions of streams. My own artist project has{" "}
+        <b>67k monthly listeners</b> on Spotify.
+      </p>
+      <p className={c.lead}>
+        <a className={c.ig} href="https://instagram.com/markhaven">
+          @markhaven on Instagram
+        </a>
+      </p>
+
       <p className={c.lead}>
         I work 1:1 with <b>5 producers a month</b>. We take your beats, find exactly what holds them back, and fix it
         together until you finish music you&apos;re proud to send.
