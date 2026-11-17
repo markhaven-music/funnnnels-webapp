@@ -165,7 +165,8 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkp-keywrap .jzb-btn{margin-left:auto;margin-right:auto}
 
 /* The kit's folders: a card each, with the old panel's examples (its moving piano rolls) and the folder's real name and subfolders. */
-.dkf{display:grid;gap:12px;width:100%;max-width:1083px;margin:28px auto 40px;padding:0;list-style:none;text-align:left;font-family:${BODY};color:#fff}
+/* one column, wider than the page's text column ("fai quella sezione piu grande (larga) e a una colonna", 2026-11-17) */
+.dkf{display:grid;gap:12px;width:100%;max-width:1100px;margin:28px auto 40px;padding:0;list-style:none;text-align:left;font-family:${BODY};color:#fff}
 .dkf>li{width:100%;box-sizing:border-box;padding:14px 14px 16px;border-radius:12px;background:#0d0c10;break-inside:avoid}
 .dkf-top{display:grid;grid-template-columns:112px minmax(0,1fr);align-items:center;gap:14px}
 .dkf-top img{display:block;width:112px;height:112px;object-fit:contain}
@@ -173,11 +174,6 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 .dkf-top p{margin:4px 0 0;font-size:14px;line-height:1.4;color:rgba(255,255,255,.72)}
 .dkf-n{display:block;margin-top:8px;font:700 18px/1 ${DISPLAY};color:#ff9a2e}
 .dkf-n small{font:500 10px/1.2 ${MONO};letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.55)}
-.dkf-path{display:flex;flex-wrap:wrap;align-items:center;gap:5px 6px;margin:12px 0 0;font:500 11px/1.4 ${MONO};color:rgba(255,255,255,.62)}
-.dkf-path svg{flex:none;width:14px;height:14px;color:#ff9a2e}
-.dkf-path b{margin-right:2px;font-weight:600;color:#fff}
-.dkf-path span{padding:2px 6px;border-radius:3px;background:#1c1b22;white-space:nowrap}
-.dkf-path i{margin-left:5px;font-style:normal;color:#ff9a2e}
 .dkf-more{column-span:all}
 .dkf-more h3{font-size:21px;line-height:1.25}
 .dkf-more>p{margin:8px 0 0;font-size:15px;line-height:1.45;color:rgba(255,255,255,.72)}
@@ -284,7 +280,7 @@ details[open]>summary.dkt-row .c{rotate:90deg}
 @keyframes dkpad{from{background:#f5851f}to{background:#1c1b22}}
 
 @media (max-width:640px){.dkp-sec{padding:48px 12px 56px}.dkp-panel{padding:14px 14px 12px;margin-top:24px}.dkp-chips{margin:0 -14px;padding:0 14px}.dkp-grid{margin:0 -14px;padding:0 14px 6px}.dkp-opt .dkp-chips{margin:0 -14px 0 0;padding:0 14px 0 0}}
-@media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkp-mix{grid-template-columns:repeat(4,minmax(0,1fr))}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{display:block;columns:2;column-gap:12px}.dkf>li{margin-bottom:12px}.dkf-top{grid-template-columns:140px minmax(0,1fr);gap:18px}.dkf-top img{width:140px;height:140px}.dkf h3{font-size:22px}.dkf-more ul{grid-template-columns:repeat(2,minmax(0,1fr))}.dkn{padding:30px 32px 26px}}
+@media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkp-mix{grid-template-columns:repeat(4,minmax(0,1fr))}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{gap:16px}.dkf-top{grid-template-columns:140px minmax(0,1fr);gap:18px}.dkf-top img{width:140px;height:140px}.dkf h3{font-size:22px}.dkf-more ul{grid-template-columns:repeat(2,minmax(0,1fr))}.dkn{padding:30px 32px 26px}}
 @media (min-width:1000px){.dkt-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:start}.dkt-side{position:sticky;top:72px;padding-top:8px}.dkb{gap:72px}.dkb>li{grid-template-columns:minmax(0,.36fr) minmax(0,.64fr);align-items:start;gap:0 56px;padding:44px 48px}.dkb-cover{grid-row:1/span 2;max-width:none;position:sticky;top:64px}.dkb-label{font-size:14px}.dkb h3{margin-top:10px;font-size:30px}.dkb-text{margin-top:14px;font-size:18px}.dkb-inside{gap:8px;margin-top:14px;font-size:17px}.dkb-preview{grid-column:2;margin-top:30px}.dkb>li.bare .dkb-preview{display:none}}
 `;
 
@@ -556,7 +552,6 @@ function player(c: Ctx): string {
 
 const FOLDER = '<svg viewBox="0 0 16 16" class="f" aria-hidden="true"><path d="M1.5 3.5A1.5 1.5 0 0 1 3 2h3.2l1.6 1.8H13a1.5 1.5 0 0 1 1.5 1.5v6.2A1.5 1.5 0 0 1 13 13H3a1.5 1.5 0 0 1-1.5-1.5z" fill="currentColor"/></svg>';
 const CHEVRON = '<svg viewBox="0 0 10 10" class="c" aria-hidden="true"><path d="M3 1.5L7 5 3 8.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const dirOf = (id: string) => tree.find((t) => t.id === id);
 
 /**
  * The kit's folders, a card each: box, name, the old panel's line, its files, the folder's real name with
@@ -568,9 +563,8 @@ function folders(c: Ctx): string {
   const cards = FOLDERS.map((f) => {
     const name = folderName(f, c);
     const text = f.text ? c.words(f.text).replace(/[\u200b\u200c]/g, " ") : esc(c.w.baseText);
-    const dir = dirOf(f.id);
     // no file counts on the cards: "50 MIDI files" under Complete Beats "feels like it's so few" (2026-11-12)
-    const subs = dir && dir.groups.length > 1 ? dir.groups.map((g) => `<span>${esc(g.dir.replace(/^\d+\. /, ""))}</span>`).join("") : "";
+    // no folder-name row (📁 9. Complete Beats + subfolder chips): "toggli quella row con folder e testo piccolo non si capisce" (2026-11-17)
     const ex = EXAMPLES[f.id] ?? [];
     const items = ex.map((e) => {
       const label = e.label ? plain(c.words(e.label)) : esc(c.w.baseEx);
@@ -581,7 +575,6 @@ function folders(c: Ctx): string {
       return `<li><div class="dkf-ex"><span class="dkf-exl">${label}</span>${pics}</div></li>`;
     }).join("");
     return `<li><div class="dkf-top"><img src="${IMG}box3-${f.box}.webp" width="132" height="132" alt="" loading="lazy" decoding="async"><div><h3>${name}</h3><p>${text}</p></div></div>
-<p class="dkf-path">${FOLDER}<b>${esc(dir?.dir ?? "")}</b>${subs}</p>
 <ul class="dkf-subs${ex.length < 2 ? " one" : ""}">${items}</ul></li>`;
   }).join("\n");
   const more = MORE.map((m) => `<li><b>${esc(m.dir.replace(" (Multi-Track)", ""))}</b><span>${esc(m.text[c.lang])}</span><i>${thousands(m.n, c.lang)}</i></li>`).join("");
