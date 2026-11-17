@@ -18,9 +18,21 @@ import { STACK_VALUES } from "./stackSwitch";
 // so ("font sizes of the page are different between the two… make them the same"): the first
 // line of the list is what used to be a title over it, as the Jazz list opens with its files.
 
-/** The bonuses' boxes, in the order of order.stack.bonuses: the ones in the Jazz bonuses' style (2026-11-12,
- *  bonus2-*-132.webp, 132 × 196, shown 36px wide as on the Jazz order page); bonus-*-132 were the old square covers. */
-const COVERS = ["famous", "starters", "drums", "grooves", "hooks", "guide"];
+/** The bonuses' boxes, in the order of order.stack.bonuses. Since 2026-11-17 real 3D software boxes like the
+ *  TOP HITS MIDI Bundle's ("metti solo le box invece di questi quadrati 2D. genera le box e mettile come TOP HITS
+ *  MIDI Bundle"): bonus3-*-120.webp, 120px wide, transparent, shown 52px wide; Famous Beats and Drunk Swing Grooves
+ *  are their own funnels' boxes, the other four generated with Higgsfield from the bonus2 covers (bonus2-*: the
+ *  flat-looking front-on boxes at 36px, before). [key, height of the 120px-wide file]. */
+const COVERS: [string, number][] = [
+  ["famous", 148],
+  ["starters", 179],
+  ["drums", 179],
+  ["grooves", 174],
+  ["hooks", 178],
+  ["guide", 179],
+];
+/** How wide a box is drawn in the list (the Jazz class draws 36px; inline so the Jazz page keeps its own). */
+const BOX_W = 52;
 const IMG = "/funnels/midi-drum-kit";
 
 const Tick = () => (
@@ -56,7 +68,17 @@ export function OrderStack({ w, price, currency, lang }: { w: Copy["order"]["sta
           {w.bonuses.map((name, i) => (
             <li key={name}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              {COVERS[i] && <img src={`${IMG}/bonus2-${COVERS[i]}-132.webp`} alt="" width={36} height={54} loading="lazy" decoding="async" />}
+              {COVERS[i] && (
+                <img
+                  src={`${IMG}/bonus3-${COVERS[i][0]}-120.webp`}
+                  alt=""
+                  width={120}
+                  height={COVERS[i][1]}
+                  style={{ width: BOX_W, height: "auto", filter: "drop-shadow(0 4px 8px rgb(0 0 0 / 0.5))" }}
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
               <span>{name}</span>
               <span className={j.bonusMiniValue}>
                 <s>{fmt(STACK_VALUES.bonuses[i])}</s> {w.free}
