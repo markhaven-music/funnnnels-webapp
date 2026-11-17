@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { BumpTextEditor } from "@/components/BumpTextEditor";
 import { I } from "@/components/icons";
 import type { FunnelItem, ItemRole } from "@/lib/catalog";
 import { money, type Money } from "@/lib/launch";
@@ -84,6 +85,7 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
   const body = useRef<HTMLDivElement>(null);
+  const [words, setWords] = useState<{ product: string; name: string } | null>(null);
 
   const draft = (i: PriceItem) => drafts[priceId(i)] ?? draftOf(i.price);
   const changed = items.filter((i) => !same(draft(i), i.price));
@@ -266,6 +268,10 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
                           <button type="button" className={p.mini} disabled={listBusy || bumps.indexOf(i) === bumps.length - 1} onClick={() => listAct("PUT", { role: "bump", key: i.key, move: 1 }, `${i.name} moved down.`)} aria-label={`Move ${i.name} down`}>
                             ↓ Down
                           </button>
+                          {/* The product's words on every order form that sells it, with this funnel's order page beside them (BumpTextEditor.tsx). */}
+                          <button type="button" className={p.mini} onClick={() => setWords({ product: i.product, name: i.name })}>
+                            Edit words
+                          </button>
                           <button
                             type="button"
                             className={`${p.mini} ${p.miniDanger}`}
@@ -366,6 +372,7 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
           </button>
         </footer>
       </form>
+      {words && <BumpTextEditor product={words.product} name={words.name} funnel={funnel} onClose={() => setWords(null)} />}
     </>
   );
 }

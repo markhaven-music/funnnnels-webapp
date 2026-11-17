@@ -78,7 +78,8 @@ function unfill(s: string, u: Use, lang: Lang) {
   return swap(u.full !== u.price ? swap(s, u.full, "{full}") : s, u.price, "{price}");
 }
 
-export function BumpTextEditor({ product, name, onClose }: { product: string; name: string; onClose: () => void }) {
+// funnel: the order page to open the preview on (the Funnels view opens it on its own funnel).
+export function BumpTextEditor({ product, name, funnel: first, onClose }: { product: string; name: string; funnel?: string; onClose: () => void }) {
   const [data, setData] = useState<Loaded | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lang, setLang] = useState<Lang>("en");
@@ -97,10 +98,10 @@ export function BumpTextEditor({ product, name, onClose }: { product: string; na
         if (d.error) return setError(d.error);
         setData(d);
         setDrafts(d.texts);
-        setFunnel(d.uses[0]?.funnel ?? "");
+        setFunnel((d.uses.find((u) => u.funnel === first) ?? d.uses[0])?.funnel ?? "");
       })
       .catch(() => setError("Couldn't load."));
-  }, [product]);
+  }, [product, first]);
 
   // The funnels that have an order page in this language.
   const uses = useMemo(() => (data?.uses ?? []).filter((u) => u.pages[lang]), [data, lang]);
