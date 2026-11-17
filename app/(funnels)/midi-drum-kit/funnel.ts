@@ -108,6 +108,9 @@ export const funnel = {
     "swing-grooves": "jazz-midi-pack/Drunk Swing Grooves.zip",
     hooks: "clickfunnels/MYSTERY Hooks Pack.zip",
     guide: "midi-drum-kit/MIDI Drum Kit - Guide.pdf",
+    // The landing pop-up add-on (popupBump.ts, 2026-11-17, €3.99): the kit's 1,040 grooves as WAV loops,
+    // rendered by tools/drum_kit_wav.py with Grind Studio's own one-shots.
+    wav: "midi-drum-kit/MIDI Drum Kit WAV.zip",
   },
   // One-click upsells after the order, in ClickFunnels order (its
   // /famous-beats-bundle and /last-offer-top-hits-midi-bundle): each its own
