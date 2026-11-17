@@ -137,7 +137,7 @@ export const es: Copy = {
       expansions: {
         headline: "¡SÍ! ¡Añade todavía más patrones de batería!",
         body: [
-          "3 expansiones del MIDI Drum Kit. Incluyen **10.003 archivos MIDI: Complete Beats de House, Lo-Fi y Afrobeat**. Genera baterías de nivel pro 27x más rápido. Normalmente cuestan 147 {c}, ¡¡pero ahora puedes tenerlas todas por solo 27 {c}!!",
+          "3 expansiones del MIDI Drum Kit. Incluyen **10.003 archivos MIDI: Complete Beats de House, Lo-Fi y Afrobeat**. Genera baterías de nivel pro 27x más rápido. Normalmente cuestan 147 {c}, ¡¡pero ahora puedes tenerlas todas por solo 9,99 {c}!!",
         ],
       },
       hustle: {
