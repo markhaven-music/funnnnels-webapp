@@ -15,6 +15,7 @@ import { pageEdits } from "@/lib/pageTexts";
 import { copyEdits } from "../../../texts";
 import { funnel } from "../../../funnel";
 import { BUTTON_SCRIPT } from "../../../abtest";
+import { ACCENT_SCRIPT, orderAccentCss } from "../../../accentTest";
 import { LP } from "../../../landingTest";
 import { PAY_SCRIPT } from "../../../payTest";
 import { BONUS, BONUS_SCRIPT, BONUS_TIME_SCRIPT, BONUS_WORDS } from "../../../bonusTest";
@@ -78,6 +79,9 @@ export default async function OrderPage({ params }: { params: Params }) {
     <main className={`${j.page} ${j.jazz} ${j.orderMain} ${d.dk} ${fontVars} ${poppins.variable} ${display.variable}`} lang={lang}>
       {/* The button colour the test kept (orange), before the buttons paint (../../../abtest.ts). */}
       <script dangerouslySetInnerHTML={{ __html: BUTTON_SCRIPT }} />
+      {/* The accent colour test (../../../accentTest.ts): the visitor's colour on <html data-ac>, before paint. */}
+      <script dangerouslySetInnerHTML={{ __html: ACCENT_SCRIPT }} />
+      <style dangerouslySetInnerHTML={{ __html: orderAccentCss({ dk: d.dk, cta: d.cta, payBar: d.payBar, payBarBtn: d.payBarBtn }) }} />
       {/* The step-2 test (../../../payTest.ts): its letter is what the visit counts under. */}
       <script dangerouslySetInnerHTML={{ __html: PAY_SCRIPT }} />
       {/* The 5-minute bonus test (../../../bonusTest.ts): its letter is what the visit counts under. */}

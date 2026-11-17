@@ -5,6 +5,7 @@ import tree from "@/public/funnels/midi-drum-kit/player/v6/tree.json";
 import type { Copy } from "./copy";
 import type { Lang } from "./i18n";
 import { JAZZ_CSS } from "./jazzCss";
+import { ACCENT_SCRIPT, ACCENT_VARS_CSS, ACCENT_VIDEO_JS, accentize } from "./accentTest";
 import { CLIENT_JS } from "./landingNewClient";
 import { compare, cta, faq, finale, guarantee, hero, key, JAZZ_MORE_CSS, license, reviews, summary, type JazzCtx } from "./landingNewJazz";
 import { STACK_VALUES } from "./stackSwitch";
@@ -837,7 +838,8 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
     groups: GROUPS[l],
     folders: Object.fromEntries(FOLDERS.map((f) => [f.id, folderName(f, c).replace(/&amp;/g, "&")])),
   };
-  return out
-    .replace("</head>", () => `<style>${CSS}</style>\n</head>`)
-    .replace("</body>", () => `<script type="application/json" id="dk-cfg">${JSON.stringify(cfg).replace(/</g, "\\u003c")}</script>\n<script>${CLIENT_JS}</script>\n<script>${TREE_JS}</script>\n</body>`);
+  // The accent colour test (./accentTest.ts): every orange as a variable, the visitor's colour set before paint.
+  return accentize(out.replace("</head>", () => `<style>${CSS}</style>\n</head>`))
+    .replace("</head>", () => `<script>${ACCENT_SCRIPT}</script>\n<style>${ACCENT_VARS_CSS}</style>\n</head>`)
+    .replace("</body>", () => `<script type="application/json" id="dk-cfg">${JSON.stringify(cfg).replace(/</g, "\\u003c")}</script>\n<script>${CLIENT_JS}</script>\n<script>${TREE_JS}</script>\n<script>${ACCENT_VIDEO_JS}</script>\n</body>`);
 }

@@ -12,6 +12,8 @@
 // The values are not a/b: those letters were step 2's, 11-06 → 11-09, and would mix in.
 // ?lp=old|new shows one page without touching the visitor's cookie (with ?preview=1 nothing is counted).
 
+import { ACCENT, type AccentVariant } from "./accentTest";
+
 export const LP = {
   cookie: "ab_lp",
   variants: ["lp-old", "lp-new"] as const,
@@ -27,6 +29,11 @@ export const LP = {
   live: "lp-new" as "lp-old" | "lp-new" | null,
   /** When `live` took over (its deploy). */
   liveFrom: "2026-11-12T19:38:00Z",
+  /**
+   * Since 2026-11-17 the new page is drawn in one of three accent colours (./accentTest.ts), one per visitor,
+   * their letter in this cookie in `live`'s place: everyone still gets the new page. null = `live` again.
+   */
+  draw: ACCENT.variants as readonly AccentVariant[] | null,
 };
 export type LpVariant = (typeof LP.variants)[number];
 export const isLp = (v: unknown): v is LpVariant => (LP.variants as readonly string[]).includes(v as string);

@@ -1,3 +1,4 @@
+import { ACCENT, PALETTES } from "@/app/(funnels)/midi-drum-kit/accentTest";
 import { isCurrency } from "@/lib/geo";
 import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
@@ -877,9 +878,27 @@ export const TESTS: TestDef[] = [
     // LP.liveFrom while its visits started 11-13 ("aggiusta allora"), so the 11-12 21:08 order had no visits beside it.
     windows: {
       "lp-old": { from: "2026-11-05T00:00:00Z", until: "2026-11-12T00:00:00Z", days: ["2026-11-05", "2026-11-11"] },
-      "lp-new": { from: "2026-11-13T00:00:00Z", until: null, days: ["2026-11-13", null] },
+      // until the accent colour test: from then on the new page is green, red or yellow, not orange (below)
+      "lp-new": { from: "2026-11-13T00:00:00Z", until: ACCENT.from, days: ["2026-11-13", ACCENT.from.slice(0, 10)] },
     },
     color: (v) => (v === "lp-old" ? { from: "#94a3b8", to: "#64748b" } : { from: "#c084fc", to: "#22d3ee" }),
+  },
+  {
+    funnel: "midi-drum-kit",
+    // 2026-11-17, "facciamo un ABC test voglio provare altri colori accent: Verde (stile FL Studio piano roll),
+    // Rosso, Giallo": the new landing and the order page in one of three accent colours, a third of the English and
+    // Italian visitors each, kept per visitor (midi-drum-kit/accentTest.ts). Counted by letter, to the sale. Orange,
+    // the colour before, is the landing test's New column (its days until this test).
+    name: "Accent colour",
+    question: "Which accent colour on the MIDI Drum Kit landing and order page sells more: FL Studio green, red or yellow?",
+    where: `Landing (the new page, English and Italian) and order page · everything that was orange (highlighted words, buttons, player, seal, video player, pay bar) in the visitor's colour, kept on return visits · since ${ACCENT.from.slice(0, 16).replace("T", " ")} UTC · orange before it: see "Landing: old vs new", New`,
+    variants: ACCENT.variants,
+    live: Object.fromEntries(ACCENT.variants.map((v) => [v, `https://m.thegrind.studio/en/midi-drum-kit?ac=${v.slice(3)}&preview=1`])),
+    label: (v) => ({ "ac-green": "Green · FL Studio piano roll", "ac-red": "Red", "ac-yellow": "Yellow" })[v] ?? v,
+    color: (v) => {
+      const p = PALETTES[v.slice(3) as keyof typeof PALETTES];
+      return p ? { from: p.g1, to: p.g2 } : { from: "#94a3b8", to: "#64748b" };
+    },
   },
   {
     funnel: "famous-beats-bundle",

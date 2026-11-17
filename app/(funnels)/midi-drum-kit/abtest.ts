@@ -12,6 +12,7 @@
 // cookie, the tab keeps the shown one (sessionStorage ab_preview) for the
 // order page, and nothing is counted (lib/beacon.ts PREVIEW_JS).
 
+import { ACCENT } from "./accentTest";
 import { LP } from "./landingTest";
 
 export const AB = {
@@ -53,7 +54,8 @@ document.documentElement.setAttribute('data-ab-btn',v);window.__abBtn=v;
  */
 export function readVariant(): string | null {
   if (typeof document === "undefined") return null;
-  const m = document.cookie.match(new RegExp(`(?:^|; )${LP.cookie}=(${LP.variants.join("|")})(?:;|$)`));
+  // since 2026-11-17 also the accent test's letters (./accentTest.ts), in the same cookie
+  const m = document.cookie.match(new RegExp(`(?:^|; )${LP.cookie}=(${[...LP.variants, ...ACCENT.variants].join("|")})(?:;|$)`));
   return m?.[1] ?? null;
 }
 
