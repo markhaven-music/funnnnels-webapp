@@ -847,6 +847,13 @@
   letter-spacing: 1.5px;
   color: #6b6b70;
 }
+.timerEnded {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #0a0a0a;
+}
 .timerSep {
   font-family: var(--anton);
   font-size: 26px;

@@ -111,6 +111,13 @@
   font-size: 11px;
   line-height: 1.43;
 }
+.timerEnded {
+  margin-top: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: rgb(247, 247, 247);
+}
 @media (max-width: 769px) {
   .timer {
     right: auto;
@@ -130,6 +137,10 @@
   }
   .timerLabel {
     font-size: 9px;
+  }
+  .timerEnded {
+    margin-top: 3px;
+    font-size: 13px;
   }
 }
 

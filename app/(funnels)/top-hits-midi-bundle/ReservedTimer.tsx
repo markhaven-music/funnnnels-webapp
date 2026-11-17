@@ -6,7 +6,7 @@ import { withSkin, type Styles } from "../skin";
 import base from "./order.module.css";
 
 // ClickFunnels' "YOUR COPY IS RESERVED FOR" box: ten minutes from the first visit (a refresh doesn't restart it, ../reservedUntil.ts),
-// counting down to 00:00:00 (it only stops; nothing expires).
+// counting down to 00:00:00, then it says time's up (nothing actually expires: the order still goes through).
 const START = 10 * 60 * 1000;
 
 // skin: a stylesheet whose classes join ./order.module.css's (the Famous Beats Bundle's).
@@ -28,23 +28,31 @@ export function ReservedTimer({ skin }: { skin?: Styles }) {
   const cs = Math.floor((left % 1000) / 10);
   return (
     <div className={s.timer} role="timer" aria-label="Your license is reserved">
-      <div className={s.timerTitle}>YOUR LICENSE IS RESERVED FOR</div>
-      <div className={s.timerDigits}>
-        <span className={s.timerUnit}>
-          <span className={s.timerNum}>{pad(min)}</span>
-          <span className={s.timerLabel}>MIN</span>
-        </span>
-        <span className={s.timerSep}>:</span>
-        <span className={s.timerUnit}>
-          <span className={s.timerNum}>{pad(sec)}</span>
-          <span className={s.timerLabel}>SEC</span>
-        </span>
-        <span className={s.timerSep}>:</span>
-        <span className={s.timerUnit}>
-          <span className={s.timerNum}>{pad(cs)}</span>
-          <span className={s.timerLabel}>MS</span>
-        </span>
+      <div className={s.timerTitle}>
+        {left ? "YOUR LICENSE IS RESERVED FOR" : "TIME'S UP"}
       </div>
+      {!left ? (
+        <div className={s.timerEnded}>
+          Your license is still yours, for now. Finish before it&apos;s gone.
+        </div>
+      ) : (
+        <div className={s.timerDigits}>
+          <span className={s.timerUnit}>
+            <span className={s.timerNum}>{pad(min)}</span>
+            <span className={s.timerLabel}>MIN</span>
+          </span>
+          <span className={s.timerSep}>:</span>
+          <span className={s.timerUnit}>
+            <span className={s.timerNum}>{pad(sec)}</span>
+            <span className={s.timerLabel}>SEC</span>
+          </span>
+          <span className={s.timerSep}>:</span>
+          <span className={s.timerUnit}>
+            <span className={s.timerNum}>{pad(cs)}</span>
+            <span className={s.timerLabel}>MS</span>
+          </span>
+        </div>
+      )}
     </div>
   );
 }
