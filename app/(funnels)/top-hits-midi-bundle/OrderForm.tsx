@@ -16,7 +16,6 @@ import { FORM, type FormWords } from "./formWords";
 import { B } from "./Lines";
 import { Rich } from "./Rich";
 import base from "./order.module.css";
-import { BUMP_PICTURES } from "@/lib/bumpWords";
 
 // The ClickFunnels order form of /order-top-hits-midi-bundle, step for step:
 //   1 · Your Info → first, last, email (saved as a lead), "GO TO STEP 2"
@@ -387,9 +386,9 @@ function PayBody({
       {offer.bumps.map((b) => {
         const on = picked.includes(b.id);
         return (
-          <label key={b.id} className={BUMP_PICTURES ? s.bump : `${s.bump} ${s.bumpBare}`}>
+          <label key={b.id} className={s.bump}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {BUMP_PICTURES && <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />}
+            <img src={b.image} alt="" className={s.bumpImg} width={80} height={80} />
             <span className={s.bumpHead}>
               {/* Gone once ticked, as on ClickFunnels. */}
               {!on && <BumpArrow />}

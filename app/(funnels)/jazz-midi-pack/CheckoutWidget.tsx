@@ -12,7 +12,6 @@ import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
 import { isPreview, readCookie, track } from "@/lib/beacon";
 import { cookieCountry, SIGN, type Currency, fillSign } from "@/lib/geo";
-import { BUMP_PICTURES } from "@/lib/bumpWords";
 import { endJazzBonus, JazzBonusItem, useJazzBonus, type BonusCfg } from "./BonusClock";
 import { JAZZ_BONUS, JAZZ_BONUS_WORDS, type JazzBonusWords } from "./fiveMinBonus";
 import c from "./fiveMinBonus.module.css";
@@ -553,8 +552,8 @@ function PayStepBody({
 function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: Currency; ticked: boolean; onTick: (on: boolean) => void }) {
   const [lead, rest] = splitPitch(offer.pitch);
   return (
-    <label className={BUMP_PICTURES ? s.bump : `${s.bump} ${s.bumpBare}`}>
-      {!BUMP_PICTURES ? null : offer.image ? (
+    <label className={s.bump}>
+      {offer.image ? (
         <img className={s.bumpPic} src={offer.image} alt="" width={84} height={84} loading="lazy" decoding="async" />
       ) : (
         <BumpCover lines={offer.cover} />
@@ -577,13 +576,13 @@ function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: C
         <span className={s.bumpPitch}>
           {offer.body.map((p, i) => (
             <span key={i} className={s.bumpPara}>
-              {i === 0 && <span className={s.bumpOffer}>ONE-TIME OFFER:</span>} <Rich text={fillSign(p, currency)} />
+              {i === 0 && <span className={s.bumpOffer}>ADD-ON OFFER:</span>} <Rich text={fillSign(p, currency)} />
             </span>
           ))}
         </span>
       ) : (
         <span className={s.bumpPitch}>
-          <span className={s.bumpOffer}>ONE-TIME OFFER:</span> <strong>{lead}</strong>
+          <span className={s.bumpOffer}>ADD-ON OFFER:</span> <strong>{lead}</strong>
           {rest} Only <strong>{money(offer.price, currency)}</strong>, added to this order.
         </span>
       )}

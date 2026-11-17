@@ -2,7 +2,6 @@ import { priceIn } from "@/lib/geo";
 import { getFunnel, resolveFunnel, type Product } from "@/lib/funnels";
 import type { Currency } from "@/lib/geo";
 import { restate } from "@/lib/restate";
-import { bumpWords } from "@/lib/bumpWords";
 import type { OrderOffer } from "../midi-drum-kit/offer";
 import { funnel } from "./funnel";
 import { ORDER } from "./words";
@@ -23,15 +22,13 @@ export async function orderOffer(currency: Currency, product?: Product, words: R
     bumps: (f.bumps ?? []).map((b) => {
       const known = funnel.bumps.find((x) => x.id === b.id);
       const was = priceIn(known?.price, currency) ?? priceIn(b.price, currency);
-      // The Unison-style words (lib/bumpWords.ts, 11-16) at the price sold here; else the page's own.
-      const said = bumpWords(b.id, priceIn(b.price, currency), "your new Drunk Swing Grooves");
       return {
         id: b.id,
         name: b.name,
         price: priceIn(b.price, currency),
         image: known?.image ?? b.image ?? "",
-        headline: said?.headline ?? known?.headline ?? `YES! Add ${b.name}!`,
-        body: (said?.body ?? words[b.id] ?? ORDER.bumps[b.id] ?? (b.pitch ? [b.pitch] : [])).map((p) => restate(p, was, priceIn(b.price, currency))),
+        headline: known?.headline ?? `YES! Add ${b.name}!`,
+        body: (words[b.id] ?? ORDER.bumps[b.id] ?? (b.pitch ? [b.pitch] : [])).map((p) => restate(p, was, priceIn(b.price, currency))),
       };
     }),
   };

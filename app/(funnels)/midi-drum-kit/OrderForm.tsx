@@ -18,7 +18,6 @@ import { OwnerSkip } from "../OwnerSkip";
 import { Arrow } from "../jazz-midi-pack/Cta";
 import k from "../jazz-midi-pack/btn.module.css";
 import j from "../jazz-midi-pack/checkout.module.css";
-import { BUMP_PICTURES } from "@/lib/bumpWords";
 import { Rich } from "../top-hits-midi-bundle/Rich";
 import d from "./order.module.css";
 import { copyFor, type Copy } from "./copy";
@@ -618,9 +617,9 @@ function BumpBox({
   price: string;
 }) {
   return (
-    <label className={BUMP_PICTURES ? j.bump : `${j.bump} ${j.bumpBare}`}>
+    <label className={j.bump}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {BUMP_PICTURES && <img className={j.bumpPic} src={o.image} alt="" width={84} height={84} loading="lazy" decoding="async" />}
+      <img className={j.bumpPic} src={o.image} alt="" width={84} height={84} loading="lazy" decoding="async" />
       <span className={j.bumpHead}>
         {/* Gone once ticked, as on ClickFunnels. */}
         {!on && <BumpArrow />}

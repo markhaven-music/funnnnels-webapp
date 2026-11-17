@@ -6,7 +6,6 @@ import { LP } from "@/app/(funnels)/midi-drum-kit/landingTest";
 import { FBB_LP } from "@/app/(funnels)/famous-beats-bundle/landingTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import { PRICE_37 } from "@/app/(funnels)/jazz-midi-pack/priceTest";
-import { BUMP_COPY_FROM } from "@/lib/bumpWords";
 import { ASTRO_FUNNEL, type Step } from "@/lib/beacon";
 import { codeFunnels, funnelLabel } from "@/lib/funnels";
 import { KIT_HOME, SHOP_URL } from "@/lib/liveUrl";
@@ -741,17 +740,23 @@ const FBB_COLORS: Record<string, { from: string; to: string }> = {
 // order page: Old = the week before, New = from its first whole day. Look at money per order (and the share
 // of orders with an add-on, in the orders table): words and pictures changed together, so it says whether
 // the pair works, not which of the two did it.
+// 2026-11-17 ("riporta gli order bump come erano prima (con le immagini)"): over, the old words and pictures
+// are back on every order page; kept here as an archive.
+/** When the Unison words and the boxes without pictures went live (UTC); they left at BUMP_TEST_ENDED. */
+const BUMP_COPY_FROM = "2026-11-16T22:45:00Z";
+const BUMP_TEST_ENDED = "2026-11-17T13:30:00Z";
 const bumpTest = (funnel: string, before: string): TestDef => ({
   funnel,
   name: "Order bumps: Unison words, no pictures",
   question: "Do the add-ons in Unison Audio's words and without pictures bring in more money per order than the old boxes?",
-  where: `Order page, the tick-box add-ons · Old = our words ("YES! Add …") with the product picture, ${before} → ${BUMP_COPY_FROM.slice(0, 10)} · New = "Yes, I want the …", ONE-TIME OFFER, the usual price against today's, "Producers who get the best results take this option.", 60-day quality guarantee, no picture, ${addDays(BUMP_COPY_FROM.slice(0, 10), 1)} → today (live 11-16 ~23:45 Italy)`,
+  where: `Order page, the tick-box add-ons · Old = our words ("YES! Add …") with the product picture, ${before} → ${BUMP_COPY_FROM.slice(0, 10)} · New = "Yes, I want the …", ONE-TIME OFFER, the usual price against today's, "Producers who get the best results take this option.", 60-day quality guarantee, no picture, ${addDays(BUMP_COPY_FROM.slice(0, 10), 1)} → 11-17 (live 11-16 ~23:45 Italy, back to the old boxes 11-17)`,
   variants: ["before", "after"],
   label: (v) => (v === "before" ? "Old · our words + picture" : "New · Unison words, no picture"),
   color: (v) => (v === "before" ? { from: "#94a3b8", to: "#64748b" } : { from: "#f472b6", to: "#db2777" }),
+  ended: { at: BUMP_TEST_ENDED, kept: "before" },
   windows: {
     before: { from: `${before}T00:00:00Z`, until: BUMP_COPY_FROM, days: [before, BUMP_COPY_FROM.slice(0, 10)] },
-    after: { from: BUMP_COPY_FROM, until: null, days: [addDays(BUMP_COPY_FROM.slice(0, 10), 1), null] },
+    after: { from: BUMP_COPY_FROM, until: BUMP_TEST_ENDED, days: [addDays(BUMP_COPY_FROM.slice(0, 10), 1), BUMP_TEST_ENDED.slice(0, 10)] },
   },
 });
 export const TESTS: TestDef[] = [
