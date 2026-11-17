@@ -68,7 +68,7 @@ const CSS = `.fv-pb{position:fixed;inset:0;z-index:2147483646;display:flex;align
 .fv-pb-t{margin:0 0 10px;font:800 24px/1.15 Poppins,Inter,system-ui,sans-serif;letter-spacing:-.01em}
 .fv-pb-p{margin:0 0 20px;color:rgba(255,255,255,.8)}
 .fv-pb-b{display:block;width:100%;min-height:60px;margin-top:10px;padding:14px 16px;border:0;border-radius:12px;font:800 19px/1.2 Inter,system-ui,sans-serif;cursor:pointer;touch-action:manipulation}
-.fv-pb-y{background:linear-gradient(180deg,#ffa13d 0%,#ec6a0c 100%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);box-shadow:0 8px 28px rgba(236,106,12,.4)}
+.fv-pb-y{background:linear-gradient(180deg,var(--ac-g1,#ffa13d) 0%,var(--ac-g2,#ec6a0c) 100%);color:var(--ac-ink,#fff);text-shadow:0 1px 2px rgba(0,0,0,.35);box-shadow:0 8px 28px rgba(var(--ac-rgbc,236,106,12),.4)}
 .fv-pb-n{background:#2a2930;color:#fff}`;
 
 /** The landing's script (in place of lib/availability.ts): taps on links to …/order open the pop-up. */
