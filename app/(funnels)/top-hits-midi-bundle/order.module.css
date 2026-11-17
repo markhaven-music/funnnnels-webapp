@@ -886,3 +886,59 @@
     padding-right: 12px;
   }
 }
+
+/* Ticking an add-on doesn't land at once ("subito carica sembra cheap"): the box spins
+   for a beat as if it's being added, the tick pops in, and the box flashes and settles. */
+.bumpCheck:checked {
+  animation:
+    bumpAdding 0.5s linear,
+    bumpTickPop 0.3s 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes bumpAdding {
+  0%,
+  100% {
+    background-image: none;
+    border-radius: 50%;
+    border: 2px solid rgb(0 0 0 / 0.15);
+    border-top-color: #000;
+  }
+  0% {
+    rotate: 0deg;
+  }
+  100% {
+    rotate: 360deg;
+  }
+}
+@keyframes bumpTickPop {
+  0% {
+    scale: 1;
+  }
+  45% {
+    scale: 1.35;
+  }
+  100% {
+    scale: 1;
+  }
+}
+.bump:has(.bumpCheck:checked) {
+  animation: bumpAdded 0.7s 0.5s ease-out;
+}
+@keyframes bumpAdded {
+  0% {
+    scale: 1;
+    box-shadow: 0 0 0 0 rgb(46 204 64 / 0.6);
+  }
+  30% {
+    scale: 1.025;
+  }
+  100% {
+    scale: 1;
+    box-shadow: 0 0 0 14px rgb(46 204 64 / 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bumpCheck:checked,
+  .bump:has(.bumpCheck:checked) {
+    animation: none;
+  }
+}
