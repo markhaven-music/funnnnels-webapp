@@ -9,6 +9,7 @@ import { isPreview, track } from "@/lib/beacon";
 import { readVariant } from "./abtest";
 import { LP } from "./landingTest";
 import { readPay, type PayVariant } from "./payTest";
+import { bumpFull } from "@/lib/bumpFull";
 import { BONUS, BONUS_WORDS } from "./bonusTest";
 import { BonusItem, endBonus, useBonus } from "./BonusClock";
 import { POPUP_BUMP, POPUP_WORDS, popupChoice } from "./popupBump";
@@ -440,17 +441,7 @@ function PayBody({
   bonusOn,
 }: PayState & { onCard?: () => void; cardPaying?: boolean; cardOff?: boolean; cardError?: string | null }) {
   const [paypalBusy, setPaypalBusy] = useState(false);
-  // The bar at the bottom shows while the real pay button is off screen (11-06: most
-  // people who left step 2 did it within 35 s on a phone, the button ~1,050px down).
-  const payRef = useRef<HTMLButtonElement>(null);
-  const [payInView, setPayInView] = useState(true);
-  useEffect(() => {
-    const el = payRef.current;
-    if (pay !== "b" || !el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(([e]) => setPayInView(e.isIntersecting), { threshold: 0.4 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [pay]);
+  // No bar docked at the bottom any more ("il bottone sticky mi sembra tolga spazio alla visione lo toglierei", 2026-11-17).
   const [paypalError, setPaypalError] = useState<string | null>(null);
   const paypal = method === "paypal";
   const busy = paypal ? paypalBusy : Boolean(cardPaying);
@@ -508,7 +499,7 @@ function PayBody({
 
       {bonusOn && bonusBump && <BonusItem w={w} image={bonusBump.image} price={bonusBump.price} currency={currency} lang={lang} compact />}
       {offered.map((o) => (
-        <BumpBox key={o.id} o={o} on={picked.includes(o.id)} toggle={toggle} t={t} currency={currency} price={cash(o.price)} />
+        <BumpBox key={o.id} o={o} on={picked.includes(o.id)} toggle={toggle} t={t} currency={currency} price={cash(o.price)} was={wasOf(o.id, o.price, cash)} />
       ))}
 
       {/* The order's lines, always open, as on the Jazz checkout. */}
@@ -550,7 +541,7 @@ function PayBody({
         </div>
       </div>
 
-      <button ref={payRef} type="button" className={`${k.btn} ${k.full}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
+      <button type="button" className={`${k.btn} ${k.full}`} disabled={blocked} onClick={() => (paypal ? payWithPayPal() : onCard?.())}>
         <span className={k.shine} aria-hidden />
         <span className={k.label}>
           <span>{busy && !cardOff ? (paypal ? t.openingPaypal : t.processing) : t.pay}</span>
@@ -565,39 +556,15 @@ function PayBody({
           {error}
         </p>
       )}
-      {/* Always there, slid out of sight while the real button is on screen (./order.module.css .payBarOn). */}
-      {pay === "b" && (
-        <div className={`${d.payBar} ${payInView ? "" : d.payBarOn}`} aria-hidden={payInView} inert={payInView}>
-          <button
-            type="button"
-            className={`${d.cta} ${d.ctaPay} ${d.payBarBtn}`}
-            disabled={blocked}
-            onClick={() => {
-              // The real button does the paying (card errors show beside it), so bring it on screen too.
-              payRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
-              payRef.current?.click();
-            }}
-          >
-            {busy && !cardOff ? (
-              paypal ? t.openingPaypal : t.processing
-            ) : (
-              <>
-                <svg viewBox="0 0 448 512" className={d.ctaArrow} aria-hidden>
-                  <path
-                    fill="currentColor"
-                    d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
-                  />
-                </svg>
-                {/* One line only in the bar ("togli get instant access"): the form's button keeps it. */}
-                {t.pay}
-              </>
-            )}
-          </button>
-        </div>
-      )}
     </>
   );
 }
+
+// The add-on's full price to strike, in the form's own money format (lib/bumpFull.ts).
+const wasOf = (id: string, price: number, cash: (n: number) => string) => {
+  const full = bumpFull(id, price);
+  return full ? cash(full) : null;
+};
 
 // One tick-box offer, as the Jazz checkout draws it: its picture, the red arrow until ticked, headline and
 // price, then its words after the red "ONE-TIME OFFER:".
@@ -608,6 +575,7 @@ function BumpBox({
   t,
   currency,
   price,
+  was,
 }: {
   o: OrderOffer["bumps"][number];
   on: boolean;
@@ -615,6 +583,7 @@ function BumpBox({
   t: Copy["form"];
   currency: Currency;
   price: string;
+  was: string | null;
 }) {
   return (
     <label className={j.bump}>
@@ -627,7 +596,10 @@ function BumpBox({
         <span className={j.bumpTitle} data-fxk={o.words && `${o.words}.headline`}>
           {o.headline}
         </span>
-        <span className={j.bumpPrice}>{price}</span>
+        <span className={j.bumpPrice}>
+          {was && <s className={j.bumpWas}>{was}</s>}
+          <b className={j.bumpNow}>{price}</b>
+        </span>
       </span>
       <span className={j.bumpPitch}>
         {o.body.map((p, i) => (

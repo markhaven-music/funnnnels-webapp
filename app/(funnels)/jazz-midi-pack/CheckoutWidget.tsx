@@ -7,6 +7,7 @@ import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { CardFields, cardElements, payWithCard, payWithWallet, Wallet, type CardLook, useFirstTouch } from "../CardFields";
 import { OwnerSkip } from "../OwnerSkip";
 import s from "./checkout.module.css";
+import { bumpFull } from "@/lib/bumpFull";
 import b from "./btn.module.css";
 import { Arrow } from "./Cta";
 import { pixel } from "./Tracking";
@@ -594,6 +595,7 @@ function PayStepBody({
 // the red arrow until ticked, headline and price, then the pitch.
 function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: Currency; ticked: boolean; onTick: (on: boolean) => void }) {
   const [lead, rest] = splitPitch(offer.pitch);
+  const full = bumpFull(offer.id, offer.price);
   return (
     <label className={s.bump}>
       {offer.image ? (
@@ -613,7 +615,10 @@ function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: C
         )}
         <input type="checkbox" checked={ticked} onChange={(e) => onTick(e.target.checked)} className={s.bumpCheck} />
         <span className={s.bumpTitle}>{offer.headline ?? `YES! Add the ${offer.name}!`}</span>
-        <span className={s.bumpPrice}>{money(offer.price, currency)}</span>
+        <span className={s.bumpPrice}>
+          {full && <s className={s.bumpWas}>{money(full, currency)}</s>}
+          <b className={s.bumpNow}>{money(offer.price, currency)}</b>
+        </span>
       </span>
       {offer.body ? (
         <span className={s.bumpPitch}>

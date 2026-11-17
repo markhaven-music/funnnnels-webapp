@@ -38,7 +38,7 @@ const OFFER = "all-access";
 // Each pack at its full price, as our own pages state it (2026-11-16, "devi fare confronto prezzo con
 // prezzi non scontati dei packs"): the Jazz MIDI Pack's value stack (97, jazz-midi-pack/funnel.ts
 // value.pack), TOP HITS' regular price after its launch (97, top-hits-chords/funnel.ts launch.after),
-// HUSTLE's "31 MIDI packs at 29, total 899" and the Expansions' "Usually 147" (the Drum Kit's order-form
+// HUSTLE's "31 MIDI packs at 29, total 899" and the Expansions' "Usually 81" (147 until 2026-11-17) (the Drum Kit's order-form
 // add-on words), and Famous Beats' "€97 Value" (the Astro MIDI Drum Kit page's offer list). Pounds and francs take the euro number.
 // 2026-11-16 evening, the long page ("non puoi aspettarti di vendere 97 euro senza una pagina da scrollare,
 // ascoltare, che convinca", "linguaggio emotivo", "i produttori amano vedere i box software"): each pack
@@ -118,7 +118,7 @@ const PACKS = [
     head: "Your Drum Kit, in three more worlds.",
     body: "The Drum Kit you just got gives your beats bounce. The Expansions take that feeling somewhere else: a lazy Lo-Fi pocket, a House night, an Afrobeat groove that makes people move. Complete beats, ready to go.",
     inside: ["172 MIDI drum files", "Complete beats for Lo-Fi, House and Afrobeat"],
-    full: { eur: 147, usd: 147 },
+    full: { eur: 81, usd: 81 },
     image: "/funnels/midi-drum-kit/bump-expansions.webp",
     w: 500,
     h: 500,

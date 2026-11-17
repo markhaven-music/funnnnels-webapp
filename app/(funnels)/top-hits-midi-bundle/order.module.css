@@ -887,6 +887,38 @@
   }
 }
 
+/* Every add-on: its full price struck through, then today's in a green that glints
+   ("il prezzo originale sbarrato e il prezzo affianco con una tinta verde sbrilluccicante"). */
+.bumpWas {
+  margin-right: 6px;
+  font-weight: 400;
+  color: rgb(0 0 0 / 0.5);
+  text-decoration-thickness: 1.5px;
+}
+.bumpNow {
+  font-weight: 800;
+  color: #0c9a43;
+  background: linear-gradient(100deg, #0c9a43 0%, #0c9a43 38%, #7df2a6 50%, #0c9a43 62%, #0c9a43 100%) 100% 0 / 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: bumpGlint 2.4s linear infinite;
+}
+@keyframes bumpGlint {
+  0%,
+  35% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bumpNow {
+    animation: none;
+  }
+}
+
 /* Ticking an add-on doesn't land at once ("subito carica sembra cheap"): the whole box is
    covered for a beat with a spinner, as if it's being added, then the cover turns green, a big
    white tick pops in its middle and a green ring goes out from the box, and it lifts with the

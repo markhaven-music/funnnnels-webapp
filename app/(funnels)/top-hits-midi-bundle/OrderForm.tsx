@@ -16,6 +16,7 @@ import { FORM, type FormWords } from "./formWords";
 import { B } from "./Lines";
 import { Rich } from "./Rich";
 import base from "./order.module.css";
+import { bumpFull } from "@/lib/bumpFull";
 
 // The ClickFunnels order form of /order-top-hits-midi-bundle, step for step:
 //   1 · Your Info → first, last, email (saved as a lead), "GO TO STEP 2"
@@ -385,6 +386,7 @@ function PayBody({
 
       {offer.bumps.map((b) => {
         const on = picked.includes(b.id);
+        const full = bumpFull(b.id, b.price);
         return (
           <label key={b.id} className={s.bump}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -394,7 +396,10 @@ function PayBody({
               {!on && <BumpArrow />}
               <input type="checkbox" checked={on} onChange={(e) => toggle(b.id, e.target.checked)} className={s.bumpCheck} />
               <span className={s.bumpTitle}>{b.headline}</span>
-              <span className={s.bumpPrice}>{money(b.price, currency)}</span>
+              <span className={s.bumpPrice}>
+                {full && <s className={s.bumpWas}>{money(full, currency)}</s>}
+                <b className={s.bumpNow}>{money(b.price, currency)}</b>
+              </span>
             </span>
             <span className={s.bumpText}>
               {b.body.map((p, i) => (
