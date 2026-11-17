@@ -102,26 +102,26 @@ export const faq: { q: string; a: string[] }[] = [
   {
     q: "What DAW do I need? Will this work in mine?",
     a: [
-      "The MIDI files work in **every major DAW** — FL Studio, Ableton Live, Logic Pro, Studio One, Cubase, Pro Tools, GarageBand, Reaper, Bitwig. MIDI is a universal format. Just drag and drop the file into a track and load your own piano, synth, or pad on top.",
+      "The MIDI files work in **every major DAW**: FL Studio, Ableton Live, Logic Pro, Studio One, Cubase, Pro Tools, GarageBand, Reaper, Bitwig. MIDI is a universal format. Just drag and drop the file into a track and load your own piano, synth, or pad on top.",
     ],
   },
   {
-    q: "Wait — is this samples or MIDI?",
+    q: "Wait, is this samples or MIDI?",
     a: [
-      "This is **pure MIDI**. You get the chord progressions — every chord, voicing, and inversion — exactly as they appear in the original songs, with each file labelled by **key and BPM**.",
+      "This is **pure MIDI**. You get the chord progressions (every chord, voicing, and inversion) exactly as they appear in the original songs, with each file labelled by **key and BPM**.",
       "Why MIDI matters: with MIDI you can use **any instrument you want**, change the key with one click, swap sounds, edit individual notes. Samples lock you in. MIDI sets you free.",
     ],
   },
   {
     q: "How do I find the right progression fast out of 1,000?",
     a: [
-      "Every file is named with the **artist, song, key and BPM**, and the whole pack is organised by artist. So if you want a moody minor progression at 120 BPM, or the exact chords behind a specific hit, you can find it in seconds — then drag the MIDI in and transpose it to your track's key.",
+      "Every file is named with the **artist, song, key and BPM**, and the whole pack is organised by artist. So if you want a moody minor progression at 120 BPM, or the exact chords behind a specific hit, you can find it in seconds, then drag the MIDI in and transpose it to your track's key.",
     ],
   },
   {
     q: "Are these the actual song MIDIs?",
     a: [
-      "No — these are **painstakingly transcribed** by ear, note for note. Every chord, voicing, and passing change has been transcribed from the original recordings. They sound identical to the originals when played through similar instruments, but they're original recreations, not extracted from the master tracks.",
+      "No, these are **painstakingly transcribed** by ear, note for note. Every chord, voicing, and passing change has been transcribed from the original recordings. They sound identical to the originals when played through similar instruments, but they're original recreations, not extracted from the master tracks.",
     ],
   },
   {
@@ -140,7 +140,7 @@ export const faq: { q: string; a: string[] }[] = [
   {
     q: "Do I need to know music theory?",
     a: [
-      "Not at all. That's the whole point. The MIDI files _are_ the theory — the chords, the voicings, the movement. Drop them in and you're already starting from a hit-level harmonic foundation. Add your own sound, your own melody, your own drums on top.",
+      "Not at all. That's the whole point. The MIDI files _are_ the theory: the chords, the voicings, the movement. Drop them in and you're already starting from a hit-level harmonic foundation. Add your own sound, your own melody, your own drums on top.",
     ],
   },
   {
@@ -152,13 +152,13 @@ export const faq: { q: string; a: string[] }[] = [
   {
     q: "What devices does this work on?",
     a: [
-      "Anywhere you can run a DAW — **Mac, Windows, Linux**, even iPad and iPhone if you produce in mobile DAWs like BeatMaker 3, GarageBand iOS, or Cubasis.",
+      "Anywhere you can run a DAW: **Mac, Windows, Linux**, even iPad and iPhone if you produce in mobile DAWs like BeatMaker 3, GarageBand iOS, or Cubasis.",
     ],
   },
   {
     q: "Will I get future updates or new packs?",
     a: [
-      "Yes — when we release new MIDI packs, existing owners get them at a steep discount or free, depending on the drop. We'll email you whenever a new volume goes live.",
+      "Yes, when we release new MIDI packs, existing owners get them at a steep discount or free, depending on the drop. We'll email you whenever a new volume goes live.",
     ],
   },
   {

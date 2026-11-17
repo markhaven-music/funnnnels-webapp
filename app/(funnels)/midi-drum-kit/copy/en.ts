@@ -79,7 +79,7 @@ export const en = {
     starsAlt: "5 stars",
     guaranteeTitle: "60-Day Quality Guarantee",
     guaranteeText:
-      "Every pattern in this kit is tested before release. If anything's wrong with your files, email support@thegrind.studio within 60 days and we'll make it right — a fresh download, a replacement, or a refund if we can't fix it.",
+      "Every pattern in this kit is tested before release. If anything's wrong with your files, email support@thegrind.studio within 60 days and we'll make it right: a fresh download, a replacement, or a refund if we can't fix it.",
     secureTitle: "Secure Payments",
     secureText:
       "Your payment is processed by Stripe, the payment platform trusted by millions of businesses including Amazon, Google and Shopify, or by PayPal. Your card details go straight to Stripe over 256-bit SSL encryption and never touch our servers.",

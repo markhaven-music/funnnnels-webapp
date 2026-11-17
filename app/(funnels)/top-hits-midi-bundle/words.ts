@@ -71,7 +71,7 @@ export const ORDER = {
   reviews: reviews.map((r) => ({ quote: r.quote, name: r.name, role: r.role })),
   guarantee: {
     title: "Quality Guarantee",
-    text: "Every pattern in this kit is tested before release. If anything's wrong with your files, email {email} within {days} days and we'll make it right — a fresh download, a replacement, or a refund if we can't fix it.",
+    text: "Every pattern in this kit is tested before release. If anything's wrong with your files, email {email} within {days} days and we'll make it right: a fresh download, a replacement, or a refund if we can't fix it.",
   },
   payments: {
     title: "Secure Payments",

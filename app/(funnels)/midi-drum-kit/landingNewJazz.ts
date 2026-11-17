@@ -46,6 +46,8 @@ const WORDS: Record<L, Record<string, string>> = {
     licenseText: "Use every file in your own music, commercial releases included: sell the beats, lease them, put them out. The money is yours, no royalties. You just can’t resell or share the MIDI files themselves.",
     licenseAlt: "GRIND STUDIO commercial license card for the MIDI Drum Kit",
     licenseTag: "Included with the kit",
+    // "metti che è limited a 1250 licenses da qualche parte nella landing page" (2026-11-17)
+    licenseLimit: "Limited to 1,250 licenses. Fewer producers walking around with your bounce.",
     stars: "5 stars",
     sealRing: "QUALITY GUARANTEE · QUALITY GUARANTEE · ",
     sealDays: "DAYS",
@@ -75,6 +77,7 @@ const WORDS: Record<L, Record<string, string>> = {
     licenseText: "Usa ogni file nella tua musica, uscite commerciali comprese: vendi i beat, dalli in leasing, pubblicali. I soldi sono tuoi, niente royalty. Non puoi solo rivendere o condividere i file MIDI.",
     licenseAlt: "Card della licenza commerciale GRIND STUDIO per il MIDI Drum Kit",
     licenseTag: "Inclusa nel kit",
+    licenseLimit: "Limitata a 1.250 licenze. Meno producer in giro con il tuo stesso bounce.",
     stars: "5 stelle",
     sealRing: "GARANZIA DI QUALITÀ · GARANZIA DI QUALITÀ · ",
     sealDays: "GIORNI",
@@ -154,11 +157,6 @@ const FAQ: Record<L, { at: number; q: string; a: string }[]> = {
     { at: 4, q: "È un abbonamento?", a: "No. {price} una volta sola, e i file sono tuoi." },
     { at: 4, q: "E se c’è qualcosa che non va nei miei file?", a: "Scrivi a support@thegrind.studio entro 60 giorni. Ti mandiamo un nuovo download o un file sostitutivo e, se non riusciamo a risolvere, ti rimborsiamo." },
   ],
-};
-// The guarantee, as three steps: the old page's promise (t255) said as what happens.
-const STEPS: Record<L, string[]> = {
-  en: ["Email support@thegrind.studio within 60 days", "We send a fresh download or a replacement", "If we can’t fix it, you get a refund"],
-  it: ["Scrivi a support@thegrind.studio entro 60 giorni", "Ti mandiamo un nuovo download o un file sostitutivo", "Se non riusciamo a risolvere, ti rimborsiamo"],
 };
 
 // What each bonus holds, in the summary's list (counted from the files buyers download).
@@ -312,7 +310,7 @@ ${items.join("\n")}
 export function license(c: JazzCtx): string {
   const w = WORDS[l(c)];
   return `<div class="jz dk-license"><div class="jz-guarantee jz-panel jz-two dk-foil"><div class="jz-twoBody jz-licenseArt"><img src="${IMG}dk-license-640.webp" srcset="${IMG}dk-license-640.webp 640w, ${IMG}dk-license-900.webp 900w" sizes="(min-width: 1000px) 420px, 90vw" width="1168" height="880" alt="${esc(w.licenseAlt)}" loading="lazy" decoding="async"></div>
-<div class="jz-twoHead"><p class="dk-eyebrow">${esc(w.licenseTag)}</p><h2 class="jz-h2">${esc(w.licenseTitle)}</h2><p class="jz-sub">${esc(w.licenseText)}</p></div></div></div>
+<div class="jz-twoHead"><p class="dk-eyebrow">${esc(w.licenseTag)}</p><h2 class="jz-h2">${esc(w.licenseTitle)}</h2><p class="jz-sub">${esc(w.licenseText)}</p><p class="dk-limit">${esc(w.licenseLimit)}</p></div></div></div>
 `;
 }
 
@@ -338,11 +336,10 @@ ${items.map((x) => `<details><summary>${x.q}</summary><p>${x.a}</p></details>`).
 /** The guarantee as the Jazz page's panel: the seal, the old page's words (t252–t254), and its promise as three steps ("remake the Risk Free section"). */
 export function guarantee(c: JazzCtx): string {
   const w = WORDS[l(c)];
-  const seal = `<svg class="jz-seal" viewBox="0 0 200 200" role="img" aria-label="${esc(w.sealAlt)}"><defs><linearGradient id="dk-seal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb866"/><stop offset=".5" stop-color="#f5851f"/><stop offset="1" stop-color="#c85a06"/></linearGradient><path id="dk-seal-arc" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0"/></defs><circle cx="100" cy="100" r="98" fill="url(#dk-seal)"/><circle cx="100" cy="100" r="88" fill="#0d0c10"/><circle cx="100" cy="100" r="60" fill="none" stroke="url(#dk-seal)" stroke-width="1.5"/><text class="jz-sealRing" fill="#ffa13d"><textPath href="#dk-seal-arc" textLength="462">${esc(w.sealRing)}</textPath></text><text x="100" y="108" text-anchor="middle" class="jz-sealDays" fill="#ffa13d">14</text><text x="100" y="134" text-anchor="middle" class="jz-sealUnit" fill="#fff">${esc(w.sealDays)}</text></svg>`;
-  const steps = STEPS[l(c)].map((s, i) => `<li><b>${i + 1}</b><span>${esc(s)}</span></li>`).join("");
+  const seal = `<svg class="jz-seal" viewBox="0 0 200 200" role="img" aria-label="${esc(w.sealAlt)}"><defs><linearGradient id="dk-seal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb866"/><stop offset=".5" stop-color="#f5851f"/><stop offset="1" stop-color="#c85a06"/></linearGradient><path id="dk-seal-arc" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0"/></defs><circle cx="100" cy="100" r="98" fill="url(#dk-seal)"/><circle cx="100" cy="100" r="88" fill="#0d0c10"/><circle cx="100" cy="100" r="60" fill="none" stroke="url(#dk-seal)" stroke-width="1.5"/><text class="jz-sealRing" fill="#ffa13d"><textPath href="#dk-seal-arc" textLength="462">${esc(w.sealRing)}</textPath></text><text x="100" y="108" text-anchor="middle" class="jz-sealDays" fill="#ffa13d">60</text><text x="100" y="134" text-anchor="middle" class="jz-sealUnit" fill="#fff">${esc(w.sealDays)}</text></svg>`;
   return `<div class="jz"><section class="jz-sec dk-guar"><div class="jz-wrap">
 <div class="jz-guarantee jz-panel jz-two dk-foil"><div class="jz-sealWrap jz-twoBody">${seal}</div>
-<div class="jz-twoHead"><p class="dk-eyebrow">${plain(c.words("t253"))}</p><h2 class="jz-h2">${c.words("t252")}</h2><p class="jz-sub">${c.words("t254")}</p><ol class="dk-steps">${steps}</ol></div></div>
+<div class="jz-twoHead"><p class="dk-eyebrow">${plain(c.words("t253"))}</p><h2 class="jz-h2">${c.words("t252")}</h2><p class="jz-sub">${c.words("t254")}</p></div></div>
 </div></section></div>
 `;
 }
@@ -410,6 +407,7 @@ export const JAZZ_MORE_CSS = `
 
 /* the license card, in the kit's own section */
 .dk-license{max-width:1083px;margin:64px auto 8px}
+.dk-limit{margin-top:16px;font:700 16px/1.4 var(--font-display),sans-serif;color:var(--brass-hi,#ff9a2e)}
 .dk-license .jz-twoBody{width:100%}
 .dk-license .jz-licenseArt{background:#0d0c10}
 .dk-license .jz-licenseArt img{max-width:340px}

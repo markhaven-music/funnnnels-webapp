@@ -29,7 +29,7 @@ const en: AbandonEmail[] = [
 
 Noticed you almost finished your order but didn't click submit.
 
-Just checking — did the page crash?
+Just checking: did the page crash?
 
 I've saved your cart for you here just in case:
 

@@ -194,7 +194,7 @@ ${FOIL.map((s) => `${s}::after`).join(",")}{content:"";position:absolute;z-index
 /* The folder tree, as a file browser: the zip's own names, files counted, two file names per folder. */
 .dkt-sec{width:100%;box-sizing:border-box;background:#070707;padding:64px 16px 72px;color:#fff;font-family:${BODY}}
 .dkt-wrap{max-width:1083px;margin:0 auto}
-.dkt-grid{display:grid;gap:24px;margin-top:32px}
+.dkt-grid{display:grid;gap:24px;max-width:760px;margin:32px auto 0}
 .dkt-win{min-width:0;padding-bottom:10px;border-radius:12px;background:#0d0c10;text-align:left}
 .dkt-bar{display:flex;align-items:center;gap:6px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.07);font:600 12px/1 ${MONO};color:rgba(255,255,255,.62)}
 .dkt-bar i{width:9px;height:9px;border-radius:50%;background:#2a2932}
@@ -212,6 +212,7 @@ details[open]>summary.dkt-row .c{rotate:90deg}
 .dkt-row b{font:500 11px/1 ${MONO};color:rgba(255,255,255,.5);white-space:nowrap}
 .dkt-row span{min-width:0;overflow-wrap:anywhere}
 .dkt-tree ul .dkt-row{min-height:30px;color:rgba(255,255,255,.86)}
+.dkt-files{max-height:220px;margin:0 0 6px;padding:0;list-style:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
 .dkt-file{padding:3px 6px 5px 41px;font-size:11.5px;color:rgba(255,255,255,.5);overflow-wrap:anywhere}
 .dkt-file i{margin-left:6px;font-style:normal;white-space:nowrap;color:rgba(255,255,255,.32)}
 .dkt-label{margin:14px 14px 4px;font:600 10.5px/1.2 ${MONO};letter-spacing:.12em;text-transform:uppercase;color:#ff9a2e}
@@ -219,7 +220,6 @@ details[open]>summary.dkt-row .c{rotate:90deg}
 .dkt-facts li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;align-items:start}
 .dkt-facts svg{width:18px;height:18px;margin-top:3px;color:#22c55e}
 .dkt-facts b{color:#fff}
-.dkt-side .jz-ctaBlock{margin-top:28px}
 
 /* "No bounce vs bounce": one switch, one roll, one play button. */
 .dkn{width:100%;max-width:820px;box-sizing:border-box;margin:40px auto 48px;padding:22px 16px 18px;border-radius:12px;background:#0d0c10;text-align:left;font-family:${BODY};color:#fff}
@@ -281,7 +281,7 @@ details[open]>summary.dkt-row .c{rotate:90deg}
 
 @media (max-width:640px){.dkp-sec{padding:48px 12px 56px}.dkp-panel{padding:14px 14px 12px;margin-top:24px}.dkp-chips{margin:0 -14px;padding:0 14px}.dkp-grid{margin:0 -14px;padding:0 14px 6px}.dkp-opt .dkp-chips{margin:0 -14px 0 0;padding:0 14px 0 0}}
 @media (min-width:720px){.dkp-bar{max-width:560px;margin-left:auto;margin-right:auto}.dkp-mix{grid-template-columns:repeat(4,minmax(0,1fr))}.dkb-rolls,.dkb-clips{grid-template-columns:repeat(2,minmax(0,1fr))}.dkb-rolls{min-height:390px}.dkpads{grid-template-columns:repeat(4,minmax(0,1fr))}.dkf{gap:16px}.dkf-top{grid-template-columns:140px minmax(0,1fr);gap:18px}.dkf-top img{width:140px;height:140px}.dkf h3{font-size:22px}.dkf-more ul{grid-template-columns:repeat(2,minmax(0,1fr))}.dkn{padding:30px 32px 26px}}
-@media (min-width:1000px){.dkt-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:start}.dkt-side{position:sticky;top:72px;padding-top:8px}.dkb{gap:72px}.dkb>li{grid-template-columns:minmax(0,.36fr) minmax(0,.64fr);align-items:start;gap:0 56px;padding:44px 48px}.dkb-cover{grid-row:1/span 2;max-width:none;position:sticky;top:64px}.dkb-label{font-size:14px}.dkb h3{margin-top:10px;font-size:30px}.dkb-text{margin-top:14px;font-size:18px}.dkb-inside{gap:8px;margin-top:14px;font-size:17px}.dkb-preview{grid-column:2;margin-top:30px}.dkb>li.bare .dkb-preview{display:none}}
+@media (min-width:1000px){.dkb{gap:72px}.dkb>li{grid-template-columns:minmax(0,.36fr) minmax(0,.64fr);align-items:start;gap:0 56px;padding:44px 48px}.dkb-cover{grid-row:1/span 2;max-width:none;position:sticky;top:64px}.dkb-label{font-size:14px}.dkb h3{margin-top:10px;font-size:30px}.dkb-text{margin-top:14px;font-size:18px}.dkb-inside{gap:8px;margin-top:14px;font-size:17px}.dkb-preview{grid-column:2;margin-top:30px}.dkb>li.bare .dkb-preview{display:none}}
 `;
 
 type L = "en" | "it";
@@ -581,17 +581,34 @@ function folders(c: Ctx): string {
   return `<ul class="dkf">\n${cards}\n<li class="dkf-more"><h3>${esc(c.w.moreTitle)}</h3><p>${esc(c.w.moreText)}</p><ul>${more}</ul></li>\n</ul>\n`;
 }
 
+// The folder tree's file lists: every file of a folder when it opens (the player's own lists, cached by the browser).
+const TREE_JS = `(function(){var root=document.getElementById('folders');if(!root)return;var done={};
+function fill(ul){var g=ul.getAttribute('data-g');if(!g||done[g])return;done[g]=1;
+fetch('${V2}'+g+'.json').then(function(r){return r.json();}).then(function(list){var f=document.createDocumentFragment();
+list.forEach(function(x){var li=document.createElement('li');li.className='dkt-file';li.textContent=String(x.f).split('/').pop();f.appendChild(li);});
+ul.textContent='';ul.appendChild(f);}).catch(function(){done[g]=0;});}
+function shown(u){for(var p=u.parentElement.closest('details');p;p=p.parentElement.closest('details'))if(!p.open)return false;return true;}
+function check(){root.querySelectorAll('ul.dkt-files').forEach(function(u){if(shown(u))fill(u);});}
+var live=false;function go(){live=true;check();}
+root.addEventListener('toggle',function(){if(live)check();},true);
+root.addEventListener('pointerdown',function(){live=true;},true);root.addEventListener('keydown',function(){live=true;},true);
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){if(!es[0].isIntersecting)return;io.disconnect();go();},{rootMargin:'400px'});io.observe(root);}else go();})();`;
+
 /** "Folder Structure Breakdown" as the tree it is: the zip's folders by their names, their files counted, a file name or two each; then the bonuses' folders. */
 function folderTree(c: Ctx): string {
   const { w } = c;
   const count = (n: number | string) => `<b>${n}</b>`;
   // the hand-written folders without their counts (see folders()); 12 to 17 keep theirs
-  const file = (names: string[]) => names.slice(0, 1).map((x) => `<li class="dkt-file">${esc(x)}<i>…</i></li>`).join("");
+  // Every file of a folder ("se apro le cartelle non escono tutti i midi", 2026-11-17): the first two in the page,
+  // the whole list (the player's own player/v6/<group>.json) filled in by TREE_JS when the folder opens, in a box
+  // that scrolls on its own so the page stays short.
+  const files = (g: { id: string; n: number; ex: string[] }) =>
+    `<ul class="dkt-files" data-g="${g.id}" data-n="${g.n}">${g.ex.map((x) => `<li class="dkt-file">${esc(x)}</li>`).join("")}</ul>`;
   const kit = tree.map((t) => {
     const inner = t.groups.length > 1
-      ? t.groups.map((g) => `<li><div class="dkt-row"><span></span>${FOLDER}<span>${esc(g.dir)}</span><b></b></div><ul>${file(g.ex)}</ul></li>`).join("")
-      : file(t.groups[0].ex);
-    return `<li><details${t.id === "808" ? " open" : ""}><summary class="dkt-row">${CHEVRON}${FOLDER}<span>${esc(t.dir)}</span><b></b></summary><ul>${inner}</ul></details></li>`;
+      ? `<ul>${t.groups.map((g) => `<li><details open><summary class="dkt-row">${CHEVRON}${FOLDER}<span>${esc(g.dir)}</span>${count(g.n)}</summary>${files(g)}</details></li>`).join("")}</ul>`
+      : files(t.groups[0]);
+    return `<li><details${t.id === "808" ? " open" : ""}><summary class="dkt-row">${CHEVRON}${FOLDER}<span>${esc(t.dir)}</span>${count(t.n)}</summary>${inner}</details></li>`;
   }).join("\n");
   const bonus = TREE_BONUSES.map((b) => {
     const head = `${FOLDER}<span>${esc(b.dir)}</span>${count(b.n)}`;
@@ -599,7 +616,6 @@ function folderTree(c: Ctx): string {
     const subs = b.subs.map((x) => { const [dir, n] = x.split("|"); return `<li><div class="dkt-row"><span></span>${FOLDER}<span>${esc(dir)}</span>${n ? count(n) : "<b></b>"}</div></li>`; }).join("");
     return `<li><details><summary class="dkt-row">${CHEVRON}${head}</summary><ul>${subs}</ul></details></li>`;
   }).join("\n");
-  const facts = w.facts.split("|").map((x) => `<li>${TICK}<span>${esc(x).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")}</span></li>`).join("");
   return `<div class="dkt-sec" id="folders"><div class="dkt-wrap">
 <h2 class="dkp-h2">${c.words("t171")}</h2>
 <p class="dkp-sub">${esc(w.treeSub)}</p>
@@ -617,7 +633,6 @@ ${MORE.map((m) => `<li><div class="dkt-row"><span></span>${FOLDER}<span>${esc(m.
 <ul class="dkt-tree">
 ${bonus}
 </ul></div>
-<div class="dkt-side"><ul class="dkt-facts">${facts}</ul><div class="jz"><div class="jz-ctaBlock">${key(c.j)}</div></div></div>
 </div>
 </div></div>
 `;
@@ -824,5 +839,5 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
   };
   return out
     .replace("</head>", () => `<style>${CSS}</style>\n</head>`)
-    .replace("</body>", () => `<script type="application/json" id="dk-cfg">${JSON.stringify(cfg).replace(/</g, "\\u003c")}</script>\n<script>${CLIENT_JS}</script>\n</body>`);
+    .replace("</body>", () => `<script type="application/json" id="dk-cfg">${JSON.stringify(cfg).replace(/</g, "\\u003c")}</script>\n<script>${CLIENT_JS}</script>\n<script>${TREE_JS}</script>\n</body>`);
 }

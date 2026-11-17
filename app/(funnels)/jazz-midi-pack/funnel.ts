@@ -226,7 +226,7 @@ export const funnel = {
     { name: "Progressions in Every Key", files: 984, what: "Every progression transposed to every key, voice-led pads." },
     { name: "Bass Lines", files: 246, what: "Walking, two-feel and bossa nova bass for each progression." },
     { name: "Combo Loops", files: 82, what: "Drop-2 comping + walking bass + ride, two choruses." },
-    { name: "Genre Loops", files: 1312, what: "Lofi, neo soul, trap soul and deep house — chords, bass, drums split." },
+    { name: "Genre Loops", files: 1312, what: "Lofi, neo soul, trap soul and deep house: chords, bass, drums split." },
   ],
   // In the pack's order since 2026-11-05: best first (make_pack.py GROUPS).
   progressions: [
