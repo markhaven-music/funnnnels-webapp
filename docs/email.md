@@ -36,7 +36,29 @@ Addresses @example.com are tests and stay out of every number.
 
 Newsletter-type emails carry an unsubscribe link and one-click
 `List-Unsubscribe` headers (`lib/mail.ts`); unsubscribing sets
-`contacts.status`. SES's own suppression list stops bounces and complaints.
+`contacts.status`. SES's own suppression list stops bounces and complaints,
+and `lib/bounces.ts` copies it onto `contacts.status` (bounced / complained)
+twice an hour from the email cron (the IAM user `funnnnels-ses` may call
+`ses:ListSuppressedDestinations`).
+
+## Deliverability (2026-11-17)
+
+- Broadcasts and launch emails go to **engaged contacts only** by default
+  (`engaged_only`, db/email-engaged.sql): buyers, a real open or click in the
+  last 90 days, or joined in the last 30. Untick it in the editor for the few
+  that should reach the whole list. Daily mail to people who never open is
+  what sends a domain to spam.
+- Broadcasts go out at **16:00 Italy** (10:00 New York): most buyers are in
+  the US.
+- DNS (Namecheap): SPF on thegrind.studio is
+  `v=spf1 include:spf.privateemail.com ~all` (support@'s mailbox; ClickFunnels
+  removed); SES signs DKIM as thegrind.studio (3 CNAMEs); DMARC `p=none`.
+  SES's MAIL FROM is set to `bounce.thegrind.studio` with its SPF TXT
+  `v=spf1 include:amazonses.com ~all`, but its MX
+  (`10 feedback-smtp.eu-west-1.amazonses.com`) can't be added while
+  Namecheap's mail setting is "Private Email" (no MX type offered), so SES
+  falls back to amazonses.com as MAIL FROM: DMARC still passes through DKIM.
+- Reputation on 2026-11-17: bounces 0.17%, complaints 0, account HEALTHY.
 
 ## Writing them
 
