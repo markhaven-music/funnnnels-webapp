@@ -10,6 +10,8 @@ import { AB_CARRY_SCRIPT } from "../abtest";
 import { SectionView, isSectionType, type Ctx } from "../sections";
 import { Tracking } from "../Tracking";
 import { Beacon } from "../../Beacon";
+import { PopupOffer } from "../PopupOffer";
+import { POPUP_OFFER } from "../offerPopup";
 import { display } from "../fonts";
 import s from "../jazz.module.css";
 
@@ -54,8 +56,10 @@ const valid = (b: unknown): b is Section =>
 export default async function JazzMidiPackPage({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
-  // Its price as dashboard → Products has it.
-  const amount = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency);
+  // Its price as dashboard → Products has it, and the popup offer's (../offerPopup.ts; none if it's gone from Products).
+  const f = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
+  const amount = priceIn(f.price, currency);
+  const popup = f.bumps?.find((b) => b.id === POPUP_OFFER.item);
   const price = money(amount, currency);
   // strict: a failed read keeps the last good page in the cache instead of
   // caching the coded defaults over the published copy.
@@ -75,7 +79,8 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
       {/* The Buy buttons take the ad tags to the order page (../abtest.ts AB_CARRY_SCRIPT). */}
       <script dangerouslySetInnerHTML={{ __html: AB_CARRY_SCRIPT }} />
       <Tracking value={amount} currency={currency} />
-      <Beacon funnel={funnel.slug} page="landing" />
+      <Beacon funnel={funnel.slug} page="landing" noAvailability={!!popup} />
+      {popup && <PopupOffer price={money(priceIn(popup.price, currency), currency)} />}
       {/* Red, on top, like TOP HITS' and the Drum Kit's ("aggiungi anche banner rossi sopra black friday come gli altri funnels"). */}
       <div className={s.bfbar}>
         <b>BLACK FRIDAY:</b> 90% Sale Ends Soon

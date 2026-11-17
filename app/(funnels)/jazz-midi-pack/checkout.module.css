@@ -548,3 +548,16 @@
 .light .orderTag {
   color: #d1442b;
 }
+/* "Remove" beside an add-on taken in the landing's popup (./popupOffer.ts). */
+.sumRemove {
+  margin-left: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  opacity: 0.7;
+  cursor: pointer;
+}

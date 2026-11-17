@@ -7,6 +7,7 @@ import { LP } from "@/app/(funnels)/midi-drum-kit/landingTest";
 import { FBB_LP } from "@/app/(funnels)/famous-beats-bundle/landingTest";
 import { AB as HEADLINE_TEST, COLORS as HEADLINE_COLORS, LABELS as HEADLINE_LABELS } from "@/app/(funnels)/jazz-midi-pack/abtest";
 import { PRICE_37 } from "@/app/(funnels)/jazz-midi-pack/priceTest";
+import { POPUP_OFFER } from "@/app/(funnels)/jazz-midi-pack/offerPopup";
 import { ASTRO_FUNNEL, type Step } from "@/lib/beacon";
 import { codeFunnels, funnelLabel } from "@/lib/funnels";
 import { KIT_HOME, SHOP_URL } from "@/lib/liveUrl";
@@ -283,6 +284,8 @@ export type Analytics = {
   bonuses: BonusStats[];
   /** Before/after the availability popup (availabilityStats), whatever the range. */
   availability: AvailabilityStats | null;
+  /** Before/after the Jazz landing's popup offer (popupOfferStats), whatever the range. */
+  popupOffer: PopupOfferStats | null;
   /** Day by day over the range (dashboard home), oldest first. */
   days: Day[];
   /** The same number of days just before the range, for the comparisons; null for "all". */
@@ -675,6 +678,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
     ),
     bonuses: (await Promise.all(BONUS_FUNNELS.map((b) => soft(`5-minute bonus (${b.name})`, bonusStats(allSales, b), null)))).filter((b): b is BonusStats => !!b),
     availability: await soft("availability popup", availabilityStats(now), null),
+    popupOffer: await soft("popup offer", popupOfferStats(now, rate), null),
     ...daily(range, since, last, dayRows, allSales, rate, trackingSince),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
@@ -1360,6 +1364,127 @@ async function availabilityStats(now: number): Promise<AvailabilityStats> {
       .sort((a, b) => b.before.landings + b.after.landings - (a.before.landings + a.after.landings)),
   };
 }
+
+// ─── the Jazz landing's popup offer ────────────────────────────
+// Since POPUP_OFFER.since (app/(funnels)/jazz-midi-pack/offerPopup.ts) a tap on the Jazz
+// landing's button opens a popup offering an add-on (POPUP_OFFER.item) before the order page
+// ("tracciamo se AOV sale"). Before = from POPUP_OFFER.before (its comparison
+// window, see offerPopup.ts) to the start;
+// after = since. Orders from the orders table (first orders, upsells apart, dollars at today's
+// rate); the upsells paid after each order on their own line; visitors from the live tracking.
+
+export type PopupOfferSide = {
+  from: string;
+  to: string | null;
+  hours: number;
+  /** Browsers that opened the Jazz landing in the window. */
+  landings: number;
+  /** First orders paid in the window. */
+  orders: number;
+  /** Of them, those with the popup's add-on. */
+  took: number;
+  /** € of the first orders (add-ons in), and of the upsells paid after them. */
+  revenue: number;
+  upsells: number;
+  /** Average first order, €. */
+  aov: number | null;
+  /** Its standard deviation, for the chance below. */
+  sd: number | null;
+};
+export type PopupOfferStats = {
+  funnel: string;
+  item: string;
+  since: string;
+  before: PopupOfferSide;
+  after: PopupOfferSide;
+  /** Chance the average order is really higher after (normal approximation); null under 2 orders a side. */
+  chanceAovUp: number | null;
+  /** Chance orders per landing visitor are higher after (normal approximation): the popup could cost orders. */
+  chanceOrderUp: number | null;
+};
+
+async function popupOfferStats(now: number, rate: number): Promise<PopupOfferStats> {
+  const db = supabase();
+  const from = Date.parse(POPUP_OFFER.before);
+  const since = Date.parse(POPUP_OFFER.since);
+  const iso = (ms: number) => new Date(ms).toISOString();
+  const side = (t: number) => (t >= since ? "after" : "before");
+
+  // Visitors: each browser once, on the side of its first Jazz landing in the window.
+  const off = /^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/;
+  const firstSeen = new Map<string, number>();
+  for (let at = 0; at < 100_000; at += 1000) {
+    const { data, error } = await db
+      .from("live_events")
+      .select("sid, at, host")
+      .eq("funnel", POPUP_OFFER.funnel)
+      .eq("page", "landing")
+      .gte("at", iso(from))
+      .order("id")
+      .range(at, at + 999);
+    if (error) throw error;
+    for (const e of (data ?? []) as { sid: string; at: string; host: string }[]) {
+      if (process.env.NODE_ENV === "production" && off.test(e.host)) continue;
+      const t = Date.parse(e.at);
+      if (!firstSeen.has(e.sid) || t < firstSeen.get(e.sid)!) firstSeen.set(e.sid, t);
+    }
+    if (!data || data.length < 1000) break;
+  }
+
+  type O = { id: string; created_at: string; amount_cents: number; currency: string; items: string[] | null; parent: string | null; offer: string | null };
+  const { data, error } = await db
+    .from("orders")
+    .select("id, created_at, amount_cents, currency, items, parent, offer")
+    .eq("funnel", POPUP_OFFER.funnel)
+    .eq("status", "succeeded")
+    .gte("created_at", iso(from))
+    .limit(5000);
+  if (error) throw error;
+  const rows = (data ?? []) as O[];
+  const eur = (o: O) => (o.amount_cents / 100) * (o.currency === "usd" ? rate : 1);
+  const upsellsOf = new Map<string, number>();
+  for (const o of rows) if (o.parent) upsellsOf.set(o.parent, (upsellsOf.get(o.parent) ?? 0) + eur(o));
+
+  const blank = () => ({ landings: 0, orders: 0, took: 0, revenue: 0, upsells: 0, amounts: [] as number[] });
+  const t = { before: blank(), after: blank() };
+  for (const at of firstSeen.values()) t[side(at)].landings += 1;
+  for (const o of rows) {
+    if (o.parent || o.offer) continue;
+    const v = t[side(Date.parse(o.created_at))];
+    const amount = eur(o);
+    v.orders += 1;
+    v.revenue += amount;
+    v.upsells += upsellsOf.get(o.id) ?? 0;
+    v.amounts.push(amount);
+    if ((o.items ?? []).includes(POPUP_OFFER.item)) v.took += 1;
+  }
+  const stats = (a: number[]) => {
+    if (!a.length) return { aov: null, sd: null };
+    const mean = a.reduce((x, y) => x + y, 0) / a.length;
+    const sd = a.length > 1 ? Math.sqrt(a.reduce((x, y) => x + (y - mean) ** 2, 0) / (a.length - 1)) : null;
+    return { aov: mean, sd };
+  };
+  const make = (k: "before" | "after", a: number, b: number): PopupOfferSide => {
+    const { amounts, ...v } = t[k];
+    return { from: iso(a), to: b < now ? iso(b) : null, hours: Math.max(0, (b - a) / 3_600_000), ...v, ...stats(amounts) };
+  };
+  const before = make("before", from, since);
+  const after = make("after", since, now);
+
+  let chanceAovUp: number | null = null;
+  if (before.orders >= 2 && after.orders >= 2 && before.aov != null && after.aov != null) {
+    const se = Math.sqrt((before.sd ?? 0) ** 2 / before.orders + (after.sd ?? 0) ** 2 / after.orders);
+    chanceAovUp = se > 0 ? phi((after.aov - before.aov) / se) : after.aov > before.aov ? 1 : after.aov < before.aov ? 0 : 0.5;
+  }
+  let chanceOrderUp: number | null = null;
+  if (before.landings && after.landings) {
+    const [p, q] = [after.orders / after.landings, before.orders / before.landings];
+    const se = Math.sqrt((p * (1 - p)) / after.landings + (q * (1 - q)) / before.landings);
+    chanceOrderUp = se > 0 ? phi((p - q) / se) : null;
+  }
+  return { funnel: POPUP_OFFER.funnel, item: POPUP_OFFER.item, since: POPUP_OFFER.since, before, after, chanceAovUp, chanceOrderUp };
+}
+
 
 /** Standard normal CDF (Abramowitz–Stegun 7.1.26). */
 function phi(z: number): number {

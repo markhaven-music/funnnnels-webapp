@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 // "pure": Stripe.js loads when loadStripe is called, not as soon as this file does.
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
@@ -15,6 +15,7 @@ import { cookieCountry, SIGN, type Currency, fillSign } from "@/lib/geo";
 import { endJazzBonus, JazzBonusItem, useJazzBonus, type BonusCfg } from "./BonusClock";
 import { JAZZ_BONUS, JAZZ_BONUS_WORDS, type JazzBonusWords } from "./fiveMinBonus";
 import c from "./fiveMinBonus.module.css";
+import { CHOICE_MS, POPUP_WORDS } from "./offerPopup";
 
 // The two-step order form, copied from the ClickFunnels checkout:
 //   1 · Your info  → name + email (saved as a lead before any card is asked for)
@@ -79,7 +80,9 @@ type Props = {
 type Info = { firstName: string; lastName: string; email: string };
 
 // headline / body: the offer's own words (`{c}` = currency sign, `**bold**`); without them, "YES! Add the <name>!" and the pitch.
-type Bump = { id: string; name: string; price: number; pitch: string; cover?: [string, string]; image?: string; headline?: string; body?: string[] };
+// popup: offered in the landing's popup (./offerPopup.ts), not as a tick box: the localStorage key
+// of the buyer's answer there; in the order when they said yes, a summary line with Remove.
+type Bump = { id: string; name: string; price: number; pitch: string; cover?: [string, string]; image?: string; headline?: string; body?: string[]; popup?: string };
 
 /** The tick-box offers this checkout shows: the list, or the single bump. */
 const offersOf = (p: Pick<Props, "bump" | "bumps">): Bump[] => p.bumps ?? (p.bump ? [{ id: "bump", ...p.bump }] : []);
@@ -110,6 +113,27 @@ export function CheckoutWidget(props: Props) {
   const offers = offersOf(props);
   const total = props.price + offers.filter((o) => picked.includes(o.id)).reduce((sum, o) => sum + o.price, 0);
   const toggle = (id: string, on: boolean) => setPicked((now) => (on ? [...now.filter((x) => x !== id), id] : now.filter((x) => x !== id)));
+  // The landing popup's answer, read once the page is shown: a prerendered page mounts
+  // while the popup is still up, before the buyer answered.
+  const popups = offers.filter((o) => o.popup).map((o) => `${o.id}|${o.popup}`).join(",");
+  useEffect(() => {
+    if (!popups) return;
+    const read = () => {
+      for (const pair of popups.split(",")) {
+        const [id, key] = pair.split("|");
+        try {
+          const a = JSON.parse(localStorage.getItem(key) ?? "null") as { add?: boolean; at?: number } | null;
+          if (a?.add && typeof a.at === "number" && Date.now() - a.at < CHOICE_MS) toggle(id, true);
+        } catch {}
+      }
+    };
+    const doc = document as Document & { prerendering?: boolean };
+    if (doc.prerendering) {
+      doc.addEventListener("prerenderingchange", read, { once: true });
+      return () => doc.removeEventListener("prerenderingchange", read);
+    }
+    read();
+  }, [popups]);
   const [wanted, setWanted] = useState(!props.deferStripe);
   // …or, sooner, once they do anything on the page (../CardFields.tsx useFirstTouch).
   const touched = useFirstTouch();
@@ -489,7 +513,7 @@ function PayStepBody({
         <JazzBonusItem w={fiveMinBonus.words ?? JAZZ_BONUS_WORDS} cfg={fiveMinBonus.cfg} price={money(fiveMinBonus.price, currency)} compact light />
       )}
 
-      {offers.map((offer) => (
+      {offers.filter((o) => !o.popup).map((offer) => (
         <BumpBox key={offer.id} offer={offer} currency={currency} ticked={picked.includes(offer.id)} onTick={(on) => toggle(offer.id, on)} />
       ))}
 
@@ -504,7 +528,26 @@ function PayStepBody({
           .filter((o) => picked.includes(o.id))
           .map((o) => (
             <div key={o.id} className={s.sumRow}>
-              <span>{o.name}</span>
+              <span>
+                {o.name}
+                {o.popup && (
+                  <>
+                    {" "}
+                    <button
+                      type="button"
+                      className={s.sumRemove}
+                      onClick={() => {
+                        toggle(o.id, false);
+                        try {
+                          localStorage.setItem(o.popup!, JSON.stringify({ add: false, at: Date.now() }));
+                        } catch {}
+                      }}
+                    >
+                      {POPUP_WORDS.remove}
+                    </button>
+                  </>
+                )}
+              </span>
               <span>{money(o.price, currency)}</span>
             </div>
           ))}

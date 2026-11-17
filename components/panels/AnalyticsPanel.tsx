@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { I } from "@/components/icons";
-import type { Analytics, AvailabilityStats, BonusStats, Metrics, TestStats } from "@/lib/analytics";
+import type { Analytics, AvailabilityStats, BonusStats, Metrics, PopupOfferStats, TestStats } from "@/lib/analytics";
 import { RangePicker, useRange } from "@/components/RangePicker";
 import s from "./analytics.module.css";
 
@@ -159,11 +159,12 @@ export function AnalyticsPanel() {
         </div>
       </div>
 
-      {(data?.availability || (data?.bonuses?.length ?? 0) > 0) && (
+      {(data?.availability || data?.popupOffer || (data?.bonuses?.length ?? 0) > 0) && (
         <div className="section-head" style={{ marginTop: 28 }}>
           <div className="section-title">Other experiments</div>
         </div>
       )}
+      {data?.popupOffer && <PopupOfferCard p={data.popupOffer} />}
       {data?.availability && <AvailabilityCard a={data.availability} />}
       {data?.bonuses?.map((b) => <BonusCard key={b.funnel} b={b} />)}
 
@@ -242,11 +243,88 @@ const mins = (sec: number) => (sec < 60 ? `${Math.round(sec)} s` : `${Math.floor
 const rate1 = (part: number, whole: number) => (whole > 0 ? `${((part / whole) * 100).toFixed(1)}%` : "—");
 const chance = (c: number | null) => (c == null ? "—" : `${Math.round(c * 100)}%`);
 
+/** Dashboard → Analytics: the Jazz landing's popup offer, average order before and after it (lib/analytics.ts popupOfferStats). */
+function PopupOfferCard({ p }: { p: PopupOfferStats }) {
+  const sides = [
+    { key: "before", title: `Before · ${whenText(when(p.before.from))} → ${whenText(when(p.before.to!))}`, v: p.before },
+    { key: "after", title: `After · since ${whenText(when(p.after.from))}`, v: p.after },
+  ] as const;
+  const money = (n: number | null) => (n == null ? "—" : `€${n.toFixed(2)}`);
+  const n = Math.min(p.before.orders, p.after.orders);
+  const verdict =
+    p.after.orders === 0
+      ? "No order since the popup yet."
+      : n < 20
+        ? `Too early to call: ${int(p.after.orders)} orders after the popup, about 20 a side make the average say something.`
+        : (p.chanceAovUp ?? 0.5) >= 0.95
+          ? "The average order is up since the popup."
+          : (p.chanceAovUp ?? 0.5) <= 0.05
+            ? "The average order is down since the popup."
+            : "No clear change in the average order yet.";
+  return (
+    <section className={s.test}>
+      <div className={s.testHead}>
+        <div>
+          <div className={s.testTitle}>
+            <I.analytics size={14} /> Popup offer · Jazz MIDI Pack
+          </div>
+          <div className={s.testSub}>
+            The landing&apos;s button opens a popup offering the Jazz Record Samples before the order page, live since {whenText(when(p.since))} · before = since the
+            5-minute bonus left the checkout · first orders, upsells on their own line, dollars at today&apos;s rate · whatever the range above
+          </div>
+        </div>
+      </div>
+
+      <div className={s.variants}>
+        {sides.map(({ key, title, v }) => (
+          <div key={key} className={s.variant}>
+            <div className={s.variantHead}>{title}</div>
+            <div className={s.bonusBig}>
+              {money(v.aov)} <small>average order</small>
+            </div>
+            <div className={s.bonusPct}>{money(v.orders ? (v.revenue + v.upsells) / v.orders : null)} with the upsells after it</div>
+            <dl className={s.kv}>
+              <dt>Days</dt>
+              <dd>{(v.hours / 24).toFixed(1)}</dd>
+              <dt>Visitors on the landing</dt>
+              <dd>{int(v.landings)}</dd>
+              <dt>Orders</dt>
+              <dd className={s.strong}>
+                {int(v.orders)} <small>{rate1(v.orders, v.landings)} of visitors</small>
+              </dd>
+              <dt>Took the Record Samples</dt>
+              <dd>
+                {int(v.took)} <small>{rate1(v.took, v.orders)}</small>
+              </dd>
+              <dt>€ per visitor</dt>
+              <dd className={s.strong}>{v.landings ? money((v.revenue + v.upsells) / v.landings) : "—"}</dd>
+            </dl>
+          </div>
+        ))}
+
+        <div className={s.variant}>
+          <div className={s.variantHead}>Is it better after?</div>
+          <dl className={s.kv}>
+            <dt>Chance the average order is up</dt>
+            <dd className={s.strong}>{chance(p.chanceAovUp)}</dd>
+            <dt>Chance orders per visitor are up</dt>
+            <dd>{chance(p.chanceOrderUp)}</dd>
+          </dl>
+          <div className={s.paidNote} style={{ marginTop: 10 }}>
+            {verdict} The popup adds a tap before the order page, so read the orders per visitor too: a higher average with fewer orders isn&apos;t a win. Before, the
+            Record Samples were on sale nowhere; the other add-ons (Drunk Swing Grooves, HUSTLE, TOP HITS) are on the order page on both sides.
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /** Dashboard → Analytics: the funnels before and after the "Checking availability…" popup (lib/analytics.ts availabilityStats). */
 function AvailabilityCard({ a }: { a: AvailabilityStats }) {
   const sides = [
     { key: "before", title: `Before · ${whenText(when(a.before.from))} → ${whenText(when(a.before.to!))}`, v: a.before },
-    { key: "after", title: `After · since ${whenText(when(a.after.from))}`, v: a.after },
+    { key: "after", title: a.after.to ? `After · ${whenText(when(a.after.from))} → ${whenText(when(a.after.to))}` : `After · since ${whenText(when(a.after.from))}`, v: a.after },
   ] as const;
   const left = Math.max(0, a.needed - a.after.landings);
   // Under 200 visitors after, the normal approximation's % says more than the numbers do.

@@ -9,10 +9,11 @@ import { salesPopJs } from "@/lib/salesPop";
  *  On a landing it also puts the "Checking availability…" popup in front of
  *  the order page's links (lib/availability.ts). Landings also carry the
  *  recent-buyer pop-up (lib/salesPop.ts). */
-export function Beacon({ funnel, page, lang, abCookie }: BeaconOptions) {
+export function Beacon({ funnel, page, lang, abCookie, noAvailability }: BeaconOptions & { noAvailability?: boolean }) {
   useEffect(() => {
-    if (page === "landing") new Function(AVAILABILITY_JS)();
-  }, [page]);
+    // Not where a popup offer takes its place (the Jazz landing, ./jazz-midi-pack/offerPopup.ts).
+    if (page === "landing" && !noAvailability) new Function(AVAILABILITY_JS)();
+  }, [page, noAvailability]);
   useEffect(() => {
     if (page === "landing") new Function(salesPopJs(funnel, lang))();
   }, [page, funnel, lang]);
