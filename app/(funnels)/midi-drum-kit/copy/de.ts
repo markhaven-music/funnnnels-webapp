@@ -154,6 +154,12 @@ export const de: Copy = {
           "Sobald deine Bestellung abgeschlossen ist, ist dieses Kästchen weg: Hak es jetzt an und das Bundle kommt im selben Download.",
         ],
       },
+      "famous-beats": {
+        headline: "JA! 320 Famous Beats dazu!",
+        body: [
+          "Die Drums von den Platten, mit denen du aufgewachsen bist, als MIDI: **320 Hit-Drum-Grooves von 76 Artists**, in 32 Packs. Öffne die Datei, nimm deine eigenen Sounds und der Groove gehört dir. Normalerweise 97 {c}, aber jetzt bekommst du es für nur 27 {c}!!",
+        ],
+      },
       chords: {
         headline: "JA! Ich will die Akkordfolgen!",
         body: [

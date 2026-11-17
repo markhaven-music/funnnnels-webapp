@@ -66,6 +66,15 @@ export const funnel = {
       pitch: "1000 chord progressions from the biggest hits, as drag-and-drop MIDI files.",
     },
     {
+      // 11-17: on the order form too ("mettiamo anche Famous Beats MIDI Bundle come Order Bump"); whoever ticks
+      // it skips its upsell page (same id as the offer below). Its 3D box, transparent, like the others.
+      id: "famous-beats",
+      name: "Famous Beats Bundle (320 MIDI Beats)",
+      price: { eur: 27, usd: 27 },
+      image: "/funnels/famous-beats-bundle/box3d-160.webp",
+      pitch: "320 hit drum grooves from 76 artists as MIDI, in 32 packs.",
+    },
+    {
       id: "chords",
       name: "Chord Progressions Bundle (750 Songs)",
       price: { eur: 25, usd: 25 },

@@ -154,6 +154,12 @@ export const es: Copy = {
           "Cuando completes tu pedido, esta casilla desaparece: márcala ahora y el bundle llega en la misma descarga.",
         ],
       },
+      "famous-beats": {
+        headline: "¡SÍ! ¡Añade 320 Famous Beats!",
+        body: [
+          "Las baterías de los discos con los que creciste, en MIDI: **320 grooves de batería de hits de 76 artistas**, en 32 packs. Abre el archivo, pon tus propios sonidos y el groove es tuyo. Normalmente cuesta 97 {c}, ¡¡pero ahora puedes añadirlo por solo 27 {c}!!",
+        ],
+      },
       chords: {
         headline: "¡SÍ! ¡Quiero las progresiones de acordes!",
         body: [

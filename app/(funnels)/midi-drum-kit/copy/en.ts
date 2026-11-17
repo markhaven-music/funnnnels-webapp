@@ -165,6 +165,12 @@ export const en = {
           "Once you complete your order this box is gone: tick it now and the bundle lands in the same download.",
         ],
       },
+      "famous-beats": {
+        headline: "YES! Add 320 Famous Beats!",
+        body: [
+          "The drums from the records you grew up on, as MIDI: **320 hit drum grooves from 76 artists**, in 32 packs. Open the file, swap in your own sounds and the groove is yours. Usually {c}97 but you can add it right now for just {c}27!!",
+        ],
+      },
       chords: {
         headline: "YES! I want Chord Progressions!",
         body: [
