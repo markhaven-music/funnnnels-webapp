@@ -21,8 +21,8 @@ export type BumpText = { headline: string; body: string };
 // not listed keeps the picture each funnel gives it. A new box: change it here, once.
 export const BUMP_IMAGE: Record<string, string> = {
   expansions: "/funnels/midi-drum-kit/bump-expansions-3box.webp",
-  // Moving: a box per pack in the bundle, 31 of them, one a second (tools/hustle_bump_anim.py; "così si capisce che sono tanti packs").
-  hustle: "/funnels/midi-drum-kit/bump-hustle-packs.webp",
+  // Moving: the bundle's packs with their real covers (22 of the 31 have one), one a second (tools/hustle_bump_anim.py; "così si capisce che sono tanti packs").
+  hustle: "/funnels/midi-drum-kit/bump-hustle-packs.webp?v=2",
   "top-hits": "/funnels/midi-drum-kit/bump-top-hits.webp?v=2",
   "famous-beats": "/funnels/famous-beats-bundle/box3d-160.webp",
 };
