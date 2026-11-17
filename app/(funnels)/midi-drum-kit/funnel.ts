@@ -40,11 +40,12 @@ export const funnel = {
     {
       id: "expansions",
       name: "MIDI Drum Kit Expansions (House, Lo-Fi, Afrobeat)",
-      price: { eur: 7, usd: 7 },
+      // 11-17: €27 with 10,003 MIDI files inside (tools/expansions_expand.py), was €7 with 172 ("espandere ogni expansions ... le vendiamo tutte e 3 a 27").
+      price: { eur: 27, usd: 27 },
       // 11-17: its three boxes on a transparent background, like the TOP HITS bump's box (was the same 3 boxes on a black
       // square: "bro im talking about the order bumps"; a single box was rejected: "mi piaceva che expansions erano 3 boxes").
       image: "/funnels/midi-drum-kit/bump-expansions-3box.webp",
-      pitch: "3 MIDI Drum Kit Expansions: Complete Beats for House, Lo-Fi and Afrobeat.",
+      pitch: "3 MIDI Drum Kit Expansions: 10,003 MIDI files, complete beats for House, Lo-Fi and Afrobeat.",
     },
     {
       id: "hustle",

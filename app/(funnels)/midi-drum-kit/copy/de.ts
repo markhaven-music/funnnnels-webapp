@@ -137,7 +137,7 @@ export const de: Copy = {
       expansions: {
         headline: "JA! Noch mehr Drum-Patterns dazu!",
         body: [
-          "3 Erweiterungen für das MIDI Drum Kit. Mit **Complete Beats für House, Lo-Fi und Afrobeat**. Erstelle Drums auf Profi-Niveau 27x schneller. Normalerweise 147 {c}, aber jetzt bekommst du alle für nur 7 {c}!!",
+          "3 Erweiterungen für das MIDI Drum Kit. Mit **10.003 MIDI-Dateien: Complete Beats für House, Lo-Fi und Afrobeat**. Erstelle Drums auf Profi-Niveau 27x schneller. Normalerweise 147 {c}, aber jetzt bekommst du alle für nur 27 {c}!!",
         ],
       },
       hustle: {
