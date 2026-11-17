@@ -111,6 +111,10 @@ export function CheckoutWidget(props: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);
+  // The add-ons ticked, for the upsell pages: one already bought here is skipped (../midi-drum-kit/upsell.ts).
+  useEffect(() => {
+    document.cookie = `fv_owned=${picked.join(",")}; path=/; max-age=7200; samesite=lax`;
+  }, [picked]);
   const [method, setMethod] = useState<Method>("card");
   const offers = offersOf(props);
   const total = props.price + offers.filter((o) => picked.includes(o.id)).reduce((sum, o) => sum + o.price, 0);
