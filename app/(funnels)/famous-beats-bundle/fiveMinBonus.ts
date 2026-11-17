@@ -25,12 +25,12 @@ export const FBB_BONUS = {
 
 // The Expansions' contents as the Drum Kit's bonus words have them (../midi-drum-kit/bonusTest.ts, counted 2026-11-08).
 export const FBB_BONUS_WORDS: JazzBonusWords = {
-  lead: "Order in the next {time} and get the MIDI Drum Kit Expansions free: 172 MIDI files.",
+  lead: "Order in the next {time} and get the MIDI Drum Kit Expansions free: 10,003 MIDI files.",
   sub: "Not a fake timer. Close this page and the offer is gone.",
   over: "Time's up. The free MIDI Drum Kit Expansions are gone.",
   badge: "BONUS",
   name: "MIDI Drum Kit Expansions",
-  line: "172 more MIDI drum files in 3 styles:",
+  line: "10,003 more MIDI drum files in 3 styles:",
   list: ["Afrobeat: 61 patterns, 7 fragments, 5 complete multi-track beats", "Lo-Fi: 87 MIDI files", "House: 12 complete beats"],
   free: "FREE",
   added: "Already in your order",

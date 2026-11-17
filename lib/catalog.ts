@@ -90,6 +90,10 @@ const ZIP_PRODUCT: Record<string, string> = {
   "HUSTLE MIDI Bundle.zip": "hustle",
   "Famous Beats Bundle (320 MIDI Beats).zip": "famous-beats",
   "EXPLORER Expansions (House, Lofi, Afrobeat).zip": "expansions",
+  // The three Expansions sold one by one in the Shop since 2026-11-17 (the 10,003-file zip split by style).
+  "House Grooves Ready-To-Use Vol.1.zip": "expansion-house",
+  "MIDI Drum Kit - Lofi Expansion.zip": "expansion-lofi",
+  "MIDI Drum Kit - Afrobeat Expansion.zip": "expansion-afrobeat",
   "Jazz MIDI Chord Pack.zip": "jazz-chord-pack",
   "Anime & Video Game MIDI Chord Pack.zip": "anime-pack",
   "Drum Loops for Songwriting.zip": "drum-loops",

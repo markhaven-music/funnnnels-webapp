@@ -25,7 +25,7 @@ export const TH_BONUS = {
 
 // The Expansions' contents as the Drum Kit's bonus words have them (../midi-drum-kit/bonusTest.ts, counted 2026-11-08).
 export const TH_BONUS_WORDS: JazzBonusWords = {
-  lead: "Order in the next {time} and get the MIDI Drum Kit Expansions free: 172 MIDI drum files.",
+  lead: "Order in the next {time} and get the MIDI Drum Kit Expansions free: 10,003 MIDI drum files.",
   sub: "Not a fake timer. Close this page and the offer is gone.",
   over: "Time's up. The free MIDI Drum Kit Expansions are gone.",
   badge: "BONUS",

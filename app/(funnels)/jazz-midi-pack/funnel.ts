@@ -68,9 +68,9 @@ export const funnel = {
     {
       id: "expansions",
       name: "MIDI Drum Kit Expansions (House, Lo-Fi, Afrobeat)",
-      price: { eur: 7, usd: 7 },
+      price: { eur: 27, usd: 27 },
       image: "/funnels/midi-drum-kit/bump-expansions.webp",
-      pitch: "172 MIDI drum files: complete beats for Lo-Fi, House and Afrobeat, to put under your jazz chords.",
+      pitch: "10,003 MIDI drum files: complete beats for Lo-Fi, House and Afrobeat, to put under your jazz chords.",
     },
     {
       id: "top-hits",
@@ -279,7 +279,7 @@ export const bumpCopy: Record<string, { headline: string; body: string[] }> = {
   expansions: {
     headline: "YES! Add the MIDI Drum Kit Expansions!",
     body: [
-      "172 MIDI drum files: **complete beats for Lo-Fi, House and Afrobeat**. Drag one under your jazz chords and the drums are done. Add them now for just {c}7.",
+      "10,003 MIDI drum files: **complete beats for Lo-Fi, House and Afrobeat**. Drag one under your jazz chords and the drums are done. Add them now for just {c}27.",
     ],
   },
   "drum-kit": {

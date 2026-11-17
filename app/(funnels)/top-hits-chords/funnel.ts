@@ -60,9 +60,9 @@ export const funnel = {
       id: "expansions",
       name: "MIDI Drum Kit Expansions (House, Lo-Fi, Afrobeat)",
       headline: "YES! Add the MIDI Drum Kit Expansions!",
-      price: { eur: 7, usd: 7 },
+      price: { eur: 27, usd: 27 },
       image: "/funnels/midi-drum-kit/bump-expansions.webp",
-      pitch: "172 more MIDI drum files: Afrobeat, Lo-Fi and House.",
+      pitch: "10,003 more MIDI drum files: Afrobeat, Lo-Fi and House.",
     },
   ],
   // Paid zips in Cloudflare R2 (lib/r2.ts), handed out as 10-minute links once the payment
