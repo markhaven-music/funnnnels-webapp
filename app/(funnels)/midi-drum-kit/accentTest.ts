@@ -53,9 +53,15 @@ export const ACCENT_VARS_CSS =
   // the Jazz key's label is dark on any light colour; on red it's white
   `html[data-ac="red"] .jzb-btn{--ink:#fff}html[data-ac="red"] .jzb-btn *{text-shadow:0 1px 2px rgba(0,0,0,.3)}`;
 
-/** Runs first thing in the page: the visitor's colour (?ac= for a look, else the cookie) on <html data-ac>. */
+/**
+ * Runs first thing in the page: the visitor's colour on <html data-ac>. A look (?ac=) is kept for the tab
+ * (sessionStorage ac_look), so the order page after it shows the same colour ("perchè order page n è dello stesso
+ * colore della landing page?", 2026-11-17); ?preview=0 or ?ac=off drops it. Else the cookie's colour.
+ */
 export const ACCENT_SCRIPT = `(function(){try{
-var q=(location.search.match(/[?&]ac=(green|red|yellow)(?:&|$)/)||[])[1];
+var s=location.search,q=(s.match(/[?&]ac=(green|red|yellow)(?:&|$)/)||[])[1];
+try{if(/[?&](preview=0|ac=off)(?:&|$)/.test(s))sessionStorage.removeItem('ac_look');else if(q)sessionStorage.setItem('ac_look',q);else q=sessionStorage.getItem('ac_look');}catch(e){}
+if(q&&!/^(green|red|yellow)$/.test(q))q=null;
 var c=(document.cookie.match(/(?:^|; )ab_lp=ac-(green|red|yellow)(?:;|$)/)||[])[1];
 var v=q||c;if(v){document.documentElement.setAttribute('data-ac',v);window.__ac=v;}
 }catch(e){}})();`;
