@@ -117,7 +117,8 @@ export const funnel = {
   // Counted from the pack (BRIEF.md): 1,000 files, 478 artist credits ("470+" on the page).
   // 1,000 files; since 2026-11-15 each one also in all 12 keys (tools/top_hits_keys.py):
   // 1,000 × 12 = 12,000 MIDI files (the empty file and the duplicate were replaced that day, BRIEF.md).
-  counts: { progressions: 1000, artists: 478, files: 12000 },
+  // Since 2026-11-18 each one also in 12 rhythms × 12 keys (tools/top_hits_rhythms.py): 144,000 more.
+  counts: { progressions: 1000, artists: 478, files: 156000 },
 } as const;
 
 // The launch (BRIEF.md, 2026-11-15, "Sun 22 Nov, midnight"): €27 / $27 until Sunday 22 Nov at
@@ -133,13 +134,13 @@ export const launch = {
 export const launchOn = (amount: number, currency: Currency, now = Date.now()) => now < launch.ends && amount === priceIn(launch.price, currency);
 
 // The bundle's four folders (BRIEF.md): the pack's own names and counts, the files each has in the
-// 12 keys, the artists with the most songs in it (counted from the file names), its box
+// 12 keys and the 12 rhythms (songs × 156), the artists with the most songs in it (counted from the file names), its box
 // (public/funnels/top-hits-midi-bundle/folder-<box>-360/640.webp, GPT Image 2.6 from the bundle's box).
 export const folders = [
-  { name: "Modern Pop & Ballads", box: "pop", songs: 556, files: 6672, artists: "Taylor Swift, The Weeknd, Sabrina Carpenter, Chappell Roan, Tate McRae, Ariana Grande, Doja Cat, Dua Lipa" },
-  { name: "Hiphop, Trap & Urban", box: "hiphop", songs: 190, files: 2280, artists: "Drake, SZA, Bad Bunny, KAROL G, Rihanna, Post Malone, Tyla, Chris Brown" },
-  { name: "Dance & Electronic", box: "dance", songs: 146, files: 1752, artists: "David Guetta, Charli xcx, Calvin Harris, Daft Punk, Ava Max, Zedd, deadmau5, Avicii" },
-  { name: "Vintage Classics, Rock & Country", box: "vintage", songs: 108, files: 1296, artists: "Michael Jackson, Madonna, Whitney Houston, Stevie Wonder, Beyoncé, Hozier, Myles Smith" },
+  { name: "Modern Pop & Ballads", box: "pop", songs: 556, files: 86736, artists: "Taylor Swift, The Weeknd, Sabrina Carpenter, Chappell Roan, Tate McRae, Ariana Grande, Doja Cat, Dua Lipa" },
+  { name: "Hiphop, Trap & Urban", box: "hiphop", songs: 190, files: 29640, artists: "Drake, SZA, Bad Bunny, KAROL G, Rihanna, Post Malone, Tyla, Chris Brown" },
+  { name: "Dance & Electronic", box: "dance", songs: 146, files: 22776, artists: "David Guetta, Charli xcx, Calvin Harris, Daft Punk, Ava Max, Zedd, deadmau5, Avicii" },
+  { name: "Vintage Classics, Rock & Country", box: "vintage", songs: 108, files: 16848, artists: "Michael Jackson, Madonna, Whitney Houston, Stevie Wonder, Beyoncé, Hozier, Myles Smith" },
 ] as const;
 
 /** An order's files: what it bought, plus what those bring along (`includes`). */

@@ -91,6 +91,21 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
     T7 in "6. Replaced 2026-11-15 …". So 1,000 songs × 12 keys = **12,000 MIDI files** exactly; the
     pages, the FAQ and the launch email say 12,000.
   - Not done: no proof email (no reviews); no paid test order.
+- 2026-11-18, the upgrade after the launch ("we should give the TOP HITS MIDI Bundle progressions in
+  various rhythms, not just the ones in the song or in blocks", "and in all 12 keys too", "i wanna
+  upgrade it now that it's launched and update the landing page too"): tools/top_hits_rhythms.py
+  reads each of the 1,000 transcriptions, takes every chord WITH THE NOTES THE FILE PLAYS (its own
+  voicing, bass and inversion; nothing re-harmonised), moves the changes to the beat and writes the
+  song in 12 rhythms: Held Chords, Pop Eighths, Ballad Arpeggio, Trap Stabs, House Offbeat, Piano
+  House, Reggaeton, Lo-Fi Lazy, Funk Stabs, Dotted Plucks, Synth Arp, Soul Push. Each rhythm in the
+  12 keys: 1,000 × 12 × 12 = **144,000 MIDI files**, so with the 12,000 of All 12 Keys the pages
+  say **156,000 MIDI files** (funnel.ts counts.files; per folder songs × 156). Songs at 140 BPM or
+  more (138 of them) are written in half time. Chords shorter than a beat are left out of the
+  rhythm versions; about 30 files are riffs or bass lines, whose "chords" are the line's notes.
+  Checked by reading all 144,000 back: 12 keys × 12 files per song, every note is a note of that
+  song's transcription (moved to the key), the key in each name is the folder's. Not checked by
+  ear by the user. On the T7: "7. 12 Rhythms x 12 Keys (144,000 MIDI)"; in the buyers' zip the
+  folder "4. 12 Rhythms x 12 Keys". The launch emails still say 12,000 (true for the keys).
 - 2026-11-10: "crea nuovo funnel per TOP HITS MIDI Bundle con TUTTO." Built as Famous Beats v2 was
   (../famous-beats-bundle/BRIEF.md), with everything that funnel got in several rounds done at once:
   the Jazz page's CSS and section order, a player of every file, renders from the real box, six
@@ -126,6 +141,8 @@ Source: `…/02. All products/11. TOP HITS MIDI Bundle/1. Hitmaker MIDI Pack`, r
 - Genres as the live page names them: Pop, Trap, R&B, Country, EDM, Afrobeats, K-pop, Latin.
 - The zip (R2 `top-hits-midi-bundle/TOP HITS MIDI Bundle.zip`) also holds The Chord Progressions Bible
   (150 MIDI + 258 WAV), which is bonus 1 on the page.
+- Since 2026-11-18 also in 12 rhythms × 12 keys: folder "4. 12 Rhythms x 12 Keys" of the zip (genre /
+  song / key / 12 files), 144,000 MIDI files; 156,000 MIDI files in the bundle in all.
 - Since 2026-11-15 also in all 12 keys: folder "3. All 12 Keys" of the zip, 1,000 songs × 12 = 12,000
   MIDI files (11,976 until the two files were replaced; Modern Pop & Ballads 6,672, Hiphop, Trap & Urban 2,280, Dance & Electronic 1,752,
   Vintage Classics, Rock & Country 1,296); the original key is one of the twelve.
