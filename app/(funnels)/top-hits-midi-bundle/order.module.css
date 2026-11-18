@@ -1096,6 +1096,18 @@
     rotate: 360deg;
   }
 }
+/* Ticked, the salmon frame goes: the edge takes the box's own yellow, so the box is one flat colour
+   ("after they're selected remove the red border and make it look just like that background").
+   Same width, so nothing moves. */
+.bump:has(.bumpCheck:checked):not(.bumpPremium) {
+  border-color: #fffbda;
+  box-shadow: none;
+}
+/* Ticked, the price goes too ("togli anche i prezzi dopo che ho spuntato"): hidden, its room kept,
+   so the headline doesn't re-wrap and nothing moves. */
+.bump:has(.bumpCheck:checked) .bumpPrice {
+  visibility: hidden;
+}
 /* The tick shows only once the cover is on. */
 .bumpCheck:checked {
   animation: bumpTickWait 0.6s step-end;
