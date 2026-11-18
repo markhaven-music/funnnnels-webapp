@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
       { source: "/famous-beats-bundle/v2/order", destination: "/famous-beats-bundle/order", permanent: false },
       { source: "/top-hits-midi-bundle/v2", destination: "/top-hits-chords", permanent: false },
       { source: "/top-hits-midi-bundle/v2/order", destination: "/top-hits-chords/order", permanent: false },
+      // The August FBB ads link to the ClickFunnels-era www.thegrind.studio/famous-beats-midi-bundle,
+      // which lands here and was a 404. The query (utm_*, campaign/adset/ad ids) rides along.
+      { source: "/famous-beats-midi-bundle", destination: "/famous-beats-bundle", permanent: false },
+      { source: "/en/famous-beats-midi-bundle", destination: "/famous-beats-bundle", permanent: false },
     ];
   },
 };
