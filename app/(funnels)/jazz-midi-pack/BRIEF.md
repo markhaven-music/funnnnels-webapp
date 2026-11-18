@@ -97,7 +97,7 @@ landing rules (`grind-studio-landing-pages/AGENTS.md`, `docs/landing-principles.
   Stripe shows (Link, Bancontact, EPS…). PayPal through our own PayPal account: the big button sends the
   buyer to PayPal's page and back.
 - Order bump (not shown since 2026-10-16): copied from the ClickFunnels template (yellow box, red arrow, cover, red offer label). Its
-  label says "ADD-ON OFFER", never "one-time offer": the Chord Pack isn't promised to disappear.
+  label says "ONE-TIME OFFER" (owner, 2026-11-18: change all "ADD-ON OFFER:" to "ONE-TIME OFFER:").
 - Order page (since 2026-10-16): the checkout has its own page, /jazz-midi-pack/order, like the ClickFunnels
   funnels. Every CTA, the sticky bar and the FAQ links go there; the landing's offer section is a recap with
   one button. The order page shows no reviews (none exist yet) and no timer. Pixel: PageView + OrderPageView

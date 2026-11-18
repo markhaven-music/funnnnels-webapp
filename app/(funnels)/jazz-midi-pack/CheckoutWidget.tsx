@@ -629,13 +629,13 @@ function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: C
         <span className={s.bumpPitch} data-bump-b>
           {offer.body.map((p, i) => (
             <span key={i} className={s.bumpPara}>
-              {i === 0 && <span className={s.bumpOffer} data-bump-oto>ADD-ON OFFER:</span>} <Rich text={fillSign(p, currency)} />
+              {i === 0 && <span className={s.bumpOffer} data-bump-oto>ONE-TIME OFFER:</span>} <Rich text={fillSign(p, currency)} />
             </span>
           ))}
         </span>
       ) : (
         <span className={s.bumpPitch}>
-          <span className={s.bumpOffer}>ADD-ON OFFER:</span> <strong>{lead}</strong>
+          <span className={s.bumpOffer}>ONE-TIME OFFER:</span> <strong>{lead}</strong>
           {rest} Only <strong>{money(offer.price, currency)}</strong>, added to this order.
         </span>
       )}
