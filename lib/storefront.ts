@@ -53,7 +53,7 @@ const CATEGORY: Record<string, Category> = {
 
 // The funnels' packs, in the order the store shows them. Name and price come
 // from the funnel as it sells today (funnel_items), so they match its pages.
-const FUNNEL_PACKS: { slug: string; funnel: string; href: string; line: string; pic: StorePic }[] = [
+const FUNNEL_PACKS: { slug: string; funnel: string; href: string; line: string; pic: StorePic; shopPrice?: number }[] = [
   {
     slug: "midi-drum-kit",
     funnel: "midi-drum-kit",
@@ -66,6 +66,7 @@ const FUNNEL_PACKS: { slug: string; funnel: string; href: string; line: string; 
     funnel: "top-hits-midi-bundle",
     href: "/top-hits-midi-bundle",
     line: "The chord progressions of 1,000 top hits.",
+    shopPrice: 97, // the shop price the order bumps strike through (lib/bumpFull.ts)
     pic: { src: "/funnels/home/top-hits-box.webp", width: 440, height: 440, fade: true },
   },
   {
@@ -73,6 +74,7 @@ const FUNNEL_PACKS: { slug: string; funnel: string; href: string; line: string; 
     funnel: "famous-beats-bundle",
     href: "/famous-beats-bundle",
     line: "The drums behind 320 hits, note for note.",
+    shopPrice: 97, // the shop price the order bumps strike through (lib/bumpFull.ts)
     pic: { src: "/funnels/home/famous-beats-box.webp", width: 440, height: 440, fade: true },
   },
   {
@@ -112,7 +114,7 @@ export async function funnelPacks(currency: Currency): Promise<StoreItem[]> {
         name: f.product,
         line: p.line,
         category: CATEGORY[p.slug] ?? "more",
-        price: priceIn(f.price, currency),
+        price: p.shopPrice ?? priceIn(f.price, currency),
         href: p.href,
         pic: p.pic,
         funnel: true,
