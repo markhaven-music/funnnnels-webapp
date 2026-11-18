@@ -123,8 +123,24 @@ const PUBLIC = [
   /^\/favicon\.ico$/,
 ];
 
+// Old addresses still printed on live ads. The August FBB ads link to the ClickFunnels-era
+// www.thegrind.studio/famous-beats-midi-bundle, which forwards here; read as a launch-kit slug it
+// was a 404. Handled here, not in next.config redirects: this proxy rewrites the path first.
+// The query (utm_*, campaign/adset/ad ids, fbclid) rides along.
+const OLD_PATHS: Record<string, string> = {
+  "/famous-beats-midi-bundle": "/famous-beats-bundle",
+  "/en/famous-beats-midi-bundle": "/famous-beats-bundle",
+};
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  const moved = OLD_PATHS[pathname.replace(/\/$/, "")];
+  if (moved) {
+    const url = request.nextUrl.clone();
+    url.pathname = moved;
+    return NextResponse.redirect(url, 307);
+  }
 
   // Stripe sends a card buyer back with ?payment_intent=…&redirect_status=succeeded
   // (to the first upsell, or the thank-you page): the order is recorded on
