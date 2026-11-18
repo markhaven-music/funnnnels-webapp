@@ -9,7 +9,8 @@ import { OrderDrawer, money } from "./OrderDetail";
 
 // Dashboard → Orders: every paid order (lib/sales.ts), newest first, with
 // whether its receipt email went out. A row opens everything about that
-// order (OrderDetail.tsx).
+// order (OrderDetail.tsx). One-click upsells sit inside the order they were
+// added to (orders.parent): one row per buyer's purchase, with its total.
 
 const DAY = 86_400_000;
 
@@ -41,6 +42,25 @@ function receipt(o: OrderRow): { label: string; cls: string; title?: string } {
   return { label: "queued", cls: e.chip_scheduled };
 }
 
+type Group = OrderRow & { upsells: OrderRow[]; totalCents: number };
+
+function group(orders: OrderRow[]): Group[] {
+  const ids = new Set(orders.map((o) => o.id));
+  const kids = new Map<string, OrderRow[]>();
+  for (const o of orders) {
+    if (!o.offer || !o.parent || !ids.has(o.parent)) continue;
+    kids.set(o.parent, [...(kids.get(o.parent) ?? []), o]);
+  }
+  return orders
+    .filter((o) => !(o.offer && o.parent && ids.has(o.parent)))
+    .map((o) => {
+      // Oldest first under the order; one in another currency keeps its own amount.
+      const upsells = (kids.get(o.id) ?? []).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+      const totalCents = upsells.filter((u) => u.currency === o.currency).reduce((n, u) => n + u.amountCents, o.amountCents);
+      return { ...o, upsells, totalCents };
+    });
+}
+
 export function OrdersPanel() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,11 +86,11 @@ export function OrdersPanel() {
   const prev = useMemo(() => (span.from ? totals(orders, span.from - (span.until - span.from), span.from) : null), [orders, span]);
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    const inRange = orders.filter((o) => {
+    const inRange = group(orders).filter((o) => {
       const t = Date.parse(o.createdAt);
       return t >= span.from && t < span.until;
     });
-    return needle ? inRange.filter((o) => [o.email, o.name, o.id, o.funnel].some((v) => v?.toLowerCase().includes(needle))) : inRange;
+    return needle ? inRange.filter((o) => [o.email, o.name, o.id, o.funnel, ...o.upsells.flatMap((u) => [u.id, u.offer])].some((v) => v?.toLowerCase().includes(needle))) : inRange;
   }, [orders, q, span]);
 
   const close = useCallback(() => setOpen(null), []);
@@ -116,7 +136,7 @@ export function OrdersPanel() {
       <div className={e.toolbar}>
         <RangePicker value={range} onChange={setRange} />
         <input className={e.input} style={{ width: 280 }} placeholder="Search email, name, order id…" value={q} onChange={(ev) => setQ(ev.target.value)} />
-        <span className={e.mono}>{shown.length} shown</span>
+        <span className={e.mono}>{shown.length} order{shown.length === 1 ? "" : "s"}</span>
       </div>
 
       {!loading && orders.length > 0 && shown.length === 0 && !q.trim() ? (
@@ -140,7 +160,8 @@ export function OrdersPanel() {
             <span>RECEIPT</span>
           </div>
           {shown.slice(0, 500).map((o) => {
-            const r = receipt(o);
+            // The receipt that went wrong, if any of them did.
+            const r = [o, ...o.upsells].map(receipt).find((x) => x.label === "not sent") ?? receipt(o);
             return (
               <button key={o.id} type="button" className={e.rowButton} style={{ ...COLS, ...(open === o.id ? { background: "var(--bg-2)" } : null) }} onClick={() => setOpen(o.id)}>
                 <span className={e.mono}>{when(o.createdAt)}</span>
@@ -148,11 +169,18 @@ export function OrdersPanel() {
                   <span className={e.strong}>{o.email ?? "—"}</span>
                   {o.name ? <span className={e.dim}> · {o.name}</span> : null}
                 </span>
-                <span className={e.cell}>
-                  {o.offer ? <span className={e.dim}>↳ upsell {o.offer}</span> : o.funnel}
-                  {!o.offer && o.items.length > 1 ? <span className={e.dim}> + {o.items.length - 1} add-on{o.items.length > 2 ? "s" : ""}</span> : null}
+                <span style={{ minWidth: 0 }}>
+                  <span className={e.cell} style={{ display: "block" }}>
+                    {o.offer ? <span className={e.dim}>↳ upsell {o.offer}</span> : o.funnel}
+                    {!o.offer && o.items.length > 1 ? <span className={e.dim}> + {o.items.length - 1} add-on{o.items.length > 2 ? "s" : ""}</span> : null}
+                  </span>
+                  {o.upsells.map((u) => (
+                    <span key={u.id} className={`${e.cell} ${e.dim}`} style={{ display: "block", marginTop: 3 }}>
+                      ↳ upsell {u.offer} · {money(u.amountCents, u.currency)}
+                    </span>
+                  ))}
                 </span>
-                <span className={e.strong}>{money(o.amountCents, o.currency)}</span>
+                <span className={e.strong}>{money(o.totalCents, o.currency)}</span>
                 <span className={e.dim}>{o.provider === "paypal" ? "PayPal" : "Card"}</span>
                 <span className={e.mono}>{o.lang}</span>
                 <span className={`${e.chip} ${r.cls}`} title={r.title}>
