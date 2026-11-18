@@ -14,6 +14,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 type Lang = "en" | "it";
 type Use = { funnel: string; funnelName: string; key: string; price: number; full: number; pages: Partial<Record<Lang, string>> };
 type Text = { headline: string; body: string };
+/** How the add-on's box looks on the order page, so the words are edited as they're read there. */
+type Look = { bg: string; fg: string; font: string; size: string; line: string; weight: string; strong: string; oto: string; otoColor: string; otoWeight: string; otoLine: string };
 type Loaded = { texts: Partial<Record<Lang, Text>>; uses: Use[] };
 
 const LANG_NAME: Record<Lang, string> = { en: "English", it: "Italiano" };
@@ -88,6 +90,7 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [found, setFound] = useState<boolean | null>(null);
+  const [look, setLook] = useState<Look | null>(null);
   const box = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
 
@@ -113,7 +116,8 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
     (t: Text | undefined) => {
       if (!use || !t) return;
       const paras = t.body.split(/\n\s*\n/).map((p) => fill(p.trim(), use, lang)).filter(Boolean);
-      frame.current?.contentWindow?.postMessage({ type: "fv-bump-draft", id: use.key, headline: fill(t.headline, use, lang), paras }, location.origin);
+      // "*": on funnnnels.com the frame is sent on to the brand's domain (proxy.ts), another host. Only the add-on's words go.
+      frame.current?.contentWindow?.postMessage({ type: "fv-bump-draft", id: use.key, headline: fill(t.headline, use, lang), paras }, "*");
     },
     [use, lang],
   );
@@ -121,11 +125,13 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
   // The frame answers with the words the page has now: the first draft when nothing is saved.
   useEffect(() => {
     function onMessage(e: MessageEvent) {
-      if (e.origin !== location.origin || e.source !== frame.current?.contentWindow) return;
-      const m = e.data as { type?: string; found?: boolean; headline?: string; paras?: string[] };
+      // From the frame itself, whichever of our hosts it ended up on.
+      if (e.source !== frame.current?.contentWindow) return;
+      const m = e.data as { type?: string; found?: boolean; headline?: string; paras?: string[]; look?: Look };
       if (m?.type !== "fv-bump-current" || !use) return;
       setFound(Boolean(m.found));
       if (!m.found) return;
+      if (m.look) setLook(m.look);
       setDrafts((d) => {
         if (d[lang]) {
           send(d[lang]);
@@ -145,7 +151,7 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
     let n = 0;
     const ask = setInterval(() => {
       if (++n > 40) return clearInterval(ask);
-      frame.current?.contentWindow?.postMessage({ type: "fv-bump-show", id: use.key }, location.origin);
+      frame.current?.contentWindow?.postMessage({ type: "fv-bump-show", id: use.key }, "*");
     }, 700);
     return () => clearInterval(ask);
   }, [src, use, found]);
@@ -282,7 +288,8 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
                     + full price
                   </button>
                 </div>
-                <style>{".fv-bump-box p{margin:0 0 12px}.fv-bump-box p:last-child{margin-bottom:0}"}</style>
+                {/* The box as the order page draws it: its ground, its type, bold in its colour, the red opener before the first line (not part of the text). */}
+                <style>{`.fv-bump-box p{margin:0 0 12px}.fv-bump-box p:last-child{margin-bottom:0}.fv-bump-box b,.fv-bump-box strong{color:var(--bump-strong,inherit)}.fv-bump-box p:first-child::before{content:var(--bump-oto,"");color:var(--bump-oto-color);font-weight:var(--bump-oto-weight);text-decoration:var(--bump-oto-line)}`}</style>
                 <div
                   ref={box}
                   className="fv-bump-box"
@@ -296,7 +303,29 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
                     e.preventDefault();
                     document.execCommand("insertText", false, e.clipboardData.getData("text/plain"));
                   }}
-                  style={{ minHeight: 200, padding: "12px 14px", border: "1px solid var(--line)", borderRadius: "var(--radius)", background: "var(--bg-1)", color: "var(--fg-0)", font: "400 16px/1.55 var(--font-sans)", outline: "none", whiteSpace: "pre-wrap" }}
+                  style={{
+                    minHeight: 200,
+                    padding: "12px 14px",
+                    border: "1px solid var(--line)",
+                    borderRadius: "var(--radius)",
+                    outline: "none",
+                    whiteSpace: "pre-wrap",
+                    ...(look
+                      ? ({
+                          background: look.bg,
+                          color: look.fg,
+                          fontFamily: look.font,
+                          fontSize: look.size,
+                          lineHeight: look.line,
+                          fontWeight: look.weight,
+                          "--bump-strong": look.strong,
+                          "--bump-oto": look.oto ? JSON.stringify(`${look.oto} `) : '""',
+                          "--bump-oto-color": look.otoColor,
+                          "--bump-oto-weight": look.otoWeight,
+                          "--bump-oto-line": look.otoLine || "none",
+                        } as React.CSSProperties)
+                      : { background: "var(--bg-1)", color: "var(--fg-0)", font: "400 16px/1.55 var(--font-sans)" }),
+                  }}
                 />
                 <p style={{ margin: "8px 0 0", color: "var(--fg-2)", fontSize: 13, lineHeight: 1.5 }}>
                   Enter starts a new paragraph. <b>{"{price}"}</b> and <b>{"{full}"}</b> become each checkout&rsquo;s own numbers

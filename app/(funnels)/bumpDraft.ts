@@ -1,8 +1,10 @@
 // The order forms' side of dashboard → Products → Order bump words (components/BumpTextEditor.tsx):
 // the editor shows the real order page in a frame and talks to it here, so the owner sees the
-// words in the checkout as they type. Only inside a frame of our own site, and only messages
-// from our own origin; nothing is saved from here.
+// words in the checkout as they type. Only inside a frame of our own site or of the dashboard
+// (funnnnels.com sends these paths on to the brand's domain, so the two are on different hosts:
+// with our own origin only, the live editor stayed empty), and nothing is saved from here.
 //   fv-bump-show  { id }                    open step 2, bring the add-on on screen, answer fv-bump-current
+//                                           with the box's look (colours, type, the red opener)
 //   fv-bump-draft { id, headline, paras }   draw these words in its box (marks: **bold**, _italic_, __underline__)
 
 type Msg = { type?: string; id?: string; headline?: string; paras?: string[] };
@@ -28,11 +30,41 @@ function marks(node: Node): string {
 
 const box = (id: string) => document.querySelector<HTMLElement>(`[data-bump="${CSS.escape(id)}"]`);
 
-function current(el: HTMLElement) {
-  const body = el.querySelector("[data-bump-b]");
-  const paras = body ? [...body.children].map((p) => marks(p).trim()).filter(Boolean) : [];
-  return { headline: el.querySelector("[data-bump-h]")?.textContent?.trim() ?? "", paras };
+// The first colour up the tree that isn't see-through: what the words sit on.
+function ground(el: HTMLElement | null): string {
+  for (let n = el; n; n = n.parentElement) {
+    const c = getComputedStyle(n).backgroundColor;
+    if (c && c !== "transparent" && !/,\s*0\)$/.test(c)) return c;
+  }
+  return "#fff";
 }
+
+function current(el: HTMLElement) {
+  const body = el.querySelector<HTMLElement>("[data-bump-b]");
+  const paras = body ? [...body.children].map((p) => marks(p).trim()).filter(Boolean) : [];
+  const oto = body?.querySelector<HTMLElement>("[data-bump-oto]");
+  const strong = body?.querySelector<HTMLElement>("strong, b");
+  const cs = body && getComputedStyle(body);
+  const os = oto && getComputedStyle(oto);
+  const look = cs && {
+    bg: ground(body),
+    fg: cs.color,
+    font: cs.fontFamily,
+    size: cs.fontSize,
+    line: cs.lineHeight,
+    weight: cs.fontWeight,
+    strong: strong ? getComputedStyle(strong).color : cs.color,
+    oto: oto?.textContent?.trim() ?? "",
+    otoColor: os?.color ?? "",
+    otoWeight: os?.fontWeight ?? "",
+    otoLine: os?.textDecorationLine ?? "",
+  };
+  return { headline: el.querySelector("[data-bump-h]")?.textContent?.trim() ?? "", paras, look };
+}
+
+// The dashboard's hosts (proxy.ts DASHBOARD_HOSTS), and our own.
+const FROM = new Set(["https://funnnnels.com", "https://www.funnnnels.com"]);
+let editor = "";
 
 let looking = "";
 function show(id: string, tries = 0) {
@@ -42,7 +74,7 @@ function show(id: string, tries = 0) {
   if (!el) {
     if (tries > 25) {
       looking = "";
-      return void parent.postMessage({ type: "fv-bump-current", id, found: false }, location.origin);
+      return void parent.postMessage({ type: "fv-bump-current", id, found: false }, editor);
     }
     // Step 1 still: the owner's own way to step 2 (OwnerSkip.tsx).
     document.querySelector<HTMLElement>("[data-owner-skip]")?.click();
@@ -50,7 +82,7 @@ function show(id: string, tries = 0) {
   }
   looking = "";
   el.scrollIntoView({ block: "center" });
-  parent.postMessage({ type: "fv-bump-current", id, found: true, ...current(el) }, location.origin);
+  parent.postMessage({ type: "fv-bump-current", id, found: true, ...current(el) }, editor);
 }
 
 function draft(m: Msg) {
@@ -68,7 +100,8 @@ function draft(m: Msg) {
 
 if (typeof window !== "undefined" && window.parent !== window) {
   window.addEventListener("message", (e) => {
-    if (e.origin !== location.origin || e.source !== window.parent) return;
+    if ((e.origin !== location.origin && !FROM.has(e.origin)) || e.source !== window.parent) return;
+    editor = e.origin;
     const m = (e.data ?? {}) as Msg;
     if (m.type === "fv-bump-show" && m.id) show(m.id);
     if (m.type === "fv-bump-draft") draft(m);
