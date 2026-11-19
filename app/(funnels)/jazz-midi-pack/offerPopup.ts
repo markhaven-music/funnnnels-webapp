@@ -14,6 +14,10 @@
 // 2026-11-19 ("metti prezzo drunk swing a 3.99"): the popup's Drunk Swing Grooves at €3.99 / $3.99
 // (funnel_items jazz-midi-pack/swing-grooves). Its own funnel and the other order pages keep €7.
 //
+// 2026-11-19 evening ("togli popup upsell e availability check. si va all'order page normale com'era prima"):
+// the popup is off, Drunk Swing Grooves is the order page's tick box again at €7 / $7 (funnel_items back to 700).
+// This file stays for the Analytics card and in case the popup comes back.
+//
 // The add-on is the funnel_items row `swing-grooves` (dashboard → Products, its
 // price there), so the card and PayPal routes price and check it like any add-on
 // (lib/funnels.ts pickedBumps). It never shows as a tick box on the order page.

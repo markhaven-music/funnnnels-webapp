@@ -13,7 +13,6 @@ import { Tracking } from "../../Tracking";
 import { JazzBonusBanner, JazzBonusItem } from "../../BonusClock";
 import { FIVE_MIN_BONUS_ON, JAZZ_BONUS, JAZZ_BONUS_SCRIPT, JAZZ_BONUS_TIME_SCRIPT, JAZZ_BONUS_WORDS } from "../../fiveMinBonus";
 import c from "../../fiveMinBonus.module.css";
-import { POPUP_OFFER } from "../../offerPopup";
 import { splitName } from "../../../_kit/KitBox";
 import { Beacon } from "../../../Beacon";
 import { display } from "../../fonts";
@@ -64,13 +63,12 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
     bump: f.bump ? { name: f.bump.name, price: priceIn(f.bump.price, currency), pitch: f.bump.pitch, cover: splitName(f.bump.name) } : null,
     // Their words say the code's price ("just {c}27"): said again at Products' (lib/restate.ts).
     // Jazz Record Samples hidden since 2026-11-08 ("lasciamo solo drunk swing grooves"), though Products still lists it.
-    // Drunk Swing Grooves: no tick box since 2026-11-17, the landing's popup offers it (../../offerPopup.ts) and
-    // it's in the order when the buyer said yes there ("remove it from order bumps on order page").
+    // Drunk Swing Grooves: offered in a landing pop-up 11-17 → 11-19 (../../offerPopup.ts), a tick box here again since.
     bumps: (f.bumps ?? []).filter((b) => b.id !== "record-samples").map((b) => {
       const was = priceIn(getFunnel(funnel.slug)?.bumps?.find((c) => c.id === b.id)?.price, currency) ?? priceIn(b.price, currency);
       const copy = bumpCopy[b.id];
       const said = copy ? { ...copy, body: copy.body.map((p) => restate(p, was, priceIn(b.price, currency))) } : {};
-      return { id: b.id, name: b.name, price: priceIn(b.price, currency), pitch: b.pitch, image: b.image, ...said, ...(b.id === POPUP_OFFER.item ? { popup: POPUP_OFFER.key } : {}) };
+      return { id: b.id, name: b.name, price: priceIn(b.price, currency), pitch: b.pitch, image: b.image, ...said };
     }),
     // After paying: the Famous Beats upsell (./offer), then the thank-you page.
     afterOrder: nextStep(f, "en", null),
