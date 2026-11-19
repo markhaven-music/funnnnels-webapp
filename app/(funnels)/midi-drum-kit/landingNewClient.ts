@@ -489,7 +489,7 @@ export const CLIENT_JS = String.raw`
     }
     function load() {
       if (!wait) {
-        wait = fetch(DATA + 'bounce.json').then(function (r) { return r.json(); }).then(function (d) {
+        wait = fetch(DATA + 'bounce01.json').then(function (r) { return r.json(); }).then(function (d) {
           var a = unflat(d.off, 1), b = unflat(d.on, 1);
           sets2 = { f: d.f, notes: [a, b] };
           songB = { notes: a, len: d.len, bpm: d.bpm, rows: rowsOf(a.concat(b)), plain: true };

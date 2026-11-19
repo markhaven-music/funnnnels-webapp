@@ -454,7 +454,9 @@ def kits(z):
 # first plain beat again (a kick and the 808 on the one, the snare on the three, straight 8th hats) with its second
 # kick "un po' prima", on the "and" of four before bar 2 ("il beat no bounce di prima era quasi perfetto
 # semplicemente la seconda cassa spostala un po' prima"): kicks on 1 and 4-and, every two bars.
-BOUNCE = "9. Complete Beats (Multi-Track)/MDK_CompleteBeat13_140.mid"
+# Complete Beat 01 again since 2026-11-19 ("can you change the beat for the 'with bounce' audio? both here and on midi
+# drum kit page", then "use beat 01"), written to bounce01.json; bounce.json stays Beat 13 for tools/drum_kit_vsl.py.
+BOUNCE = "9. Complete Beats (Multi-Track)/MDK_CompleteBeat01_164.mid"
 
 
 def bounce(z):
@@ -475,7 +477,7 @@ def bounce(z):
     plain.sort()
     out = {"f": e["f"], "bpm": e["bpm"], "len": e["len"], "on": e["n"], "off": [x for n in plain for x in n]}
     # a new name: browsers keep /funnels/* for a week
-    print("bounce.json", write("bounce.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
+    print("bounce01.json", write("bounce01.json", out), "bytes ·", e["f"], e["bpm"], "bpm ·", len(notes), "notes against", len(plain))
 
 
 def main(argv):

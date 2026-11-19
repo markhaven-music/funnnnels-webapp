@@ -342,7 +342,7 @@ const WORDS: Record<L, Record<string, string>> = {
     bnOff: "No bounce",
     bnOn: "Bounce",
     bnOffWhat: "A plain beat: kick and 808 on the one, and an 8th before the snare in bars 2 and 4; straight hi-hats.",
-    bnOnWhat: "Complete Beat 13 from the kit, exactly as it is in the zip.",
+    bnOnWhat: "Complete Beat 01 from the kit, exactly as it is in the zip.",
   },
   it: {
     h2: "Premi play. Ascolta il kit prima di prenderlo.",
@@ -395,7 +395,7 @@ const WORDS: Record<L, Record<string, string>> = {
     bnOff: "Senza bounce",
     bnOn: "Con bounce",
     bnOffWhat: "Un beat piatto: kick e 808 sull’uno, e un ottavo prima del rullante nella seconda e quarta battuta; hi-hat dritti.",
-    bnOnWhat: "Il Complete Beat 13 del kit, esattamente com’è nello zip.",
+    bnOnWhat: "Il Complete Beat 01 del kit, esattamente com’è nello zip.",
   },
 };
 // The groups' names as the kit's folders have them, and in Italian as the page calls them.
@@ -643,7 +643,7 @@ ${bonus}
 `;
 }
 
-/** "NO BOUNCE VS BOUNCE": where the page says what bounce is, a switch to hear it (./landingNewClient.ts, player/v5/bounce.json). */
+/** "NO BOUNCE VS BOUNCE": where the page says what bounce is, a switch to hear it (./landingNewClient.ts, player/v6/bounce01.json: Complete Beat 01 since 2026-11-19, "use beat 01"). */
 function bounce(c: Ctx): string {
   const { w } = c;
   return `<div class="dkn dk-foil" id="dkn">

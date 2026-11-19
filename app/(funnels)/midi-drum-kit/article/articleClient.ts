@@ -1,7 +1,7 @@
 // The advertorial's script (./stiffDrums.ts puts it at the end of <body>). Plain JS in a string, the
 // page being a static document: no backticks or dollar-braces inside.
 //   - "No bounce vs bounce" (#bn): the landing's switch (../landingNewClient.ts), cut down to what this
-//     figure needs: the kit's own drum sounds (player/*.m4a), bounce.json, a roll on a canvas, one switch.
+//     figure needs: the kit's own drum sounds (player/*.m4a), bounce01.json, a roll on a canvas, one switch.
 //   - "One bar, two ways" (#race): its CSS animation starts when the figure comes on screen.
 //   - Read depth: Read25 / Read50 / Read75 / Read100 once per visit to the Meta Pixel (custom events, to
 //     build audiences of who read how far) and to Clarity. Measured on the article, not the footer.
@@ -252,7 +252,7 @@ export const ARTICLE_JS = String.raw`
   }
   function load() {
     if (!wait) {
-      wait = fetch(DATA + 'bounce.json').then(function (r) { return r.json(); }).then(function (d) {
+      wait = fetch(DATA + 'bounce01.json').then(function (r) { return r.json(); }).then(function (d) {
         var a = unflat(d.off), b = unflat(d.on);
         sets = { f: d.f, notes: [a, b] };
         song = { notes: a, len: d.len, bpm: d.bpm, rows: rowsOf(a.concat(b)), plain: true };

@@ -14,7 +14,7 @@ import { ARTICLE_JS } from "./articleClient";
 // Structure (the "1-2" format): hook (a pain and a way out) → what you'll learn → why listen to us →
 // problem 1 with a figure → problem 2 with a figure → the fix in two steps, the kit mentioned in
 // passing → recap → one soft offer. Every fact is the kit's own (./copy/en.ts, ./landingNew.ts,
-// player/v6/tree.json); the figure that plays is the landing's "No bounce vs bounce" (bounce.json).
+// player/v6/tree.json); the figure that plays is the landing's "No bounce vs bounce" (bounce01.json, Complete Beat 01).
 //
 // Read depth: Read25 / Read50 / Read75 / Read100 go to the Meta Pixel (custom events, to build
 // audiences of the people who read far and retarget them) and to Clarity. ./articleClient.ts.
@@ -200,7 +200,7 @@ export function articleHtml(currency: Currency, price: number): string {
     rows: ["808", "Kick", "Snare", "Clap", "Rim", "Hat", "Open hat", "Perc"],
     bn: [
       ["No bounce", "A plain beat: kick and 808 on the one, and an 8th before the snare in bars 2 and 4; straight hi-hats."],
-      ["Bounce", "Complete Beat 13 from the MIDI Drum Kit, exactly as it is in the zip."],
+      ["Bounce", "Complete Beat 01 from the MIDI Drum Kit, exactly as it is in the zip."],
     ],
   });
   const title = "Your drums sound stiff. It's not your sounds.";
@@ -262,7 +262,7 @@ ${head(currency, price)}
 <p class="fig-sub">The same pattern: once clicked in hit by hit, once dragged in from a MIDI file.</p>
 <div class="race">
 <div class="lane hand"><p class="lane-h">By hand <span>click, click, click…</span></p><div class="grid">${raceGrid("hand")}</div><p class="lane-f">hats · snare · kick</p></div>
-<div class="lane drag"><p class="lane-h">One drag <span>done</span></p><div class="grid">${raceGrid("drag")}<b class="file">MDK_CompleteBeat13_140.mid</b></div><p class="lane-f">hats · snare · kick</p></div>
+<div class="lane drag"><p class="lane-h">One drag <span>done</span></p><div class="grid">${raceGrid("drag")}<b class="file">MDK_CompleteBeat01_164.mid</b></div><p class="lane-f">hats · snare · kick</p></div>
 </div>
 <figcaption><b>One bar.</b> A beat is dozens of them, and every bar you click in is time the idea is cooling down.</figcaption>
 </figure>
