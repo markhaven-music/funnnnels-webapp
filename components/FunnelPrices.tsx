@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { BumpTextEditor } from "@/components/BumpTextEditor";
+import { notATickBox } from "@/lib/bumpPlaces";
 import { I } from "@/components/icons";
 import type { FunnelItem, ItemRole } from "@/lib/catalog";
 import { money, type Money } from "@/lib/launch";
@@ -26,8 +27,11 @@ const both = (m: Money) => `${money(m.eur, "eur")} · ${money(m.usd, "usd")}`;
 const TAG: Record<ItemRole, string> = { main: "Product", bump: "Order bump", upsell: "Upsell" };
 
 /** The prices on a step's card; a click opens the drawer on that price. */
-export function PriceList({ items, onEdit }: { items: PriceItem[]; onEdit: (id: string) => void }) {
+export function PriceList({ funnel, items, onEdit }: { funnel: string; items: PriceItem[]; onEdit: (id: string) => void }) {
   const first = items.find((i) => i.role === "bump") ?? items[0];
+  // As on the order page: the tick boxes in its order, then the add-ons it shows another way (lib/bumpPlaces.ts).
+  const away = (i: PriceItem) => i.role === "bump" && !!notATickBox(funnel, i.key);
+  const shown = [...items.filter((i) => !away(i)), ...items.filter(away)];
   return (
     <div className={p.list}>
       <div className={p.listHead}>
@@ -36,10 +40,10 @@ export function PriceList({ items, onEdit }: { items: PriceItem[]; onEdit: (id: 
           Edit prices &amp; order bumps
         </button>
       </div>
-      {items.map((i) => (
-        <button key={priceId(i)} type="button" className={p.line} onClick={() => onEdit(priceId(i))} title="Change this price">
+      {shown.map((i) => (
+        <button key={priceId(i)} type="button" className={p.line} onClick={() => onEdit(priceId(i))} title={away(i) ? notATickBox(funnel, i.key) : "Change this price"}>
           <span className={p.lineName}>{i.name}</span>
-          <span className={`${p.tag} ${p[`tag_${i.role}`]}`}>{TAG[i.role]}</span>
+          <span className={`${p.tag} ${p[`tag_${i.role}`]}`}>{away(i) ? "Not a tick box" : TAG[i.role]}</span>
           <span className={p.linePrice}>{both(i.price)}</span>
         </button>
       ))}
@@ -122,6 +126,10 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
     }
   }
   const bumps = items.filter((i) => i.role === "bump");
+  // The tick boxes, in the order page's order; the add-ons it shows another way (a pop-up, a free
+  // bonus) after them, saying where they are (lib/bumpPlaces.ts).
+  const ticks = bumps.filter((i) => !notATickBox(funnel, i.key));
+  const elsewhere = bumps.filter((i) => notATickBox(funnel, i.key));
   const addable = products.filter((x) => x.file && !items.some((i) => i.product === x.slug && i.role !== "upsell"));
 
   useEffect(() => {
@@ -215,7 +223,7 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
 
         <div className={p.body} ref={body}>
           {GROUPS.map((g) => {
-            const rows = items.filter((i) => i.role === g.role);
+            const rows = g.role === "bump" ? [...ticks, ...elsewhere] : items.filter((i) => i.role === g.role);
             if (!rows.length && g.role !== "bump") return null;
             return (
               <section key={g.role} className={p.group}>
@@ -259,15 +267,21 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
                       </div>
                       {i.role === "bump" && (
                         <div className={p.order}>
-                          <span className={p.place}>
-                            {bumps.indexOf(i) + 1} of {bumps.length} on the order form
-                          </span>
-                          <button type="button" className={p.mini} disabled={listBusy || bumps.indexOf(i) === 0} onClick={() => listAct("PUT", { role: "bump", key: i.key, move: -1 }, `${i.name} moved up.`)} aria-label={`Move ${i.name} up`}>
-                            ↑ Up
-                          </button>
-                          <button type="button" className={p.mini} disabled={listBusy || bumps.indexOf(i) === bumps.length - 1} onClick={() => listAct("PUT", { role: "bump", key: i.key, move: 1 }, `${i.name} moved down.`)} aria-label={`Move ${i.name} down`}>
-                            ↓ Down
-                          </button>
+                          {notATickBox(funnel, i.key) ? (
+                            <span className={p.place}>{notATickBox(funnel, i.key)}</span>
+                          ) : (
+                            <>
+                              <span className={p.place}>
+                                {ticks.indexOf(i) + 1} of {ticks.length} on the order form
+                              </span>
+                              <button type="button" className={p.mini} disabled={listBusy || ticks.indexOf(i) === 0} onClick={() => listAct("PUT", { role: "bump", key: i.key, move: -1 }, `${i.name} moved up.`)} aria-label={`Move ${i.name} up`}>
+                                ↑ Up
+                              </button>
+                              <button type="button" className={p.mini} disabled={listBusy || ticks.indexOf(i) === ticks.length - 1} onClick={() => listAct("PUT", { role: "bump", key: i.key, move: 1 }, `${i.name} moved down.`)} aria-label={`Move ${i.name} down`}>
+                                ↓ Down
+                              </button>
+                            </>
+                          )}
                           {/* The product's words on every order form that sells it, with this funnel's order page beside them (BumpTextEditor.tsx). */}
                           <button type="button" className={p.mini} onClick={() => setWords({ product: i.product, name: i.name })}>
                             Edit words

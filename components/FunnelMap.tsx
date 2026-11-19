@@ -423,7 +423,7 @@ export function FunnelMapView({ map, prices = [] }: { map: FunnelMap; prices?: P
                     )}
                   </div>
                 )}
-                {sells.length > 0 && <PriceList items={sells} onEdit={setEditing} />}
+                {sells.length > 0 && <PriceList funnel={map.id} items={sells} onEdit={setEditing} />}
                 {test && (step.kind === "landing" || step.kind === "order") && <Variants test={test} scope={testScope} step={step} />}
               </section>
             </div>

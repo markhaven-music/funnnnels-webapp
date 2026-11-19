@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { sayBumps } from "@/lib/bumpText";
+import { tickBoxes } from "@/lib/bumpPlaces";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel, upsellsOn, type Bump } from "@/lib/funnels";
@@ -40,11 +41,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// The tick boxes, in this order: the Jazz page's €7 Drunk Swing Grooves, then HUSTLE. Emotional
+// The tick boxes are the funnel map's "Prices & order bumps" list, in its order (lib/bumpPlaces.ts;
+// 2026-11-19 there: the Jazz page's €7 Drunk Swing Grooves, then HUSTLE; the Expansions are left out). Emotional
 // Keys is one of the six bonuses and Famous Beats is the upsell after the order, so neither is
 // a tick box here. Their prices are dashboard → Products'; until Products lists a new one, the
 // code's (preview only: the checkout charges what Products says).
-const ORDER_BUMPS = ["swing-grooves", "hustle"];
 
 const JAZZ = "/funnels/jazz-midi-pack";
 const BONUS_THUMBS: Record<string, string> = {
@@ -73,9 +74,8 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
 
   const live = f.bumps ?? [];
   const code = funnel.bumps as readonly (Bump & { headline: string })[];
-  const ownBumps = ORDER_BUMPS.flatMap((id) => {
-    const b = live.find((x) => x.id === id) ?? code.find((x) => x.id === id);
-    if (!b) return [];
+  const ownBumps = tickBoxes(funnel.slug, live.length ? live : code).flatMap((b) => {
+    const id = b.id;
     const known = code.find((x) => x.id === id);
     const was = priceIn(known?.price, currency) ?? priceIn(b.price, currency);
     const copy = BUMP_COPY[id];

@@ -71,7 +71,8 @@ export async function sayBumps<T extends { id: string; price: number }>(funnel: 
       const picture = BUMP_IMAGE[own.id];
       const b = picture ? { ...own, image: picture } : own;
       const saved = texts[productOf[b.id] ?? b.id];
-      const t = saved?.[lang] ?? saved?.en;
+      // A language the editor has no tab for (de, fr, es) keeps the funnel's own words, not the English ones.
+      const t = saved?.[lang] ?? ((BUMP_LANGS as readonly string[]).includes(lang) ? saved?.en : undefined);
       if (!t || (!t.headline.trim() && !t.body.trim())) return b;
       const { words: _own, ...rest } = b as T & { words?: string };
       void _own;

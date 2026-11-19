@@ -1,3 +1,4 @@
+import { notATickBox } from "@/lib/bumpPlaces";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { funnel as drumKit } from "@/app/(funnels)/midi-drum-kit/funnel";
@@ -334,7 +335,10 @@ export async function moveItem(funnel: string, role: ItemRole, key: string, move
   const rows = (data ?? []) as { key: string; position: number }[];
   const at = rows.findIndex((r) => r.key === key);
   if (at < 0) return "Not found.";
-  const to = at + move;
+  // A tick box moves past the add-ons that aren't tick boxes (lib/bumpPlaces.ts), so each click shows.
+  const hidden = (k: string) => role === "bump" && !notATickBox(funnel, key) && !!notATickBox(funnel, k);
+  let to = at + move;
+  while (to >= 0 && to < rows.length && hidden(rows[to].key)) to += move;
   if (to < 0 || to >= rows.length) return null;
   [rows[at], rows[to]] = [rows[to], rows[at]];
   // Positions renumbered 0, 1, 2… in the new order.

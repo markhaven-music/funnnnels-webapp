@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { sayBumps } from "@/lib/bumpText";
+import { tickBoxes } from "@/lib/bumpPlaces";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { getFunnel, nextStep, resolveFunnel, upsellsOn, type Bump } from "@/lib/funnels";
@@ -40,13 +41,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// The tick boxes, in this order (2026-11-09: the Jazz page's €7 Drunk Swing Grooves, HUSTLE;
-// Emotional Keys is one of the six bonuses since "add more bonuses just like midi jazz pack"). Their prices are dashboard → Products'; until Products lists the new ones,
-// the code's (preview only: the checkout charges what Products says).
-// 2026-11-19 ("metti anche TOP HITS MIDI BUNDLE come order bump dell order page"): TOP HITS first; whoever
-// ticks it skips the TOP HITS upsell page after the order (same id, fv_owned). The MIDI Drum Kit comes from
-// the landing's pop-up (../../popupOffer.ts): never a tick box, a summary line with Remove when they said Yes.
-const ORDER_BUMPS = ["top-hits", "swing-grooves", "hustle", FBB_POPUP.item];
+// The tick boxes are the funnel map's "Prices & order bumps" list, in its order (lib/bumpPlaces.ts):
+// TOP HITS first since 2026-11-19 (whoever ticks it skips the TOP HITS upsell, same id, fv_owned).
+// Left out there: the MIDI Drum Kit, the landing's pop-up (../../popupOffer.ts, a summary line with
+// Remove when they said Yes), Emotional Keys (one of the six bonuses) and the Expansions (the
+// 5-minute bonus, off). When the list can't be read, the code's add-ons in the code's order.
 
 const BONUS_THUMBS: Record<string, string | null> = {
   "essential-drums": "/funnels/famous-beats-bundle/bonus-essential-360.webp",
@@ -67,9 +66,11 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
 
   const live = f.bumps ?? [];
   const code = funnel.bumps as readonly (Bump & { headline: string })[];
-  const ownBumps = ORDER_BUMPS.flatMap((id) => {
-    const b = live.find((x) => x.id === id) ?? code.find((x) => x.id === id);
-    if (!b) return [];
+  // The pop-up's add-on rides along (the form shows it only after its Yes), the rest are the tick boxes.
+  const popup = live.find((x) => x.id === FBB_POPUP.item) ?? code.find((x) => x.id === FBB_POPUP.item);
+  const listed = [...tickBoxes(funnel.slug, live.length ? live : code), ...(popup ? [popup] : [])];
+  const ownBumps = listed.flatMap((b) => {
+    const id = b.id;
     const was = priceIn(code.find((x) => x.id === id)?.price, currency) ?? priceIn(b.price, currency);
     const copy = BUMP_COPY[id];
     const known = code.find((x) => x.id === id);
