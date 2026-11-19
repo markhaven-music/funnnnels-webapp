@@ -80,6 +80,31 @@ function unfill(s: string, u: Use, lang: Lang) {
   return swap(u.full !== u.price ? swap(s, u.full, "{full}") : s, u.price, "{price}");
 }
 
+// Unsaved words are kept in this browser until they're saved, so a closed tab, a lost sign-in or a
+// save that never reached the server doesn't lose them: reopening the editor brings them back.
+// (2026-11-19: a whole TOP HITS rewrite from 11-18 was lost that way; every save is also kept in
+// bump_text_history now.)
+const DRAFT_KEY = (product: string, lang: Lang) => `fv-bump-draft:${product}:${lang}`;
+type Kept = { t: Text; at: number };
+function keepDraft(product: string, lang: Lang, t: Text) {
+  try {
+    localStorage.setItem(DRAFT_KEY(product, lang), JSON.stringify({ t, at: Date.now() } satisfies Kept));
+  } catch {}
+}
+function keptDraft(product: string, lang: Lang): Kept | null {
+  try {
+    const k = JSON.parse(localStorage.getItem(DRAFT_KEY(product, lang)) ?? "null") as Kept | null;
+    return k && typeof k.t?.headline === "string" && typeof k.t?.body === "string" ? k : null;
+  } catch {
+    return null;
+  }
+}
+function dropDraft(product: string, lang: Lang) {
+  try {
+    localStorage.removeItem(DRAFT_KEY(product, lang));
+  } catch {}
+}
+
 // funnel: the order page to open the preview on (the Funnels view opens it on its own funnel).
 export function BumpTextEditor({ product, name, funnel: first, onClose }: { product: string; name: string; funnel?: string; onClose: () => void }) {
   const [data, setData] = useState<Loaded | null>(null);
@@ -104,8 +129,23 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
       .then((d: Loaded & { error?: string }) => {
         if (d.error) return setError(d.error);
         setData(d);
-        setDrafts(d.texts);
         setSaved(d.texts);
+        // Words typed here before and never saved come back.
+        const back: Partial<Record<Lang, Text>> = { ...d.texts };
+        const restored: string[] = [];
+        for (const l of Object.keys(LANG_NAME) as Lang[]) {
+          const k = keptDraft(product, l);
+          const was = d.texts[l];
+          if (!k) continue;
+          if (was && was.headline.trim() === k.t.headline.trim() && was.body.trim() === k.t.body.trim()) {
+            dropDraft(product, l);
+            continue;
+          }
+          back[l] = k.t;
+          restored.push(`${LANG_NAME[l]} (${new Date(k.at).toLocaleString()})`);
+        }
+        setDrafts(back);
+        if (restored.length) setMsg({ ok: false, text: `Unsaved words brought back: ${restored.join(", ")}. Save everywhere to put them live.` });
         setFunnel((d.uses.find((u) => u.funnel === first) ?? d.uses[0])?.funnel ?? "");
       })
       .catch(() => setError("Couldn't load."));
@@ -183,6 +223,7 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
     if (next.body !== undefined) shown.current = `${lang}:${next.body}`;
     latest.current = { ...latest.current, [lang]: t };
     setDrafts(latest.current);
+    keepDraft(product, lang, t);
     setMsg(null);
     send(t);
   }
@@ -198,8 +239,16 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
     setMsg(null);
     try {
       const r = await fetch("/api/products/bump-text", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ product, lang, ...t }) });
-      const d = (await r.json()) as { error?: string; forms?: number };
-      if (!r.ok || d.error) throw new Error(d.error ?? "Couldn't save.");
+      // A lost sign-in or a server error answers with a page, not JSON: say so plainly, the words stay here.
+      const raw = await r.text();
+      let d: { error?: string; forms?: number; ok?: boolean } = {};
+      try {
+        d = JSON.parse(raw);
+      } catch {
+        throw new Error(`NOT saved (the server answered ${r.status}${r.status === 401 ? ": sign in again" : ""}). Your words are kept in this browser, try Save everywhere again.`);
+      }
+      if (!r.ok || d.error || !d.ok) throw new Error(`NOT saved: ${d.error ?? `the server answered ${r.status}`}. Your words are kept in this browser.`);
+      dropDraft(product, lang);
       const cleared = !t.headline.trim() && !t.body.trim();
       setSaved((sv) => ({ ...sv, [lang]: cleared ? undefined : t }));
       setMsg({ ok: true, text: cleared ? "Removed. Each order form says its own words again." : `Saved. Live on ${d.forms} order form${d.forms === 1 ? "" : "s"}.` });
