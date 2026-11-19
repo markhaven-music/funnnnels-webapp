@@ -338,6 +338,22 @@
 .miniDanger {
   color: #c03535;
 }
+/* Edit words: the add-on's words on every order form that sells it, the one place to change them,
+   so it stands out ("metti un bottone giallo più prominente, è una cosa importante", 2026-11-19). */
+.words {
+  padding: 7px 14px;
+  border: 1px solid #c99a00;
+  border-radius: var(--radius-sm);
+  background: #ffd84d;
+  color: #1a1400;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+.words:hover {
+  background: #ffcd1f;
+}
 .add {
   margin-top: 6px;
   padding-top: 14px;

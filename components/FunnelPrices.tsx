@@ -283,8 +283,8 @@ export function PricesDrawer({ funnel, name, items, focus, onSaved, onClose }: D
                             </>
                           )}
                           {/* The product's words on every order form that sells it, with this funnel's order page beside them (BumpTextEditor.tsx). */}
-                          <button type="button" className={p.mini} onClick={() => setWords({ product: i.product, name: i.name })}>
-                            Edit words
+                          <button type="button" className={p.words} onClick={() => setWords({ product: i.product, name: i.name })} title="The words on every order form that sells it">
+                            ✎ Edit words
                           </button>
                           <button
                             type="button"

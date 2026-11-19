@@ -329,8 +329,14 @@ function BumpWords({ p }: { p: Entry }) {
     <div>
       <p className={c.legend}>Order bump words</p>
       <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0 0", flexWrap: "wrap" }}>
-        <button type="button" className="btn" onClick={() => setOpen(true)}>
-          Edit the words
+        {/* Yellow and prominent, as on the funnel map's "Edit words" (funnelPrices.module.css .words). */}
+        <button
+          type="button"
+          className="btn"
+          style={{ background: "#ffd84d", borderColor: "#c99a00", color: "#1a1400", fontWeight: 700 }}
+          onClick={() => setOpen(true)}
+        >
+          ✎ Edit the words
         </button>
         <span className={c.note} style={{ margin: 0 }}>
           One text for all {forms} order form{forms === 1 ? "" : "s"} where it&rsquo;s an add-on, with the real checkout beside it as you type.
