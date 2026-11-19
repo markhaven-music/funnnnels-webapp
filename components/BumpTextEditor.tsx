@@ -87,6 +87,10 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
   const [lang, setLang] = useState<Lang>("en");
   const [funnel, setFunnel] = useState("");
   const [drafts, setDrafts] = useState<Partial<Record<Lang, Text>>>({});
+  // What is saved (or, before any save, the words the page says): the drafts are compared with it, so
+  // closing with words that were only previewed asks first. The preview shows a draft as if it were live,
+  // and on 11-18 an edit (Michael Jackson among the artists) was closed unsaved and never reached a page.
+  const [saved, setSaved] = useState<Partial<Record<Lang, Text>>>({});
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [found, setFound] = useState<boolean | null>(null);
@@ -101,6 +105,7 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
         if (d.error) return setError(d.error);
         setData(d);
         setDrafts(d.texts);
+        setSaved(d.texts);
         setFunnel((d.uses.find((u) => u.funnel === first) ?? d.uses[0])?.funnel ?? "");
       })
       .catch(() => setError("Couldn't load."));
@@ -138,6 +143,7 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
           return d;
         }
         const own = { headline: unfill(m.headline ?? "", use, lang), body: (m.paras ?? []).map((p) => unfill(p, use, lang)).join("\n\n") };
+        setSaved((sv) => (sv[lang] ? sv : { ...sv, [lang]: own }));
         return { ...d, [lang]: own };
       });
     }
@@ -195,6 +201,7 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
       const d = (await r.json()) as { error?: string; forms?: number };
       if (!r.ok || d.error) throw new Error(d.error ?? "Couldn't save.");
       const cleared = !t.headline.trim() && !t.body.trim();
+      setSaved((sv) => ({ ...sv, [lang]: cleared ? undefined : t }));
       setMsg({ ok: true, text: cleared ? "Removed. Each order form says its own words again." : `Saved. Live on ${d.forms} order form${d.forms === 1 ? "" : "s"}.` });
       if (cleared) {
         setDrafts((d2) => ({ ...d2, [lang]: undefined }));
@@ -205,6 +212,22 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
     } finally {
       setBusy(false);
     }
+  }
+
+  const same = (a?: Text, b?: Text) => (a?.headline ?? "").trim() === (b?.headline ?? "").trim() && (a?.body ?? "").trim() === (b?.body ?? "").trim();
+  const unsaved = (Object.keys(drafts) as Lang[]).filter((l) => drafts[l] && !same(drafts[l], saved[l]));
+  const dirty = unsaved.length > 0;
+
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  function close() {
+    if (dirty && !window.confirm(`Your changes (${unsaved.map((l) => l.toUpperCase()).join(", ")}) aren't saved: the order pages still show the old words. Close and lose them?`)) return;
+    onClose();
   }
 
   const tool: React.CSSProperties = { minWidth: 34, height: 32, padding: "0 9px", border: "1px solid var(--line)", borderRadius: "var(--radius-sm)", background: "var(--bg-2)", color: "var(--fg-0)", font: "600 13px/1 var(--font-sans)", cursor: "pointer" };
@@ -222,7 +245,7 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
             <div style={{ font: "600 12px/1.2 var(--font-sans)", letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--fg-2)" }}>Order bump words</div>
             <div style={{ font: "700 22px/1.25 var(--font-sans)" }}>{name}</div>
           </div>
-          <button type="button" className="btn" onClick={onClose}>
+          <button type="button" className="btn" onClick={close}>
             Close
           </button>
         </div>
@@ -341,6 +364,7 @@ export function BumpTextEditor({ product, name, funnel: first, onClose }: { prod
                       Back to each form&rsquo;s own words
                     </button>
                   )}
+                  {!msg && dirty && <span style={{ color: "var(--amber, #f5a623)", fontWeight: 600 }}>Not saved yet: the order pages still show the old words.</span>}
                   {msg && <span style={{ color: msg.ok ? "var(--mint)" : "var(--rose)", fontWeight: 600 }}>{msg.text}</span>}
                 </div>
               </div>
