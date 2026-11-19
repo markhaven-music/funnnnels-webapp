@@ -8,7 +8,7 @@ import s from "./analytics.module.css";
 
 // Dashboard → Analytics. Numbers from /api/analytics (lib/analytics.ts):
 // visitors and checkout starts from our own beacon, orders from Stripe and
-// PayPal, and the running A/B tests (lib/analytics.ts TESTS).
+// PayPal. The A/B tests read the same endpoint in A/B Tests (ABTestsPanel).
 
 
 const LANG_NAMES: Record<string, string> = { en: "English", fr: "French", es: "Spanish", de: "German", it: "Italian", "?": "Language not recorded" };
@@ -57,11 +57,6 @@ export function AnalyticsPanel() {
     { visitors: 0, checkouts: 0, orders: 0, ratedOrders: 0, revenue: 0 },
   );
 
-  // Running tests, the latest started first; the ended ones go to the archive.
-  const tests = data?.tests ?? [];
-  const running = tests.filter((t) => !t.ended).sort((a, b) => (b.since ?? "").localeCompare(a.since ?? ""));
-  const ended = tests.filter((t) => t.ended);
-
   return (
     <main className="main">
       <div className="page-head">
@@ -90,18 +85,6 @@ export function AnalyticsPanel() {
         <Stat label="ORDERS" value={total ? int(total.orders) : "…"} sub={total ? pct(total.ratedOrders, total.visitors) : ""} color="var(--mint)" />
         <Stat label="REVENUE" value={total ? eur(total.revenue) : "…"} color="var(--accent)" />
       </div>
-
-      {/* The tests first, the newest on top; the ended ones folded away at the end of the page. */}
-      {running.length > 0 && (
-        <div className="section-head">
-          <div className="section-title">
-            A/B tests <span className="count">{running.length} running</span>
-          </div>
-        </div>
-      )}
-      {running.map((t) => (
-        <TestCard key={`${t.funnel}|${t.name}`} t={t} />
-      ))}
 
       <div className="section-head">
         <div className="section-title">
@@ -159,26 +142,9 @@ export function AnalyticsPanel() {
         </div>
       </div>
 
-      {(data?.availability || data?.popupOffer || data?.taps || (data?.bonuses?.length ?? 0) > 0) && (
-        <div className="section-head" style={{ marginTop: 28 }}>
-          <div className="section-title">Other experiments</div>
-        </div>
-      )}
-      {data?.taps && <TapsCard t={data.taps} />}
-      {data?.popupOffer && <PopupOfferCard p={data.popupOffer} />}
-      {data?.availability && <AvailabilityCard a={data.availability} />}
-      {data?.bonuses?.map((b) => <BonusCard key={b.funnel} b={b} />)}
-
-      {ended.length > 0 && (
-        <details className={s.archive}>
-          <summary>
-            Ended tests <span className="count">{ended.length}</span>
-          </summary>
-          {ended.map((t) => (
-            <TestCard key={`${t.funnel}|${t.name}`} t={t} />
-          ))}
-        </details>
-      )}
+      <p className={s.foot}>
+        The A/B tests and the other experiments are in A/B Tests.
+      </p>
 
       {data && (
         <p className={s.foot}>
@@ -246,7 +212,7 @@ const chance = (c: number | null) => (c == null ? "—" : `${Math.round(c * 100)
 
 /** Dashboard → Analytics: the Jazz landing's popup offer, average order before and after it (lib/analytics.ts popupOfferStats). */
 /** Dashboard → Analytics: who taps a landing's button and what they answer the pop-up after it (lib/analytics.ts tapStats). */
-function TapsCard({ t }: { t: TapStats }) {
+export function TapsCard({ t }: { t: TapStats }) {
   return (
     <section className={s.test}>
       <div className={s.testHead}>
@@ -308,7 +274,7 @@ function TapsCard({ t }: { t: TapStats }) {
   );
 }
 
-function PopupOfferCard({ p }: { p: PopupOfferStats }) {
+export function PopupOfferCard({ p }: { p: PopupOfferStats }) {
   const sides = [
     { key: "before", title: `Before · ${whenText(when(p.before.from))} → ${whenText(when(p.before.to!))}`, v: p.before },
     { key: "after", title: `After · since ${whenText(when(p.after.from))}`, v: p.after },
@@ -385,7 +351,7 @@ function PopupOfferCard({ p }: { p: PopupOfferStats }) {
 }
 
 /** Dashboard → Analytics: the funnels before and after the "Checking availability…" popup (lib/analytics.ts availabilityStats). */
-function AvailabilityCard({ a }: { a: AvailabilityStats }) {
+export function AvailabilityCard({ a }: { a: AvailabilityStats }) {
   const sides = [
     { key: "before", title: `Before · ${whenText(when(a.before.from))} → ${whenText(when(a.before.to!))}`, v: a.before },
     { key: "after", title: a.after.to ? `After · ${whenText(when(a.after.from))} → ${whenText(when(a.after.to))}` : `After · since ${whenText(when(a.after.from))}`, v: a.after },
@@ -471,7 +437,7 @@ function AvailabilityCard({ a }: { a: AvailabilityStats }) {
 }
 
 /** Dashboard → Analytics: how many buyers pay within an order page's 5-minute bonus (Drum Kit, Jazz: lib/analytics.ts bonusStats). */
-function BonusCard({ b }: { b: BonusStats }) {
+export function BonusCard({ b }: { b: BonusStats }) {
   const top = Math.max(1, ...b.timing.map((t) => t.n));
   return (
     <section className={s.test}>
@@ -539,7 +505,7 @@ function BonusCard({ b }: { b: BonusStats }) {
 }
 
 /** One test, read in a glance: the question, where it stands in a sentence, then each variant with a picture of its page, its conversion big, and the numbers behind it. */
-function TestCard({ t }: { t: TestStats }) {
+export function TestCard({ t }: { t: TestStats }) {
   const name = (v: string) => t.variants.find((x) => x.variant === v)?.label ?? v;
   const best = t.leader;
   const rateOf = (m: Metrics) => {
@@ -701,8 +667,10 @@ function TestCard({ t }: { t: TestStats }) {
  * A variant's page as it is now, in a phone-sized frame scaled to the card (TestDef.live): it updates by itself.
  * Loaded when the card comes near the screen; the page is in preview (not counted) and can't be clicked here.
  */
+// The live page, scaled to the card. It scrolls and clicks like the real page
+// (the URL is a ?preview=1 one, so nothing is counted); "Open" shows it full size.
 function LiveShot({ url, label }: { url: string; label: string }) {
-  const box = useRef<HTMLAnchorElement>(null);
+  const box = useRef<HTMLDivElement>(null);
   const [k, setK] = useState(0);
   const [near, setNear] = useState(false);
   useEffect(() => {
@@ -718,11 +686,14 @@ function LiveShot({ url, label }: { url: string; label: string }) {
     };
   }, []);
   return (
-    <a ref={box} className={`${s.tcShot} ${s.tcLive}`} href={url} target="_blank" rel="noreferrer" title="Open the page (preview, not counted)">
+    <div ref={box} className={`${s.tcShot} ${s.tcLive}`}>
       {near && k > 0 && (
-        <iframe src={url} title={`The page now: ${label}`} tabIndex={-1} loading="lazy" style={{ width: 390, height: 280 / k, transform: `scale(${k})` }} />
+        <iframe src={url} title={`The page now: ${label}`} loading="lazy" style={{ width: 390, height: 280 / k, transform: `scale(${k})` }} />
       )}
       <span className={s.tcLiveTag}>LIVE</span>
-    </a>
+      <a className={s.tcOpen} href={url} target="_blank" rel="noreferrer" title="Open the page full size (preview, not counted)">
+        Open ↗
+      </a>
+    </div>
   );
 }

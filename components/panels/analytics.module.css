@@ -449,7 +449,6 @@
   display: block;
   border: 0;
   transform-origin: 0 0;
-  pointer-events: none;
 }
 .tcLiveTag {
   position: absolute;
@@ -461,6 +460,17 @@
   color: #fff;
   font: 700 10px/1.4 var(--font-mono, monospace);
   letter-spacing: 0.08em;
+}
+.tcOpen {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--accent);
+  color: #fff;
+  font: 700 10px/1.4 var(--font-mono, monospace);
+  text-decoration: none;
 }
 .tcShot img {
   display: block;
