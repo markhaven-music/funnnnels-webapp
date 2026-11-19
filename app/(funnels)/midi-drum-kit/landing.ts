@@ -352,14 +352,14 @@ function lazyBelow(html: string, at: number): string {
   return html.slice(0, at).replace(/\sloading="(true|false)"/g, "") + html.slice(at).replace(/<img [^>]*>/g, lazy);
 }
 
-// Meta Pixel + Clarity + Neo, as on the other funnels (their Tracking.tsx).
+// Meta Pixel + Google tag + Clarity + Neo, as on the other funnels (their Tracking.tsx).
 // Never on localhost, *.local or *.vercel.app, so tests don't reach the ad
 // account. ViewContent here; InitiateCheckout and Purchase come from the order
 // form and the thank-you page.
 const OFF = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/);
 
 function headScripts(currency: Currency, price: number): string {
-  const { metaPixelId, clarityId, neoSnippet } = funnel.tracking;
+  const { metaPixelId, clarityId, neoSnippet, googleAdsId } = funnel.tracking;
   const params = JSON.stringify({ content_name: funnel.product, content_type: "product", value: price, currency: currency.toUpperCase() });
   return `<script>
 (function () {
@@ -383,7 +383,13 @@ function headScripts(currency: Currency, price: number): string {
       clarity('event', 'cta_click');
     }
   }, { capture: true });
-  ${AFTER_LOAD}(['https://connect.facebook.net/en_US/fbevents.js', '${neoSnippet}', 'https://www.clarity.ms/tag/${clarityId}']);
+  // Google tag: keeps the Google Ads click id (gclid) in a first-party cookie
+  // so the Purchase on the thank-you page is credited to the ad.
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+  gtag('js', new Date());
+  gtag('config', '${googleAdsId}');
+  ${AFTER_LOAD}(['https://connect.facebook.net/en_US/fbevents.js', '${neoSnippet}', 'https://www.clarity.ms/tag/${clarityId}', 'https://www.googletagmanager.com/gtag/js?id=${googleAdsId}']);
 })();
 </script>`;
 }

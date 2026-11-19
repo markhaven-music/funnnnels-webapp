@@ -19,6 +19,11 @@ export const funnel = {
     metaPixelId: "1679148316291540",
     clarityId: "yum5a2rsel",
     neoSnippet: "https://t.thegrind.studio/api/s/3d5ba6a05e6bcaea",
+    // Google Ads account 214-173-0201 (Grind Studio, Demand Gen): the Google
+    // tag on every page (it keeps the gclid in a first-party cookie from the
+    // landing to the thank-you page) and the "Purchase" conversion's label.
+    googleAdsId: "AW-18584276957",
+    googleAdsPurchaseLabel: "Dys7CMr2wrsdEN2f1p1F",
   },
   // The ClickFunnels page's Wistia video (hero). It's in English; other
   // languages swap it in landing.ts (VIDEOS).

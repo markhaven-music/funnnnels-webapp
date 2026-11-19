@@ -6,14 +6,26 @@ import { funnel } from "./funnel";
 import { PREVIEW_JS } from "@/lib/beacon";
 import { purchaseEventId } from "@/lib/neoIds";
 
-// Meta Pixel + Clarity + Neo, as on the Jazz page. Never on localhost, *.local
+// Meta Pixel + Google tag + Clarity + Neo, as on the Jazz page. Never on localhost, *.local
 // or *.vercel.app (previews, and the origin m.thegrind.studio forwards to), so
 // tests don't reach the ad account. `event`: ViewContent on the landing,
 // InitiateCheckout fires from the order form, Purchase from the thank-you page.
+// Google tag (gtag.js) for Google Ads, booted once per page.
+const GTAG = (id: string) => `
+  if (!window.gtag) {
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    gtag('js', new Date());
+    var g = document.createElement('script'); g.async = true; g.src = 'https://www.googletagmanager.com/gtag/js?id=${id}';
+    document.head.appendChild(g);
+  }
+  gtag('config', '${id}');
+`;
+
 const OFF = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/);
 
 export function Tracking({ value, currency, event = "ViewContent" }: { value: number; currency: string; event?: string | null }) {
-  const { metaPixelId, clarityId, neoSnippet } = funnel.tracking;
+  const { metaPixelId, clarityId, neoSnippet, googleAdsId } = funnel.tracking;
   const params = JSON.stringify({ content_name: funnel.product, content_type: "product", value, currency: currency.toUpperCase() });
   return (
     <Script id="drum-kit-tracking" strategy="afterInteractive">{`
@@ -29,6 +41,7 @@ export function Tracking({ value, currency, event = "ViewContent" }: { value: nu
         params.ab_btn = (document.cookie.match(/(?:^|; )ab_btn=([a-z]+)/) || [])[1];
         ${BOOT}
         bootPixel('${metaPixelId}');
+        ${GTAG(googleAdsId)}
         ${event ? `fbq('track', '${event}', params);` : ""}
         document.addEventListener('click', function (e) {
           if (e.target && e.target.closest && e.target.closest('[data-cta]')) {
@@ -57,6 +70,13 @@ export function PurchasePixel({ orderId, value, currency }: { orderId: string; v
         var data = ${data};
         data.ab_btn = (document.cookie.match(/(?:^|; )ab_btn=([a-z]+)/) || [])[1];
         fbq('track', 'Purchase', data, { eventID: '${purchaseEventId(orderId)}' });
+        ${GTAG(funnel.tracking.googleAdsId)}
+        gtag('event', 'conversion', {
+          send_to: '${funnel.tracking.googleAdsId}/${funnel.tracking.googleAdsPurchaseLabel}',
+          value: data.value,
+          currency: data.currency,
+          transaction_id: '${orderId}'
+        });
       })();
     `}</Script>
   );
