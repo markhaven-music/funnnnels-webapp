@@ -14,6 +14,7 @@
 
 import { ACCENT } from "./accentTest";
 import { LP } from "./landingTest";
+import { HL } from "./headlineTest";
 
 export const AB = {
   cookie: "ab_btn",
@@ -55,7 +56,7 @@ document.documentElement.setAttribute('data-ab-btn',v);window.__abBtn=v;
 export function readVariant(): string | null {
   if (typeof document === "undefined") return null;
   // since 2026-11-17 also the accent test's letters (./accentTest.ts), in the same cookie
-  const m = document.cookie.match(new RegExp(`(?:^|; )${LP.cookie}=(${[...LP.variants, ...ACCENT.variants].join("|")})(?:;|$)`));
+  const m = document.cookie.match(new RegExp(`(?:^|; )${LP.cookie}=(${[...LP.variants, ...ACCENT.variants, ...HL.variants].join("|")})(?:;|$)`));
   return m?.[1] ?? null;
 }
 

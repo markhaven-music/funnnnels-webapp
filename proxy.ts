@@ -4,6 +4,7 @@ import { KIT_HOME } from "@/lib/liveUrl";
 import { LANGS as DRUM_KIT_LANGS } from "@/app/(funnels)/midi-drum-kit/i18n";
 import { isLp, LP, type LpVariant } from "@/app/(funnels)/midi-drum-kit/landingTest";
 import { isAccent, type AccentVariant } from "@/app/(funnels)/midi-drum-kit/accentTest";
+import { isHl, type HlVariant } from "@/app/(funnels)/midi-drum-kit/headlineTest";
 import { FBB_LP, isFbbLp, type FbbLp } from "@/app/(funnels)/famous-beats-bundle/landingTest";
 import { isLive } from "@/app/blog/schedule";
 import { CF_PATHS as FREE_PAGES, CF_REDIRECTS as FREE_REDIRECTS } from "@/app/free/packs";
@@ -256,13 +257,13 @@ export function proxy(request: NextRequest) {
  * Which landing this visitor sees: ?lp=old|new shows one without touching their cookie (a look,
  * the funnel map's lanes); else their cookie's; else one of the two at random, kept from now on.
  */
-function landingVariant(request: NextRequest): { variant: LpVariant | AccentVariant; assign: boolean } {
+function landingVariant(request: NextRequest): { variant: LpVariant | AccentVariant | HlVariant; assign: boolean } {
   const asked = request.nextUrl.searchParams.get("lp");
   if (asked === "old" || asked === "new") return { variant: `lp-${asked}`, assign: false };
   const kept = request.cookies.get(LP.cookie)?.value;
   // the accent colour test (midi-drum-kit/accentTest.ts): the new page in one of its colours, kept per visitor
   if (LP.draw) {
-    if (isAccent(kept) && LP.draw.includes(kept)) return { variant: kept, assign: false };
+    if ((isAccent(kept) || isHl(kept)) && LP.draw.includes(kept)) return { variant: kept, assign: false };
     return { variant: LP.draw[Math.floor(Math.random() * LP.draw.length)], assign: true };
   }
   // no split (LP.live): everyone on that page, their cookie set to it

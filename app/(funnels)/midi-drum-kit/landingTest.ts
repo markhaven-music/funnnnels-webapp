@@ -13,6 +13,7 @@
 // ?lp=old|new shows one page without touching the visitor's cookie (with ?preview=1 nothing is counted).
 
 import type { AccentVariant } from "./accentTest";
+import { HL, type HlVariant } from "./headlineTest";
 
 export const LP = {
   cookie: "ab_lp",
@@ -37,7 +38,9 @@ export const LP = {
   // whoever had it draws green or red on their next visit (proxy.ts), its column stays in Analytics.
   // 2026-11-19 later ("facciamo vincere il verde"): the test is over, green wins. Everyone gets green; whoever
   // had red draws green on their next visit (proxy.ts), the cookie still says ac-green so orders carry it.
-  draw: ["ac-green"] as readonly AccentVariant[] | null,
+  // 2026-11-19 night: the headline test (./headlineTest.ts) takes the draw, green for everyone (accentTest's script
+  // defaults to it).
+  draw: HL.variants as readonly (AccentVariant | HlVariant)[] | null,
 };
 export type LpVariant = (typeof LP.variants)[number];
 export const isLp = (v: unknown): v is LpVariant => (LP.variants as readonly string[]).includes(v as string);

@@ -13,6 +13,7 @@ import { STACK_VALUES } from "./stackSwitch";
 // The words are the old page's (copy/landing by key, the order page's stack) wherever it has them; what
 // the Jazz sections need and the old page never said is in WORDS, in English and Italian.
 
+import { HEADLINES, HL_KEYS } from "./headlineTest";
 const IMG = "/funnels/midi-drum-kit/";
 type L = "en" | "it";
 
@@ -224,7 +225,7 @@ export function hero(c: JazzCtx, video: string): string {
 <div class="jz-topband"><header class="jz-wrap jz-topbar"><span class="jz-logo"><img src="${IMG}logo.webp" alt="GRIND STUDIO" width="360" height="42"></span><span class="jz-tag"><span class="jz-dot" aria-hidden="true"></span>${esc(w.tag)}</span></header></div>
 <div class="jz-wrap jz-heroCenter">
 <p class="jz-heroPre">${esc(w.heroPre)}</p>
-<h1 class="jz-heroHead">${marked(w.heroHead)}</h1>
+${HL_KEYS.map((k) => `<h1 class="jz-heroHead" data-hl="${k}">${marked(HEADLINES[l(c)][k])}</h1>`).join("\n")}
 <p class="jz-heroSub">${esc(w.heroSub)}</p>
 <div class="jz-vsl">${video}</div>
 ${ticks(bullets, "jz-heroBullets")}

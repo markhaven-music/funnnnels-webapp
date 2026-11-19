@@ -1,4 +1,5 @@
 import { ACCENT, PALETTES } from "@/app/(funnels)/midi-drum-kit/accentTest";
+import { HL } from "@/app/(funnels)/midi-drum-kit/headlineTest";
 import { isCurrency } from "@/lib/geo";
 import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
@@ -839,6 +840,18 @@ export const TESTS: TestDef[] = [
       const p = PALETTES[v.slice(3) as keyof typeof PALETTES];
       return p ? { from: p.g1, to: p.g2 } : { from: "#94a3b8", to: "#64748b" };
     },
+  },
+  {
+    funnel: "midi-drum-kit",
+    // 2026-11-19, "ok testiamo AB e poi voglio una piu emotiva e una che segue le regole del D2C": only the hero's
+    // headline (then "facciamo ABCD"), a quarter of the English and Italian visitors each, kept per visitor (midi-drum-kit/headlineTest.ts).
+    name: "Headline",
+    question: "Which of four headlines on the MIDI Drum Kit landing sells more: stiff vs bounce, relief, plain words (IQ 75) or the owner's Make Beats Like The Charts?",
+    where: `Landing (the new page, English and Italian), the hero's headline only · everything else the same, green · since ${HL.from.slice(0, 16).replace("T", " ")} UTC · before it: "Stop Programming Drums Hit By Hit…" (see "Accent colour", Green)`,
+    variants: HL.variants,
+    live: Object.fromEntries(HL.variants.map((v) => [v, `https://m.thegrind.studio/en/midi-drum-kit?hl=${v.slice(3)}&preview=1`])),
+    label: (v) => ({ "hl-stiff": "A · Stiff vs bounce", "hl-relief": "B · Stop fighting the piano roll", "hl-simple": "C · Plain words (IQ 75)", "hl-charts": "D · Make beats like the charts" })[v] ?? v,
+    color: (v) => ({ "hl-stiff": { from: "#fb923c", to: "#ef4444" }, "hl-relief": { from: "#fde047", to: "#eab308" }, "hl-simple": { from: "#f472b6", to: "#a855f7" } } as Record<string, { from: string; to: string }>)[v] ?? { from: "#38bdf8", to: "#22c55e" },
   },
   {
     funnel: "famous-beats-bundle",

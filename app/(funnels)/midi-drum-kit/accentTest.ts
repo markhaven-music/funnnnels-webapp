@@ -65,7 +65,7 @@ var s=location.search,q=(s.match(/[?&]ac=(green|red|yellow)(?:&|$)/)||[])[1];
 try{if(/[?&](preview=0|ac=off)(?:&|$)/.test(s))sessionStorage.removeItem('ac_look');else if(q)sessionStorage.setItem('ac_look',q);else q=sessionStorage.getItem('ac_look');}catch(e){}
 if(q&&!/^(green|red|yellow)$/.test(q))q=null;
 var c=(document.cookie.match(/(?:^|; )ab_lp=ac-(green|red|yellow)(?:;|$)/)||[])[1];
-var v=q||c;if(v){document.documentElement.setAttribute('data-ac',v);window.__ac=v;}
+var v=q||c||'green';if(v){document.documentElement.setAttribute('data-ac',v);window.__ac=v;}
 }catch(e){}})();`;
 
 /** After the hero's video: Wistia's player colour from the accent (the URL can't read CSS). */
