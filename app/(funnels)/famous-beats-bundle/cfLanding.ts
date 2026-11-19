@@ -9,6 +9,7 @@ import { faster, mapText } from "../midi-drum-kit/landing";
 import { FIXES, HIDE_CF_BAR, headScripts } from "../midi-drum-kit/upsell";
 import { funnel } from "./funnel";
 import { FBB_LP } from "./landingTest";
+import { fbbPopupJs } from "./popupOffer";
 
 // The landing test's "fbb-cf" (./landingTest.ts): ClickFunnels' own Famous Beats Bundle page, the red one
 // (2026-11-15: "one of them should be the clickfunnel one with the red background", "we have run it
@@ -45,7 +46,8 @@ const CSS = `${HIDE_CF_BAR}
 a[data-no]{display:none!important}
 #cf-offer-popup{display:none!important}`;
 
-export function cfLandingHtml(currency: Currency, price: number): string {
+// popupPrice: the pop-up add-on's price (./popupOffer.ts, dashboard → Products); null = no pop-up.
+export function cfLandingHtml(currency: Currency, price: number, popupPrice: number | null = null): string {
   const strings = { ...(en as Record<string, unknown>), ...WORDS } as Record<string, string>;
   const money = (t: string) => {
     let out = t.replace(/€27\b/g, `€${price}`).replace(/€0\.08\b/g, `€${(price / 320).toFixed(2)}`);
@@ -63,7 +65,7 @@ export function cfLandingHtml(currency: Currency, price: number): string {
     .replace("{{DESCRIPTION}}", "320 hip-hop drum beats transcribed note for note into multi-track MIDI. Any DAW.")
     .replace(
       "{{HEAD}}",
-      `<script>${ORIGIN_BOUNCE_JS}</script>\n<style>${FIXES}\n${CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", abCookie: FBB_LP.cookie })};\n${AVAILABILITY_JS}</script>\n${headScripts()}`,
+      `<script>${ORIGIN_BOUNCE_JS}</script>\n<style>${FIXES}\n${CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", abCookie: FBB_LP.cookie })};\n${popupPrice === null ? "" : fbbPopupJs(popupPrice, currency)}\n${AVAILABILITY_JS}</script>\n${headScripts()}`,
     )
     .replace("{{BODY}}", `<script>${CARRY_JS}</script>`);
   html = faster(html.replaceAll(UPSELL_VIDEO, funnel.vsl.wistiaId), "vsl-famous", [], "#f5b800").replaceAll("/funnels/midi-drum-kit/vsl-famous.webp", POSTER);

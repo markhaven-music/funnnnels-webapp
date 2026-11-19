@@ -60,13 +60,24 @@ export const funnel = {
       image: "/funnels/top-hits-midi-bundle/bump-emotional-keys.webp",
       pitch: "Emotional Keys Vol.1, Vol.2 and Vol.3, by pianist Orazio Saracino.",
     },
+    // The landing's pop-up offer since 2026-11-19 (./popupOffer.ts), 27 with its 297 struck.
     {
       id: "drum-kit",
       name: "MIDI Drum Kit Bundle",
       headline: "YES! Add MIDI Drum Kit Bundle!",
-      price: { eur: 25, usd: 25 },
+      price: { eur: 27, usd: 27 },
       image: "/funnels/famous-beats-bundle/bump-drum-kit.webp",
       pitch: "1050 MIDI drum patterns modeled after Billboard producers: complete beats, patterns and fragments.",
+    },
+    // A tick box since 2026-11-19 ("metti anche TOP HITS MIDI BUNDLE come order bump"), the first one;
+    // ticking it skips the TOP HITS upsell below (same id, fv_owned).
+    {
+      id: "top-hits",
+      name: "TOP HITS MIDI Bundle",
+      headline: "YES! Add the TOP HITS MIDI Bundle!",
+      price: { eur: 27, usd: 27 },
+      image: "/funnels/midi-drum-kit/bump-top-hits.webp?v=2",
+      pitch: "1000 chord progressions from the biggest hits, as drag-and-drop MIDI: put one under these drums and the beat has a hit's harmony.",
     },
     {
       id: "hustle",

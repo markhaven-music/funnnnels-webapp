@@ -10,6 +10,7 @@ import { display } from "../../jazz-midi-pack/fonts";
 import { Tracking } from "../../top-hits-midi-bundle/Tracking";
 import { funnel } from "../funnel";
 import { FBB_LP } from "../landingTest";
+import { FBB_POPUP, fbbPopupJs } from "../popupOffer";
 import { BeatClip } from "../_v2/Beats";
 import { PatternPlayer } from "../_v2/PatternPlayer";
 import { LANDING as w } from "../_v2/words";
@@ -72,7 +73,10 @@ const ORDER: Record<"jazz" | "v3", SectionName[]> = {
 export async function FamousBeatsLanding({ currency, variant }: { currency: Currency; variant: "jazz" | "v3" }) {
   if (!CURRENCIES.includes(currency)) notFound();
   // The price as dashboard → Products has it.
-  const amount = priceIn(((await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!).price, currency);
+  const product = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
+  const amount = priceIn(product.price, currency);
+  // The pop-up's add-on (../popupOffer.ts), at Products' price; none when Products doesn't sell it.
+  const popup = product.bumps?.find((b) => b.id === FBB_POPUP.item);
   const price = money(amount, currency);
   const t = (text: string) => fill(text, { price, c: SIGN[currency], email: funnel.support });
   const order = funnel.checkout.orderPage;
@@ -596,6 +600,8 @@ export async function FamousBeatsLanding({ currency, variant }: { currency: Curr
       <Tracking value={amount} currency={currency} product={funnel.product} />
       <Beacon funnel={funnel.slug} page="landing" abCookie={FBB_LP.cookie} />
       <script dangerouslySetInnerHTML={{ __html: CARRY_SCRIPT }} />
+      {/* Before the page's own scripts: the pop-up owns the buttons' click, "Checking availability…" follows its answer. */}
+      {popup && <script dangerouslySetInnerHTML={{ __html: fbbPopupJs(priceIn(popup.price, currency), currency) }} />}
       {/* Red, on top, like the Jazz page's. */}
       <div className={s.bfbar}>
         <b>BLACK FRIDAY:</b> 90% Sale Ends Soon

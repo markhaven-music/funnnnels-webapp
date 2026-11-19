@@ -19,6 +19,7 @@ import s from "../../../jazz-midi-pack/jazz.module.css";
 import { funnel } from "../../funnel";
 import { FBB_LP } from "../../landingTest";
 import { FBB_BONUS, FBB_BONUS_WORDS } from "../../fiveMinBonus";
+import { FBB_POPUP } from "../../popupOffer";
 import { BUMP_COPY, LANDING, ORDER as w } from "../../_v2/words";
 
 // The order page, the Jazz order page's (../../../../jazz-midi-pack/order): red bar, the
@@ -42,7 +43,10 @@ export const metadata: Metadata = {
 // The tick boxes, in this order (2026-11-09: the Jazz page's €7 Drunk Swing Grooves, HUSTLE;
 // Emotional Keys is one of the six bonuses since "add more bonuses just like midi jazz pack"). Their prices are dashboard → Products'; until Products lists the new ones,
 // the code's (preview only: the checkout charges what Products says).
-const ORDER_BUMPS = ["swing-grooves", "hustle"];
+// 2026-11-19 ("metti anche TOP HITS MIDI BUNDLE come order bump dell order page"): TOP HITS first; whoever
+// ticks it skips the TOP HITS upsell page after the order (same id, fv_owned). The MIDI Drum Kit comes from
+// the landing's pop-up (../../popupOffer.ts): never a tick box, a summary line with Remove when they said Yes.
+const ORDER_BUMPS = ["top-hits", "swing-grooves", "hustle", FBB_POPUP.item];
 
 const BONUS_THUMBS: Record<string, string | null> = {
   "essential-drums": "/funnels/famous-beats-bundle/bonus-essential-360.webp",
@@ -77,6 +81,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
         pitch: b.pitch,
         image: known?.image ?? b.image,
         ...(copy ? { headline: copy.headline, body: copy.body.map((p) => restate(p, was, priceIn(b.price, currency))) } : {}),
+        ...(b.id === FBB_POPUP.item ? { popup: FBB_POPUP.key } : {}),
       },
     ];
   });

@@ -103,3 +103,15 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
   are ClickFunnels' as they ran ("platinum-certified producers", "multi-platinum plaques", "Limited To The First 100
   Copies", €20 per transcription = €6,400). New visitors now draw fbb-jazz, fbb-v3 or fbb-cf (FBB_LP.split); fbb-old
   left the draw (those who have it keep it, still counted). Look: ?lp=cf&preview=1.
+
+## Landing pop-up + TOP HITS order bump (2026-11-19)
+- "metti MIDI Drum Kit a 27 scontato da 297 in una popup di famous beats bundle landing page": every button of the
+  three landings in the test (fbb-jazz, fbb-v3, fbb-cf) opens the same pop-up (./popupOffer.ts, script in
+  lib/landingPopup.ts, shared with the Drum Kit's WAV pop-up): "Never stare at an empty drum track again.", the
+  MIDI Drum Kit (1,050 patterns, kit-box-v3) at 27 with 297 struck (lib/bumpFull.ts). Yes and No both go on to the
+  order page, then "Checking availability…"; Yes puts the Drum Kit in the order as a summary line with Remove
+  (funnel_items drum-kit, 27). Taps, Yes, No, close go to landing_taps (dashboard → Analytics → Button taps).
+  fbb-old (out of the draw) has no pop-up.
+- "metti anche TOP HITS MIDI BUNDLE come order bump dell order page": TOP HITS is the first tick box (funnel_items
+  bump top-hits €27/$27 added, struck 97, the product's saved words); whoever ticks it skips the TOP HITS upsell
+  page after the order (same id, fv_owned). Order: TOP HITS, Drunk Swing Grooves, HUSTLE.
