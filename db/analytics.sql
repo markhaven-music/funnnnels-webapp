@@ -51,7 +51,7 @@ create table public.paypal_sales (
   variant text not null default '',
   country text not null default '',
   amount_cents integer not null check (amount_cents >= 0),
-  currency text not null check (currency in ('eur', 'usd')),
+  currency text not null check (currency in ('eur', 'usd', 'gbp', 'chf')),
   created_at timestamptz not null default now()
 );
 create index paypal_sales_created_idx on public.paypal_sales (created_at desc);

@@ -7,7 +7,7 @@
 -- reminder_sent_at: when the last one did. currency: the price the visitor
 -- saw at checkout (lib/geo.ts), for the price the emails state.
 alter table public.checkout_starts add column if not exists reminders smallint not null default 0;
-alter table public.checkout_starts add column if not exists currency text check (currency in ('eur', 'usd'));
+alter table public.checkout_starts add column if not exists currency text check (currency in ('eur', 'usd', 'gbp', 'chf'));
 -- The single reminder sent before this: that start is done.
 update public.checkout_starts set reminders = 3 where reminder_sent_at is not null and reminders = 0;
 drop index if exists public.checkout_starts_due_idx;

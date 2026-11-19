@@ -12,7 +12,7 @@ create table public.orders (
   -- File keys the order unlocks: ["pack"] or ["pack", "<bump id>"]
   items jsonb not null default '["pack"]'::jsonb,
   amount_cents integer not null check (amount_cents >= 0),
-  currency text not null check (currency in ('eur', 'usd')),
+  currency text not null check (currency in ('eur', 'usd', 'gbp', 'chf')),
   email text,
   name text,
   country text,
