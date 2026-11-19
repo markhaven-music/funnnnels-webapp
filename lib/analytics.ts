@@ -831,6 +831,8 @@ export const TESTS: TestDef[] = [
     question: "Which accent colour on the MIDI Drum Kit landing and order page sells more: FL Studio green, red or yellow?",
     where: `Landing (the new page, English and Italian) and order page · everything that was orange (highlighted words, buttons, player, seal, video player, pay bar) in the visitor's colour, kept on return visits · since ${ACCENT.from.slice(0, 16).replace("T", " ")} UTC · orange before it: see "Landing: old vs new", New`,
     variants: ACCENT.variants,
+    // 2026-11-19, "facciamo vincere il verde": over, green kept for everyone.
+    ended: { at: ACCENT.ended, kept: "ac-green" },
     live: Object.fromEntries(ACCENT.variants.map((v) => [v, `https://m.thegrind.studio/en/midi-drum-kit?ac=${v.slice(3)}&preview=1`])),
     label: (v) => ({ "ac-green": "Green · FL Studio piano roll", "ac-red": "Red", "ac-yellow": "Yellow · off since 11-19" })[v] ?? v,
     color: (v) => {

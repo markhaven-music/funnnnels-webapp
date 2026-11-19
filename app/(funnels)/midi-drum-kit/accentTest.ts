@@ -14,6 +14,8 @@ export const ACCENT = {
   variants: ["ac-green", "ac-red", "ac-yellow"] as const,
   /** When the test went live (its deploy). */
   from: "2026-11-17T13:45:00Z",
+  /** 2026-11-19 ("facciamo vincere il verde"): the test is over, green kept for everyone (LP.draw). */
+  ended: "2026-11-19T21:45:00Z",
 };
 export type AccentVariant = (typeof ACCENT.variants)[number];
 export const isAccent = (v: unknown): v is AccentVariant => (ACCENT.variants as readonly string[]).includes(v as string);
