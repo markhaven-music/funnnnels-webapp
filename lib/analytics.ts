@@ -679,8 +679,9 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
       }),
     ),
     bonuses: (await Promise.all(BONUS_FUNNELS.map((b) => soft(`5-minute bonus (${b.name})`, bonusStats(allSales, b), null)))).filter((b): b is BonusStats => !!b),
-    availability: await soft("availability popup", availabilityStats(now), null),
-    popupOffer: await soft("popup offer", popupOfferStats(now, rate), null),
+    // The availability popup's and the Jazz popup offer's cards removed 2026-11-19 ("Sì, procedi"): both decided, the Jazz popup gone.
+    availability: null,
+    popupOffer: null,
     taps: await soft("button taps", tapStats(), null),
     ...daily(range, since, last, dayRows, allSales, rate, trackingSince),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
@@ -791,78 +792,6 @@ export const TESTS: TestDef[] = [
   },
   {
     funnel: "midi-drum-kit",
-    // Since 11-06 evening, beside the button-colour test: the old step 2 against the new one.
-    // Split 50/50 for ~1 hour on 11-06 evening, then everyone on B (payTest.ts
-    // live): kept here so A's numbers stay beside B's for the comparison.
-    name: "Step 2: as it was vs new",
-    question: "Does the new payment step (pay bar, $297 → $27) get more people who start the checkout to pay?",
-    // Ended 2026-11-12 ("metti a posto il resto"): since 11-10 20:15 everyone has B's step with the pay
-    // bar docked (C without its bonus) and no column counts it any more; the Order summary card took over.
-    ended: { at: "2026-11-10T19:15:00Z", kept: "b" },
-    shots: { a: `${SHOTS}/step2-a.webp`, b: `${SHOTS}/step2-b.webp`, c: `${SHOTS}/step2-c.webp` },
-    where: `Order page, step 2 (payment), every language · each column counts the days everyone had that step: A 11-02 → 11-05, B 11-08 alone (card payments failed until 11-07 17:35), C 11-09 → 11-10; orders go to the step they were paid on · C also has the landing's “Checking availability…” popup (since 11-08 20:15), A and B don't · D (no bonus, from 11-10 20:15) has no column: the order page got its “what you get” box ${ORDER_STACK.from.slice(0, 10)} 00:00 UTC, before D had a whole day (see the Order summary card)`,
-    // The popup is named in C and D ("D ha anche check availability come variabile", 2026-11-10):
-    // D against C is the bonus alone, D against A is the new step 2 and the popup together.
-    // C: the same step as B with the phone's pay bar docked to the bottom edge
-    // (11-08 17:29, "contiamolo come test C"); no letter of its own, only days.
-    // D (below) left out on 2026-11-10: the "what you get" box went live that night ("Stanotte"),
-    // ~5 hours after D, so D never had a whole day of visits; a column without visitors would
-    // also leave every other column without its "chance best".
-    variants: [...PAY_TEST.variants, "c"],
-    // 11-08 evening: C also gives everyone the 5-minute Expansions bonus (bonusTest.ts,
-    // "metti a tutti il bonus e diventa semplicemente C"); its own A/B test is gone.
-    // 11-10 evening: D is C without the bonus ("direi di toglierlo", "ok quindi torniamo a B":
-    // with it nobody paid for an add-on, 0 of 6 against 6 of 9 on A); the docked pay bar stays,
-    // the Expansions are the paid add-on again.
-    label: (v) =>
-      v === "c" ? "C · Pay bar docked at the bottom + 5-minute bonus + availability popup" : v === "d" ? "D · Pay bar docked at the bottom + availability popup, no bonus" : PAY_LABELS[v as keyof typeof PAY_LABELS],
-    color: (v) =>
-      v === "c" ? { from: "#fbbf24", to: "#f59e0b" } : v === "d" ? { from: "#a78bfa", to: "#8b5cf6" } : PAY_COLORS[v as keyof typeof PAY_COLORS],
-    // The split ran too short to say anything, so each step is judged on when
-    // everyone had it: the old one from 11-02 (funnnnels' order page) until the
-    // first test on 11-06 16:00, the new one since 11-06 19:20 (everyone on B).
-    // The card's other rows (visitors, orders, revenue…) count whole UTC days,
-    // as the visits are kept per day: 11-06, when both ran, is left out.
-    windows: {
-      a: { from: "2026-11-02T00:00:00+01:00", until: "2026-11-06T16:00:00+01:00", days: ["2026-11-02", "2026-11-05"] },
-      // B's days take 11-08 whole (C went live at 17:29 that day); its checkouts stop at the minute.
-      // Only 11-08 since 2026-11-10 ("dovremmo togliere le visite di quando la carta non funzionava"):
-      // every card payment failed from 11-06 17:21 to 11-07 17:35, and the visits are kept per UTC
-      // day, so 11-07 goes whole (its three orders with it: two by PayPal, one card at 17:37).
-      b: { from: "2026-11-08T01:00:00+01:00", until: "2026-11-08T17:29:00+01:00", days: ["2026-11-08", "2026-11-08"] },
-      c: { from: "2026-11-08T17:29:00+01:00", until: "2026-11-10T20:15:00+01:00", days: ["2026-11-09", "2026-11-10"] },
-    },
-  },
-  {
-    funnel: "midi-drum-kit",
-    // 2026-11-10, "Sì e poi tracciamola in analytics in maniera chiara": the order page's left
-    // column gets the Jazz order page's "what you get" box (midi-drum-kit/stackSwitch.ts), live that
-    // night ("Stanotte"). Judged by its days like step 2: Before is the last two days of the same
-    // page (step 2's C; its 5-minute bonus ended 11-10 20:15), After is since the box. The box was due
-    // 11-11 00:00 UTC but only reached visitors at 11-11 21:21 UTC (its deploy had failed): 11-11 is in
-    // neither column, After starts 11-12 (ORDER_STACK.live / firstDay).
-    // 2026-11-12 ("rendiamola come jazz, aggiungi i bonus"): the box lists 6 bonuses, not 3, from
-    // ORDER_STACK.sixBonuses on, before After's first whole day: After is the box with 6 bonuses.
-    // 2026-11-12 ("ok vai partire l'AB test da ora"): the order page was rebuilt as the Jazz MIDI
-    // Pack's (16acc3f, live 11-11 23:27 UTC = 11-12 00:27 Italy): its header, the summary with six
-    // bonuses and their covers on the left, the checkout sticky on the right. The test starts there:
-    // New counts orders from that minute and visits from 11-12, its first whole UTC day. The
-    // in-between page (the bordered box, 3 then 6 bonuses, 11-11 21:21 → 23:27 UTC) is in neither.
-    name: "Order page: old vs Jazz-style",
-    question: "Does the order page rebuilt like the Jazz MIDI Pack's get more people to pay than the old one?",
-    shots: { before: `${SHOTS}/order-old.webp`, after: `${SHOTS}/order-new.webp` },
-    live: { after: "https://m.thegrind.studio/midi-drum-kit/order?preview=1" },
-    where: `Order page, every language · Old = the product picture and 12 claims (hidden on phones), 3 bonuses, 11-09 → ${dayBefore(ORDER_STACK.from)} (step 2's C; 5-minute bonus until 11-10 20:15) · New = the Jazz order page's layout: wordmark and “Secure checkout” bar, the kit's box, tick list, 6 bonuses with their covers and values (Drunk Swing Grooves, the MYSTERY Hooks Pack and a PDF guide added, in the download too), total value against today's price, the checkout sticky on a computer and first on a phone, ${ORDER_STACK.firstDay} → today (live since 11-12 00:27 Italy) · 11-11 is in neither column: that day the page changed three times`,
-    variants: ["before", "after"],
-    label: (v) => (v === "before" ? "Old · Picture + 12 claims, 3 bonuses" : "New · Jazz-style page, 6 bonuses"),
-    color: (v) => (v === "before" ? { from: "#94a3b8", to: "#64748b" } : { from: "#34d399", to: "#059669" }),
-    windows: {
-      before: { from: "2026-11-08T17:29:00+01:00", until: ORDER_STACK.from, days: ["2026-11-09", dayBefore(ORDER_STACK.from)] },
-      after: { from: ORDER_STACK.jazzStyle, until: null, days: [ORDER_STACK.firstDay, null] },
-    },
-  },
-  {
-    funnel: "midi-drum-kit",
     // 2026-11-12, "voglio fare un AB pulito tra vecchio funnel e nuovo senza cambiare URL": the old
     // landing against a new one (midi-drum-kit/landingTest.ts, landingNew.ts), 50/50 at the same
     // address, English and Italian, the same order page after both. Counted by letter, to the sale.
@@ -883,6 +812,8 @@ export const TESTS: TestDef[] = [
     // Italy), New = from 11-13 00:00 UTC, its first whole day, orders and visits alike. The whole of 11-12 (6 hours
     // of split, then ~4 hours of the new page alone) is in neither column: until 2026-11-13 New's orders started at
     // LP.liveFrom while its visits started 11-13 ("aggiusta allora"), so the 11-12 21:08 order had no visits beside it.
+    // Over when the accent colour test started (its New column stops there); 2026-11-19 moved to the ended tests ("Sì, procedi").
+    ended: { at: ACCENT.from, kept: "lp-new" },
     windows: {
       "lp-old": { from: "2026-11-05T00:00:00Z", until: "2026-11-12T00:00:00Z", days: ["2026-11-05", "2026-11-11"] },
       // until the accent colour test: from then on the new page is green, red or yellow, not orange (below)
@@ -901,7 +832,7 @@ export const TESTS: TestDef[] = [
     where: `Landing (the new page, English and Italian) and order page · everything that was orange (highlighted words, buttons, player, seal, video player, pay bar) in the visitor's colour, kept on return visits · since ${ACCENT.from.slice(0, 16).replace("T", " ")} UTC · orange before it: see "Landing: old vs new", New`,
     variants: ACCENT.variants,
     live: Object.fromEntries(ACCENT.variants.map((v) => [v, `https://m.thegrind.studio/en/midi-drum-kit?ac=${v.slice(3)}&preview=1`])),
-    label: (v) => ({ "ac-green": "Green · FL Studio piano roll", "ac-red": "Red", "ac-yellow": "Yellow" })[v] ?? v,
+    label: (v) => ({ "ac-green": "Green · FL Studio piano roll", "ac-red": "Red", "ac-yellow": "Yellow · off since 11-19" })[v] ?? v,
     color: (v) => {
       const p = PALETTES[v.slice(3) as keyof typeof PALETTES];
       return p ? { from: p.g1, to: p.g2 } : { from: "#94a3b8", to: "#64748b" };
@@ -916,30 +847,10 @@ export const TESTS: TestDef[] = [
     question: "Which Famous Beats landing sells more?",
     live: Object.fromEntries(FBB_LP.variants.map((v) => [v, `https://m.thegrind.studio/famous-beats-bundle?lp=${v.slice(4)}&preview=1`])),
     where: "Landing, English · the visitors split evenly at the same address, each kept on their page · the same order page after each · Old = the page cloned from the Astro site, live 11-03 → 11-10 · Jazz-style = the page built like the Jazz MIDI Pack's, the only one 11-10 → 11-15 · v3 = the Jazz-style page's sections in the new MIDI Drum Kit landing's order: the player right after the hero, the producers' quotes after the product, the bonuses and the offer before the steps and the chart (in the split since 11-15 evening, ~2 hours after the other two) · ClickFunnels = its red Famous Beats page as a landing (the Drum Kit's upsell page, upsell words and No links out), in the split since 11-15 ~18:00 UTC; from then on new visitors draw Jazz-style, v3 or ClickFunnels, Old keeps only those who had it",
-    variants: FBB_LP.variants,
+    // Old out of the test 2026-11-19 (no new visitors since 11-15, 0 counted): the three pages in the draw.
+    variants: [...FBB_LP.split],
     label: (v) => FBB_LABELS[v] ?? v,
     color: (v) => FBB_COLORS[v] ?? { from: "#94a3b8", to: "#64748b" },
-  },
-  {
-    funnel: "jazz-midi-pack",
-    // 2026-11-15, "ok allora alziamo prezzo Jazz (metti in analytics il cambio e teniamolo d'occhio)":
-    // the pack at 37 for everyone, with a seventh bonus (jazz-midi-pack/priceTest.ts). By days, like
-    // the Drum Kit's order page: 27 = the last five whole days before, 37 = from its first whole day.
-    // The evening of 11-15 after the deploy is in neither column.
-    name: "Price: 27 vs 37",
-    question: "Does the Jazz MIDI Pack bring in more money per visitor at 37 than at 27? It does while it loses fewer than 27 % of the orders.",
-    live: { p37: "https://m.thegrind.studio/jazz-midi-pack/order?preview=1" },
-    where: `Landing and order page, € and $ alike · 27 = six bonuses, 11-11 → 11-15 (after the 5-minute bonus ended) · 37 = the same pages with the Jazz Record Samples (122 WAV loops, until then a €7 add-on) as a seventh bonus, ${PRICE_37.afterFrom.slice(0, 10)} only (live 11-15 23:28 → 11-16 17:49 Italy, then back to 27) · the Black Friday bar is on both · since 11-16 00:00 Italy the order page also offers the MIDI Drum Kit Expansions as a 7 add-on (37 only) · since 11-16 ~01:00 Italy UK visitors pay £37 and Swiss CHF 37 (they paid €37 before; their sales count in euros) · as another funnel's upsell the pack is still 27 · since 11-16 ~18:10 Italy the first one-click upsell after the order is the Jazz MIDI Pack Vol. 2 at the pack's price (Famous Beats moved second)`,
-    variants: ["p27", "p37"],
-    label: (v) => (v === "p27" ? "27 · six bonuses" : "37 · seven bonuses"),
-    color: (v) => (v === "p27" ? { from: "#94a3b8", to: "#64748b" } : { from: "#34d399", to: "#059669" }),
-    windows: {
-      p27: { from: PRICE_37.beforeFrom, until: PRICE_37.live, days: [PRICE_37.beforeFrom.slice(0, 10), dayBefore(PRICE_37.afterFrom)] },
-      p37: { from: PRICE_37.afterFrom, until: PRICE_37.back27, days: [PRICE_37.afterFrom.slice(0, 10), PRICE_37.back27.slice(0, 10)] },
-    },
-    // Back to 27 on 11-16 at 17:49 Italy; until 11-19 the card kept counting every day since as "37"
-    // ("ABBIAMO CONTINUATO A MANDARE GENTE A 37?!", it hadn't: the pages and the checkout say 27).
-    ended: { at: PRICE_37.back27, kept: "p27" },
   },
   {
     funnel: "jazz-midi-pack",
@@ -1173,7 +1084,7 @@ async function checkoutPaid(funnel: string, w: { from: string; until: string | n
 const STEP2_FROM = "2026-11-07T17:35:00+01:00";
 const BONUS_FUNNELS: { funnel: string; name: string; item: string; since: string | null; start: string }[] = [
   { funnel: "midi-drum-kit", name: "MIDI Drum Kit", item: "Expansions", since: "2026-11-08T19:50:00+01:00", start: "2026-11-08T19:50:00+01:00" },
-  { funnel: "jazz-midi-pack", name: "Jazz MIDI Pack", item: "Jazz Record Samples", since: null, start: "2026-11-09T05:33:00+01:00" },
+  // Jazz MIDI Pack's (Jazz Record Samples, 11-09 → 11-10) removed 2026-11-19: off since 11-10.
 ];
 
 /**

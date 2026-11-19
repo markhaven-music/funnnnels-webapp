@@ -262,7 +262,7 @@ function landingVariant(request: NextRequest): { variant: LpVariant | AccentVari
   const kept = request.cookies.get(LP.cookie)?.value;
   // the accent colour test (midi-drum-kit/accentTest.ts): the new page in one of its colours, kept per visitor
   if (LP.draw) {
-    if (isAccent(kept)) return { variant: kept, assign: false };
+    if (isAccent(kept) && LP.draw.includes(kept)) return { variant: kept, assign: false };
     return { variant: LP.draw[Math.floor(Math.random() * LP.draw.length)], assign: true };
   }
   // no split (LP.live): everyone on that page, their cookie set to it
@@ -276,7 +276,8 @@ function fbbVariant(request: NextRequest): { variant: FbbLp; assign: boolean } {
   const asked = `fbb-${request.nextUrl.searchParams.get("lp")}`;
   if (isFbbLp(asked)) return { variant: asked, assign: false };
   const kept = request.cookies.get(FBB_LP.cookie)?.value;
-  if (isFbbLp(kept)) return { variant: kept, assign: false };
+  // a page out of the draw (fbb-old since 2026-11-19) draws again
+  if (isFbbLp(kept) && FBB_LP.split.includes(kept)) return { variant: kept, assign: false };
   return { variant: FBB_LP.split[Math.floor(Math.random() * FBB_LP.split.length)] as FbbLp, assign: true };
 }
 

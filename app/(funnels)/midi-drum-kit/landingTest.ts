@@ -33,7 +33,9 @@ export const LP = {
    * Since 2026-11-17 the new page is drawn in one of three accent colours (./accentTest.ts), one per visitor,
    * their letter in this cookie in `live`'s place: everyone still gets the new page. null = `live` again.
    */
-  draw: ACCENT.variants as readonly AccentVariant[] | null,
+  // 2026-11-19 ("Sì, procedi" on "spegnere il giallo"): yellow leaves the draw, 1 % chance of being best;
+  // whoever had it draws green or red on their next visit (proxy.ts), its column stays in Analytics.
+  draw: ACCENT.variants.filter((v) => v !== "ac-yellow") as readonly AccentVariant[] | null,
 };
 export type LpVariant = (typeof LP.variants)[number];
 export const isLp = (v: unknown): v is LpVariant => (LP.variants as readonly string[]).includes(v as string);
