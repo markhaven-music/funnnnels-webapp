@@ -84,7 +84,9 @@ type Info = { firstName: string; lastName: string; email: string };
 // headline / body: the offer's own words (`{c}` = currency sign, `**bold**`); without them, "YES! Add the <name>!" and the pitch.
 // popup: offered in the landing's popup (./offerPopup.ts), not as a tick box: the localStorage key
 // of the buyer's answer there; in the order when they said yes, a summary line with Remove.
-type Bump = { id: string; name: string; price: number; pitch: string; cover?: [string, string]; image?: string; headline?: string; body?: string[]; popup?: string };
+// tickBox: a pop-up add-on that is also a tick box (Famous Beats' MIDI Drum Kit, 2026-11-19): the
+// pop-up's Yes ticks it, unticking it is the No.
+type Bump = { id: string; name: string; price: number; pitch: string; cover?: [string, string]; image?: string; headline?: string; body?: string[]; popup?: string; tickBox?: boolean };
 
 /** The tick-box offers this checkout shows: the list, or the single bump. */
 const offersOf = (p: Pick<Props, "bump" | "bumps">): Bump[] => p.bumps ?? (p.bump ? [{ id: "bump", ...p.bump }] : []);
@@ -519,8 +521,21 @@ function PayStepBody({
         <JazzBonusItem w={fiveMinBonus.words ?? JAZZ_BONUS_WORDS} cfg={fiveMinBonus.cfg} price={money(fiveMinBonus.price, currency)} compact light />
       )}
 
-      {offers.filter((o) => !o.popup).map((offer) => (
-        <BumpBox key={offer.id} offer={offer} currency={currency} ticked={picked.includes(offer.id)} onTick={(on) => toggle(offer.id, on)} />
+      {offers.filter((o) => !o.popup || o.tickBox).map((offer) => (
+        <BumpBox
+          key={offer.id}
+          offer={offer}
+          currency={currency}
+          ticked={picked.includes(offer.id)}
+          onTick={(on) => {
+            toggle(offer.id, on);
+            // A pop-up add-on's box is its answer too, so a reload keeps what they chose here.
+            if (offer.popup)
+              try {
+                localStorage.setItem(offer.popup, JSON.stringify({ add: on, at: Date.now() }));
+              } catch {}
+          }}
+        />
       ))}
 
       <div className={s.summary}>
@@ -536,7 +551,7 @@ function PayStepBody({
             <div key={o.id} className={s.sumRow}>
               <span>
                 {o.name}
-                {o.popup && (
+                {o.popup && !o.tickBox && (
                   <>
                     {" "}
                     <button

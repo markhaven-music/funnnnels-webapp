@@ -25,6 +25,11 @@ export const BUMP_IMAGE: Record<string, string> = {
   hustle: "/funnels/midi-drum-kit/bump-hustle-packs.webp?v=2",
   "top-hits": "/funnels/midi-drum-kit/bump-top-hits.webp?v=2",
   "famous-beats": "/funnels/famous-beats-bundle/box3d-160.webp",
+  // Its software box since 2026-11-19 ("fai una software box per drunk swing grooves e mettila negli order bump"),
+  // generated with Higgsfield in the TOP HITS / Expansions boxes' style from its cover, cut by tools/cut_box.cjs.
+  "swing-grooves": "/funnels/midi-drum-kit/bump-swing-grooves-box.webp",
+  // The Drum Kit's own 3D box, as in the Famous Beats pop-up (a tick box there since 2026-11-19).
+  "drum-kit": "/funnels/midi-drum-kit/kit-box-v3-480.webp",
 };
 
 type Row = { product: string; lang: string; headline: string; body: string };

@@ -43,8 +43,8 @@ export const metadata: Metadata = {
 
 // The tick boxes are the funnel map's "Prices & order bumps" list, in its order (lib/bumpPlaces.ts):
 // TOP HITS first since 2026-11-19 (whoever ticks it skips the TOP HITS upsell, same id, fv_owned).
-// Left out there: the MIDI Drum Kit, the landing's pop-up (../../popupOffer.ts, a summary line with
-// Remove when they said Yes), Emotional Keys (one of the six bonuses) and the Expansions (the
+// The MIDI Drum Kit is a tick box too since 2026-11-19 ("aggiungi anche midi drum kit agli order bump"),
+// already ticked when they said Yes to the landing's pop-up (../../popupOffer.ts). Left out: Emotional Keys (one of the six bonuses) and the Expansions (the
 // 5-minute bonus, off). When the list can't be read, the code's add-ons in the code's order.
 
 const BONUS_THUMBS: Record<string, string | null> = {
@@ -66,10 +66,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
 
   const live = f.bumps ?? [];
   const code = funnel.bumps as readonly (Bump & { headline: string })[];
-  // The pop-up's add-on rides along (the form shows it only after its Yes), the rest are the tick boxes.
-  const popup = live.find((x) => x.id === FBB_POPUP.item) ?? code.find((x) => x.id === FBB_POPUP.item);
-  const listed = [...tickBoxes(funnel.slug, live.length ? live : code), ...(popup ? [popup] : [])];
-  const ownBumps = listed.flatMap((b) => {
+  const ownBumps = tickBoxes(funnel.slug, live.length ? live : code).flatMap((b) => {
     const id = b.id;
     const was = priceIn(code.find((x) => x.id === id)?.price, currency) ?? priceIn(b.price, currency);
     const copy = BUMP_COPY[id];
@@ -82,7 +79,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
         pitch: b.pitch,
         image: known?.image ?? b.image,
         ...(copy ? { headline: copy.headline, body: copy.body.map((p) => restate(p, was, priceIn(b.price, currency))) } : {}),
-        ...(b.id === FBB_POPUP.item ? { popup: FBB_POPUP.key } : {}),
+        ...(b.id === FBB_POPUP.item ? { popup: FBB_POPUP.key, tickBox: true } : {}),
       },
     ];
   });

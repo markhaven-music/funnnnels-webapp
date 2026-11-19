@@ -11,7 +11,6 @@
 
 export const NOT_A_TICK_BOX: Record<string, Record<string, string>> = {
   "famous-beats-bundle": {
-    "drum-kit": "Pop-up on the landing, not a tick box",
     "emotional-keys": "Free bonus in the bundle, not a tick box",
     expansions: "Not on the order page (it was the 5-minute bonus, off)",
   },
