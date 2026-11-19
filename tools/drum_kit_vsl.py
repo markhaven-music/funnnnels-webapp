@@ -75,14 +75,16 @@ def rolls():
     read = lambda path, sound=None: T.entry(path[len(KIT):], z.read(path), sound)
     cut = lambda notes, beats: [n for n in notes if n[0] < beats]
     out = {}
-    b = json.load(open(os.path.join(PLAYER, "v6", "bounce.json")))
+    # Complete Beat 01 since 2026-11-19 ("usa beat01 per l'esempio bounce da ora in poi ... aggiusta il primo video"), the
+    # landing switch's own pair (player/v6/bounce01.json); it was Beat 13 (bounce.json).
+    b = json.load(open(os.path.join(PLAYER, "v6", "bounce01.json")))
     out["flat"] = {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["off"]), "file": "A plain beat: kick and 808 on the one, and an 8th before the snare in bars 2 and 4; straight hi-hats"}
     out["bounce"] = {"bpm": b["bpm"], "beats": b["len"], "notes": five(b["on"]), "file": f"{KIT}{b['f']}".replace("/", " / ")}
     # the same beat, its hats in the last two beats swapped for a Roll Up fragment
     frag = find("2. Hihat Closed/Roll Up/", "Fragment_10")
     roll = [n for n in five(b["on"]) if not (n[2] == T.HAT and n[0] >= 14)]
     roll += [(n[0] + 14,) + n[1:5] + (1,) for n in five(read(frag, T.HAT)["n"])]
-    out["roll"] = {"bpm": b["bpm"], "beats": b["len"], "notes": sorted(roll), "file": f"Complete Beat 13 + {os.path.basename(frag)[:-4]} (2. Hihat Closed / Roll Up)"}
+    out["roll"] = {"bpm": b["bpm"], "beats": b["len"], "notes": sorted(roll), "file": f"Complete Beat 01 + {os.path.basename(frag)[:-4]} (2. Hihat Closed / Roll Up)"}
     for rid, folder, part in (("combo", "17. ", "MDK_Beat07_Hats07"), ("beat14", "9. ", "CompleteBeat14_"), ("beat11", "9. ", "CompleteBeat11_")):
         path = find(folder, part)
         e = read(path)
@@ -93,8 +95,8 @@ def rolls():
 ROLLS = rolls()
 DEMOS = {
     "flat": ("NO BOUNCE · a plain beat", RED),
-    "bounce": ("BOUNCE · Complete Beat 13 of the kit · 140 BPM", GREEN),
-    "roll": ("Complete Beat 13 + a Roll Up fragment in the last bar", YELLOW),
+    "bounce": (f"BOUNCE · Complete Beat 01 of the kit · {ROLLS['bounce']['bpm']} BPM", GREEN),
+    "roll": ("Complete Beat 01 + a Roll Up fragment in the last bar", YELLOW),
     "combo": (f"Folder 17 · Kick & Snare Beat 07 + Hi-Hats 07 · {ROLLS['combo']['bpm']} BPM", YELLOW),
     "beat14": (f"Complete Beat 14 of the kit · {ROLLS['beat14']['bpm']} BPM", YELLOW),
     "beat11": (f"Complete Beat 11 of the kit · {ROLLS['beat11']['bpm']} BPM", YELLOW),
@@ -260,7 +262,7 @@ def visual(show):
         layer = draw_drums(ROLLS[arg], (260, 110, 1660, 720), DEMOS[arg][1], title=DEMOS[arg])
     elif kind == "compare":
         layer = draw_drums(ROLLS["flat"], (60, 130, 940, 720), RED, title=("NO BOUNCE", RED))
-        layer.alpha_composite(draw_drums(ROLLS["bounce"], (980, 130, 1860, 720), GREEN, title=("BOUNCE · Complete Beat 13", GREEN)))
+        layer.alpha_composite(draw_drums(ROLLS["bounce"], (980, 130, 1860, 720), GREEN, title=("BOUNCE · Complete Beat 01", GREEN)))
     return layer
 
 

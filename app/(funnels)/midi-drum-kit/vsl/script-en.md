@@ -14,9 +14,10 @@ counts. Nothing about notes on or off the grid, nothing about who in the charts 
 
 [DEMO: id] = real files of the kit (the zip V2) played with the page's own sounds, the Hit-Maker Drums one-shots
 of the player and its 808, each drum on its own line with a playhead. Not read aloud. `flat` and `bounce` are the
-two sides of the page's "No bounce vs bounce" switch (player/v5/bounce3.json): a plain beat with a syncopated
-second kick ("nobody puts the kick just on the 1st beat"), and Complete Beat 13 of the kit, same sounds, same
-tempo. `roll` is Complete Beat 13 with a Roll Up fragment in its last bar, `combo` a file of folder 17, `beat14`
+two sides of the page's "No bounce vs bounce" switch (player/v6/bounce01.json): a plain beat with a syncopated
+second kick ("nobody puts the kick just on the 1st beat"), and Complete Beat 01 of the kit (164 BPM; Beat 13 until
+2026-11-19, "usa beat01 per l'esempio bounce da ora in poi"), same sounds, same tempo. `roll` is Complete Beat 01
+with a Roll Up fragment in its last bar, `combo` a file of folder 17, `beat14`
 and `beat11` Complete Beats 14 and 11. Made by `tools/drum_kit_vsl.py` (voice: ElevenLabs "Aaron Sage - Friendly
 & Conversational", eleven_v4, the Jazz video's).
 
