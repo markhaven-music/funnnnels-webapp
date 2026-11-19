@@ -4,7 +4,7 @@
 //     figure needs: the kit's own drum sounds (player/*.m4a), bounce01.json, a roll on a canvas, one switch.
 //   - "One bar, two ways" (#race): its CSS animation starts when the figure comes on screen.
 //   - Read depth: Read25 / Read50 / Read75 / Read100 once per visit to the Meta Pixel (custom events, to
-//     build audiences of who read how far) and to Clarity. Measured on the article, not the footer.
+//     build audiences of who read how far), to Clarity, and to neo (neoq 'read', its Read 75% column). Measured on the article, not the footer.
 //   - The ad's tags ride along on every button to the order page (the drunk-swing-grooves CARRY list,
 //     plus ChatGPT Ads' oppref), so neo credits the sale to the ad, ad set and campaign that sent it.
 export const ARTICLE_JS = String.raw`
@@ -37,13 +37,17 @@ export const ARTICLE_JS = String.raw`
     var art = document.getElementById('art'), end = document.getElementById('art-end');
     if (!art || !end) return;
     var marks = [25, 50, 75, 100], sent = {}, ticking = false;
+    // neo's "Read 75%" per ad set (neo commit 9b35da0): 0 when the article opens is what the share is measured
+    // against; the snippet loads after the page, so the marks wait in neoq until it's there. Not for previews.
+    function neo(m) { if (!window.__fvMe) (window.neoq = window.neoq || []).push(['read', m]); }
+    neo(0);
     function check() {
       ticking = false;
       var top = art.getBoundingClientRect().top + window.pageYOffset;
       var bottom = end.getBoundingClientRect().top + window.pageYOffset;
       var seen = window.pageYOffset + window.innerHeight - top, total = Math.max(1, bottom - top);
       var pct = Math.min(100, Math.max(0, (seen / total) * 100));
-      marks.forEach(function (m) { if (pct >= m && !sent[m]) { sent[m] = 1; ev('Read' + m, { percent: m }); } });
+      marks.forEach(function (m) { if (pct >= m && !sent[m]) { sent[m] = 1; ev('Read' + m, { percent: m }); neo(m); } });
     }
     addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(check); } }, { passive: true });
     addEventListener('load', check);
