@@ -21,16 +21,49 @@ import { ARTICLE_JS } from "./articleClient";
 
 const OFF = String(/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.local$|\.vercel\.app$/);
 export const ARTICLE_SLUG = "why-your-drums-sound-stiff";
-const PATH = `/midi-drum-kit/${ARTICLE_SLUG}`;
+
+// One version of the article per audience (2026-11-19, "aggiusta tutto": the video rewrites the article for each
+// micro-audience its ads target). Only the top changes: headline, dek, the opening and the closing line of the
+// hook; the problem, the player, the fix and the offer are the same. Each version has its own address, which the
+// matching ad set links to, and its own name in the Pixel's read events (params.article) and in Clarity.
+// Never "drill" (owner, 11-19): trap and hip-hop.
+export type Variant = { slug: string; kick: string; h1: [string, string]; dek: string; lead: string; second: string };
+export const VARIANTS: Record<string, Variant> = {
+  base: { slug: ARTICLE_SLUG, kick: "Drums", h1: ["Your drums sound stiff.", "It's not your sounds."],
+    dek: "Why a beat with good samples can still feel dead, and how producers get drums that move without programming every hit.",
+    lead: "You know the feeling. You find a loop you love at 2 AM. The chords hit, and you can already hear the whole song. Then you put the drums in, and everything goes flat.",
+    second: "So you swap the kick. You try another snare. You download one more drum kit. The beat still sits there like a metronome with nice sounds." },
+  trap: { slug: "why-your-trap-drums-sound-stiff", kick: "Trap", h1: ["Your trap drums sound stiff.", "It's not your sounds."],
+    dek: "Why a trap beat with hard samples can still feel dead, and how producers get hats, 808s and snares that move without programming every hit.",
+    lead: "You know the feeling. You find a dark loop at 2 AM and you can already hear someone rapping on it. Then you put the drums in: hats, snare, 808. And the whole thing goes flat.",
+    second: "So you swap the 808. You try another snare. You add more hi-hat rolls. The beat still sits there like a metronome with expensive sounds." },
+  hiphop: { slug: "why-your-hip-hop-drums-sound-stiff", kick: "Hip-hop", h1: ["Your hip-hop drums sound stiff.", "It's not your sounds."],
+    dek: "Why a hip-hop beat can have the right samples and still not make anyone nod, and how producers get drums that move without programming every hit.",
+    lead: "You know the feeling. You chop a sample you love and the loop already feels like a record. Then you put the drums in, and nobody's head moves. Not even yours.",
+    second: "So you swap the kick. You try a dustier snare. You download one more drum kit. The beat still sits there like a metronome with nice sounds." },
+  beginner: { slug: "why-your-first-beats-sound-stiff", kick: "Starting out", h1: ["Your beats sound off.", "It's not you. It's the grid."],
+    dek: "If you're new to making beats and your drums never sound like the songs you love, this is why, and how to fix it without learning to program every hit.",
+    lead: "You know the feeling. You watch the tutorials, you open the DAW, you make a loop you actually like. Then you add drums, and it sounds like a beginner made it.",
+    second: "So you think you're not good enough yet. You download another drum kit. You watch another tutorial. The beat still sits there like a metronome." },
+  typebeat: { slug: "why-type-beats-sound-the-same", kick: "Type beats", h1: ["Your type beats sound like everyone's.", "It's the drums."],
+    dek: "Why so many type beats blend into each other, and how producers get drums that sound like theirs without programming every hit.",
+    lead: "You know the feeling. You finish a beat, title it, upload it. Then you scroll the same tag and every beat sounds like yours. Same hats, same snare, same flat bounce.",
+    second: "So you buy another drum kit. You chase another sound. Your beats still sound like the ones next to them." },
+  stuck: { slug: "why-your-drums-still-sound-stiff", kick: "Drums", h1: ["Years of beats.", "Drums still stiff."],
+    dek: "If you've been making beats for years and the drums still don't feel like the records, this is why, and how producers get drums that move without programming every hit.",
+    lead: "You know the feeling. You've been doing this for years. The chords are good, the mix is fine. And the drums still sit there, stiff, no matter what you try.",
+    second: "You've bought the kits. You've tried the plugins. You've redone the hats a hundred times. It was never the sounds." },
+};
 const IMG = "/funnels/midi-drum-kit/";
 
 function money(price: number, currency: Currency): string {
   return `${SIGN[currency]}${price}`;
 }
 
-function head(currency: Currency, price: number): string {
+function head(currency: Currency, price: number, v: Variant): string {
+  const PATH = `/midi-drum-kit/${v.slug}`;
   const { metaPixelId, clarityId, neoSnippet, googleAdsId } = funnel.tracking;
-  const params = JSON.stringify({ content_name: funnel.product, content_type: "product", value: price, currency: currency.toUpperCase(), article: ARTICLE_SLUG });
+  const params = JSON.stringify({ content_name: funnel.product, content_type: "product", value: price, currency: currency.toUpperCase(), article: v.slug });
   return `<script>${ORIGIN_BOUNCE_JS};
 window.__fvMe = ${PREVIEW_JS} || ${OFF}.test(location.hostname);
 ${beaconScript({ funnel: funnel.slug, page: "landing" })};
@@ -192,7 +225,8 @@ const FOLDERS: [string, number][] = [
 
 const PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>';
 
-export function articleHtml(currency: Currency, price: number): string {
+export function articleHtml(currency: Currency, price: number, variant = "base"): string {
+  const v = VARIANTS[variant] ?? VARIANTS.base;
   const order = funnel.checkout.orderPage;
   const p = money(price, currency);
   const was = money(funnel.wasPrice, currency);
@@ -203,8 +237,8 @@ export function articleHtml(currency: Currency, price: number): string {
       ["Bounce", "Complete Beat 01 from the MIDI Drum Kit, exactly as it is in the zip."],
     ],
   });
-  const title = "Your drums sound stiff. It's not your sounds.";
-  const desc = "Why a beat with good samples can still feel dead, and how producers get drums that move without programming every hit.";
+  const title = v.h1.join(" ");
+  const desc = v.dek;
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${title} · GRIND STUDIO</title>
 <meta name="description" content="${desc}">
@@ -213,17 +247,17 @@ export function articleHtml(currency: Currency, price: number): string {
 <meta property="og:type" content="article"><meta property="og:title" content="${title}"><meta property="og:description" content="${desc}">
 <meta property="og:image" content="https://m.thegrind.studio${IMG}kit-box-v3-640.webp">
 <link rel="icon" href="/favicon.ico">
-${head(currency, price)}
+${head(currency, price, v)}
 <style>${CSS}</style></head><body>
 <header class="top"><div><a class="mast" href="#"><img src="${IMG}logo-dark.webp" width="162" height="18" alt="GRIND STUDIO"><span>Journal</span></a><nav>Beatmaking</nav></div></header>
 <main><article id="art">
-<p class="kick"><b>Drums</b>5 min read</p>
-<h1><span>Your drums sound stiff.</span><span>It's not your sounds.</span></h1>
+<p class="kick"><b>${v.kick}</b>5 min read</p>
+<h1><span>${v.h1[0]}</span><span>${v.h1[1]}</span></h1>
 <p class="dek">${desc}</p>
 <div class="by"><i class="gem" aria-hidden="true"></i><div><b>GRIND STUDIO</b>Beatmakers writing for beatmakers</div></div>
 
-<p class="lead">You know the feeling. You find a loop you love at 2 AM. The chords hit, and you can already hear the whole song. Then you put the drums in, and everything goes flat.</p>
-<p>So you swap the kick. You try another snare. You download one more drum kit. The beat still sits there like a metronome with nice sounds.</p>
+<p class="lead">${v.lead}</p>
+<p>${v.second}</p>
 <p><mark><b>Here's the hard part: no sample pack is going to fix it.</b></mark> Here's the good part: once you see what's actually wrong, the fix takes seconds.</p>
 
 <div class="box"><h3>What you'll get from the next 5 minutes</h3>
