@@ -8,7 +8,9 @@
 // One plain script (salesPopJs) for every kind of landing: the React ones run it from
 // app/(funnels)/Beacon.tsx, the HTML ones (MIDI Drum Kit, the Astro copies) carry it in
 // their <head>. Bottom left; on a computer a card with the box, on a phone a pill. Starts
-// 8 s after the page opens, shows a buyer for 5 s every 20 s, 3 at most per page view;
+// 15 s after the page opens, shows a buyer for 3 s every 35 s, 2 at most per page view
+// (was 8 s / 5 s / 20 s / 3: "verified by grind studio social proof popups last too long
+// and are distracting", 2026-11-19);
 // nothing is fetched before then, so the page's speed score doesn't see it.
 // SALES_POP_ON = false switches it off everywhere (?pop=1 still shows it, for a look).
 export const SALES_POP_ON = true;
@@ -88,13 +90,13 @@ setTimeout(function(){fetch("/api/checkout/recent?f="+encodeURIComponent(c.f)+"&
 var list=(d&&d.buyers)||[];if(!list.length)return;
 var st=document.createElement("style");st.textContent=c.css;document.head.appendChild(st);
 var el=document.createElement("div");el.className="gsp";el.setAttribute("role","status");el.setAttribute("aria-live","polite");document.body.appendChild(el);
-var n=0,max=Math.min(3,list.length);
+var n=0,max=Math.min(2,list.length);
 (function next(){if(n>=max)return;var b=list[n++];
 var who=b.country?b.name+" "+c.w[0]+" "+b.country:b.name;
 el.innerHTML='<img class="gsp-icon" src="'+c.icon+'" alt="" width="160" height="160" decoding="async"><div class="gsp-text"><div class="gsp-who"><span class="gsp-name">'+esc(who)+'</span><i class="gsp-tick" aria-label="'+esc(c.w[2])+'"></i></div><div class="gsp-what">'+esc(c.w[1].replace("{p}",c.product))+'</div><div class="gsp-meta"><span>'+esc(ago(b.ago))+'</span><span class="gsp-by">'+c.tick+esc(c.w[2])+'</span></div></div>';
 requestAnimationFrame(function(){el.classList.add("gsp-open")});
-setTimeout(function(){el.classList.remove("gsp-open")},5000);
-setTimeout(next,20000);})();
-}).catch(function(){})},8000);
+setTimeout(function(){el.classList.remove("gsp-open")},3000);
+setTimeout(next,35000);})();
+}).catch(function(){})},15000);
 }catch(e){}})(${JSON.stringify(cfg).replace(/</g, "\\u003c")});`;
 }
