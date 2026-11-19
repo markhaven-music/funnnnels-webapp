@@ -196,7 +196,7 @@ export const funnel = {
     // Vol. 2 costs what the pack costs here ("il prezzo dell'upsell facciamo lo stesso prezzo del volume 1?
     // 27 o 37 quello che sia", 2026-11-15). The price buyers pay is funnel_items': on sale since 2026-11-16 at
 // the pack's price there (27 that day; the pack's row went back to 27 at 16:49 UTC). Change the two together.
-    { id: "vol2", path: "vol2", name: "Jazz MIDI Pack Vol. 2", price: { eur: 37, usd: 37 } },
+    { id: "vol2", path: "vol2", name: "Jazz MIDI Pack Vol. 2", price: { eur: 27, usd: 27 } },
     { id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } },
   ],
   checkout: {

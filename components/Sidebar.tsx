@@ -6,12 +6,14 @@ import { NAV } from "@/lib/data";
 type Props = {
   funnelCount: number;
   supportUnread?: number;
+  /** The A/B tests running now (dashboard → A/B Tests). */
+  abRunning?: number;
   active: string;
   open?: boolean;
   onNav: (id: string) => void;
 };
 
-export function Sidebar({ funnelCount, supportUnread = 0, active, open = false, onNav }: Props) {
+export function Sidebar({ funnelCount, supportUnread = 0, abRunning = 0, active, open = false, onNav }: Props) {
   return (
     <aside className={`nav ${open ? "open" : ""}`} id="main-nav">
       {NAV.map((s) => (
@@ -25,7 +27,9 @@ export function Sidebar({ funnelCount, supportUnread = 0, active, open = false, 
                 ? String(funnelCount)
                 : it.badgeKey === "support" && supportUnread > 0
                   ? String(supportUnread)
-                  : null;
+                  : it.badgeKey === "ab" && abRunning > 0
+                    ? String(abRunning)
+                    : null;
             return (
               <button
                 key={it.id}

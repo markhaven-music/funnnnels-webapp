@@ -12,4 +12,7 @@ export const PRICE_37 = {
   live: "2026-11-15T22:28:00Z",
   /** After: its first whole UTC day, orders and visits alike. */
   afterFrom: "2026-11-16T00:00:00Z",
+  /** Back to 27 ("Riportiamo a 27"): dashboard → Products' row at 27 again. 37 lasted about 17 hours, so the
+   * 37 column is 11-16 alone (its evening at 27 included: page_views has days, not hours). */
+  back27: "2026-11-16T16:49:00Z",
 };

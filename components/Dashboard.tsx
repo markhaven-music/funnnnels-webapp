@@ -92,6 +92,7 @@ export function Dashboard({ funnels: rows }: Props) {
       <Sidebar
         funnelCount={funnels.filter((f) => !isLeadMagnet(f)).length}
         supportUnread={supportUnread}
+        abRunning={analytics?.tests.filter((t) => !t.ended).length ?? 0}
         active={activeNav}
         open={navOpen}
         onNav={(id) => {

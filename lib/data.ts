@@ -4,7 +4,7 @@ export type NavItem = {
   id: string;
   label: string;
   icon: IconName;
-  badgeKey?: "funnels" | "support";
+  badgeKey?: "funnels" | "support" | "ab";
 };
 
 export type NavSection = {
@@ -21,7 +21,7 @@ export const NAV: NavSection[] = [
       { id: "products", label: "Products", icon: "box" },
       { id: "launches", label: "Launches", icon: "rocket" },
       { id: "pages", label: "Landing Pages", icon: "page" },
-      { id: "ab", label: "A/B Tests", icon: "abtest" },
+      { id: "ab", label: "A/B Tests", icon: "abtest", badgeKey: "ab" },
     ],
   },
   {
