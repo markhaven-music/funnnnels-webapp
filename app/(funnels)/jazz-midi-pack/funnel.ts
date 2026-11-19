@@ -293,7 +293,7 @@ export const bumpCopy: Record<string, { headline: string; body: string[] }> = {
   "famous-beats": {
     headline: "YES! Add 320 Famous Beats!",
     body: [
-      "The drums from the records you grew up on, as MIDI: **320 hit drum grooves from 76 artists**, in 32 packs. Put one under your jazz chords, swap in your own sounds and the groove is yours. Usually {c}97 but you can add it right now for just {c}27!!",
+      "The drums from the records you grew up on, as MIDI: **320 hit drum grooves from 76 artists**, in 32 packs. Open the file, swap in your own sounds and the groove is yours. Usually {c}97 but you can add it right now for just {c}27!!",
     ],
   },
   hustle: {
