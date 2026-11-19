@@ -111,21 +111,6 @@ export const DEFAULT_SECTIONS: Section[] = [
       ],
     },
   },
-  {
-    id: "product",
-    type: "s_product",
-    props: {
-      eyebrow: "Introducing",
-      title: "The Jazz",
-      titleEm: "MIDI Pack",
-      lead: "{files} MIDI files. The most used jazz progressions, each voiced 12 ways, in 8 rhythms and all 12 keys, plus bass lines, combo loops and full lofi, neo soul, trap soul and deep house loops with drums. A different progression for every beat you upload, for years.",
-      ticks: [
-        "No theory needed: every file shows its chord names",
-        "Your sounds: Rhodes, piano, pads, synths",
-        "One payment, yours to keep",
-      ],
-    },
-  },
   // The voicing, explained beside the before/after rolls (a letter block
   // followed by the rolls block is drawn as a pair, [currency]/page.tsx).
   {
@@ -151,6 +136,21 @@ export const DEFAULT_SECTIONS: Section[] = [
       afterLabel: "After",
       afterText: "Best Voicing. The first folder of every progression.",
       note: "Same eight chords, same rhythm. Watch the top note.",
+    },
+  },
+  {
+    id: "product",
+    type: "s_product",
+    props: {
+      eyebrow: "Introducing",
+      title: "The Jazz",
+      titleEm: "MIDI Pack",
+      lead: "{files} MIDI files. The most used jazz progressions, each voiced 12 ways, in 8 rhythms and all 12 keys, plus bass lines, combo loops and full lofi, neo soul, trap soul and deep house loops with drums. A different progression for every beat you upload, for years.",
+      ticks: [
+        "No theory needed: every file shows its chord names",
+        "Your sounds: Rhodes, piano, pads, synths",
+        "One payment, yours to keep",
+      ],
     },
   },
   {
