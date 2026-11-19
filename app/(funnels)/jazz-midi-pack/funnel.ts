@@ -63,16 +63,8 @@ export const funnel = {
       image: "/funnels/jazz-midi-pack/bump-grooves.webp",
       pitch: "The drunk, J Dilla-style swing of lofi and neo soul: 80 MIDI drum grooves (snare on 2 and 4 and half-time, 4 feels incl. quintuplet swing, drum rack and multitrack) and 31 groove templates for any MIDI. Snare on the beat, everything else laid back.",
     },
-    // The MIDI Drum Kit's €7 add-on, here since 2026-11-15 ("mi piacciono le tue idee per i prodotti 1,2
-    // falle": 2 = this one): on the Drum Kit's order page 14 of 32 buyers took it, and lofi and house are
-    // genres this page sells. The same zip (R2), the picture the Drum Kit's order page shows.
-    {
-      id: "expansions",
-      name: "MIDI Drum Kit Expansions (House, Lo-Fi, Afrobeat)",
-      price: { eur: 27, usd: 27 },
-      image: "/funnels/midi-drum-kit/bump-expansions.webp",
-      pitch: "10,003 MIDI drum files: complete beats for Lo-Fi, House and Afrobeat, to put under your jazz chords.",
-    },
+    // MIDI Drum Kit Expansions was an add-on here from 2026-11-15 to 2026-11-19 ("togli midi drum expansions
+    // dagli order bump di midi jazz pack"); its zip key stays below for those who bought it.
     {
       id: "top-hits",
       name: "TOP HITS MIDI Bundle",
