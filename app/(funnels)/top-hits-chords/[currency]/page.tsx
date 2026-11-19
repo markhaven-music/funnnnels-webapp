@@ -11,7 +11,7 @@ import { display } from "../../jazz-midi-pack/fonts";
 import { Tracking } from "../../top-hits-midi-bundle/Tracking";
 import { BigClock, Clock } from "../Countdown";
 import { folders, funnel, launch, launchOn } from "../funnel";
-import { BigRoll, HeroRolls } from "../Rolls";
+import { BigRoll, HeroRolls, RhythmRolls } from "../Rolls";
 import { SongPlayer } from "../SongPlayer";
 import { LANDING } from "../words";
 import first from "../rolls.json";
@@ -282,6 +282,27 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
           </div>
         </section>
       </div>
+
+      <section className={s.sec}>
+        <div className={s.wrap}>
+          <h2 className={s.h2}>
+            <Marked text={w.rhythms.title} />
+          </h2>
+          <p className={s.sub}>{w.rhythms.sub}</p>
+          <RhythmRolls lead={w.rhythms.listen} />
+          <p className={t.foldersSum}>
+            <Marked text={w.rhythms.sum} />
+          </p>
+          <p className={s.sub} style={{ marginTop: 10 }}>{w.rhythms.names}</p>
+          {key(s.ctaBlock)}
+          <p className={s.sub} style={{ marginTop: 18, fontSize: 15 }}>
+            {w.rhythms.owners}{" "}
+            <a href="/account" style={{ color: "#f5b800", fontWeight: 700 }}>
+              {w.rhythms.ownersLink}
+            </a>
+          </p>
+        </div>
+      </section>
 
       <section className={s.sec}>
         <div className={s.wrap}>

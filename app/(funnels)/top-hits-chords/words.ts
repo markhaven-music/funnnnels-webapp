@@ -62,6 +62,17 @@ export const LANDING = {
     ] as [string, string][],
     total: "*That's the TOP HITS MIDI Bundle.* 1,000 of those progressions, in 12 rhythms and all 12 keys. One download.",
   },
+  // 2026-11-18/19, the upgrade ("did you update the page? it's a big deal"): one song of the
+  // bundle played in its 12 rhythms, right after the letter.
+  rhythms: {
+    title: "One hit. *Twelve ways to play it.*",
+    sub: "Drop a hit's chords in as the record plays them and your beat sounds like the record. So every one of the 1,000 songs now comes in 12 rhythms, each in all 12 keys. Same chords, same voicings. You pick the one that moves like your beat.",
+    listen: "SZA, Kill Bill. The same four chords, twelve ways. Press play.",
+    names: "Held chords, pop eighths, ballad arpeggio, trap stabs, house offbeat, piano house, reggaeton, lo-fi lazy, funk stabs, dotted plucks, synth arp, soul push.",
+    sum: "*144,000* new MIDI files. 1,000 songs × 12 rhythms × 12 keys.",
+    owners: "Already have the bundle? The new folder is yours too. Download it again here:",
+    ownersLink: "your downloads",
+  },
   // The bundle's four folders, a box each (2026-11-15, "there should be a box for every folder
   // inside the bundle otherwise what bundle is it"). Names, counts and artists: funnel.ts `folders`.
   folders: {

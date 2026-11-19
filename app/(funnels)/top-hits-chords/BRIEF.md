@@ -106,6 +106,13 @@ in Analytics and its own card on the funnel list ("TOP HITS MIDI Bundle (new fun
   song's transcription (moved to the key), the key in each name is the folder's. Not checked by
   ear by the user. On the T7: "7. 12 Rhythms x 12 Keys (144,000 MIDI)"; in the buyers' zip the
   folder "4. 12 Rhythms x 12 Keys". The launch emails still say 12,000 (true for the keys).
+- 2026-11-19 ("did you update the page? it's a big deal", "also email the buyers with a link to the
+  new version and explain what we did"): a section of its own right after the letter, "One hit.
+  Twelve ways to play it.": SZA - Kill Bill's first 4 bars played in the 12 rhythms (Rolls.tsx
+  RhythmRolls, rhythm-rolls.json from tools/top_hits_rhythms.py --rolls), "144,000 new MIDI files",
+  and a line for owners with the link to /account. The buyers' email: a broadcast to the tag
+  owns-top-hits (given that day to everyone who bought it: funnnnels orders and legacy_purchases),
+  link m.thegrind.studio/account.
 - 2026-11-10: "crea nuovo funnel per TOP HITS MIDI Bundle con TUTTO." Built as Famous Beats v2 was
   (../famous-beats-bundle/BRIEF.md), with everything that funnel got in several rounds done at once:
   the Jazz page's CSS and section order, a player of every file, renders from the real box, six

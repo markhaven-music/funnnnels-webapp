@@ -17,6 +17,7 @@ Songs at 140 BPM or more are written in half time (their bar is felt as two), so
 stab at 172 BPM doesn't turn into a machine gun.
 
     /usr/bin/python3 tools/top_hits_rhythms.py <pack dir> <out dir> [--only "Blinding"] [--orig]
+    /usr/bin/python3 tools/top_hits_rhythms.py <pack dir> --rolls "Kill Bill" <out.json>   (the landing's player)
     --orig   only the original key (for listening checks)
 """
 import json
@@ -463,7 +464,35 @@ def one(job):
             "pcs": sorted({p % 12 for s in segs for p in s["ps"]})}
 
 
+def page_rolls(pack, name, out, beats=16):
+    """The landing's "twelve ways" player: one song's first bars in the 12 rhythms, original key
+    (app/(funnels)/top-hits-chords/rhythm-rolls.json, the Roll shape of jazz-midi-pack/piano.ts)."""
+    if pack.endswith(".json"):  # the page's rolls.json (the file's first 8 bars) when the drive is away
+        src = json.load(open(pack))[name]
+        files = [(None, src["file"], {"notes": [(x[0], x[1], x[2], 100) for x in src["notes"]], "ts": (4, 4), "bpm": src["bpm"]})]
+    else:
+        files = [(os.path.join(pack, g), fn, None) for g in sorted(os.listdir(pack)) if os.path.isdir(os.path.join(pack, g))
+                 for fn in sorted(os.listdir(os.path.join(pack, g)))]
+    for gdir, fn, midi in files:
+        if True:
+            if midi or (name.lower() in fn.lower() and fn.lower().endswith((".mid", ".midi"))):
+                midi = midi or V.parse(os.path.join(gdir, fn))
+                segs = segments(midi)
+                bpm = round(midi["bpm"] or 120)
+                sc = 2 if bpm >= 140 else 1
+                rows = []
+                for i, r in enumerate(ORDER):
+                    notes = [[round(s, 3), round(min(d, beats - s), 3), p] for s, d, p, v in rhythm(r, segs, sc) if s < beats - 0.01]
+                    rows.append({"name": r, "file": f"{os.path.splitext(fn)[0]} - {i + 1:02d} {r}.mid", "bpm": bpm, "beats": beats, "notes": notes, "chords": []})
+                json.dump({"source": fn, "rhythms": rows}, open(out, "w"), separators=(",", ":"), ensure_ascii=False)
+                print(out, [len(r["notes"]) for r in rows], os.path.getsize(out), "bytes")
+                return
+
+
 def main():
+    if "--rolls" in sys.argv:  # top_hits_rhythms.py <pack dir> --rolls "Kill Bill" <out.json>
+        i = sys.argv.index("--rolls")
+        return page_rolls(sys.argv[1], sys.argv[i + 1], sys.argv[i + 2])
     pack, out = sys.argv[1], sys.argv[2]
     only = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else None
     orig = "--orig" in sys.argv

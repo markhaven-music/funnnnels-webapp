@@ -4,6 +4,7 @@ import { PlayableRoll } from "../jazz-midi-pack/PlayableRoll";
 import { SoundPicker } from "../jazz-midi-pack/SoundPicker";
 import type { Roll } from "../jazz-midi-pack/piano";
 import first from "./rolls.json";
+import ways from "./rhythm-rolls.json";
 import t from "./th.module.css";
 
 // Real files from the bundle on the page itself (./rolls.json, read from the pack by
@@ -44,5 +45,23 @@ export function BigRoll({ id = "killbill", caption }: { id?: Id; caption: string
       <PlayableRoll roll={roll(id)} title={title(id)} meta={meta(id)} variant="short" playLabel={`Play ${first[id].song}`} />
       <figcaption>{caption}</figcaption>
     </figure>
+  );
+}
+
+/** One song in the 12 rhythms of the bundle (./rhythm-rolls.json: SZA - Kill Bill's first 4 bars,
+ *  written by tools/top_hits_rhythms.py --rolls from the same notes the 144,000 files are made of). */
+export function RhythmRolls({ lead }: { lead: string }) {
+  return (
+    <div className={t.heroPlay}>
+      <div className={t.heroPlayHead}>
+        <p>{lead}</p>
+        <SoundPicker />
+      </div>
+      <div className={t.heroRolls}>
+        {ways.rhythms.map((r, i) => (
+          <PlayableRoll key={r.name} roll={r as unknown as Roll} title={`${String(i + 1).padStart(2, "0")} ${r.name}`} meta={`${r.bpm} BPM · Ab`} variant="mini" playLabel={`Play ${r.name}`} />
+        ))}
+      </div>
+    </div>
   );
 }
