@@ -1,5 +1,7 @@
 import type Stripe from "stripe";
+import { funnelItems, type FunnelItem } from "@/lib/catalog";
 import { resolveFunnel } from "@/lib/funnels";
+import { priceIn } from "@/lib/geo";
 import { paypal, paypalConfigured } from "@/lib/paypal";
 import { ordersByEmail, toOrderRow as toRow, type OrderRow } from "@/lib/sales";
 import { stripe, stripeConfigured } from "@/lib/stripe";
@@ -23,7 +25,8 @@ import { supabase } from "@/lib/supabase";
 const DAY = 86_400_000;
 const CREDIT_DAYS = 5; // as Email → Insights (db/email-insights.sql)
 
-export type Line = { key: string; name: string };
+/** One thing in the order: its price in the order's currency (cents, null when unknown) and its picture. */
+export type Line = { key: string; name: string; cents: number | null; image: string | null };
 
 export type Payment = {
   status: string;
@@ -126,8 +129,9 @@ export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
   const row = toRow(r);
   const email: string | null = row.email;
 
-  const [funnel, payment, attribution, related, emails, extra] = await Promise.all([
+  const [funnel, items, payment, attribution, related, emails, extra] = await Promise.all([
     part("product", () => resolveFunnel(row.funnel), undefined),
+    part("prices", () => funnelItems(row.funnel), [] as FunnelItem[]),
     part(row.provider === "paypal" ? "PayPal" : "Stripe", () => (row.provider === "paypal" ? paypalPayment(id) : stripePayment(id)), null),
     part("source (neo)", () => neoAttribution(id, row.createdAt), null),
     part("related orders", () => relatedOrders(row), { parent: null, upsells: [], others: [] as OrderRow[] }),
@@ -135,12 +139,35 @@ export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
     part("buyer", () => buyerExtras(email, row.funnel), { contact: null, checkoutStart: null, support: null, libraryLogin: null, legacy: [] }),
   ]);
 
+  const allBumps = funnel?.bumps ?? (funnel?.bump ? [funnel.bump] : []);
+  const itemOf = (key: string) => {
+    const role = row.offer ? "upsell" : key === "pack" ? "main" : "bump";
+    return items.find((it) => it.key === key && it.role === role) ?? items.find((it) => it.key === key);
+  };
+  const listCents = (key: string): number | null => {
+    if (row.currency !== "eur" && row.currency !== "usd") return null; // GBP / CHF are charged converted
+    const price = itemOf(key)?.price ?? allBumps.find((b) => b.id === key)?.price ?? (key === "pack" ? funnel?.price : undefined);
+    const v = price ? priceIn(price, row.currency) : undefined;
+    return typeof v === "number" ? Math.round(v * 100) : null;
+  };
   const lines: Line[] = row.items.map((key) => {
-    if (row.offer) return { key, name: funnel?.offers?.find((o) => o.id === key)?.name ?? key };
-    if (key === "pack") return { key, name: funnel?.product ?? row.funnel };
-    const bump = (funnel?.bumps ?? (funnel?.bump ? [funnel.bump] : [])).find((b) => b.id === key);
-    return { key, name: bump?.name ?? key };
+    const it = itemOf(key);
+    const bump = allBumps.find((b) => b.id === key);
+    const name = row.offer
+      ? (funnel?.offers?.find((o) => o.id === key)?.name ?? it?.name ?? key)
+      : key === "pack"
+        ? (funnel?.product ?? it?.name ?? row.funnel)
+        : (bump?.name ?? it?.name ?? key);
+    return { key, name, cents: listCents(key), image: it?.image ?? bump?.image ?? null };
   });
+  // What was really paid: a single line is the whole amount; with add-ons, the
+  // add-ons at their price and the main product what's left (launch prices,
+  // discounts), unless that doesn't add up.
+  if (lines.length === 1) lines[0].cents = row.amountCents;
+  else if (lines[0]?.key === "pack") {
+    const rest = row.amountCents - lines.slice(1).reduce((n, l) => n + (l.cents ?? 0), 0);
+    if (lines.every((l, i) => i === 0 || l.cents !== null) && rest > 0) lines[0].cents = rest;
+  }
 
   // Email → Insights' rule: the last email clicked in the 5 days before the
   // order (or before the order it followed), else the last one received.

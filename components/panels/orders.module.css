@@ -150,6 +150,41 @@
   margin: 0 -8px;
   border-radius: var(--radius-sm);
 }
+.bought {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 0;
+}
+.boughtThumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  display: block;
+}
+.boughtText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 12px;
+}
+.boughtName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg-0);
+  line-height: 1.3;
+}
+.boughtPrice {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+}
 .itemLink {
   composes: item;
   width: calc(100% + 16px);

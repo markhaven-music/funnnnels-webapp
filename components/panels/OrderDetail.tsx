@@ -187,11 +187,13 @@ function Body({ d, onClose, onOpen }: { d: Detail; onClose: () => void; onOpen: 
         <Section label="WHAT WAS BOUGHT">
           <div className={s.list}>
             {d.lines.map((l, i) => (
-              <div key={l.key} className={s.item}>
-                <span>
-                  {l.name} <span className={`${s.sub} ${s.mono}`}>{l.key}</span>
+              <div key={l.key} className={s.bought}>
+                {l.image ? <img className={s.boughtThumb} src={l.image} alt="" width={48} height={48} loading="lazy" /> : <span className={s.boughtThumb} />}
+                <span className={s.boughtText}>
+                  <span className={s.boughtName}>{l.name}</span>
+                  <span className={s.sub}>{o.offer ? "one-click upsell" : i === 0 ? "main product" : "add-on"}</span>
                 </span>
-                <span className={s.sub}>{o.offer ? "one-click upsell" : i === 0 ? "main product" : "add-on"}</span>
+                <span className={s.boughtPrice}>{l.cents !== null ? money(l.cents, o.currency) : "—"}</span>
               </div>
             ))}
           </div>
