@@ -72,15 +72,8 @@ export const funnel = {
       image: "/funnels/home/top-hits-box.webp",
       pitch: "1000 chord progressions from top hits: chords for pop, R&B, trap and more, beside your jazz ones.",
     },
-    // 11-17: a fourth tick-box ("lets get 4 order bumps on MIDI Jazz Pack too"), as on the Drum Kit's order form;
-    // whoever ticks it skips the Famous Beats upsell page (same id as the offer below, fv_owned).
-    {
-      id: "famous-beats",
-      name: "Famous Beats Bundle (320 MIDI Beats)",
-      price: { eur: 27, usd: 27 },
-      image: "/funnels/famous-beats-bundle/box3d-160.webp",
-      pitch: "320 hit drum grooves from 76 artists as MIDI, in 32 packs.",
-    },
+    // Famous Beats Bundle was a tick-box here from 2026-11-17 to 2026-11-20 ("togli i order bump di famous beats da
+    // jazz midi pack order page"); it stays the upsell page after the order (offers, below).
     // The MIDI Drum Kit add-on left on 2026-11-08 ("è difficile che lo prendano"); no Jazz order had taken it.
     {
       id: "hustle",
