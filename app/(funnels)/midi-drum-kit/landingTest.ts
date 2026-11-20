@@ -42,6 +42,7 @@ export const LP = {
   // defaults to it).
   // 2026-11-20 ("spegni B dell'ABCD test"): B, Stop Fighting The Piano Roll, leaves the draw; whoever had it draws
   // A, C or D on their next visit (proxy.ts), its column stays in Analytics.
+  // Later that day ("rimetti anche l'headline di prima"): E, the pre-test headline (hl-prog), joins A, C and D.
   draw: HL.variants.filter((v) => v !== "hl-relief") as readonly (AccentVariant | HlVariant)[] | null,
 };
 export type LpVariant = (typeof LP.variants)[number];

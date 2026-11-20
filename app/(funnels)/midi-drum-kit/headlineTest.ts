@@ -11,14 +11,19 @@
 // without touching the cookie (with ?preview=1 nothing is counted).
 
 export const HL = {
-  variants: ["hl-stiff", "hl-relief", "hl-simple", "hl-charts"] as const,
+  variants: ["hl-stiff", "hl-relief", "hl-simple", "hl-charts", "hl-prog"] as const,
   /** When the test went live (its deploy). */
   from: "2026-11-19T22:02:00Z",
+  /**
+   * 2026-11-20 ("rimetti anche l'headline di prima"): E, the headline the page had before the test, back in the draw
+   * beside A, C and D (B off the same day, ./landingTest.ts). Counted from its deploy.
+   */
+  progFrom: "2026-11-20T20:20:00Z",
 };
 export type HlVariant = (typeof HL.variants)[number];
 export const isHl = (v: unknown): v is HlVariant => (HL.variants as readonly string[]).includes(v as string);
-export type HlKey = "stiff" | "relief" | "simple" | "charts";
-export const HL_KEYS: readonly HlKey[] = ["stiff", "relief", "simple", "charts"];
+export type HlKey = "stiff" | "relief" | "simple" | "charts" | "prog";
+export const HL_KEYS: readonly HlKey[] = ["stiff", "relief", "simple", "charts", "prog"];
 
 /**
  * The four headlines, *highlighted* and _underlined_ parts like the one before ("facciamo ABCD": the two proposed
@@ -32,12 +37,15 @@ export const HEADLINES: Record<"en" | "it", Record<HlKey, string>> = {
     relief: "Stop Fighting The Piano Roll. *Drop In A Groove* _That Already Feels Right_.",
     simple: "Want Drums That Sound Good? *Drag One File In*. _Done_.",
     charts: "Make Beats Like The Charts. *Like The Big Artists*. _Just Drag-And-Drop_. We've Done All The Work!!",
+    // E: the page's headline before the test (landingNewJazz.ts WORDS.heroHead), word for word
+    prog: "Stop Programming Drums Hit By Hit. 10,296 *MIDI Drum Patterns* That Bounce, _Drag One Into Your Beat_.",
   },
   it: {
     stiff: "I Tuoi Beat Suonano Rigidi. *I Loro Rimbalzano*. _Ecco La Differenza_.",
     relief: "Smetti Di Combattere Con Il Piano Roll. *Trascina Un Groove* _Che Suona Già Giusto_.",
     simple: "Vuoi Una Batteria Che Suona Bene? *Trascina Un File*. _Fatto_.",
     charts: "Fai Beat Come Le Classifiche. *Come I Big Artist*. _Solo Drag-And-Drop_. Abbiamo Fatto Tutto Noi!!",
+    prog: "Smetti Di Programmare La Batteria Colpo Per Colpo. 10.296 *Pattern MIDI Di Batteria* Con Il Bounce, _Trascinane Uno Nel Tuo Beat_.",
   },
 };
 
