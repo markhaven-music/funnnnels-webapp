@@ -183,6 +183,8 @@ export type TestStats = {
     shot?: string;
     /** The page this variant's visitors see now, shown live in the card in place of the picture (TestDef.live). */
     live?: string;
+    /** Out of the draw: new visitors no longer get it (TestDef.off). The card tags its page OFF, not LIVE. */
+    off?: boolean;
   }[];
   /** The test in one plain sentence, for the Analytics card. */
   question?: string;
@@ -733,6 +735,8 @@ type TestDef = {
    * A URL with ?preview=1 (not counted). A variant without one keeps its picture: what visitors saw then.
    */
   live?: Record<string, string>;
+  /** Variants out of the draw while the test goes on: still counted, their page tagged OFF on the card. */
+  off?: string[];
 };
 const cap = (v: string) => v[0].toUpperCase() + v.slice(1);
 /** The variants' pictures (tools/test_shots.sh). */
@@ -851,6 +855,8 @@ export const TESTS: TestDef[] = [
     where: `Landing (the new page, English and Italian), the hero's headline only · everything else the same, green · since ${HL.from.slice(0, 16).replace("T", " ")} UTC · before it: "Stop Programming Drums Hit By Hit…" (see "Accent colour", Green)`,
     variants: HL.variants,
     live: Object.fromEntries(HL.variants.map((v) => [v, `https://m.thegrind.studio/en/midi-drum-kit?hl=${v.slice(3)}&preview=1`])),
+    // 2026-11-20, "metti solo A vs E": B, C and D out of the draw.
+    off: ["hl-relief", "hl-simple", "hl-charts"],
     label: (v) => ({ "hl-stiff": "A · Stiff vs bounce", "hl-relief": "B · Stop fighting the piano roll · off since 11-20", "hl-simple": "C · Plain words (IQ 75) · off since 11-20", "hl-charts": "D · Make beats like the charts · off since 11-20", "hl-prog": "E · Before the test: Stop programming drums hit by hit · since 11-20" })[v] ?? v,
     color: (v) => ({ "hl-stiff": { from: "#fb923c", to: "#ef4444" }, "hl-relief": { from: "#fde047", to: "#eab308" }, "hl-simple": { from: "#f472b6", to: "#a855f7" }, "hl-prog": { from: "#94a3b8", to: "#64748b" } } as Record<string, { from: string; to: string }>)[v] ?? { from: "#38bdf8", to: "#22c55e" },
   },
@@ -1004,6 +1010,7 @@ function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, sin
     chanceBest: null as number | null,
     shot: def.shots?.[variant],
     live: def.ended ? undefined : def.live?.[variant],
+    off: def.off?.includes(variant) || undefined,
   }));
   // Orders per landing visitor; the order page's visitors when the landing has none.
   const rateOf = (m: Metrics) => {

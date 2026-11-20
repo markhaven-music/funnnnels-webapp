@@ -461,6 +461,9 @@
   font: 700 10px/1.4 var(--font-mono, monospace);
   letter-spacing: 0.08em;
 }
+.tcOffTag {
+  background: #52525b;
+}
 .tcOpen {
   position: absolute;
   top: 8px;

@@ -568,7 +568,7 @@ export function TestCard({ t }: { t: TestStats }) {
           return (
             <div key={v.variant} className={`${s.tcVariant} ${lead ? s.tcLead : ""}`}>
               {v.live ? (
-                <LiveShot url={v.live} label={v.label} />
+                <LiveShot url={v.live} label={v.label} off={v.off} />
               ) : v.shot && (
                 <a className={s.tcShot} href={v.shot} target="_blank" rel="noreferrer" title="Open the picture">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -670,7 +670,7 @@ export function TestCard({ t }: { t: TestStats }) {
  */
 // The live page, scaled to the card. It scrolls and clicks like the real page
 // (the URL is a ?preview=1 one, so nothing is counted); "Open" shows it full size.
-function LiveShot({ url, label }: { url: string; label: string }) {
+function LiveShot({ url, label, off }: { url: string; label: string; off?: boolean }) {
   const box = useRef<HTMLDivElement>(null);
   const [k, setK] = useState(0);
   const [near, setNear] = useState(false);
@@ -691,7 +691,9 @@ function LiveShot({ url, label }: { url: string; label: string }) {
       {near && k > 0 && (
         <iframe src={url} title={`The page now: ${label}`} loading="lazy" style={{ width: 390, height: 280 / k, transform: `scale(${k})` }} />
       )}
-      <span className={s.tcLiveTag}>LIVE</span>
+      <span className={`${s.tcLiveTag} ${off ? s.tcOffTag : ""}`} title={off ? "Out of the draw: new visitors no longer see this page" : "In the draw now"}>
+        {off ? "OFF" : "LIVE"}
+      </span>
       <a className={s.tcOpen} href={url} target="_blank" rel="noreferrer" title="Open the page full size (preview, not counted)">
         Open ↗
       </a>
