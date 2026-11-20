@@ -918,6 +918,53 @@ function testStats(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, 
   };
 }
 
+/**
+ * Chance each variant has the highest real conversion rate, from its orders and visitors: each rate drawn from
+ * its Beta(1 + orders, 1 + visitors - orders) many times, counting how often each one comes out on top. Seeded,
+ * so the same numbers always give the same answer. The results add up to 1.
+ */
+function chanceOfBest(arms: { orders: number; visitors: number }[], draws = 20000): number[] {
+  let seed = 0x9e3779b9;
+  const rand = () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const normal = () => {
+    let u = 0;
+    while (u === 0) u = rand();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rand());
+  };
+  // Marsaglia and Tsang; shape >= 1 here (1 + a count).
+  const gamma = (k: number) => {
+    const d = k - 1 / 3;
+    const c = 1 / Math.sqrt(9 * d);
+    for (;;) {
+      let x: number, v: number;
+      do {
+        x = normal();
+        v = 1 + c * x;
+      } while (v <= 0);
+      v = v * v * v;
+      const u = rand();
+      if (u < 1 - 0.0331 * x ** 4 || Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+    }
+  };
+  const wins = arms.map(() => 0);
+  for (let n = 0; n < draws; n++) {
+    let top = -1;
+    let at = 0;
+    arms.forEach((a, i) => {
+      const x = gamma(1 + a.orders);
+      const p = x / (x + gamma(1 + Math.max(0, a.visitors - a.orders)));
+      if (p > top) (top = p), (at = i);
+    });
+    wins[at]++;
+  }
+  return wins.map((w) => w / draws);
+}
+
 /** A test since it started: visitors, checkouts and orders per variant, and how sure the leader is. */
 function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, since: string | null, now: number): TestStats {
   const { funnel } = def;
@@ -953,18 +1000,11 @@ function testOn(def: TestDef, views: ViewRow[], sales: Sale[], rate: number, sin
   };
   const rates = variants.map((v) => rateOf(v.m));
   if (rates.every(Boolean)) {
-    for (let i = 0; i < variants.length; i++) {
-      // Chance this variant converts better than each other one (normal approximation), the lowest of them.
-      let chance = 1;
-      for (let j = 0; j < variants.length; j++) {
-        if (i === j) continue;
-        const a = rates[i]!;
-        const b = rates[j]!;
-        const se = Math.sqrt((a.p * (1 - a.p)) / a.n + (b.p * (1 - b.p)) / b.n);
-        chance = Math.min(chance, se > 0 ? phi((a.p - b.p) / se) : a.p > b.p ? 1 : 0.5);
-      }
-      variants[i].chanceBest = chance;
-    }
+    // Chance each variant is the one that really converts best: the test replayed many times with these
+    // numbers, how often it comes first. The variants add up to 100 % ("chance is best makes no sense",
+    // 2026-11-20: the pairwise figures it replaced could read 55 %, 45 % and 37 % side by side).
+    const best = chanceOfBest(variants.map((v, i) => ({ orders: v.m.orders, visitors: rates[i]!.n })));
+    variants.forEach((v, i) => (v.chanceBest = best[i]));
   }
 
   const minOrders = Math.min(...variants.map((v) => v.m.orders));

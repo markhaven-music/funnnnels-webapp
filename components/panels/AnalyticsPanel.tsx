@@ -550,7 +550,7 @@ export function TestCard({ t }: { t: TestStats }) {
           </>
         ) : t.verdict === "winner" && best ? (
           <>
-            <b>{name(best)} wins.</b> It converts better than every other variant with at least 95% certainty. Keep it and end the test.
+            <b>{name(best)} wins.</b> It has a 95% or better chance of being the one that sells best. Keep it and end the test.
           </>
         ) : (
           <>
@@ -634,7 +634,7 @@ export function TestCard({ t }: { t: TestStats }) {
                   <dd>{perVisitor(v.m)}</dd>
                 </div>
                 <div>
-                  <dt>Chance it&apos;s best</dt>
+                  <dt title="If the test ran again and again with these numbers, how often this one would come out on top. The variants add up to 100%.">Chance it wins</dt>
                   <dd>{v.chanceBest == null || v.m.orders === 0 ? "—" : `${Math.round(v.chanceBest * 100)}%`}</dd>
                 </div>
               </dl>
@@ -654,8 +654,9 @@ export function TestCard({ t }: { t: TestStats }) {
         <summary>How this is counted</summary>
         <p>{t.where}</p>
         <p>
-          &ldquo;Bought&rdquo; is orders per landing visitor (per order-page visitor when the landing has none), upsells apart. The whole test is counted, whatever the
-          date range picked above.
+          &ldquo;Bought&rdquo; is orders per landing visitor (per order-page visitor when the landing has none), upsells apart. &ldquo;Chance it wins&rdquo; is how
+          often each one would come out on top if the test ran again and again with these numbers: the variants add up to 100%, and 95% or more is a winner.
+          The whole test is counted, whatever the date range picked above.
           {t.variants.some((v) => v.paid) ? " “Paid after starting the checkout” counts people (one per email) who filled in step 1 while everyone had that page, free-pack sign-ups left out." : ""}
         </p>
       </details>

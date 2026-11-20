@@ -31,13 +31,13 @@ export const HEADLINES: Record<"en" | "it", Record<HlKey, string>> = {
     stiff: "Your Beats Sound Stiff. *Theirs Bounce*. _Here's The Difference_.",
     relief: "Stop Fighting The Piano Roll. *Drop In A Groove* _That Already Feels Right_.",
     simple: "Want Drums That Sound Good? *Drag One File In*. _Done_.",
-    charts: "Make Beats Like The Charts. Like The Big Artists. Just Drag-And-Drop. We'Ve Done All The Work!!",
+    charts: "Make Beats Like The Charts. *Like The Big Artists*. _Just Drag-And-Drop_. We've Done All The Work!!",
   },
   it: {
     stiff: "I Tuoi Beat Suonano Rigidi. *I Loro Rimbalzano*. _Ecco La Differenza_.",
     relief: "Smetti Di Combattere Con Il Piano Roll. *Trascina Un Groove* _Che Suona Già Giusto_.",
     simple: "Vuoi Una Batteria Che Suona Bene? *Trascina Un File*. _Fatto_.",
-    charts: "Fai Beat Come Le Classifiche. Come I Big Artist. Solo Drag-And-Drop. Abbiamo Fatto Tutto Noi!!",
+    charts: "Fai Beat Come Le Classifiche. *Come I Big Artist*. _Solo Drag-And-Drop_. Abbiamo Fatto Tutto Noi!!",
   },
 };
 

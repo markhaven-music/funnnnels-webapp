@@ -5,7 +5,7 @@ import tree from "@/public/funnels/midi-drum-kit/player/v6/tree.json";
 import type { Copy } from "./copy";
 import type { Lang } from "./i18n";
 import { JAZZ_CSS } from "./jazzCss";
-import { ACCENT_SCRIPT, ACCENT_VARS_CSS, ACCENT_VIDEO_JS, accentize } from "./accentTest";
+import { ACCENT_SCRIPT, ACCENT_VARS_CSS, ACCENT_VIDEO_JS, PALETTES, accentize } from "./accentTest";
 import { HL_CSS, HL_SCRIPT } from "./headlineTest";
 import { CLIENT_JS } from "./landingNewClient";
 import { compare, cta, faq, finale, guarantee, hero, key, JAZZ_MORE_CSS, license, reviews, summary, type JazzCtx } from "./landingNewJazz";
@@ -59,6 +59,9 @@ const BOXES = [
 
 // The button's orange (abtest.ts COLORS.orange: #ffa13d → #ec6a0c), as text on black.
 const ACCENT = "#ff9a2e";
+/** Wistia's player colour, the accent test's winner (green, for everyone since 2026-11-19): a URL can't read CSS, and the
+ * player sometimes loaded after ACCENT_VIDEO_JS, staying orange ("video on second one is orange ?", 2026-11-20). */
+const VIDEO_GREEN = PALETTES.green.t.slice(1);
 const DISPLAY = 'Poppins,"Poppins Fallback",sans-serif';
 const BODY = 'Inter,"Inter Fallback",sans-serif';
 const MONO = "ui-monospace,SFMono-Regular,Menlo,monospace";
@@ -800,9 +803,10 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
     .replace(/(value-stack-8(?:-it)?\.webp"[^>]*?) height="1240"/g, '$1 height="1214"')
     // "Sciences PROVES that BOUNCE releases…": its words are glued with no-break spaces and ran out of the card.
     .replace(/(data-t="t063">)([\s\S]*?)(<\/span><\/span>)/, (_, a: string, b: string, c: string) => a + b.replaceAll("&nbsp;", " ") + c)
-    // The video: its play button and Wistia's player in the page's orange (they were red).
+    // The video: its play button and Wistia's player in the page's orange (they were red); the player's
+    // colour in green below, written in the page (the script that recoloured it missed a player that loaded after it).
     .replace('style="--vsl-play:#dd0000"', 'style="--vsl-play:#ec6a0c"')
-    .replace("'&wmode=transparent'", "'&wmode=transparent&playerColor=ec6a0c'");
+    .replace("'&wmode=transparent'", `'&wmode=transparent&playerColor=${VIDEO_GREEN}'`);
   const vsl = NEW_VSL[l];
   if (vsl) out = out.replace(/data-wistia="[a-z0-9]+"/, `data-wistia="${vsl.id}"`).replace(/\/funnels\/midi-drum-kit\/vsl-[a-z]+\.webp/g, `${IMG}${vsl.poster}.webp`);
   // The hero's headline at the Jazz page's weight (Poppins 800: the old page loads up to 700).
@@ -826,7 +830,7 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
   // The video as the Jazz page has it: Wistia's own player at once, its thumbnail, play button and progress bar
   // ("also progress bar of video visible", 2026-11-12), not the old page's still that loads the player on a tap.
   const wistia = out.match(POSTER)?.[0].match(/data-wistia="([a-z0-9]+)"/)?.[1];
-  const video = wistia && `<iframe src="https://fast.wistia.net/embed/iframe/${wistia}?playerColor=${ACCENT.slice(1)}&videoFoam=false" title="MIDI Drum Kit" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+  const video = wistia && `<iframe src="https://fast.wistia.net/embed/iframe/${wistia}?playerColor=${VIDEO_GREEN}&videoFoam=false" title="MIDI Drum Kit" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
   const from = out.indexOf(LOGO_BAR);
   const to = at(out, SEC.strip);
   if (video && from >= 0 && to > from) {
