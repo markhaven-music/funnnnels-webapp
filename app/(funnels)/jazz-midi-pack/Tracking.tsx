@@ -95,8 +95,16 @@ export const BOOT = `
   }
 `;
 
-/** Fire a standard Pixel event from React code (no-op if the pixel never booted). */
+/** Fire a standard Pixel event from React code (no-op if the pixel never booted).
+ * InitiateCheckout also goes to neo, which sends Meta the server copy (Conversions API,
+ * with the buyer's email and ad click id) under the same eventID, so Meta counts it once.
+ * window.neoq queues it until neo's snippet has loaded. */
 export function pixel(event: string, data: Record<string, unknown>, eventID?: string) {
-  const fbq = (window as unknown as { fbq?: (...a: unknown[]) => void }).fbq;
-  if (fbq) fbq("track", event, data, eventID ? { eventID } : undefined);
+  const w = window as unknown as { fbq?: (...a: unknown[]) => void; neoq?: { push: (a: unknown) => void } };
+  if (event === "InitiateCheckout") {
+    eventID ??= `ic_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+    w.neoq = w.neoq ?? (([] as unknown[]) as unknown as { push: (a: unknown) => void });
+    w.neoq.push(["ic", { eid: eventID, value: data.value, currency: data.currency }]);
+  }
+  if (w.fbq) w.fbq("track", event, data, eventID ? { eventID } : undefined);
 }
