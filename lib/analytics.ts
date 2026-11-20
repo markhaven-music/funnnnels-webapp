@@ -1,5 +1,6 @@
 import { ACCENT, PALETTES } from "@/app/(funnels)/midi-drum-kit/accentTest";
 import { HL } from "@/app/(funnels)/midi-drum-kit/headlineTest";
+import { JZH } from "@/app/(funnels)/jazz-midi-pack/rhodesTest";
 import { isCurrency } from "@/lib/geo";
 import { AB as BUTTON_TEST, COLORS as BUTTON_COLORS } from "@/app/(funnels)/midi-drum-kit/abtest";
 import { PAY as PAY_TEST, PAY_COLORS, PAY_LABELS } from "@/app/(funnels)/midi-drum-kit/payTest";
@@ -878,6 +879,17 @@ export const TESTS: TestDef[] = [
     ended: { at: "2026-11-10T23:59:59Z", kept: "d" },
     label: (v) => HEADLINE_LABELS[v as keyof typeof HEADLINE_LABELS],
     color: (v) => HEADLINE_COLORS[v as keyof typeof HEADLINE_COLORS],
+  },
+  {
+    funnel: "jazz-midi-pack",
+    // 2026-11-20, "prova anche AB test Jazz, dici un altra cosa invece di rhodes" (jazz-midi-pack/rhodesTest.ts).
+    name: "Headline: Rhodes vs beat",
+    question: "Does the Jazz landing's headline sell more ending on \"Drag One Onto Your Rhodes\" or on \"Drag One Into Your Beat\"?",
+    where: `Landing, the hero's headline only, its last words · half the visitors each, kept on return visits and on the order page · since ${JZH.from.slice(0, 16).replace("T", " ")} UTC`,
+    variants: JZH.variants,
+    live: { "jzh-rhodes": "https://m.thegrind.studio/jazz-midi-pack?jzh=rhodes&preview=1", "jzh-beat": "https://m.thegrind.studio/jazz-midi-pack?jzh=beat&preview=1" },
+    label: (v) => ({ "jzh-rhodes": "A · Onto your Rhodes", "jzh-beat": "B · Into your beat" })[v] ?? v,
+    color: (v) => (v === "jzh-beat" ? { from: "#34d399", to: "#059669" } : { from: "#fb7185", to: "#e11d48" }),
   },
 ];
 

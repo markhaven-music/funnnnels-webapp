@@ -19,6 +19,7 @@ import { BonusPlayer } from "./BonusPlayer";
 import { money } from "@/lib/launch";
 import { ProductBox, Scene } from "./ProductBox";
 import { CheckoutWidget } from "./CheckoutWidget";
+import { BEAT_HEADLINE, JZH, JZH_CLASS, JZH_CSS } from "./rhodesTest";
 import { Vsl } from "./Vsl";
 import { PackBrowser } from "./PackBrowser";
 import s from "./jazz.module.css";
@@ -339,9 +340,25 @@ function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch
           <T v={p.pre} set={set("pre")} ctx={ctx} as="p" className={s.heroPre} />
         </Part>
         <Part k="headline" h={h}>
-          {/* The editor's headline again since 2026-11-10: the A–E test ended with D kept (./abtest.ts). */}
+          {/* The editor's headline again since 2026-11-10: the A–E test ended with D kept (./abtest.ts). Since 11-20
+              it is A of the Rhodes vs beat test (./rhodesTest.ts) while it still ends on "Onto Your Rhodes": B, the
+              same with "Into Your Beat", sits beside it and the visitor's shows. */}
           <h1 className={s.heroHead}>
-            {patch ? <T v={p.headline} set={set("headline")} ctx={ctx} /> : <Marked text={fill(p.headline, ctx)} />}
+            {patch ? (
+              <T v={p.headline} set={set("headline")} ctx={ctx} />
+            ) : /Drag One Onto Your Rhodes/i.test(p.headline) ? (
+              <>
+                <style dangerouslySetInnerHTML={{ __html: JZH_CSS }} />
+                <span className={JZH_CLASS} data-v="rhodes">
+                  <Marked text={fill(p.headline, ctx)} />
+                </span>
+                <span className={JZH_CLASS} data-v="beat">
+                  <Marked text={fill(BEAT_HEADLINE, ctx)} />
+                </span>
+              </>
+            ) : (
+              <Marked text={fill(p.headline, ctx)} />
+            )}
           </h1>
           {patch && <p className={e.hint}>*word* = highlighted, _word_ = underlined</p>}
         </Part>
@@ -1064,6 +1081,7 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       keepCard={ctx.keepCard}
       publishableKey={ctx.publishableKey}
       fiveMinBonus={ctx.fiveMinBonus}
+      abCookie={JZH.cookie}
       deferStripe
       secureRow={false}
       light

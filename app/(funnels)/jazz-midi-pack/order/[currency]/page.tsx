@@ -15,6 +15,7 @@ import { FIVE_MIN_BONUS_ON, JAZZ_BONUS, JAZZ_BONUS_SCRIPT, JAZZ_BONUS_TIME_SCRIP
 import c from "../../fiveMinBonus.module.css";
 import { splitName } from "../../../_kit/KitBox";
 import { Beacon } from "../../../Beacon";
+import { JZH, JZH_KEEP_SCRIPT } from "../../rhodesTest";
 import { display } from "../../fonts";
 import s from "../../jazz.module.css";
 
@@ -86,7 +87,9 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
   return (
     <main className={`${s.page} ${s.jazz} ${s.orderMain} ${display.variable}`}>
       <Tracking value={amount} currency={currency} page="order" />
-      <Beacon funnel={funnel.slug} page="order" />
+      {/* ?jzh= from the landing's button back into the cookie, before the counts and the checkout read it (../../rhodesTest.ts). */}
+      <script dangerouslySetInnerHTML={{ __html: JZH_KEEP_SCRIPT }} />
+      <Beacon funnel={funnel.slug} page="order" abCookie={JZH.cookie} />
       {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
       {rs && <script dangerouslySetInnerHTML={{ __html: JAZZ_BONUS_SCRIPT }} />}
       <div className={s.bfbar}>
