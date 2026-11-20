@@ -43,7 +43,9 @@ export const LP = {
   // 2026-11-20 ("spegni B dell'ABCD test"): B, Stop Fighting The Piano Roll, leaves the draw; whoever had it draws
   // A, C or D on their next visit (proxy.ts), its column stays in Analytics.
   // Later that day ("rimetti anche l'headline di prima"): E, the pre-test headline (hl-prog), joins A, C and D.
-  draw: HL.variants.filter((v) => v !== "hl-relief") as readonly (AccentVariant | HlVariant)[] | null,
+  // Evening ("metti solo A vs E"): C and D leave too, A against E, half each; whoever had B, C or D draws A or E
+  // on their next visit (proxy.ts), their columns stay in Analytics.
+  draw: ["hl-stiff", "hl-prog"] as readonly (AccentVariant | HlVariant)[] | null,
 };
 export type LpVariant = (typeof LP.variants)[number];
 export const isLp = (v: unknown): v is LpVariant => (LP.variants as readonly string[]).includes(v as string);
