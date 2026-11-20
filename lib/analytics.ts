@@ -850,7 +850,7 @@ export const TESTS: TestDef[] = [
     where: `Landing (the new page, English and Italian), the hero's headline only · everything else the same, green · since ${HL.from.slice(0, 16).replace("T", " ")} UTC · before it: "Stop Programming Drums Hit By Hit…" (see "Accent colour", Green)`,
     variants: HL.variants,
     live: Object.fromEntries(HL.variants.map((v) => [v, `https://m.thegrind.studio/en/midi-drum-kit?hl=${v.slice(3)}&preview=1`])),
-    label: (v) => ({ "hl-stiff": "A · Stiff vs bounce", "hl-relief": "B · Stop fighting the piano roll", "hl-simple": "C · Plain words (IQ 75)", "hl-charts": "D · Make beats like the charts" })[v] ?? v,
+    label: (v) => ({ "hl-stiff": "A · Stiff vs bounce", "hl-relief": "B · Stop fighting the piano roll · off since 11-20", "hl-simple": "C · Plain words (IQ 75)", "hl-charts": "D · Make beats like the charts" })[v] ?? v,
     color: (v) => ({ "hl-stiff": { from: "#fb923c", to: "#ef4444" }, "hl-relief": { from: "#fde047", to: "#eab308" }, "hl-simple": { from: "#f472b6", to: "#a855f7" } } as Record<string, { from: string; to: string }>)[v] ?? { from: "#38bdf8", to: "#22c55e" },
   },
   {

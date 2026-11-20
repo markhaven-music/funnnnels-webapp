@@ -40,7 +40,9 @@ export const LP = {
   // had red draws green on their next visit (proxy.ts), the cookie still says ac-green so orders carry it.
   // 2026-11-19 night: the headline test (./headlineTest.ts) takes the draw, green for everyone (accentTest's script
   // defaults to it).
-  draw: HL.variants as readonly (AccentVariant | HlVariant)[] | null,
+  // 2026-11-20 ("spegni B dell'ABCD test"): B, Stop Fighting The Piano Roll, leaves the draw; whoever had it draws
+  // A, C or D on their next visit (proxy.ts), its column stays in Analytics.
+  draw: HL.variants.filter((v) => v !== "hl-relief") as readonly (AccentVariant | HlVariant)[] | null,
 };
 export type LpVariant = (typeof LP.variants)[number];
 export const isLp = (v: unknown): v is LpVariant => (LP.variants as readonly string[]).includes(v as string);
