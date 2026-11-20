@@ -28,7 +28,8 @@ export const funnel = {
   // its still is a frame of the video (the two grids, "Same drum sounds.").
   vsl: { wistiaId: "tuqmnch1mn" },
   tagline: "MIDI drum grooves with the drunk, laid-back feel of lofi and neo soul.",
-  price: { eur: 7, usd: 7 },
+  // 9.99 since 2026-11-20 ("drunk swing grooves mettilo a 9.99"), 7 before.
+  price: { eur: 9.99, usd: 9.99 },
   // Counted from the files (make_swing_grooves.py, 2026-11-08).
   // 80 grooves = 10 patterns × 2 snare placements (2 and 4, half-time) × 4 feels; 160 files with the multitrack copies.
   counts: { files: 211, grooves: 80, grooveFiles: 160, patterns: 10, feels: 4, templates: 31, bonus: 20 },
