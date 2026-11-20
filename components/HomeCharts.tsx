@@ -594,6 +594,23 @@ export function Performance({ a, cur, periodName, onRefresh, refreshing, updated
   const splitLines = series.filter((x) => x.on).map((x) => ({ key: x.key, color: x.color, lines: lineOf(x.vals) }));
   const fills = show.net && show.spend && spendS.every((v) => v !== null) && n > 1 ? bands(netLines[0] ?? [], spendLines[0] ?? []) : [];
   const dots = n <= 40;
+  // Profit view: each day's (or week's) ROAS in a tag between the two lines,
+  // as long as there's room for one tag per point (~42 px).
+  const roasTags =
+    show.net && show.spend && n > 0 && (W - 2 * padX) / Math.max(1, n - 1) >= 42
+      ? rows.flatMap((r, i) => {
+          const v = roasOf(r);
+          if (v === null || spendS[i] === null) return [];
+          const yN = yOf(netS[i]);
+          const yS = yOf(spendS[i]!);
+          const text = v === 0 ? "0×" : `${v < 10 ? v.toFixed(1) : Math.round(v)}×`;
+          const w = text.length * 7 + 12;
+          // Between the lines when the gap fits the tag, above both otherwise.
+          const cy = Math.abs(yN - yS) >= 26 ? (yN + yS) / 2 : Math.max(padTop + 9, Math.min(yN, yS) - 15);
+          const cx = Math.min(Math.max(xOf(i), w / 2 + 1), W - w / 2 - 1);
+          return [{ i, cx, cy, w, text, good: v >= 1 }];
+        })
+      : [];
   const marks = MARKS.flatMap((mk) => {
     const i = rows.findIndex((r) => r.from <= mk.day && mk.day <= r.to);
     return i < 0 || n < 2 ? [] : [{ ...mk, i }];
@@ -883,6 +900,14 @@ export function Performance({ a, cur, periodName, onRefresh, refreshing, updated
                       ...(show.cur ? curS.map((v, i) => ({ v, i, c: m.color, k: "c" })) : []),
                       ...series.filter((x) => x.on).flatMap((x) => x.vals.map((v, i) => ({ v, i, c: x.color, k: `f${x.key}` }))),
                     ].map((p) => (p.v === null ? null : <circle key={`${p.k}${p.i}`} cx={xOf(p.i)} cy={yOf(p.v)} r={3.5} fill={p.c} className={s.dot} />))}
+                  {roasTags.map((t) => (
+                    <g key={`r${t.i}`} pointerEvents="none" opacity={hv !== null && hv !== t.i ? 0.45 : 1}>
+                      <rect x={t.cx - t.w / 2} y={t.cy - 10} width={t.w} height={20} rx={2} fill="var(--bg-1)" stroke={t.good ? PROFIT : LOSS} strokeWidth={1.25} />
+                      <text x={t.cx} y={t.cy + 4} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={12} fontWeight={600} fill={t.good ? PROFIT : LOSS}>
+                        {t.text}
+                      </text>
+                    </g>
+                  ))}
                   {marks.map((mk) => (
                     <line key={mk.day} className={s.mark} x1={Math.round(xOf(mk.i)) + 0.5} x2={Math.round(xOf(mk.i)) + 0.5} y1={0} y2={H} />
                   ))}
