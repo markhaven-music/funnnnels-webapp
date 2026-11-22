@@ -1,0 +1,254 @@
+/* Dashboard → LTV (LtvPanel.tsx). The chart, tiles and cards come from
+   ../home.module.css; this file holds what only this page has: the cohort
+   heat table, the two-tone rank bars, the paths and the top buyers. Rules of
+   docs/design.md: borders the colour of the card, nearly square corners,
+   readable first. */
+
+.six {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+@media (max-width: 1300px) {
+  .six {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .six {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.block {
+  margin-bottom: 12px;
+}
+
+/* A dashed reference line's name, at its right end. */
+.refLabel {
+  position: absolute;
+  right: 4px;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  background: color-mix(in oklch, var(--bg-1) 88%, transparent);
+  border-radius: var(--radius-xs);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ─── cohorts ─── */
+.heat td.cell {
+  color: var(--fg-0);
+  font-weight: 600;
+  min-width: 52px;
+  border-bottom: 2px solid var(--bg-1);
+  border-left: 2px solid var(--bg-1);
+  border-radius: var(--radius-xs);
+}
+.heat td.cellEmpty {
+  border-bottom: 2px solid var(--bg-1);
+}
+.heat td.cohortName {
+  color: var(--fg-0);
+  font-weight: 600;
+}
+.heat tbody tr:hover td.cell {
+  filter: brightness(1.18);
+}
+
+/* ─── ranks ─── */
+.ranks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+@media (max-width: 700px) {
+  .ranks {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.rankName {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.rankNo {
+  flex: none;
+  min-width: 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+}
+.split {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  min-width: 2px;
+}
+.split i {
+  display: block;
+  height: 100%;
+}
+.split i:last-child {
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+}
+.miniLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: -6px 0 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-1);
+}
+.miniLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.miniLegend i {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-xs);
+}
+.group {
+  margin: 4px 0 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+.group ~ .group {
+  margin-top: 20px;
+}
+
+.paths {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  counter-reset: p;
+}
+.paths li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 9px 10px;
+  font-size: 13px;
+  color: var(--fg-0);
+  background: color-mix(in oklch, var(--fg-0) 4%, transparent);
+  border-radius: var(--radius-sm);
+}
+.paths li b {
+  text-align: right;
+  font-size: 14px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.pathFrom {
+  color: var(--fg-1);
+}
+.pathTo {
+  color: var(--fg-0);
+  font-weight: 600;
+}
+.arrow {
+  color: var(--accent-2);
+  text-align: center;
+}
+.same {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding: 1px 6px 2px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: oklch(0.25 0.06 75);
+  background: var(--amber);
+  border-radius: var(--radius-xs);
+}
+
+/* ─── top buyers ─── */
+.top td,
+.top th {
+  vertical-align: middle;
+}
+.top th.left,
+.top td.left {
+  text-align: left;
+}
+.medal {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--fg-1);
+  background: color-mix(in oklch, var(--fg-0) 7%, transparent);
+  border-radius: var(--radius-xs);
+}
+.m1 {
+  color: oklch(0.25 0.06 85);
+  background: oklch(0.86 0.15 88);
+}
+.m2 {
+  color: oklch(0.22 0.01 270);
+  background: oklch(0.85 0.01 270);
+}
+.m3 {
+  color: oklch(0.22 0.05 50);
+  background: oklch(0.74 0.11 55);
+}
+.who {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--fg-0);
+  font-weight: 600;
+}
+.whoName {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.email {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+}
+.era {
+  padding: 1px 6px 2px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: oklch(0.2 0.05 162);
+  background: var(--mint);
+  border-radius: var(--radius-xs);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 420px;
+}
+.chip {
+  padding: 2px 7px 3px;
+  font-size: 11.5px;
+  color: var(--fg-1);
+  background: color-mix(in oklch, var(--fg-0) 7%, transparent);
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+}
+.ltvCell {
+  color: var(--fg-0) !important;
+  font-size: 14px;
+  font-weight: 650;
+}

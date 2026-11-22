@@ -213,6 +213,12 @@ export const I = {
       <path d="M11 18h2" />
     </Base>
   ),
+  gem: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M6 3h12l4 6-10 12L2 9l4-6z" />
+      <path d="M2 9h20M9 3l3 6 3-6M12 21 9 9M12 21l3-12" />
+    </Base>
+  ),
   person: (p: IconProps) => (
     <Base {...p}>
       <circle cx="12" cy="8" r="4" />
