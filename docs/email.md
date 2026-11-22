@@ -66,8 +66,10 @@ twice an hour from the email cron (the IAM user `funnnnels-ses` may call
   they're transactional okay but in general should only be 1, 2 max",
   2026-11-02). Receipts and the backup link carry what they need. The footer
   doesn't count.
-- Links in the text are FL Studio / Matrix green, `#00b034`, bold and
-  underlined (`LINK` in `lib/mail.ts`); the footer's stay grey.
+- Links in the text are green, `#006e19`, bold and underlined (`LINK` in
+  `lib/mail.ts`); the footer's stay grey. Deep on purpose: Gmail's dark mode
+  on the phone flips lightness, so a deep green shows bright there and a neon
+  one would show near black (2026-11-22).
 
 ## Still to switch on
 

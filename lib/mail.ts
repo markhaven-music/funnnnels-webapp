@@ -185,10 +185,14 @@ const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&gt;/g, ">").rep
 type Href = (url: string) => string;
 const plainHref: Href = (u) => esc(u);
 
-// Links in the letter's text: FL Studio / Matrix green ("verde matrix in tema
-// con FL STUDIO… bit darker", 2026-11-02), a shade under the neon so it still
-// reads on white; bold to carry the colour. The footer's links stay grey.
-const LINK = "color:#00b034;font-weight:700;text-decoration:underline";
+// Links in the letter's text: green, bold to carry the colour; the footer's
+// links stay grey. A deep green on purpose (2026-11-22, "a better brighter
+// almost fluorescent green"): Gmail's dark mode on the phone flips the letter's
+// lightness, so the darker the green we send, the brighter it shows there
+// (#00b034 arrived as #3f8937; a neon #39ff14 would arrive near black).
+// #006e19 shows as a light green (about #8cc486) in Gmail dark and reads
+// strongly on white (6.5:1).
+const LINK = "color:#006e19;font-weight:700;text-decoration:underline";
 
 // [text](url), or [[text]](url): the link reads "[text]", brackets included, as in
 // ClickFunnels' abandoned-checkout emails (lib/abandonCopy.ts). Only that exact
