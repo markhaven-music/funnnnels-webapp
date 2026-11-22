@@ -89,6 +89,8 @@ export type LtvCac = { since: string; spend: number; newBuyers: number; perBuyer
 
 export type Ltv = {
   asOf: string;
+  /** Only buyers whose first purchase is on or after this day (YYYY-MM-DD), or null for all. */
+  since: string | null;
   excluded: { tests: number; noEmail: number };
   totals: LtvTotals;
   curve: LtvCurvePoint[];
@@ -298,7 +300,13 @@ function groupBy(buyers: Buyer[], key: (b: Buyer) => string | null): Map<string,
   return m;
 }
 
-export async function getLtv(): Promise<Ltv> {
+/**
+ * since (YYYY-MM-DD): count only buyers whose first purchase is on or after
+ * that day, with every purchase they made after it: the buyers new products
+ * and strategies brought in ("voglio anche possibilità di contare solo da
+ * novembre", 2026-11-22). Older buyers coming back are left out of that view.
+ */
+export async function getLtv(since: string | null = null): Promise<Ltv> {
   const now = Date.now();
   const [cf, orders, items, usd, fx] = await Promise.all([
     cfOrders(),
@@ -334,7 +342,8 @@ export async function getLtv(): Promise<Ltv> {
     sales.push(fromOrder(o, itemMap, rate));
   }
 
-  const buyers = buyersOf(sales);
+  const sinceMs = since ? Date.parse(`${since}T00:00:00Z`) : 0;
+  const buyers = buyersOf(sales).filter((b) => b.purchases[0].at >= sinceMs);
   const nB = buyers.length || 1;
   const revenue = buyers.reduce((n, b) => n + b.total, 0);
   const repeaters = buyers.filter((b) => b.purchases.length > 1);
@@ -530,16 +539,17 @@ export async function getLtv(): Promise<Ltv> {
   else {
     try {
       const today = new Date(now).toISOString().slice(0, 10);
-      const meta = await spendByDay(SPEND_SINCE, today);
+      const from = since && since > SPEND_SINCE ? since : SPEND_SINCE;
+      const meta = await spendByDay(from, today);
       if (!meta.connected) cacNote = meta.reason;
       else {
         const k = meta.currency.toLowerCase() === "usd" ? usd : 1;
         const spend = meta.days.reduce((n, d) => n + d.spend, 0) * k;
-        const since = Date.parse(`${SPEND_SINCE}T00:00:00Z`);
-        const fresh = buyers.filter((b) => b.purchases[0].at >= since);
+        const fromMs = Date.parse(`${from}T00:00:00Z`);
+        const fresh = buyers.filter((b) => b.purchases[0].at >= fromMs);
         if (fresh.length && spend > 0) {
           cac = {
-            since: SPEND_SINCE,
+            since: from,
             spend: r2(spend),
             newBuyers: fresh.length,
             perBuyer: r2(spend / fresh.length),
@@ -554,6 +564,7 @@ export async function getLtv(): Promise<Ltv> {
 
   return {
     asOf: new Date(now).toISOString(),
+    since,
     excluded: { tests, noEmail },
     totals,
     curve,

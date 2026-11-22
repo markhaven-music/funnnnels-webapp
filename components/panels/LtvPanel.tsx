@@ -292,6 +292,10 @@ function SplitLegend() {
 
 // ─── the panel ─────────────────────────────────────────────────────
 
+const SINCE_KEY = "fv:ltv-since";
+/** New products and strategies from November 2026 on. */
+const NOV = "2026-11-01";
+
 type View = "ltv" | "aov" | "buyers" | "repeat" | "repeatRev" | "gap" | "cac";
 
 export function LtvPanel() {
@@ -299,13 +303,33 @@ export function LtvPanel() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [reload, setReload] = useState(0);
+  // Count only buyers who first bought from this day (YYYY-MM-DD), or everyone.
+  // Kept per browser ("contare solo da novembre", 2026-11-22).
+  const [since, setSinceState] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem(SINCE_KEY);
+      if (v && /^\d{4}-\d{2}-\d{2}$/.test(v)) setSinceState(v);
+    } catch {
+      // no storage: all time
+    }
+  }, []);
+  const setSince = (v: string | null) => {
+    setSinceState(v);
+    try {
+      if (v) localStorage.setItem(SINCE_KEY, v);
+      else localStorage.removeItem(SINCE_KEY);
+    } catch {
+      // fine
+    }
+  };
   const [view, setView] = useState<View>("ltv");
   const [entrySort, setEntrySort] = useState<"ltv" | "buyers">("ltv");
 
   useEffect(() => {
     let gone = false;
     setLoading(true);
-    fetch("/api/ltv", { cache: "no-store" })
+    fetch(`/api/ltv${since ? `?since=${since}` : ""}`, { cache: "no-store" })
       .then(async (r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const d = (await r.json()) as Ltv;
@@ -319,7 +343,7 @@ export function LtvPanel() {
     return () => {
       gone = true;
     };
-  }, [reload]);
+  }, [reload, since]);
 
   const t = data?.totals;
   const lastCurve = data?.curve[data.curve.length - 1];
@@ -553,7 +577,16 @@ export function LtvPanel() {
   const insights = useMemo(() => {
     if (!data || !t) return [];
     const out: { tone: "up" | "down" | "info"; text: ReactNode }[] = [];
-    if (lastCurve && lastCurve.day > 0)
+    if (data.since && lastCurve && lastCurve.day < 90)
+      out.push({
+        tone: "info",
+        text: (
+          <>
+            Still early: the oldest of these buyers first bought {Math.round((Date.parse(data.asOf) - Date.parse(`${data.since}T00:00:00Z`)) / 86_400_000)} days ago, and most second purchases come after 1–6 months. Their LTV has time to grow.
+          </>
+        ),
+      });
+    if (lastCurve && lastCurve.day >= 30)
       out.push({
         tone: "up",
         text: (
@@ -598,12 +631,15 @@ export function LtvPanel() {
         tone: "down",
         text: (
           <>
-            <b>{count(data.rebought.buyers)} buyers</b> paid again for a product they already had ({data.rebought.top.map((x) => `${x.name} ${x.buyers}`).join(", ")}): {eur(data.rebought.revenue)}. Likely a lost download link.
+            <b>
+              {count(data.rebought.buyers)} buyer{data.rebought.buyers === 1 ? "" : "s"}
+            </b>{" "}
+            paid again for a product they already had ({data.rebought.top.map((x) => `${x.name} ${x.buyers}`).join(", ")}): {eur(data.rebought.revenue)}. Likely a lost download link.
           </>
         ),
       });
     const late = data.gaps.filter((g) => /month/.test(g.label) && !/^1–2/.test(g.label)).reduce((n, g) => n + g.buyers, 0);
-    if (t.repeatBuyers)
+    if (t.repeatBuyers >= 10)
       out.push({
         tone: "info",
         text: (
@@ -639,16 +675,39 @@ export function LtvPanel() {
             {loading && !data
               ? "Loading…"
               : error ||
-                "What a buyer is worth over time. Every paid order since Nov 2025, ClickFunnels and funnnnels, joined by email. Gross, in euros."}
+                (since
+                  ? `Only buyers whose first purchase is on or after ${dayName(`${since}T12:00:00Z`)}, with everything they bought after. Gross, in euros.`
+                  : "What a buyer is worth over time. Every paid order since Nov 2025, ClickFunnels and funnnnels, joined by email. Gross, in euros.")}
           </p>
         </div>
-        <div className="tabs">
+        <div className={l.headControls}>
+          <div className="tabs" role="group" aria-label="Which buyers to count">
+            <button type="button" className={`tab ${!since ? "active" : ""}`} onClick={() => setSince(null)}>
+              All time
+            </button>
+            <button type="button" className={`tab ${since === NOV ? "active" : ""}`} onClick={() => setSince(NOV)}>
+              From 1 Nov
+            </button>
+            <label className={`tab ${since && since !== NOV ? "active" : ""} ${l.dateTab}`}>
+              From
+              <input
+                type="date"
+                className={l.date}
+                value={since ?? ""}
+                min="2025-11-26"
+                max={new Date().toISOString().slice(0, 10)}
+                onChange={(e) => setSince(e.target.value || null)}
+              />
+            </label>
+          </div>
+          <div className="tabs">
           <button type="button" className={`tab ${s.refresh}`} onClick={() => setReload((n) => n + 1)} disabled={loading}>
             <span className={loading ? s.spin : undefined}>
               <I.refresh size={12} />
             </span>
             Refresh
           </button>
+          </div>
         </div>
       </div>
 
@@ -694,7 +753,13 @@ export function LtvPanel() {
                 ))}
               </div>
             )}
-            <Chart key={view} plot={chart.plot} fmt={chart.fmt} tip={chart.tip} />
+            <Chart
+              key={`${view}-${since}`}
+              plot={chart.plot}
+              fmt={chart.fmt}
+              tip={chart.tip}
+              none={view === "aov" && data.months.length < 2 ? "One month only in this view: the AOV vs LTV card below has the comparison." : undefined}
+            />
             {!data.cac && data.cacNote && <p className={s.foot}>{data.cacNote}</p>}
           </section>
 
