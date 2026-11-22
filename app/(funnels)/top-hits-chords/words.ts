@@ -258,6 +258,12 @@ export const BUMP_COPY: Record<string, { headline: string; body: string[] }> = {
       "80 MIDI drum grooves with the **drunk, J Dilla-style swing** of lofi and neo soul, in 4 feels, plus 31 groove templates. The snare stays on the beat, everything else lays back. Add it now for just {c}7.",
     ],
   },
+  "famous-beats": {
+    headline: "YES! Add 320 Famous Beats!",
+    body: [
+      "The drums from the records you grew up on, as MIDI: **320 hit drum grooves from 76 artists**, in 32 packs. Put one under your hit chords, swap in your own sounds and the groove is yours. Usually {c}97 but you can add it right now for just {c}27!!",
+    ],
+  },
   hustle: {
     headline: "YES! I Also Want 31 Musical MIDI Packs!",
     body: [

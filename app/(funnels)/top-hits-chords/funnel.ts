@@ -48,6 +48,16 @@ export const funnel = {
       image: "/funnels/jazz-midi-pack/bump-grooves.webp",
       pitch: "80 MIDI drum grooves with the drunk, J Dilla-style swing of lofi and neo soul, plus 31 groove templates.",
     },
+    // 11-22: Famous Beats as a tick box between the grooves and HUSTLE ("mettilo tra drum swings e HUSTLE");
+    // whoever ticks it skips the Famous Beats upsell page (same id as the offer below, fv_owned).
+    {
+      id: "famous-beats",
+      name: "Famous Beats Bundle (320 MIDI Beats)",
+      headline: "YES! Add 320 Famous Beats!",
+      price: { eur: 27, usd: 27 },
+      image: "/funnels/famous-beats-bundle/box3d-160.webp",
+      pitch: "320 hit drum grooves from 76 artists as MIDI, in 32 packs.",
+    },
     {
       id: "hustle",
       name: "HUSTLE Bundle (31 MIDI Packs)",
