@@ -45,6 +45,7 @@ export type LtvTotals = {
   buyers: number;
   purchases: number;
   revenue: number; // euros
+  aov: number; // revenue ÷ purchases: what one checkout brings, add-ons included
   ltv: number; // revenue ÷ buyers
   firstAov: number; // what the first purchase brings, on average
   repeatBuyers: number;
@@ -55,10 +56,21 @@ export type LtvTotals = {
 };
 
 export type LtvCurvePoint = { day: number; ltv: number; buyers: number; repeatRate: number };
-export type LtvMonth = { month: string; newBuyers: number; returning: number; firstRevenue: number; repeatRevenue: number };
+export type LtvMonth = {
+  month: string;
+  newBuyers: number;
+  returning: number;
+  firstRevenue: number;
+  repeatRevenue: number;
+  purchases: number;
+  /** Revenue ÷ purchases made that month. */
+  aov: number;
+  /** What the buyers who first bought that month have paid so far, each (their LTV to date). */
+  cohortLtv: number;
+};
 export type LtvBucket = { label: string; buyers: number; revenue: number };
 export type LtvCohort = { month: string; buyers: number; firstAov: number; repeat: number; cum: (number | null)[] };
-export type LtvRank = { name: string; buyers: number; ltv: number; firstAov: number; repeatRate: number; revenue: number };
+export type LtvRank = { name: string; buyers: number; purchases: number; aov: number; ltv: number; firstAov: number; repeatRate: number; revenue: number };
 export type LtvNext = { name: string; buyers: number; revenue: number; share: number };
 export type LtvPath = { from: string; to: string; buyers: number };
 export type LtvCustomer = {
@@ -262,9 +274,12 @@ function rank(groups: Map<string, Buyer[]>, min = 1): LtvRank[] {
     .filter(([, bs]) => bs.length >= min)
     .map(([name, bs]) => {
       const revenue = bs.reduce((n, b) => n + b.total, 0);
+      const purchases = bs.reduce((n, b) => n + b.purchases.length, 0);
       return {
         name,
         buyers: bs.length,
+        purchases,
+        aov: r2(revenue / (purchases || 1)),
         revenue: r2(revenue),
         ltv: r2(revenue / bs.length),
         firstAov: r2(bs.reduce((n, b) => n + b.purchases[0].eur, 0) / bs.length),
@@ -331,6 +346,7 @@ export async function getLtv(): Promise<Ltv> {
     buyers: buyers.length,
     purchases: buyers.reduce((n, b) => n + b.purchases.length, 0),
     revenue: r2(revenue),
+    aov: r2(revenue / (buyers.reduce((n, b) => n + b.purchases.length, 0) || 1)),
     ltv: r2(revenue / nB),
     firstAov: r2(firstRevenue / nB),
     repeatBuyers: repeaters.length,
@@ -365,13 +381,14 @@ export async function getLtv(): Promise<Ltv> {
   const monthMap = new Map<string, LtvMonth>();
   const monthRow = (m: string) => {
     let row = monthMap.get(m);
-    if (!row) monthMap.set(m, (row = { month: m, newBuyers: 0, returning: 0, firstRevenue: 0, repeatRevenue: 0 }));
+    if (!row) monthMap.set(m, (row = { month: m, newBuyers: 0, returning: 0, firstRevenue: 0, repeatRevenue: 0, purchases: 0, aov: 0, cohortLtv: 0 }));
     return row;
   };
   for (const b of buyers) {
     const seen = new Set<string>();
     b.purchases.forEach((p, i) => {
       const row = monthRow(monthOf(p.at));
+      row.purchases++;
       if (i === 0) {
         row.newBuyers++;
         row.firstRevenue += p.eur;
@@ -386,7 +403,14 @@ export async function getLtv(): Promise<Ltv> {
   const months: LtvMonth[] = [];
   for (let m = firstMonth; m <= monthOf(now); m = monthOf(Date.UTC(Number(m.slice(0, 4)), Number(m.slice(5, 7)), 1))) {
     const row = monthRow(m);
-    months.push({ ...row, firstRevenue: r2(row.firstRevenue), repeatRevenue: r2(row.repeatRevenue) });
+    const cohort = buyers.filter((b) => monthOf(b.purchases[0].at) === m);
+    months.push({
+      ...row,
+      firstRevenue: r2(row.firstRevenue),
+      repeatRevenue: r2(row.repeatRevenue),
+      aov: r2((row.firstRevenue + row.repeatRevenue) / (row.purchases || 1)),
+      cohortLtv: r2(cohort.reduce((n, b) => n + b.total, 0) / (cohort.length || 1)),
+    });
   }
 
   const bucket = (label: string, bs: Buyer[]): LtvBucket => ({ label, buyers: bs.length, revenue: r2(bs.reduce((n, b) => n + b.total, 0)) });

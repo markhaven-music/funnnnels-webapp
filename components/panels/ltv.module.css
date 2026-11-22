@@ -5,12 +5,7 @@
    readable first. */
 
 .six {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-@media (max-width: 1300px) {
-  .six {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
 }
 @media (max-width: 900px) {
   .six {
@@ -251,4 +246,104 @@
   color: var(--fg-0) !important;
   font-size: 14px;
   font-weight: 650;
+}
+
+/* ─── AOV vs LTV ─── */
+.vs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+@media (max-width: 700px) {
+  .vs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.vsBox {
+  padding: 14px 16px 15px;
+  background: color-mix(in oklch, var(--fg-0) 5%, transparent);
+  border-radius: var(--radius);
+}
+.vsLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+  color: var(--fg-1);
+}
+.vsLabel i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.vsValue {
+  margin: 6px 0 3px;
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--fg-0);
+}
+.vsSub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+}
+.vsMid {
+  text-align: center;
+  padding: 0 8px;
+}
+.vsGap {
+  font-size: 22px;
+  font-weight: 650;
+  color: var(--mint);
+}
+.vsGap::before {
+  content: "→ ";
+  color: var(--fg-2);
+  font-weight: 400;
+}
+.vsTable td.rowName {
+  color: var(--fg-0);
+  font-weight: 600;
+}
+.vsTable tr.groupRow td {
+  border-top: 1px solid color-mix(in oklch, var(--fg-0) 20%, transparent);
+}
+.gapCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 190px;
+}
+.gapBar {
+  display: block;
+  flex: none;
+  max-width: 90px;
+  height: 8px;
+  min-width: 2px;
+  background: var(--mint);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+}
+
+/* The total above each bar of the LTV chart. */
+.barTop {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  fill: var(--fg-0);
+}
+
+.vsTable th.left,
+.vsTable td.left {
+  text-align: left;
+}
+/* Tile notes wrap rather than end in "…": six tiles share the row. */
+.wrap {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }

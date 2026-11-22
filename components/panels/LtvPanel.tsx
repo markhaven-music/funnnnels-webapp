@@ -17,6 +17,7 @@ const C = {
   first: "var(--accent)",
   repeat: "var(--mint)",
   cac: "var(--amber)",
+  aov: "var(--sky)",
   base: "var(--fg-2)",
 };
 
@@ -69,18 +70,18 @@ function useSize<T extends HTMLElement>() {
 type Series = { name: string; color: string };
 type Ref = { y: number; label: string; color: string };
 type Plot =
-  | { kind: "line"; xs: number[]; ys: number[]; xLabel: (x: number) => string; color: string; area?: boolean; refs?: Ref[] }
-  | { kind: "bars"; labels: string[]; values: number[][]; series: Series[] };
+  | { kind: "line"; xs: number[]; ys: number[]; xLabel: (x: number) => string; color: string; area?: boolean; refs?: Ref[]; more?: { ys: number[]; color: string }[] }
+  | { kind: "bars"; labels: string[]; values: number[][]; series: Series[]; refs?: Ref[]; tops?: string[] };
 
 function Chart({ plot, fmt, tip, none }: { plot: Plot; fmt: (n: number) => string; tip: (i: number) => ReactNode; none?: string }) {
   const [ref, { w, h }] = useSize<HTMLDivElement>();
   const [hover, setHover] = useState<number | null>(null);
   const n = plot.kind === "line" ? plot.xs.length : plot.labels.length;
-  const top = plot.kind === "line" ? Math.max(...plot.ys, ...(plot.refs ?? []).map((r) => r.y), 0) : Math.max(0, ...plot.values.map((v) => v.reduce((a, b) => a + b, 0)));
+  const top = plot.kind === "line" ? Math.max(...plot.ys, ...(plot.more ?? []).flatMap((m) => m.ys), ...(plot.refs ?? []).map((r) => r.y), 0) : Math.max(0, ...plot.values.map((v) => v.reduce((a, b) => a + b, 0)), ...(plot.refs ?? []).map((r) => r.y));
   // A line starts its axis near its lowest point, so a slow climb reads; bars start at 0.
   let yt: number[];
   if (plot.kind === "line" && top > 0) {
-    const low = Math.min(...plot.ys, ...(plot.refs ?? []).map((r) => r.y));
+    const low = Math.min(...plot.ys, ...(plot.more ?? []).flatMap((m) => m.ys), ...(plot.refs ?? []).map((r) => r.y));
     const lo = Math.max(0, low - (top - low) * 0.6);
     const hi = top + (top - low) * 0.15 || top * 1.1;
     const t = ticks(hi - lo, 4, [1, 2, 5, 10]);
@@ -145,6 +146,9 @@ function Chart({ plot, fmt, tip, none }: { plot: Plot; fmt: (n: number) => strin
         {w > 0 && h > 0 && (
           <svg className={s.svg} width={w} height={h}>
             {yt.map((t, i) => <line key={t} className={i === 0 ? s.base : s.grid} x1={0} x2={w} y1={y(t)} y2={y(t)} />)}
+            {(plot.refs ?? []).map((r) => (
+              <line key={r.label} x1={0} x2={w} y1={y(r.y)} y2={y(r.y)} stroke={r.color} strokeWidth={1.5} strokeDasharray="5 5" opacity={0.85} />
+            ))}
             {plot.kind === "line" ? (
               <>
                 <defs>
@@ -153,17 +157,20 @@ function Chart({ plot, fmt, tip, none }: { plot: Plot; fmt: (n: number) => strin
                     <stop offset="100%" stopColor={plot.color} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                {(plot.refs ?? []).map((r) => (
-                  <g key={r.label}>
-                    <line x1={0} x2={w} y1={y(r.y)} y2={y(r.y)} stroke={r.color} strokeWidth={1.5} strokeDasharray="5 5" opacity={0.85} />
-                  </g>
-                ))}
                 {plot.area && (
                   <path
                     d={`M${x(0)},${h} ${plot.ys.map((v, i) => `L${x(i)},${y(v)}`).join(" ")} L${x(n - 1)},${h} Z`}
                     fill={`url(#${gid})`}
                   />
                 )}
+                {(plot.more ?? []).map((m, k) => (
+                  <g key={k}>
+                    <path className={s.line} stroke={m.color} d={m.ys.map((v, i) => `${i ? "L" : "M"}${x(i)},${y(v)}`).join(" ")} />
+                    {m.ys.map((v, i) => (
+                      <circle key={i} className={s.dot} cx={x(i)} cy={y(v)} r={hover === i ? 6 : 3.5} fill={m.color} />
+                    ))}
+                  </g>
+                ))}
                 <path className={s.line} stroke={plot.color} d={plot.ys.map((v, i) => `${i ? "L" : "M"}${x(i)},${y(v)}`).join(" ")} />
                 {plot.ys.map((v, i) => (
                   <circle key={i} className={s.dot} cx={x(i)} cy={y(v)} r={hover === i ? 6 : 3.5} fill={plot.color} />
@@ -195,14 +202,18 @@ function Chart({ plot, fmt, tip, none }: { plot: Plot; fmt: (n: number) => strin
                         />
                       );
                     })}
+                    {plot.tops?.[i] && (
+                      <text className={l.barTop} x={x(i)} y={y(base) - 8} textAnchor="middle">
+                        {plot.tops[i]}
+                      </text>
+                    )}
                   </g>
                 );
               })
             )}
           </svg>
         )}
-        {plot.kind === "line" &&
-          w > 0 &&
+        {w > 0 &&
           (plot.refs ?? []).map((r) => (
             <span key={r.label} className={l.refLabel} style={{ top: y(r.y) - 20, color: r.color }}>
               {r.label}
@@ -281,7 +292,7 @@ function SplitLegend() {
 
 // ─── the panel ─────────────────────────────────────────────────────
 
-type View = "ltv" | "buyers" | "repeat" | "repeatRev" | "gap" | "cac";
+type View = "ltv" | "aov" | "buyers" | "repeat" | "repeatRev" | "gap" | "cac";
 
 export function LtvPanel() {
   const [data, setData] = useState<Ltv | null>(null);
@@ -323,6 +334,13 @@ export function LtvPanel() {
         value: eur2(t.ltv),
         note: `${eur2(t.firstAov)} first + ${eur2(t.ltv - t.firstAov)} later`,
       },
+      {
+        id: "aov",
+        label: "AOV",
+        color: C.aov,
+        value: eur2(t.aov),
+        note: `per purchase · LTV +${pct(t.ltv / t.aov - 1, 0)}`,
+      },
       { id: "buyers", label: "BUYERS", color: C.first, value: count(t.buyers), note: `${count(t.purchases)} purchases · ${t.avgPurchases.toFixed(2)} each` },
       { id: "repeat", label: "CAME BACK", color: C.repeat, value: pct(t.repeatRate), note: `${count(t.repeatBuyers)} bought again` },
       { id: "repeatRev", label: "REPEAT REVENUE", color: C.repeat, value: eur(t.repeatRevenue), note: `${pct(t.repeatRevenue / (t.revenue || 1))} of ${eur(t.revenue)}` },
@@ -350,27 +368,76 @@ export function LtvPanel() {
     const months = data.months;
     if (view === "ltv" || view === "cac") {
       const c = data.curve;
-      const refs: Ref[] = [{ y: t.firstAov, label: `First purchase ${eur2(t.firstAov)}`, color: C.base }];
-      if (data.cac) refs.push({ y: data.cac.perBuyer, label: `Ad cost per new buyer ${eur2(data.cac.perBuyer)}`, color: C.cac });
+      const refs: Ref[] = data.cac ? [{ y: data.cac.perBuyer, label: `Ad cost per new buyer ${eur2(data.cac.perBuyer)}`, color: C.cac }] : [];
+      const series = [
+        { name: "First purchase", color: C.first },
+        { name: "Came back and bought again", color: C.repeat },
+        ...(data.cac ? [{ name: "Ad cost to get a buyer", color: C.cac }] : []),
+      ];
       return {
-        title: "What a buyer is worth, day by day",
-        sub: `Average money per buyer N days after their first purchase. Each step counts only buyers old enough for it (${count(lastCurve?.buyers ?? 0)} reach day ${lastCurve?.day ?? 0}).`,
-        plot: { kind: "line", xs: c.map((p) => p.day), ys: c.map((p) => p.ltv), xLabel: (d) => (d === 0 ? "Day 0" : `${d} d`), color: C.first, area: true, refs },
+        title: "How much one buyer pays you, as time goes by",
+        sub: `Each bar is what one buyer has paid you on average, N days after their first purchase. Violet: the first purchase. Green: what they came back for later.${data.cac ? " Orange line: what Meta paid to get one buyer." : ""}`,
+        plot: {
+          kind: "bars",
+          labels: c.map((p) => (p.day === 0 ? "Day 1" : p.day < 60 ? `Day ${p.day}` : p.day % 30 === 0 ? `${p.day / 30} months` : `Day ${p.day}`)),
+          values: c.map((p) => [c[0].ltv, Math.max(0, p.ltv - c[0].ltv)]),
+          series,
+          refs,
+          tops: c.map((p) => eur2(p.ltv)),
+        },
         fmt: (n) => `€${Math.round(n)}`,
-        legend: [{ name: "LTV per buyer", color: C.first }, { name: "First purchase", color: C.base }, ...(data.cac ? [{ name: "Ad cost per new buyer", color: C.cac }] : [])],
+        legend: series,
         tip: (i) => {
           const p = c[i];
           return (
             <>
-              <div className={s.tipHead}>{p.day === 0 ? "Day of the first purchase" : `${p.day} days after the first purchase`}</div>
+              <div className={s.tipHead}>{p.day === 0 ? "The day of the first purchase" : `${p.day} days after the first purchase`}</div>
               <div className={s.tipBig}>{eur2(p.ltv)}</div>
+              <div className={s.tipVs}>paid by one buyer, on average</div>
               <div className={s.tipRows}>
-                <TipRow color={C.base} name="First purchase" value={eur2(c[0].ltv)} />
-                <TipRow color={C.repeat} name="Added since" value={`+${eur2(p.ltv - c[0].ltv)}`} />
-                <TipRow name="Came back by now" value={pct(p.repeatRate)} />
-                {data.cac && <TipRow color={C.cac} name="Pays back the ad" value={`${(p.ltv / data.cac.perBuyer).toFixed(2)}×`} />}
+                <TipRow color={C.first} name="First purchase" value={eur2(c[0].ltv)} />
+                <TipRow color={C.repeat} name="Came back for" value={`+${eur2(p.ltv - c[0].ltv)}`} />
+                <TipRow name="Buyers who came back" value={pct(p.repeatRate)} />
+                {data.cac && <TipRow color={C.cac} name="Ad cost paid back" value={`${(p.ltv / data.cac.perBuyer).toFixed(2)}×`} />}
               </div>
-              <div className={s.tipNote}>From {count(p.buyers)} buyers whose first purchase is at least {p.day} days old.</div>
+              <div className={s.tipNote}>From {count(p.buyers)} buyers who first bought at least {p.day} days ago.</div>
+            </>
+          );
+        },
+      };
+    }
+    if (view === "aov") {
+      const series = [
+        { name: "LTV of that month's new buyers", color: C.first },
+        { name: "AOV", color: C.aov },
+      ];
+      return {
+        title: "AOV vs LTV, month by month",
+        sub: "AOV: money per purchase made that month, add-ons included. LTV: what the buyers who first bought that month have paid so far, each. Recent months have had less time to grow.",
+        plot: {
+          kind: "line",
+          xs: months.map((_, i) => i),
+          ys: months.map((m) => m.cohortLtv),
+          more: [{ ys: months.map((m) => m.aov), color: C.aov }],
+          xLabel: (i) => monthName(months[i].month),
+          color: C.first,
+          refs: [],
+        },
+        fmt: (n) => `€${Math.round(n)}`,
+        legend: series,
+        tip: (i) => {
+          const m = months[i];
+          return (
+            <>
+              <div className={s.tipHead}>{monthName(m.month)}</div>
+              <div className={s.tipBig}>+{eur2(m.cohortLtv - m.aov)}</div>
+              <div className={s.tipVs}>LTV above AOV</div>
+              <div className={s.tipRows}>
+                <TipRow color={C.first} name="LTV, new buyers" value={eur2(m.cohortLtv)} />
+                <TipRow color={C.aov} name="AOV" value={eur2(m.aov)} />
+                <TipRow name="Purchases" value={count(m.purchases)} />
+                <TipRow name="New buyers" value={count(m.newBuyers)} />
+              </div>
             </>
           );
         },
@@ -495,6 +562,14 @@ export function LtvPanel() {
           </>
         ),
       });
+    out.push({
+      tone: "info",
+      text: (
+        <>
+          One checkout brings <b>{eur2(t.aov)}</b> (AOV), one buyer brings <b>{eur2(t.ltv)}</b> (LTV): {pct(t.ltv / t.aov - 1, 0)} more, because each buyer makes {t.avgPurchases.toFixed(2)} purchases on average.
+        </>
+      ),
+    });
     const took = data.addOns.find((a) => a.name.startsWith("Took"));
     const only = data.addOns.find((a) => a.name.startsWith("Main"));
     if (took && only)
@@ -597,7 +672,7 @@ export function LtvPanel() {
                       {tile.label}
                     </div>
                     <div className={s.tileValue}>{tile.value}</div>
-                    <div className={s.tileNote}>{tile.note}</div>
+                    <div className={`${s.tileNote} ${l.wrap}`}>{tile.note}</div>
                   </button>
                 );
               })}
@@ -640,6 +715,92 @@ export function LtvPanel() {
               </ul>
             </section>
           )}
+
+          <section className={`${s.card} ${l.block}`}>
+            <div className={s.cardHead}>
+              <span className={s.title}>AOV vs LTV</span>
+              <span className={s.sub}>what one checkout brings vs what one buyer brings</span>
+            </div>
+            <div className={l.vs}>
+              <div className={l.vsBox}>
+                <div className={l.vsLabel}>
+                  <i style={{ background: C.aov }} />
+                  AOV · per purchase
+                </div>
+                <div className={l.vsValue}>{eur2(t.aov)}</div>
+                <div className={l.vsSub}>
+                  {eur(t.revenue)} ÷ {count(t.purchases)} purchases
+                </div>
+              </div>
+              <div className={l.vsMid}>
+                <div className={l.vsGap}>+{eur2(t.ltv - t.aov)}</div>
+                <div className={l.vsSub}>+{pct(t.ltv / t.aov - 1, 1)} · {t.avgPurchases.toFixed(2)} purchases per buyer</div>
+              </div>
+              <div className={l.vsBox}>
+                <div className={l.vsLabel}>
+                  <i style={{ background: C.first }} />
+                  LTV · per buyer
+                </div>
+                <div className={l.vsValue}>{eur2(t.ltv)}</div>
+                <div className={l.vsSub}>
+                  {eur(t.revenue)} ÷ {count(t.buyers)} buyers
+                </div>
+              </div>
+            </div>
+            <div className={s.tableWrap}>
+              <table className={`${s.table} ${l.vsTable}`}>
+                <thead>
+                  <tr>
+                    <th>STARTED WITH</th>
+                    <th>BUYERS</th>
+                    <th>AOV</th>
+                    <th>FIRST ORDER</th>
+                    <th>LTV</th>
+                    <th className={l.left}>LTV ABOVE AOV</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...data.entries, ...data.addOns, ...data.eras].map((r, i, all) => {
+                    const gap = r.ltv - r.aov;
+                    const maxGap = Math.max(...all.map((q) => q.ltv - q.aov), 0.01);
+                    const groupStart = i === data.entries.length || i === data.entries.length + data.addOns.length;
+                    return (
+                      <tr key={r.name} className={groupStart ? l.groupRow : undefined}>
+                        <td className={l.rowName}>{r.name}</td>
+                        <td>{count(r.buyers)}</td>
+                        <td>{eur2(r.aov)}</td>
+                        <td>{eur2(r.firstAov)}</td>
+                        <td className={l.ltvCell}>{eur2(r.ltv)}</td>
+                        <td className={l.left}>
+                          <span className={l.gapCell}>
+                            <span className={l.gapBar} style={{ width: `${(Math.max(0, gap) / maxGap) * 100}%` }} />
+                            <span>
+                              +{eur2(gap)} · {pct(gap / (r.aov || 1), 0)}
+                            </span>
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td>All buyers</td>
+                    <td>{count(t.buyers)}</td>
+                    <td>{eur2(t.aov)}</td>
+                    <td>{eur2(t.firstAov)}</td>
+                    <td>{eur2(t.ltv)}</td>
+                    <td className={l.left}>
+                      +{eur2(t.ltv - t.aov)} · {pct(t.ltv / t.aov - 1, 0)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <p className={s.foot}>
+              AOV = revenue ÷ purchases. First order = the first purchase with its add-ons and upsells. LTV = revenue ÷ buyers. Products: the first purchase, 5+ buyers; then add-on takers and the era they bought in.
+            </p>
+          </section>
 
           <section className={`${s.card} ${l.block}`}>
             <div className={s.cardHead}>
