@@ -138,9 +138,9 @@ export const funnel = {
   // 2026-11-18 ("togli l'upsell ALL ACCESS da tutto il sito"): GRIND STUDIO All Access (€97, first since
   // 11-16, nobody bought it) is gone, page and all: Famous Beats, then TOP HITS.
   // 2026-11-23 ("xkè poi lo mettiamo come oto upsell di midi drum kit vol1", then "Yes, make the OTO"): MIDI Drum Kit
-  // Vol.2 first, €37, on its own page ([lang]/vol2-offer), then Famous Beats and TOP HITS.
+  // Vol.2 first, €27, on its own page ([lang]/vol2-offer), then Famous Beats and TOP HITS.
   offers: [
-    { id: "vol2", path: "vol2-offer", name: "MIDI Drum Kit Vol.2 (480 Full Song Beats)", price: { eur: 37, usd: 37 } },
+    { id: "vol2", path: "vol2-offer", name: "MIDI Drum Kit Vol.2 (480 Full Song Beats)", price: { eur: 27, usd: 27 } },
     { id: "jazz", path: "jazz-offer", name: "Jazz MIDI Pack", price: { eur: 27, usd: 27 } },
     { id: "famous-beats", path: "offer", name: "Famous Beats Bundle (320 MIDI Beats)", price: { eur: 27, usd: 27 } },
     { id: "top-hits", path: "last-offer", name: "TOP HITS MIDI Bundle (1000 Chord Progressions)", price: { eur: 27, usd: 27 } },

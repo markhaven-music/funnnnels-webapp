@@ -5,7 +5,7 @@ Started 2026-11-23 with the Vol.2 upsell; the landing's own claims live in its c
 ## MIDI Drum Kit Vol.2 upsell ([lang]/vol2-offer)
 
 Decided by the owner on 2026-11-23: "xkè poi lo mettiamo come oto upsell di midi drum kit vol1", then "Yes, make the OTO".
-The first upsell after the order (funnel_items upsell position 0), before Famous Beats and TOP HITS. Price €37 / $37
+The first upsell after the order (funnel_items upsell position 0), before Famous Beats and TOP HITS. Price €27 / $27 (was €37 at launch; owner 2026-11-24: "Change it to €27")
 (Claude's pick, changeable in dashboard → Products). English in every language, like the Jazz upsell.
 
 Facts the page states, all checked on the built pack (T7 `02. All products/18. MIDI Drum Kit Vol.2/MIDI Drum Kit Vol.2`):
