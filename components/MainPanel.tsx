@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { I } from "@/components/icons";
 import { FunnelCard } from "@/components/FunnelCard";
-import { isLeadMagnet, LeadMagnets } from "@/components/LeadMagnets";
+import { FunnelSection, isApart, isBlackFriday, isLeadMagnet, LeadMagnets } from "@/components/LeadMagnets";
 import { NewFunnelTile } from "@/components/NewFunnelTile";
 import type { FunnelStatus, StoredFunnel } from "@/lib/blocks";
 import type { FunnelSpend } from "@/lib/funnelSpend";
@@ -37,8 +37,10 @@ function SpendLine({ spend }: { spend: FunnelSpend }) {
 export function MainPanel({ funnels: all, spend }: Props) {
   const [tab, setTab] = useState<TabKey>("all");
   // The lead magnets (free packs) have their own section under the funnels that sell.
-  const funnels = useMemo(() => all.filter((f) => !isLeadMagnet(f)), [all]);
+  const funnels = useMemo(() => all.filter((f) => !isApart(f)), [all]);
   const magnets = useMemo(() => all.filter(isLeadMagnet), [all]);
+  // The Black Friday copies at 9.99 (lib/blackFriday.ts) too.
+  const blackFriday = useMemo(() => all.filter(isBlackFriday), [all]);
   const filtered = useMemo(() => {
     if (tab === "all") return funnels;
     return funnels.filter((f) => f.status === tab);
@@ -131,6 +133,7 @@ export function MainPanel({ funnels: all, spend }: Props) {
           <FunnelCard key={f.id} f={f} />
         ))}
       </div>
+      <FunnelSection title="Black Friday" funnels={tab === "all" ? blackFriday : blackFriday.filter((f) => f.status === tab)} />
       <LeadMagnets funnels={shownMagnets} />
     </main>
   );

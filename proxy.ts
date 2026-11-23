@@ -8,6 +8,7 @@ import { isHl, type HlVariant } from "@/app/(funnels)/midi-drum-kit/headlineTest
 import { FBB_LP, isFbbLp, type FbbLp } from "@/app/(funnels)/famous-beats-bundle/landingTest";
 import { isLive } from "@/app/blog/schedule";
 import { CF_PATHS as FREE_PAGES, CF_REDIRECTS as FREE_REDIRECTS } from "@/app/free/packs";
+import { BF, bfLive } from "@/lib/blackFriday";
 
 // funnnnels.com is the dashboard, behind ADMIN_PASSWORD. Funnels are public
 // but live on their brand's domain: m.thegrind.studio forwards /jazz-midi-pack
@@ -45,7 +46,7 @@ const DASHBOARD_HOSTS = new Set(["funnnnels.com", "www.funnnnels.com"]);
 // The visitor keeps the plain URL; the country comes from ?country= (the
 // brand domain's rewrite sets it, and it lets you preview either price) or
 // from Vercel's geo header, and also goes into a cookie for the checkout.
-const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/jazz-midi-pack/offer", "/jazz-midi-pack/vol2", "/top-hits-midi-bundle", "/top-hits-midi-bundle/order", "/top-hits-midi-bundle/offer", "/top-hits-chords", "/top-hits-chords/order", "/top-hits-chords/offer", "/top-hits-chords/offer-2", "/famous-beats-bundle", "/famous-beats-bundle/order", "/famous-beats-bundle/offer", "/drunk-swing-grooves", "/drunk-swing-grooves/order", "/drunk-swing-grooves/offer", "/drunk-swing-grooves/offer-2", "/midi-drum-kit/bounce", "/midi-drum-kit/why-your-drums-sound-stiff", "/midi-drum-kit/why-your-trap-drums-sound-stiff", "/midi-drum-kit/why-your-hip-hop-drums-sound-stiff", "/midi-drum-kit/why-your-first-beats-sound-stiff", "/midi-drum-kit/why-type-beats-sound-the-same", "/midi-drum-kit/why-your-drums-still-sound-stiff", "/home", "/links"]);
+const CURRENCY_PAGES = new Set(["/jazz-midi-pack", "/jazz-midi-pack/order", "/jazz-midi-pack/black-friday", "/jazz-midi-pack/black-friday/order", "/jazz-midi-pack/offer", "/jazz-midi-pack/vol2", "/top-hits-midi-bundle", "/top-hits-midi-bundle/order", "/top-hits-midi-bundle/offer", "/top-hits-chords", "/top-hits-chords/order", "/top-hits-chords/offer", "/top-hits-chords/offer-2", "/famous-beats-bundle", "/famous-beats-bundle/order", "/famous-beats-bundle/offer", "/drunk-swing-grooves", "/drunk-swing-grooves/order", "/drunk-swing-grooves/offer", "/drunk-swing-grooves/offer-2", "/midi-drum-kit/bounce", "/midi-drum-kit/why-your-drums-sound-stiff", "/midi-drum-kit/why-your-trap-drums-sound-stiff", "/midi-drum-kit/why-your-hip-hop-drums-sound-stiff", "/midi-drum-kit/why-your-first-beats-sound-stiff", "/midi-drum-kit/why-type-beats-sound-the-same", "/midi-drum-kit/why-your-drums-still-sound-stiff", "/home", "/links"]);
 
 // Launch-kit products (dashboard → Launches) live at /<slug> and are served by
 // app/(funnels)/[slug]: the page per currency, /<slug>/thank-you and
@@ -64,7 +65,13 @@ const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
 // The pages a localized funnel has after its /<lang>/<slug>.
-const LOCAL_PAGES = ["", "order", "offer", "last-offer", "jazz-offer", "thank-you"] as const;
+const LOCAL_PAGES = ["", "order", "offer", "last-offer", "jazz-offer", "thank-you", "black-friday", "black-friday/order"] as const;
+
+// The Black Friday copies (lib/blackFriday.ts): /[<lang>/]midi-drum-kit/black-friday[/order] and
+// /jazz-midi-pack/black-friday[/order]. Until Black Friday ends they are rewritten like the funnels' own pages (and the
+// visitor gets the Black Friday cookie, the letter their page views count under); from then on they redirect to the
+// funnel's own page, at its regular price. m[1] the funnel's address, m[2] "/order" or nothing.
+const BF_PAGE = new RegExp(`^(/(?:(?:fr|it|de|nl|es)/)?(?:${BF.funnels.join("|")}))/${BF.path}(/order)?/?$`);
 
 function localized(pathname: string): { slug: string; lang: string; page: (typeof LOCAL_PAGES)[number] } | null {
   const parts = pathname.replace(/\/$/, "").split("/");
@@ -143,6 +150,14 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 307);
   }
 
+  // The Black Friday copies after Black Friday: the regular page, at the regular price (the clock reloads onto this).
+  const bf = pathname.match(BF_PAGE);
+  if (bf && !bfLive()) {
+    const url = request.nextUrl.clone();
+    url.pathname = `${bf[1]}${bf[2] ?? ""}`;
+    return NextResponse.redirect(url, 307);
+  }
+
   // Stripe sends a card buyer back with ?payment_intent=…&redirect_status=succeeded
   // (to the first upsell, or the thank-you page): the order is recorded on
   // arrival, before any upsell, after the page is on its way (lib/stripeSales.ts).
@@ -211,10 +226,17 @@ export function proxy(request: NextRequest) {
     // page or the new one at the same address, 50/50, each visitor kept on theirs by a cookie; since 2026-11-12
     // evening everyone gets the new one (LP.live).
     const lp = loc.slug === "midi-drum-kit" && !loc.page && LP.langs.includes(loc.lang) ? landingVariant(request) : null;
+    // The Black Friday copy is the new landing's, in its languages: the others go to the English one.
+    if (bf && !LP.langs.includes(loc.lang)) {
+      const en = request.nextUrl.clone();
+      en.pathname = `/${loc.slug}/${loc.page}`;
+      return NextResponse.redirect(en, 307);
+    }
     url.pathname = `/${loc.slug}/${loc.lang}${loc.page ? `/${loc.page}` : ""}${lp && lp.variant !== "lp-old" ? "/new" : ""}/${currencyFor(country, true)}`;
     const res = NextResponse.rewrite(url);
     res.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax" });
     if (lp?.assign) res.cookies.set(LP.cookie, lp.variant, { path: "/", sameSite: "lax", maxAge: 15552000 });
+    if (bf) res.cookies.set(BF.cookie, BF.variant, { path: "/", sameSite: "lax", maxAge: 7 * 86400 });
     return res;
   }
 
@@ -241,6 +263,7 @@ export function proxy(request: NextRequest) {
     const res = NextResponse.rewrite(url);
     res.cookies.set(COUNTRY_COOKIE, country, { path: "/", sameSite: "lax" });
     if (fbb?.assign) res.cookies.set(FBB_LP.cookie, fbb.variant, { path: "/", sameSite: "lax", maxAge: 15552000 });
+    if (bf) res.cookies.set(BF.cookie, BF.variant, { path: "/", sameSite: "lax", maxAge: 7 * 86400 });
     return res;
   }
 

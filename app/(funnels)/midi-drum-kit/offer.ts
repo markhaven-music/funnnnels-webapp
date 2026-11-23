@@ -19,7 +19,9 @@ import type { Lang } from "./i18n";
 // on-page editor knows each box's texts even with its price restated; none for
 // an add-on that speaks with the product's tagline.
 export type OrderBump = { id: string; name: string; price: number; image: string; headline: string; body: string[]; words?: string };
-export type OrderOffer = { product: string; name: string; price: number; bumps: OrderBump[] };
+// was, variant, abCookie: the Black Friday copy (lib/blackFriday.ts): the regular price struck before `price`, the
+// letter its orders carry instead of the landing test's, the cookie its page views are counted under.
+export type OrderOffer = { product: string; name: string; price: number; bumps: OrderBump[]; was?: number; variant?: string; abCookie?: string };
 
 // "YES! Add …!" for an add-on the copy has no words for, per language.
 const ADD: Record<Lang, (name: string) => string> = {

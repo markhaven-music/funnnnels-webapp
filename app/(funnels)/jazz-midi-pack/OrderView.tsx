@@ -1,0 +1,159 @@
+// The Jazz MIDI Pack order page, shared by its route (./order/[currency]/page.tsx) and the Black Friday copy's
+// (./black-friday/order/[currency]/page.tsx). What the page is: see the route.
+import { sayBumps } from "@/lib/bumpText";
+import { getFunnel, nextStep, resolveFunnel, upsellsOn } from "@/lib/funnels";
+import { type Currency, priceIn } from "@/lib/geo";
+import { money } from "@/lib/launch";
+import { restate } from "@/lib/restate";
+import { getPublishedBlocks } from "@/lib/pages";
+import { bumpCopy, funnel } from "./funnel";
+import { DEFAULT_SECTIONS, type Section, type SectionProps } from "./content";
+import { Checkout, OrderSummary, Proof, Reviews, Seal, fill, isSectionType, type Ctx } from "./sections";
+import { Tracking } from "./Tracking";
+import { JazzBonusBanner, JazzBonusItem } from "./BonusClock";
+import { FIVE_MIN_BONUS_ON, JAZZ_BONUS, JAZZ_BONUS_SCRIPT, JAZZ_BONUS_TIME_SCRIPT, JAZZ_BONUS_WORDS } from "./fiveMinBonus";
+import c from "./fiveMinBonus.module.css";
+import { splitName } from "../_kit/KitBox";
+import { Beacon } from "../Beacon";
+import { JZH, JZH_KEEP_SCRIPT } from "./rhodesTest";
+import { display } from "./fonts";
+import s from "./jazz.module.css";
+import { BF, BF_CLOCK_JS, bfBarHtml } from "@/lib/blackFriday";
+import { BF_ORDER } from "./LandingView";
+
+const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US", gbp: "GB", chf: "CH" };
+
+const valid = (b: unknown): b is Section =>
+  !!b && typeof b === "object" && isSectionType((b as Section).type) && typeof (b as Section).props === "object";
+
+function pick<T extends Section["type"]>(sections: Section[], type: T): SectionProps[T] {
+  const hit = sections.find((x) => x.type === type) ?? DEFAULT_SECTIONS.find((x) => x.type === type)!;
+  return hit.props as SectionProps[T];
+}
+
+// bf: the Black Friday copy (lib/blackFriday.ts, ./black-friday/order): BF.price with the regular one struck, a
+// countdown in the red bar, its views and orders under its letter (the checkout charges BF.price for it).
+export async function JazzOrder({ currency, bf = false }: { currency: Currency; bf?: boolean }) {
+  // Its price and its add-ons (TOP HITS, MIDI Drum Kit, HUSTLE) as dashboard → Products has them.
+  const f = (await resolveFunnel(funnel.slug)) ?? getFunnel(funnel.slug)!;
+  const regular = priceIn(f.price, currency);
+  const amount = bf ? priceIn(BF.price, currency) : regular;
+  const sections = await getPublishedBlocks(funnel.slug, DEFAULT_SECTIONS, valid, { strict: true });
+  const ctx: Ctx = {
+    price: money(amount, currency),
+    amount,
+    currency,
+    country: FALLBACK_COUNTRY[currency],
+    publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null,
+    bump: f.bump ? { name: f.bump.name, price: priceIn(f.bump.price, currency), pitch: f.bump.pitch, cover: splitName(f.bump.name) } : null,
+    // Their words say the code's price ("just {c}27"): said again at Products' (lib/restate.ts).
+    // Jazz Record Samples hidden since 2026-11-08 ("lasciamo solo drunk swing grooves"), though Products still lists it.
+    // Drunk Swing Grooves: offered in a landing pop-up 11-17 → 11-19 (../../offerPopup.ts), a tick box here again since.
+    bumps: (f.bumps ?? []).filter((b) => b.id !== "record-samples").map((b) => {
+      const was = priceIn(getFunnel(funnel.slug)?.bumps?.find((c) => c.id === b.id)?.price, currency) ?? priceIn(b.price, currency);
+      const copy = bumpCopy[b.id];
+      const said = copy ? { ...copy, body: copy.body.map((p) => restate(p, was, priceIn(b.price, currency))) } : {};
+      return { id: b.id, name: b.name, price: priceIn(b.price, currency), pitch: b.pitch, image: b.image, ...said };
+    }),
+    // After paying: the Famous Beats upsell (./offer), then the thank-you page.
+    afterOrder: nextStep(f, "en", null),
+    keepCard: upsellsOn(f),
+    ...(bf ? { bf: { was: money(regular, currency), wasAmount: regular, order: BF_ORDER } } : {}),
+  };
+  // The product's own words where dashboard → Products has some (lib/bumpText.ts).
+  ctx.bumps = await sayBumps(funnel.slug, ctx.bumps ?? []);
+  // The add-on the 5-minute bonus gives (none if it's gone from Products).
+  const rs = FIVE_MIN_BONUS_ON ? f.bumps?.find((b) => b.id === JAZZ_BONUS.item) : undefined;
+  if (rs) ctx.fiveMinBonus = { price: priceIn(rs.price, currency) };
+  const offer = pick(sections, "s_offer");
+  const guarantee = pick(sections, "s_guarantee");
+  const reviews = pick(sections, "s_reviews");
+
+  return (
+    <main className={`${s.page} ${s.jazz} ${s.orderMain} ${display.variable}`}>
+      <Tracking value={amount} currency={currency} page="order" />
+      {/* ?jzh= from the landing's button back into the cookie, before the counts and the checkout read it (../../rhodesTest.ts). */}
+      {!bf && <script dangerouslySetInnerHTML={{ __html: JZH_KEEP_SCRIPT }} />}
+      <Beacon funnel={funnel.slug} page="order" abCookie={bf ? BF.cookie : JZH.cookie} />
+      {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
+      {rs && <script dangerouslySetInnerHTML={{ __html: JAZZ_BONUS_SCRIPT }} />}
+      {bf ? (
+        <>
+          <div className={s.bfbar} dangerouslySetInnerHTML={{ __html: bfBarHtml("en", money(regular, currency), money(amount, currency)) }} />
+          <script dangerouslySetInnerHTML={{ __html: BF_CLOCK_JS }} />
+        </>
+      ) : (
+        <div className={s.bfbar}>
+          <b>BLACK FRIDAY:</b> 90% Sale Is Ending Soon
+        </div>
+      )}
+      <div className={s.topband}>
+        <header className={`${s.wrap} ${s.topbar}`}>
+          <span className={s.logo}>
+            <img src="/funnels/midi-drum-kit/logo.webp" alt="GRIND STUDIO" width={360} height={42} />
+          </span>
+          <span className={s.tag}>
+            <LockGlyph /> Secure checkout
+          </span>
+        </header>
+      </div>
+      {rs && <JazzBonusBanner w={JAZZ_BONUS_WORDS} />}
+
+      <section id="buy" className={`${s.sec} ${s.order} ${s.orderPage}`}>
+        <div className={s.wrap}>
+          {/* No heading above the box and the form ("you can eliminate it"); the h1 stays for screen readers. */}
+          <h1 className={s.srOnly}>Complete your Jazz MIDI Pack order</h1>
+          <div className={s.orderGrid}>
+            <OrderSummary
+              p={offer}
+              ctx={ctx}
+              extra={
+                rs && (
+                  <div className={c.slot}>
+                    <JazzBonusItem w={JAZZ_BONUS_WORDS} price={money(priceIn(rs.price, currency), currency)} />
+                    <script dangerouslySetInnerHTML={{ __html: JAZZ_BONUS_TIME_SCRIPT }} />
+                  </div>
+                )
+              }
+            />
+            <div className={s.orderForm}>
+              <Checkout ctx={ctx} />
+              <Proof />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {reviews && <Reviews p={reviews} ctx={ctx} />}
+
+      <section className={`${s.sec} ${s.band}`}>
+        <div className={s.wrap}>
+          <div className={s.guarantee}>
+            <Seal />
+            <div>
+              <h2 className={s.h2}>{fill(guarantee.title, ctx)}</h2>
+              <p className={s.sub}>{fill(guarantee.text, ctx)}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className={s.footer}>
+        <p>
+          © 2026 {funnel.brand} · <a href={funnel.legal.terms} rel="noopener">Terms</a> ·{" "}
+          <a href={funnel.legal.privacy} rel="noopener">Privacy</a> ·{" "}
+          <a href={funnel.legal.refund} rel="noopener">Refund policy</a> ·{" "}
+          <a href={`mailto:${funnel.support}`}>{funnel.support}</a>
+        </p>
+      </footer>
+    </main>
+  );
+}
+
+function LockGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
+      <path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7zm2 0h4V5a2 2 0 0 0-4 0z" fill="currentColor" />
+    </svg>
+  );
+}

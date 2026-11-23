@@ -17,7 +17,7 @@ import { ContactsPanel } from "@/components/panels/ContactsPanel";
 import { DomainsPanel } from "@/components/panels/DomainsPanel";
 import { EmailInsightsPanel } from "@/components/panels/EmailInsightsPanel";
 import { FreePacksPanel } from "@/components/panels/FreePacksPanel";
-import { isLeadMagnet } from "@/components/LeadMagnets";
+import { isApart } from "@/components/LeadMagnets";
 import { IntegrationsPanel } from "@/components/panels/IntegrationsPanel";
 import { LandingPagesPanel } from "@/components/panels/LandingPagesPanel";
 import { LaunchesPanel } from "@/components/panels/LaunchesPanel";
@@ -90,7 +90,7 @@ export function Dashboard({ funnels: rows }: Props) {
     <div className="app">
       <Brand />
       <Sidebar
-        funnelCount={funnels.filter((f) => !isLeadMagnet(f)).length}
+        funnelCount={funnels.filter((f) => !isApart(f)).length}
         supportUnread={supportUnread}
         abRunning={analytics?.tests.filter((t) => !t.ended).length ?? 0}
         active={activeNav}

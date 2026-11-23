@@ -20,6 +20,7 @@ import type Stripe from "stripe";
 import { rangeDays, rangeLength, type Range } from "@/lib/range";
 import { addDays, dayIn, startOfDay } from "@/lib/tz";
 import { supabase } from "@/lib/supabase";
+import { BF, BF_SUFFIX } from "@/lib/blackFriday";
 
 // Dashboard → Analytics: visitors, checkout starts, orders and revenue per
 // funnel, and the results of the running A/B tests (TESTS, below).
@@ -611,6 +612,12 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
     // The shop's orders, all its products together (lib/shop.ts).
     { slug: SHOP_SLUG, name: "Shop", langs: null, url: SHOP_URL },
   ];
+  // The Black Friday copies (lib/blackFriday.ts): the same funnels' orders and visits with the variant "bf", counted
+  // on their own (dashboard → Funnels → Black Friday) and left out of the funnel they copy, so nothing counts twice.
+  const bfList = BF.funnels.flatMap((base) => {
+    const b = list.find((f) => f.slug === base);
+    return b ? [{ slug: `${base}${BF_SUFFIX}`, base, name: `${b.name} · Black Friday`, langs: b.langs, url: `${KIT_HOME}/${base}/${BF.path}` }] : [];
+  });
 
   const hasStripe = stripeConfigured();
   // The day-by-day rows reach back one range more, for the comparison.
@@ -636,7 +643,11 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
   for (const s of allSales) s.rated = s.created >= ratedFrom;
   const sales = allSales.filter((s) => s.created >= sinceMs && s.created < untilMs);
 
-  const funnels: FunnelStats[] = list.map((f) => {
+  const rows = [...list.map((f) => ({ ...f, base: f.slug, bf: false })), ...bfList.map((f) => ({ ...f, bf: true }))];
+  // A row's own visits and sales: the funnel's, with or without the Black Friday ones.
+  const mine = (f: (typeof rows)[number], funnel: string, variant: string) =>
+    funnel === f.base && (f.bf ? variant === BF.variant : !BF.funnels.includes(f.base) || variant !== BF.variant);
+  const funnels: FunnelStats[] = rows.map((f) => {
     const total = empty();
     const byLang = new Map<string, Metrics>((f.langs ?? []).map((l) => [l, empty()]));
     const lang = (l: string) => {
@@ -644,12 +655,12 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
       return byLang.get(l)!;
     };
     for (const v of views) {
-      if (v.funnel !== f.slug) continue;
+      if (!mine(f, v.funnel, v.variant)) continue;
       addView(total, v.page, v.views);
       if (f.langs) addView(lang(v.lang), v.page, v.views);
     }
     for (const s of sales) {
-      if (s.funnel !== f.slug) continue;
+      if (!mine(f, s.funnel, s.variant)) continue;
       addSale(total, s);
       if (f.langs) addSale(lang(s.lang), s);
     }

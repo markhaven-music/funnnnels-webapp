@@ -20,6 +20,7 @@ import { money } from "@/lib/launch";
 import { ProductBox, Scene } from "./ProductBox";
 import { CheckoutWidget } from "./CheckoutWidget";
 import { BEAT_HEADLINE, JZH, JZH_CLASS, JZH_CSS } from "./rhodesTest";
+import { BF } from "@/lib/blackFriday";
 import { Vsl } from "./Vsl";
 import { PackBrowser } from "./PackBrowser";
 import s from "./jazz.module.css";
@@ -45,7 +46,21 @@ export type Ctx = {
   keepCard?: boolean;
   // The order page's 5-minute bonus (./fiveMinBonus.ts): the Record Samples' price, free while the clock runs.
   fiveMinBonus?: { price: number };
+  // The Black Friday copy (lib/blackFriday.ts, ./black-friday): the regular price, struck before `price` on the
+  // buttons, the value stack and the order; `order` is its own order page, where every button goes.
+  bf?: { was: string; wasAmount: number; order: string };
 };
+
+/** The price on the buttons: "€9.99", or on the Black Friday copy "<s>€27</s> €9.99". */
+function PriceTag({ ctx }: { ctx: Ctx }) {
+  return ctx.bf ? (
+    <>
+      <s style={{ opacity: 0.6 }}>{ctx.bf.was}</s> {ctx.price}
+    </>
+  ) : (
+    <>{ctx.price}</>
+  );
+}
 
 type Patch = (props: Record<string, unknown>) => void;
 
@@ -379,7 +394,7 @@ function Hero({ p: raw, patch, ctx }: { p: SectionProps["s_hero"]; patch?: Patch
         </ul>
         <Add onClick={bullets.add && (() => bullets.add!("New bullet"))} label="bullet" />
         {h.on("cta") && (
-          <Cta className={h.host(s.heroCta)} inner={`${ctx.price} · instant download`}>
+          <Cta href={ctx.bf?.order} className={h.host(s.heroCta)} inner={<><PriceTag ctx={ctx} /> · instant download</>}>
             <Drop onClick={h.x("cta")} />
           </Cta>
         )}
@@ -552,7 +567,7 @@ function Product({ p, patch, ctx }: { p: SectionProps["s_product"]; patch?: Patc
           </Part>
           <TickList items={p.ticks} k="ticks" patch={patch} ctx={ctx} className={s.ticks} />
           {h.on("cta") && (
-            <Cta className={h.host(s.ctaBlock)} inner={`${ctx.price} · instant download`}>
+            <Cta href={ctx.bf?.order} className={h.host(s.ctaBlock)} inner={<><PriceTag ctx={ctx} /> · instant download</>}>
               <Drop onClick={h.x("cta")} />
             </Cta>
           )}
@@ -849,7 +864,7 @@ function Math_({ p: raw, patch, ctx }: { p: SectionProps["s_math"]; patch?: Patc
           <T v={p.note} set={patch && ((v) => patch({ note: v }))} ctx={ctx} as="p" className={s.chNote} emph />
         </Part>
         {h.on("cta") && (
-          <Cta className={h.host(s.ctaBlock)} inner={`${ctx.price} · instant download`}>
+          <Cta href={ctx.bf?.order} className={h.host(s.ctaBlock)} inner={<><PriceTag ctx={ctx} /> · instant download</>}>
             <Drop onClick={h.x("cta")} />
           </Cta>
         )}
@@ -1017,7 +1032,9 @@ export function ValueStack({ p, patch, ctx, h = ALL }: { p: SectionProps["s_offe
           <p className={vs.today}>
             <span className={vs.todayLabel}>Today</span>
             <s className={vs.old}>{worth(total, ctx)}</s>
-            <span className={vs.now}>{ctx.price}</span>
+            <span className={vs.now}>
+              <PriceTag ctx={ctx} />
+            </span>
           </p>
           <p className={vs.save}>You save {worth(total - ctx.amount, ctx)}</p>
           <Drop onClick={h.x("total")} />
@@ -1053,7 +1070,7 @@ export function OrderSummary({ p, patch, ctx, extra }: { p: SectionProps["s_offe
           Total value <s>{worth(VALUE_TOTAL, ctx)}</s>
         </span>
         <span>
-          Today <b>{ctx.price}</b>
+          Today {ctx.bf && <s>{ctx.bf.was}</s>} <b>{ctx.price}</b>
         </span>
       </p>
       <p className={s.guaranteeMini}>
@@ -1081,7 +1098,9 @@ export function Checkout({ ctx }: { ctx: Ctx }) {
       keepCard={ctx.keepCard}
       publishableKey={ctx.publishableKey}
       fiveMinBonus={ctx.fiveMinBonus}
-      abCookie={JZH.cookie}
+      abCookie={ctx.bf ? BF.cookie : JZH.cookie}
+      was={ctx.bf?.wasAmount}
+      variant={ctx.bf ? BF.variant : undefined}
       deferStripe
       secureRow={false}
       light
@@ -1099,7 +1118,7 @@ function Offer({ p, patch, ctx }: { p: SectionProps["s_offer"]; patch?: Patch; c
         <Head eyebrow={p.eyebrow} title={p.title} h={h} patch={patch} ctx={ctx} />
         <ValueStack p={p} patch={patch} ctx={ctx} h={h} />
         {h.on("cta") && (
-          <Cta className={h.host(s.ctaBlock)} inner="Card or PayPal · secure checkout">
+          <Cta href={ctx.bf?.order} className={h.host(s.ctaBlock)} inner="Card or PayPal · secure checkout">
             <Drop onClick={h.x("cta")} />
           </Cta>
         )}
@@ -1267,7 +1286,7 @@ function Faq({ p, patch, ctx }: { p: SectionProps["s_faq"]; patch?: Patch; ctx: 
                 <p>
                   {fill(it.a, ctx)}{" "}
                   {!ctx.upsell && (
-                    <a href={funnel.checkout.orderPage} data-cta className={s.micro}>
+                    <a href={ctx.bf?.order ?? funnel.checkout.orderPage} data-cta className={s.micro}>
                       Get the pack
                     </a>
                   )}
@@ -1299,7 +1318,7 @@ function Final({ p, patch, ctx }: { p: SectionProps["s_final"]; patch?: Patch; c
           <T v={p.title} set={patch && ((v) => patch({ title: v }))} ctx={ctx} as="h2" className={s.h2} emph />
         </Part>
         {h.on("cta") && (
-          <Cta className={h.host(s.ctaBlock)} inner={`${ctx.price} · instant download`} note={h.on("note") ? fill(p.note, ctx) : undefined}>
+          <Cta href={ctx.bf?.order} className={h.host(s.ctaBlock)} inner={<><PriceTag ctx={ctx} /> · instant download</>} note={h.on("note") ? fill(p.note, ctx) : undefined}>
             <Drop onClick={h.x("cta")} />
           </Cta>
         )}

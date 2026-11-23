@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FunnelCard } from "@/components/FunnelCard";
 import { CURRENCIES, dayLabel, fromEur, money, moneyExact, Performance, SYMBOL, type Currency } from "@/components/HomeCharts";
-import { isLeadMagnet, LeadMagnets } from "@/components/LeadMagnets";
+import { FunnelSection, isApart, isBlackFriday, isLeadMagnet, LeadMagnets } from "@/components/LeadMagnets";
 import { NewFunnelTile } from "@/components/NewFunnelTile";
 import { I } from "@/components/icons";
 import type { Analytics } from "@/lib/analytics";
@@ -131,8 +131,10 @@ type Props = {
 export function DashboardHome({ funnels: all, analytics }: Props) {
   const [tab, setTab] = useState<TabKey>("all");
   // The lead magnets (free packs) have their own section under the funnels that sell.
-  const funnels = useMemo(() => all.filter((f) => !isLeadMagnet(f)), [all]);
+  const funnels = useMemo(() => all.filter((f) => !isApart(f)), [all]);
   const magnets = useMemo(() => all.filter(isLeadMagnet), [all]);
+  // The Black Friday copies at 9.99 (lib/blackFriday.ts) too.
+  const blackFriday = useMemo(() => all.filter(isBlackFriday), [all]);
   const [range, setRange] = useRange();
   const [loaded, setLoaded] = useState<Partial<Record<Range, Analytics>>>({});
   const current = loaded[range] ?? (range === "28d" ? analytics : null);
@@ -321,6 +323,7 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
           <FunnelCard key={f.id} f={f} />
         ))}
       </div>
+      <FunnelSection title="Black Friday" funnels={tab === "all" ? blackFriday : blackFriday.filter((f) => f.status === tab)} />
       <LeadMagnets funnels={shownMagnets} />
     </main>
   );

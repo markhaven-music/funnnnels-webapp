@@ -48,7 +48,8 @@ const Shield = () => (
   </svg>
 );
 
-export function OrderStack({ w, price, currency, lang }: { w: Copy["order"]["stack"]; price: number; currency: Currency; lang: Lang }) {
+// was: the Black Friday copy's regular price, struck before today's (lib/blackFriday.ts).
+export function OrderStack({ w, price, currency, lang, was }: { w: Copy["order"]["stack"]; price: number; currency: Currency; lang: Lang; was?: number }) {
   const fmt = (n: number) => money(n, currency, lang, false);
   return (
     <>
@@ -92,7 +93,7 @@ export function OrderStack({ w, price, currency, lang }: { w: Copy["order"]["sta
           {w.totalValue} <s>{fmt(STACK_VALUES.total)}</s>
         </span>
         <span>
-          {w.today} <b>{money(price, currency, lang, !Number.isInteger(price))}</b>
+          {w.today} {was ? <s>{money(was, currency, lang, !Number.isInteger(was))}</s> : null} <b>{money(price, currency, lang, !Number.isInteger(price))}</b>
         </span>
       </p>
       <p className={j.guaranteeMini}>

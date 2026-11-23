@@ -22,6 +22,12 @@ import { copyEdits, markupEdits } from "./texts";
 import { funnel } from "./funnel";
 import { money, paths, type Lang } from "./i18n";
 import { popupLandingJs } from "./popupBump";
+import { BF, BF_CLOCK_JS, bfBarHtml } from "@/lib/blackFriday";
+
+// Where the red bar's words go on the Black Friday copy (filled once the page is built).
+const BF_SLOT = "BFBARSLOT";
+/** The Black Friday order page's address in a language: /midi-drum-kit/black-friday/order, /it/midi-drum-kit/black-friday/order. */
+export const bfOrderPath = (lang: Lang) => `${paths(lang).landing}/${BF.path}/order`;
 
 // The sales page: ClickFunnels' own HTML and CSS (./cf/template.ts, made by
 // tools/cf_clone.mjs), so it looks exactly like the ClickFunnels page on every
@@ -152,8 +158,12 @@ const TEMPLATE6 = sixBonuses(TEMPLATE);
 // variant: the landing test's page (./landingTest.ts); "lp-new" is the new one (./landingNew.ts).
 // popup: the pop-up add-on (./popupBump.ts) while Products sells it, in this currency; it takes the
 // place of "Checking availability…".
-export function landingHtml(lang: Lang, currency: Currency, price: number = priceIn(funnel.price, currency), edits: PageEdits = {}, marks = false, layout: Layout = {}, variant: LpVariant = "lp-old", popup?: { price: number; image: string }): string {
-  const strings = { ...STRINGS.en, ...STRINGS[lang], ...markupEdits(edits, "landing") };
+// bf: the Black Friday copy (lib/blackFriday.ts): the same page, its price struck for bf.price, a countdown in the red
+// bar on top, its buttons to the Black Friday order page, its views counted under the Black Friday letter.
+export type BfLanding = { price: number };
+
+export function landingHtml(lang: Lang, currency: Currency, price: number = priceIn(funnel.price, currency), edits: PageEdits = {}, marks = false, layout: Layout = {}, variant: LpVariant = "lp-old", popup?: { price: number; image: string }, bf?: BfLanding): string {
+  const strings: Record<string, string> = { ...STRINGS.en, ...STRINGS[lang], ...markupEdits(edits, "landing"), ...(bf ? { t001: BF_SLOT } : {}) };
   const words = (key: string) => {
     let html = mapText(strings[key] ?? "", (t) => restate(t, priceIn(funnel.price, currency), price, lang));
     if (lang === "es" || lang === "de" || lang === "it") html = mapText(html, unitSpaces);
@@ -169,13 +179,13 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = pric
 
   let html = applySections(TEMPLATE6, layout, marks)
     .replace(/\{\{(t\d{3})\}\}/g, (_, key: string) => (marks ? `<!--fx:${key}-->${words(key)}<!--/fx-->` : words(key)))
-    .replaceAll("{{ORDER}}", paths(lang).order)
+    .replaceAll("{{ORDER}}", bf ? bfOrderPath(lang) : paths(lang).order)
     .replace("{{LANG}}", lang)
     .replace("{{TITLE}}", escapeAttr(meta.title))
     .replace("{{DESCRIPTION}}", escapeAttr(meta.description))
     .replace(
       "{{HEAD}}",
-      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${ab}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: LP.cookie })}</script>\n<script>${popup ? popupLandingJs(lang, money(popup.price, currency, lang, !Number.isInteger(popup.price)), popup.image) : ""}${AVAILABILITY_JS}</script>\n<script>${salesPopJs(funnel.slug, lang)}</script>\n${headScripts(currency, price)}`,
+      `<script>${ORIGIN_BOUNCE_JS}</script>\n<script>${ab}</script>\n<style>${AB_LANDING_CSS}</style>\n<script>${beaconScript({ funnel: funnel.slug, page: "landing", lang, abCookie: bf ? BF.cookie : LP.cookie })}</script>\n<script>${popup ? popupLandingJs(lang, money(popup.price, currency, lang, !Number.isInteger(popup.price)), popup.image, bf ? BF.cookie : undefined) : ""}${AVAILABILITY_JS}</script>\n<script>${salesPopJs(funnel.slug, lang)}</script>\n${bf ? `<script>${BF_CLOCK_JS}</script>\n` : ""}${headScripts(currency, bf ? bf.price : price)}`,
     )
     .replace("{{BODY}}", BODY_SCRIPT);
   if (lang === "en") html = html.replace(FREE_BAR_AT, (at) => FREE_BAR + at);
@@ -187,7 +197,11 @@ export function landingHtml(lang: Lang, currency: Currency, price: number = pric
   // The pictures replaced in the dashboard, keyed by the src the page shows in this language.
   const images = layout.images ?? {};
   html = faster(swapImages(html, images, marks), video.poster);
-  if (variant === "lp-new") html = newLanding(html, lang, currency, paths(lang).order, words, price, copyWith(lang, currency, copyEdits(edits)).order.stack);
+  if (variant === "lp-new") html = newLanding(html, lang, currency, bf ? bfOrderPath(lang) : paths(lang).order, words, bf ? bf.price : price, copyWith(lang, currency, copyEdits(edits)).order.stack, bf ? price : undefined);
+  if (bf) {
+    const cash = (n: number) => money(n, currency, lang, !Number.isInteger(n));
+    html = html.replace(BF_SLOT, bfBarHtml(lang, cash(price), cash(bf.price)));
+  }
   const origins = imageOrigins(images);
   return origins ? html.replace("<head>", `<head>\n${origins}`) : html;
 }

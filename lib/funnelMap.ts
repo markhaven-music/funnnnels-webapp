@@ -4,6 +4,7 @@ import { funnelLabel, resolveFunnel, upsellsOn, type Product } from "@/lib/funne
 import { KIT_HOME, PRODUCT_TYPE } from "@/lib/liveUrl";
 import { shotSrc } from "@/lib/shots";
 import { getFunnel } from "@/lib/store";
+import { BF, BF_SUFFIX, bfBase } from "@/lib/blackFriday";
 
 // The funnel map (/funnels/<id>, like ClickFunnels' funnel view): where the
 // funnel starts, then each page in order with its live address, a picture
@@ -204,8 +205,39 @@ async function freePacksMap(only?: FreePackTab): Promise<FunnelMap> {
   };
 }
 
+// ─── Black Friday copies ───────────────────────────────────────────
+// The copies at 9.99 (lib/blackFriday.ts): the funnel's own map with its sales and order pages at their
+// /black-friday addresses, counted apart in Analytics (id "<slug>-bf"). The MIDI Drum Kit's copy is in English and
+// Italian only (the new landing); the upsells and the thank-you page are the funnel's own.
+function blackFridayMap(f: Product): FunnelMap {
+  const m = codeMap(f, new Set());
+  const order = f.checkout.orderPage;
+  const langs = m.langs
+    .filter((l) => f.slug !== "midi-drum-kit" || l.lang === "en" || l.lang === "it")
+    .map((l) => {
+      const prefix = l.lang === "en" ? "" : `/${l.lang}`;
+      const at = (path: string) => ({ path, url: `${KIT_HOME}${path}` });
+      return {
+        ...l,
+        steps: l.steps.map((s) =>
+          s.kind === "landing"
+            ? { ...s, ...at(`${prefix}/${f.slug}/${BF.path}`), editUrl: null }
+            : s.kind === "order" && order
+              ? { ...s, ...at(`${prefix}/${f.slug}/${BF.path}/order`), editUrl: null }
+              : s,
+        ),
+      };
+    });
+  return { ...m, id: `${f.slug}${BF_SUFFIX}`, name: `${m.name} · Black Friday`, statsSlug: `${f.slug}${BF_SUFFIX}`, langs };
+}
+
 export async function getFunnelMap(id: string): Promise<FunnelMap | null> {
   if (id === FREE_PACKS_ID) return freePacksMap();
+  const bfOf = bfBase(id);
+  if (bfOf) {
+    const base = await resolveFunnel(bfOf).catch(() => undefined);
+    return base ? blackFridayMap(base) : null;
+  }
   const pack = FREE_PACK_TABS.find((t) => t.optin === id);
   if (pack) return freePacksMap(pack);
   const row = await getFunnel(id).catch(() => null);

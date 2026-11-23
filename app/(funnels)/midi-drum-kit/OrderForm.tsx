@@ -170,7 +170,7 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
         keep(saved, 2);
         setWanted(true);
         setStep(2);
-        track({ funnel: funnel.slug, page: "checkout", lang, abCookie: LP.cookie });
+        track({ funnel: funnel.slug, page: "checkout", lang, abCookie: offer.abCookie ?? LP.cookie });
         // The token off the address bar: a shared or bookmarked link carries no one's cart.
         const url = new URL(location.href);
         url.searchParams.delete("c");
@@ -230,8 +230,8 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
               setWanted(true);
               setStep(2);
               // No scroll on "Go to step 2": the page stays where the buyer is ("dovrebbe rimanere normale").
-              pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_lp: readVariant(), ab_pay: readPay() });
-              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: LP.cookie });
+              pixel("InitiateCheckout", { content_name: offer.product, value: price, currency: currency.toUpperCase(), ab_lp: offer.variant ?? readVariant(), ab_pay: readPay() });
+              track({ funnel: funnel.slug, page: "checkout", lang, abCookie: offer.abCookie ?? LP.cookie });
             }}
           />
         ) : (
@@ -249,7 +249,8 @@ export function OrderForm({ lang, currency, country, publishableKey, afterOrder,
                 <span className={j.orderDesc}>{t.orderDesc}</span>
                 <span className={j.orderPrice}>
                   {/* The price it's down from (funnel.ts wasPrice, the sales page's €297), then today's. */}
-                  {pay !== "a" && funnel.wasPrice > price && <s className={d.was}>{cash(funnel.wasPrice)}</s>}
+                  {/* The Black Friday copy: the regular price struck instead (lib/blackFriday.ts). */}
+                  {offer.was ? <s className={d.was}>{cash(offer.was)}</s> : pay !== "a" && funnel.wasPrice > price && <s className={d.was}>{cash(funnel.wasPrice)}</s>}
                   {cash(price)} · {t.onePayment}
                 </span>
               </span>
@@ -363,7 +364,7 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
         bumps: props.picked,
         // The landing the buyer saw (./landingTest.ts): what the dashboard counts this order under.
         // Step 2 (./payTest.ts) is judged by its days, so it needs no letter here.
-        variant: readVariant() ?? "",
+        variant: props.offer.variant ?? readVariant() ?? "",
         // The Expansions free, as the page shows them (the server checks the 5 minutes).
         bonus: props.bonusLive,
         lang: props.lang,
@@ -460,7 +461,7 @@ function PayBody({
           funnel: funnel.slug,
           ...info,
           bumps: picked,
-          variant: readVariant() ?? "",
+          variant: offer.variant ?? readVariant() ?? "",
           bonus: bonusLive,
           country: cookieCountry(currency, country),
           origin: window.location.origin,
@@ -507,7 +508,10 @@ function PayBody({
       <div className={j.summary}>
         <div className={j.sumRow}>
           <span>{offer.name}</span>
-          <span>{cash(offer.price)}</span>
+          <span>
+            {offer.was ? <s className={d.was}>{cash(offer.was)}</s> : null}
+            {cash(offer.price)}
+          </span>
         </div>
         {chosen.map((o) => (
           <div key={o.id} className={j.sumRow}>

@@ -145,8 +145,11 @@ export type StoredFunnel = {
   ads?: { spend: string; cpc: string; roas: string; profit: string; profitTone: "up" | "down" | "flat"; visitors: string; since: string };
   /** What the cards are ordered by on the home: the net profit (net revenue less ad spend, ads' days), else the net revenue. */
   profitValue?: number;
-  /** "lead-magnet": listed apart, under Lead magnets (the free packs), not among the funnels that sell. */
-  category?: "lead-magnet";
+  /**
+   * Listed apart from the funnels that sell: "lead-magnet" under Lead magnets (the free packs),
+   * "black-friday" under Black Friday (the copies at 9.99, lib/blackFriday.ts).
+   */
+  category?: "lead-magnet" | "black-friday";
 };
 
 export function defaultProps<T extends BlockType>(

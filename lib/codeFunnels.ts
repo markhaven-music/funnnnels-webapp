@@ -2,6 +2,7 @@ import type { Metrics } from "@/lib/analytics";
 import type { StoredFunnel } from "@/lib/blocks";
 import type { FunnelSpend } from "@/lib/funnelSpend";
 import { shotSrc } from "@/lib/shots";
+import { BF_SUFFIX } from "@/lib/blackFriday";
 
 // The funnels built in code (app/(funnels)/<slug>) on the dashboard's funnel
 // list. They have no row in the `funnels` table (only Jazz does, because its
@@ -52,6 +53,11 @@ const CARDS: CodeCard[] = [
     { id: "free-bounce", name: "Free Bounce Pack", shot: "optin-bounce" },
     { id: "free-hooks", name: "Free Mystery Hooks Pack", shot: "optin-hooks" },
   ].map((p): CodeCard => ({ id: p.id, name: p.name, image: shotSrc("free", p.shot), steps: 4, tag: "Lead magnet", category: "lead-magnet" })),
+  // The Black Friday copies at 9.99 (lib/blackFriday.ts), listed apart under Black Friday. Their ids are the
+  // Analytics rows that count them (the funnel's orders and visits with the variant "bf"); each opens its map
+  // (lib/funnelMap.ts blackFridayMap). The picture is the funnel's own page, without the red bar.
+  { id: `midi-drum-kit${BF_SUFFIX}`, name: "MIDI Drum Kit · Black Friday", image: shotSrc("midi-drum-kit", "preview"), steps: 3, tag: "€9.99", category: "black-friday" },
+  { id: `jazz-midi-pack${BF_SUFFIX}`, name: "Jazz MIDI Pack · Black Friday", image: shotSrc("jazz-midi-pack", "preview"), steps: 3, tag: "€9.99", category: "black-friday" },
 ];
 
 // The cards show a screenshot of the first page (lib/shots.ts), taken again

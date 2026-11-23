@@ -77,6 +77,10 @@ type Props = {
   // free in the order while the clock runs; `price` is what they'd cost.
   // `cfg` / `words`: another funnel's clock and words (Famous Beats since 2026-11-09); Jazz's by default.
   fiveMinBonus?: { price: number; cfg?: BonusCfg; words?: JazzBonusWords };
+  // The Black Friday copy (lib/blackFriday.ts): the regular price, struck before `price`, and the letter its orders
+  // carry (in place of the A/B cookie's).
+  was?: number;
+  variant?: string;
 };
 
 type Info = { firstName: string; lastName: string; email: string };
@@ -228,7 +232,10 @@ export function CheckoutWidget(props: Props) {
                   <span className={s.orderTag}>Instant download</span>
                   <span className={s.orderName}>{props.product}</span>
                   <span className={s.orderDesc}>{props.tagline}</span>
-                  <span className={s.orderPrice}>{money(props.price, props.currency)} · one payment</span>
+                  <span className={s.orderPrice}>
+                    {props.was ? <s style={{ opacity: 0.6, marginRight: 6 }}>{money(props.was, props.currency)}</s> : null}
+                    {money(props.price, props.currency)} · one payment
+                  </span>
                 </span>
               </div>
             )}
@@ -384,7 +391,7 @@ function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromis
         // The total on screen: the server refuses if its price differs (an early-bird just ended).
         expected: props.total,
         // The A/B variant the buyer saw, if the funnel runs a test.
-        variant: props.abCookie ? readCookie(props.abCookie) : "",
+        variant: props.variant ?? (props.abCookie ? readCookie(props.abCookie) : ""),
         bonus: props.bonusLive,
       }),
     });
@@ -460,7 +467,9 @@ function PayStepBody({
   abCookie,
   fiveMinBonus,
   bonusLive,
-}: Pick<Props, "funnel" | "country" | "currency" | "price" | "product" | "cart" | "abCookie" | "bumps" | "fiveMinBonus"> &
+  was,
+  variant,
+}: Pick<Props, "funnel" | "country" | "currency" | "price" | "product" | "cart" | "abCookie" | "bumps" | "fiveMinBonus" | "was" | "variant"> &
   BodyState & {
     onCard?: () => void;
     cardPaying?: boolean;
@@ -489,7 +498,7 @@ function PayStepBody({
           country: cookieCountry(currency, country),
           origin: window.location.origin,
           expected: total,
-          variant: abCookie ? readCookie(abCookie) : "",
+          variant: variant ?? (abCookie ? readCookie(abCookie) : ""),
           bonus: bonusLive,
         }),
       });
@@ -542,7 +551,10 @@ function PayStepBody({
         {(cart ?? [{ slug: "", name: product, price }]).map((l) => (
           <div key={l.slug} className={s.sumRow}>
             <span>{l.name}</span>
-            <span>{money(l.price, currency)}</span>
+            <span>
+              {was && !cart ? <s style={{ opacity: 0.6, marginRight: 6 }}>{money(was, currency)}</s> : null}
+              {money(l.price, currency)}
+            </span>
           </div>
         ))}
         {offers

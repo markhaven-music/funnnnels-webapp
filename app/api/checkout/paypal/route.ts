@@ -6,6 +6,7 @@ import { money } from "@/lib/launch";
 import { currencyFor, visitorCountry } from "@/lib/geo";
 import { PAYPAL_LOCALE, PayPalError, paypal, paypalConfigured, paypalValue, returnOrigin, vaultAttributes, type PayPalOrder } from "@/lib/paypal";
 import { cleanVariant } from "@/app/(funnels)/midi-drum-kit/abtest";
+import { withBlackFriday } from "@/lib/blackFriday";
 import { cleanVisitorId } from "@/lib/neoIds";
 import { buyerDevice } from "@/lib/buyerDevice";
 import { notePayPalOrder } from "@/lib/orders";
@@ -21,7 +22,8 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
-  const f = await resolveFunnel(body.funnel);
+  // The Black Friday pages (lib/blackFriday.ts): 9.99 until Black Friday ends, then the regular price.
+  const f = withBlackFriday(await resolveFunnel(body.funnel), cleanVariant(body.variant));
   // The shop prices a cart: /api/checkout/shop/*.
   if (!f || f.kind === "shop") return NextResponse.json({ error: "Unknown funnel" }, { status: 404 });
   const now = requestNow(body);

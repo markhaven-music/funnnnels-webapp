@@ -66,9 +66,9 @@ export const POPUP_WORDS: Record<Lang, Words> = {
 };
 
 /** The landing's script (in place of lib/availability.ts): taps on links to …/order open the pop-up (lib/landingPopup.ts). */
-export function popupLandingJs(lang: Lang, price: string, image: string): string {
+export function popupLandingJs(lang: Lang, price: string, image: string, abCookie = "ab_lp"): string {
   const w = POPUP_WORDS[lang];
-  return landingPopupJs({ key: POPUP_KEY, abCookie: "ab_lp", image, title: w.title, body: w.body, yes: w.yes.replace("{price}", price), no: w.no });
+  return landingPopupJs({ key: POPUP_KEY, abCookie, image, title: w.title, body: w.body, yes: w.yes.replace("{price}", price), no: w.no });
 }
 
 /** The order page: the landing's answer, if fresh. true = add the WAVs. */

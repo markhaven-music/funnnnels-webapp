@@ -13,7 +13,7 @@ export function Cta({
   children,
 }: {
   label?: string;
-  inner?: string;
+  inner?: ReactNode;
   note?: string;
   className?: string;
   href?: string;

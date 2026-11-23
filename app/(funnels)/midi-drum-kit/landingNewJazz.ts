@@ -198,16 +198,19 @@ export type JazzCtx = {
   price: number;
   /** The order page's "what you get" words (copy/<lang>.ts order.stack): the tick list, the proof numbers, the guarantee line. */
   stack: Copy["order"]["stack"];
+  /** The Black Friday copy: the regular price, struck before `price` (lib/blackFriday.ts). */
+  was?: number;
 };
 const l = (c: JazzCtx): L => (c.lang === "it" ? "it" : "en");
-const priceOf = (c: JazzCtx) => money(c.price, c.currency, c.lang, !Number.isInteger(c.price));
+const priceOf = (c: JazzCtx) =>
+  (c.was ? `<s style="opacity:.6;font-weight:inherit">${money(c.was, c.currency, c.lang, !Number.isInteger(c.was))}</s> ` : "") + money(c.price, c.currency, c.lang, !Number.isInteger(c.price));
 const worth = (n: number, c: JazzCtx) => money(n, c.currency, c.lang, false);
 const fill = (s: string, c: JazzCtx) => s.replaceAll("{price}", priceOf(c));
 
 /** The one call to action, the Jazz page's key (jazz-midi-pack/Cta.tsx): the old page's "GET THE PACK!" on it. */
 export function key(c: JazzCtx, inner?: string, note?: string): string {
   const w = WORDS[l(c)];
-  return `<a href="${c.order}" class="jzb-btn" data-cta><span class="jzb-shine" aria-hidden="true"></span><span class="jzb-label"><span>${plain(c.words("t011"))}</span>${ARROW}</span><span class="jzb-inner">${esc(fill(inner ?? w.inner, c))}</span></a>${note ? `<p class="jzb-note">${note}</p>` : ""}`;
+  return `<a href="${c.order}" class="jzb-btn" data-cta><span class="jzb-shine" aria-hidden="true"></span><span class="jzb-label"><span>${plain(c.words("t011"))}</span>${ARROW}</span><span class="jzb-inner">${fill(esc(inner ?? w.inner), c)}</span></a>${note ? `<p class="jzb-note">${note}</p>` : ""}`;
 }
 
 /** The key on its own between two sections, in place of one of the old page's buttons. */
@@ -247,7 +250,7 @@ export function compare(c: JazzCtx): string {
   const rows = chart.rows
     .map(
       (row) =>
-        `<div class="dkx-row" role="row"><span class="dkx-label" role="rowheader">${esc(row.label)}</span><span class="dkx-cell dkx-win" role="cell">${MARKS.yes}<span>${esc(fill(row.kit, c))}</span></span>${row.alts
+        `<div class="dkx-row" role="row"><span class="dkx-label" role="rowheader">${esc(row.label)}</span><span class="dkx-cell dkx-win" role="cell">${MARKS.yes}<span>${fill(esc(row.kit), c)}</span></span>${row.alts
           .map((cell) => `<span class="dkx-cell dkx-${cell.ok === true ? "yes" : cell.ok === false ? "no" : "meh"}" role="cell">${mark(cell.ok)}<span>${esc(cell.text)}</span></span>`)
           .join("")}</div>`,
     )
@@ -274,7 +277,7 @@ export function summary(c: JazzCtx): string {
     })
     .join("\n");
   return `<div class="jz" id="buy"><section class="jz-sec jz-order"><div class="jz-wrap">
-<div class="jz-secHead"><h2 class="jz-h2">${esc(fill(w.summaryTitle, c))}</h2></div>
+<div class="jz-secHead"><h2 class="jz-h2">${fill(esc(w.summaryTitle), c)}</h2></div>
 <div class="jzv-stack">
 <div class="jzv-main"><div class="jzv-mainBox"><span class="jzv-ribbon">${worth(KIT_VALUE, c)} ${esc(w.value)}</span><img src="${IMG}kit-box-v3-640.webp" width="640" height="824" alt="MIDI Drum Kit" loading="lazy" decoding="async"></div>
 <div><p class="jzv-kicker">${esc(w.kit)}</p><p class="jzv-mainName">MIDI Drum Kit</p>${ticks(c.stack.items.map(bold), "jz-stack")}</div></div>
@@ -321,7 +324,7 @@ export function faq(c: JazzCtx): string {
   const more = FAQ[l(c)];
   const items: { q: string; a: string }[] = [];
   for (let i = 0; i <= old.length; i++) {
-    for (const m of more) if (m.at === i) items.push({ q: esc(m.q), a: esc(fill(m.a, c)) });
+    for (const m of more) if (m.at === i) items.push({ q: esc(m.q), a: fill(esc(m.a), c) });
     if (i < old.length) items.push(old[i]);
   }
   return `<div class="jz"><section class="jz-sec dk-faq"><div class="jz-wrap jz-col">

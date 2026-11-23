@@ -787,9 +787,10 @@ function swap(html: string, from: string, to: string, by: string): string {
  * The new landing from the old one's finished HTML (after its words, images and speed-ups).
  * words: the old page's copy by key, in this language and currency (./landing.ts).
  */
-export function newLanding(html: string, lang: Lang, currency: Currency, order: string, words: Words, price: number, stack: Copy["order"]["stack"]): string {
+// was: the Black Friday copy's struck price (../../../lib/blackFriday.ts), shown before `price` wherever the page says it.
+export function newLanding(html: string, lang: Lang, currency: Currency, order: string, words: Words, price: number, stack: Copy["order"]["stack"], was?: number): string {
   const l: L = lang === "it" ? "it" : "en";
-  const j: JazzCtx = { lang, currency, words, order, price, stack };
+  const j: JazzCtx = { lang, currency, words, order, price, stack, was };
   const c: Ctx = { lang: l, w: WORDS[l], words, currency, order, j };
   let out = html
     .replaceAll(`${IMG}kit-box.webp`, `${IMG}kit-box-v3.webp`)

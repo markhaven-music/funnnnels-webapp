@@ -29,6 +29,7 @@ import { pageEdits } from "@/lib/pageTexts";
 import { markupEdits, type TextPage } from "./texts";
 import type { Lang } from "./i18n";
 import { AFTER_LOAD, dollarFirst, escapeAttr, faster, frenchSpaces, mapText, unitSpaces } from "./landing";
+import { BF } from "@/lib/blackFriday";
 
 // The one-click upsell pages after the order (funnel.offers): ClickFunnels'
 // own pages, 1:1 (./cf/upsell-*.ts, made by tools/cf_clone.mjs --oto), with
@@ -339,7 +340,7 @@ export function headScripts(): string {
 /** The buttons, the "reserved for" countdown (also on ./[lang]/jazz-offer: its links with data-oto). */
 // yesNext: where a Yes goes when it isn't `next` (an offer that ends the funnel: the downloads).
 export function script(slug: string, offerId: string, lang: Lang, next: string, yesNext?: string): string {
-  const cfg = JSON.stringify({ funnel: slug, offer: offerId, lang, next, yesNext: yesNext ?? next, ui: UI[lang], ab: abCookieOf(slug) });
+  const cfg = JSON.stringify({ funnel: slug, offer: offerId, lang, next, yesNext: yesNext ?? next, ui: UI[lang], ab: abCookieOf(slug), bf: BF.funnels.includes(slug) ? { cookie: BF.cookie, ends: Date.parse(BF.ends) } : null });
   return `<script>
 (function () {
   var C = ${cfg};
@@ -397,7 +398,7 @@ export function script(slug: string, offerId: string, lang: Lang, next: string, 
     busy = true; label(a, C.ui.busy);
     fetch('/api/checkout/upsell', {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ funnel: C.funnel, offer: C.offer, order: main[1], lang: C.lang, bought: bought, variant: cookie(C.ab), ft_vid: cookie('ft_vid') })
+      body: JSON.stringify({ funnel: C.funnel, offer: C.offer, order: main[1], lang: C.lang, bought: bought, variant: (C.bf && Date.now() < C.bf.ends && cookie(C.bf.cookie)) || cookie(C.ab), ft_vid: cookie('ft_vid') })
     }).then(function (res) { return res.json().catch(function () { return {}; }).then(function (r) { r.code = res.status; return r; }); }).then(function (r) {
       if (r.status === 'paid') return go(r.id);
       if (r.status === 'owned') return go(null);
