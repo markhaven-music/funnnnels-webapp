@@ -89,7 +89,8 @@ type Info = { firstName: string; lastName: string; email: string };
 type Bump = { id: string; name: string; price: number; pitch: string; cover?: [string, string]; image?: string; headline?: string; body?: string[]; popup?: string; tickBox?: boolean };
 
 /** The tick-box offers this checkout shows: the list, or the single bump. */
-const offersOf = (p: Pick<Props, "bump" | "bumps">): Bump[] => p.bumps ?? (p.bump ? [{ id: "bump", ...p.bump }] : []);
+// Cheapest first, always (the owner, 2026-11-24: "the order bumps should always show from cheapest to priceiest").
+const offersOf = (p: Pick<Props, "bump" | "bumps">): Bump[] => [...(p.bumps ?? (p.bump ? [{ id: "bump", ...p.bump }] : []))].sort((a, b) => a.price - b.price);
 
 /** What the checkout APIs get: `bumps: [ids]` for a list, `bump: true/false` for the single one. */
 const bumpBody = (p: Pick<Props, "bumps">, picked: string[]) => (p.bumps ? { bumps: picked } : { bump: picked.length > 0 });

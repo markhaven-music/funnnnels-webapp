@@ -482,7 +482,8 @@ function PayBody({
   const chosen = offer.bumps.filter((b) => picked.includes(b.id));
   // While the bonus runs, its add-on isn't offered: it's already in the order.
   // The pop-up's add-on (./popupBump.ts) is asked on paying, not as a tick-box.
-  const offered = offer.bumps.filter((b) => b.id !== POPUP_BUMP && !(bonusLive && b.id === BONUS.item));
+  // Cheapest first, always (the owner, 2026-11-24: "the order bumps should always show from cheapest to priceiest").
+  const offered = offer.bumps.filter((b) => b.id !== POPUP_BUMP && !(bonusLive && b.id === BONUS.item)).sort((a, b) => a.price - b.price);
 
   const bonusBump = offer.bumps.find((b) => b.id === BONUS.item);
   const w = BONUS_WORDS[lang];

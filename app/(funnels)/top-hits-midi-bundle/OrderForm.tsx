@@ -395,7 +395,8 @@ function PayBody({
         </div>
       )}
 
-      {offer.bumps.map((b) => {
+      {/* Cheapest first, always (the owner, 2026-11-24). */}
+      {[...offer.bumps].sort((a, b) => a.price - b.price).map((b) => {
         const on = picked.includes(b.id);
         const full = bumpFull(b.id, b.price);
         return (
