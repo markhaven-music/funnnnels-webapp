@@ -86,8 +86,14 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
   const [info, setInfo] = useState<Info>({ firstName: "", lastName: "", email: "" });
   const [picked, setPicked] = useState<string[]>([]);
   const [method, setMethod] = useState<Method>("card");
-  const price = offer.price;
-  const total = price + offer.bumps.filter((b) => picked.includes(b.id)).reduce((n, b) => n + b.price, 0);
+  // The server's price when it differs from the one the page was built with (the launch
+  // price ended while the tab was open): the next click then pays the new total, not the
+  // same refused one again (a buyer was stuck on "Check the total and pay again", 2026-11-23).
+  const [repriced, setRepriced] = useState<number | null>(null);
+  const bumpsTotal = offer.bumps.filter((b) => picked.includes(b.id)).reduce((n, b) => n + b.price, 0);
+  const price = repriced ?? offer.price;
+  const total = price + bumpsTotal;
+  const onRepriced = (amount: number) => setRepriced(Math.round((amount - bumpsTotal) * 100) / 100);
   // Stripe.js (≈150 KB of script) loads once the buyer starts on the form, not
   // with the page, which kept the order page under 90 on PageSpeed mobile (docs/page-speed.md).
   const [wanted, setWanted] = useState(false);
@@ -96,7 +102,7 @@ export function OrderForm({ currency, country, publishableKey, afterOrder, upsel
   const stripePromise = useMemo(() => (publishableKey && (wanted || touched) ? stripeFor(publishableKey) : null), [publishableKey, wanted, touched]);
   // Paid by card: the upsell, unless its product is already in the order.
   const next = upsell && picked.includes(upsell) ? sells.thankYou : afterOrder;
-  const state: PayState = { currency, country, info, method, picked, setPicked, total, next, offer, slug: sells.slug };
+  const state: PayState = { currency, country, info, method, picked, setPicked, total, next, offer, slug: sells.slug, onRepriced };
 
   return (
     <Words.Provider value={w}>
@@ -256,6 +262,7 @@ type PayState = {
   next: string;
   offer: OrderOffer;
   slug: string;
+  onRepriced: (amount: number) => void;
 };
 
 function CardPay({ stripePromise, ...props }: PayState & { stripePromise: ReturnType<typeof loadStripe> }) {
@@ -283,6 +290,7 @@ function CardPay({ stripePromise, ...props }: PayState & { stripePromise: Return
       }),
     });
     const json = await res.json().catch(() => ({}));
+    if (res.status === 409 && typeof json.amount === "number") props.onRepriced(json.amount);
     if (!res.ok || !json.clientSecret) throw new Error(json.error ?? "Payment couldn't start.");
     return json.clientSecret;
   }
@@ -331,6 +339,7 @@ function PayBody({
   total,
   offer,
   slug,
+  onRepriced,
   onCard,
   cardPaying,
   cardOff,
@@ -362,6 +371,7 @@ function PayBody({
         }),
       });
       const json = await res.json().catch(() => ({}));
+      if (res.status === 409 && typeof json.amount === "number") onRepriced(json.amount);
       if (!res.ok || !json.approveUrl) throw new Error(json.error ?? "PayPal couldn't start.");
       window.location.assign(json.approveUrl);
     } catch (err) {

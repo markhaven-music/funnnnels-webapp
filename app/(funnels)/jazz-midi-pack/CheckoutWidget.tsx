@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 // "pure": Stripe.js loads when loadStripe is called, not as soon as this file does.
 import { loadStripe } from "@stripe/stripe-js/pure";
 import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
@@ -119,7 +119,22 @@ export function CheckoutWidget(props: Props) {
   }, [picked]);
   const [method, setMethod] = useState<Method>("card");
   const offers = offersOf(props);
-  const total = props.price + offers.filter((o) => picked.includes(o.id)).reduce((sum, o) => sum + o.price, 0);
+  const addOns = offers.filter((o) => picked.includes(o.id)).reduce((sum, o) => sum + o.price, 0);
+  // The server's price when it differs from the page's (a launch price ended while the tab was
+  // open): the next click pays the new total instead of the same refused one (a buyer was
+  // stuck on "Check the total and pay again", 2026-11-23). Sent by repriced() below.
+  const [repriced, setRepriced] = useState<number | null>(null);
+  useEffect(() => {
+    const on = (e: Event) => {
+      const amount = (e as CustomEvent<number>).detail;
+      setRepriced(Math.round((amount - addOnsRef.current) * 100) / 100);
+    };
+    window.addEventListener(REPRICED, on);
+    return () => window.removeEventListener(REPRICED, on);
+  }, []);
+  const addOnsRef = useRef(addOns);
+  addOnsRef.current = addOns;
+  const total = (repriced ?? props.price) + addOns;
   const toggle = (id: string, on: boolean) => setPicked((now) => (on ? [...now.filter((x) => x !== id), id] : now.filter((x) => x !== id)));
   // The landing popup's answer, read once the page is shown: a prerendered page mounts
   // while the popup is still up, before the buyer answered.
@@ -390,6 +405,7 @@ function PayStep({ stripePromise, ...props }: Props & BodyState & { stripePromis
     });
     const json = await res.json().catch(() => ({}));
     if (json.bonusExpired) endJazzBonus();
+    if (!props.cart) repriced(res.status, json);
     if (!res.ok || !json.clientSecret) throw new Error(json.error ?? "Payment couldn't start.");
     return json.clientSecret;
   }
@@ -495,6 +511,7 @@ function PayStepBody({
       });
       const json = await res.json().catch(() => ({}));
       if (json.bonusExpired) endJazzBonus();
+      if (!cart) repriced(res.status, json);
       if (!res.ok || !json.approveUrl) throw new Error(json.error ?? "PayPal couldn't start.");
       // PayPal's page takes over; it sends the buyer back to the thank-you page.
       window.location.assign(json.approveUrl);
@@ -739,4 +756,10 @@ function LockGlyph() {
       />
     </svg>
   );
+}
+
+const REPRICED = "fv:repriced";
+/** A 409 with the server's total: the widget shows that total from now on. */
+function repriced(status: number, json: { amount?: unknown }) {
+  if (status === 409 && typeof json.amount === "number") window.dispatchEvent(new CustomEvent(REPRICED, { detail: json.amount }));
 }
