@@ -22,6 +22,7 @@ import { funnel, launch, launchOn } from "../../funnel";
 import { TH_BONUS, TH_BONUS_WORDS } from "../../fiveMinBonus";
 import { BUMP_COPY, LANDING, ORDER } from "../../words";
 import { BfDeal } from "@/app/(funnels)/_kit/BfClock";
+import { sitewideOn } from "@/lib/blackFriday";
 
 // This funnel's order page, the Jazz order page's (../../../jazz-midi-pack/order) as Famous Beats
 // has it: red bar, the 5-minute bonus (the MIDI Drum Kit Expansions, ../../fiveMinBonus.ts),
@@ -110,7 +111,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
           </>
         ) : (
           <>
-            <BfDeal currency={currency} regular={97} />
+            {sitewideOn("top-hits-chords") ? <BfDeal currency={currency} regular={97} /> : <><b>BLACK FRIDAY:</b> {w.bfbar}</>}
           </>
         )}
       </div>

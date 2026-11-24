@@ -118,9 +118,15 @@ export const BF_FUNNELS: Record<string, number> = {
 export const BF_SITEWIDE_OFF: Record<string, string> = {
   "midi-drum-kit": "2026-11-24T23:01:00Z",
   "jazz-midi-pack": "2026-11-24T23:01:00Z",
+  // Then the rest of the store-wide sale, back at 27 / 97 and their own red bar ("Riportali", 2026-11-25 00:35 Italy).
+  "famous-beats-bundle": "2026-11-24T23:35:49Z",
+  "top-hits-midi-bundle": "2026-11-24T23:35:49Z",
+  "top-hits-chords": "2026-11-24T23:35:49Z",
 };
 /** When a funnel's own pages stopped being part of the store-wide sale (ms), or BF_ENDS_MS. */
 export const sitewideUntil = (funnel: string) => (BF_SITEWIDE_OFF[funnel] ? Date.parse(BF_SITEWIDE_OFF[funnel]) : BF_ENDS_MS);
+/** Whether a funnel's own pages are still in the store-wide sale (their red bar shows the deal and its clock). */
+export const sitewideOn = (funnel: string) => Date.now() < sitewideUntil(funnel);
 /** The funnels whose own pages are still in the store-wide sale. */
 const sitewideNow = () => Object.keys(BF_FUNNELS).filter((f) => Date.now() < sitewideUntil(f));
 

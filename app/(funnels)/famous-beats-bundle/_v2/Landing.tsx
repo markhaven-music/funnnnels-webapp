@@ -21,6 +21,7 @@ import vs from "../../jazz-midi-pack/value.module.css";
 import shot from "../../jazz-midi-pack/shot.module.css";
 import f from "../_v2/fbb.module.css";
 import { BfDeal } from "@/app/(funnels)/_kit/BfClock";
+import { sitewideOn } from "@/lib/blackFriday";
 
 // The Famous Beats Bundle sales page, built on the Jazz page's own CSS and in its order
 // (2026-11-09, "Ne crei uno più simile a quello jazz": the first version copied the Drunk Swing
@@ -605,7 +606,7 @@ export async function FamousBeatsLanding({ currency, variant }: { currency: Curr
       {popup && <script dangerouslySetInnerHTML={{ __html: fbbPopupJs(priceIn(popup.price, currency), currency) }} />}
       {/* Red, on top, like the Jazz page's. */}
       <div className={s.bfbar}>
-        <BfDeal currency={currency} regular={27} />
+        {sitewideOn("famous-beats-bundle") ? <BfDeal currency={currency} regular={27} /> : <><b>BLACK FRIDAY:</b> 90% Sale Ends Soon</>}
       </div>
 
       {ORDER[variant].map((name) => (

@@ -17,6 +17,7 @@ import { Wistia } from "../Wistia";
 import { LANDING } from "../words";
 import s from "../landing.module.css";
 import { BfDeal } from "@/app/(funnels)/_kit/BfClock";
+import { sitewideOn } from "@/lib/blackFriday";
 
 // The TOP HITS MIDI Bundle sales page, a 1:1 copy of the ClickFunnels one
 // (thegrind.studio/top-hits-midi-bundle--2ff37). Words in ../words.ts (lists in
@@ -51,7 +52,7 @@ export default async function TopHitsPage({ params }: { params: Promise<{ curren
     <main className={`${s.page} ${fontVars}`}>
       <Tracking value={price} currency={currency} />
       <Beacon funnel={funnel.slug} page="landing" />
-      <div className={s.topbar}><BfDeal currency={currency} regular={97} /></div>
+      <div className={s.topbar}>{sitewideOn("top-hits-midi-bundle") ? <BfDeal currency={currency} regular={97} /> : w.topbar}</div>
 
       <section className={s.hero}>
         <div className={s.wrap}>
