@@ -1,3 +1,4 @@
+import { bfLabel } from "@/lib/blackFriday";
 import type { Currency } from "@/lib/geo";
 import type { Copy } from "./copy";
 import { money, type Lang } from "./i18n";
@@ -207,7 +208,7 @@ const fill = (s: string, c: JazzCtx) => s.replaceAll("{price}", priceOf(c));
 /** The one call to action, the Jazz page's key (jazz-midi-pack/Cta.tsx): the old page's "GET THE PACK!" on it. */
 export function key(c: JazzCtx, inner?: string, note?: string): string {
   const w = WORDS[l(c)];
-  return `<a href="${c.order}" class="jzb-btn" data-cta><span class="jzb-shine" aria-hidden="true"></span><span class="jzb-label"><span>${plain(c.words("t011"))}</span>${ARROW}</span><span class="jzb-inner">${esc(fill(inner ?? w.inner, c))}</span></a>${note ? `<p class="jzb-note">${note}</p>` : ""}`;
+  return `<a href="${c.order}" class="jzb-btn" data-cta><span class="jzb-shine" aria-hidden="true"></span><span class="jzb-label"><span>${bfLabel(plain(c.words("t011")), c.order, c.lang)}</span>${ARROW}</span><span class="jzb-inner">${esc(fill(inner ?? w.inner, c))}</span></a>${note ? `<p class="jzb-note">${note}</p>` : ""}`;
 }
 
 /** The key on its own between two sections, in place of one of the old page's buttons. */

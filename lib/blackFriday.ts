@@ -29,3 +29,13 @@ export function bfDealHtml(regular: string, sale: string, lang = "en"): string {
   const ends = it ? "Finisce tra" : "Ends in";
   return `<span style="display:block;font-size:clamp(15px,2.2vw,19px);line-height:1.4"><b style="font-weight:900">${deal}</b><span style="white-space:nowrap"> · <s style="opacity:.75">${regular}</s> <b style="font-weight:900">${sale}</b></span> <span style="display:inline-block">· ${limited} · ${ends} <b id="bf-clock" style="font-variant-numeric:tabular-nums;white-space:nowrap">–d ––h ––m ––s</b></span></span><script>(function(){var e=${BF_ENDS_MS},el=document.getElementById("bf-clock");function p(n){return(n<10?"0":"")+n}function t(){var s=Math.max(0,Math.floor((e-Date.now())/1e3));el.textContent=Math.floor(s/86400)+"d "+p(Math.floor(s%86400/3600))+"h "+p(Math.floor(s%3600/60))+"m "+p(s%60)+"s"}t();setInterval(t,1e3)})();</script>`;
 }
+
+/** While the sale runs, a front-end's buy button says the deal ("scrivi black friday anche sui bottoni", 2026-11-24):
+ * any button that goes to one of the BF funnels' order pages. Upsell and other buttons keep their words. */
+export function bfLabel(label: string, href = "", lang = "en"): string {
+  if (Date.now() > BF_ENDS_MS) return label;
+  if (href && !new RegExp(`/(${Object.keys(BF_FUNNELS).join("|")})/order`).test(href)) return label;
+  const upper = label === label.toUpperCase();
+  const deal = lang === "it" ? "Prendi l'offerta Black Friday" : "Get the Black Friday deal";
+  return upper ? deal.toUpperCase() + (label.endsWith("!") ? "!" : "") : deal;
+}

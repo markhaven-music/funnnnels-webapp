@@ -7,6 +7,7 @@ import { funnel } from "./funnel";
 import { Rich, sign } from "./Rich";
 import { LANDING, type CompareWords, type StackWords } from "./words";
 import s from "./landing.module.css";
+import { bfLabel } from "@/lib/blackFriday";
 
 // The landing's repeated blocks: the value stack, the two green buttons, the comparison table.
 // `price`: the bundle's, as dashboard → Products has it; the words that say
@@ -53,7 +54,7 @@ const ORDER = funnel.checkout.orderPage;
 export function GetThePack({ w = LANDING.cta }: { w?: { main: string; sub: string } }) {
   return (
     <a href={ORDER} className={s.cta} data-cta>
-      <span className={s.ctaMain}>{w.main}</span>
+      <span className={s.ctaMain}>{bfLabel(w.main, ORDER)}</span>
       <span className={s.ctaSub}>{w.sub}</span>
     </a>
   );
