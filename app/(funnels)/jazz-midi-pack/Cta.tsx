@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import b from "./btn.module.css";
 import { funnel } from "./funnel";
+import { bfLabel } from "@/lib/blackFriday";
 
 // The one call to action. Same label everywhere; goes to the order page.
 // `data-cta` is what Tracking listens to for LandingCTAClick.
@@ -25,7 +26,7 @@ export function Cta({
       <a href={href} className={b.btn} data-cta>
         <span className={b.shine} aria-hidden />
         <span className={b.label}>
-          <span>{label}</span>
+          <span>{bfLabel(label, href)}</span>
           <Arrow className={b.arrow} />
         </span>
         {inner && <span className={b.inner}>{inner}</span>}

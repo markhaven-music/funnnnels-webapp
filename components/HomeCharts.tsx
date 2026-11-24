@@ -79,15 +79,15 @@ const spendCache = new Map<string, { at: number; data: MetaDaily }>();
 const SPEND_TTL = 2 * 60_000;
 const FAILED: MetaDaily = { connected: false, reason: "Couldn't load the ad spend." };
 
-function useAdSpend(since: string | undefined, until: string | undefined, reload: number): MetaDaily | null {
-  const key = `${since}..${until}#${reload}`;
+function useAdSpend(since: string | undefined, until: string | undefined, reload: number, era = "all"): MetaDaily | null {
+  const key = `${since}..${until}@${era}#${reload}`;
   const [got, setGot] = useState<{ key: string; data: MetaDaily } | null>(null);
   useEffect(() => {
     if (!since || !until) return;
     const hit = spendCache.get(key);
     if (hit && Date.now() - hit.at < SPEND_TTL) return;
     let gone = false;
-    fetch(`/api/analytics/spend?since=${since}&until=${until}`, { cache: "no-store" })
+    fetch(`/api/analytics/spend?since=${since}&until=${until}&era=${era}`, { cache: "no-store" })
       .then((res) => (res.ok ? (res.json() as Promise<MetaDaily>) : null))
       .then((m) => {
         if (gone) return;
@@ -99,7 +99,7 @@ function useAdSpend(since: string | undefined, until: string | undefined, reload
     return () => {
       gone = true;
     };
-  }, [key, since, until, reload]);
+  }, [key, since, until, reload, era]);
   return got?.key === key ? got.data : (spendCache.get(key)?.data ?? null);
 }
 
@@ -470,7 +470,7 @@ export function Performance({ a, cur, periodName, onRefresh, refreshing, updated
   const gid = useId().replace(/[^a-zA-Z0-9]/g, "");
   const days = a?.days ?? [];
   const before = a?.previous ?? [];
-  const spend = useAdSpend((before[0] ?? days[0])?.day, days[days.length - 1]?.day, reload);
+  const spend = useAdSpend((before[0] ?? days[0])?.day, days[days.length - 1]?.day, reload, a?.era ?? "all");
 
   if (!a) {
     return (

@@ -12,6 +12,7 @@ import { RangePicker, useRange } from "@/components/RangePicker";
 import { previousName, rangePhrase, type Range } from "@/lib/range";
 import type { FunnelStatus, StoredFunnel } from "@/lib/blocks";
 import { insights, type Insight } from "@/lib/insights";
+import { BF_FIRST_DAY, BF_FROM_MS, BF_LAST_DAY, BF_UNTIL_MS, italyTime } from "@/lib/bfEra";
 import s from "./home.module.css";
 
 // The dashboard's first screen. One filter row (the range and the currency)
@@ -21,11 +22,11 @@ import s from "./home.module.css";
 // Everything comes from lib/analytics.ts and Meta (docs/design.md: real
 // numbers only).
 
-const CURRENCY_KEY = "fv:home-currency";
+export const CURRENCY_KEY = "fv:home-currency";
 
 // ─── Revenue by funnel, visit → sale ─────────────────────────────────────────
 
-function FunnelRevenue({ a, cur }: { a: Analytics; cur: Currency }) {
+export function FunnelRevenue({ a, cur }: { a: Analytics; cur: Currency }) {
   const c = (v: number) => money(fromEur(v, cur, a.usdToEur), cur);
   const cx = (v: number) => moneyExact(fromEur(v, cur, a.usdToEur), cur);
   const rows = a.funnels.filter((f) => f.total.revenue > 0 || f.total.visitors > 0).sort((x, y) => y.total.revenue - x.total.revenue);
@@ -53,7 +54,7 @@ function FunnelRevenue({ a, cur }: { a: Analytics; cur: Currency }) {
   );
 }
 
-function Steps({ a }: { a: Analytics }) {
+export function Steps({ a }: { a: Analytics }) {
   const t = a.funnels.reduce(
     (n, f) => ({ v: n.v + f.total.visitors, o: n.o + f.total.orderViews, c: n.c + f.total.checkouts, p: n.p + f.total.ratedOrders }),
     { v: 0, o: 0, c: 0, p: 0 },
@@ -126,9 +127,11 @@ type Props = {
   funnels: StoredFunnel[];
   /** The last 28 days, loaded by Dashboard (null while it loads). */
   analytics: Analytics | null;
+  /** Opens dashboard → Black Friday, whose numbers this page leaves out. */
+  onBlackFriday?: () => void;
 };
 
-export function DashboardHome({ funnels: all, analytics }: Props) {
+export function DashboardHome({ funnels: all, analytics, onBlackFriday }: Props) {
   const [tab, setTab] = useState<TabKey>("all");
   // The lead magnets (free packs) have their own section under the funnels that sell.
   const funnels = useMemo(() => all.filter((f) => !isApart(f)), [all]);
@@ -145,7 +148,7 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
   const [firstAt] = useState(() => Date.now());
   const refresh = () => {
     setRefreshing(true);
-    fetch(`/api/analytics?range=${range}`, { cache: "no-store" })
+    fetch(`/api/analytics?range=${range}&era=regular`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
       .then((a) => {
         if (!a) return;
@@ -165,7 +168,7 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
   useEffect(() => {
     // 28 days comes with the page (Dashboard), until a refresh makes it as old as the rest.
     if (loaded[range] || (range === "28d" && !refreshed)) return;
-    fetch(`/api/analytics?range=${range}`, { cache: "no-store" })
+    fetch(`/api/analytics?range=${range}&era=regular`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
       .then((a) => {
         if (!a) return;
@@ -259,6 +262,12 @@ export function DashboardHome({ funnels: all, analytics }: Props) {
         )}
         {data?.trackingSince && data.since && data.since < data.trackingSince && (
           <span className={s.note}>Visitors counted since {dayLabel(data.trackingSince, { day: "numeric", month: "short" })}</span>
+        )}
+        {/* The Black Friday window has its own dashboard (lib/bfEra.ts): said where the range is picked. */}
+        {Date.now() >= BF_FROM_MS && data && (data.since ?? "") <= BF_LAST_DAY && data.until >= BF_FIRST_DAY && (
+          <button type="button" className={s.bfNote} onClick={onBlackFriday}>
+            Full price only: Black Friday ({italyTime(BF_FROM_MS)} → {italyTime(BF_UNTIL_MS)}) left out · see Black Friday →
+          </button>
         )}
         {data && !data.sources.stripe && <span className={s.warn}>Stripe isn&apos;t connected on this server: card sales are missing.</span>}
       </div>

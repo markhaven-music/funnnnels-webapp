@@ -1,3 +1,4 @@
+import { bfDealHtml } from "@/lib/blackFriday";
 import type { Currency } from "@/lib/geo";
 import { SIGN } from "@/lib/geo";
 import clips from "@/public/funnels/midi-drum-kit/player/v6/clips.json";
@@ -839,6 +840,10 @@ export function newLanding(html: string, lang: Lang, currency: Currency, order: 
     out = out.replace(/<link rel="preload" as="image" href="\/funnels\/midi-drum-kit\/vsl-[a-z0-9-]+\.webp" fetchpriority="high">\n/, ""); // the still, gone with the player
     out = out.replace('<link rel="preload" as="image" href="/funnels/midi-drum-kit/hero-bg.webp" fetchpriority="high">\n', ""); // the old hero's background
   }
+  // Black Friday (lib/blackFriday.ts): the red sticky bar on top says the whole deal, with its clock.
+  const bfAmt = (v: number) => money(Number.isInteger(v) ? v : (v.toFixed(2) as unknown as number), { currency, lang } as Ctx);
+  const deal = bfDealHtml(bfAmt(27), bfAmt(price), lang, "midi-drum-kit");
+  if (deal) out = out.replace(/(data-t="t001"[^>]*>)[\s\S]*?(<\/span>)(?=\s*<\/span>\s*<\/h1>)/, (_m, a: string, b: string) => a + deal + b);
   const cfg = {
     sound: c.w.sound, change: c.w.change,
     play: c.w.play, stop: c.w.stop, loading: c.w.loading, of: c.w.of, all: c.w.all,

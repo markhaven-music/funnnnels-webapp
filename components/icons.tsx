@@ -172,6 +172,12 @@ export const I = {
       <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" />
     </Base>
   ),
+  tag: (p: IconProps) => (
+    <Base {...p}>
+      <path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z" />
+      <circle cx="7.5" cy="7.5" r="1.5" />
+    </Base>
+  ),
   layers: (p: IconProps) => (
     <Base {...p}>
       <path d="M12 3 2 8l10 5 10-5-10-5z" />

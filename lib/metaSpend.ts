@@ -14,6 +14,7 @@
 // 10 minutes. Amounts in the account's currency (EUR), never converted.
 
 import { addDays, dayIn, instantAt } from "@/lib/tz";
+import { BF_FIRST_DAY, BF_FROM_MS, BF_UNTIL_MS, bfShare, eraShare, type Era } from "@/lib/bfEra";
 
 const GRAPH = "https://graph.facebook.com/v23.0";
 const DEFAULT_ACCOUNT = "462189981361126";
@@ -77,7 +78,12 @@ export type MetaDaily = { connected: false; reason: string } | { connected: true
  * Angeles days, 9 hours behind Warsaw, so the spend is asked hour by hour and
  * each hour put on the Warsaw day it fell in (lib/tz.ts).
  */
-export async function spendByDay(since: string, until: string): Promise<MetaDaily> {
+/**
+ * era (lib/bfEra.ts): "regular" leaves out the hours inside the Black Friday window, "bf" keeps only
+ * them on its own days and counts the days before it at full price (the comparison); an hour cut
+ * by the window is shared out by its minutes.
+ */
+export async function spendByDay(since: string, until: string, era: Era = "all"): Promise<MetaDaily> {
   const token = process.env.META_ADS_TOKEN;
   if (!token) return { connected: false, reason: "Meta isn't connected (no META_ADS_TOKEN)." };
   if (since < SPEND_SINCE) since = SPEND_SINCE;
@@ -102,15 +108,19 @@ export async function spendByDay(since: string, until: string): Promise<MetaDail
   for (const r of rows) {
     const hour = Number((r[HOURLY] ?? "").slice(0, 2));
     if (!r.date_start || !Number.isFinite(hour)) continue;
-    const day = dayIn(instantAt(r.date_start, hour, ACCOUNT_TZ));
+    const start = instantAt(r.date_start, hour, ACCOUNT_TZ);
+    const day = dayIn(start);
     if (day < since || day > until) continue;
+    const w = eraShare(era === "bf" && day < BF_FIRST_DAY ? "regular" : era, start, start + 3_600_000);
     const d = by.get(day) ?? { day, spend: 0, impressions: 0, clicks: 0 };
-    d.spend += Number(r.spend ?? 0);
-    d.impressions += Number(r.impressions ?? 0);
-    d.clicks += Number(r.inline_link_clicks ?? 0);
+    d.spend += Number(r.spend ?? 0) * w;
+    d.impressions += Number(r.impressions ?? 0) * w;
+    d.clicks += Number(r.inline_link_clicks ?? 0) * w;
     by.set(day, d);
   }
-  const days = [...by.values()].map((d) => ({ ...d, spend: Math.round(d.spend * 100) / 100 })).sort((a, b) => (a.day < b.day ? -1 : 1));
+  const days = [...by.values()]
+    .map((d) => ({ ...d, spend: Math.round(d.spend * 100) / 100, impressions: Math.round(d.impressions), clicks: Math.round(d.clicks) }))
+    .sort((a, b) => (a.day < b.day ? -1 : 1));
   return { connected: true, currency: rows[0]?.account_currency ?? "EUR", days };
 }
 
@@ -149,8 +159,49 @@ export async function spendByPack(labels: string[], since: string, until: string
 
 export type AdSpend = { adId: string; adName: string; campaignName: string; spend: number };
 
-/** Spend per ad between two days (YYYY-MM-DD, inclusive), for the funnel cards (lib/funnelSpend.ts). */
-export async function spendByAd(since: string, until: string): Promise<{ connected: false; reason: string } | { connected: true; currency: string; ads: AdSpend[] }> {
+/**
+ * Each ad's spend inside the Black Friday window (lib/bfEra.ts), asked hour by hour for the window's
+ * Los Angeles days only, and only the days between `since` and `until`; an hour cut by the window
+ * shared out by its minutes.
+ */
+async function bfSpendByAd(since: string, until: string, token: string): Promise<Map<string, AdSpend> | { reason: string }> {
+  const first = dayIn(BF_FROM_MS, ACCOUNT_TZ);
+  const last = dayIn(Math.min(BF_UNTIL_MS - 1, Date.now()), ACCOUNT_TZ);
+  const from = since > first ? since : first;
+  const to = until < last ? until : last;
+  const out = new Map<string, AdSpend>();
+  if (from > to) return out;
+  const rows = (await insightRows(
+    new URLSearchParams({
+      level: "ad",
+      fields: "ad_id,ad_name,campaign_name,spend",
+      time_increment: "1",
+      breakdowns: HOURLY,
+      time_range: JSON.stringify({ since: from, until: to }),
+      limit: "500",
+      access_token: token,
+    }),
+    to,
+  )) as (Row & { ad_id?: string; ad_name?: string; [HOURLY]?: string })[] | { reason: string };
+  if (!Array.isArray(rows)) return rows;
+  for (const r of rows) {
+    const hour = Number((r[HOURLY] ?? "").slice(0, 2));
+    if (!r.ad_id || !r.date_start || !Number.isFinite(hour)) continue;
+    const start = instantAt(r.date_start, hour, ACCOUNT_TZ);
+    const spend = Number(r.spend ?? 0) * bfShare(start, start + 3_600_000);
+    if (!spend) continue;
+    const a = out.get(r.ad_id) ?? { adId: r.ad_id, adName: r.ad_name ?? "", campaignName: r.campaign_name ?? "", spend: 0 };
+    a.spend += spend;
+    out.set(r.ad_id, a);
+  }
+  return out;
+}
+
+/**
+ * Spend per ad between two days (YYYY-MM-DD, inclusive), for the funnel cards (lib/funnelSpend.ts).
+ * era (lib/bfEra.ts): "regular" less the Black Friday hours, "bf" only them.
+ */
+export async function spendByAd(since: string, until: string, era: Era = "all"): Promise<{ connected: false; reason: string } | { connected: true; currency: string; ads: AdSpend[] }> {
   const token = process.env.META_ADS_TOKEN;
   if (!token) return { connected: false, reason: "Meta isn't connected (no META_ADS_TOKEN)." };
   if (since < SPEND_SINCE) since = SPEND_SINCE;
@@ -166,9 +217,11 @@ export async function spendByAd(since: string, until: string): Promise<{ connect
     until,
   )) as (Row & { ad_id?: string; ad_name?: string })[] | { reason: string };
   if (!Array.isArray(rows)) return { connected: false, reason: rows.reason };
-  return {
-    connected: true,
-    currency: rows[0]?.account_currency ?? "EUR",
-    ads: rows.filter((r) => r.ad_id && Number(r.spend ?? 0) > 0).map((r) => ({ adId: r.ad_id!, adName: r.ad_name ?? "", campaignName: r.campaign_name ?? "", spend: Number(r.spend ?? 0) })),
-  };
+  const currency = rows[0]?.account_currency ?? "EUR";
+  const ads = rows.filter((r) => r.ad_id && Number(r.spend ?? 0) > 0).map((r) => ({ adId: r.ad_id!, adName: r.ad_name ?? "", campaignName: r.campaign_name ?? "", spend: Number(r.spend ?? 0) }));
+  if (era === "all") return { connected: true, currency, ads };
+  const bf = await bfSpendByAd(since, until, token);
+  if (!(bf instanceof Map)) return { connected: false, reason: bf.reason };
+  if (era === "bf") return { connected: true, currency, ads: [...bf.values()].filter((a) => a.spend > 0) };
+  return { connected: true, currency, ads: ads.map((a) => ({ ...a, spend: Math.max(0, a.spend - (bf.get(a.adId)?.spend ?? 0)) })).filter((a) => a.spend > 0) };
 }
