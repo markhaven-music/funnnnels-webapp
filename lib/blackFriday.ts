@@ -1,0 +1,27 @@
+// Black Friday 2026 ("vorrei switchare a 9.99 per black friday con un timer e vedere che succede.
+// solo prezzo iniziale ma voglio anche misurare conversioni vs prima", 2026-11-24; every front-end,
+// "fino al black friday e se va bene allunghiamo a monday").
+// The price itself lives in funnel_items (dashboard → Products): set to 999 at BF_FROM, put back
+// by the pg_cron job `black-friday-close` at BF_ENDS (db/black-friday-2026.sql). To extend to
+// Cyber Monday: move BF_ENDS here AND reschedule that job.
+// Measured in Analytics as a before/after per funnel (lib/analytics.ts bfTest).
+
+/** When the €9.99 prices went live (UTC). */
+export const BF_FROM = "2026-11-24T13:31:00Z";
+/** Friday 28 November, 23:59 Italy (UTC). */
+export const BF_ENDS = "2026-11-28T22:59:00Z";
+export const BF_ENDS_MS = Date.parse(BF_ENDS);
+/** The funnels whose main product is €9.99 until BF_ENDS, and the price they go back to (euro = dollar). */
+export const BF_FUNNELS: Record<string, number> = {
+  "midi-drum-kit": 27,
+  "jazz-midi-pack": 27,
+  "famous-beats-bundle": 27,
+  "top-hits-midi-bundle": 97,
+  "top-hits-chords": 97,
+};
+
+/** The red bar with its clock as plain HTML, for the pages built as strings (the Drum Kit landing). Empty once over. */
+export function bfBarHtml(text = "<b>BLACK FRIDAY:</b> 90% Sale Ends Soon"): string {
+  if (Date.now() > BF_ENDS_MS) return "";
+  return `<div style="background:#d61f1f;color:#fff;text-align:center;padding:10px 12px;font-size:15px;font-weight:600;line-height:1.35">${text}<span style="font-variant-numeric:tabular-nums;white-space:nowrap"> · ends in <b id="bf-clock">–d ––h ––m ––s</b></span></div><script>(function(){var e=${BF_ENDS_MS},el=document.getElementById("bf-clock");function p(n){return(n<10?"0":"")+n}function t(){var s=Math.max(0,Math.floor((e-Date.now())/1e3));el.textContent=Math.floor(s/86400)+"d "+p(Math.floor(s%86400/3600))+"h "+p(Math.floor(s%3600/60))+"m "+p(s%60)+"s"}t();setInterval(t,1e3)})();</script>`;
+}

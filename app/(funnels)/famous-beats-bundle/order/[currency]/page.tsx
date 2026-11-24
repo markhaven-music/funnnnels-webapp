@@ -22,6 +22,7 @@ import { FBB_LP } from "../../landingTest";
 import { FBB_BONUS, FBB_BONUS_WORDS } from "../../fiveMinBonus";
 import { FBB_POPUP } from "../../popupOffer";
 import { BUMP_COPY, LANDING, ORDER as w } from "../../_v2/words";
+import { BfClock } from "@/app/(funnels)/_kit/BfClock";
 
 // The order page, the Jazz order page's (../../../../jazz-midi-pack/order): red bar, the
 // 5-minute bonus (the MIDI Drum Kit Expansions, ../../../fiveMinBonus.ts), the box and
@@ -96,7 +97,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
       {ex && <script dangerouslySetInnerHTML={{ __html: bonusScript(FBB_BONUS.endKey) }} />}
       <div className={s.bfbar}>
-        <b>BLACK FRIDAY:</b> {w.bfbar}
+        <b>BLACK FRIDAY:</b> {w.bfbar}<BfClock />
       </div>
       <div className={s.topband}>
         <header className={`${s.wrap} ${s.topbar}`}>

@@ -1,3 +1,4 @@
+import { bfBarHtml } from "@/lib/blackFriday";
 import type { Currency } from "@/lib/geo";
 import type { Copy } from "./copy";
 import { money, type Lang } from "./i18n";
@@ -222,7 +223,7 @@ export function hero(c: JazzCtx, video: string): string {
   const bullets = ["t005", "t006", "t007", "t008", "t009", "t010"].map((k) => c.words(k).replace(/1[.,]?050/g, w.count));
   return `<div class="jz" id="dk-hero"><section class="jz-hero">
 <div class="jz-heroBg" aria-hidden="true"></div>
-<div class="jz-topband"><header class="jz-wrap jz-topbar"><span class="jz-logo"><img src="${IMG}logo.webp" alt="GRIND STUDIO" width="360" height="42"></span><span class="jz-tag"><span class="jz-dot" aria-hidden="true"></span>${esc(w.tag)}</span></header></div>
+${bfBarHtml()}<div class="jz-topband"><header class="jz-wrap jz-topbar"><span class="jz-logo"><img src="${IMG}logo.webp" alt="GRIND STUDIO" width="360" height="42"></span><span class="jz-tag"><span class="jz-dot" aria-hidden="true"></span>${esc(w.tag)}</span></header></div>
 <div class="jz-wrap jz-heroCenter">
 <p class="jz-heroPre">${esc(w.heroPre)}</p>
 ${HL_KEYS.map((k) => `<h1 class="jz-heroHead" data-hl="${k}">${marked(HEADLINES[l(c)][k])}</h1>`).join("\n")}

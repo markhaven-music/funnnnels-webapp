@@ -21,6 +21,7 @@ import { Clock } from "../../Countdown";
 import { funnel, launch, launchOn } from "../../funnel";
 import { TH_BONUS, TH_BONUS_WORDS } from "../../fiveMinBonus";
 import { BUMP_COPY, LANDING, ORDER } from "../../words";
+import { BfClock } from "@/app/(funnels)/_kit/BfClock";
 
 // This funnel's order page, the Jazz order page's (../../../jazz-midi-pack/order) as Famous Beats
 // has it: red bar, the 5-minute bonus (the MIDI Drum Kit Expansions, ../../fiveMinBonus.ts),
@@ -109,7 +110,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
           </>
         ) : (
           <>
-            <b>BLACK FRIDAY:</b> {w.bfbar}
+            <b>BLACK FRIDAY:</b> {w.bfbar}<BfClock />
           </>
         )}
       </div>

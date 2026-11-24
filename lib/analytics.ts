@@ -1,3 +1,4 @@
+import { BF_FROM, BF_ENDS, BF_FUNNELS } from "@/lib/blackFriday";
 import { ACCENT, PALETTES } from "@/app/(funnels)/midi-drum-kit/accentTest";
 import { HL } from "@/app/(funnels)/midi-drum-kit/headlineTest";
 import { JZH } from "@/app/(funnels)/jazz-midi-pack/rhodesTest";
@@ -774,7 +775,23 @@ const bumpTest = (funnel: string, before: string): TestDef => ({
     after: { from: BUMP_COPY_FROM, until: BUMP_TEST_ENDED, days: [addDays(BUMP_COPY_FROM.slice(0, 10), 1), BUMP_TEST_ENDED.slice(0, 10)] },
   },
 });
+// 2026-11-24, Black Friday (lib/blackFriday.ts): every front-end at €9.99 / $9.99 with a clock, against the
+// 7 days before. Judged by days like the bump test: visitors → orders and money per visitor, old price vs €9.99.
+const bfTest = (funnel: string, regular: number): TestDef => ({
+  funnel,
+  name: "Black Friday €9.99",
+  question: `Does €9.99 with a Black Friday clock sell more (and make more per visitor) than €${regular}?`,
+  where: `Main product price, landing and order page · Before = €${regular}, ${addDays(BF_FROM.slice(0, 10), -7)} → ${BF_FROM.slice(0, 10)} · Black Friday = €9.99 + red bar with a clock, from ${BF_FROM.slice(0, 10)} to ${BF_ENDS.slice(0, 10)} (23:59 Italy)`,
+  variants: ["before", "after"],
+  label: (v) => (v === "before" ? `Before · €${regular}` : "Black Friday · €9.99 + clock"),
+  color: (v) => (v === "before" ? { from: "#94a3b8", to: "#64748b" } : { from: "#f87171", to: "#dc2626" }),
+  windows: {
+    before: { from: `${addDays(BF_FROM.slice(0, 10), -7)}T00:00:00Z`, until: BF_FROM, days: [addDays(BF_FROM.slice(0, 10), -7), addDays(BF_FROM.slice(0, 10), -1)] },
+    after: { from: BF_FROM, until: null, days: [BF_FROM.slice(0, 10), null] },
+  },
+});
 export const TESTS: TestDef[] = [
+  ...Object.entries(BF_FUNNELS).map(([f, r]) => bfTest(f, r)),
   bumpTest("midi-drum-kit", "2026-11-09"),
   bumpTest("jazz-midi-pack", "2026-11-09"),
   {

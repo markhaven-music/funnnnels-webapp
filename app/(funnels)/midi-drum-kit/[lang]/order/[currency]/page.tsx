@@ -27,6 +27,7 @@ import { OrderForm } from "../../../OrderForm";
 import { ReservedTimer } from "../../../ReservedTimer";
 import { Tracking } from "../../../Tracking";
 import { OrderProof, OrderStack } from "../../../OrderStack";
+import { BfClock } from "@/app/(funnels)/_kit/BfClock";
 
 // The order page. Until 2026-11-12 a copy of ClickFunnels' /spot-available-midi-drum-kit-ad-15m30;
 // now the Jazz MIDI Pack's order page with the Drum Kit's products, words and orange: it is drawn
@@ -89,7 +90,7 @@ export default async function OrderPage({ params }: { params: Params }) {
       <Tracking value={offer.price} currency={currency} event={null} />
       <Beacon funnel={funnel.slug} page="order" lang={lang} abCookie={LP.cookie} />
       <div className={j.bfbar}>
-        <Rich text={t.orderTopbar} currency={currency} />
+        <Rich text={t.orderTopbar} currency={currency} /><BfClock />
       </div>
       <div className={j.topband}>
         <header className={`${j.wrap} ${j.topbar}`}>

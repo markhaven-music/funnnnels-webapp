@@ -13,6 +13,7 @@ import { Tracking } from "../Tracking";
 import { Beacon } from "../../Beacon";
 import { display } from "../fonts";
 import s from "../jazz.module.css";
+import { BfClock } from "@/app/(funnels)/_kit/BfClock";
 
 // Copy rules: grind-studio-landing-pages/docs/copy-style.md ("Diretto").
 // Every claim is in BRIEF.md. The sections are edited in the dashboard
@@ -84,7 +85,7 @@ export default async function JazzMidiPackPage({ params }: { params: Promise<{ c
       <Beacon funnel={funnel.slug} page="landing" abCookie={JZH.cookie} noAvailability />
       {/* Red, on top, like TOP HITS' and the Drum Kit's ("aggiungi anche banner rossi sopra black friday come gli altri funnels"). */}
       <div className={s.bfbar}>
-        <b>BLACK FRIDAY:</b> 90% Sale Ends Soon
+        <b>BLACK FRIDAY:</b> 90% Sale Ends Soon<BfClock />
       </div>
       {sections.map((section, i) => {
         // Desktop, like the Drum Kit page's copy-beside-a-picture blocks: the
