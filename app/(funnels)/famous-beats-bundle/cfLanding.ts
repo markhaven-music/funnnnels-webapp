@@ -1,3 +1,4 @@
+import { bfLabel } from "@/lib/blackFriday";
 import type { Currency } from "@/lib/geo";
 import { fromEuro } from "@/lib/geo";
 import { AVAILABILITY_JS } from "@/lib/availability";
@@ -28,10 +29,10 @@ const POSTER = "/funnels/famous-beats-bundle/vsl-en-960.webp";
 
 const WORDS: Record<string, string> = {
   t001: "BLACK FRIDAY DEAL: 90% OFF · LIMITED TIME ONLY",
-  t027: "OKAY, GET THE BUNDLE",
-  t094: "YES!! GET THE BUNDLE",
-  t118: "YES!! GET THE BUNDLE NOW",
-  t120: "YES!! GET THE BUNDLE NOW",
+  t027: bfLabel("OKAY, GET THE BUNDLE"),
+  t094: bfLabel("YES!! GET THE BUNDLE"),
+  t118: bfLabel("YES!! GET THE BUNDLE NOW"),
+  t120: bfLabel("YES!! GET THE BUNDLE NOW"),
 };
 
 // The ad's tags go along to the order page (neo credits the sale to the ad by them).
