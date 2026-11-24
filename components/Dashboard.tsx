@@ -22,6 +22,7 @@ import { IntegrationsPanel } from "@/components/panels/IntegrationsPanel";
 import { LandingPagesPanel } from "@/components/panels/LandingPagesPanel";
 import { LaunchesPanel } from "@/components/panels/LaunchesPanel";
 import { LivePanel } from "@/components/panels/LivePanel";
+import { LtvPanel } from "@/components/panels/LtvPanel";
 import { OrdersPanel } from "@/components/panels/OrdersPanel";
 import { ProductsPanel } from "@/components/panels/ProductsPanel";
 import { SettingsPanel } from "@/components/panels/SettingsPanel";
@@ -120,6 +121,7 @@ export function Dashboard({ funnels: rows }: Props) {
       {activeNav === "broadcasts"   && <BroadcastsPanel />}
       {activeNav === "automations"  && <AutomationsPanel />}
       {activeNav === "analytics"    && <AnalyticsPanel />}
+      {activeNav === "ltv"          && <LtvPanel />}
       {activeNav === "brand"        && <BrandKitPanel />}
       {activeNav === "integrations" && <IntegrationsPanel />}
       {activeNav === "domains"      && <DomainsPanel />}

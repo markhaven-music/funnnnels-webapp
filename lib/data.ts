@@ -34,6 +34,7 @@ export const NAV: NavSection[] = [
       { id: "blog", label: "Blog", icon: "page" },
       { id: "support", label: "Support", icon: "inbox", badgeKey: "support" },
       { id: "analytics", label: "Analytics", icon: "analytics" },
+      { id: "ltv", label: "LTV", icon: "gem" },
       { id: "clickfunnels", label: "ClickFunnels", icon: "box" }, // the sales before funnnnels, an archive
     ],
   },

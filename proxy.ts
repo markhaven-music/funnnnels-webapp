@@ -65,7 +65,7 @@ const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** /fr/midi-drum-kit/order → { slug, lang: "fr", page: "order" }; null for anything else. */
 // The pages a localized funnel has after its /<lang>/<slug>.
-const LOCAL_PAGES = ["", "order", "offer", "last-offer", "jazz-offer", "thank-you", "black-friday", "black-friday/order"] as const;
+const LOCAL_PAGES = ["", "order", "offer", "last-offer", "jazz-offer", "vol2-offer", "thank-you", "black-friday", "black-friday/order"] as const;
 
 // The Black Friday copies (lib/blackFriday.ts): /[<lang>/]midi-drum-kit/black-friday[/order] and
 // /jazz-midi-pack/black-friday[/order]. Until Black Friday ends they are rewritten like the funnels' own pages (and the
