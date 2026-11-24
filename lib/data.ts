@@ -17,6 +17,7 @@ export const NAV: NavSection[] = [
     section: "Workspace",
     items: [
       { id: "home", label: "Dashboard", icon: "layers" },
+      { id: "black-friday", label: "Black Friday", icon: "tag" },
       { id: "funnels", label: "Funnels", icon: "funnel", badgeKey: "funnels" },
       { id: "products", label: "Products", icon: "box" },
       { id: "launches", label: "Launches", icon: "rocket" },

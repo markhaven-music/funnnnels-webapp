@@ -20,6 +20,7 @@ import { stripe, stripeConfigured } from "@/lib/stripe";
 import type Stripe from "stripe";
 import { rangeDays, rangeLength, type Range } from "@/lib/range";
 import { addDays, dayIn, startOfDay } from "@/lib/tz";
+import { BF_FIRST_DAY, BF_FROM_MS, BF_LAST_DAY, BF_UNTIL_MS, bfShare, inBf, type Era } from "@/lib/bfEra";
 import { supabase } from "@/lib/supabase";
 
 // Dashboard → Analytics: visitors, checkout starts, orders and revenue per
@@ -276,6 +277,8 @@ export type FunnelDay = { orders: number; upsells: number; revenue: number; net:
 
 export type Analytics = {
   range: Range;
+  /** Which part of the time the numbers cover (lib/bfEra.ts): "regular" leaves the Black Friday window out, "bf" is only it. */
+  era: Era;
   since: string | null;
   /** The range's last day, included ("2026-11-06" for yesterday). */
   until: string;
@@ -406,6 +409,88 @@ async function viewDays(since: string | null): Promise<DayRow[]> {
   return ((data ?? []) as DayRow[]).map((r) => ({ ...r, views: Number(r.views) }));
 }
 
+/**
+ * The Black Friday part of the page views (lib/bfEra.ts): page_views counts browsers per UTC day,
+ * so the days inside the window count whole, and the two days it starts and ends on count the share
+ * of browsers whose first visit to that page that day fell inside it (live_events, kept 30 days;
+ * after that, the share of the day's hours). Rows like page_view_totals', with their day, rounded.
+ */
+type BfViewRow = ViewRow & { day: string };
+const utcDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+async function bfViewRows(): Promise<BfViewRow[]> {
+  const db = supabase();
+  const firstDay = utcDay(BF_FROM_MS);
+  const lastDay = utcDay(BF_UNTIL_MS - 1);
+  const rows: (ViewRow & { day: string })[] = [];
+  for (let at = 0; ; at += 1000) {
+    const { data, error } = await db.from("page_views").select("day, funnel, page, lang, variant, views").gte("day", firstDay).lte("day", lastDay).order("day").range(at, at + 999);
+    if (error) throw error;
+    rows.push(...((data ?? []) as BfViewRow[]));
+    if (!data || data.length < 1000) break;
+  }
+  // The share per (day, funnel, page) on the two edge days.
+  const share = new Map<string, number>();
+  for (const day of new Set([firstDay, lastDay])) {
+    const dayFrom = Date.parse(`${day}T00:00:00Z`);
+    const dayUntil = dayFrom + DAY;
+    if (dayFrom >= BF_FROM_MS && dayUntil <= BF_UNTIL_MS) continue;
+    const firstSeen = new Map<string, number>();
+    for (let at = 0; ; at += 1000) {
+      const { data, error } = await db.from("live_events").select("id, sid, at, funnel, page").gte("at", new Date(dayFrom).toISOString()).lt("at", new Date(dayUntil).toISOString()).order("id").range(at, at + 999);
+      if (error) throw error;
+      for (const e of (data ?? []) as { sid: string; at: string; funnel: string; page: string }[]) {
+        const key = `${e.funnel}|${e.page}|${e.sid}`;
+        const t = Date.parse(e.at);
+        if (!firstSeen.has(key) || t < firstSeen.get(key)!) firstSeen.set(key, t);
+      }
+      if (!data || data.length < 1000) break;
+    }
+    const tally = new Map<string, { inside: number; all: number }>();
+    for (const [key, t] of firstSeen) {
+      const fp = key.slice(0, key.lastIndexOf("|"));
+      const c = tally.get(fp) ?? { inside: 0, all: 0 };
+      c.all += 1;
+      if (inBf(t)) c.inside += 1;
+      tally.set(fp, c);
+    }
+    const byHours = bfShare(dayFrom, dayUntil);
+    for (const r of rows) {
+      if (r.day !== day) continue;
+      const c = tally.get(`${r.funnel}|${r.page}`);
+      share.set(`${day}|${r.funnel}|${r.page}`, c && c.all ? c.inside / c.all : byHours);
+    }
+  }
+  return rows
+    .map((r) => ({ ...r, views: Math.round(Number(r.views) * (share.get(`${r.day}|${r.funnel}|${r.page}`) ?? 1)) }))
+    .filter((r) => r.views > 0);
+}
+
+/** Black Friday view rows summed per (day, funnel, page), for daily(). */
+function bfByDay(rows: BfViewRow[]): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const r of rows) {
+    const key = `${r.day}|${r.funnel}|${r.page}`;
+    out.set(key, (out.get(key) ?? 0) + r.views);
+  }
+  return out;
+}
+
+/** View totals (page_view_totals' shape) less, or only, the Black Friday rows between two days. */
+function withEra(totals: ViewRow[], bf: BfViewRow[], era: Era, first: string, last: string): ViewRow[] {
+  if (era === "all") return totals;
+  const key = (r: ViewRow) => `${r.funnel}|${r.page}|${r.lang}|${r.variant}`;
+  const inside = new Map<string, ViewRow>();
+  for (const r of bf) {
+    if (r.day < first || r.day > last) continue;
+    const k = key(r);
+    const o = inside.get(k) ?? { funnel: r.funnel, page: r.page, lang: r.lang, variant: r.variant, views: 0 };
+    o.views += r.views;
+    inside.set(k, o);
+  }
+  if (era === "bf") return [...inside.values()];
+  return totals.map((r) => ({ ...r, views: r.views - (inside.get(key(r))?.views ?? 0) })).filter((r) => r.views > 0);
+}
+
 /** The Warsaw day of an instant (lib/tz.ts). */
 const dayOf = (ms: number) => dayIn(ms);
 
@@ -417,7 +502,7 @@ function dayList(first: string, last: string): string[] {
 }
 
 /** The range day by day, and as many days before it (none for "all"). */
-function daily(range: Range, since: string | null, last: string, rows: DayRow[], sales: Sale[], rate: number, trackingSince: string | null) {
+function daily(hasPrevious: boolean, since: string | null, last: string, rows: DayRow[], sales: Sale[], rate: number, trackingSince: string | null, era: Era = "all", bf: Map<string, number> = new Map()) {
   const first = since ?? [trackingSince, ...sales.map((s) => dayOf(s.created))].filter(Boolean).sort()[0] ?? last;
   const days = dayList(first, last);
   const before = since ? dayList(addDays(first, -days.length), addDays(first, -1)) : [];
@@ -425,19 +510,29 @@ function daily(range: Range, since: string | null, last: string, rows: DayRow[],
     [...before, ...days].map((day) => [day, { day, orders: 0, upsells: 0, revenue: 0, net: 0, visitors: 0, orderViews: 0, checkouts: 0, byFunnel: {} }]),
   );
   const of = (d: Day, funnel: string) => (d.byFunnel[funnel] ??= { orders: 0, upsells: 0, revenue: 0, net: 0, visitors: 0 });
+  // The era (lib/bfEra.ts): the range's days count only its part of the time; the days before it,
+  // the comparison, always the regular part (for the Black Friday dashboard: the days before at full price).
+  const current = new Set(days);
+  const dayViews = (r: DayRow) => {
+    if (era === "all") return r.views;
+    const inside = bf.get(`${r.day}|${r.funnel}|${r.page}`) ?? 0;
+    return era === "bf" && current.has(r.day) ? inside : r.views - inside;
+  };
+  const counts = (s: Sale, day: string) => era === "all" || (era === "bf" && current.has(day) ? inBf(s.created) : !inBf(s.created));
   for (const r of rows) {
     const d = by.get(r.day);
     if (!d) continue;
+    const views = dayViews(r);
     if (r.page === "landing") {
-      d.visitors += r.views;
-      of(d, r.funnel).visitors += r.views;
+      d.visitors += views;
+      of(d, r.funnel).visitors += views;
     }
-    else if (r.page === "order") d.orderViews += r.views;
-    else if (r.page === "checkout") d.checkouts += r.views;
+    else if (r.page === "order") d.orderViews += views;
+    else if (r.page === "checkout") d.checkouts += views;
   }
   for (const s of sales) {
     const d = by.get(dayOf(s.created));
-    if (!d) continue;
+    if (!d || !counts(s, d.day)) continue;
     const f = of(d, s.funnel);
     if (s.offer) {
       d.upsells += 1;
@@ -452,7 +547,7 @@ function daily(range: Range, since: string | null, last: string, rows: DayRow[],
     f.revenue += s.amount * r;
     f.net += (s.amount - (s.fee ?? 0)) * r;
   }
-  return { days: days.map((d) => by.get(d)!), previous: range === "all" ? null : before.map((d) => by.get(d)!) };
+  return { days: days.map((d) => by.get(d)!), previous: hasPrevious ? before.map((d) => by.get(d)!) : null };
 }
 
 async function stripeSales(slug: string): Promise<Sale[]> {
@@ -583,9 +678,12 @@ async function kitFunnels(): Promise<{ slug: string; name: string }[]> {
  * numbers that must cover the same days as something else: the funnel cards'
  * ad spend, counted only from SPEND_SINCE (lib/funnelSpend.ts).
  */
-export async function getAnalytics(range: Range, opts: { since?: string } = {}): Promise<Analytics> {
+export async function getAnalytics(range: Range, opts: { since?: string; era?: Era } = {}): Promise<Analytics> {
+  const era = opts.era ?? "all";
   const now = Date.now();
-  const { first: rangeFirst, last } = rangeDays(range, now);
+  // The Black Friday dashboard covers its window, whatever the range (lib/bfEra.ts).
+  const { first: rangeFirst, last } =
+    era === "bf" ? { first: BF_FIRST_DAY, last: dayOf(now) < BF_LAST_DAY ? dayOf(now) : BF_LAST_DAY } : rangeDays(range, now);
   const since = opts.since && (!rangeFirst || opts.since > rangeFirst) ? opts.since : rangeFirst;
   const sinceMs = since ? startOfDay(since) : 0;
   // The first day after the range, when it ends before today (Yesterday, Last month…).
@@ -615,10 +713,11 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
 
   const hasStripe = stripeConfigured();
   // The day-by-day rows reach back one range more, for the comparison.
-  const span = rangeLength(range, now) ?? 0;
+  const span = era === "bf" ? Math.round((Date.parse(last) - Date.parse(since!)) / DAY) + 1 : (rangeLength(range, now) ?? 0);
   const before = since ? addDays(since, -span) : null;
-  const [views, allViews, dayRows, rate, trackingSince, testStarts, paypal, ...stripeLists] = await Promise.all([
+  const [rangeViews, bfRows, allViews, dayRows, rate, trackingSince, testStarts, paypal, ...stripeLists] = await Promise.all([
     soft("visitors", viewTotals(since, after), []),
+    era === "all" ? Promise.resolve([] as BfViewRow[]) : soft("Black Friday visitors", bfViewRows(), []),
     range === "all" ? Promise.resolve(null) : soft("visitors (all time)", viewTotals(null), []),
     soft("visitors per day", viewDays(before), []),
     usdToEur(),
@@ -635,7 +734,8 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
   const windowDays = firstWindow ? await soft("visitors per day (tests)", viewDays(firstWindow), []) : [];
   const ratedFrom = trackingSince ? startOfDay(trackingSince) : Infinity;
   for (const s of allSales) s.rated = s.created >= ratedFrom;
-  const sales = allSales.filter((s) => s.created >= sinceMs && s.created < untilMs);
+  const views = withEra(rangeViews, bfRows, era, since && since > VISITS_FROM ? since : VISITS_FROM, last);
+  const sales = allSales.filter((s) => s.created >= sinceMs && s.created < untilMs && (era === "all" || (era === "bf") === inBf(s.created)));
 
   const funnels: FunnelStats[] = list.map((f) => {
     const total = empty();
@@ -664,6 +764,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
 
   return {
     range,
+    era,
     since,
     until: last,
     trackingSince,
@@ -676,8 +777,8 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
         const stats: TestStats = t.windows
           ? { ...windowTest(t, windowDays, allSales, rate, now), ...(t.ended ? { ended: { day: t.ended.at.slice(0, 10), kept: t.ended.kept } } : {}) }
           : end !== null
-            ? { ...testStats(t, allViews ?? views, allSales.filter((s) => s.created <= end), rate, testStarts[i], Math.min(now, end)), ended: { day: t.ended!.at.slice(0, 10), kept: t.ended!.kept } }
-            : { ...testStats(t, allViews ?? views, allSales, rate, testStarts[i], now), map: true };
+            ? { ...testStats(t, allViews ?? rangeViews, allSales.filter((s) => s.created <= end), rate, testStarts[i], Math.min(now, end)), ended: { day: t.ended!.at.slice(0, 10), kept: t.ended!.kept } }
+            : { ...testStats(t, allViews ?? rangeViews, allSales, rate, testStarts[i], now), map: true };
         if (!t.windows) return stats;
         const paid = await soft(`checkouts paid (${t.name})`, Promise.all(stats.variants.map((v) => (t.windows![v.variant] ? checkoutPaid(t.funnel, t.windows![v.variant]) : null))), null);
         return paid ? { ...stats, variants: stats.variants.map((v, j) => ({ ...v, paid: paid[j] ?? undefined })) } : stats;
@@ -688,7 +789,7 @@ export async function getAnalytics(range: Range, opts: { since?: string } = {}):
     availability: null,
     popupOffer: null,
     taps: await soft("button taps", tapStats(), null),
-    ...daily(range, since, last, dayRows, allSales, rate, trackingSince),
+    ...daily(range !== "all" || era === "bf", since, last, dayRows, allSales, rate, trackingSince, era, bfByDay(bfRows)),
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
     errors,

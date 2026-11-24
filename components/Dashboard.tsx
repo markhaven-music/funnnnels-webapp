@@ -9,6 +9,7 @@ import { TopBar } from "@/components/TopBar";
 import { ABTestsPanel } from "@/components/panels/ABTestsPanel";
 import { AnalyticsPanel } from "@/components/panels/AnalyticsPanel";
 import { AutomationsPanel } from "@/components/panels/AutomationsPanel";
+import { BlackFridayPanel } from "@/components/panels/BlackFridayPanel";
 import { BlogPanel } from "@/components/panels/BlogPanel";
 import { ClickFunnelsPanel } from "@/components/panels/ClickFunnelsPanel";
 import { BroadcastsPanel } from "@/components/panels/BroadcastsPanel";
@@ -41,7 +42,8 @@ const NAV_LABELS: Record<string, string> = Object.fromEntries(
 type Props = { funnels: StoredFunnel[] };
 
 // The cards' visits, CVR and revenue, and the home's charts until another
-// range is picked: the last 28 days from dashboard → Analytics.
+// range is picked: the last 28 days from dashboard → Analytics, without the
+// Black Friday window (lib/bfEra.ts: it has its own dashboard, BlackFridayPanel).
 const CARD_RANGE = "28d";
 
 export function Dashboard({ funnels: rows }: Props) {
@@ -67,7 +69,7 @@ export function Dashboard({ funnels: rows }: Props) {
     if (nav && nav in NAV_LABELS) setActiveNav(nav);
   }, []);
   useEffect(() => {
-    fetch(`/api/analytics?range=${CARD_RANGE}`, { cache: "no-store" })
+    fetch(`/api/analytics?range=${CARD_RANGE}&era=regular`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
       .then((a) => a && setAnalytics(a))
       .catch(() => {});
@@ -75,7 +77,7 @@ export function Dashboard({ funnels: rows }: Props) {
   // The cards' ad spend, cost per visitor, ROAS and net profit (lib/funnelSpend.ts).
   const [spend, setSpend] = useState<FunnelSpend | null>(null);
   useEffect(() => {
-    fetch(`/api/analytics/funnel-spend?range=${CARD_RANGE}`, { cache: "no-store" })
+    fetch(`/api/analytics/funnel-spend?range=${CARD_RANGE}&era=regular`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<FunnelSpend>) : null))
       .then((s) => s && setSpend(s))
       .catch(() => {});
@@ -103,7 +105,8 @@ export function Dashboard({ funnels: rows }: Props) {
       />
       {navOpen && <div className="nav-scrim" onClick={() => setNavOpen(false)} aria-hidden="true" />}
       <TopBar trail={trail} onMenu={() => setNavOpen((o) => !o)} menuOpen={navOpen} />
-      {activeNav === "home"         && <DashboardHome funnels={funnels} analytics={analytics} />}
+      {activeNav === "home"         && <DashboardHome funnels={funnels} analytics={analytics} onBlackFriday={() => setActiveNav("black-friday")} />}
+      {activeNav === "black-friday" && <BlackFridayPanel />}
       {activeNav === "funnels"      && <MainPanel funnels={funnels} spend={spend} />}
       {activeNav === "products"     && <ProductsPanel />}
       {activeNav === "launches"     && <LaunchesPanel />}

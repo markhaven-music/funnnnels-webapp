@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
+import { isEra } from "@/lib/bfEra";
 import { getFunnelSpend } from "@/lib/funnelSpend";
 import { rangeParam } from "@/lib/range";
 
 export const runtime = "nodejs";
 
 // Dashboard → Funnels, each card's ad spend, cost per visitor, ROAS and net
-// profit (lib/funnelSpend.ts), ?range= one of lib/range.ts RANGES. Behind
-// ADMIN_PASSWORD like every non-public route (proxy.ts).
+// profit (lib/funnelSpend.ts), ?range= one of lib/range.ts RANGES, ?era= regular | bf | all
+// (lib/bfEra.ts; left out: all). Behind ADMIN_PASSWORD like every non-public route (proxy.ts).
 export async function GET(req: Request) {
-  return NextResponse.json(await getFunnelSpend(rangeParam(req.url)), { headers: { "cache-control": "no-store" } });
+  const era = new URL(req.url).searchParams.get("era");
+  return NextResponse.json(await getFunnelSpend(rangeParam(req.url), isEra(era) ? era : "all"), { headers: { "cache-control": "no-store" } });
 }

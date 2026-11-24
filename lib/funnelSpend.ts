@@ -1,6 +1,8 @@
 import { getAnalytics } from "@/lib/analytics";
 import { SPEND_SINCE, spendByAd } from "@/lib/metaSpend";
 import { rangeDays, type Range } from "@/lib/range";
+import { BF_FIRST_DAY, BF_LAST_DAY, type Era } from "@/lib/bfEra";
+import { dayIn } from "@/lib/tz";
 import { supabase } from "@/lib/supabase";
 
 // What the Meta ads cost per funnel, for the funnel cards (Funnels): ad spend,
@@ -107,11 +109,13 @@ async function funnelOfAds(ads: { adId: string; adName: string; campaignName: st
   return out;
 }
 
-export async function getFunnelSpend(range: Range): Promise<FunnelSpend> {
-  const { first, last } = rangeDays(range);
+/** era (lib/bfEra.ts): "regular" leaves the Black Friday window out, "bf" is only it (whatever the range). */
+export async function getFunnelSpend(range: Range, era: Era = "all"): Promise<FunnelSpend> {
+  const today = dayIn(Date.now());
+  const { first, last } = era === "bf" ? { first: BF_FIRST_DAY, last: today < BF_LAST_DAY ? today : BF_LAST_DAY } : rangeDays(range);
   const since = !first || first < SPEND_SINCE ? SPEND_SINCE : first;
   if (since > last) return { connected: true, currency: "EUR", since, until: last, byFunnel: {}, leadMagnets: 0, unplaced: 0 };
-  const [meta, a] = await Promise.all([spendByAd(since, last), getAnalytics(range, { since })]);
+  const [meta, a] = await Promise.all([spendByAd(since, last, era), getAnalytics(range, { since, era })]);
   if (!meta.connected) return meta;
   const slugs = a.funnels.map((f) => f.slug);
   const place = await funnelOfAds(meta.ads, slugs);
