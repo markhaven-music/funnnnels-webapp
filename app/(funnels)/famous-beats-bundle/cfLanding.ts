@@ -27,7 +27,7 @@ const UPSELL_VIDEO = "t1dx0gv5tg";
 const POSTER = "/funnels/famous-beats-bundle/vsl-en-960.webp";
 
 const WORDS: Record<string, string> = {
-  t001: "BLACK FRIDAY: 90% SALE ENDS SOON",
+  t001: "BLACK FRIDAY DEAL: 90% OFF · LIMITED TIME ONLY",
   t027: "OKAY, GET THE BUNDLE",
   t094: "YES!! GET THE BUNDLE",
   t118: "YES!! GET THE BUNDLE NOW",

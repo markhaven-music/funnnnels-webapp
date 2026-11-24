@@ -20,8 +20,12 @@ export const BF_FUNNELS: Record<string, number> = {
   "top-hits-chords": 97,
 };
 
-/** The red bar with its clock as plain HTML, for the pages built as strings (the Drum Kit landing). Empty once over. */
-export function bfBarHtml(text = "<b>BLACK FRIDAY:</b> 90% Sale Ends Soon"): string {
+/** The deal bar with its clock as plain HTML, for the pages built as strings (the Drum Kit landing). Empty once over. */
+export function bfBarHtml(regular: string, sale: string, lang = "en"): string {
   if (Date.now() > BF_ENDS_MS) return "";
-  return `<div style="background:#d61f1f;color:#fff;text-align:center;padding:10px 12px;font-size:15px;font-weight:600;line-height:1.35">${text}<span style="font-variant-numeric:tabular-nums;white-space:nowrap"> · ends in <b id="bf-clock">–d ––h ––m ––s</b></span></div><script>(function(){var e=${BF_ENDS_MS},el=document.getElementById("bf-clock");function p(n){return(n<10?"0":"")+n}function t(){var s=Math.max(0,Math.floor((e-Date.now())/1e3));el.textContent=Math.floor(s/86400)+"d "+p(Math.floor(s%86400/3600))+"h "+p(Math.floor(s%3600/60))+"m "+p(s%60)+"s"}t();setInterval(t,1e3)})();</script>`;
+  const it = lang === "it";
+  const deal = it ? "OFFERTA BLACK FRIDAY" : "BLACK FRIDAY DEAL";
+  const limited = it ? "Solo per pochi giorni" : "Limited time only";
+  const ends = it ? "Finisce tra" : "Ends in";
+  return `<div style="background:#d61f1f;color:#fff;text-align:center;padding:10px 12px;font-size:clamp(15px,2.2vw,19px);font-weight:600;line-height:1.4"><b style="font-weight:900">${deal}</b><span style="white-space:nowrap"> · <s style="opacity:.75">${regular}</s> <b style="font-weight:900">${sale}</b></span> <span style="display:inline-block">· ${limited} · ${ends} <b id="bf-clock" style="font-variant-numeric:tabular-nums;white-space:nowrap">–d ––h ––m ––s</b></span></div><script>(function(){var e=${BF_ENDS_MS},el=document.getElementById("bf-clock");function p(n){return(n<10?"0":"")+n}function t(){var s=Math.max(0,Math.floor((e-Date.now())/1e3));el.textContent=Math.floor(s/86400)+"d "+p(Math.floor(s%86400/3600))+"h "+p(Math.floor(s%3600/60))+"m "+p(s%60)+"s"}t();setInterval(t,1e3)})();</script>`;
 }

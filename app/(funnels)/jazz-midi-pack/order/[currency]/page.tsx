@@ -18,7 +18,7 @@ import { Beacon } from "../../../Beacon";
 import { JZH, JZH_KEEP_SCRIPT } from "../../rhodesTest";
 import { display } from "../../fonts";
 import s from "../../jazz.module.css";
-import { BfClock } from "@/app/(funnels)/_kit/BfClock";
+import { BfDeal } from "@/app/(funnels)/_kit/BfClock";
 
 // The order page, like the ClickFunnels funnels: every CTA on the landing comes
 // here. Cached on the CDN per currency like the landing (proxy.ts rewrites
@@ -94,7 +94,7 @@ export default async function OrderPage({ params }: { params: Promise<{ currency
       {/* Before anything paints: the normal page for a browser whose 5 minutes are over. */}
       {rs && <script dangerouslySetInnerHTML={{ __html: JAZZ_BONUS_SCRIPT }} />}
       <div className={s.bfbar}>
-        <b>BLACK FRIDAY:</b> 90% Sale Is Ending Soon<BfClock />
+        <BfDeal currency={currency} regular={27} />
       </div>
       <div className={s.topband}>
         <header className={`${s.wrap} ${s.topbar}`}>

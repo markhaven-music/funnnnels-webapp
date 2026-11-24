@@ -19,7 +19,7 @@ import s from "../../jazz-midi-pack/jazz.module.css";
 import bn from "../../jazz-midi-pack/bonus.module.css";
 import vs from "../../jazz-midi-pack/value.module.css";
 import t from "../th.module.css";
-import { BfClock } from "@/app/(funnels)/_kit/BfClock";
+import { BfDeal } from "@/app/(funnels)/_kit/BfClock";
 
 // The TOP HITS MIDI Bundle sales page of its new funnel (2026-11-10, "crea nuovo funnel per
 // TOP HITS MIDI Bundle con TUTTO", "crea un funnel a parte"): built on the Jazz page's own CSS
@@ -123,7 +123,7 @@ export default async function TopHitsLanding({ params }: { params: Promise<{ cur
           </>
         ) : (
           <>
-            <b>BLACK FRIDAY:</b> 90% Sale Ends Soon<BfClock />
+            <BfDeal currency={currency} regular={97} />
           </>
         )}
       </div>
