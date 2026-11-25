@@ -1,6 +1,8 @@
 import { BF, BF_ENDS, BF_FROM, BF_SITEWIDE_OFF, sitewideUntil } from "@/lib/blackFriday";
 import { dayIn } from "@/lib/tz";
 
+// (2026-11-25: no longer split by the clock alone. Orders, visits and ad spend count as Black Friday when the Black
+// Friday ads brought them, see bfFor and lib/bfAds.ts; the notes below are how it started.)
 // The dashboard in two parts ("metti tutti i dati da quando abbiamo iniziato la Black Friday offer a
 // parte, perché altrimenti inquinano i dati che abbiamo col prezzo a 27", 2026-11-24): everything
 // from BF_FROM to BF_ENDS (orders, upsells, visitors, ad spend) is the Black Friday dashboard's, and
@@ -27,13 +29,20 @@ export const BF_LAST_DAY = dayIn(BF_UNTIL_MS - 1);
 export const inBf = (ms: number) => ms >= BF_FROM_MS && ms < BF_UNTIL_MS;
 
 /**
- * Whether an order, upsell or visit belongs to Black Friday. Mostly by the clock (inBf), but the MIDI Drum Kit and the
- * Jazz MIDI Pack left the store-wide sale early (lib/blackFriday.ts BF_SITEWIDE_OFF, 24 Nov 00:01 Italy): their own
- * pages count as Black Friday only until then, and the separate Black Friday copies at 9.99 (variant "bf") always do.
+ * Whether the funnel's own pages sold at €9.99 at that minute (the store-wide hours: BF_FROM until the funnel's
+ * BF_SITEWIDE_OFF, 24 Nov evening).
  */
-export function bfFor(funnel: string, ms: number, variant = ""): boolean {
+export const inSitewide = (funnel: string, ms: number) => inBf(ms) && (!BF_SITEWIDE_OFF[funnel] || ms < sitewideUntil(funnel));
+
+/**
+ * Whether an order, upsell or visit belongs to Black Friday: what the Black Friday ads brought ("solo quelle che
+ * venivano da ads precedenti vanno escluse dalla dashboard black friday", 2026-11-25). The Black Friday copies at 9.99
+ * (variant "bf") always; the funnels' own pages only in the store-wide hours, and only for a buyer who came from a
+ * Black Friday ad (fromBfAd, lib/bfAds.ts). What the ads already running brought stays on Dashboard.
+ */
+export function bfFor(funnel: string, ms: number, variant = "", fromBfAd = false): boolean {
   if (variant === BF.variant) return true;
-  return inBf(ms) && (!BF_SITEWIDE_OFF[funnel] || ms < sitewideUntil(funnel));
+  return fromBfAd && inSitewide(funnel, ms);
 }
 
 /** How much of [from, until) (ms) falls in the Black Friday window, 0 to 1. */

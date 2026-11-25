@@ -14,7 +14,8 @@
 // 10 minutes. Amounts in the account's currency (EUR), never converted.
 
 import { addDays, dayIn, instantAt } from "@/lib/tz";
-import { BF_FIRST_DAY, BF_FROM_MS, BF_UNTIL_MS, bfShare, eraShare, type Era } from "@/lib/bfEra";
+import { BF_FIRST_DAY, BF_FROM_MS, BF_UNTIL_MS, bfShare, type Era } from "@/lib/bfEra";
+import { bfAdIds } from "@/lib/bfAds";
 
 const GRAPH = "https://graph.facebook.com/v23.0";
 const DEFAULT_ACCOUNT = "462189981361126";
@@ -104,6 +105,13 @@ export async function spendByDay(since: string, until: string, era: Era = "all")
     laUntil,
   )) as (Row & { [HOURLY]?: string })[] | { reason: string };
   if (!Array.isArray(rows)) return { connected: false, reason: rows.reason };
+  // The Black Friday ads' spend per hour (bfSpendByAd); the rest of each hour is the regular ads'.
+  let bfHour = new Map<number, number>();
+  if (era !== "all") {
+    const got = await bfSpendByAd(addDays(since, -1), laUntil, token);
+    if ("reason" in got) return { connected: false, reason: got.reason };
+    bfHour = got.byHour;
+  }
   const by = new Map<string, DaySpend>();
   for (const r of rows) {
     const hour = Number((r[HOURLY] ?? "").slice(0, 2));
@@ -111,7 +119,9 @@ export async function spendByDay(since: string, until: string, era: Era = "all")
     const start = instantAt(r.date_start, hour, ACCOUNT_TZ);
     const day = dayIn(start);
     if (day < since || day > until) continue;
-    const w = eraShare(era === "bf" && day < BF_FIRST_DAY ? "regular" : era, start, start + 3_600_000);
+    const total = Number(r.spend ?? 0);
+    const bfPart = total > 0 ? Math.min(1, (bfHour.get(start) ?? 0) / total) : 0;
+    const w = era === "all" ? 1 : era === "bf" && day >= BF_FIRST_DAY ? bfPart : 1 - bfPart;
     const d = by.get(day) ?? { day, spend: 0, impressions: 0, clicks: 0 };
     d.spend += Number(r.spend ?? 0) * w;
     d.impressions += Number(r.impressions ?? 0) * w;
@@ -160,17 +170,21 @@ export async function spendByPack(labels: string[], since: string, until: string
 export type AdSpend = { adId: string; adName: string; campaignName: string; spend: number };
 
 /**
- * Each ad's spend inside the Black Friday window (lib/bfEra.ts), asked hour by hour for the window's
- * Los Angeles days only, and only the days between `since` and `until`; an hour cut by the window
- * shared out by its minutes.
+ * The Black Friday ads' spend (lib/bfAds.ts: a campaign named Black Friday, or clicks on a Black Friday page) inside
+ * the Black Friday window, per ad and per hour (the hour's start, ms), asked hour by hour for the window's Los Angeles
+ * days between `since` and `until`; an hour cut by the window shared out by its minutes. The ads that were already
+ * running are never Black Friday spend, even in the hours the whole store was at €9.99 ("solo quelle che venivano da
+ * ads precedenti vanno escluse dalla dashboard black friday", 2026-11-25).
  */
-async function bfSpendByAd(since: string, until: string, token: string): Promise<Map<string, AdSpend> | { reason: string }> {
+type BfSpend = { byAd: Map<string, AdSpend>; byHour: Map<number, number> };
+async function bfSpendByAd(since: string, until: string, token: string): Promise<BfSpend | { reason: string }> {
   const first = dayIn(BF_FROM_MS, ACCOUNT_TZ);
   const last = dayIn(Math.min(BF_UNTIL_MS - 1, Date.now()), ACCOUNT_TZ);
   const from = since > first ? since : first;
   const to = until < last ? until : last;
   const out = new Map<string, AdSpend>();
-  if (from > to) return out;
+  const byHour = new Map<number, number>();
+  if (from > to) return { byAd: out, byHour };
   const rows = (await insightRows(
     new URLSearchParams({
       level: "ad",
@@ -184,17 +198,19 @@ async function bfSpendByAd(since: string, until: string, token: string): Promise
     to,
   )) as (Row & { ad_id?: string; ad_name?: string; [HOURLY]?: string })[] | { reason: string };
   if (!Array.isArray(rows)) return rows;
+  const bfAds = await bfAdIds([...new Map(rows.filter((r) => r.ad_id).map((r) => [r.ad_id!, { adId: r.ad_id!, campaignName: r.campaign_name ?? "" }])).values()]);
   for (const r of rows) {
     const hour = Number((r[HOURLY] ?? "").slice(0, 2));
-    if (!r.ad_id || !r.date_start || !Number.isFinite(hour)) continue;
+    if (!r.ad_id || !bfAds.has(r.ad_id) || !r.date_start || !Number.isFinite(hour)) continue;
     const start = instantAt(r.date_start, hour, ACCOUNT_TZ);
     const spend = Number(r.spend ?? 0) * bfShare(start, start + 3_600_000);
     if (!spend) continue;
     const a = out.get(r.ad_id) ?? { adId: r.ad_id, adName: r.ad_name ?? "", campaignName: r.campaign_name ?? "", spend: 0 };
     a.spend += spend;
     out.set(r.ad_id, a);
+    byHour.set(start, (byHour.get(start) ?? 0) + spend);
   }
-  return out;
+  return { byAd: out, byHour };
 }
 
 /**
@@ -220,8 +236,9 @@ export async function spendByAd(since: string, until: string, era: Era = "all"):
   const currency = rows[0]?.account_currency ?? "EUR";
   const ads = rows.filter((r) => r.ad_id && Number(r.spend ?? 0) > 0).map((r) => ({ adId: r.ad_id!, adName: r.ad_name ?? "", campaignName: r.campaign_name ?? "", spend: Number(r.spend ?? 0) }));
   if (era === "all") return { connected: true, currency, ads };
-  const bf = await bfSpendByAd(since, until, token);
-  if (!(bf instanceof Map)) return { connected: false, reason: bf.reason };
+  const got = await bfSpendByAd(since, until, token);
+  if ("reason" in got) return { connected: false, reason: got.reason };
+  const bf = got.byAd;
   if (era === "bf") return { connected: true, currency, ads: [...bf.values()].filter((a) => a.spend > 0) };
   return { connected: true, currency, ads: ads.map((a) => ({ ...a, spend: Math.max(0, a.spend - (bf.get(a.adId)?.spend ?? 0)) })).filter((a) => a.spend > 0) };
 }

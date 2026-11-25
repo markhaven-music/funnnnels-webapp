@@ -65,7 +65,7 @@ export function BlackFridayPanel() {
         <div>
           <h1 className="page-title">Black Friday</h1>
           <p className="page-sub">
-            Every front-end at €9.99 / $9.99. Only the orders, visitors and ad spend from these hours are here, and Dashboard leaves them out.
+            Only what the Black Friday ads brought: their spend, and the visitors and orders at €9.99 / $9.99 they sent. What the ads that were already running brought stays on Dashboard.
           </p>
         </div>
       </div>

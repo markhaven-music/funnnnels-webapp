@@ -20,7 +20,8 @@ import { stripe, stripeConfigured } from "@/lib/stripe";
 import type Stripe from "stripe";
 import { rangeDays, rangeLength, type Range } from "@/lib/range";
 import { addDays, dayIn, startOfDay } from "@/lib/tz";
-import { BF_FIRST_DAY, BF_FROM_MS, BF_LAST_DAY, BF_UNTIL_MS, bfFor, bfShare, type Era } from "@/lib/bfEra";
+import { BF_FIRST_DAY, BF_FROM_MS, BF_LAST_DAY, BF_UNTIL_MS, bfFor, bfShare, inSitewide, type Era } from "@/lib/bfEra";
+import { bfClickShare, bfOrderIds } from "@/lib/bfAds";
 import { supabase } from "@/lib/supabase";
 import { BF, BF_SITEWIDE_OFF, BF_SUFFIX } from "@/lib/blackFriday";
 
@@ -312,6 +313,10 @@ export type Analytics = {
 // bonus: the Drum Kit's 5-minute bonus was given (card orders: metadata.bonus); bonusStart: when the
 // buyer's 5 minutes started (ms, card orders since 2026-11-09: metadata.bonus_start); paypal: a PayPal order.
 type Sale = {
+  /** The Stripe payment intent or PayPal order id. */
+  id?: string;
+  /** Brought by the Black Friday ads (lib/bfEra.ts bfFor), set when an era is asked for. */
+  bf?: boolean;
   funnel: string;
   lang: string;
   variant: string;
@@ -452,7 +457,7 @@ async function bfViewRows(): Promise<BfViewRow[]> {
       const fp = key.slice(0, key.lastIndexOf("|"));
       const c = tally.get(fp) ?? { inside: 0, all: 0 };
       c.all += 1;
-      if (bfFor(fp.slice(0, fp.indexOf("|")), t)) c.inside += 1;
+      if (inSitewide(fp.slice(0, fp.indexOf("|")), t)) c.inside += 1;
       tally.set(fp, c);
     }
     const byHours = bfShare(dayFrom, dayUntil);
@@ -462,13 +467,16 @@ async function bfViewRows(): Promise<BfViewRow[]> {
       share.set(`${day}|${r.funnel}|${r.page}`, c && c.all ? c.inside / c.all : byHours);
     }
   }
-  // The Drum Kit's and Jazz's own pages after they left the sale (bfFor): none of their visits, but those of the
-  // Black Friday copies (variant "bf"), whole.
+  // What the Black Friday ads brought (lib/bfEra.ts bfFor): the Black Friday copies' visits (variant "bf") whole; on
+  // the funnels' own pages only the store-wide hours, and of those only the share of clicks from Black Friday ads
+  // (lib/bfAds.ts): the visitors the ads already running sent stay on Dashboard. Other funnels never.
+  const fromAds = await bfClickShare();
   const part = (r: BfViewRow) => {
     if (r.variant === BF.variant) return 1;
+    if (!(r.funnel in BF_FUNNELS)) return 0;
     const off = BF_SITEWIDE_OFF[r.funnel];
     if (off && r.day > utcDay(Date.parse(off))) return 0;
-    return share.get(`${r.day}|${r.funnel}|${r.page}`) ?? 1;
+    return (share.get(`${r.day}|${r.funnel}|${r.page}`) ?? 1) * (fromAds.get(r.funnel) ?? 0);
   };
   return rows
     .map((r) => ({ ...r, views: Math.round(Number(r.views) * part(r)) }))
@@ -528,7 +536,7 @@ function daily(hasPrevious: boolean, since: string | null, last: string, rows: D
     const inside = bf.get(`${r.day}|${r.funnel}|${r.page}`) ?? 0;
     return era === "bf" && current.has(r.day) ? inside : r.views - inside;
   };
-  const counts = (s: Sale, day: string) => era === "all" || (era === "bf" && current.has(day) ? bfFor(s.funnel, s.created, s.variant) : !bfFor(s.funnel, s.created, s.variant));
+  const counts = (s: Sale, day: string) => era === "all" || (era === "bf" && current.has(day) ? !!s.bf : !s.bf);
   for (const r of rows) {
     const d = by.get(r.day);
     if (!d) continue;
@@ -576,6 +584,7 @@ async function stripeSales(slug: string): Promise<Sale[]> {
       const bt = pi.latest_charge && typeof pi.latest_charge !== "string" ? pi.latest_charge.balance_transaction : null;
       const converted = (pi.currency === "gbp" || pi.currency === "chf") && bt && typeof bt !== "string" && bt.currency === "eur";
       out.push({
+        id: pi.id,
         funnel: slug,
         lang: pi.metadata.lang || "?",
         variant: pi.metadata.variant || "",
@@ -615,6 +624,7 @@ async function paypalSales(): Promise<Sale[]> {
   const rows = data ?? [];
   await fillPayPalFees(rows);
   return rows.map((r) => ({
+    id: r.order_id,
     funnel: r.funnel,
     lang: r.lang,
     variant: r.variant,
@@ -750,8 +760,13 @@ export async function getAnalytics(range: Range, opts: { since?: string; era?: E
   const windowDays = firstWindow ? await soft("visitors per day (tests)", viewDays(firstWindow), []) : [];
   const ratedFrom = trackingSince ? startOfDay(trackingSince) : Infinity;
   for (const s of allSales) s.rated = s.created >= ratedFrom;
+  // Which orders the Black Friday ads brought (lib/bfEra.ts bfFor): the store-wide hours' orders by the buyer's ad.
+  if (era !== "all") {
+    const fromBfAds = await soft("Black Friday orders by ad", bfOrderIds(), new Set<string>());
+    for (const s of allSales) s.bf = bfFor(s.funnel, s.created, s.variant, !!s.id && fromBfAds.has(s.id));
+  }
   const views = withEra(rangeViews, bfRows, era, since && since > VISITS_FROM ? since : VISITS_FROM, last);
-  const sales = allSales.filter((s) => s.created >= sinceMs && s.created < untilMs && (era === "all" || (era === "bf") === bfFor(s.funnel, s.created, s.variant)));
+  const sales = allSales.filter((s) => s.created >= sinceMs && s.created < untilMs && (era === "all" || (era === "bf") === !!s.bf));
 
   const rows = [...list.map((f) => ({ ...f, base: f.slug, bf: false })), ...bfList.map((f) => ({ ...f, bf: true }))];
   // A row's own visits and sales: the funnel's, with or without the Black Friday ones.
