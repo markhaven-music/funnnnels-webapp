@@ -21,8 +21,11 @@ export const BF = {
   variant: "bf",
   /** Set by proxy.ts on the Black Friday pages: the page views' variant (lib/beacon.ts abCookie). */
   cookie: "bf_promo",
-  /** End of Black Friday, Fri 27 Nov 2026, midnight US Pacific (PST, UTC-8) = 09:00 in Italy. */
-  ends: "2026-11-28T08:00:00Z",
+  /** End of the Black Friday pages. Planned for Fri 27 Nov midnight US Pacific (2026-11-28T08:00:00Z); closed early
+   * on Thu 26 Nov 11:40 Italy, with the Black Friday ads paused ("spegni tutte le ads black friday e togli offerta
+   * black friday dal sito. lascia stats a parte"). From here proxy.ts sends the pages to the funnels' own, at 27, and
+   * the checkout no longer charges 9.99. The Black Friday dashboard keeps its own window (BF_FROM → BF_ENDS). */
+  ends: "2026-11-26T10:40:00Z",
   price: { eur: 9.99, usd: 9.99 } as Money,
   funnels: ["midi-drum-kit", "jazz-midi-pack"] as readonly string[],
   /** The path after the funnel's own: /<slug>/black-friday, /<slug>/black-friday/order. */
