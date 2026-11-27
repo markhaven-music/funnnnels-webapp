@@ -48,6 +48,12 @@ export default async function Page({ params }: { params: Promise<{ n: string }> 
         })}
       </ol>
 
+      <a className={s.early} href="/free/bible/notify">
+        <span>
+          <b style={{ all: "unset", fontWeight: 800 }}>December 21, 12 PM New York.</b> Join the list and get in 1 hour before everyone.
+        </span>
+        <b>Get early access</b>
+      </a>
       <h1 className={s.h1}>{v.title}</h1>
 
       {v.wistiaId ? (
