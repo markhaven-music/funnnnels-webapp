@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import s from "./bible.module.css";
 
 export type Comment = { id: string; name: string; body: string; created_at: string };
@@ -18,19 +18,8 @@ export default function Comments({ video, ask, quick, initial }: { video: number
   const [list, setList] = useState(initial);
   const [text, setText] = useState("");
   const [done, setDone] = useState(false);
-  const nameRef = useRef<HTMLInputElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
-  // Remember who they are, so the next comment is one tap and one click.
-  useEffect(() => {
-    try {
-      const n = localStorage.getItem("bible_name"), e = localStorage.getItem("bible_email");
-      if (n && nameRef.current) nameRef.current.value = n;
-      if (e && emailRef.current) emailRef.current.value = e;
-    } catch {}
-  }, []);
   function pick(q: string) {
     setText((t) => (t.trim() ? t : q + ". "));
-    if (nameRef.current && !nameRef.current.value) nameRef.current.focus();
   }
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -41,13 +30,12 @@ export default function Comments({ video, ask, quick, initial }: { video: number
     setBusy(true); setErr("");
     const r = await fetch("/api/checkout/bible/comment", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ video, name: f.get("name"), email: f.get("email"), body: f.get("body"), company: f.get("company") }),
+      body: JSON.stringify({ video, body: f.get("body"), company: f.get("company") }),
     }).catch(() => null);
     const d = r ? await r.json().catch(() => ({})) : {};
     setBusy(false);
     if (r?.ok && d.comment) {
       setList([d.comment, ...list]); setText(""); setDone(true);
-      try { localStorage.setItem("bible_name", String(f.get("name") ?? "")); localStorage.setItem("bible_email", String(f.get("email") ?? "")); } catch {}
     }
     else if (!r?.ok) setErr(d.error || "Something went wrong. Try again.");
   }
@@ -64,10 +52,6 @@ export default function Comments({ video, ask, quick, initial }: { video: number
       )}
       <form className={`${s.form} ${s.cform}`} onSubmit={submit}>
         <textarea name="body" required rows={3} maxLength={800} value={text} onChange={(e) => setText(e.target.value)} placeholder="Or write it in your own words" />
-        <div className={s.crow}>
-          <input ref={nameRef} name="name" required placeholder="First name" autoComplete="given-name" />
-          <input ref={emailRef} name="email" type="email" placeholder="Email (optional, not shown)" autoComplete="email" />
-        </div>
         <input name="company" tabIndex={-1} autoComplete="off" className={s.hp} aria-hidden />
         <button disabled={busy}>{busy ? "Posting…" : "Post comment"}</button>
         {err && <p className={s.err}>{err}</p>}

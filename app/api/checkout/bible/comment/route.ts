@@ -18,11 +18,10 @@ export async function POST(req: Request) {
   }
   if (b.company) return NextResponse.json({ ok: true }); // honeypot
   const video = Number(b.video);
-  const name = String(b.name ?? "").trim().slice(0, 40);
+  const name = String(b.name ?? "").trim().slice(0, 40) || "Producer";
   const email = String(b.email ?? "").trim().toLowerCase();
   const body = String(b.body ?? "").trim().replace(/\s+\n/g, "\n").slice(0, 800);
   if (![1, 2, 3, 4].includes(video)) return NextResponse.json({ error: "Bad request" }, { status: 400 });
-  if (!name) return NextResponse.json({ error: "Add your first name." }, { status: 400 });
   if (email && !isEmail(email)) return NextResponse.json({ error: "That email doesn't look right." }, { status: 400 });
   if (body.length < 3) return NextResponse.json({ error: "Write a few words." }, { status: 400 });
   if (/https?:\/\/|www\.|\.com\b/i.test(body)) return NextResponse.json({ error: "No links in comments." }, { status: 400 });
