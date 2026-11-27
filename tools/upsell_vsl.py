@@ -31,6 +31,7 @@ os.makedirs(D, exist_ok=True)
 SPOKEN = {
     "it": {"FL": "Effe-Elle", "31": "trentun", "310": "trecentodieci", "496": "quattrocentonovantasei", "808,": "ottozerotto,",
            "BPM": "bi-pi-em", "BeatStars.": "Beat-Stars.", "hi-hat": "hai-het"},
+    "en": {},   # 2026-11-27: MIDI DRUMS BIBLE launch videos, numbers already spelled out in the script
 }[LANG]
 
 

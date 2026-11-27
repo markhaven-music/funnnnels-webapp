@@ -114,6 +114,7 @@ const PUBLIC = [
   /^\/api\/coaching\/apply$/,
   /^\/legal\/[a-z-]+$/, // the legal pages
   /^\/free\/[a-z-]+(\/[a-z-]+)?$/, // the free packs' pages and downloads (app/free)
+  /^\/free\/bible\/\d$/, // MIDI DRUMS BIBLE launch videos (app/free/bible/[n])
   /^\/blog(\/(og\/)?[a-z0-9-]+)?\/?$/, // the blog, its posts and their share pictures (app/blog)
   /^\/(robots\.txt|sitemap\.xml)$/, // for search engines (app/robots.ts, app/sitemap.ts)
   /^\/api\/checkout\/shop\/(intent|paypal)$/,
