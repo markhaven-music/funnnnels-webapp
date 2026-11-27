@@ -315,10 +315,20 @@ export async function setDone(customers: string | string[], done: boolean): Prom
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+// A web address in a reply becomes a link. Long ones (a signed download link)
+// show as "Download" instead of the whole address. Runs on escaped text, so
+// the address's & is already &amp;, which is right inside href.
+function linkify(escaped: string): string {
+  return escaped.replace(/https?:\/\/[^\s<]+[^\s<.,;:!?)]/g, (url) => {
+    const label = url.length > 80 ? "Download" : url;
+    return `<a href="${url}" style="color:#0a58ca;font-weight:bold">${label}</a>`;
+  });
+}
+
 function htmlOf(reply: string, quoted: { who: string; when: string; text: string } | null): string {
   const paras = esc(reply.trim())
     .split(/\n{2,}/)
-    .map((p) => `<p style="margin:0 0 12px">${p.replace(/\n/g, "<br>")}</p>`)
+    .map((p) => `<p style="margin:0 0 12px">${linkify(p).replace(/\n/g, "<br>")}</p>`)
     .join("");
   const quote = quoted
     ? `<div style="margin-top:20px;color:#666">On ${esc(quoted.when)}, ${esc(quoted.who)} wrote:</div><blockquote style="margin:6px 0 0;padding-left:12px;border-left:2px solid #ccc;color:#666">${esc(quoted.text.trim()).replace(/\n/g, "<br>")}</blockquote>`
