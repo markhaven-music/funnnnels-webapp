@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { poppins } from "@/app/shop/fonts";
+import { supabase } from "@/lib/supabase";
+import { LAUNCH } from "../launch";
+import Comments, { type Comment } from "./Comments";
+import Countdown from "./Countdown";
 import { VIDEOS } from "./videos";
 import s from "./bible.module.css";
 
@@ -8,7 +12,7 @@ import s from "./bible.module.css";
 // (the Astro site already forwards /free/* here). The four videos run along the
 // top as a timeline (user, 11-27: "put time line on top", "make the page LOOK GOOD").
 // A video shows once it has a Wistia id; before that the page says when it comes out.
-export const revalidate = 3600;
+export const revalidate = 300; // comments: a new one also revalidates the page (api/checkout/bible/comment)
 
 export function generateStaticParams() {
   return VIDEOS.map((v) => ({ n: String(v.n) }));
@@ -25,6 +29,9 @@ export default async function Page({ params }: { params: Promise<{ n: string }> 
   const v = VIDEOS.find((x) => String(x.n) === n);
   if (!v) notFound();
   const next = VIDEOS.find((x) => x.n === v.n + 1);
+  const { data: comments } = v.wistiaId
+    ? await supabase().from("bible_comments").select("id, name, body, created_at").eq("video", v.n).eq("hidden", false).order("created_at", { ascending: false }).limit(200)
+    : { data: null };
   return (
     <main className={`${s.page} ${poppins.variable}`}>
       <div className={s.glow} aria-hidden />
@@ -54,6 +61,7 @@ export default async function Page({ params }: { params: Promise<{ n: string }> 
         </span>
         <b>Get early access</b>
       </a>
+      <Countdown to={LAUNCH.open} label="The pack comes out in" />
       <h1 className={s.h1}>{v.title}</h1>
 
       {v.wistiaId ? (
@@ -95,6 +103,8 @@ export default async function Page({ params }: { params: Promise<{ n: string }> 
           </ol>
         </section>
       )}
+
+      {v.wistiaId && <Comments video={v.n} ask={v.ask ?? "What did you think? Tell me below."} initial={(comments ?? []) as Comment[]} />}
 
       {next && (
         <section className={s.next}>

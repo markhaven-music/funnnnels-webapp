@@ -115,3 +115,29 @@
 .date b { font-size: clamp(64px, 16vw, 150px); font-weight: 800; line-height: .95; text-transform: uppercase; letter-spacing: -.03em;
   background: linear-gradient(180deg, #fff 0%, #ffd2bd 45%, #fc4200 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 0 30px rgba(252, 66, 0, .45)); }
+
+/* countdown to the opening (LAUNCH.open) */
+.count { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 0 22px; }
+.countLabel { font-size: 13px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #fff; }
+.countRow { display: flex; gap: 10px; }
+.countCell { display: flex; flex-direction: column; align-items: center; min-width: 74px; padding: 10px 6px 8px; border-radius: 10px; background: #141414; }
+.countCell b { font-size: clamp(30px, 8vw, 44px); font-weight: 800; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
+.countCell small { margin-top: 4px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #fc4200; }
+@media (max-width: 420px) { .countCell { min-width: 62px; } .countRow { gap: 6px; } }
+
+/* comments under the videos */
+.comments { max-width: 760px; margin: 46px auto 0; }
+.cform { max-width: none; margin: 16px 0 0; }
+.cform textarea { font: inherit; font-size: 17px; padding: 16px 18px; border-radius: 10px; border: 0; background: #fff; color: #111; resize: vertical; }
+.cform textarea::placeholder { color: #8a8a8a; }
+.crow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.crow input { min-width: 0; }
+@media (max-width: 560px) { .crow { grid-template-columns: 1fr; } }
+.cform button { min-height: 64px; font-size: 20px; }
+.ccount { margin: 26px 0 10px; color: #a9a9a9; font-size: 14px; }
+.clist { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+.clist li { display: flex; gap: 12px; align-items: flex-start; }
+.clist b { color: #fff; }
+.clist small { color: #8a8a8a; font-size: 12px; }
+.clist p { margin: 4px 0 0; color: #dcdcdc; font-size: 16px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cavatar { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; background: #fc4200; }

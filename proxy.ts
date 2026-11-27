@@ -121,7 +121,7 @@ const PUBLIC = [
   /^\/funnels\/[^/]+\/.+\.[a-z0-9]+$/, // funnel assets in /public (audio, zips)
   /^\/api\/optin$/,
   /^\/api\/shots$/, // new screenshots of the funnel pages, from the GitHub Action (its own SHOTS_TOKEN)
-  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|here|me|upsell|owned|go|open|resume|bonus|blog|recent|bible)$/, // go, open: a click on / an open of an email (lib/mail.ts); resume: its saved cart; here, me: dashboard → Live; bonus: the Drum Kit order page's 5-minute clock; owned: an upsell page asking if the buyer has it already; recent: the recent-buyer pop-up (lib/salesPop.ts)
+  /^\/api\/checkout\/(lead|intent|paypal|paypal\/return|view|here|me|upsell|owned|go|open|resume|bonus|blog|recent|bible|bible\/comment)$/, // go, open: a click on / an open of an email (lib/mail.ts); resume: its saved cart; here, me: dashboard → Live; bonus: the Drum Kit order page's 5-minute clock; owned: an upsell page asking if the buyer has it already; recent: the recent-buyer pop-up (lib/salesPop.ts)
   /^\/account$/, // the customer login and its API
   /^\/api\/checkout\/account\/(login|verify|session)$/,
   // Email: Stripe's webhook, the email job (its own CRON_SECRET), unsubscribing.
