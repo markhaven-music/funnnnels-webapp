@@ -36,7 +36,7 @@ export default function Join({ consent }: { consent: string }) {
         <span>{consent}</span>
       </label>
       <input name="company" tabIndex={-1} autoComplete="off" className={s.hp} aria-hidden />
-      <button disabled={state === "busy"}>{state === "busy" ? "Saving…" : "Get early access"}</button>
+      <button disabled={state === "busy"}>{state === "busy" ? "Saving…" : <>Get early access<span className={s.arrow}>→</span></>}</button>
       {err && <p className={s.err}>{err}</p>}
       <small>Your phone is optional. We text you only for this launch, 3 messages at most.</small>
     </form>

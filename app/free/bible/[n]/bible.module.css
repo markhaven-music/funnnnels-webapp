@@ -12,10 +12,10 @@
 .timeline li > a, .timeline li > div { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; color: inherit; text-align: center; }
 .dot { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 20px;
   background: #1a1a1a; color: #8a8a8a; position: relative; }
-.when { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #8a8a8a; }
+.when { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; }
 .name { font-size: 14px; font-weight: 700; color: #cfcfcf; }
 .now .dot { background: #fc4200; color: #000; box-shadow: 0 0 0 6px rgba(252, 66, 0, .18), 0 0 34px rgba(252, 66, 0, .65); }
-.now .when { color: #fc4200; }
+.now .when { color: #fff; }
 .now .name { color: #fff; }
 .open .dot { background: #fff; color: #000; }
 .open a:hover .dot { background: #fc4200; }
@@ -72,9 +72,24 @@
 .form input::placeholder { color: #7d7d7d; }
 .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.45; color: #a9a9a9; }
 .consent input { margin-top: 3px; width: 18px; height: 18px; accent-color: #fc4200; flex: none; }
-.form button { font: inherit; font-weight: 800; font-size: 20px; text-transform: uppercase; padding: 18px; border: 0; border-radius: 12px; cursor: pointer;
-  color: #000; background: linear-gradient(#ff6a2e, #fc4200); box-shadow: 0 6px 0 #9c2900, 0 18px 40px rgba(252, 66, 0, .35); }
-.form button:active { transform: translateY(4px); box-shadow: 0 2px 0 #9c2900; }
+.form button { position: relative; overflow: hidden; font: inherit; font-weight: 800; font-size: clamp(22px, 5.5vw, 28px); letter-spacing: .02em;
+  text-transform: uppercase; min-height: 92px; padding: 18px 22px; border: 0; border-radius: 16px; cursor: pointer; color: #fff;
+  text-shadow: 0 2px 0 rgba(120, 30, 0, .55), 0 0 18px rgba(255, 255, 255, .25);
+  background: linear-gradient(180deg, #ff8a52 0%, #fc4200 48%, #e23a00 100%);
+  box-shadow: 0 9px 0 #8f2500, 0 12px 0 #5c1700, 0 22px 50px rgba(252, 66, 0, .55), inset 0 2px 0 rgba(255, 255, 255, .55);
+  animation: breathe 2.4s ease-in-out infinite; transition: transform .08s, box-shadow .08s; }
+.form button::before { content: ""; position: absolute; inset: 0 0 52% 0; border-radius: 16px 16px 40% 40% / 16px 16px 18px 18px;
+  background: linear-gradient(rgba(255, 255, 255, .45), rgba(255, 255, 255, .06)); pointer-events: none; }
+.form button::after { content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%; transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent); animation: sweep 3.2s ease-in-out infinite; }
+.form button:hover { filter: brightness(1.08); }
+.form button:active { transform: translateY(9px); box-shadow: 0 0 0 #8f2500, 0 3px 0 #5c1700, 0 10px 26px rgba(252, 66, 0, .5), inset 0 2px 0 rgba(255, 255, 255, .5); animation: none; }
+.form button:disabled { filter: grayscale(.4); animation: none; }
+.arrow { display: inline-block; margin-left: 10px; animation: nudge 1.2s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+@keyframes sweep { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+@keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .form button, .form button::after, .arrow { animation: none; } }
 .form small { color: #8a8a8a; font-size: 13px; text-align: center; }
 .err { color: #ff7b52; text-align: center; margin: 0; }
 .hp { position: absolute; left: -9999px; }
@@ -84,6 +99,8 @@
 .early { display: flex; align-items: center; justify-content: space-between; gap: 14px; max-width: 980px; margin: 0 0 26px; padding: 16px 20px;
   border-radius: 12px; background: linear-gradient(90deg, #2a0d02, #141414); color: #fff; text-decoration: none; }
 .early span { font-size: 16px; line-height: 1.35; }
-.early b { flex: none; font-size: 14px; font-weight: 800; text-transform: uppercase; padding: 10px 16px; border-radius: 8px; background: #fc4200; color: #000; }
+.early b { flex: none; font-size: 16px; font-weight: 800; text-transform: uppercase; padding: 14px 20px; border-radius: 10px; color: #fff;
+  text-shadow: 0 1px 0 rgba(120, 30, 0, .55); background: linear-gradient(180deg, #ff8a52, #fc4200 50%, #e23a00);
+  box-shadow: 0 5px 0 #8f2500, 0 12px 28px rgba(252, 66, 0, .5), inset 0 2px 0 rgba(255, 255, 255, .5); animation: breathe 2.4s ease-in-out infinite; }
 .foot a { color: #fc4200; }
 @media (max-width: 560px) { .early { flex-direction: column; align-items: stretch; text-align: center; } }
