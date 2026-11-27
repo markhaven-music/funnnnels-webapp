@@ -20,7 +20,15 @@ import { supabase } from "@/lib/supabase";
 // Every number covers the same days: the range, from SPEND_SINCE at the
 // earliest (before it the ads sold on ClickFunnels, outside funnnnels).
 
-export type FunnelAds = { spend: number; visitors: number; revenue: number; net: number; orders: number };
+export type FunnelAds = {
+  spend: number;
+  visitors: number;
+  revenue: number;
+  net: number;
+  orders: number;
+  /** The same without Black Friday's (its ads' spend, visitors and orders), for ROAS and cost per visitor: set with core. */
+  core?: { spend: number; visitors: number; revenue: number; net: number; orders: number };
+};
 export type FunnelSpend =
   | { connected: false; reason: string }
   | {
@@ -110,12 +118,18 @@ async function funnelOfAds(ads: { adId: string; adName: string; campaignName: st
 }
 
 /** era (lib/bfEra.ts): "regular" leaves the Black Friday window out, "bf" is only it (whatever the range). */
-export async function getFunnelSpend(range: Range, era: Era = "all"): Promise<FunnelSpend> {
+/** core: totals with Black Friday and, on each funnel, `core` without it (lib/analytics.ts Analytics.core). */
+export async function getFunnelSpend(range: Range, era: Era = "all", core = false): Promise<FunnelSpend> {
+  core = core && era === "all";
   const today = dayIn(Date.now());
   const { first, last } = era === "bf" ? { first: BF_FIRST_DAY, last: today < BF_LAST_DAY ? today : BF_LAST_DAY } : rangeDays(range);
   const since = !first || first < SPEND_SINCE ? SPEND_SINCE : first;
   if (since > last) return { connected: true, currency: "EUR", since, until: last, byFunnel: {}, leadMagnets: 0, unplaced: 0 };
-  const [meta, a] = await Promise.all([spendByAd(since, last, era), getAnalytics(range, { since, era })]);
+  const [meta, a, regular] = await Promise.all([
+    spendByAd(since, last, era),
+    getAnalytics(range, { since, era, core }),
+    core ? spendByAd(since, last, "regular") : Promise.resolve(null),
+  ]);
   if (!meta.connected) return meta;
   const slugs = a.funnels.map((f) => f.slug);
   const place = await funnelOfAds(meta.ads, slugs);
@@ -123,6 +137,7 @@ export async function getFunnelSpend(range: Range, era: Era = "all"): Promise<Fu
   const byFunnel: Record<string, FunnelAds> = {};
   for (const f of a.funnels) {
     byFunnel[f.slug] = { spend: 0, visitors: f.total.visitors, revenue: f.total.revenue, net: f.total.net, orders: f.total.orders };
+    if (f.core) byFunnel[f.slug].core = { spend: 0, visitors: f.core.visitors, revenue: f.core.revenue, net: f.core.net, orders: f.core.orders };
   }
   let leadMagnets = 0;
   let unplaced = 0;
@@ -131,6 +146,13 @@ export async function getFunnelSpend(range: Range, era: Era = "all"): Promise<Fu
     if (f === "free") leadMagnets += ad.spend;
     else if (f && byFunnel[f]) byFunnel[f].spend += ad.spend;
     else unplaced += ad.spend;
+  }
+  if (regular?.connected) {
+    for (const ad of regular.ads) {
+      const f = place.get(ad.adId);
+      const c = f && f !== "free" ? byFunnel[f]?.core : undefined;
+      if (c) c.spend += ad.spend;
+    }
   }
   return { connected: true, currency: meta.currency, since, until: last, byFunnel, leadMagnets, unplaced };
 }

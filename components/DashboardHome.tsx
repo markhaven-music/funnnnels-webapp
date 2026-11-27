@@ -7,7 +7,7 @@ import { CURRENCIES, dayLabel, fromEur, money, moneyExact, Performance, SYMBOL, 
 import { FunnelSection, isApart, isBlackFriday, isLeadMagnet, LeadMagnets } from "@/components/LeadMagnets";
 import { NewFunnelTile } from "@/components/NewFunnelTile";
 import { I } from "@/components/icons";
-import type { Analytics } from "@/lib/analytics";
+import type { Analytics, Metrics } from "@/lib/analytics";
 import { RangePicker, useRange } from "@/components/RangePicker";
 import { previousName, rangePhrase, type Range } from "@/lib/range";
 import type { FunnelStatus, StoredFunnel } from "@/lib/blocks";
@@ -41,7 +41,7 @@ export function FunnelRevenue({ a, cur }: { a: Analytics; cur: Currency }) {
             <span className={s.hmeta}>
               {f.total.orders} order{f.total.orders === 1 ? "" : "s"} · {f.total.visitors.toLocaleString("en-US")} visitors
               {f.total.revenue > 0 && ` · ${c(f.total.net)} net`}
-              {f.total.orders > 0 && ` · AOV ${cx(f.total.revenue / f.total.orders)}`}
+              {(f.core ?? f.total).orders > 0 && ` · AOV ${cx((f.core ?? f.total).revenue / (f.core ?? f.total).orders)}${f.core ? " w/o Black Friday" : ""}`}
             </span>
           </div>
           <div className={s.htrack}>
@@ -55,10 +55,15 @@ export function FunnelRevenue({ a, cur }: { a: Analytics; cur: Currency }) {
 }
 
 export function Steps({ a }: { a: Analytics }) {
-  const t = a.funnels.reduce(
-    (n, f) => ({ v: n.v + f.total.visitors, o: n.o + f.total.orderViews, c: n.c + f.total.checkouts, p: n.p + f.total.ratedOrders }),
-    { v: 0, o: 0, c: 0, p: 0 },
-  );
+  const sumOf = (pick: (f: Analytics["funnels"][number]) => Metrics) =>
+    a.funnels.reduce(
+      (n, f) => ({ v: n.v + pick(f).visitors, o: n.o + pick(f).orderViews, c: n.c + pick(f).checkouts, p: n.p + pick(f).ratedOrders }),
+      { v: 0, o: 0, c: 0, p: 0 },
+    );
+  // Counts with Black Friday, the step-to-step rates without (lib/analytics.ts Analytics.core).
+  const t = sumOf((f) => f.total);
+  const r = sumOf((f) => f.core ?? f.total);
+  const rates = [r.v, r.o, r.c, r.p];
   if (!t.v) return <div className={s.empty}>No visitors counted in this range yet.</div>;
   const steps = [
     { label: "Landing visitors", n: t.v },
@@ -74,7 +79,7 @@ export function Steps({ a }: { a: Analytics }) {
             <span>{step.label}</span>
             {i > 0 && (
               <span className={s.hmeta}>
-                {steps[i - 1].n ? `${((step.n / steps[i - 1].n) * 100).toFixed(0)}% of the step before` : "—"}
+                {rates[i - 1] ? `${((rates[i] / rates[i - 1]) * 100).toFixed(0)}% of the step before${a.core ? " (w/o Black Friday)" : ""}` : "—"}
               </span>
             )}
           </div>
@@ -148,7 +153,7 @@ export function DashboardHome({ funnels: all, analytics, onBlackFriday }: Props)
   const [firstAt] = useState(() => Date.now());
   const refresh = () => {
     setRefreshing(true);
-    fetch(`/api/analytics?range=${range}&era=regular`, { cache: "no-store" })
+    fetch(`/api/analytics?range=${range}&era=all&core=1`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
       .then((a) => {
         if (!a) return;
@@ -168,7 +173,7 @@ export function DashboardHome({ funnels: all, analytics, onBlackFriday }: Props)
   useEffect(() => {
     // 28 days comes with the page (Dashboard), until a refresh makes it as old as the rest.
     if (loaded[range] || (range === "28d" && !refreshed)) return;
-    fetch(`/api/analytics?range=${range}&era=regular`, { cache: "no-store" })
+    fetch(`/api/analytics?range=${range}&era=all&core=1`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
       .then((a) => {
         if (!a) return;
@@ -266,7 +271,9 @@ export function DashboardHome({ funnels: all, analytics, onBlackFriday }: Props)
         {/* The Black Friday window has its own dashboard (lib/bfEra.ts): said where the range is picked. */}
         {Date.now() >= BF_FROM_MS && data && (data.since ?? "") <= BF_LAST_DAY && data.until >= BF_FIRST_DAY && (
           <button type="button" className={s.bfNote} onClick={onBlackFriday}>
-            Full price only: Black Friday ({italyTime(BF_FROM_MS)} → {italyTime(BF_UNTIL_MS)}) left out · see Black Friday →
+            {data.core
+              ? "Black Friday counted in the totals, left out of AOV, conversion and ROAS · see Black Friday →"
+              : <>Full price only: Black Friday ({italyTime(BF_FROM_MS)} → {italyTime(BF_UNTIL_MS)}) left out · see Black Friday →</>}
           </button>
         )}
         {data && !data.sources.stripe && <span className={s.warn}>Stripe isn&apos;t connected on this server: card sales are missing.</span>}

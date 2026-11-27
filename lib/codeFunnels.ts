@@ -97,11 +97,13 @@ function adsOf(slug: string, spend: FunnelSpend | null): StoredFunnel["ads"] {
   const a = spend.byFunnel[slug];
   if (!a || (a.spend === 0 && a.revenue === 0)) return undefined;
   const profit = a.net - a.spend;
+  // Cost per visitor and ROAS without Black Friday (FunnelAds.core); spend and profit with it.
+  const r = a.core ?? a;
   return {
     spend: eur2(a.spend),
     // Cost per visitor: the spend over every landing visitor, ads or not.
-    cpc: a.visitors > 0 && a.spend > 0 ? eur2(a.spend / a.visitors) : "—",
-    roas: a.spend > 0 ? `${(a.revenue / a.spend).toFixed(2)}x` : "—",
+    cpc: r.visitors > 0 && r.spend > 0 ? eur2(r.spend / r.visitors) : "—",
+    roas: r.spend > 0 ? `${(r.revenue / r.spend).toFixed(2)}x` : "—",
     profit: `${profit < 0 ? "−" : ""}${eur2(Math.abs(profit))}`,
     profitTone: profit > 0.005 ? "up" : profit < -0.005 ? "down" : "flat",
     visitors: a.visitors.toLocaleString("en-US"),
@@ -110,13 +112,15 @@ function adsOf(slug: string, spend: FunnelSpend | null): StoredFunnel["ads"] {
 }
 
 /** The cards' visits, CVR and revenue from the Analytics numbers, keyed by funnel slug, and their ad numbers. */
-export function withStats(funnels: StoredFunnel[], stats: Record<string, Metrics>, range: string, spend: FunnelSpend | null = null): StoredFunnel[] {
+/** core: the same without Black Friday, for the averages (AOV, conversion); totals come from stats. */
+export function withStats(funnels: StoredFunnel[], stats: Record<string, Metrics>, range: string, spend: FunnelSpend | null = null, core: Record<string, Metrics> = {}): StoredFunnel[] {
   return funnels.map((f) => {
     const m = stats[f.id];
     if (!m) return f;
     const ads = adsOf(f.id, spend);
     const a = spend?.connected ? spend.byFunnel[f.id] : undefined;
-    const cvr = m.visitors > 0 ? `${((m.ratedOrders / m.visitors) * 100).toFixed(1)}%` : "—";
+    const c = core[f.id] ?? m;
+    const cvr = c.visitors > 0 ? `${((c.ratedOrders / c.visitors) * 100).toFixed(1)}%` : "—";
     return {
       ...f,
       views: m.visitors.toLocaleString("en-US"),
@@ -127,7 +131,7 @@ export function withStats(funnels: StoredFunnel[], stats: Record<string, Metrics
         revenue: eur(m.revenue),
         orders: m.orders.toLocaleString("en-US"),
         // Average order value: revenue (upsells included) per order.
-        aov: m.orders > 0 ? eur2(m.revenue / m.orders) : "—",
+        aov: c.orders > 0 ? eur2(c.revenue / c.orders) : "—",
         cvr,
         visitors: m.visitors.toLocaleString("en-US"),
       },

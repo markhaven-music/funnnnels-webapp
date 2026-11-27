@@ -120,16 +120,43 @@ type Row = {
   clicks: number;
   /** The same per funnel (slug). */
   funnels: Record<string, FunnelPart>;
+  /**
+   * The averages' numbers (AOV, conversion, ROAS): without what the Black Friday ads brought when the analytics carry
+   * it (Analytics.core, "totali con, medie senza"), else the same as the row's own. core: they differ.
+   */
+  c: Core;
+  cf: Record<string, FunnelPart>;
+  core: boolean;
 };
 
 type FunnelPart = { revenue: number; net: number; orders: number; upsells: number; visitors: number; ratedOrders: number };
+type Core = { revenue: number; orders: number; visitors: number; ratedOrders: number; adNet: number; spend: number | null };
 
 type DaySpend = Map<string, { spend: number; clicks: number }>;
 
-function toRows(days: Day[], spend: DaySpend | null, k: number, trackingSince: string | null): Row[] {
+function toRows(days: Day[], spend: DaySpend | null, k: number, trackingSince: string | null, coreSpend: DaySpend | null = null): Row[] {
+  const part = (byFunnel: Day["byFunnel"], day: string) =>
+    Object.fromEntries(
+      Object.entries(byFunnel ?? {}).map(([slug, f]) => [
+        slug,
+        { revenue: f.revenue * k, net: f.net * k, orders: f.orders, upsells: f.upsells, visitors: f.visitors, ratedOrders: trackingSince && day >= trackingSince ? f.orders : 0 },
+      ]),
+    );
   return days.map((d) => {
     const m = spend && d.day >= SPEND_SINCE ? (spend.get(d.day) ?? { spend: 0, clicks: 0 }) : null;
+    const cd = d.core ?? d;
+    const cm = d.core && coreSpend && d.day >= SPEND_SINCE ? (coreSpend.get(d.day) ?? { spend: 0, clicks: 0 }) : m;
     return {
+      core: !!d.core,
+      c: {
+        revenue: cd.revenue * k,
+        orders: cd.orders,
+        visitors: cd.visitors,
+        ratedOrders: trackingSince && d.day >= trackingSince ? cd.orders : 0,
+        adNet: cm ? cd.net * k : 0,
+        spend: cm ? cm.spend * k : null,
+      },
+      cf: part(cd.byFunnel, d.day),
       from: d.day,
       to: d.day,
       revenue: d.revenue * k,
@@ -169,12 +196,47 @@ function partOf(r: Row, slug: string): Row {
     adOrders: 0,
     clicks: 0,
     funnels: {},
+    core: r.core,
+    c: { revenue: r.cf[slug]?.revenue ?? 0, orders: r.cf[slug]?.orders ?? 0, visitors: r.cf[slug]?.visitors ?? 0, ratedOrders: r.cf[slug]?.ratedOrders ?? 0, adNet: 0, spend: null },
+    cf: {},
   };
 }
 
 function merge(rows: Row[]): Row {
-  const out: Row = { from: rows[0]?.from ?? "", to: rows[rows.length - 1]?.to ?? "", revenue: 0, net: 0, orders: 0, upsells: 0, visitors: 0, ratedOrders: 0, spend: null, adNet: 0, adOrders: 0, clicks: 0, funnels: {} };
+  const out: Row = {
+    from: rows[0]?.from ?? "",
+    to: rows[rows.length - 1]?.to ?? "",
+    revenue: 0,
+    net: 0,
+    orders: 0,
+    upsells: 0,
+    visitors: 0,
+    ratedOrders: 0,
+    spend: null,
+    adNet: 0,
+    adOrders: 0,
+    clicks: 0,
+    funnels: {},
+    core: rows.some((r) => r.core),
+    c: { revenue: 0, orders: 0, visitors: 0, ratedOrders: 0, adNet: 0, spend: null },
+    cf: {},
+  };
   for (const r of rows) {
+    out.c.revenue += r.c.revenue;
+    out.c.orders += r.c.orders;
+    out.c.visitors += r.c.visitors;
+    out.c.ratedOrders += r.c.ratedOrders;
+    out.c.adNet += r.c.adNet;
+    if (r.c.spend !== null) out.c.spend = (out.c.spend ?? 0) + r.c.spend;
+    for (const [slug, f] of Object.entries(r.cf)) {
+      const o = (out.cf[slug] ??= { revenue: 0, net: 0, orders: 0, upsells: 0, visitors: 0, ratedOrders: 0 });
+      o.revenue += f.revenue;
+      o.net += f.net;
+      o.orders += f.orders;
+      o.upsells += f.upsells;
+      o.visitors += f.visitors;
+      o.ratedOrders += f.ratedOrders;
+    }
     out.revenue += r.revenue;
     out.net += r.net;
     out.orders += r.orders;
@@ -253,10 +315,12 @@ const FUNNEL_COLORS = [
 const OTHER = "oklch(0.7 0.02 270)";
 
 const profitOf = (r: Row) => (r.spend === null ? null : r.adNet - r.spend);
-const roasOf = (r: Row) => (r.spend ? r.adNet / r.spend : null);
-const cvrOf = (r: Row) => (r.visitors ? r.ratedOrders / r.visitors : null);
+// The averages read r.c: without Black Friday when the row carries it (Row.c).
+const roasOf = (r: Row) => (r.c.spend ? r.c.adNet / r.c.spend : null);
+const cvrOf = (r: Row) => (r.c.visitors ? r.c.ratedOrders / r.c.visitors : null);
+const noBf = (r: Row) => (r.core ? " · without Black Friday" : "");
 /** Average order value: the revenue (upsells included) per order. */
-const aovOf = (r: Row) => (r.orders ? r.revenue / r.orders : null);
+const aovOf = (r: Row) => (r.c.orders ? r.c.revenue / r.c.orders : null);
 
 const METRICS: Metric[] = [
   { id: "profit", label: "Profit", color: PROFIT, kind: "money", ads: true, upGood: true, of: profitOf, note: (r, cur) => `${money(r.adNet, cur)} net − ${money(r.spend ?? 0, cur)} ad spend` },
@@ -270,7 +334,7 @@ const METRICS: Metric[] = [
     note: (r, cur) => (r.revenue > r.net ? `${money(r.revenue - r.net, cur)} Stripe + PayPal fees` : "less the processors' fees"),
   },
   { id: "spend", label: "Ad spend", color: SPEND, kind: "money", ads: true, upGood: null, of: (r) => r.spend, note: (r) => `${count(r.clicks)} link clicks` },
-  { id: "roas", label: "ROAS", color: "oklch(0.86 0.15 95)", kind: "ratio", ads: true, upGood: true, of: roasOf, note: (r, cur) => `${money(r.adNet, cur)} net ÷ ${money(r.spend ?? 0, cur)} ad spend` },
+  { id: "roas", label: "ROAS", color: "oklch(0.86 0.15 95)", kind: "ratio", ads: true, upGood: true, of: roasOf, note: (r, cur) => `${money(r.c.adNet, cur)} net ÷ ${money(r.c.spend ?? 0, cur)} ad spend${noBf(r)}` },
   { id: "revenue", label: "Revenue", color: "oklch(0.86 0.1 305)", kind: "money", upGood: true, of: (r) => r.revenue, note: () => "upsells included" },
   {
     id: "sales",
@@ -281,9 +345,9 @@ const METRICS: Metric[] = [
     of: (r) => r.orders,
     note: (r) => (r.upsells ? `+ ${r.upsells} upsell${r.upsells === 1 ? "" : "s"}` : "orders, upsells apart"),
   },
-  { id: "aov", label: "AOV", color: "oklch(0.82 0.12 140)", kind: "money", upGood: true, of: aovOf, note: () => "revenue ÷ orders, upsells included" },
+  { id: "aov", label: "AOV", color: "oklch(0.82 0.12 140)", kind: "money", upGood: true, of: aovOf, note: (r) => `revenue ÷ orders, upsells included${noBf(r)}` },
   { id: "visitors", label: "Visitors", color: "oklch(0.8 0.14 235)", kind: "count", upGood: true, of: (r) => r.visitors, note: () => "unique, on the landings" },
-  { id: "cvr", label: "Conversion", color: "oklch(0.84 0.13 195)", kind: "pct", upGood: true, of: cvrOf, note: () => "orders ÷ visitors" },
+  { id: "cvr", label: "Conversion", color: "oklch(0.84 0.13 195)", kind: "pct", upGood: true, of: cvrOf, note: (r) => `orders ÷ visitors${noBf(r)}` },
 ];
 
 function fmt(v: number | null, kind: Kind, cur: Currency, exact = false) {
@@ -471,6 +535,8 @@ export function Performance({ a, cur, periodName, onRefresh, refreshing, updated
   const days = a?.days ?? [];
   const before = a?.previous ?? [];
   const spend = useAdSpend((before[0] ?? days[0])?.day, days[days.length - 1]?.day, reload, a?.era ?? "all");
+  // ROAS without Black Friday (Analytics.core): the spend less the Black Friday ads'.
+  const coreSpend = useAdSpend(a?.core ? (before[0] ?? days[0])?.day : undefined, a?.core ? days[days.length - 1]?.day : undefined, reload, "regular");
 
   if (!a) {
     return (
@@ -501,7 +567,10 @@ export function Performance({ a, cur, periodName, onRefresh, refreshing, updated
   // before it the ads sold on ClickFunnels, and tiles over different days
   // didn't add up (net revenue − ad spend ≠ profit). The period before is as
   // many days right before that.
-  const allDays = [...toRows(before, spendMap, k, a.trackingSince), ...toRows(days, spendMap, k, a.trackingSince)];
+  const coreMap: DaySpend | null = coreSpend?.connected
+    ? new Map(coreSpend.days.map((d) => [d.day, { spend: coreSpend.currency === "USD" ? d.spend * rate : d.spend, clicks: d.clicks }]))
+    : null;
+  const allDays = [...toRows(before, spendMap, k, a.trackingSince, coreMap), ...toRows(days, spendMap, k, a.trackingSince, coreMap)];
   const rangeStartsEarly = (days[0]?.day ?? SPEND_SINCE) < SPEND_SINCE;
   const firstIn = allDays.findIndex((r) => r.from >= SPEND_SINCE);
   const rangeStart = Math.max(before.length, firstIn < 0 ? before.length : firstIn);
@@ -547,7 +616,7 @@ export function Performance({ a, cur, periodName, onRefresh, refreshing, updated
     : [];
   const lead = slugs.length > FUNNEL_COLORS.length ? slugs.slice(0, FUNNEL_COLORS.length - 1) : slugs;
   const rest = slugs.slice(lead.length);
-  const restOf = (r: Row) => merge(rest.map((slug) => partOf(r, slug)).map((p) => ({ ...p, funnels: {} })));
+  const restOf = (r: Row) => merge(rest.map((slug) => partOf(r, slug)).map((p) => ({ ...p, funnels: {}, cf: {} })));
   const series = split
     ? [
         ...lead.map((slug, i) => ({ key: slug, name: names.get(slug) ?? slug, color: FUNNEL_COLORS[i], of: (r: Row) => partOf(r, slug) })),
@@ -1025,13 +1094,13 @@ function Details({ r, cur }: { r: Row; cur: Currency }) {
       <TipRow color={NET} value={moneyExact(r.net, cur)} label="net revenue" />
       {r.spend !== null && <TipRow color={SPEND} value={moneyExact(r.spend, cur)} label="ad spend" />}
       {profit !== null && <TipRow mark={profit >= 0 ? "pos" : "neg"} value={moneyExact(profit, cur)} label={profit >= 0 ? "profit" : "loss"} />}
-      {roas !== null && <TipRow value={`${roas.toFixed(2)}×`} label="ROAS" />}
+      {roas !== null && <TipRow value={`${roas.toFixed(2)}×`} label={`ROAS${r.core ? ", w/o Black Friday" : ""}`} />}
       <span className={s.tipRule} />
       <TipRow value={moneyExact(r.revenue, cur)} label={r.revenue > r.net ? `revenue · ${moneyExact(r.revenue - r.net, cur)} fees` : "revenue"} />
       <TipRow value={count(r.orders)} label={`order${r.orders === 1 ? "" : "s"}${r.upsells ? ` + ${r.upsells} upsell${r.upsells === 1 ? "" : "s"}` : ""}`} />
       <TipRow value={count(r.visitors)} label="visitors" />
-      {r.orders > 0 && <TipRow value={moneyExact(r.revenue / r.orders, cur)} label="per order (AOV)" />}
-      {cvr !== null && <TipRow value={pct(cvr)} label="conversion" />}
+      {r.c.orders > 0 && <TipRow value={moneyExact(r.c.revenue / r.c.orders, cur)} label={`per order (AOV)${r.core ? ", w/o Black Friday" : ""}`} />}
+      {cvr !== null && <TipRow value={pct(cvr)} label={`conversion${r.core ? ", w/o Black Friday" : ""}`} />}
       {r.spend !== null && r.adOrders > 0 && <TipRow value={moneyExact(r.spend / r.adOrders, cur)} label="ad cost per order" />}
       {r.spend !== null && <TipRow value={count(r.clicks)} label="link clicks" />}
       {r.spend === null && r.from < SPEND_SINCE && <div className={s.tipNote}>Ads sold on ClickFunnels before {SINCE_LABEL}: no ad spend here.</div>}

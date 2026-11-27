@@ -69,7 +69,7 @@ export function Dashboard({ funnels: rows }: Props) {
     if (nav && nav in NAV_LABELS) setActiveNav(nav);
   }, []);
   useEffect(() => {
-    fetch(`/api/analytics?range=${CARD_RANGE}&era=regular`, { cache: "no-store" })
+    fetch(`/api/analytics?range=${CARD_RANGE}&era=all&core=1`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<Analytics>) : null))
       .then((a) => a && setAnalytics(a))
       .catch(() => {});
@@ -77,14 +77,16 @@ export function Dashboard({ funnels: rows }: Props) {
   // The cards' ad spend, cost per visitor, ROAS and net profit (lib/funnelSpend.ts).
   const [spend, setSpend] = useState<FunnelSpend | null>(null);
   useEffect(() => {
-    fetch(`/api/analytics/funnel-spend?range=${CARD_RANGE}&era=regular`, { cache: "no-store" })
+    fetch(`/api/analytics/funnel-spend?range=${CARD_RANGE}&era=all&core=1`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<FunnelSpend>) : null))
       .then((s) => s && setSpend(s))
       .catch(() => {});
   }, []);
   const funnels = useMemo(() => {
     const stats: Record<string, Metrics> = Object.fromEntries((analytics?.funnels ?? []).map((f) => [f.slug, f.total]));
-    return withStats(rows, stats, CARD_RANGE, spend);
+    // Totals with Black Friday, averages without (lib/analytics.ts Analytics.core).
+    const core: Record<string, Metrics> = Object.fromEntries((analytics?.funnels ?? []).flatMap((f) => (f.core ? [[f.slug, f.core]] : [])));
+    return withStats(rows, stats, CARD_RANGE, spend, core);
   }, [rows, analytics, spend]);
   const topBarLabel = NAV_LABELS[activeNav] ?? "Dashboard";
   const trail = activeNav === "email-insights" ? [{ label: "Email" }, { label: topBarLabel }] : [{ label: topBarLabel }];

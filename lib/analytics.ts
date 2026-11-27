@@ -148,6 +148,8 @@ export type FunnelStats = {
   name: string;
   url: string;
   total: Metrics;
+  /** The same without what the Black Friday ads brought, for the averages (AOV, conversion): set with opts.core. */
+  core?: Metrics;
   /** Per language, for funnels sold in several. "?" = orders from before the language was recorded. */
   langs: { lang: string; m: Metrics }[] | null;
 };
@@ -273,7 +275,11 @@ export type Day = {
   checkouts: number;
   /** The same day per funnel (slug), for the home chart's "By funnel" lines; funnels with nothing that day left out. */
   byFunnel: Record<string, FunnelDay>;
+  /** The same day without what the Black Friday ads brought, for the averages: set with opts.core. */
+  core?: CoreDay;
 };
+
+export type CoreDay = { orders: number; revenue: number; net: number; visitors: number; byFunnel: Record<string, FunnelDay> };
 
 export type FunnelDay = { orders: number; upsells: number; revenue: number; net: number; visitors: number };
 
@@ -281,6 +287,12 @@ export type Analytics = {
   range: Range;
   /** Which part of the time the numbers cover (lib/bfEra.ts): "regular" leaves the Black Friday window out, "bf" is only it. */
   era: Era;
+  /**
+   * Totals with Black Friday, averages without (2026-11-27, "Sì, totali con, medie senza"): every number counts
+   * everything, the Black Friday copies folded into their funnel, and `core` (on each funnel and day) leaves out what
+   * the Black Friday ads brought, for AOV, conversion, ROAS and cost per visitor.
+   */
+  core?: boolean;
   since: string | null;
   /** The range's last day, included ("2026-11-06" for yesterday). */
   until: string;
@@ -698,8 +710,9 @@ async function kitFunnels(): Promise<{ slug: string; name: string }[]> {
  * numbers that must cover the same days as something else: the funnel cards'
  * ad spend, counted only from SPEND_SINCE (lib/funnelSpend.ts).
  */
-export async function getAnalytics(range: Range, opts: { since?: string; era?: Era } = {}): Promise<Analytics> {
+export async function getAnalytics(range: Range, opts: { since?: string; era?: Era; core?: boolean } = {}): Promise<Analytics> {
   const era = opts.era ?? "all";
+  const core = !!opts.core && era === "all";
   const now = Date.now();
   // The Black Friday dashboard covers its window, whatever the range (lib/bfEra.ts).
   const { first: rangeFirst, last } =
@@ -743,7 +756,7 @@ export async function getAnalytics(range: Range, opts: { since?: string; era?: E
   const before = since ? addDays(since, -span) : null;
   const [rangeViews, bfRows, allViews, dayRows, rate, trackingSince, testStarts, paypal, ...stripeLists] = await Promise.all([
     soft("visitors", viewTotals(since, after), []),
-    era === "all" ? Promise.resolve([] as BfViewRow[]) : soft("Black Friday visitors", bfViewRows(), []),
+    era === "all" && !core ? Promise.resolve([] as BfViewRow[]) : soft("Black Friday visitors", bfViewRows(), []),
     range === "all" ? Promise.resolve(null) : soft("visitors (all time)", viewTotals(null), []),
     soft("visitors per day", viewDays(before), []),
     usdToEur(),
@@ -761,7 +774,7 @@ export async function getAnalytics(range: Range, opts: { since?: string; era?: E
   const ratedFrom = trackingSince ? startOfDay(trackingSince) : Infinity;
   for (const s of allSales) s.rated = s.created >= ratedFrom;
   // Which orders the Black Friday ads brought (lib/bfEra.ts bfFor): the store-wide hours' orders by the buyer's ad.
-  if (era !== "all") {
+  if (era !== "all" || core) {
     const fromBfAds = await soft("Black Friday orders by ad", bfOrderIds(), new Set<string>());
     for (const s of allSales) s.bf = bfFor(s.funnel, s.created, s.variant, !!s.id && fromBfAds.has(s.id));
   }
@@ -770,9 +783,10 @@ export async function getAnalytics(range: Range, opts: { since?: string; era?: E
 
   const rows = [...list.map((f) => ({ ...f, base: f.slug, bf: false })), ...bfList.map((f) => ({ ...f, bf: true }))];
   // A row's own visits and sales: the funnel's, with or without the Black Friday ones.
+  // With core the Black Friday copies are folded into their funnel (one Drum Kit, one Jazz).
   const mine = (f: (typeof rows)[number], funnel: string, variant: string) =>
-    funnel === f.base && (f.bf ? variant === BF.variant : !BF.funnels.includes(f.base) || variant !== BF.variant);
-  const funnels: FunnelStats[] = rows.map((f) => {
+    funnel === f.base && (core || (f.bf ? variant === BF.variant : !BF.funnels.includes(f.base) || variant !== BF.variant));
+  const build = (views: ViewRow[], sales: Sale[]): FunnelStats[] => (core ? rows.filter((f) => !f.bf) : rows).map((f) => {
     const total = empty();
     const byLang = new Map<string, Metrics>((f.langs ?? []).map((l) => [l, empty()]));
     const lang = (l: string) => {
@@ -796,10 +810,22 @@ export async function getAnalytics(range: Range, opts: { since?: string; era?: E
       : null;
     return { slug: f.slug, name: f.name, url: f.url, total: withRevenue(total, rate), langs };
   });
+  const coreBySlug = core
+    ? new Map(build(withEra(rangeViews, bfRows, "regular", since && since > VISITS_FROM ? since : VISITS_FROM, last), sales.filter((s) => !s.bf)).map((f) => [f.slug, f.total]))
+    : null;
+  const funnels: FunnelStats[] = build(views, sales).map((f) => (coreBySlug ? { ...f, core: coreBySlug.get(f.slug) } : f));
+  const days = daily(range !== "all" || era === "bf", since, last, dayRows, allSales, rate, trackingSince, era, bfByDay(bfRows));
+  if (core) {
+    const regular = daily(range !== "all", since, last, dayRows, allSales, rate, trackingSince, "regular", bfByDay(bfRows));
+    const coreOf = (d: Day): CoreDay => ({ orders: d.orders, revenue: d.revenue, net: d.net, visitors: d.visitors, byFunnel: d.byFunnel });
+    days.days.forEach((d, i) => (d.core = coreOf(regular.days[i])));
+    days.previous?.forEach((d, i) => regular.previous && (d.core = coreOf(regular.previous[i])));
+  }
 
   return {
     range,
     era,
+    ...(core ? { core: true } : {}),
     since,
     until: last,
     trackingSince,
@@ -824,7 +850,7 @@ export async function getAnalytics(range: Range, opts: { since?: string; era?: E
     availability: null,
     popupOffer: null,
     taps: await soft("button taps", tapStats(), null),
-    ...daily(range !== "all" || era === "bf", since, last, dayRows, allSales, rate, trackingSince, era, bfByDay(bfRows)),
+    ...days,
     lastSale: allSales.reduce<number | null>((last, s) => (last === null || s.created > last ? s.created : last), null),
     sources: { stripe: hasStripe, paypal: true },
     errors,

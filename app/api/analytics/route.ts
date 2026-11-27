@@ -9,5 +9,7 @@ export const runtime = "nodejs";
 // left out: all). Behind ADMIN_PASSWORD like every non-public route (proxy.ts).
 export async function GET(req: Request) {
   const era = new URL(req.url).searchParams.get("era");
-  return NextResponse.json(await getAnalytics(rangeParam(req.url), { era: isEra(era) ? era : "all" }), { headers: { "cache-control": "no-store" } });
+  // &core=1: totals with Black Friday, averages without (lib/analytics.ts Analytics.core).
+  const core = new URL(req.url).searchParams.get("core") === "1";
+  return NextResponse.json(await getAnalytics(rangeParam(req.url), { era: isEra(era) ? era : "all", core }), { headers: { "cache-control": "no-store" } });
 }

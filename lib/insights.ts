@@ -17,7 +17,7 @@ const DAY = 86_400_000;
 
 const euro = (n: number) => `€${n >= 100 ? Math.round(n).toLocaleString("en-US") : n.toFixed(2).replace(/\.00$/, "")}`;
 const pct = (n: number) => `${n >= 0.1 ? Math.round(n * 100) : (n * 100).toFixed(1)}%`;
-const sum = (days: Day[], k: keyof Omit<Day, "day" | "byFunnel">) => days.reduce((n, d) => n + d[k], 0);
+const sum = (days: Day[], k: keyof Omit<Day, "day" | "byFunnel" | "core">) => days.reduce((n, d) => n + d[k], 0);
 const langName = (l: string) => ({ en: "English", fr: "French", es: "Spanish", de: "German", it: "Italian", nl: "Dutch" })[l] ?? l;
 // "the last 7 days", "this month", "October", "2025", "the whole period": after "in" or on its own.
 const lastDays = (a: Analytics) => {
@@ -67,9 +67,10 @@ export function insights(a: Analytics, now = Date.now(), eur: (n: number) => str
       }
     }
 
-  // The step where most visitors leave, all funnels together.
+  // The step where most visitors leave, all funnels together (rates: without Black Friday, Analytics.core).
+  const rated = (f: Analytics["funnels"][number]) => f.core ?? f.total;
   const all = a.funnels.reduce(
-    (t, f) => ({ visitors: t.visitors + f.total.visitors, orderViews: t.orderViews + f.total.orderViews, checkouts: t.checkouts + f.total.checkouts, orders: t.orders + f.total.ratedOrders }),
+    (t, f) => ({ visitors: t.visitors + rated(f).visitors, orderViews: t.orderViews + rated(f).orderViews, checkouts: t.checkouts + rated(f).checkouts, orders: t.orders + rated(f).ratedOrders }),
     { visitors: 0, orderViews: 0, checkouts: 0, orders: 0 },
   );
   if (hasSales && all.visitors >= 100 && all.orders > 0) {
@@ -83,7 +84,7 @@ export function insights(a: Analytics, now = Date.now(), eur: (n: number) => str
   }
 
   // Funnels against each other, per visitor.
-  const ranked = a.funnels.filter((f) => f.total.visitors >= 30 && f.total.ratedOrders > 0).map((f) => ({ f, per: f.total.ratedRevenue / f.total.visitors }));
+  const ranked = a.funnels.filter((f) => rated(f).visitors >= 30 && rated(f).ratedOrders > 0).map((f) => ({ f, per: rated(f).ratedRevenue / rated(f).visitors }));
   if (ranked.length >= 2) {
     ranked.sort((x, y) => y.per - x.per);
     const [best, worst] = [ranked[0], ranked[ranked.length - 1]];
