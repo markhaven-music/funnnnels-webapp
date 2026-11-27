@@ -1,109 +1,310 @@
 /* Dashboard → Free packs (FreePacksPanel.tsx). Cards told apart by fill, square-ish corners (docs/design.md). */
 
-.packs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
-  margin-bottom: 22px;
+.rangeHint {
+  font-size: 12px;
+  color: var(--fg-2);
 }
-.pack {
+
+/* The verdict: one line that answers "are they worth it?" (docs/design.md rule 6). */
+.hero {
   background: var(--bg-1);
   border: 1px solid transparent;
   border-radius: var(--radius);
-  padding: 16px 18px;
+  padding: 22px 24px 20px;
+  margin-bottom: 14px;
   display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+.hero_good {
+  background: linear-gradient(90deg, oklch(0.86 0.16 165 / 0.10), var(--bg-1) 60%);
+}
+.hero_warn {
+  background: linear-gradient(90deg, oklch(0.82 0.16 75 / 0.10), var(--bg-1) 60%);
+}
+.hero_bad {
+  background: linear-gradient(90deg, oklch(0.72 0.2 18 / 0.12), var(--bg-1) 60%);
+}
+.heroLine {
+  font-size: 34px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.heroSub {
+  font-size: 14px;
+  color: var(--fg-1);
+  max-width: 760px;
+}
+.badge {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+}
+.b_good {
+  background: oklch(0.86 0.16 165 / 0.16);
+  color: var(--mint);
+}
+.b_warn {
+  background: oklch(0.82 0.16 75 / 0.16);
+  color: var(--amber);
+}
+.b_bad {
+  background: oklch(0.72 0.2 18 / 0.18);
+  color: var(--rose);
+}
+.t_good {
+  color: var(--mint);
+}
+.t_warn {
+  color: var(--amber);
+}
+.t_bad {
+  color: var(--rose);
+}
+
+/* spent → signed up → checkout → bought → earned → profit */
+.chain {
+  margin-top: 14px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 22px;
+}
+.link {
+  position: relative;
+  background: color-mix(in oklab, var(--fg-0) 5%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.linkValue {
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.linkLabel {
+  font-size: 12.5px;
+  color: var(--fg-1);
+  margin-top: 4px;
+}
+.linkSub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+  margin-top: 2px;
+}
+.arrow {
+  position: absolute;
+  right: -17px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--fg-2);
+  font-size: 14px;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 14px;
+  margin-bottom: 22px;
+}
+.card {
+  background: var(--bg-1);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: grid;
+  gap: 12px;
   align-content: start;
 }
-.packHead {
+.cardHead {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 10px;
+  flex-wrap: wrap;
 }
-.packName {
+.cardTitle {
   font-size: 15px;
   font-weight: 600;
+  margin: 0;
 }
-.packMeta {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--fg-3);
-}
-.big {
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-.bigLabel {
+.cardNote {
   font-size: 12px;
   color: var(--fg-2);
-  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-.cost {
-  font-size: 12.5px;
+.hint {
+  font-size: 12px;
   color: var(--fg-2);
-  margin-top: 8px;
+  margin: 0;
+  line-height: 1.5;
 }
-.cost b {
-  color: var(--fg-0);
-  font-weight: 600;
-}
-.steps {
+
+.bins {
   display: grid;
-  gap: 10px;
-}
-.step {
-  display: grid;
-  gap: 5px;
-}
-.stepTop {
-  display: flex;
-  justify-content: space-between;
   gap: 8px;
+}
+.bin {
+  display: grid;
+  grid-template-columns: 104px 1fr 28px;
+  align-items: center;
+  gap: 10px;
   font-size: 13px;
 }
-.stepLabel {
+.binLabel {
   color: var(--fg-1);
 }
-.stepValue {
-  font-weight: 600;
-  white-space: nowrap;
-}
-.stepPct {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--fg-2);
-  margin-left: 6px;
-  font-weight: 400;
-}
-.track {
-  height: 6px;
+.binTrack {
+  height: 14px;
   background: var(--bg-3);
   border-radius: var(--radius-xs);
   overflow: hidden;
 }
-.fill {
+.binFill {
   height: 100%;
-  background: var(--accent);
+  background: var(--mint);
   border-radius: var(--radius-xs);
 }
-.fillBought {
+.binValue {
+  text-align: right;
+  font-weight: 600;
+}
+.ageHead {
+  font-size: 13px;
+  color: var(--fg-1);
+  margin-top: 6px;
+}
+.ageHead b {
+  color: var(--fg-0);
+}
+.ageBar {
+  display: flex;
+  gap: 2px;
+  height: 22px;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+}
+.ageSeg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: oklch(0.2 0.02 270);
+  min-width: 22px;
+}
+.age0 {
   background: var(--mint);
 }
-.packFoot {
+.age1 {
+  background: var(--amber);
+}
+.age2 {
+  background: oklch(0.6 0.02 270);
+}
+.ageKeys {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
   font-size: 12px;
   color: var(--fg-2);
-  line-height: 1.5;
-  border-top: 1px solid var(--line-soft);
-  padding-top: 10px;
+}
+.ageKeys span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.key {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.keySpend {
+  background: var(--rose);
+}
+.keyEarned {
+  background: var(--mint);
+}
+
+.packRows {
+  display: grid;
+  gap: 16px;
+}
+.packRow {
+  display: grid;
+  gap: 7px;
+}
+.packRowHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.packName {
+  font-size: 14px;
+  font-weight: 600;
+}
+.duo {
+  display: grid;
+  gap: 3px;
+}
+.duoBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--fg-1);
+  height: 14px;
+}
+.spendFill,
+.earnedFill {
+  height: 100%;
+  min-width: 2px;
+  border-radius: var(--radius-xs);
+}
+.spendFill {
+  background: var(--rose);
+}
+.earnedFill {
+  background: var(--mint);
+}
+.packFacts {
+  font-size: 12.5px;
+  color: var(--fg-2);
+}
+.packFacts b {
+  color: var(--fg-0);
+  font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  .chain {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .link:nth-child(3) .arrow {
+    display: none;
+  }
 }
 
 .sectionTitle {
   font-size: 14px;
   font-weight: 600;
   margin: 0 0 10px;
+}
+.sectionNote {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--fg-2);
 }
 .filters {
   display: flex;
@@ -143,7 +344,7 @@
   color: var(--amber);
 }
 .status_off {
-  color: var(--fg-3);
+  color: var(--fg-2);
 }
 
 @media (max-width: 760px) {

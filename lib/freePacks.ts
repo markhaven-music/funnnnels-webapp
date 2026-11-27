@@ -3,6 +3,7 @@ import { type MetaSpend, spendByPack } from "@/lib/metaSpend";
 import { dayIn } from "@/lib/tz";
 import { rangeSpan, type Range } from "@/lib/range";
 import { supabase } from "@/lib/supabase";
+import { usdToEur } from "@/lib/analytics";
 
 // Dashboard → Free packs: what the free lead magnets bring in. Each opt-in
 // (db/optins.sql) is a lead; per pack and per ad: how many leads, how many
@@ -43,7 +44,7 @@ export type FreePackPerson = {
   kit: { sent: number; of: number; state: "waiting" | "sending" | "done" | "stopped"; nextAt: string | null } | null;
 };
 // spend: what the Meta ads cost per pack in the same period (lib/metaSpend.ts), when Meta is connected.
-export type FreePackStats = { since: string; packs: FreePackRow[]; ads: FreePackRow[]; leads: number; people: FreePackPerson[]; spend: MetaSpend };
+export type FreePackStats = { since: string; packs: FreePackRow[]; ads: FreePackRow[]; leads: number; people: FreePackPerson[]; spend: MetaSpend; /** Euros per dollar, for the revenue in one currency. */ usdToEur: number };
 
 const KIT_SEQUENCE = "Free packs · Drum Kit follow-up";
 
@@ -247,6 +248,7 @@ export async function freePackStats(range: Range | number = "90d"): Promise<Free
     packs: group((l) => l.optin, pack),
     ads: group((l) => `${l.optin}|${l.ad_id ?? l.utm_content ?? ""}`, ad),
     people,
+    usdToEur: await usdToEur(),
     spend: await spendByPack(
       Object.values(PACK_NAMES),
       // All time: from the first sign-up, not 1970.

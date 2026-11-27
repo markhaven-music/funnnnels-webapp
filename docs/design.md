@@ -38,3 +38,12 @@ editor's chrome). Buyer pages follow their brand and
      thing changes its fill strongly enough to see from across the room.
    - One chart says one thing, big: tiles pick what it draws (WooCommerce
      style) instead of a second chart.
+6. **A panel answers its question at first sight.** Every dashboard panel
+   starts by saying, in one big line, the answer to the question it exists for
+   ("Are the free packs worth it?" → "€9 of ads per buyer: worth it"), with a
+   coloured verdict against a target. Then the few numbers that explain it
+   (spent → leads → buyers → earned → profit), then one picture of the
+   mechanism (when people buy, which option wins), and only then the raw
+   list. Plain words, the unit on every number, no column of rates to
+   decode ("Gestisci tutti i pannelli backend così: super intuitivi, grafici,
+   che comunicano bene", 2026-11-27).
