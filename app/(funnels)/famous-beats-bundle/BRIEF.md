@@ -29,6 +29,13 @@ Every claim on the pages must be in this file. Rules: `.claude/skills/grind-funn
   same R2 key (shared/Famous Beats Bundle (320 MIDI Beats).zip; the old zip backed up first). The page says
   "320 hit drum grooves in 2,067 MIDI files" + "4,360 more MIDI files and 305 WAV loops" in the bonuses
   (163 + 2,304 + 195 + 150 + 1,548 MIDI; 47 + 258 WAV).
+- 2026-11-27: a buyer (Ableton) couldn't use the multi-track files in one Drum Rack, so the zip was rebuilt with
+  folders named for what they are, easiest first, in every volume: 01 - Drum Rack Ready (One Track per Beat) (the GM
+  files, named like the song), 02 - Multi-Track (One Track per Sound), 03 - Single Sounds (One File per Sound),
+  04 - Audio (Hear the Beat), plus "START HERE - How To Use.pdf" at the top (Ableton, FL, Logic, pad map). Perc 2/3/4
+  moved from notes 75-77 (off the 16 pads) to 47/48/50; everything else stays on its General MIDI note. Made by
+  ~/Desktop/Famous Beats Tools/make_parts_v3.py (guide source /Volumes/T7/fbb-build/v3/guide.html), same R2 key,
+  the old zip at R2 backup-2026-11-27/.
 - Value stack: the bundle at its own price ($27) + the bonuses' Jazz values; nothing else invented. Built beside the live page at /famous-beats-bundle/v2 (+ /v2/order) until the user
   switches. No VSL yet (the Jazz page has one; a Famous Beats one is a separate job). No reviews (the user's call).
 - Numbers before (11-02 → 11-09, own visits and bots out): 99 landing visitors, 14 on the order page, 3 checkout
