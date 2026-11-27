@@ -16,10 +16,15 @@ export default function Notify() {
     <main className={`${s.page} ${poppins.variable}`}>
       <div className={s.glow} aria-hidden />
       <img className={s.logo} src="/funnels/shop/logo.webp" alt="Grind Studio" width={300} height={35} fetchPriority="high" />
-      <h1 className={s.h1}>Get in 1 hour before everyone</h1>
+      <div className={s.date}>
+        <span>Save the date</span>
+        <b>December 21</b>
+        <span>12 PM New York · 6 PM Rome</span>
+      </div>
+      <h1 className={s.h1}>The biggest drum pack we ever made comes out</h1>
       <div className={s.lines}>
-        <p>On December 21 at 12 PM New York time we open the MIDI DRUMS BIBLE.</p>
-        <p>The people on this list get in at 11 AM, one hour before everyone else, with every launch bonus still there.</p>
+        <p>Nobody has ever put this much in one drum pack. Not us, not anyone.</p>
+        <p>Join the list and you get in 1 hour before everyone else, with every launch bonus still there.</p>
       </div>
       <Join consent={CONSENT_TEXT} />
       {live.length > 0 && (

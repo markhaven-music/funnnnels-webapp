@@ -37,7 +37,7 @@ export default async function Page({ params }: { params: Promise<{ n: string }> 
             <>
               <span className={s.dot}>{x.wistiaId || x.n === v.n ? x.n : "🔒"}</span>
               <span className={s.when}>{x.out}</span>
-              <span className={s.name}>{x.n === 4 ? "The reveal" : `Video ${x.n}`}</span>
+              <span className={s.name}>{x.n === 4 ? "The pack comes out" : `Video ${x.n}`}</span>
             </>
           );
           return (
@@ -50,7 +50,7 @@ export default async function Page({ params }: { params: Promise<{ n: string }> 
 
       <a className={s.early} href="/free/bible/notify">
         <span>
-          <b style={{ all: "unset", fontWeight: 800 }}>December 21, 12 PM New York.</b> Join the list and get in 1 hour before everyone.
+          <b style={{ all: "unset", fontWeight: 800 }}>Save the date: December 21.</b> The biggest drum pack we ever made comes out. Get in 1 hour before everyone.
         </span>
         <b>Get early access</b>
       </a>
@@ -99,13 +99,13 @@ export default async function Page({ params }: { params: Promise<{ n: string }> 
       {next && (
         <section className={s.next}>
           <span className={s.nextWhen}>Next · {next.out}</span>
-          <b>{next.n === 4 ? "The reveal" : `Video ${next.n}: ${next.title}`}</b>
+          <b>{next.n === 4 ? "The pack comes out" : `Video ${next.n}: ${next.title}`}</b>
           <span className={s.nextHint}>We email you the moment it is out.</span>
         </section>
       )}
 
       <p className={s.foot}>
-        On <b>December 21</b> we show you what we built from all of this.
+        Save the date: on <b>December 21</b> the biggest drum pack we ever made comes out.
       </p>
     </main>
   );

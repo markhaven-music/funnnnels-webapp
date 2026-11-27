@@ -6,7 +6,7 @@ export type Video = { n: number; wistiaId: string | null; title: string; out: st
 export const VIDEOS: Video[] = [
   {
     n: 1,
-    wistiaId: "d229dqt7yl",
+    wistiaId: "6giytkrr7k",
     title: "Why your beats stay loops",
     out: "December 1",
     lines: [
@@ -23,5 +23,5 @@ export const VIDEOS: Video[] = [
   },
   { n: 2, wistiaId: null, title: "The whole song, in the drums", out: "December 8", lines: [] },
   { n: 3, wistiaId: null, title: "Video 3", out: "December 15", lines: [] },
-  { n: 4, wistiaId: null, title: "December 21", out: "December 21", lines: [] },
+  { n: 4, wistiaId: null, title: "The pack comes out", out: "December 21", lines: [] },
 ];

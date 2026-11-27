@@ -104,3 +104,10 @@
   box-shadow: 0 5px 0 #8f2500, 0 12px 28px rgba(252, 66, 0, .5), inset 0 2px 0 rgba(255, 255, 255, .5); animation: breathe 2.4s ease-in-out infinite; }
 .foot a { color: #fc4200; }
 @media (max-width: 560px) { .early { flex-direction: column; align-items: stretch; text-align: center; } }
+
+/* save the date */
+.date { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 0 22px; text-align: center; }
+.date span { font-size: 14px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #fff; }
+.date b { font-size: clamp(64px, 16vw, 150px); font-weight: 800; line-height: .95; text-transform: uppercase; letter-spacing: -.03em;
+  background: linear-gradient(180deg, #fff 0%, #ffd2bd 45%, #fc4200 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 30px rgba(252, 66, 0, .45)); }
