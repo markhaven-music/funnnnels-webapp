@@ -1,4 +1,6 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { confirmEmail } from "@/app/free/bible/confirmEmail";
+import { sendEmail } from "@/lib/ses";
 import { isEmail, upsertContact } from "@/lib/contacts";
 import { supabase } from "@/lib/supabase";
 import { CONSENT_TEXT, LAUNCH } from "@/app/free/bible/launch";
@@ -29,7 +31,7 @@ export async function POST(req: Request) {
   const sms = Boolean(phone && b.sms === true);
   if (phone && !sms) return NextResponse.json({ error: "Tick the box to get the text reminders." }, { status: 400 });
   try {
-    await upsertContact({ email, name: name ?? undefined, source: "bible-waitlist", tags: ["bible-waitlist"] });
+    const contact = await upsertContact({ email, name: name ?? undefined, source: "bible-waitlist", tags: ["bible-waitlist"] });
     const utm = b.src && typeof b.src === "object" ? b.src : null;
     const { error } = await supabase()
       .from("launch_signups")
@@ -42,6 +44,11 @@ export async function POST(req: Request) {
         { onConflict: "launch,email" },
       );
     if (error) throw error;
+    // The "You're in" email (Cymatics-style confirmation), not to people who unsubscribed.
+    if (contact?.status !== "unsubscribed") {
+      const to = { email, name: contact?.name ?? name };
+      after(() => sendEmail(confirmEmail(to)).catch((err) => console.error(`bible: confirmation to ${email} failed`, err)));
+    }
   } catch (err) {
     console.error("bible: signup failed", err);
     return NextResponse.json({ error: "We couldn't save you just now. Try again in a minute." }, { status: 503 });
