@@ -1,0 +1,152 @@
+/* Dashboard → Support, the customer card (SupportCustomer.tsx). docs/design.md:
+   border = the card's colour, nearly square corners, big readable numbers. */
+
+.card {
+  background: var(--bg-1);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: grid;
+  gap: 16px;
+}
+.top {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.email {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-1);
+  overflow-wrap: anywhere;
+}
+.tag {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+}
+.tagBuyer {
+  color: var(--mint);
+  background: oklch(0.86 0.16 165 / 0.14);
+}
+.tagLead {
+  color: var(--fg-2);
+  background: oklch(0.98 0.004 270 / 0.06);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: minmax(170px, 1.4fr) repeat(3, minmax(110px, 1fr));
+  gap: 10px;
+}
+@media (max-width: 760px) {
+  .stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.stat {
+  background: oklch(0.98 0.004 270 / 0.05);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  min-width: 0;
+}
+.main {
+  background: oklch(0.74 0.19 295 / 0.16);
+}
+.big {
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+}
+.mid {
+  font-size: 24px;
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+}
+.label {
+  font-size: 12.5px;
+  color: var(--fg-2);
+}
+
+.flags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.flag {
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+}
+.bad {
+  color: var(--rose);
+  background: oklch(0.72 0.18 18 / 0.16);
+}
+.warn {
+  color: var(--amber);
+  background: oklch(0.82 0.16 75 / 0.14);
+}
+
+.list {
+  display: grid;
+}
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 14px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.name {
+  font-size: 14px;
+  color: var(--fg-0);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.meta {
+  font-size: 12.5px;
+  color: var(--fg-2);
+  white-space: nowrap;
+}
+.amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 64px;
+}
+.off .name,
+.off .amount {
+  color: var(--fg-2);
+  text-decoration: line-through;
+}
+.status {
+  margin-left: 8px;
+  font-weight: 600;
+  color: var(--amber);
+}
+@media (max-width: 760px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .meta {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

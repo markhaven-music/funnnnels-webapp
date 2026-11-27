@@ -5,6 +5,7 @@ import { SIGN, type Currency } from "@/lib/geo";
 import type { Conversation, SupportMessage, Thread } from "@/lib/support";
 import type { Overview } from "@/lib/supportOverview";
 import { I } from "@/components/icons";
+import { SupportCustomer } from "./SupportCustomer";
 import { SupportOverview } from "./SupportOverview";
 import e from "./email.module.css";
 import s from "./support.module.css";
@@ -324,6 +325,9 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
               </button>
             </div>
 
+            {thread.card ? (
+              <SupportCustomer email={thread.customer} card={thread.card} />
+            ) : (
             <div className={s.side}>
               <span className={s.sideLabel}>{thread.customer.toUpperCase()}</span>
               {thread.orders.length === 0 && thread.legacy.length === 0 ? (
@@ -358,6 +362,7 @@ export function SupportPanel({ onUnread }: { onUnread?: (n: number) => void }) {
                 </div>
               ))}
             </div>
+            )}
 
             {thread.messages.map((m) => (
               <Message key={m.id} m={m} />

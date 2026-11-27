@@ -6,6 +6,7 @@ import sanitizeHtml from "sanitize-html";
 import MailComposer from "nodemailer/lib/mail-composer";
 import { supabase } from "@/lib/supabase";
 import { ordersByEmail, type OrderRow } from "@/lib/sales";
+import { customerCard, type CustomerCard } from "@/lib/supportCustomer";
 
 // Dashboard → Support: support@thegrind.studio, a Namecheap Private Email
 // mailbox, read over IMAP and answered over its SMTP (db/support.sql).
@@ -214,7 +215,7 @@ export type LegacyOrder = {
   at: string | null;
 };
 
-export type Thread = { customer: string; done: boolean; messages: SupportMessage[]; orders: OrderRow[]; legacy: LegacyOrder[] };
+export type Thread = { customer: string; done: boolean; messages: SupportMessage[]; orders: OrderRow[]; legacy: LegacyOrder[]; card: CustomerCard | null };
 
 async function legacyOrders(email: string): Promise<LegacyOrder[]> {
   const db = supabase();
@@ -266,6 +267,10 @@ export async function getThread(customer: string): Promise<Thread> {
   ]);
   if (error) throw error;
   const rows = data ?? [];
+  const card = await customerCard(c, orders, legacy).catch((err) => {
+    console.error("support: customer card", err);
+    return null;
+  });
   if (rows.some((m) => m.direction === "in" && !m.read_at)) {
     await db.from("support_messages").update({ read_at: new Date().toISOString() }).eq("customer", c).is("read_at", null);
   }
@@ -276,6 +281,7 @@ export async function getThread(customer: string): Promise<Thread> {
     done,
     orders,
     legacy,
+    card,
     messages: rows.map((m) => ({
       id: m.id,
       direction: m.direction,
