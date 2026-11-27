@@ -33,7 +33,11 @@ export default function Join({ consent }: { consent: string }) {
       <input name="phone" type="tel" placeholder="Phone with country code, like +1 555 123 4567" autoComplete="tel" />
       <label className={s.consent}>
         <input type="checkbox" name="sms" />
-        <span>{consent}</span>
+        <span>
+          {consent}{" "}
+          <a href="/terms-and-conditions" target="_blank" rel="noopener">Terms</a> ·{" "}
+          <a href="/privacy-policy" target="_blank" rel="noopener">Privacy</a>
+        </span>
       </label>
       <input name="company" tabIndex={-1} autoComplete="off" className={s.hp} aria-hidden />
       <button disabled={state === "busy"}>{state === "busy" ? "Saving…" : <>Get early access<span className={s.arrow}>→</span></>}</button>

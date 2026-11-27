@@ -71,6 +71,7 @@
 .form input:not([type="checkbox"]) { font: inherit; font-size: 17px; padding: 16px 18px; border-radius: 10px; border: 0; background: #161616; color: #fff; }
 .form input::placeholder { color: #7d7d7d; }
 .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.45; color: #a9a9a9; }
+.consent a { color: #d6d6d6; text-decoration: underline; }
 .consent input { margin-top: 3px; width: 18px; height: 18px; accent-color: #fc4200; flex: none; }
 .form button { position: relative; overflow: hidden; font: inherit; font-weight: 800; font-size: clamp(22px, 5.5vw, 28px); letter-spacing: .02em;
   text-transform: uppercase; min-height: 92px; padding: 18px 22px; border: 0; border-radius: 16px; cursor: pointer; color: #fff;

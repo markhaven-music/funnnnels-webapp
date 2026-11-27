@@ -24,7 +24,7 @@ export const LEGAL_PAGES: LegalPage[] = [
   {
     slug: "terms-and-conditions",
     title: "Terms & Conditions",
-    updated: "November 16, 2026",
+    updated: "November 27, 2026",
     blocks: [
       {
         h: "1. BUSINESS INFORMATION",
@@ -95,6 +95,12 @@ export const LEGAL_PAGES: LegalPage[] = [
         p: "These Terms shall be governed by and construed in accordance with the laws of the State of Wyoming, United States. Any legal action arising under these Terms shall be brought exclusively in the courts located in Sheridan, Wyoming. We reserve the right to update these Terms at any time, and your continued use of the Website after such changes are posted constitutes your acceptance of the new terms. For any legal or administrative questions, please contact support@thegrind.studio.",
       },
       {
+        h: "12. TEXT MESSAGE (SMS) TERMS",
+      },
+      {
+        p: "Grind Studio launch alerts: if you opt in on one of our sign-up pages, FFUNK Media LLC will send you up to 3 text messages per launch at the number you gave us (for example, a reminder before a product release and a message when it opens). Message frequency varies. Message and data rates may apply. Reply STOP at any time to cancel; you will get one message confirming that you are unsubscribed. Reply HELP for help, or write to support@thegrind.studio. Carriers are not liable for delayed or undelivered messages. Consent to receive texts is not a condition of any purchase. See our Privacy Policy at https://m.thegrind.studio/privacy-policy for how we handle your number.",
+      },
+      {
         p: "If you have any questions about this policy, please contact us at support@thegrind.studio",
       },
     ],
@@ -103,7 +109,7 @@ export const LEGAL_PAGES: LegalPage[] = [
   {
     slug: "privacy-policy",
     title: "Privacy Policy",
-    updated: "November 3, 2026",
+    updated: "November 27, 2026",
     blocks: [
       {
         h: "1. INTRODUCTION AND DATA CONTROLLER",
@@ -164,6 +170,12 @@ export const LEGAL_PAGES: LegalPage[] = [
       },
       {
         p: "If you are a California resident, you have the right to request access to, deletion of, or information about the personal data we collect about you. You also have the right to opt-out of the sale of your personal information. FFUNK Media LLC does not sell your personal information, but you may exercise your rights by contacting us at support@thegrind.studio",
+      },
+      {
+        h: "11. TEXT MESSAGES (SMS)",
+      },
+      {
+        p: "If you give us your mobile number and tick the SMS consent box on one of our sign-up pages, we use that number only to send you the text messages you asked for, such as launch reminders. No mobile information will be shared with third parties or affiliates for marketing or promotional purposes. Text messaging originator opt-in data and consent will not be shared with any third parties. We only pass your number to our messaging provider (Amazon Web Services) so the messages can be delivered. Reply STOP to any message to stop receiving texts, or HELP for help. Message and data rates may apply.",
       },
     ],
     address: false,
