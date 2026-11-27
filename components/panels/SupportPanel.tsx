@@ -37,7 +37,8 @@ function split(text: string): [string, string] {
 function Message({ m }: { m: SupportMessage }) {
   const [fresh, quoted] = useMemo(() => split(m.text), [m.text]);
   const [showQuoted, setShowQuoted] = useState(false);
-  const [showHtml, setShowHtml] = useState(false);
+  // Our replies open as sent (links and all); a customer's email opens as text.
+  const [showHtml, setShowHtml] = useState(m.direction === "out" && Boolean(m.html));
   return (
     <div className={`${s.msg} ${m.direction === "out" ? s.msgOut : ""}`}>
       <div className={s.msgHead}>

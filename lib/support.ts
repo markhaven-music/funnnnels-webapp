@@ -394,7 +394,8 @@ export async function reply(customer: string, body: string): Promise<SupportMess
         to_email: c,
         subject,
         text_body: body.trim(),
-        html_body: null,
+        // The HTML exactly as sent, so Support shows the reply as the customer sees it.
+        html_body: mail.html,
         snippet: body.replace(/\s+/g, " ").trim().slice(0, 160),
         in_reply_to: mail.inReplyTo ?? null,
         refs: refs ?? null,
@@ -406,5 +407,5 @@ export async function reply(customer: string, body: string): Promise<SupportMess
     .select()
     .single();
   if (error) throw error;
-  return { id: saved.id, direction: "out", fromEmail: user(), fromName: FROM_NAME, toEmail: c, subject, text: body.trim(), html: null, sentAt: now };
+  return { id: saved.id, direction: "out", fromEmail: user(), fromName: FROM_NAME, toEmail: c, subject, text: body.trim(), html: cleanHtml(mail.html), sentAt: now };
 }
