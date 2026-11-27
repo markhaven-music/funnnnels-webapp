@@ -4,7 +4,7 @@
 .glow { position: absolute; inset: -200px -40% auto; height: 760px; pointer-events: none; z-index: 0;
   background: radial-gradient(closest-side, rgba(252, 66, 0, .22), transparent 70%); }
 .page > *:not(.glow) { position: relative; z-index: 1; }
-.logo { display: block; margin: 0 auto 30px; height: auto; max-width: 190px; }
+.logo { display: block; margin: 0 auto 22px; height: auto; max-width: 120px; opacity: .9; }
 
 /* the timeline */
 .timeline { list-style: none; margin: 0 0 34px; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); position: relative; }
