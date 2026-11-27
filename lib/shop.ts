@@ -117,7 +117,9 @@ const toItem = ({ slug, name, tagline, description, price, image }: ShopProduct)
 // MIDI Drum Kit Vol.2 is the Drum Kit's upsell; a loyal buyer gets it early by
 // link before it goes public (2026-11-27, "since he's a loyal customer he can
 // get it before it goes public").
-export const UNLISTED = new Set(["midi-drum-kit-vol2"]);
+// midi-drum-kit-999: the Drum Kit at the Black Friday price for one reader who saw "$9.99 until Friday" in an
+// email after the sale closed early on Thursday (2026-11-27, owner: "Yes, $9.99 link").
+export const UNLISTED = new Set(["midi-drum-kit-vol2", "midi-drum-kit-999"]);
 
 /** The shop's Live products, the unlisted ones left out unless `unlisted` (the cart needs them). */
 export async function liveProducts(opts: { unlisted?: boolean } = {}): Promise<ShopItem[]> {
