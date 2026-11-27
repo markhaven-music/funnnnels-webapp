@@ -8,4 +8,4 @@ export const LAUNCH = {
 };
 
 export const CONSENT_TEXT =
-  "I agree to get up to 3 text messages from Grind Studio (FFUNK Media LLC) about the MIDI DRUMS BIBLE launch at this number. Consent is not a condition of purchase. Message frequency varies. Message and data rates may apply. Reply HELP for help, STOP to stop.";
+  "I wanna get notified. Grind Studio can text me about the MIDI DRUMS BIBLE launch, 3 messages at most. Not needed to buy anything. Message and data rates may apply. Reply HELP for help, STOP to stop.";

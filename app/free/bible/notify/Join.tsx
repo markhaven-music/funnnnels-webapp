@@ -56,10 +56,10 @@ export default function Join({ consent }: { consent: string }) {
         <select name="cc" defaultValue="US|+1" aria-label="Country code">
           {DIAL.map(([c, flag, code]) => <option key={c} value={`${c}|${code}`}>{flag} {code}</option>)}
         </select>
-        <input name="phone" type="tel" placeholder="Phone (optional)" autoComplete="tel-national" />
+        <input name="phone" type="tel" required placeholder="Phone" autoComplete="tel-national" />
       </div>
       <label className={s.consent}>
-        <input type="checkbox" name="sms" />
+        <input type="checkbox" name="sms" required />
         <span>
           {consent}{" "}
           <a href="/terms-and-conditions" target="_blank" rel="noopener">Terms</a> ·{" "}
@@ -69,7 +69,7 @@ export default function Join({ consent }: { consent: string }) {
       <input name="company" tabIndex={-1} autoComplete="off" className={s.hp} aria-hidden />
       <button disabled={state === "busy"}>{state === "busy" ? "Saving…" : <>Get early access<span className={s.arrow}>→</span></>}</button>
       {err && <p className={s.err}>{err}</p>}
-      <small>Your phone is optional. We text you only for this launch, 3 messages at most.</small>
+      <small>No spam. Only this launch.</small>
     </form>
   );
 }

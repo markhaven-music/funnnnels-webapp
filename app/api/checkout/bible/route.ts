@@ -22,7 +22,8 @@ export async function POST(req: Request) {
   if (!isEmail(email)) return NextResponse.json({ error: "That email doesn't look right." }, { status: 400 });
   const raw = String(b.phone ?? "").replace(/[^\d+]/g, "");
   const phone = raw ? (raw.startsWith("+") ? raw : `+${raw}`) : null;
-  if (phone && !/^\+\d{8,15}$/.test(phone)) {
+  if (!phone) return NextResponse.json({ error: "Add your phone so we can text you when it opens." }, { status: 400 });
+  if (!/^\+\d{8,15}$/.test(phone)) {
     return NextResponse.json({ error: "Check your phone number and the country code next to it." }, { status: 400 });
   }
   const sms = Boolean(phone && b.sms === true);
