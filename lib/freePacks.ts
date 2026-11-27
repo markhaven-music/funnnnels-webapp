@@ -37,6 +37,7 @@ export type FreePackPerson = {
   alreadyBuyer: boolean; // had bought before opting in
   checkoutAt: string | null; // first checkout started since
   boughtAt: string | null; // first order since
+  boughtAs: string | null; // the other email they bought with (otherEmails), null = their own
   revenue: { eur: number; usd: number };
   // The Drum Kit follow-up (db/free-packs-kit.sql): emails sent of all, and whether it's still going.
   kit: { sent: number; of: number; state: "waiting" | "sending" | "done" | "stopped"; nextAt: string | null } | null;
@@ -46,9 +47,9 @@ export type FreePackStats = { since: string; packs: FreePackRow[]; ads: FreePack
 
 const KIT_SEQUENCE = "Free packs · Drum Kit follow-up";
 
-type Optin = { email: string; optin: string; utm_content: string | null; utm_campaign: string | null; ad_id: string | null; created_at: string };
+type Optin = { email: string; optin: string; utm_content: string | null; utm_campaign: string | null; ad_id: string | null; visitor_id: string | null; created_at: string };
 type Run = { email: string; next_position: number; next_at: string | null; status: string | null };
-type Lead = Optin & { at: number; before: boolean; checkoutAt: number | null; buyAt: number | null; eur: number; usd: number };
+type Lead = Optin & { at: number; before: boolean; checkoutAt: number | null; buyAt: number | null; buyAs: string | null; eur: number; usd: number };
 
 const PACK_NAMES: Record<string, string> = {
   "free-rolls": "Rolls",
@@ -67,6 +68,40 @@ async function inChunks<T>(emails: string[], run: (chunk: string[]) => PromiseLi
   return out;
 }
 
+/**
+ * The same person under another email (2026-11-27: signed up for Mystery Hooks as one address on 6 Nov, bought the
+ * Drum Kit as another on 27 Nov, "avevamo creato questo pannello proprio per vedere se nel tempo quei leads
+ * compravano"): another browser on the network the opt-in came from (an IP of the opt-in browser's visits) that also
+ * came from the same ad campaign, and the emails it bought with (neo's conversions). Per opt-in visitor id, lower case.
+ */
+async function otherEmails(db: ReturnType<typeof supabase>, optins: Optin[]): Promise<Map<string, Set<string>>> {
+  const out = new Map<string, Set<string>>();
+  const vids = [...new Set(optins.map((o) => o.visitor_id).filter(Boolean))] as string[];
+  if (!vids.length) return out;
+  type C = { visitor_id: string; ip: string | null; campaign_id: string | null };
+  // The opt-in browser's networks, each with the ad campaigns it came from.
+  const own = await inChunks<C>(vids, (c) => db.from("clicks").select("visitor_id, ip, campaign_id").in("visitor_id", c).not("ip", "is", null));
+  const tag = (r: C) => `${r.ip}|${r.campaign_id}`;
+  const mine = new Map<string, Set<string>>();
+  for (const r of own) if (r.ip && r.campaign_id) (mine.get(r.visitor_id) ?? mine.set(r.visitor_id, new Set()).get(r.visitor_id)!).add(tag(r));
+  const ips = [...new Set(own.map((r) => r.ip).filter(Boolean))] as string[];
+  if (!ips.length) return out;
+  // Other browsers on those networks from the same campaign.
+  const near = await inChunks<C>(ips, (c) => db.from("clicks").select("visitor_id, ip, campaign_id").in("ip", c).not("campaign_id", "is", null));
+  const visitorsOn = new Map<string, Set<string>>();
+  for (const r of near) (visitorsOn.get(tag(r)) ?? visitorsOn.set(tag(r), new Set()).get(tag(r))!).add(r.visitor_id);
+  const buyers = [...new Set(near.map((r) => r.visitor_id))];
+  const sold = await inChunks<{ visitor_id: string; email: string | null }>(buyers, (c) => db.from("conversions").select("visitor_id, email").in("visitor_id", c).not("email", "is", null));
+  const emailsOf = new Map<string, Set<string>>();
+  for (const r of sold) if (r.email) (emailsOf.get(r.visitor_id) ?? emailsOf.set(r.visitor_id, new Set()).get(r.visitor_id)!).add(r.email.toLowerCase());
+  for (const [vid, tags] of mine) {
+    const emails = new Set<string>();
+    for (const t of tags) for (const v of visitorsOn.get(t) ?? []) for (const e of emailsOf.get(v) ?? []) emails.add(e);
+    if (emails.size) out.set(vid, emails);
+  }
+  return out;
+}
+
 /** range: one of the dashboard's ranges, or the last so many days. */
 export async function freePackStats(range: Range | number = "90d"): Promise<FreePackStats> {
   const db = supabase();
@@ -75,7 +110,7 @@ export async function freePackStats(range: Range | number = "90d"): Promise<Free
   const until = new Date(span.until).toISOString();
   const { data, error } = await db
     .from("optins")
-    .select("email, optin, utm_content, utm_campaign, ad_id, created_at")
+    .select("email, optin, utm_content, utm_campaign, ad_id, visitor_id, created_at")
     .gte("created_at", since)
     .lt("created_at", until)
     .order("created_at", { ascending: true })
@@ -90,7 +125,11 @@ export async function freePackStats(range: Range | number = "90d"): Promise<Free
     seen.add(k);
     return true;
   });
-  const emails = [...new Set(optins.map((o) => o.email))];
+  const linked = await otherEmails(db, optins);
+  // Another email of the same person (otherEmails), not one that signed up itself.
+  const signedUp = new Set(optins.map((o) => o.email.toLowerCase()));
+  const alsoOf = (o: Optin) => [...(o.visitor_id ? (linked.get(o.visitor_id) ?? []) : [])].filter((e) => !signedUp.has(e));
+  const emails = [...new Set([...optins.map((o) => o.email), ...optins.flatMap(alsoOf)])];
 
   const [orders, starts, legacy, names, kit] = await Promise.all([
     inChunks<{ email: string; amount_cents: number; currency: string; created_at: string }>(emails, (c) =>
@@ -127,18 +166,22 @@ export async function freePackStats(range: Range | number = "90d"): Promise<Free
 
   const leads: Lead[] = optins.map((o) => {
     const at = Date.parse(o.created_at);
-    const mine = ordersBy.get(o.email) ?? [];
+    const mine = ordersBy.get(o.email.toLowerCase()) ?? [];
     const before =
       mine.some((x) => Date.parse(x.created_at) < at) ||
-      (legacyBy.get(o.email) ?? []).some((x) => !x.bought_at || Date.parse(x.bought_at) < at);
-    const after = mine.filter((x) => Date.parse(x.created_at) >= at);
+      (legacyBy.get(o.email.toLowerCase()) ?? []).some((x) => !x.bought_at || Date.parse(x.bought_at) < at);
+    // Their other emails' orders count from the opt-in on (otherEmails).
+    const other = alsoOf(o).flatMap((e) => ordersBy.get(e) ?? []);
+    const after = [...mine, ...other].filter((x) => Date.parse(x.created_at) >= at);
+    const firstBuy = after.reduce<(typeof after)[number] | null>((f, x) => (!f || x.created_at < f.created_at ? x : f), null);
     const first = (ts: number[]) => (ts.length ? Math.min(...ts) : null);
     return {
       ...o,
       at,
       before,
-      checkoutAt: first((startsBy.get(o.email) ?? []).map((s) => Date.parse(s.started_at)).filter((t) => t >= at)),
+      checkoutAt: first([o.email.toLowerCase(), ...alsoOf(o)].flatMap((e) => startsBy.get(e) ?? []).map((s) => Date.parse(s.started_at)).filter((t) => t >= at)),
       buyAt: first(after.map((x) => Date.parse(x.created_at))),
+      buyAs: firstBuy && firstBuy.email.toLowerCase() !== o.email.toLowerCase() ? firstBuy.email : null,
       eur: after.filter((x) => euroColumn(x.currency)).reduce((n, x) => n + Math.round(roughEuros(x.amount_cents, x.currency)), 0),
       usd: after.filter((x) => x.currency === "usd").reduce((n, x) => n + x.amount_cents, 0),
     };
@@ -192,6 +235,7 @@ export async function freePackStats(range: Range | number = "90d"): Promise<Free
         alreadyBuyer: l.before,
         checkoutAt: iso(l.checkoutAt),
         boughtAt: iso(l.buyAt),
+        boughtAs: l.buyAs,
         revenue: { eur: l.eur, usd: l.usd },
         kit: r && state ? { sent: r.next_position, of: kit.of, state, nextAt: state === "waiting" || state === "sending" ? r.next_at : null } : null,
       };

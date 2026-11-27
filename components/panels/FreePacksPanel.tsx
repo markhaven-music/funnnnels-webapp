@@ -79,7 +79,7 @@ function PackCard({ p, people, spend }: { p: FreePackRow; people: FreePackPerson
 
 function status(x: FreePackPerson): { label: string; cls: string } {
   if (x.alreadyBuyer) return { label: "Bought before signing up", cls: f.status_off };
-  if (x.boughtAt) return { label: `Bought ${money(x.revenue)} · ${day(x.boughtAt)}`, cls: f.status_bought };
+  if (x.boughtAt) return { label: `Bought ${money(x.revenue)} · ${day(x.boughtAt)}${x.boughtAs ? ` as ${x.boughtAs}` : ""}`, cls: f.status_bought };
   const kit = x.kit;
   const next =
     kit && (kit.state === "waiting" || kit.state === "sending")
