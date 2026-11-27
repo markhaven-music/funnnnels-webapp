@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Script from "next/script";
 import { BRAND } from "@/app/(funnels)/_kit/brand";
 import { BOOT, pixel } from "@/app/(funnels)/jazz-midi-pack/Tracking";
@@ -41,37 +41,45 @@ export function AddToCart({
 }) {
   const slugs = useCart();
   const inCart = slugs.includes(slug);
+  // For a moment after the click the button only says it worked: no link under the
+  // finger, so a double tap doesn't land on the checkout ("se premo add to cart nello
+  // shop va direttamente al checkout", 2026-11-27).
+  const [justAdded, setJustAdded] = useState(false);
+  useEffect(() => {
+    if (!justAdded) return;
+    const t = setTimeout(() => setJustAdded(false), 1500);
+    return () => clearTimeout(t);
+  }, [justAdded]);
   const add = () => {
     cart.add([slug]);
+    setJustAdded(true);
     pixel("AddToCart", { content_name: name, content_ids: [slug], content_type: "product", value: price, currency: currency.toUpperCase() });
   };
 
   if (small) {
-    return inCart ? (
+    return justAdded ? (
+      <GlassButton variant="clear" size="md" label="Added ✓" />
+    ) : inCart ? (
       <GlassButton href="/shop/cart" variant="clear" size="md" label="In your cart ✓" />
     ) : (
       <GlassButton onClick={add} variant="dark" size="md" label="Add to cart" icon={<CartIcon />} />
     );
   }
-  // Both states are the same height, so nothing below moves once the cart is read.
+  // Added: the big button keeps them shopping, the checkout is the smaller one below.
+  // Every state is the same height, so nothing below moves once the cart is read.
   return (
     <div className={s.buy}>
-      {inCart ? (
-        <GlassButton
-          href="/shop/cart"
-          variant="clear"
-          size="xl"
-          label="Checkout"
-          sub={`In your cart · ${slugs.length} product${slugs.length === 1 ? "" : "s"}`}
-          cta
-        />
+      {justAdded ? (
+        <GlassButton variant="glass" size="lg" label="Added to your cart ✓" cta />
+      ) : inCart ? (
+        <GlassButton href="/shop" variant="glass" size="lg" label="Keep shopping" cta />
       ) : (
         <GlassButton onClick={add} variant="glass" size="lg" label="Add to cart" price={money(price, currency)} cta />
       )}
       <p className={s.buyNote}>
         {inCart ? (
           <>
-            Added. <a href="/shop">Keep shopping</a> or check out now.
+            In your cart. <a href="/shop/cart">Checkout · {slugs.length} product{slugs.length === 1 ? "" : "s"} →</a>
           </>
         ) : (
           "One payment, no subscription. Card, Apple Pay, Google Pay or PayPal."

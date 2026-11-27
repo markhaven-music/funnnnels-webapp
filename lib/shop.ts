@@ -3,6 +3,7 @@ import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { toCents, type Money } from "@/lib/launch";
 import { BUCKET as FILES_BUCKET, filePath } from "@/lib/products";
 import { supabase } from "@/lib/supabase";
+import { EXPANSIONS_BUMP, expansionsBump } from "@/app/shop/bump";
 
 // The shop: products sold side by side at /shop, with a cart (app/shop),
 // next to the funnels. Its products are the catalog's (db/catalog.sql: one
@@ -162,6 +163,7 @@ export function shopItems(raw: unknown): string[] {
 export async function priceCart(
   raw: unknown,
   currency: Currency,
+  bumps?: unknown, // the ticked order bumps' ids (app/shop/bump.ts)
 ): Promise<{ items: ShopItem[]; amount: number } | { error: string }> {
   const slugs = Array.isArray(raw) ? [...new Set(raw.filter((s): s is string => typeof s === "string" && SLUG.test(s)))] : [];
   if (slugs.length === 0) return { error: "Your cart is empty." };
@@ -172,6 +174,16 @@ export async function priceCart(
   if (found.size !== slugs.length) return { error: "Something in your cart isn't for sale any more. Refresh the page and check your cart." };
   // In the order the buyer added them.
   const items = slugs.map((s) => found.get(s)!);
+  // The ticked order bump (app/shop/bump.ts): the Expansions the cart lacks, at the
+  // bump's price split between them.
+  const offer = Array.isArray(bumps) && bumps.includes(EXPANSIONS_BUMP) ? expansionsBump(slugs) : null;
+  if (offer) {
+    const { data: extra, error: extraError } = await supabase().from("catalog").select("*").in("slug", offer.missing).eq("status", "live");
+    if (extraError) throw extraError;
+    if ((extra as Row[]).length !== offer.missing.length) return { error: "The add-on isn't for sale any more. Refresh the page and check your cart." };
+    const each = offer.price / offer.missing.length;
+    for (const r of extra as Row[]) items.push({ ...toItem(toProduct(r)), price: { eur: each, usd: each } });
+  }
   return { items, amount: items.reduce((sum, it) => sum + toCents(priceIn(it.price, currency)), 0) };
 }
 

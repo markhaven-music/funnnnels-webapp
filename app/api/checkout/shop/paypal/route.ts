@@ -33,7 +33,7 @@ export async function POST(req: Request) {
   }
   const country = visitorCountry(await headers(), body.country);
   const currency = currencyFor(country);
-  const cart = await priceCart(body.items, currency).catch((err) => {
+  const cart = await priceCart(body.items, currency, body.bumps).catch((err) => {
     console.error("shop paypal: pricing failed", err);
     return { error: "We couldn't start the PayPal payment. Please try again." };
   });
