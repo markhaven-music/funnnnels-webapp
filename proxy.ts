@@ -154,7 +154,9 @@ export function proxy(request: NextRequest) {
   const bf = pathname.match(BF_PAGE);
   if (bf && !bfLive()) {
     const url = request.nextUrl.clone();
-    url.pathname = `${bf[1]}${bf[2] ?? ""}`;
+    // Bare /midi-drum-kit is the old Astro landing: the Drum Kit's own page is /en/midi-drum-kit.
+    const base = bf[1] === "/midi-drum-kit" ? "/en/midi-drum-kit" : bf[1];
+    url.pathname = `${base}${bf[2] ?? ""}`;
     return NextResponse.redirect(url, 307);
   }
 
