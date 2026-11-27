@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   const raw = String(b.phone ?? "").replace(/[^\d+]/g, "");
   const phone = raw ? (raw.startsWith("+") ? raw : `+${raw}`) : null;
   if (phone && !/^\+\d{8,15}$/.test(phone)) {
-    return NextResponse.json({ error: "Add your phone with the country code, like +1 555 123 4567." }, { status: 400 });
+    return NextResponse.json({ error: "Check your phone number and the country code next to it." }, { status: 400 });
   }
   const sms = Boolean(phone && b.sms === true);
   if (phone && !sms) return NextResponse.json({ error: "Tick the box to get the text reminders." }, { status: 400 });
