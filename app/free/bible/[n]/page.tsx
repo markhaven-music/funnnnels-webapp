@@ -104,7 +104,7 @@ export default async function Page({ params }: { params: Promise<{ n: string }> 
         </section>
       )}
 
-      {v.wistiaId && <Comments video={v.n} ask={v.ask ?? "What did you think? Tell me below."} initial={(comments ?? []) as Comment[]} />}
+      {v.wistiaId && <Comments video={v.n} ask={v.ask ?? "What did you think? Tell me below."} quick={v.quick ?? []} initial={(comments ?? []) as Comment[]} />}
 
       {next && (
         <section className={s.next}>

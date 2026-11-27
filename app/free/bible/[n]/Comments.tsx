@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import s from "./bible.module.css";
 
 export type Comment = { id: string; name: string; body: string; created_at: string };
@@ -14,8 +14,24 @@ const ago = (iso: string) => {
 };
 
 // The comments under a launch video: the form on top, newest first.
-export default function Comments({ video, ask, initial }: { video: number; ask: string; initial: Comment[] }) {
+export default function Comments({ video, ask, quick, initial }: { video: number; ask: string; quick: string[]; initial: Comment[] }) {
   const [list, setList] = useState(initial);
+  const [text, setText] = useState("");
+  const [done, setDone] = useState(false);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  // Remember who they are, so the next comment is one tap and one click.
+  useEffect(() => {
+    try {
+      const n = localStorage.getItem("bible_name"), e = localStorage.getItem("bible_email");
+      if (n && nameRef.current) nameRef.current.value = n;
+      if (e && emailRef.current) emailRef.current.value = e;
+    } catch {}
+  }, []);
+  function pick(q: string) {
+    setText((t) => (t.trim() ? t : q + ". "));
+    if (nameRef.current && !nameRef.current.value) nameRef.current.focus();
+  }
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   async function submit(e: React.FormEvent<HTMLFormElement>) {
@@ -29,21 +45,33 @@ export default function Comments({ video, ask, initial }: { video: number; ask: 
     }).catch(() => null);
     const d = r ? await r.json().catch(() => ({})) : {};
     setBusy(false);
-    if (r?.ok && d.comment) { setList([d.comment, ...list]); (form.elements.namedItem("body") as HTMLTextAreaElement).value = ""; }
+    if (r?.ok && d.comment) {
+      setList([d.comment, ...list]); setText(""); setDone(true);
+      try { localStorage.setItem("bible_name", String(f.get("name") ?? "")); localStorage.setItem("bible_email", String(f.get("email") ?? "")); } catch {}
+    }
     else if (!r?.ok) setErr(d.error || "Something went wrong. Try again.");
   }
   return (
     <section className={s.comments}>
-      <h2 className={s.h2}>{ask}</h2>
+      <h2 className={s.cask}>{ask}</h2>
+      <p className={s.csub}>Tap your answer and tell me below. I read every comment.</p>
+      {quick.length > 0 && (
+        <div className={s.chips}>
+          {quick.map((q) => (
+            <button type="button" key={q} className={text.startsWith(q) ? s.chipOn : s.chip} onClick={() => pick(q)}>{q}</button>
+          ))}
+        </div>
+      )}
       <form className={`${s.form} ${s.cform}`} onSubmit={submit}>
-        <textarea name="body" required rows={3} maxLength={800} placeholder="Write your comment" />
+        <textarea name="body" required rows={3} maxLength={800} value={text} onChange={(e) => setText(e.target.value)} placeholder="Or write it in your own words" />
         <div className={s.crow}>
-          <input name="name" required placeholder="First name" autoComplete="given-name" />
-          <input name="email" type="email" required placeholder="Email (not shown)" autoComplete="email" />
+          <input ref={nameRef} name="name" required placeholder="First name" autoComplete="given-name" />
+          <input ref={emailRef} name="email" type="email" placeholder="Email (optional, not shown)" autoComplete="email" />
         </div>
         <input name="company" tabIndex={-1} autoComplete="off" className={s.hp} aria-hidden />
         <button disabled={busy}>{busy ? "Posting…" : "Post comment"}</button>
         {err && <p className={s.err}>{err}</p>}
+        {done && !err && <p className={s.cdone}>Posted. Thank you, I read it.</p>}
       </form>
       <p className={s.ccount}>{list.length} {list.length === 1 ? "comment" : "comments"}</p>
       <ul className={s.clist}>
