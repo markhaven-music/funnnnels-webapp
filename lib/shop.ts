@@ -112,7 +112,15 @@ const toItem = ({ slug, name, tagline, description, price, image }: ShopProduct)
 // Read by cached pages: a failed read throws, so the CDN keeps serving the
 // last good page and tries again on the next visit.
 
-export async function liveProducts(): Promise<ShopItem[]> {
+// Live but not shown in the shop: sold to someone with the product's own link
+// (m.thegrind.studio/shop/usd/<slug>), and in the cart once added from there.
+// MIDI Drum Kit Vol.2 is the Drum Kit's upsell; a loyal buyer gets it early by
+// link before it goes public (2026-11-27, "since he's a loyal customer he can
+// get it before it goes public").
+export const UNLISTED = new Set(["midi-drum-kit-vol2"]);
+
+/** The shop's Live products, the unlisted ones left out unless `unlisted` (the cart needs them). */
+export async function liveProducts(opts: { unlisted?: boolean } = {}): Promise<ShopItem[]> {
   const { data, error } = await supabase()
     .from("catalog")
     .select("*")
@@ -120,7 +128,7 @@ export async function liveProducts(): Promise<ShopItem[]> {
     .order("position")
     .order("created_at");
   if (error) throw error;
-  return (data as Row[]).map((r) => toItem(toProduct(r)));
+  return (data as Row[]).filter((r) => opts.unlisted || !UNLISTED.has(r.slug)).map((r) => toItem(toProduct(r)));
 }
 
 export async function liveProduct(slug: string): Promise<ShopItem | null> {

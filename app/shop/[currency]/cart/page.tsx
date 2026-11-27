@@ -27,7 +27,7 @@ const FALLBACK_COUNTRY: Record<Currency, string> = { eur: "IT", usd: "US", gbp: 
 export default async function CartPage({ params }: { params: Promise<{ currency: string }> }) {
   const { currency } = (await params) as { currency: Currency };
   if (!CURRENCIES.includes(currency)) notFound();
-  const catalog: CartLine[] = (await liveProducts()).map((p) => ({
+  const catalog: CartLine[] = (await liveProducts({ unlisted: true })).map((p) => ({
     slug: p.slug,
     name: p.name,
     price: priceIn(p.price, currency),

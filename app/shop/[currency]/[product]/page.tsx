@@ -5,7 +5,7 @@ import { BRAND } from "@/app/(funnels)/_kit/brand";
 import { Beacon } from "@/app/(funnels)/Beacon";
 import { CURRENCIES, type Currency, priceIn } from "@/lib/geo";
 import { money } from "@/lib/launch";
-import { SHOP_SLUG, descriptionBlocks, liveProduct, liveProducts } from "@/lib/shop";
+import { SHOP_SLUG, UNLISTED, descriptionBlocks, liveProduct, liveProducts } from "@/lib/shop";
 import { Cover, ProductCard, ShopFrame } from "../../ShopFrame";
 import { AddToCart, ShopTracking } from "../../ShopClient";
 import s from "../../shop.module.css";
@@ -31,6 +31,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: `${p.name} · ${BRAND.name}`,
     description: p.tagline || undefined,
     openGraph: { title: p.name, description: p.tagline || undefined, type: "website", ...(p.image ? { images: [p.image.lg] } : {}) },
+    // Sold by link only, kept out of search too.
+    ...(UNLISTED.has(p.slug) ? { robots: { index: false, follow: false } } : {}),
   };
 }
 
