@@ -90,8 +90,7 @@ type Info = { firstName: string; lastName: string; email: string };
 // of the buyer's answer there; in the order when they said yes, a summary line with Remove.
 // tickBox: a pop-up add-on that is also a tick box (Famous Beats' MIDI Drum Kit, 2026-11-19): the
 // pop-up's Yes ticks it, unticking it is the No.
-// full: the struck full price when it isn't lib/bumpFull.ts's (the shop's Expansions bump: their shop prices added up).
-type Bump = { id: string; name: string; price: number; full?: number; pitch: string; cover?: [string, string]; image?: string; headline?: string; body?: string[]; popup?: string; tickBox?: boolean };
+type Bump = { id: string; name: string; price: number; pitch: string; cover?: [string, string]; image?: string; headline?: string; body?: string[]; popup?: string; tickBox?: boolean };
 
 /** The tick-box offers this checkout shows: the list, or the single bump. */
 // Cheapest first, always (the owner, 2026-11-24: "the order bumps should always show from cheapest to priceiest").
@@ -646,7 +645,7 @@ function PayStepBody({
 // the red arrow until ticked, headline and price, then the pitch.
 function BumpBox({ offer, currency, ticked, onTick }: { offer: Bump; currency: Currency; ticked: boolean; onTick: (on: boolean) => void }) {
   const [lead, rest] = splitPitch(offer.pitch);
-  const full = offer.full && offer.full > offer.price ? offer.full : bumpFull(offer.id, offer.price);
+  const full = bumpFull(offer.id, offer.price);
   return (
     <label className={offer.id === "hustle" ? `${s.bump} ${s.bumpPremium}` : s.bump} data-bump={offer.id}>
       {offer.image ? (

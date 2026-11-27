@@ -5,7 +5,6 @@ import { CheckoutWidget } from "@/app/(funnels)/jazz-midi-pack/CheckoutWidget";
 import { GlassButton } from "@/components/ui/GlassButton";
 import type { Currency } from "@/lib/geo";
 import { money } from "@/lib/launch";
-import { EXPANSIONS_BUMP, EXPANSION_WORDS, expansionsBump } from "./bump";
 import { cart, useCart } from "./cart";
 import s from "./shop.module.css";
 
@@ -61,9 +60,6 @@ export function CartView({
   }
 
   const total = Math.round(lines.reduce((sum, l) => sum + l.price, 0) * 100) / 100;
-  const offer = expansionsBump(slugs);
-  const extra = offer ? offer.missing.flatMap((x) => bySlug.get(x) ?? []) : [];
-  const bumps = offer && extra.length === offer.missing.length ? [expansionsOffer(offer.price, extra, currency)] : [];
   return (
     <div className={s.cartPage}>
       <section>
@@ -108,7 +104,6 @@ export function CartView({
           country={country}
           price={total}
           bump={null}
-          bumps={bumps}
           thankYou="/shop/thank-you"
           publishableKey={publishableKey}
           cart={lines.map(({ slug, name, price }) => ({ slug, name, price }))}
@@ -119,23 +114,3 @@ export function CartView({
   );
 }
 
-
-// The Expansions the cart lacks, as a tick box (./bump.ts). Words to the feeling first, the numbers after.
-function expansionsOffer(price: number, extra: CartLine[], currency: Currency) {
-  const names = extra.map((l) => EXPANSION_WORDS[l.slug]?.short ?? l.name);
-  const both = names.join(" + ");
-  const grooves = extra.reduce((n, l) => n + (EXPANSION_WORDS[l.slug]?.grooves ?? 0), 0);
-  const full = Math.round(extra.reduce((sum, l) => sum + l.price, 0) * 100) / 100;
-  return {
-    id: EXPANSIONS_BUMP,
-    name: `${both} Expansion${extra.length > 1 ? "s" : ""}`,
-    price,
-    full,
-    pitch: "",
-    image: extra[0].image ?? undefined,
-    headline: `YES! Add ${both} too!`,
-    body: [
-      `**You know that feeling when your drums finally move.** Get it in every beat you make: ${both}, ${grooves.toLocaleString("en-US")} more drum grooves you just drag in, for **${money(price, currency)}** instead of ${money(full, currency)}. Only with this order.`,
-    ],
-  };
-}

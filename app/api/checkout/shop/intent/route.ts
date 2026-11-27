@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   }
   const country = visitorCountry(await headers(), body.country);
   const currency = currencyFor(country);
-  const cart = await priceCart(body.items, currency, body.bumps).catch((err) => {
+  const cart = await priceCart(body.items, currency).catch((err) => {
     console.error("shop intent: pricing failed", err);
     return { error: "We couldn't start the payment. Please try again." };
   });
